@@ -1,0 +1,29 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NanoQL.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);NQL0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NanoQL\NanoQL.csproj" />
+  </ItemGroup>
+
+  <!-- Ported tests keep QuantLib's type names (Real, Rate, Size, ...): the library's global aliases. -->
+  <ItemGroup>
+    <Compile Include="..\..\src\NanoQL\Types.cs" Link="Types.cs" />
+  </ItemGroup>
+</Project>

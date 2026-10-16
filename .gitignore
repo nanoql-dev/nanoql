@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Python virtual environment for the vector generators and the licensing tools
+.venv/

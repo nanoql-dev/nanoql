@@ -1,0 +1,12 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>NanoQL</RootNamespace>
+    <IsAotCompatible>true</IsAotCompatible>
+    <!-- NanoQL's own code may use its experimental types (NQL0001); consumers still get the diagnostic. -->
+    <NoWarn>$(NoWarn);NQL0001</NoWarn>
+  </PropertyGroup>
+</Project>

@@ -1,3 +1,8 @@
+# Third-party notices
+
+nanoql is derived from QuantLib. QuantLib's license file, `LICENSE.TXT` at release tag v1.44, is reproduced verbatim below.
+
+```text
 
 Copyright (C) 2000, 2001, 2002, 2003 RiskMap srl
 
@@ -234,3 +239,4 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
+```

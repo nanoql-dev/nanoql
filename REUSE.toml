@@ -1,0 +1,17 @@
+version = 1
+
+# Files without a comment header.
+[[annotations]]
+path = [
+  "README.md", "CONTRIBUTING.md", "NOTICE", ".gitattributes", ".gitignore", "NanoQL.slnx", "Directory.Build.props",
+  ".editorconfig", "global.json", "stylecop.json", "tools/porting-map.json", "tests/vectors/**",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 The nanoql Authors"
+SPDX-License-Identifier = "Apache-2.0"
+
+# QuantLib's license file, verbatim; its copyright lines are read from the file itself.
+[[annotations]]
+path = "THIRD_PARTY_NOTICES.md"
+precedence = "aggregate"
+SPDX-License-Identifier = "BSD-3-Clause"

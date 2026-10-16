@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# The build backend for reuse, which publishes no Windows wheel and is built from its sdist.
+# Install first: python -m pip install --require-hashes --only-binary :all: -r tools/vectors/build-requirements.txt
+poetry-core==2.5.0 --hash=sha256:98ee465b66f7e14bb9fbe68fb5e00d0cff184f036993ec94610ae4b5612f3add

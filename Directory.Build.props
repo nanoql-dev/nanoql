@@ -1,0 +1,27 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Malformed doc comments and unresolved crefs fail the build; missing ones don't, as QuantLib's coverage is partial. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- Debugging: the PDB carries the source text, symbols ship as a symbol package, builds are deterministic.
+         ContinuousIntegrationBuild is passed only by release builds (-p:ContinuousIntegrationBuild=true). -->
+    <EmbedAllSources>true</EmbedAllSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <!-- One type per file, the file named after its type: SA1402 and SA1649 only (.editorconfig). -->
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.3.82-beta" PrivateAssets="all" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="QuantLibVersion" Value="1.44" />
+  </ItemGroup>
+</Project>

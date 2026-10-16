@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# Third-party notice blocks inside QuantLib files: code QuantLib carries under its own licence (MINPACK, FDLIBM,
+# MT19937, and others). A nanoql file ported from such a file reproduces the block verbatim as a comment after its
+# header, and adds the block's licence to its SPDX expression. tools/check-upstream.py reads this list.
+#
+# One row per block, tab-separated:
+#   <QuantLib path>	<the block's first line>	<the block's last line>	<SPDX licence id>
+#
+# No ported file carries a third-party notice yet.

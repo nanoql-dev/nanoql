@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# Source files with no QuantLib upstream. Each carries only the nanoql copyright line and the Apache-2.0 licence
+# identifier, and no Upstream line. tools/check-upstream.py reads this list.
+# One path or glob per line, relative to the repository root, with forward slashes; "**" matches any depth.
+src/NanoQL/NanoQLException.cs
+tests/NanoQL.Tests/Conventions/**
+tests/NanoQL.Tests/Divergences/**
+tests/NanoQL.Tests/Harness/**
+tests/NanoQL.Tests/NoOracle/**
+tests/NanoQL.Tests/Vectors/**
+tools/**/*.py

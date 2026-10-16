@@ -1,0 +1,84 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+
+# Porting plan
+
+How the port of QuantLib v1.44 proceeds. The rules each port follows are in
+[porting-playbook.md](porting-playbook.md), and every QuantLib file's status is in [porting-map.md](porting-map.md).
+
+## All of QuantLib, in batches
+
+At the tag, QuantLib holds 1,456 units (an `.hpp`/`.cpp` pair under `ql/`) and 193,721 code lines. nanoql ports 1,276
+units and 188,982 code lines, 35,011 of them experimental. The rest is deprecated, legacy, include-only, C++ platform
+code, or plumbing that nanoql's design replaces (playbook §6).
+
+The port proceeds bottom-up: a slot comes after the slots whose types it uses. Each unit belongs to the first slot
+whose content reaches it. "Oracle" is the share of the batch's declared classes that QuantLib-Python exposes by name;
+the rest are checked through QuantLib's own test cases, the classes that use them, or the C++ harness (playbook §7.1).
+
+| Batch | Content | Units | Code lines | Share | Oracle |
+|---:|---|---:|---:|---:|---:|
+| 1 | Rates, bonds, inflation-linked bonds, equity, FX and credit default swaps: the first milestone | 374 | 64,510 | 34% | 72% |
+| 2 | Conventions breadth | 108 | 8,761 | 5% | 94% |
+| 3 | Rates and bonds beyond vanilla | 141 | 25,615 | 14% | 49% |
+| 4 | Equity and FX beyond vanilla | 228 | 34,628 | 18% | 62% |
+| 5 | Market models | 118 | 15,618 | 8% | 12% |
+| 6 | Core remainder | 113 | 9,863 | 5% | 37% |
+| 7 | Experimental remainder | 194 | 29,987 | 16% | 10% |
+
+- **v0.1** is batches 1–6, all of QuantLib's non-experimental code: 1,082 units and 158,995 code lines. Batch 7 joins
+  it if it is ready, marked `[Experimental]`.
+- **QuantLib's test suite:** 182 test files to port, 98,709 code lines. Most test files span batches, so each slot
+  ports the test cases for its own units.
+- **Frameworks that keep state between steps** settle how their state fits nanoql's stateless design in the slot that
+  first ports them: random numbers and Monte Carlo paths (S2), lattices (S-bond), finite differences (S-eq), and
+  market models (batch 5).
+
+## Batch 1
+
+In this order:
+
+| Slot | Content |
+|---|---|
+| Pilot | The repository's conventions, the vector harness and the licensing checks; time (`Date`, `Period`, the TARGET, United States, United Kingdom, joint, weekends-only and null calendars, the Actual/360, Actual/365 (Fixed), 30/360 and Actual/Actual day counters, `Schedule` and `MakeSchedule`); and the pattern slice: `EvaluationContext`, `InterestRate`, `TermStructure`, `YieldTermStructure`, `FlatForward`, cash flows and the fixed-rate leg, part of `CashFlows`, `Instrument`, `Swap` and `DiscountingSwapEngine`, with an expired swap among the vectors. |
+| S-cxx | The C++ harness. It ports no QuantLib units. It builds QuantLib 1.44 from source against Boost 1.90.0's headers, sets up the Boost checkout the licensing gate reads for Boost ports, and writes the harness's first vectors: a pilot class the wheel also covers, matched against the wheel, then the pilot's members that only nanoql's own tests check. |
+| S2 | Maths: interpolations, including the linear and log-linear ones and the cubic family; 1-D solvers; optimisers, with MINPACK's licence; distributions, including Boost.Math ports; MT19937, Halton and Sobol, with generated tables and their notices. It settles the state of random numbers and Monte Carlo paths, and how stateful template parameters are ported. 41 units, 6,806 code lines. |
+| S3 | Indexes and coupons: `EvaluationContext.Fixings`; the Ibor and overnight indexes (SOFR, €STR, SONIA, Euribor, TONA, Tibor), with the Japan calendar; Ibor and overnight coupons (compounded and averaged, lookback, lockout, observation shift) and the coupon pricers they need. It adds `context.UseAtParCoupons`. 35 units, 6,129 code lines. |
+| S4 | Swaps and OIS: `VanillaSwap` and `FixedVsFloatingSwap`, `OvernightIndexedSwap`, `MakeVanillaSwap`, `MakeOIS`; `DiscountingSwapEngine` extended with their results derivations. 8 units, 1,599 code lines. |
+| S5 | Bootstrapping: rate helpers (deposit, FRA, swap, OIS), `PiecewiseYieldCurve` and its bootstraps, the interpolated discount, zero and forward curves, and `SwapIndex`. 21 units, 4,366 code lines. |
+| S-bind | Bindings: a language-neutral C interface over Native AOT's exports, with a generated C header, opaque handles released by the caller, and error codes with a last-error message; then a generated Python wrapper over that header, and one Windows x64 wheel that builds a curve and prices a swap from Python. It ports no QuantLib units. |
+| S-xl | The Excel add-in: Excel-DNA on `net10.0-windows`; curve and swap functions from Excel; immutable objects behind handles keyed by their inputs; export of a cell's call in the vector format; debugging by stepping from Excel into nanoql's source. It ports no QuantLib units. |
+| S6 | Swaptions: the Black and Bachelier formulas, `Swaption` and `MakeSwaption`, the Black and Bachelier swaption engines, the swaption volatility matrix. 16 units, 3,411 code lines. |
+| S7 | SABR: `sabr.cpp` (including Boost's `cubic_roots`), `SabrSmileSection`, `SABRInterpolation`, the swaption volatility cubes. 11 units, 2,754 code lines. |
+| S8 | Caps and floors: `CapFloor` and `MakeCapFloor`, the Black and Bachelier cap/floor engines, `CapFloorTermVolSurface`, optionlet stripping. 13 units, 2,325 code lines. |
+| S-rx | FRA, basis and cross-currency swaps: `ForwardRateAgreement`; `FloatFloatSwap` and the basis-swap rate helpers; the constant-notional and mark-to-market cross-currency swaps, their engines and rate helpers; exchange rates and `Money`, with `context.ExchangeRates` and `context.MoneySettings`. 18 units, 4,768 code lines, 7 of them experimental. |
+| S-bond | Bonds: `Bond`; fixed-rate, floating-rate, zero-coupon and amortizing bonds; `DiscountingBondEngine` and `BondFunctions`; bond helpers; callable and puttable bonds, with OAS, the Hull-White tree engine and the Black engine; Hull-White calibrated to swaptions. It settles the state of lattices. 35 units, 5,242 code lines, 6 of them experimental. |
+| S-infl | Inflation-linked bonds: `CPIBond` and `CPIBondHelper`; CPI coupons and their pricer; the inflation index, term-structure and seasonality bases; UK RPI, US CPI and EU HICP; the zero-inflation curve and its helpers, with the zero-coupon inflation swap. 24 units, 4,497 code lines. |
+| S-eq | Equity: European and American vanilla options; the Black-Scholes processes; the analytic European, analytic Heston and finite-difference Black-Scholes engines; Heston calibration; variance swaps by replication; constant, surface and local volatility; the finite-difference core. It settles the state of finite differences. 81 units, 9,567 code lines. |
+| S-fx | FX: `FxForward` and its engine; barrier options with the analytic, finite-difference and Vanna-Volga engines; SVI smiles; the Black delta calculator and delta-volatility quotes. 15 units, 2,222 code lines, 4 of them experimental. |
+| S-cds | Credit default swaps: `CreditDefaultSwap` and `MakeCreditDefaultSwap`; the ISDA standard-model and mid-point engines; default-probability helpers and the piecewise default curve. 18 units, 3,078 code lines. |
+
+## Later batches
+
+| Batch | Content |
+|---:|---|
+| 2 | Conventions breadth: the remaining calendars, day counters and currencies; the Ibor, overnight, swap and inflation indexes. |
+| S-conv | Conventions as data: XML round-tripping of convention values, a resolver, and QuantLib's presets as generated XML records checked against the coded ones. It ports no QuantLib units, and starts the extensions layer. |
+| S-qlnet | QLNet's additions: mortgage-backed securities with prepayment, and accounting amortised cost, checked against QLNet with QLNet's notices kept. |
+| 3 | Rates and bonds beyond vanilla: short-rate models with their tree, finite-difference and Gaussian1d engines; Bermudan swaptions; CMS, digital and range-accrual coupons; inflation caps, floors and year-on-year swaps; the remaining yield-curve and volatility structures. |
+| 4 | Equity and FX beyond vanilla: Asian, barrier, basket, cliquet, lookback, compound, chooser and quanto options; the remaining vanilla engines; Bates and the other equity models. |
+| 5 | The LIBOR market-model framework. |
+| 6 | Core remainder: what no product above reaches, mostly the rest of the finite-difference framework, optimisers, random-number generators, interpolations, matrix utilities, quotes and copulas. |
+| 7 | Experimental remainder: credit portfolios and CDOs, experimental maths, commodities, volatility models, barrier engines, finite differences and inflation. Marked `[Experimental]`. |
+
+After batch 6 (and batch 7 if it is ready): the documentation, with a validation report per module, and the v0.1
+release. From the end of batch 1, private preview builds carry a pre-release version, `0.1.0-preview.<n>`.
+
+## Partial ports
+
+Files that port only part of their QuantLib file, each with a `// Partial:` line naming what is left (playbook §1).
+The licensing gate checks that this list and the files match.
+
+None yet.

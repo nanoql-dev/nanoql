@@ -3,15 +3,16 @@
 ## The faithfulness rule
 
 The core mirrors QuantLib exactly. It changes only through ports of upstream QuantLib changes, or through fixes proven
-against QuantLib. Anything QuantLib lacks (a new convention, model or feature) goes into the extensions layer,
-`src/NanoQL.Extensions/`, with its own tests.
+against QuantLib. Anything QuantLib lacks (a new convention, model or feature) goes into a separate extensions
+layer, decided when it is first needed, with its own tests.
 
 ## Porting a QuantLib class
 
 - One nanoql type per QuantLib class, with the same name where possible.
-- Each ported file records the upstream path and the QuantLib commit it came from.
+- Each ported file records the upstream path and the QuantLib release tag it came from.
 - No observers, lazy objects or global state: inputs are immutable records; models and pricers are static functions.
-- Results must match QuantLib's test vectors to 1e-10. CI blocks the merge otherwise.
+- Results must match QuantLib's test vectors within the tolerance in docs/porting-playbook.md; the test suite
+  blocks the merge otherwise.
 
 ## Code that may not be ported
 

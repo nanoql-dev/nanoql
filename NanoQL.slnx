@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NanoQL/NanoQL.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NanoQL.Tests/NanoQL.Tests.csproj" />
+  </Folder>
+</Solution>
