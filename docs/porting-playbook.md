@@ -40,7 +40,8 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
   - **Ported tests** (`test-suite/<name>.cpp`) use the same form.
   - **Boost ports:** Boost's copyright lines, `AND BSL-1.0`, and an Upstream line of the form
     `Upstream: boost/<path> @ boost-1.90.0`.
-- **Lines after the header:**
+- **Lines directly after the header,** with no blank line between, since the tools read only the header's comment
+  block:
   - `// Partial: <members left>`: the type ports only part of its QuantLib file. A test class that ports only some of
     its QuantLib file's cases carries `// Partial: <cases left>`. Every file with a `// Partial:` line is listed in
     [porting-plan.md](porting-plan.md), and the port that completes the type removes the line.

@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="xunit.v3" Version="4.0.2" />
+    <!-- The coverage gate's engine: Coverlet's Microsoft.Testing.Platform extension. -->
+    <PackageReference Include="coverlet.MTP" Version="10.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,5 +27,10 @@
   <!-- Ported tests keep QuantLib's type names (Real, Rate, Size, ...): the library's global aliases. -->
   <ItemGroup>
     <Compile Include="..\..\src\NanoQL\Types.cs" Link="Types.cs" />
+  </ItemGroup>
+
+  <!-- The committed vectors, read beside the test assembly. -->
+  <ItemGroup>
+    <None Include="..\vectors\**\*.json" Link="vectors\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
