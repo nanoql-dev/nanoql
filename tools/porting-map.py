@@ -308,7 +308,8 @@ def build(root, ql_root):
             status = "not started" if not mine else ("partial" if partial else "ported")
             left = [n for n in declared if n not in ported]
             if partial:
-                notes.append("partial: " + "; ".join(partial))
+                # Files split from one unit may carry the same text; it is printed once.
+                notes.append("partial: " + "; ".join(dict.fromkeys(partial)))
             if left:
                 notes.append("no nanoql type: " + cell(left))
         own = [h.own_tested for _, h in mine if h.own_tested]

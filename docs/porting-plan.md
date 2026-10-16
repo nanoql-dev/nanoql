@@ -81,4 +81,13 @@ release. From the end of batch 1, private preview builds carry a pre-release ver
 Files that port only part of their QuantLib file, each with a `// Partial:` line naming what is left (playbook §1).
 The licensing gate checks that this list and the files match.
 
-None yet.
+- `src/NanoQL/Time/BusinessDayConvention.cs`: the convention's text, which waits for the C++ harness.
+- `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
+- `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
+- `src/NanoQL/Time/Frequency.cs`: the frequency's text.
+- `src/NanoQL/Time/IMM.cs`: everything but `isIMMdate`.
+- `src/NanoQL/Time/Weekday.cs`: the weekday's text, which waits for the C++ harness.
+- `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
+- `tests/NanoQL.Tests/TestSuite/DatesTests.cs`: the ECB, IMM, ASX, parsing and intraday cases, and `nullDate`.
+- `tests/NanoQL.Tests/TestSuite/DayCountersTests.cs`: the cases for day counters not yet ported.
+- `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases and those needing the Japan calendar.

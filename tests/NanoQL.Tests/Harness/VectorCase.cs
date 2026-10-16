@@ -74,6 +74,36 @@ public sealed class VectorCase
     /// <returns>The value.</returns>
     public string String(string name) => Input(name).GetString()!;
 
+    /// <summary>The evaluation context the case's generator set, from <c>inputs.settings</c>.</summary>
+    /// <returns>The context.</returns>
+    public EvaluationContext Context()
+    {
+        JsonElement s = Input("settings");
+        JsonElement todays = s.GetProperty("includeTodaysCashFlows");
+        return new EvaluationContext
+        {
+            EvaluationDate = new NanoQL.Time.Date(s.GetProperty("evaluationDate").GetInt32()),
+            IncludeReferenceDateEvents = s.GetProperty("includeReferenceDateEvents").GetBoolean(),
+            IncludeTodaysCashFlows = todays.ValueKind == JsonValueKind.Null ? null : todays.GetBoolean(),
+            EnforcesTodaysHistoricFixings = s.GetProperty("enforcesTodaysHistoricFixings").GetBoolean(),
+        };
+    }
+
+    /// <summary>Gets a date input, written as its serial number.</summary>
+    /// <param name="name">The input's name.</param>
+    /// <returns>The date.</returns>
+    public NanoQL.Time.Date DateInput(string name) => new(Int(name));
+
+    /// <summary>Gets a date input that may be null.</summary>
+    /// <param name="name">The input's name.</param>
+    /// <returns>The date, or <see langword="null"/>.</returns>
+    public NanoQL.Time.Date? NullableDateInput(string name) => NullableInt(name) is int serial ? new NanoQL.Time.Date(serial) : null;
+
+    /// <summary>Gets an array of dates, written as serial numbers.</summary>
+    /// <param name="name">The input's name.</param>
+    /// <returns>The dates.</returns>
+    public NanoQL.Time.Date[] DateInputs(string name) => Ints(name).Select(s => new NanoQL.Time.Date(s)).ToArray();
+
     /// <summary>Gets an array of integers.</summary>
     /// <param name="name">The input's name.</param>
     /// <returns>The values.</returns>

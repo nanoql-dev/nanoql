@@ -5,6 +5,7 @@ using System.Collections;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NanoQL.Time;
 
 namespace NanoQL.Tests.Harness;
 
@@ -243,6 +244,11 @@ public sealed class VectorAssert
         if (actual is Enum)
         {
             actual = Convert.ToInt64(actual, CultureInfo.InvariantCulture);
+        }
+        else if (actual is Date date)
+        {
+            // Dates compare as QuantLib's serial numbers.
+            actual = date.SerialNumber;
         }
 
         switch (expected.ValueKind)

@@ -20,7 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,276 | 182 |
+| not started | 1,254 | 177 |
+| partial | 5 | 4 |
+| ported | 17 | 1 |
 | replaced | 15 | 6 |
 | total | 1,456 | 194 |
 
@@ -64,7 +66,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `quantlib` | not ported: C++ platform header |  |  |
 | `quote` | replaced: double |  |  |
 | `rebatedexercise` | not started |  | no nanoql type: RebatedExercise |
-| `settings` | replaced: EvaluationContext |  |  |
+| `settings` | replaced: EvaluationContext | EvaluationContext.cs |  |
 | `shared_ptr` | not ported: C++ platform header |  |  |
 | `stochasticprocess` | not started |  | no nanoql type: StochasticProcess, StochasticProcessDiscretization, StochasticProcess1D, StochasticProcess1DDiscretization |
 | `termstructure` | not started |  | no nanoql type: TermStructure |
@@ -1944,18 +1946,18 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `asx` | not started |  | no nanoql type: ASX, ASXMonth |
-| `businessdayconvention` | not started |  | no nanoql type: BusinessDayConvention |
-| `calendar` | not started |  | no nanoql type: Calendar |
-| `date` | not started |  | no nanoql type: Month, Date |
-| `dategenerationrule` | not started |  | no nanoql type: DateGenerationRule |
-| `daycounter` | not started |  | no nanoql type: DayCounter |
+| `businessdayconvention` | partial | Time/BusinessDayConvention.cs | partial: operator<<, which waits for the C++ harness |
+| `calendar` | ported | Time/Calendar.cs |  |
+| `date` | partial | Time/Date/Date.cs, Time/Date/DateFunctions.cs, Time/Date/Month.cs | partial: io::formatted_date (not ported: a Date converts to DateOnly, whose ToString(format) does its job); own-tested: ShortDate |
+| `dategenerationrule` | ported | Time/DateGenerationRule.cs |  |
+| `daycounter` | ported | Time/DayCounter.cs |  |
 | `ecb` | not started |  | no nanoql type: ECB |
-| `frequency` | not started |  | no nanoql type: Frequency |
-| `imm` | not started |  | no nanoql type: IMM, IMMMonth |
-| `period` | not started |  | no nanoql type: Period |
-| `schedule` | not started |  | no nanoql type: Schedule, MakeSchedule |
-| `timeunit` | not started |  | no nanoql type: TimeUnit |
-| `weekday` | not started |  | no nanoql type: Weekday |
+| `frequency` | partial | Time/Frequency.cs | partial: operator<<, which FrequencyFunctions.ToString will hold |
+| `imm` | partial | Time/IMM.cs, Time/IMMMonth.cs | partial: isIMMcode, code, date, nextDate and nextCode, which the wheel exposes and a later slot ports |
+| `period` | ported | Time/Period/Period.cs, Time/Period/PeriodFunctions.cs, Time/Period/TimeUnitExtensions.cs | own-tested: Days, LongPeriod; TimeUnit * int |
+| `schedule` | ported | Time/Schedule/MakeSchedule.cs, Time/Schedule/Schedule.cs, Time/Schedule/ScheduleFunctions.cs |  |
+| `timeunit` | ported | Time/TimeUnit.cs |  |
+| `weekday` | partial | Time/Weekday.cs | partial: io::long_weekday, io::short_weekday, io::shortest_weekday and operator<<, which wait for the C++ harness |
 
 ### `ql/time/calendars/`
 
@@ -1986,7 +1988,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `israel` | not started |  | no nanoql type: Israel, IsraelMarket |
 | `italy` | not started |  | no nanoql type: Italy, ItalyMarket |
 | `japan` | not started |  | no nanoql type: Japan |
-| `jointcalendar` | not started |  | no nanoql type: JointCalendarRule, JointCalendar |
+| `jointcalendar` | ported | Time/Calendars/JointCalendar.cs, Time/Calendars/JointCalendarRule.cs |  |
 | `malaysia` | not started |  | no nanoql type: Malaysia, MalaysiaMarket |
 | `malta` | not started |  | no nanoql type: Malta, MaltaMarket |
 | `mexico` | not started |  | no nanoql type: Mexico, MexicoMarket |
@@ -1994,7 +1996,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `newzealand` | not started |  | no nanoql type: NewZealand, NewZealandMarket |
 | `northmacedonia` | not started |  | no nanoql type: NorthMacedonia, NorthMacedoniaMarket |
 | `norway` | not started |  | no nanoql type: Norway |
-| `nullcalendar` | not started |  | no nanoql type: NullCalendar |
+| `nullcalendar` | ported | Time/Calendars/NullCalendar.cs |  |
 | `philippines` | not started |  | no nanoql type: Philippines, PhilippinesMarket |
 | `poland` | not started |  | no nanoql type: Poland, PolandMarket |
 | `romania` | not started |  | no nanoql type: Romania, RomaniaMarket |
@@ -2009,30 +2011,30 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `sweden` | not started |  | no nanoql type: Sweden |
 | `switzerland` | not started |  | no nanoql type: Switzerland |
 | `taiwan` | not started |  | no nanoql type: Taiwan, TaiwanMarket |
-| `target` | not started |  | no nanoql type: TARGET |
+| `target` | ported | Time/Calendars/TARGET.cs |  |
 | `thailand` | not started |  | no nanoql type: Thailand |
 | `turkey` | not started |  | no nanoql type: Turkey |
 | `ukraine` | not started |  | no nanoql type: Ukraine, UkraineMarket |
-| `unitedkingdom` | not started |  | no nanoql type: UnitedKingdom, UnitedKingdomMarket |
-| `unitedstates` | not started |  | no nanoql type: UnitedStates, UnitedStatesMarket |
+| `unitedkingdom` | ported | Time/Calendars/UnitedKingdom.cs, Time/Calendars/UnitedKingdomMarket.cs |  |
+| `unitedstates` | ported | Time/Calendars/UnitedStates.cs, Time/Calendars/UnitedStatesMarket.cs |  |
 | `uzbekistan` | not started |  | no nanoql type: Uzbekistan, UzbekistanMarket |
-| `weekendsonly` | not started |  | no nanoql type: WeekendsOnly |
+| `weekendsonly` | ported | Time/Calendars/WeekendsOnly.cs |  |
 
 ### `ql/time/daycounters/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `actual360` | not started |  | no nanoql type: Actual360 |
+| `actual360` | ported | Time/DayCounters/Actual360.cs |  |
 | `actual364` | not started |  | no nanoql type: Actual364 |
 | `actual36525` | not started |  | no nanoql type: Actual36525 |
-| `actual365fixed` | not started |  | no nanoql type: Actual365Fixed, Actual365FixedConvention |
+| `actual365fixed` | ported | Time/DayCounters/Actual365Fixed.cs, Time/DayCounters/Actual365FixedConvention.cs |  |
 | `actual366` | not started |  | no nanoql type: Actual366 |
-| `actualactual` | not started |  | no nanoql type: ActualActual, ActualActualConvention |
+| `actualactual` | ported | Time/DayCounters/ActualActual.cs, Time/DayCounters/ActualActualConvention.cs |  |
 | `all` | not ported: include-only header |  |  |
 | `business252` | not started |  | no nanoql type: Business252 |
 | `one` | not started |  | no nanoql type: OneDayCounter |
 | `simpledaycounter` | not started |  | no nanoql type: SimpleDayCounter |
-| `thirty360` | not started |  | no nanoql type: Thirty360, Thirty360Convention |
+| `thirty360` | ported | Time/DayCounters/Thirty360.cs, Time/DayCounters/Thirty360Convention.cs |  |
 | `thirty365` | not started |  | no nanoql type: Thirty365 |
 | `yearfractiontodate` | not started |  |  |
 
@@ -2042,7 +2044,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `clone` | replaced: references |  |  |
-| `dataformatters` | not started |  |  |
+| `dataformatters` | ported | Utilities/DataFormattersFunctions.cs | own-tested: PowerOfTwo, CheckNull, Sequence; Volatility (plumbing) |
 | `dataparsers` | not started |  | no nanoql type: PeriodParser, DateParser |
 | `null` | replaced: nullable types |  |  |
 | `null_deleter` | not ported: C++ platform header |  |  |
@@ -2081,7 +2083,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bonds` | not started |  | 22 cases |
 | `brownianbridge` | not started |  | 2 cases |
 | `businessdayconventions` | not started |  | 1 cases |
-| `calendars` | not started |  | 81 cases |
+| `calendars` | partial | TestSuite/CalendarsTests.cs | 15 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testCanadaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
 | `callablebonds` | not started |  | 14 cases |
 | `capfloor` | not started |  | 10 cases |
 | `capflooredcoupon` | not started |  | 2 cases |
@@ -2107,8 +2109,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `crosscurrencyratehelpers` | not started |  | 30 cases |
 | `currency` | not started |  | 1 cases |
 | `curvestates` | not started |  | 3 cases |
-| `dates` | not started |  | 15 cases |
-| `daycounters` | not started |  | 22 cases |
+| `dates` | partial | TestSuite/DatesTests.cs | 3 of 15 cases; not yet: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, immDates, asxDates, asxDatesSpecific, isoDates, parseDates, intraday, nullDate |
+| `daycounters` | partial | TestSuite/DayCountersTests.cs | 10 of 22 cases; not yet: testActualActualWithSchedule, testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter |
 | `defaultprobabilitycurves` | not started |  | 10 cases |
 | `digitalcoupon` | not started |  | 8 cases |
 | `digitaloption` | not started |  | 10 cases |
@@ -2198,7 +2200,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `paralleltestrunner` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `partialtimebarrieroption` | not started |  | 3 cases |
 | `pathgenerator` | not started |  | 2 cases |
-| `period` | not started |  | 9 cases |
+| `period` | ported | TestSuite/PeriodTests.cs | 9 of 9 cases |
 | `perpetualfutures` | not started |  | 1 cases |
 | `piecewiseblackvariancesurface` | not started |  | 20 cases |
 | `piecewiseyieldcurve` | not started |  | 38 cases |
@@ -2216,7 +2218,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rngtraits` | not started |  | 4 cases |
 | `roughhestonmodel` | not started |  | 24 cases |
 | `rounding` | not started |  | 5 cases |
-| `schedule` | not started |  | 28 cases |
+| `schedule` | partial | TestSuite/ScheduleTests.cs | 18 of 28 cases; not yet: testEndDateWithEomAdjustment, testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured, testTruncation |
 | `settings` | not ported: tests Settings, which EvaluationContext replaces |  |  |
 | `shortratemodels` | not started |  | 9 cases |
 | `sofrfutures` | not started |  | 6 cases |

@@ -78,7 +78,7 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
 | `CalibratedModel::calibrate` | A static `Calibrate` that returns an immutable parameter object. |
 | `SeedGenerator` | An explicit input: a seed is a parameter. |
 | `QL_REQUIRE` on a public method's parameter | `ArgumentException`, with `ParamName` set. A null argument a member doesn't accept throws `ArgumentNullException`. |
-| Other `QL_REQUIRE`, `QL_FAIL`, `QL_ENSURE` | `NanoQLException`. The wording is kept; numbers in it use C# formatting. |
+| Other `QL_REQUIRE`, `QL_FAIL`, `QL_ENSURE` | `NanoQLException`, including a `QL_FAIL` in a switch's default that rejects an unknown enum value, even one passed in as an argument. The wording is kept; numbers in it use C# formatting. |
 | `Null<T>()`, `ext::optional<T>` | `T?`. QuantLib's null `Date()` is `Date?` null; `default(Date)` is never a valid date, and public members given it throw `ArgumentException`. Ported `d == Date()` becomes `d is null`. |
 | `ext::shared_ptr<T>`, `ext::make_shared` | A plain `T` reference; `new T(...)`. |
 | `ext::function` | `Func<…>` or `Action<…>`. |
@@ -223,9 +223,10 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   months, weeks as days); an undecidable pair (`1M` against `30D`) compares unequal, where QuantLib's `==` throws.
   `CompareTo`, `<` and `>` follow QuantLib's ordering and throw `NanoQLException` on undecidable pairs, as QuantLib
   does.
-- **Calendars** are equal when they have the same name and the same added and removed holidays, compared by content.
-  A calendar built from others (a joint calendar) is equal to another only when its rule and its components are equal
-  too, each component by the same rule. The hash combines the same values.
+- **Calendars** are equal when they are of the same type and have the same name and the same added and removed
+  holidays, compared by content; the type keeps equality symmetric between a calendar and a subclass that compares
+  more. A calendar built from others (a joint calendar) is equal to another only when its rule and its components
+  are equal too, each component by the same rule. The hash combines the same values.
 - **Day counters** are equal by name, as in QuantLib.
 - **Missing values:** `T?`.
 - **Collections:** stored as `ImmutableArray<T>`; inputs are taken as `IEnumerable<T>` or `ReadOnlySpan<T>` and
@@ -237,8 +238,8 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `Probability` (`double`), `Size`, `Integer`, `Natural` (`int`) and `BigInteger` (`long`), and the `Leg` alias (§2.4).
   `Decimal` and `Time` are written as `double`. The test project links `Types.cs`, so ported tests keep QuantLib's
   names.
-- **Errors:** `ArgumentException` for bad arguments, otherwise `NanoQLException`, which derives from `Exception` and
-  has the three standard constructors.
+- **Errors:** `ArgumentException` for a `QL_REQUIRE` on a public method's parameter; QuantLib's other checks throw
+  `NanoQLException` (§2's table), which derives from `Exception` and has the three standard constructors.
 - **Experimental code:** types ported from `ql/experimental` carry `[Experimental("NQL0001")]`. NanoQL's own projects
   consent with `<NoWarn>$(NoWarn);NQL0001</NoWarn>`; a consumer that references one still gets the diagnostic.
 - **Docs:** Doxygen comments become XML doc comments. A malformed comment or an unresolved `cref` fails the build, so
