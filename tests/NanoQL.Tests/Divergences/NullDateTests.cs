@@ -1,6 +1,11 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Immutable;
+using NanoQL.Coupons;
+using NanoQL.Instruments;
+using NanoQL.PricingEngines;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Divergences;
@@ -116,6 +121,58 @@ public class NullDateTests
         Assert.True(d == default(Date));
         Assert.True(d < Date.MinDate);
         Assert.Equal("null date", d.ToString());
+    }
+
+    [Fact]
+    public void CashFlowRateCurveAndEngineMembersRefuseTheDefaultDate()
+    {
+        Date d = default;
+        Date valid = new(15, Month.October, 2026);
+        var context = new EvaluationContext { EvaluationDate = valid };
+        DayCounter dc = new Actual360();
+
+        var cashFlow = new SimpleCashFlow(1.0, valid + 10);
+        AssertParam("date", () => new SimpleCashFlow(1.0, d));
+        AssertParam("date", () => new Redemption(1.0, d));
+        AssertParam("date", () => new AmortizingPayment(1.0, d));
+        AssertParam("refDate", () => cashFlow.HasOccurred(context, d));
+        AssertParam("refDate", () => cashFlow.TradingExCoupon(context, d));
+
+        var coupon = new FixedRateCoupon(valid + 180, 100.0, 0.03, dc, valid, valid + 180);
+        AssertParam("paymentDate", () => new FixedRateCoupon(d, 100.0, 0.03, dc, valid, valid + 180));
+        AssertParam("accrualStartDate", () => new FixedRateCoupon(valid + 180, 100.0, 0.03, dc, d, valid + 180));
+        AssertParam("accrualEndDate", () => new FixedRateCoupon(valid + 180, 100.0, 0.03, dc, valid, d));
+        AssertParam("refPeriodStart", () => new FixedRateCoupon(valid + 180, 100.0, 0.03, dc, valid, valid + 180, d));
+        AssertParam("refPeriodEnd", () => new FixedRateCoupon(valid + 180, 100.0, 0.03, dc, valid, valid + 180, valid, d));
+        AssertParam("exCouponDate", () => new FixedRateCoupon(
+            valid + 180, 100.0, 0.03, dc, valid, valid + 180, valid, valid + 180, d));
+        AssertParam("d", () => coupon.AccruedAmount(d));
+
+        var rate = new InterestRate(0.03, dc, Compounding.Simple, Frequency.Annual);
+        AssertParam("d1", () => rate.CompoundFactor(d, valid));
+        AssertParam("d2", () => rate.DiscountFactor(valid, d));
+        AssertParam("refStart", () => rate.CompoundFactor(valid, valid + 30, d, valid + 180));
+        AssertParam("refEnd", () => rate.CompoundFactor(valid, valid + 30, valid, d));
+        AssertParam("d1", () => InterestRate.ImpliedRate(1.01, dc, Compounding.Simple, Frequency.Annual, d, valid));
+        AssertParam("d2", () => rate.EquivalentRate(dc, Compounding.Simple, Frequency.Annual, valid, d));
+
+        var curve = new FlatForward(valid, 0.03, new Actual365Fixed());
+        AssertParam("referenceDate", () => new FlatForward(d, 0.03, new Actual365Fixed()));
+        AssertParam("date", () => curve.TimeFromReference(d));
+        AssertParam("d", () => curve.Discount(d));
+        AssertParam("d", () => curve.ZeroRate(d, dc, Compounding.Continuous));
+        AssertParam("d1", () => curve.ForwardRate(d, valid, dc, Compounding.Simple));
+        AssertParam("d2", () => curve.ForwardRate(valid, d, dc, Compounding.Simple));
+        AssertParam("d", () => curve.ForwardRate(d, new Period(1, TimeUnit.Years), dc, Compounding.Simple));
+
+        ImmutableArray<CashFlow> leg = [cashFlow];
+        AssertParam("settlementDate", () => CashFlows.Npv(leg, curve, context, null, d));
+        AssertParam("npvDate", () => CashFlows.Bps(leg, curve, context, null, valid, d));
+        AssertParam("settlementDate", () => CashFlows.NpvBps(leg, curve, context, null, d));
+        var swap = new Swap(leg, leg);
+        AssertParam("settlementDate", () => DiscountingSwapEngine.Calculate(swap, context, curve, null, d));
+        AssertParam("npvDate", () => DiscountingSwapEngine.Calculate(swap, context, curve, null, null, d));
+        AssertParam("ValuationDate", () => new InstrumentResults { ValuationDate = d });
     }
 
     private static void AssertParam(string paramName, Action action) =>

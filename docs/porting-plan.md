@@ -81,13 +81,24 @@ release. From the end of batch 1, private preview builds carry a pre-release ver
 Files that port only part of their QuantLib file, each with a `// Partial:` line naming what is left (playbook §1).
 The licensing gate checks that this list and the files match.
 
+- `src/NanoQL/CashFlow.cs`: `earlier_than<CashFlow>`, which waits for the bond slot.
+- `src/NanoQL/Coupons/CashFlows.cs`: every function but `startDate`, `maturityDate`, and `npv`, `bps` and `npvbps` on a yield term structure.
+- `src/NanoQL/Coupons/Coupon.cs`: `accruedPeriod(d)` and `accruedDays(d)`.
+- `src/NanoQL/Coupons/FixedRateLeg.cs`: `withLastPeriodDayCounter`, which waits for the credit default swap slot.
+- `src/NanoQL/Event.cs`: `detail::simple_event`, which only experimental code uses.
+- `src/NanoQL/Instrument.cs`: `result<T>`, which waits for the first engine that sets additional results.
+- `src/NanoQL/InterestRate.cs`: the discount factor's two derivatives, which wait for the slot that ports the cash-flow duration and convexity.
+- `src/NanoQL/Numerics/ComparisonFunctions.cs`: `earlier_than`, which waits for the bond slot.
+- `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
+- `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only, and the jumps.
 - `src/NanoQL/Time/BusinessDayConvention.cs`: the convention's text, which waits for the C++ harness.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
-- `src/NanoQL/Time/Frequency.cs`: the frequency's text.
 - `src/NanoQL/Time/IMM.cs`: everything but `isIMMdate`.
 - `src/NanoQL/Time/Weekday.cs`: the weekday's text, which waits for the C++ harness.
 - `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
+- `tests/NanoQL.Tests/TestSuite/CashFlowsTests.cs`: the cases needing Ibor coupons, pricers or cash-flow functions not yet ported.
 - `tests/NanoQL.Tests/TestSuite/DatesTests.cs`: the ECB, IMM, ASX, parsing and intraday cases, and `nullDate`.
 - `tests/NanoQL.Tests/TestSuite/DayCountersTests.cs`: the cases for day counters not yet ported.
 - `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases and those needing the Japan calendar.
+- `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported, and the moving reference date.

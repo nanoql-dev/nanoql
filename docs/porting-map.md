@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,254 | 177 |
-| partial | 5 | 4 |
-| ported | 17 | 1 |
+| not started | 1,238 | 174 |
+| partial | 14 | 6 |
+| ported | 24 | 2 |
 | replaced | 15 | 6 |
 | total | 1,456 | 194 |
 
@@ -34,8 +34,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `any` | not ported: C++ platform header |  |  |
 | `auto_link` | not ported: C++ platform header |  |  |
-| `cashflow` | not started |  | no nanoql type: CashFlow, Leg |
-| `compounding` | not started |  | no nanoql type: Compounding |
+| `cashflow` | partial | CashFlow.cs | partial: earlier_than<CashFlow>, which waits for the bond slot, whose code and tests sort by it |
+| `compounding` | ported | Compounding.cs |  |
 | `config.ansi` | not ported: C++ platform header |  |  |
 | `config.mingw` | not ported: C++ platform header |  |  |
 | `config.msvc` | not ported: C++ platform header |  |  |
@@ -44,15 +44,15 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `default` | not started |  | no nanoql type: ProtectionSide |
 | `discretizedasset` | not started |  | no nanoql type: DiscretizedAsset, DiscretizedDiscountBond, DiscretizedOption |
 | `errors` | replaced: ArgumentException and NanoQLException |  |  |
-| `event` | not started |  | no nanoql type: Event |
+| `event` | partial | Event.cs | partial: detail::simple_event, which only experimental code uses |
 | `exchangerate` | not started |  | no nanoql type: ExchangeRate, ExchangeRateType |
 | `exercise` | not started |  | no nanoql type: Exercise, ExerciseType, EarlyExercise, AmericanExercise, BermudanExercise, EuropeanExercise |
 | `functional` | not ported: deprecated |  |  |
 | `grid` | not ported: deprecated |  |  |
 | `handle` | replaced: the object itself |  |  |
 | `index` | not started |  | no nanoql type: Index |
-| `instrument` | not started |  | no nanoql type: Instrument, InstrumentResults |
-| `interestrate` | not started |  | no nanoql type: InterestRate |
+| `instrument` | partial | Instrument.cs, InstrumentResults.cs | partial: result<T>(tag), which waits for the first engine that sets additional results |
+| `interestrate` | partial | InterestRate.cs | partial: discountFactorFirstDerivative and discountFactorSecondDerivative, which wait for the slot that ports the cash-flow duration and convexity, whose wheel functions check them |
 | `mathconstants` | not started |  |  |
 | `money` | not started |  | no nanoql type: Money, MoneyConversionType, MoneySettings |
 | `numericalmethod` | not started |  | no nanoql type: Lattice |
@@ -69,7 +69,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `settings` | replaced: EvaluationContext | EvaluationContext.cs |  |
 | `shared_ptr` | not ported: C++ platform header |  |  |
 | `stochasticprocess` | not started |  | no nanoql type: StochasticProcess, StochasticProcessDiscretization, StochasticProcess1D, StochasticProcess1DDiscretization |
-| `termstructure` | not started |  | no nanoql type: TermStructure |
+| `termstructure` | partial | TermStructure.cs | partial: the constructors taking a day counter only, for structures that manage their own reference date, which no pilot curve uses |
 | `timegrid` | not started |  | no nanoql type: TimeGrid |
 | `timeseries` | not started |  | no nanoql type: TimeSeries, TimeSeriesReverse |
 | `tuple` | not ported: deprecated |  |  |
@@ -87,11 +87,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackovernightindexedcouponpricer` | not started |  | no nanoql type: BlackCompoundingOvernightIndexedCouponPricer, BlackAveragingOvernightIndexedCouponPricer |
 | `capflooredcoupon` | not started |  | no nanoql type: CappedFlooredCoupon, CappedFlooredIborCoupon, CappedFlooredCmsCoupon |
 | `capflooredinflationcoupon` | not started |  | no nanoql type: CappedFlooredYoYInflationCoupon |
-| `cashflows` | not started |  | no nanoql type: CashFlows |
+| `cashflows` | partial | Coupons/CashFlows.cs | partial: every function but startDate, maturityDate, and npv, bps and npvbps on a yield term structure, which wait for the slots whose code and tests use them |
 | `cashflowvectors` | not started |  |  |
 | `cmscoupon` | not started |  | no nanoql type: CmsCoupon, CmsLeg |
 | `conundrumpricer` | not started |  | no nanoql type: VanillaOptionPricer, MarketQuotedOptionPricer, GFunction, GFunctionFactory, GFunctionFactoryYieldCurveModel, HaganPricer, NumericHaganPricer, NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand, AnalyticHaganPricer |
-| `coupon` | not started |  | no nanoql type: Coupon |
+| `coupon` | partial | Coupons/Coupon.cs | partial: accruedPeriod(d) and accruedDays(d), which wait for the slot that ports the cash-flow functions using them |
 | `couponpricer` | not started |  | no nanoql type: FloatingRateCouponPricer, IborCouponPricer, BlackIborCouponPricer, BlackIborCouponPricerTimingAdjustment, CmsCouponPricer, MeanRevertingPricer |
 | `cpicoupon` | not started |  | no nanoql type: CPICoupon, CPICashFlow, CPILeg |
 | `cpicouponpricer` | not started |  | no nanoql type: CPICouponPricer |
@@ -101,7 +101,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `dividend` | not started |  | no nanoql type: Dividend, FixedDividend, FractionalDividend |
 | `duration` | not started |  | no nanoql type: DurationType |
 | `equitycashflow` | not started |  | no nanoql type: EquityCashFlow, EquityCashFlowPricer, EquityQuantoCashFlowPricer |
-| `fixedratecoupon` | not started |  | no nanoql type: FixedRateCoupon, FixedRateLeg |
+| `fixedratecoupon` | partial | Coupons/FixedRateCoupon.cs, Coupons/FixedRateLeg.cs | partial: withLastPeriodDayCounter, which waits for the credit-default-swap slot, whose tests use it |
 | `floatingratecoupon` | not started |  | no nanoql type: FloatingRateCoupon |
 | `iborcoupon` | not started |  | no nanoql type: IborCoupon, IborCouponSettings, IborLeg |
 | `indexedcashflow` | not started |  | no nanoql type: IndexedCashFlow |
@@ -114,7 +114,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rangeaccrual` | not started |  | no nanoql type: RangeAccrualFloatersCoupon, RangeAccrualPricer, RangeAccrualPricerByBgm, RangeAccrualLeg |
 | `rateaveraging` | not started |  | no nanoql type: RateAveragingType |
 | `replication` | not started |  | no nanoql type: ReplicationType, DigitalReplication |
-| `simplecashflow` | not started |  | no nanoql type: SimpleCashFlow, Redemption, AmortizingPayment |
+| `simplecashflow` | ported | Coupons/SimpleCashFlow/AmortizingPayment.cs, Coupons/SimpleCashFlow/Redemption.cs, Coupons/SimpleCashFlow/SimpleCashFlow.cs |  |
 | `stubiborcoupon` | not started |  | no nanoql type: StubIndexSelection, StubIndexSelectionConvention, StubIborCoupon, StubIborCouponWeightedIndex |
 | `timebasket` | not started |  | no nanoql type: TimeBasket |
 | `yoyinflationcoupon` | not started |  | no nanoql type: YoYInflationCoupon, YoyInflationLeg |
@@ -685,7 +685,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `softbarrieroption` | not started |  | no nanoql type: SoftBarrierOption |
 | `stickyratchet` | not started |  | no nanoql type: DoubleStickyRatchetPayoff, RatchetPayoff, StickyPayoff, RatchetMaxPayoff, RatchetMinPayoff, StickyMaxPayoff, StickyMinPayoff |
 | `stock` | not started |  | no nanoql type: Stock |
-| `swap` | not started |  | no nanoql type: Swap, SwapType, SwapResults |
+| `swap` | ported | Instruments/Swap/Swap.cs, Instruments/Swap/SwapResults.cs, Instruments/Swap/SwapType.cs |  |
 | `swaption` | not started |  | no nanoql type: Settlement, SettlementType, SettlementMethod, Swaption, SwaptionPriceType |
 | `twoassetbarrieroption` | not started |  | no nanoql type: TwoAssetBarrierOption |
 | `twoassetcorrelationoption` | not started |  | no nanoql type: TwoAssetCorrelationOption |
@@ -753,7 +753,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bernsteinpolynomial` | not started |  | no nanoql type: BernsteinPolynomial |
 | `beta` | not started |  |  |
 | `bspline` | not started |  | no nanoql type: BSpline |
-| `comparison` | not started |  |  |
+| `comparison` | partial | Numerics/ComparisonFunctions.cs | partial: earlier_than, which waits for the bond slot, whose code and tests sort by it |
 | `errorfunction` | not started |  | no nanoql type: ErrorFunction |
 | `expm1` | not started |  |  |
 | `factorial` | not started |  | no nanoql type: Factorial |
@@ -844,7 +844,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `chebyshevinterpolation` | not started |  | no nanoql type: ChebyshevInterpolation, ChebyshevInterpolationPointsType |
 | `convexmonotoneinterpolation` | not started |  | no nanoql type: ConvexMonotoneInterpolation, ConvexMonotone |
 | `cubicinterpolation` | not started |  | no nanoql type: CubicInterpolation, CubicInterpolationDerivativeApprox, CubicInterpolationBoundaryCondition, CubicNaturalSpline, MonotonicCubicNaturalSpline, CubicSplineOvershootingMinimization1, CubicSplineOvershootingMinimization2, AkimaCubicInterpolation, KrugerCubic, HarmonicCubic, FritschButlandCubic, Parabolic, MonotonicParabolic, Cubic |
-| `extrapolation` | not started |  | no nanoql type: Extrapolator |
+| `extrapolation` | ported | Numerics/Interpolations/Extrapolator.cs, Numerics/Interpolations/ExtrapolatorExtensions.cs |  |
 | `flatextrapolation` | not started |  | no nanoql type: FlatExtrapolator |
 | `flatextrapolation2d` | not started |  | no nanoql type: FlatExtrapolator2D |
 | `forwardflatinterpolation` | not started |  | no nanoql type: ForwardFlatInterpolation, ForwardFlat |
@@ -1642,7 +1642,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `cvaswapengine` | not started |  | no nanoql type: CounterpartyAdjSwapEngine |
 | `discountingconstnotionalcrosscurrencyswapengine` | not started |  | no nanoql type: DiscountingConstNotionalCrossCurrencySwapEngine |
-| `discountingswapengine` | not started |  | no nanoql type: DiscountingSwapEngine |
+| `discountingswapengine` | ported | PricingEngines/Swap/DiscountingSwapEngine.cs |  |
 | `discretizedswap` | not started |  | no nanoql type: DiscretizedSwap |
 | `treeswapengine` | not started |  | no nanoql type: TreeVanillaSwapEngine |
 
@@ -1773,7 +1773,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `localbootstrap` | not started |  | no nanoql type: PenaltyFunction, LocalBootstrap |
 | `multicurve` | not started |  | no nanoql type: MultiCurveBootstrapProvider, MultiCurve |
 | `voltermstructure` | not started |  | no nanoql type: VolatilityTermStructure |
-| `yieldtermstructure` | not started |  | no nanoql type: YieldTermStructure |
+| `yieldtermstructure` | partial | TermStructures/YieldTermStructure.cs | partial: the constructors taking a day counter only, and the jumps (jumpDates, jumpTimes), which no pilot curve uses |
 
 ### `ql/termstructures/credit/`
 
@@ -1917,7 +1917,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `derivedtermstructure` | not started |  | no nanoql type: DerivedYieldTermStructure, RelativeDerivedYieldTermStructure |
 | `discountcurve` | not started |  | no nanoql type: InterpolatedDiscountCurve, DiscountCurve |
 | `fittedbonddiscountcurve` | not started |  | no nanoql type: FittedBondDiscountCurve, FittedBondDiscountCurveFittingMethod |
-| `flatforward` | not started |  | no nanoql type: FlatForward |
+| `flatforward` | ported | TermStructures/Yield/FlatForward.cs |  |
 | `forwardcurve` | not started |  | no nanoql type: InterpolatedForwardCurve, ForwardCurve |
 | `forwardspreadedtermstructure` | not started |  | no nanoql type: ForwardSpreadedTermStructure |
 | `forwardstructure` | not started |  | no nanoql type: ForwardRateStructure |
@@ -1952,7 +1952,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `dategenerationrule` | ported | Time/DateGenerationRule.cs |  |
 | `daycounter` | ported | Time/DayCounter.cs |  |
 | `ecb` | not started |  | no nanoql type: ECB |
-| `frequency` | partial | Time/Frequency.cs | partial: operator<<, which FrequencyFunctions.ToString will hold |
+| `frequency` | ported | Time/Frequency.cs, Time/FrequencyFunctions.cs |  |
 | `imm` | partial | Time/IMM.cs, Time/IMMMonth.cs | partial: isIMMcode, code, date, nextDate and nextCode, which the wheel exposes and a later slot ports |
 | `period` | ported | Time/Period/Period.cs, Time/Period/PeriodFunctions.cs, Time/Period/TimeUnitExtensions.cs | own-tested: Days, LongPeriod; TimeUnit * int |
 | `schedule` | ported | Time/Schedule/MakeSchedule.cs, Time/Schedule/Schedule.cs, Time/Schedule/ScheduleFunctions.cs |  |
@@ -2087,7 +2087,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `callablebonds` | not started |  | 14 cases |
 | `capfloor` | not started |  | 10 cases |
 | `capflooredcoupon` | not started |  | 2 cases |
-| `cashflows` | not started |  | 16 cases |
+| `cashflows` | partial | TestSuite/CashFlowsTests.cs | 6 of 16 cases; not yet: testAccessViolation, testDefaultSettlementDate, testNullFixingDays, testFixedIborCouponWithoutForecastCurve, testIborCouponKnowsWhenitHasFixed, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices |
 | `catbonds` | not started |  | 9 cases |
 | `cdo` | not started |  | 0 cases |
 | `cdsoption` | not started |  | 1 cases |
@@ -2158,7 +2158,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationvolatility` | not started |  | 3 cases |
 | `instruments` | not started |  | 2 cases |
 | `integrals` | not started |  | 21 cases |
-| `interestrates` | not started |  | 1 cases |
+| `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | not started |  | 8 cases |
 | `interpolations` | not started |  | 40 cases |
 | `jumpdiffusion` | not started |  | 2 cases |
@@ -2234,7 +2234,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `swaptionvolatilitymatrix` | not started |  | 2 cases |
 | `swaptionvolstructuresutilities` | not started |  | 0 cases |
 | `swingoption` | not started |  | 6 cases |
-| `termstructures` | not started |  | 15 cases |
+| `termstructures` | partial | TestSuite/TermStructuresTests.cs | 1 of 15 cases; not yet: testReferenceChange, testImplied, testImpliedObs, testFSpreaded, testFSpreadedObs, testZSpreaded, testZSpreadedObs, testCreateWithNullUnderlying, testLinearInterpolationSpreadedForwardRate, testForwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationZeroRate, testLinkToNullUnderlying, testCompositeZeroYieldStructures |
 | `timegrid` | not started |  | 10 cases |
 | `timeseries` | not started |  | 6 cases |
 | `toplevelfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |

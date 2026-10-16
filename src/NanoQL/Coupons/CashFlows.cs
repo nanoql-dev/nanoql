@@ -1,0 +1,221 @@
+// SPDX-FileCopyrightText: Copyright (C) 2005, 2006 StatPro Italia srl
+// SPDX-FileCopyrightText: Copyright (C) 2005 Charles Whitmore
+// SPDX-FileCopyrightText: Copyright (C) 2007, 2008, 2009, 2010, 2011 Ferdinando Ametrano
+// SPDX-FileCopyrightText: Copyright (C) 2008 Toyin Akin
+// SPDX-FileCopyrightText: Copyright (C) 2007, 2008, 2009, 2010, 2011, 2012 Ferdinando Ametrano
+// SPDX-FileCopyrightText: 2026 The nanoql Authors
+// SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
+// Upstream: ql/cashflows/cashflows.hpp ql/cashflows/cashflows.cpp @ v1.44
+// Ported to C# from QuantLib and modified by the nanoql Authors.
+// Partial: every function but startDate, maturityDate, and npv, bps and npvbps on a yield term structure, which wait for the slots whose code and tests use them
+
+using System.Collections.Immutable;
+using NanoQL.TermStructures;
+using NanoQL.Time;
+
+namespace NanoQL.Coupons;
+
+/// <summary>Cash-flow analysis functions.</summary>
+public static class CashFlows
+{
+    private const double BasisPoint = 1.0e-4;
+
+    /// <summary>The earliest accrual start date of the coupons, or the earliest date of the other cash flows.</summary>
+    /// <param name="leg">The leg.</param>
+    /// <returns>The start date.</returns>
+    /// <exception cref="ArgumentException">The leg is empty.</exception>
+    public static Date StartDate(ImmutableArray<CashFlow> leg)
+    {
+        if (leg.IsDefaultOrEmpty)
+        {
+            throw new ArgumentException("empty leg", nameof(leg));
+        }
+
+        Date d = Date.MaxDate;
+        foreach (CashFlow i in leg)
+        {
+            Date candidate = i is Coupon c ? c.AccrualStartDate : i.Date;
+            d = candidate < d ? candidate : d;
+        }
+
+        return d;
+    }
+
+    /// <summary>The latest accrual end date of the coupons, or the latest date of the other cash flows.</summary>
+    /// <param name="leg">The leg.</param>
+    /// <returns>The maturity date.</returns>
+    /// <exception cref="ArgumentException">The leg is empty.</exception>
+    public static Date MaturityDate(ImmutableArray<CashFlow> leg)
+    {
+        if (leg.IsDefaultOrEmpty)
+        {
+            throw new ArgumentException("empty leg", nameof(leg));
+        }
+
+        Date d = Date.MinDate;
+        foreach (CashFlow i in leg)
+        {
+            Date candidate = i is Coupon c ? c.AccrualEndDate : i.Date;
+            d = candidate > d ? candidate : d;
+        }
+
+        return d;
+    }
+
+    /// <summary>
+    /// The net present value of the cash flows: their sum, each discounted on the given curve, then forwarded to the
+    /// NPV date.
+    /// </summary>
+    /// <param name="leg">The leg.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="includeSettlementDateFlows">Whether cash flows on the settlement date count.</param>
+    /// <param name="settlementDate">The settlement date; the evaluation date when <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the value is given at; the settlement date when <see langword="null"/>.</param>
+    /// <returns>The NPV.</returns>
+    public static double Npv(
+        ImmutableArray<CashFlow> leg,
+        YieldTermStructure discountCurve,
+        EvaluationContext context,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(discountCurve);
+        Date.ThrowIfDefault(settlementDate, nameof(settlementDate));
+        Date.ThrowIfDefault(npvDate, nameof(npvDate));
+        if (leg.IsDefaultOrEmpty)
+        {
+            return 0.0;
+        }
+
+        Date settlement = settlementDate ?? context.EvaluationDate;
+        Date npvAt = npvDate ?? settlement;
+
+        double totalNPV = 0.0;
+        foreach (CashFlow i in leg)
+        {
+            if (!i.HasOccurred(context, settlement, includeSettlementDateFlows) && !i.TradingExCoupon(context, settlement))
+            {
+                totalNPV += i.Amount() * discountCurve.Discount(i.Date);
+            }
+        }
+
+        return totalNPV / discountCurve.Discount(npvAt);
+    }
+
+    /// <summary>
+    /// The basis-point sensitivity of the cash flows: the change in NPV for a one-basis-point change in the coupon
+    /// rates.
+    /// </summary>
+    /// <param name="leg">The leg.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="includeSettlementDateFlows">Whether cash flows on the settlement date count.</param>
+    /// <param name="settlementDate">The settlement date; the evaluation date when <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the value is given at; the settlement date when <see langword="null"/>.</param>
+    /// <returns>The BPS.</returns>
+    public static double Bps(
+        ImmutableArray<CashFlow> leg,
+        YieldTermStructure discountCurve,
+        EvaluationContext context,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(discountCurve);
+        Date.ThrowIfDefault(settlementDate, nameof(settlementDate));
+        Date.ThrowIfDefault(npvDate, nameof(npvDate));
+        if (leg.IsDefaultOrEmpty)
+        {
+            return 0.0;
+        }
+
+        Date settlement = settlementDate ?? context.EvaluationDate;
+        Date npvAt = npvDate ?? settlement;
+
+        var calc = new BPSCalculator(discountCurve);
+        foreach (CashFlow i in leg)
+        {
+            if (!i.HasOccurred(context, settlement, includeSettlementDateFlows) && !i.TradingExCoupon(context, settlement))
+            {
+                calc.Add(i);
+            }
+        }
+
+        return BasisPoint * calc.Bps / discountCurve.Discount(npvAt);
+    }
+
+    /// <summary>The NPV and the BPS of the cash flows, computed together.</summary>
+    /// <param name="leg">The leg.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="includeSettlementDateFlows">Whether cash flows on the settlement date count.</param>
+    /// <param name="settlementDate">The settlement date; the evaluation date when <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the values are given at; the settlement date when <see langword="null"/>.</param>
+    /// <returns>The NPV and the BPS.</returns>
+    public static (double Npv, double Bps) NpvBps(
+        ImmutableArray<CashFlow> leg,
+        YieldTermStructure discountCurve,
+        EvaluationContext context,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(discountCurve);
+        Date.ThrowIfDefault(settlementDate, nameof(settlementDate));
+        Date.ThrowIfDefault(npvDate, nameof(npvDate));
+        double npv = 0.0;
+        double bps = 0.0;
+
+        if (leg.IsDefaultOrEmpty)
+        {
+            return (npv, bps);
+        }
+
+        Date settlement = settlementDate ?? context.EvaluationDate;
+        Date npvAt = npvDate ?? settlement;
+
+        foreach (CashFlow cf in leg)
+        {
+            if (!cf.HasOccurred(context, settlement, includeSettlementDateFlows) && !cf.TradingExCoupon(context, settlement))
+            {
+                double df = discountCurve.Discount(cf.Date);
+                npv += cf.Amount() * df;
+                if (cf is Coupon cp)
+                {
+                    bps += cp.Nominal() * cp.AccrualPeriod() * df;
+                }
+            }
+        }
+
+        double d = discountCurve.Discount(npvAt);
+        npv /= d;
+        bps = BasisPoint * bps / d;
+
+        return (npv, bps);
+    }
+}
+
+/// <summary>Sums the coupons' basis-point sensitivity, and the other cash flows' NPV apart.</summary>
+file sealed class BPSCalculator(YieldTermStructure discountCurve)
+{
+    public double Bps { get; private set; }
+
+    public double NonSensNPV { get; private set; }
+
+    public void Add(CashFlow c)
+    {
+        if (c is Coupon cpn)
+        {
+            Bps += cpn.Nominal() * cpn.AccrualPeriod() * discountCurve.Discount(c.Date);
+        }
+        else
+        {
+            NonSensNPV += c.Amount() * discountCurve.Discount(c.Date);
+        }
+    }
+}

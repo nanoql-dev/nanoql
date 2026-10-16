@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/time/frequency.hpp ql/time/frequency.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: operator<<, which FrequencyFunctions.ToString will hold
 
 namespace NanoQL.Time;
 

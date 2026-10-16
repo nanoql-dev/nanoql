@@ -19,3 +19,6 @@ global using Rate = double;
 global using Spread = double;
 global using Volatility = double;
 global using Probability = double;
+
+// QuantLib's Leg, a sequence of cash flows. Public signatures write the type out.
+global using Leg = System.Collections.Immutable.ImmutableArray<NanoQL.CashFlow>;

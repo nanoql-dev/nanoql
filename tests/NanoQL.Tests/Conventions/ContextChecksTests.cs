@@ -1,6 +1,11 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Immutable;
+using NanoQL.Coupons;
+using NanoQL.Instruments;
+using NanoQL.PricingEngines;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Conventions;
@@ -54,6 +59,62 @@ public class ContextChecksTests
         Assert.Equal(new Date(15, Month.January, 2026), Annual.PreviousDate(null, Context));
     }
 
+    [Fact]
+    public void CashFlowCurveAndSwapMembersRefuseANullContext()
+    {
+        Date valid = Context.EvaluationDate;
+        var cashFlow = new SimpleCashFlow(1.0, valid + 10);
+        ImmutableArray<CashFlow> leg = [cashFlow];
+        var curve = new FlatForward(valid, 0.03, new Actual365Fixed());
+        var swap = new Swap(leg, leg);
+
+        AssertContext(() => new AnEvent(valid).HasOccurred(null!));
+        AssertContext(() => cashFlow.HasOccurred(null!, valid));
+        AssertContext(() => cashFlow.TradingExCoupon(null!, valid));
+
+        // An empty leg, which the functions value at 0 without reading the context, still needs one.
+        AssertContext(() => CashFlows.Npv([], curve, null!));
+        AssertContext(() => CashFlows.Bps([], curve, null!));
+        AssertContext(() => CashFlows.NpvBps([], curve, null!));
+        AssertContext(() => swap.IsExpired(null!));
+        AssertContext(() => DiscountingSwapEngine.Calculate(swap, null!, curve));
+        AssertContext(() => FlatForward.Create(2, new TARGET(), 0.03, new Actual365Fixed(), null!));
+    }
+
+    [Fact]
+    public void CashFlowMembersReadTheContextForAMissingDateOrFlag()
+    {
+        // QuantLib's tradingExCoupon(const Date& refDate = Date()) and hasOccurred(refDate = Date(), includeRefDate =
+        // nullopt) read the evaluation date, and CashFlows' functions read includeReferenceDateEvents when
+        // includeSettlementDateFlows is nullopt, through hasOccurred.
+        Date today = Context.EvaluationDate;
+        var coupon = new FixedRateCoupon(
+            today + 10, 100.0, 0.03, new Actual360(), today - 170, today + 10, null, null, today - 1);
+        Assert.True(coupon.TradingExCoupon(Context));
+        Assert.False(coupon.TradingExCoupon(Context with { EvaluationDate = today - 2 }));
+        Assert.Equal(coupon.TradingExCoupon(Context, today), coupon.TradingExCoupon(Context));
+
+        // flows at T+0, T+1 and T+2, on a curve that doesn't discount
+        ImmutableArray<CashFlow> leg = [new SimpleCashFlow(1.0, today), new SimpleCashFlow(1.0, today + 1),
+            new SimpleCashFlow(1.0, today + 2)];
+        var noDiscount = new FlatForward(today, 0.0, new Actual365Fixed());
+        EvaluationContext excluding = Context with { IncludeReferenceDateEvents = false };
+        EvaluationContext including = Context with { IncludeReferenceDateEvents = true };
+        Assert.False(leg[0].HasOccurred(including));
+        Assert.True(leg[0].HasOccurred(excluding));
+        Assert.Equal(2.0, CashFlows.Npv(leg, noDiscount, excluding), 1e-12);
+        Assert.Equal(3.0, CashFlows.Npv(leg, noDiscount, including), 1e-12);
+        Assert.Equal(CashFlows.Npv(leg, noDiscount, including, true), CashFlows.Npv(leg, noDiscount, including));
+        Assert.Equal(CashFlows.Bps(leg, noDiscount, excluding, false), CashFlows.Bps(leg, noDiscount, excluding));
+        Assert.Equal(CashFlows.NpvBps(leg, noDiscount, including, true), CashFlows.NpvBps(leg, noDiscount, including));
+        Assert.Equal(2.0, CashFlows.Npv(leg, noDiscount, including with { IncludeTodaysCashFlows = false }), 1e-12);
+    }
+
     private static void AssertContext(Action action) =>
         Assert.Equal("context", Assert.Throws<ArgumentNullException>(action).ParamName);
+
+    private sealed class AnEvent(Date date) : Event
+    {
+        public override Date Date => date;
+    }
 }
