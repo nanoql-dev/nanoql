@@ -9,7 +9,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/dates.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, immDates, asxDates, asxDatesSpecific, isoDates, parseDates, intraday, nullDate
+// Partial: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, immDates, asxDates, asxDatesSpecific, isoDates, parseDates, intraday
+// Replaced: nullDate (Divergences/NullDateTests.cs)
 
 using NanoQL.Time;
 

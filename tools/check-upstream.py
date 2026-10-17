@@ -4,11 +4,14 @@
 # REUSE-IgnoreStart
 """The licensing gate's upstream checks, (2) to (5) (docs/porting-playbook.md §8).
 
-Usage: .venv\\Scripts\\python -I tools/check-upstream.py <QuantLib v1.44 worktree> [--self-test]
+Usage: .venv\\Scripts\\python -I tools/check-upstream.py <QuantLib v1.44 worktree> [--boost <Boost 1.90.0 root>]
+       [--self-test]
 
-(2) Every .cs and .py file carries an Upstream line or is listed in tools/no-upstream.txt, not both. Every
-    Upstream path exists at the pin, and the file sits in the folder, and declares the namespace, that the name table
-    (tools/porting-map.json) gives that path. Every test file's namespace names its folder.
+(2) Every .cs, .py, .cpp and .hpp file carries an Upstream line or is listed in tools/no-upstream.txt, not both.
+    Every Upstream path exists at the pin, and the file sits in the folder, and declares the namespace, that the name
+    table (tools/porting-map.json) gives that path. Every test file's namespace names its folder. A test class's
+    "// Replaced:" line names cases of its QuantLib test file that it neither ports nor lists as partial, each with
+    a test file that exists under tests/NanoQL.Tests/.
 (3) The QuantLib copyright lines of the named upstream files appear verbatim and in order, with every third-party
     block tools/third-party-notices.txt lists for them, and its licence in the SPDX expression. THIRD_PARTY_NOTICES.md's
     fenced block is QuantLib's LICENSE.TXT at the pin, verbatim.
@@ -16,10 +19,19 @@ Usage: .venv\\Scripts\\python -I tools/check-upstream.py <QuantLib v1.44 worktre
 (5) docs/porting-map.md reproduces (tools/porting-map.py --check); every entry of the name table exists at the pin;
     and no Upstream line names a file that a rule or the name table marks not ported.
 
---self-test copies the tree to a temporary folder, adds a ported probe file, and applies one perturbation per check
-to a fresh copy each time; it exits 0 only if every perturbation is caught by the check it targets.
+A Boost port's Upstream line (boost/<path> @ boost-1.90.0) needs --boost, the root of Boost 1.90.0's release tree
+(tools/cxx/build.py's boost_1_90_0, or the release zip checked against its SHA-256). Its pin is the name table's
+boostPin and the root's boost/version.hpp gives 109000; every path exists under the root; the file sits in the folder
+the table's boost section gives the path's directory, under src/NanoQL/Boost/, in namespace NanoQL.Numerics; Boost's
+copyright lines appear verbatim and in order; the SPDX expression is Apache-2.0 AND BSL-1.0; and one Upstream line
+names QuantLib paths or Boost paths, never both.
+
+--self-test (which needs --boost) copies the tree to a temporary folder, adds a ported probe file and a Boost probe,
+and applies one perturbation per check to a fresh copy each time; it exits 0 only if every perturbation is caught by
+the check it targets.
 """
 import importlib.util
+import json
 import os
 import re
 import shutil
@@ -37,6 +49,10 @@ _spec.loader.exec_module(porting_map)
 SRC = "src/NanoQL/"
 TESTS = "tests/NanoQL.Tests/"
 TEST_SUITE = TESTS + "TestSuite/"
+BOOST_SRC = SRC + "Boost/"
+BOOST_NAMESPACE = "NanoQL.Numerics"
+BOOST_VERSION = "109000"
+CHECKED = (".cs", ".py", ".cpp", ".hpp")
 
 
 def glob_regex(pattern):
@@ -75,9 +91,18 @@ def listed_partials(root):
     return {p for p in re.findall(r"^\s*[-*]\s+`([^`]+)`", m.group(1), re.M)}
 
 
+def boost_version(boost_root):
+    try:
+        text = sources.read_text(os.path.join(boost_root, "boost", "version.hpp"))
+    except OSError:
+        return None
+    m = re.search(r"^#define BOOST_VERSION (\d+)", text, re.M)
+    return m.group(1) if m else None
+
+
 class Checker:
-    def __init__(self, root, ql_root):
-        self.root, self.ql = root, ql_root
+    def __init__(self, root, ql_root, boost_root=None):
+        self.root, self.ql, self.boost = root, ql_root, boost_root
         self.errors = []  # (code, message)
         self.table = sources.load_table(root)
         self.units = sources.ql_units(ql_root)
@@ -100,8 +125,13 @@ class Checker:
         allow = [glob_regex(p.strip()) for p in read_list(self.root, "tools/no-upstream.txt")]
         notices = [ln.split("\t") for ln in read_list(self.root, "tools/third-party-notices.txt")]
         upstream_files, copyright_ok, partial = 0, 0, set()
+        if self.boost is not None:
+            version = boost_version(self.boost)
+            if version != BOOST_VERSION:
+                self.error("boost-root", f"{self.boost}: boost/version.hpp gives BOOST_VERSION {version}, "
+                                         f"not {BOOST_VERSION} (Boost 1.90.0)")
         for path in files:
-            if not path.endswith((".cs", ".py")):
+            if not path.endswith(CHECKED):
                 continue
             header = sources.Header(os.path.join(self.root, path))
             allowed = any(r.match(path) for r in allow)
@@ -109,6 +139,8 @@ class Checker:
                 partial.add(path)
             if path.startswith(TESTS) and path.endswith(".cs"):
                 self.check_test_namespace(path, header)
+            if header.replaced:
+                self.check_replaced(path, header)
             if not header.upstream:
                 if not allowed:
                     self.error("allowlist", f"{path}: no Upstream line, and not listed in tools/no-upstream.txt")
@@ -116,7 +148,13 @@ class Checker:
             if allowed:
                 self.error("allowlist", f"{path}: carries an Upstream line but is listed in tools/no-upstream.txt")
             upstream_files += 1
-            if self.check_upstream(path, header) and self.check_copyrights(path, header, notices):
+            boost = [up.startswith("boost/") for up in header.upstream]
+            if any(boost) and not all(boost):
+                self.error("boost-mixed", f"{path}: its Upstream line names QuantLib and Boost paths; a file ports "
+                                          "from one or the other")
+            elif all(boost):
+                copyright_ok += self.check_boost(path, header)
+            elif self.check_upstream(path, header) and self.check_copyrights(path, header, notices):
                 copyright_ok += 1
         self.counts["upstream"] = upstream_files
         self.counts["copyright"] = copyright_ok
@@ -143,6 +181,81 @@ class Checker:
             self.error("test-namespace", f"{path}: declares no namespace, expected {expected} for its folder")
         elif header.namespace != expected:
             self.error("test-namespace", f"{path}: namespace {header.namespace}, expected {expected} for its folder")
+
+    def check_replaced(self, path, header):
+        """A "// Replaced:" line: cases of the class's QuantLib test file, replaced for good by a nanoql test."""
+        units = {sources.unit_of(up) for up in header.upstream}
+        if not path.startswith(TEST_SUITE) or len(units) != 1:
+            self.error("replaced", f"{path}: a // Replaced: line belongs on a TestSuite class naming one test file")
+            return
+        unit = next(iter(units))
+        cases = porting_map.quantlib_side(self.ql).get(unit, {}).get("cases", [])
+        methods = set(porting_map.METHOD.findall(header.text))
+        partial = {c.strip() for c in (header.partial or "").split(",")}
+        for case, test in header.replaced:
+            if case is None:
+                self.error("replaced", f"{path}: '{test}' on its // Replaced: line isn't '<case> (<test file>)'")
+                continue
+            if case not in cases:
+                self.error("replaced", f"{path}: Replaced names {case}, which isn't a case of {unit}.cpp")
+            elif case[0].upper() + case[1:] in methods:
+                self.error("replaced", f"{path}: Replaced names {case}, which is also ported")
+            elif case in partial:
+                self.error("replaced", f"{path}: Replaced names {case}, which is also on its // Partial: line")
+            if not os.path.isfile(os.path.join(self.root, TESTS, test)):
+                self.error("replaced", f"{path}: Replaced names {test}, which doesn't exist under {TESTS}")
+
+    def check_boost(self, path, header):
+        """A Boost port (D19). Returns whether its header holds."""
+        if self.boost is None:
+            self.error("boost-root", f"{path}: a Boost Upstream line needs --boost <Boost 1.90.0 root>")
+            return False
+        ok = True
+        if header.pin != self.table["boostPin"]:
+            self.error("boost-pin", f"{path}: Upstream pin {header.pin}, expected {self.table['boostPin']}")
+            ok = False
+        for up in header.upstream:
+            if not os.path.isfile(os.path.join(self.boost, up)):
+                self.error("boost-path", f"{path}: Upstream path {up} doesn't exist under the Boost root")
+                ok = False
+        if not ok:
+            return False
+        folders = set()
+        for up in header.upstream:
+            directory = up.rsplit("/", 1)[0]
+            entry = self.table["boost"].get(directory)
+            if entry is None:
+                self.error("folder", f"{path}: {directory} isn't in the name table's boost section")
+                return False
+            folders.add((BOOST_SRC + entry["folder"]).rstrip("/"))
+        actual = path.rsplit("/", 1)[0]
+        if folders != {actual}:
+            self.error("folder", f"{path}: in {actual}, but the name table's boost section gives "
+                                 f"{', '.join(sorted(folders))}")
+            ok = False
+        if header.namespace != BOOST_NAMESPACE:
+            self.error("namespace", f"{path}: namespace {header.namespace}, expected {BOOST_NAMESPACE} for a Boost "
+                                    "port")
+            ok = False
+        expected = []
+        for up in header.upstream:
+            for line in sources.boost_copyrights(self.boost, up):
+                if line not in expected:
+                    expected.append(line)
+        if header.copyrights != expected:
+            missing = [c for c in expected if c not in header.copyrights]
+            extra = [c for c in header.copyrights if c not in expected]
+            detail = f"missing {missing}" if missing else (f"extra {extra}" if extra else "out of order")
+            self.error("copyright", f"{path}: Boost copyright lines differ from the upstream files' ({detail})")
+            ok = False
+        if header.nanoql is None:
+            self.error("copyright", f"{path}: no 'SPDX-FileCopyrightText: <year> The nanoql Authors' line")
+            ok = False
+        if header.license != "Apache-2.0 AND BSL-1.0":
+            self.error("copyright", f"{path}: SPDX-License-Identifier '{header.license}', expected Apache-2.0 AND "
+                                    "BSL-1.0")
+            ok = False
+        return ok
 
     def check_upstream(self, path, header):
         ok = True
@@ -257,6 +370,10 @@ class Checker:
         absent += [d for d in self.table["directories"] if not os.path.isdir(os.path.join(self.ql, d))]
         for u in absent:
             self.error("table-absent", f"tools/porting-map.json: {u} doesn't exist at the pin")
+        if self.boost is not None:
+            for d in self.table["boost"]:
+                if not os.path.isdir(os.path.join(self.boost, d)):
+                    self.error("table-absent", f"tools/porting-map.json: {d} doesn't exist under the Boost root")
         self.counts["table"] = (len(entries) + len(self.table["directories"]) - len(absent),
                                 len(entries) + len(self.table["directories"]))
         self.counts["table-lists"] = len(self.table["replaced"]) + len(self.table["notPorted"])
@@ -268,7 +385,9 @@ class Checker:
 
 def report(checker):
     c = checker.counts
-    print(f"(2) files with an Upstream line: {c['upstream']}; every other .cs and .py file is allowlisted")
+    if checker.boost is not None:
+        print(f"Boost root: {checker.boost}")
+    print(f"(2) files with an Upstream line: {c['upstream']}; every other .cs, .py, .cpp and .hpp file is allowlisted")
     print(f"(3) copyright lines verbatim: {c['copyright']}/{c['upstream']} files")
     print("(3) THIRD_PARTY_NOTICES.md carries LICENSE.TXT verbatim")
     print(f"(4) partial files: {c['partial']}, listed in docs/porting-plan.md: {c['partial']}")
@@ -281,6 +400,21 @@ def report(checker):
 
 PROBE = "src/NanoQL/Time/SelfTestProbe.cs"
 PROBE_TEST = "tests/NanoQL.Tests/Conventions/SelfTestProbeTests.cs"
+# A synthetic port of a real Boost header, checked against the real tree.
+BOOST_PROBE = "src/NanoQL/Boost/Math/Tools/SelfTestBoostProbe.cs"
+BOOST_PROBE_UPSTREAM = "boost/math/tools/cubic_roots.hpp"
+# Boost's notice layouts, each a synthetic port whose copyright lines are written out as Boost 1.90.0's files have them:
+# the plain form; a notice after the include guard; and holders on the line after the years, joined with them.
+BOOST_LAYOUTS = [
+    ("boost/math/distributions/normal.hpp", "Math/Distributions", "SelfTestNormalProbe",
+     ["Copyright John Maddock 2006, 2007.", "Copyright Paul A. Bristow 2006, 2007.", "Copyright Matt Borland 2024."]),
+    ("boost/math/special_functions/detail/fp_traits.hpp", "Math/SpecialFunctions/Detail", "SelfTestFpTraitsProbe",
+     ["Copyright (c) 2006 Johan Rade", "Copyright (c) 2024 Matt Borland"]),
+    ("boost/numeric/ublas/matrix_sparse.hpp", "Numeric/Ublas", "SelfTestMatrixSparseProbe",
+     ["Copyright (c) 2000-2007 Joerg Walter, Mathias Koch, Gunter Winkler"]),
+]
+UBLAS_PROBE = "src/NanoQL/Boost/Numeric/Ublas/SelfTestMatrixSparseProbe.cs"
+DATES_TESTS = "tests/NanoQL.Tests/TestSuite/DatesTests.cs"
 
 
 def probe_text(ql_root, upstream=("ql/time/weekday.hpp", "ql/time/weekday.cpp"), namespace="NanoQL.Time",
@@ -304,6 +438,21 @@ def probe_text(ql_root, upstream=("ql/time/weekday.hpp", "ql/time/weekday.cpp"),
         ""])
 
 
+def boost_probe_text(copyrights, upstream=BOOST_PROBE_UPSTREAM, name="SelfTestBoostProbe"):
+    return "\n".join(["// SPDX-FileCopyrightText: " + c for c in copyrights]
+                     + ["// SPDX-FileCopyrightText: 2026 The nanoql Authors",
+                        "// SPDX-License-Identifier: Apache-2.0 AND BSL-1.0",
+                        f"// Upstream: {upstream} @ boost-1.90.0",
+                        "// Ported to C# from Boost and modified by the nanoql Authors.",
+                        "",
+                        f"namespace {BOOST_NAMESPACE};",
+                        "",
+                        f"internal static class {name}",
+                        "{",
+                        "}",
+                        ""])
+
+
 def edit(root, rel, old, new):
     path = os.path.join(root, rel)
     text = sources.read_text(path)
@@ -324,9 +473,12 @@ def append(root, rel, text):
         f.write(text)
 
 
-def perturbations(ql_root):
-    """(name, the error code it must raise, a text that error must contain, how to apply it)."""
+def perturbations(ql_root, boost_root, tmp):
+    """(name, the error code it must raise, a text that error must contain, how to apply it). Applying one may
+    return the Boost root the checker then runs with, or "none" for a run without --boost."""
     first_copyright = "// SPDX-FileCopyrightText: " + sources.upstream_copyrights(ql_root, "ql/time/weekday.hpp")[0]
+    boost_copyright = ("// SPDX-FileCopyrightText: "
+                       + sources.boost_copyrights(boost_root, BOOST_PROBE_UPSTREAM)[0] + "\n")
     orphan = ("// SPDX-FileCopyrightText: 2026 The nanoql Authors\n// SPDX-License-Identifier: Apache-2.0\n"
               "\nnamespace NanoQL;\n\ninternal static class SelfTestOrphan\n{\n}\n")
 
@@ -338,6 +490,16 @@ def perturbations(ql_root):
         text = sources.read_text(os.path.join(root, PROBE))
         text = re.sub(r"// Upstream: .*", "// Upstream: ql/qldefines.hpp @ v1.44", text)
         write(root, PROBE, text)
+
+    def old_boost(root):
+        # Another release's tree: its version.hpp, and the probe's upstream file, so only the version differs.
+        fake = os.path.join(tmp, "boost-1.89.0")
+        write(fake, "boost/version.hpp", "#define BOOST_VERSION 108900\n")
+        write(fake, BOOST_PROBE_UPSTREAM, sources.read_text(os.path.join(boost_root, BOOST_PROBE_UPSTREAM)))
+        return fake
+
+    def boost_moved(root):
+        shutil.move(os.path.join(root, BOOST_PROBE), os.path.join(root, "src/NanoQL/Boost/Math/SelfTestBoostProbe.cs"))
 
     return [
         ("missing Upstream line", "allowlist", "no Upstream line, and not listed",
@@ -380,10 +542,45 @@ def perturbations(ql_root):
          lambda r: edit(r, PROBE_TEST, "namespace NanoQL.Tests.Conventions;", "namespace NanoQL.Tests.Vectors;")),
         ("a test file with no namespace", "test-namespace", "declares no namespace",
          lambda r: edit(r, PROBE_TEST, "namespace NanoQL.Tests.Conventions;\n", "")),
+        ("a Boost path absent under the root", "boost-path", "doesn't exist under the Boost root",
+         lambda r: edit(r, BOOST_PROBE, "cubic_roots.hpp @", "cubic_rootz.hpp @")),
+        ("a Boost Upstream pin at another release", "boost-pin", "Upstream pin boost-1.89.0",
+         lambda r: edit(r, BOOST_PROBE, "@ boost-1.90.0", "@ boost-1.89.0")),
+        ("a Boost root whose version.hpp isn't 1.90.0", "boost-root", "gives BOOST_VERSION 108900", old_boost),
+        ("a missing Boost copyright line", "copyright", "Boost copyright lines differ",
+         lambda r: edit(r, BOOST_PROBE, boost_copyright, "")),
+        ("a Boost port's SPDX expression without BSL-1.0", "copyright", "expected Apache-2.0 AND BSL-1.0",
+         lambda r: edit(r, BOOST_PROBE, "Apache-2.0 AND BSL-1.0", "Apache-2.0")),
+        ("a Boost port in the wrong folder", "folder", "but the name table's boost section gives", boost_moved),
+        ("a Boost port in the wrong namespace", "namespace", "expected NanoQL.Numerics for a Boost port",
+         lambda r: edit(r, BOOST_PROBE, "namespace NanoQL.Numerics;", "namespace NanoQL.Time;")),
+        ("QuantLib and Boost paths on one Upstream line", "boost-mixed", "names QuantLib and Boost paths",
+         lambda r: edit(r, BOOST_PROBE, "cubic_roots.hpp @", "cubic_roots.hpp ql/time/weekday.hpp @")),
+        ("a Boost Upstream line without --boost", "boost-root", "needs --boost", lambda r: "none"),
+        ("an unlisted .cpp with no Upstream line", "allowlist", "SelfTestOrphan.cpp: no Upstream line",
+         lambda r: write(r, "tools/selftest/SelfTestOrphan.cpp", "// SPDX-FileCopyrightText: 2026 The nanoql Authors\n"
+                                                                  "// SPDX-License-Identifier: Apache-2.0\n")),
+        ("a uBLAS notice carried without its holders", "copyright", "Boost copyright lines differ",
+         lambda r: edit(r, UBLAS_PROBE, "2000-2007 Joerg Walter, Mathias Koch, Gunter Winkler\n", "2000-2007\n")),
+        ("a // Replaced: line naming a missing test file", "replaced", "which doesn't exist under",
+         lambda r: edit(r, DATES_TESTS, "(Divergences/NullDateTests.cs)", "(Divergences/NoSuchTests.cs)")),
+        ("a replaced case that isn't a case of the QuantLib file", "replaced", "nullDates, which isn't a case of",
+         lambda r: edit(r, DATES_TESTS, "// Replaced: nullDate (", "// Replaced: nullDates (")),
+        ("a replaced case that is also ported", "replaced", "testConsistency, which is also ported",
+         lambda r: edit(r, DATES_TESTS, "// Replaced: nullDate (Divergences/NullDateTests.cs)",
+                        "// Replaced: nullDate (Divergences/NullDateTests.cs); "
+                        "testConsistency (Divergences/NullDateTests.cs)")),
+        ("a replaced case also on the // Partial: line", "replaced", "nullDate, which is also on its // Partial: line",
+         lambda r: edit(r, DATES_TESTS, ", parseDates, intraday\n", ", parseDates, intraday, nullDate\n")),
+        ("a // Replaced: item that isn't '<case> (<test file>)'", "replaced", "isn't '<case> (<test file>)'",
+         lambda r: edit(r, DATES_TESTS, "// Replaced: nullDate (", "// Replaced: nullDate, (")),
+        ("a // Replaced: line outside a TestSuite class", "replaced", "belongs on a TestSuite class",
+         lambda r: edit(r, PROBE, "// Ported to C#",
+                        "// Replaced: nullDate (Divergences/NullDateTests.cs)\n// Ported to C#")),
     ]
 
 
-def self_test(root, ql_root):
+def self_test(root, ql_root, boost_root):
     files = sources.git_files(root)
     with tempfile.TemporaryDirectory() as tmp:
         base = os.path.join(tmp, "base")
@@ -395,20 +592,26 @@ def self_test(root, ql_root):
         write(base, PROBE_TEST, "// SPDX-FileCopyrightText: 2026 The nanoql Authors\n"
                                 "// SPDX-License-Identifier: Apache-2.0\n\nnamespace NanoQL.Tests.Conventions;\n\n"
                                 "internal static class SelfTestProbeTests\n{\n}\n")
+        write(base, BOOST_PROBE, boost_probe_text(sources.boost_copyrights(boost_root, BOOST_PROBE_UPSTREAM)))
+        boost_table = {"boost/math/tools": {"folder": "Math/Tools"}}
+        for upstream, folder, name, copyrights in BOOST_LAYOUTS:
+            write(base, f"{BOOST_SRC}{folder}/{name}.cs", boost_probe_text(copyrights, upstream, name))
+            boost_table[upstream.rsplit("/", 1)[0]] = {"folder": folder}
+        edit(base, "tools/porting-map.json", '"boost": {}', '"boost": ' + json.dumps(boost_table))
         porting_map.main([ql_root, "--root", base])
-        baseline = Checker(base, ql_root)
+        baseline = Checker(base, ql_root, boost_root)
         baseline.run()
         if baseline.errors:
             report(baseline)
             print("self-test: the unperturbed copy isn't green")
             return 1
         caught = 0
-        cases = perturbations(ql_root)
+        cases = perturbations(ql_root, boost_root, tmp)
         for i, (name, code, text, apply) in enumerate(cases):
             copy = os.path.join(tmp, f"p{i}")
             shutil.copytree(base, copy)
-            apply(copy)
-            checker = Checker(copy, ql_root)
+            run_with = apply(copy)
+            checker = Checker(copy, ql_root, None if run_with == "none" else run_with or boost_root)
             checker.run()
             hit = any(c == code and text in message for c, message in checker.errors)
             caught += hit
@@ -418,14 +621,26 @@ def self_test(root, ql_root):
 
 
 def main(argv):
+    argv = list(argv)
+    boost_root = None
+    if "--boost" in argv:
+        i = argv.index("--boost")
+        if i + 1 >= len(argv):
+            print(__doc__)
+            return 2
+        boost_root = argv.pop(i + 1)
+        argv.pop(i)
     args = [a for a in argv if not a.startswith("--")]
     if len(args) != 1:
         print(__doc__)
         return 2
     root = os.path.dirname(TOOLS)
     if "--self-test" in argv:
-        return self_test(root, args[0])
-    checker = Checker(root, args[0])
+        if boost_root is None:
+            print("check-upstream: --self-test needs --boost <Boost 1.90.0 root>, for its Boost probe")
+            return 2
+        return self_test(root, args[0], boost_root)
+    checker = Checker(root, args[0], boost_root)
     checker.run()
     report(checker)
     return 1 if checker.errors else 0

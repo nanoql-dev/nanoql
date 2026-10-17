@@ -10,7 +10,8 @@ Usage: .venv\\Scripts\\python -I tools/porting-map.py <QuantLib v1.44 worktree> 
 The status comes, in order, from a rule (legacy, deprecated, include-only), from the name table (replaced or not
 ported, with the reason; the table wins over an Upstream line), from the Upstream lines of nanoql's files (partial if
 any has a "// Partial:" line, otherwise ported), and otherwise "not started". A test file is ported when every case
-has a test method. With --check, it writes nothing and exits 1 if the committed map differs from a fresh one.
+has a test method or is named on its class's "// Replaced:" line, which the map lists as "replaced: <case> by <test
+file>". With --check, it writes nothing and exits 1 if the committed map differs from a fresh one.
 """
 import os
 import re
@@ -285,16 +286,19 @@ def build(root, ql_root):
             status = "not ported: " + not_ported[unit]
         elif top == "test-suite":
             cases = units[unit]["cases"]
-            methods = set()
+            methods, replaced_cases = set(), {}
             for _, h in mine:
                 methods |= set(METHOD.findall(h.text))
-            left = [c for c in cases if c[0].upper() + c[1:] not in methods]
+                replaced_cases.update({c: f for c, f in h.replaced if c in cases})
+            left = [c for c in cases if c[0].upper() + c[1:] not in methods and c not in replaced_cases]
             if not mine:
                 status = "not started"
                 notes.append(f"{len(cases)} cases")
             else:
                 status = "ported" if not left else "partial"
                 notes.append(f"{len(cases) - len(left)} of {len(cases)} cases")
+                if replaced_cases:
+                    notes.append("replaced: " + "; ".join(f"{c} by {f}" for c, f in replaced_cases.items()))
                 if left:
                     notes.append("not yet: " + cell(left))
         else:

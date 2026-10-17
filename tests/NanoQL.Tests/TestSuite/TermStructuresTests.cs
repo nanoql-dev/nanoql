@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/termstructures.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testReferenceChange, testImplied, testImpliedObs, testFSpreaded, testFSpreadedObs, testZSpreaded, testZSpreadedObs, testCreateWithNullUnderlying, testLinearInterpolationSpreadedForwardRate, testForwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationZeroRate, testLinkToNullUnderlying, testCompositeZeroYieldStructures
+// Partial: testImplied, testImpliedObs, testFSpreaded, testFSpreadedObs, testZSpreaded, testZSpreadedObs, testCreateWithNullUnderlying, testLinearInterpolationSpreadedForwardRate, testForwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationZeroRate, testLinkToNullUnderlying, testCompositeZeroYieldStructures
+// Replaced: testReferenceChange (Vectors/TermStructures/FlatForwardVectorTests.cs)
 
 using NanoQL.TermStructures;
 using NanoQL.Time;

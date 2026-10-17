@@ -98,7 +98,7 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Time/Weekday.cs`: the weekday's text, which waits for the C++ harness.
 - `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
 - `tests/NanoQL.Tests/TestSuite/CashFlowsTests.cs`: the cases needing Ibor coupons, pricers or cash-flow functions not yet ported.
-- `tests/NanoQL.Tests/TestSuite/DatesTests.cs`: the ECB, IMM, ASX, parsing and intraday cases, and `nullDate`.
+- `tests/NanoQL.Tests/TestSuite/DatesTests.cs`: the ECB, IMM, ASX, parsing and intraday cases.
 - `tests/NanoQL.Tests/TestSuite/DayCountersTests.cs`: the cases for day counters not yet ported.
 - `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases and those needing the Japan calendar.
-- `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported, and the moving reference date.
+- `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported.

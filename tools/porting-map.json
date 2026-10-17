@@ -1,5 +1,6 @@
 {
   "pin": "v1.44",
+  "boostPin": "boost-1.90.0",
   "directories": {
     "ql": {"folder": "", "namespace": "NanoQL"},
     "ql/cashflows": {"folder": "Coupons", "namespace": "NanoQL.Coupons"},

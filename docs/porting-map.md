@@ -2109,7 +2109,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `crosscurrencyratehelpers` | not started |  | 30 cases |
 | `currency` | not started |  | 1 cases |
 | `curvestates` | not started |  | 3 cases |
-| `dates` | partial | TestSuite/DatesTests.cs | 3 of 15 cases; not yet: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, immDates, asxDates, asxDatesSpecific, isoDates, parseDates, intraday, nullDate |
+| `dates` | partial | TestSuite/DatesTests.cs | 4 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; not yet: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, immDates, asxDates, asxDatesSpecific, isoDates, parseDates, intraday |
 | `daycounters` | partial | TestSuite/DayCountersTests.cs | 10 of 22 cases; not yet: testActualActualWithSchedule, testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter |
 | `defaultprobabilitycurves` | not started |  | 10 cases |
 | `digitalcoupon` | not started |  | 8 cases |
@@ -2234,7 +2234,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `swaptionvolatilitymatrix` | not started |  | 2 cases |
 | `swaptionvolstructuresutilities` | not started |  | 0 cases |
 | `swingoption` | not started |  | 6 cases |
-| `termstructures` | partial | TestSuite/TermStructuresTests.cs | 1 of 15 cases; not yet: testReferenceChange, testImplied, testImpliedObs, testFSpreaded, testFSpreadedObs, testZSpreaded, testZSpreadedObs, testCreateWithNullUnderlying, testLinearInterpolationSpreadedForwardRate, testForwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationZeroRate, testLinkToNullUnderlying, testCompositeZeroYieldStructures |
+| `termstructures` | partial | TestSuite/TermStructuresTests.cs | 2 of 15 cases; replaced: testReferenceChange by Vectors/TermStructures/FlatForwardVectorTests.cs; not yet: testImplied, testImpliedObs, testFSpreaded, testFSpreadedObs, testZSpreaded, testZSpreadedObs, testCreateWithNullUnderlying, testLinearInterpolationSpreadedForwardRate, testForwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationZeroRate, testLinkToNullUnderlying, testCompositeZeroYieldStructures |
 | `timegrid` | not started |  | 10 cases |
 | `timeseries` | not started |  | 6 cases |
 | `toplevelfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |

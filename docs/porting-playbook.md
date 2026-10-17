@@ -39,7 +39,14 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
   - **The nanoql line:** its year is the year the file was created.
   - **Ported tests** (`test-suite/<name>.cpp`) use the same form.
   - **Boost ports:** Boost's copyright lines, `AND BSL-1.0`, and an Upstream line of the form
-    `Upstream: boost/<path> @ boost-1.90.0`.
+    `Upstream: boost/<path> @ boost-1.90.0`. The licensing gate checks them against Boost 1.90.0's release tree (§8):
+    the upstream file's notices as written, verbatim and in order. They are the lines of its leading comments, read
+    past an include guard, that hold "Copyright", in any of Boost's forms (`Copyright John Maddock 2006.`,
+    `(C) Copyright John Maddock 2006.`, `Copyright (c) 2006 Johan Rade`); a line that gives only the years takes its
+    holders from the lines after it, joined by one space (`Copyright (c) 2000-2007 Joerg Walter, Mathias Koch, Gunter
+    Winkler`). It also checks the SPDX expression, exactly `Apache-2.0 AND BSL-1.0`, and the file's place: the folder
+    under `src/NanoQL/Boost/` that the name table's `boost` section gives the path's directory, in namespace
+    `NanoQL.Numerics`. An Upstream line names QuantLib paths or Boost paths, never both.
 - **Lines directly after the header,** with no blank line between, since the tools read only the header's comment
   block:
   - `// Partial: <members left>`: the type ports only part of its QuantLib file. A test class that ports only some of
@@ -51,6 +58,11 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
     (§9.5).
   - `// Adapted: <reason>` on a ported test method that QuantLib's case doesn't run as written, naming the lines it
     drops.
+  - `// Replaced: <case> (<test file>)[; <case> (<test file>)]` on a test class: QuantLib test cases replaced for good
+    by a nanoql test, each with that test's file under `tests/NanoQL.Tests/` (`// Replaced: nullDate
+    (Divergences/NullDateTests.cs)`). The porting map lists them as replaced and counts them as done. The licensing
+    gate checks that each is a case of the class's QuantLib test file, neither ported nor on its `// Partial:` line,
+    and that the test file exists.
 - **Files that replace a QuantLib file** may name it in their Upstream line, with its copyright lines, so the map
   shows which nanoql file takes its role: `EvaluationContext.cs` names `ql/settings.hpp` and `ql/settings.cpp`. A
   file may not name a file the name table marks as not ported.
@@ -276,7 +288,10 @@ NanoQL/
 
 - **The name table**, `tools/porting-map.json`, holds each QuantLib directory's folder and namespace, each ported
   file's word split and grouping subfolder, each ported test file's word split, the files nanoql replaces or doesn't
-  port with the reason, the renames, and the Boost paths. It is the one source of those lists.
+  port with the reason, and the renames. For Boost ports it holds the pin, `boostPin` (`boost-1.90.0`), and the `boost`
+  section, which gives each Boost directory a port names its folder under `src/NanoQL/Boost/`
+  (`"boost/math/tools": {"folder": "Math/Tools"}`); the section stays empty until the first Boost port. It is the one
+  source of those lists.
 - **Test folders** (`tests/NanoQL.Tests/`), each its own namespace `NanoQL.Tests.<Folder>`:
   - `TestSuite/`: QuantLib's own test cases, one class per QuantLib test file
     (`test-suite/daycounters.cpp` → `DayCountersTests.cs`). Methods keep the case name, capitalised
@@ -437,9 +452,9 @@ Every commit that ports code passes these gates, each with its denominator.
 | Build | `dotnet build NanoQL.slnx -c Release` | 0 errors, 0 warnings, all projects built. The AOT and trim analyzers run through `IsAotCompatible`; SA1402 and SA1649 run as errors. |
 | Tests | `dotnet test --solution NanoQL.slnx -c Release` | passed = total, failed 0, skipped 0. |
 | Vectors | part of the tests, counted per vector file by `tools/vectors/count.py`; then `.venv\Scripts\python -I tools/vectors/agree.py` | every compared output within tolerance, counting outputs, not cases; with the number of overridden outputs. Every twin on `agree.py`'s list agrees with its wheel file: the same case names and inputs, every output within tolerance, and kinds and scales exactly; it prints the outputs agreeing M/M and how many are bit-identical. |
-| Licensing | `.venv\Scripts\reuse lint`, then `.venv\Scripts\python -I tools/check-upstream.py <QuantLib v1.44 worktree>`, and the same with `--self-test` | (1) `reuse lint` reports the project compliant. (2) Every `.cs` file under `src/NanoQL/` and `tests/NanoQL.Tests/TestSuite/` carries an Upstream line whose paths exist at the pin, in the folder and namespace the name table gives, or is listed in `tools/no-upstream.txt`; so is every other `.cs` and `.py` file; and every test file's namespace names its folder. (3) Every `Copyright (C)` line of the named upstream files appears verbatim, with every third-party block `tools/third-party-notices.txt` lists for them. (4) The files with a `// Partial:` line are exactly those `porting-plan.md` lists. (5) Regenerating `porting-map.md` reproduces the committed file; every file the name table marks replaced or not ported exists at the pin; and no Upstream line names a not-ported file. The self-test perturbs a copy of the tree once per check and passes only if each perturbation is caught. `reuse lint` also lints the ignored build output under a folder none of whose files is in git's index yet, a false red: in a change that adds such a folder, run it on a tree without build output (`git clean -fdX -- <new folders>`) or after `git add -N <new folders>`. |
+| Licensing | `.venv\Scripts\reuse lint`, then `.venv\Scripts\python -I tools/check-upstream.py <QuantLib v1.44 worktree> --boost <Boost 1.90.0 root>`, and the same with `--self-test` | (1) `reuse lint` reports the project compliant. (2) Every `.cs` file under `src/NanoQL/` and `tests/NanoQL.Tests/TestSuite/` carries an Upstream line whose paths exist at the pin, in the folder and namespace the name table gives, or is listed in `tools/no-upstream.txt`; so is every other `.cs`, `.py`, `.cpp` and `.hpp` file; every test file's namespace names its folder; and every `// Replaced:` line holds (§1). (3) Every `Copyright (C)` line of the named upstream files appears verbatim, with every third-party block `tools/third-party-notices.txt` lists for them; a Boost port's header holds as §1 says. (4) The files with a `// Partial:` line are exactly those `porting-plan.md` lists. (5) Regenerating `porting-map.md` reproduces the committed file; every file the name table marks replaced or not ported exists at the pin; and no Upstream line names a not-ported file. The self-test perturbs a copy of the tree once per check, with a synthetic Boost port among them, and passes only if each perturbation is caught. **The Boost root** is Boost 1.90.0's release tree: `tools/cxx/build.py`'s `boost_1_90_0` (§7.1), or `boost_1_90_0.zip` from `https://archives.boost.io/release/1.90.0/source/`, checked against its SHA-256, `bdc79f179d1a4a60c10fe764172946d0eeafad65e576a8703c4d89d49949973c`, and extracted with Python's `zipfile` (Windows' `tar` skips one file). `--boost` is required for `--self-test` and whenever an Upstream line names a Boost path. `reuse lint` also lints the ignored build output under a folder none of whose files is in git's index yet, a false red: in a change that adds such a folder, run it on a tree without build output (`git clean -fdX -- <new folders>`) or after `git add -N <new folders>`. |
 | Reproducibility | `.venv\Scripts\python -I tools/vectors/reproduce.py [<generators>]`, a folder named by its path ending in `/` (`cxx/`); for harness generators, after `tools/cxx/build.py`, with `NANOQL_HARNESS` set and `tools/vectors/cxx.py --self-test` passing | rerunning each generator the commit adds or changes, or all of them when the shared helpers or the requirements change, writes bytes identical to the committed files, compared outside git. Harness generators rerun when the commit adds or changes them; all of them when the harness's source, its client, the shared helpers or the requirements change; and one also when a wheel generator it imports changes. |
-| Coverage | `dotnet test --solution NanoQL.slnx -c Release --filter-trait "Oracle=QuantLib" --coverlet --coverlet-output-format cobertura --results-directory TestResults\G7`, from the repository root into an emptied folder; then `.venv\Scripts\python -I tools/check-coverage.py TestResults\G7` | Every public type the commit ports that has executable lines has covered lines from the tests marked `Oracle=QuantLib` (§9.5). Types the report doesn't list (enums, interfaces, delegates, abstract types with no bodies, types holding only fields or constants) are listed apart by name and count, and so are types whose only code is equality nanoql adds. The line coverage of the commit's ported files is reported, with no threshold. |
+| Coverage | `dotnet test --solution NanoQL.slnx -c Release --filter-trait "Oracle=QuantLib" --coverlet --coverlet-output-format cobertura --results-directory TestResults\G7` and the whole suite's run, `dotnet test --solution NanoQL.slnx -c Release --coverlet --coverlet-output-format cobertura --results-directory TestResults\G7all`, each from the repository root into an emptied folder; then `.venv\Scripts\python -I tools/check-coverage.py TestResults\G7 --all TestResults\G7all` | Every public type the commit ports that has executable lines has covered lines from the tests marked `Oracle=QuantLib` (§9.5). Types the report doesn't list (enums, interfaces, delegates, abstract types with no bodies, types holding only fields or constants) are listed apart by name and count, and so are types whose only code is equality nanoql adds. The line coverage of the commit's ported files is reported, with no threshold. It also prints, without failing, the commit's public members that no test of any kind reaches (§9.5); a missing or second whole-suite report is a red. |
 
 ## 9 Checking every member
 
@@ -490,5 +505,16 @@ through a checked caller):
   that ports a QuantLib `operator==` needs an `Oracle=QuantLib` test like any other.
 - **It prints** types T/T and lines L/M for the commit and over every ported file, and the commit's own-tested
   members.
+- **The member line** (`--all`, from the whole suite's report): "members no test reaches: N" and the list, the public
+  members of the same files whose report lines have no hit from any test, tagged or not. It never fails the gate; the
+  review reads it. A member counts as public when its declaration and every type around it are declared `public`, so
+  a member of a protected nested type or of a `file` type doesn't count. A member is a report method of a class the
+  compiler didn't generate, named as the report names it (`Period.get_Length()`, `TimeUnitExtensions.op_Multiply(…)`,
+  `Period..ctor(…)`); the code of a lambda or local function counts toward the member whose source holds it, and an
+  iterator or async method, whose code is all in its generated class, is named by that class. Red only when the whole
+  suite's folder doesn't hold exactly one report, or a `NanoQL` class of it resolves to no file. What it can't see: a
+  member with no declaration of its own (an implicit or primary constructor, a positional record's members);
+  auto-property accessors, which the report leaves out; and an explicit interface implementation, reached through
+  its interface but not declared `public`.
 
 <!-- REUSE-IgnoreEnd -->

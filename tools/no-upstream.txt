@@ -13,3 +13,4 @@ tests/NanoQL.Tests/Harness/**
 tests/NanoQL.Tests/NoOracle/**
 tests/NanoQL.Tests/Vectors/**
 tools/**/*.py
+tools/cxx/**
