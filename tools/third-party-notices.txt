@@ -21,5 +21,12 @@
 
 ql/math/errorfunction.cpp	NOTE: The following copyright notice	====================================================	SunPro
 ql/math/optimization/lmdif.cpp	The original Fortran version is Copyright (C) 1999 University of Chicago.	or guarantee.	Minpack
-ql/math/primenumbers.hpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel
 ql/math/primenumbers.cpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel
+ql/math/primenumbers.hpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel
+ql/math/randomnumbers/haltonrsg.cpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel
+ql/math/randomnumbers/mt19937uniformrng.cpp	A C-program for MT19937, with initialization improved 2002/1/26.	email: matumoto@math.keio.ac.jp	BSD-3-Clause
+ql/math/randomnumbers/primitivepolynomials.cpp	This file contains 21200 polinomials, that is all primitive polynomials	=========================================================================	LicenseRef-Jaeckel
+ql/math/randomnumbers/primitivepolynomials.hpp	this file is a slightly edited version of	===========================================================================	LicenseRef-Jaeckel
+ql/math/randomnumbers/sobolrsg.cpp	Copyright (c) 2008, Frances Y. Kuo and Stephen Joe	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.	LicenseRef-JoeKuo	LICENSES/LicenseRef-JoeKuo.txt
+ql/methods/montecarlo/brownianbridge.cpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel
+ql/methods/montecarlo/brownianbridge.hpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel

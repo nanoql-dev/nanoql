@@ -27,7 +27,7 @@ namespace NanoQL.Numerics;
 /// field or array element) is QuantLib's default construction, the standard normal (μ = 0, σ = 1).
 /// </para>
 /// </remarks>
-public readonly struct MoroInverseCumulativeNormal
+public readonly struct MoroInverseCumulativeNormal : IInverseCumulative
 {
     private const double a0_ = 2.50662823884;
     private const double a1_ = -18.61500062529;

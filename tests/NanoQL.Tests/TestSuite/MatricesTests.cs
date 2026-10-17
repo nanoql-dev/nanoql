@@ -89,9 +89,6 @@ public class MatricesTests
         }
     }
 
-    // Adapted: without its second loop, lines 410-440, the determinants of 100 random 3x3 matrices drawn from
-    // MersenneTwisterUniformRng(1234) against the explicit formula, which waits for MersenneTwisterUniformRng (S2's
-    // random numbers, after this port). The five matrices with Octave's determinants are kept.
     [Fact]
     public void TestDeterminant()
     {
@@ -111,6 +108,42 @@ public class MatricesTests
             {
                 Assert.Fail(
                     $"determinant calculation failed \n matrix     :\n{testMatrices[j]}\n calculated : {calculated}\n expected   : {expected[j]}");
+            }
+        }
+
+        var rng = new MersenneTwisterUniformRng(1234);
+        for (Size j = 0; j < 100; ++j)
+        {
+            var m = new Matrix(3, 3, 0.0);
+            foreach (ref double iter in m)
+            {
+                iter = rng.Next().Value;
+            }
+
+            if ((j % 3) == 0)
+            {
+                // every third matrix is a singular matrix
+                Size row = (Size)(3 * rng.Next().Value);
+                m.Row(row).Fill(0.0);
+            }
+
+            Real a = m[0, 0];
+            Real b = m[0, 1];
+            Real c = m[0, 2];
+            Real d = m[1, 0];
+            Real e = m[1, 1];
+            Real f = m[1, 2];
+            Real g = m[2, 0];
+            Real h = m[2, 1];
+            Real i = m[2, 2];
+
+            Real expectedValue = (a * e * i) + (b * f * g) + (c * d * h) - ((g * e * c) + (h * f * a) + (i * d * b));
+            Real calculated = Determinant(m);
+
+            if (Math.Abs(expectedValue - calculated) > tol)
+            {
+                Assert.Fail(
+                    $"determinant calculation failed \n matrix     :\n{m}\n calculated : {calculated}\n expected   : {expectedValue}");
             }
         }
     }

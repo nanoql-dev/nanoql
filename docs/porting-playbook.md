@@ -80,6 +80,16 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
     (Divergences/NullDateTests.cs)`). The porting map lists them as replaced and counts them as done. The licensing
     gate checks that each is a case of the class's QuantLib test file, neither ported nor on its `// Partial:` line,
     and that the test file exists.
+- **Generated tables:** QuantLib's data tables (the primitive polynomials, Sobol's direction integers) aren't ported
+  as code. A script of nanoql's own, `tools/tables/<QuantLib file>.py`, reads the QuantLib `.cpp` at the pin and
+  writes each table to a binary file beside the type that reads it: little-endian 32-bit integers, laid out as
+  QuantLib's arrays are (each dimension's coefficients ended by 0, each degree's polynomials by -1). The project
+  embeds each file as a manifest resource with a fixed logical name. The loader, an internal type written by hand,
+  carries the Upstream line, the copyright lines and the notice blocks of the QuantLib file, and reads its tables
+  once, at first use, through `Assembly.GetManifestResourceStream`. A table holds only QuantLib's and third parties'
+  data, so `REUSE.toml` annotates it with the upstream copyright lines and the data's licences, without Apache-2.0,
+  and `THIRD_PARTY_NOTICES.md` carries their notices. The licensing gate regenerates the tables and compares the
+  bytes (§8).
 - **Files that replace a QuantLib file** may name it in their Upstream line, with its copyright lines, so the map
   shows which nanoql file takes its role: `EvaluationContext.cs` names `ql/settings.hpp` and `ql/settings.cpp`. A
   file may not name a file the name table marks as not ported.
@@ -211,11 +221,15 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   add members through C# 14 extension members.
 - **Extension points so far:** `Calendar`, `DayCounter`, `Event`, `CashFlow`, `Coupon`, `Extrapolator`,
   `TermStructure`, `YieldTermStructure`, `Instrument`, `TridiagonalOperatorTimeSetter`, `Interpolation`,
-  `Solver1D<TSelf, TFunction>`, `OptimizationMethod`, `CostFunction`, `Constraint` and `ParametersTransformation`
-  (abstract); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`, `TridiagonalOperator`,
-  `CubicInterpolation` and `LogCubicInterpolation` (unsealed); `IInterpolator` (the interpolation traits),
-  `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers' function concepts), interfaces; and
-  `Solver1DBracket` and `ProblemState`, sealed, which a solver's `SolveCore` and a method's `MinimizeCore` receive.
+  `Solver1D<TSelf, TFunction>`, `OptimizationMethod`, `CostFunction`, `Constraint`, `ParametersTransformation`,
+  `StochasticProcess`, `StochasticProcess1D`, `StochasticProcessDiscretization` and
+  `StochasticProcess1DDiscretization` (abstract); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
+  `TridiagonalOperator`, `CubicInterpolation`, `LogCubicInterpolation`, `RandomSequenceGenerator<TRng>`,
+  `InverseCumulativeRng<TRng, TIc>`, `InverseCumulativeRsg<TUsg, TIc>` and `PathGenerator<TGsg>` (unsealed);
+  `IInterpolator` (the interpolation traits), `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers'
+  function concepts), and the generator concepts `IRng`, `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`,
+  `ISeedableRsg<TSelf>`, `IInverseCumulative` and `IRngTraits` (interfaces); and `Solver1DBracket` and
+  `ProblemState`, sealed, which a solver's `SolveCore` and a method's `MinimizeCore` receive.
 - **Leg:** QuantLib's `Leg` is the global alias
   `global using Leg = System.Collections.Immutable.ImmutableArray<NanoQL.CashFlow>;` in `Types.cs`. Public signatures
   show `ImmutableArray<CashFlow>`.
@@ -403,6 +417,7 @@ NanoQL/
   tools/vectors/                the hash-pinned requirements, the generators gen/<ql path>.py and gen/cxx/<ql path>.py,
                                 the shared helpers, the harness's client cxx.py and the twins' check agree.py
   tools/cxx/                    the C++ harness (§7.1): CMakeLists.txt, src/<ql path>.cpp, build.py
+  tools/tables/<file>.py        the generators of QuantLib's data tables (§1), which the licensing gate reruns
   tools/check-upstream.py       the licensing gate's upstream checks; tools/no-upstream.txt, its allowlist
   tools/porting-map.json        the name table
   tools/third-party-notices.txt the third-party notice blocks the licensing gate checks
@@ -447,7 +462,7 @@ NanoQL/
 - C++ platform headers and the include-only `all.hpp` files;
 - the test suite's infrastructure, which xUnit and the vector harness replace, and its files with nothing to port,
   among them the tests of `Settings`, `Observable` and `LazyObject`;
-- data tables, which are generated instead, with their notices;
+- data tables, which are generated instead, with their notices (§1);
 - uBLAS-backed `Matrix` operations other than the LU, until a port needs them;
 - what the default QuantLib build leaves out.
 
@@ -575,7 +590,7 @@ Every commit that ports code passes these gates, each with its denominator.
 | Build | `dotnet build NanoQL.slnx -c Release` | 0 errors, 0 warnings, all projects built. The AOT and trim analyzers run through `IsAotCompatible`; SA1402 and SA1649 run as errors. |
 | Tests | `dotnet test --solution NanoQL.slnx -c Release` | passed = total, failed 0, skipped 0. |
 | Vectors | part of the tests, counted per vector file by `tools/vectors/count.py`; then `.venv\Scripts\python -I tools/vectors/agree.py` | every compared output within tolerance, counting outputs, not cases; with the number of overridden outputs. Every twin on `agree.py`'s list agrees with its wheel file: the same case names and inputs, every output within tolerance, and kinds and scales exactly; it prints the outputs agreeing M/M and how many are bit-identical. |
-| Licensing | `.venv\Scripts\reuse lint`, then `.venv\Scripts\python -I tools/check-upstream.py <QuantLib v1.44 worktree> --boost <Boost 1.90.0 root>`, and the same with `--self-test` | (1) `reuse lint` reports the project compliant. (2) Every `.cs` file under `src/NanoQL/` and `tests/NanoQL.Tests/TestSuite/` carries an Upstream line whose paths exist at the pin, in the folder and namespace the name table gives, or is listed in `tools/no-upstream.txt`; so is every other `.cs`, `.py`, `.cpp` and `.hpp` file; every test file's namespace names its folder; and every `// Replaced:` line holds (§1). (3) Every `Copyright (C)` line of the named upstream files appears verbatim, read as §1 says; every third-party block `tools/third-party-notices.txt` lists for them appears whole, every line in order, in the file's header and in `THIRD_PARTY_NOTICES.md`, read from the row's source, with its licence in the SPDX expression; a Boost port's header holds as §1 says. (4) The files with a `// Partial:` line are exactly those `porting-plan.md` lists. (5) Regenerating `porting-map.md` reproduces the committed file; every file the name table marks replaced or not ported exists at the pin; and no Upstream line names a not-ported file. The self-test perturbs a copy of the tree once per check, with a synthetic Boost port among them and synthetic ports carrying third-party blocks (a starred notice and a replacement character among them), whose expected lines are written out rather than read through the checker, and passes only if each perturbation is caught. **The Boost root** is Boost 1.90.0's release tree: `tools/cxx/build.py`'s `boost_1_90_0` (§7.1), or `boost_1_90_0.zip` from `https://archives.boost.io/release/1.90.0/source/`, checked against its SHA-256, `bdc79f179d1a4a60c10fe764172946d0eeafad65e576a8703c4d89d49949973c`, and extracted with Python's `zipfile` (Windows' `tar` skips one file). `--boost` is required for `--self-test` and whenever an Upstream line names a Boost path. `reuse lint` also lints the ignored build output under a folder none of whose files is in git's index yet, a false red: in a change that adds such a folder, run it on a tree without build output (`git clean -fdX -- <new folders>`) or after `git add -N <new folders>`. |
+| Licensing | `.venv\Scripts\reuse lint`, then `.venv\Scripts\python -I tools/check-upstream.py <QuantLib v1.44 worktree> --boost <Boost 1.90.0 root>`, and the same with `--self-test` | (1) `reuse lint` reports the project compliant. (2) Every `.cs` file under `src/NanoQL/` and `tests/NanoQL.Tests/TestSuite/` carries an Upstream line whose paths exist at the pin, in the folder and namespace the name table gives, or is listed in `tools/no-upstream.txt`; so is every other `.cs`, `.py`, `.cpp` and `.hpp` file; every test file's namespace names its folder; and every `// Replaced:` line holds (§1). (3) Every `Copyright (C)` line of the named upstream files appears verbatim, read as §1 says; every third-party block `tools/third-party-notices.txt` lists for them appears whole, every line in order, in the file's header and in `THIRD_PARTY_NOTICES.md`, read from the row's source, with its licence in the SPDX expression; a Boost port's header holds as §1 says. (4) The files with a `// Partial:` line are exactly those `porting-plan.md` lists. (5) Regenerating `porting-map.md` reproduces the committed file; every file the name table marks replaced or not ported exists at the pin; and no Upstream line names a not-ported file. (6) Regenerating the tables (§1) with each script under `tools/tables/` into a temporary folder writes bytes identical to the committed files, and every `.bin` file under `src/NanoQL/` is one they write. The self-test perturbs a copy of the tree once per check, with a synthetic Boost port among them, synthetic ports carrying third-party blocks (a starred notice and a replacement character among them), whose expected lines are written out rather than read through the checker, and a table with one changed byte, and passes only if each perturbation is caught. **The Boost root** is Boost 1.90.0's release tree: `tools/cxx/build.py`'s `boost_1_90_0` (§7.1), or `boost_1_90_0.zip` from `https://archives.boost.io/release/1.90.0/source/`, checked against its SHA-256, `bdc79f179d1a4a60c10fe764172946d0eeafad65e576a8703c4d89d49949973c`, and extracted with Python's `zipfile` (Windows' `tar` skips one file). `--boost` is required for `--self-test` and whenever an Upstream line names a Boost path. `reuse lint` also lints the ignored build output under a folder none of whose files is in git's index yet, a false red: in a change that adds such a folder, run it on a tree without build output (`git clean -fdX -- <new folders>`) or after `git add -N <new folders>`. |
 | Reproducibility | `.venv\Scripts\python -I tools/vectors/reproduce.py [<generators>]`, a folder named by its path ending in `/` (`cxx/`); for harness generators, after `tools/cxx/build.py`, with `NANOQL_HARNESS` set and `tools/vectors/cxx.py --self-test` passing | rerunning each generator the commit adds or changes, or all of them when the shared helpers or the requirements change, writes bytes identical to the committed files, compared outside git. Harness generators rerun when the commit adds or changes them; all of them when the harness's source, its client, the shared helpers or the requirements change; and one also when a wheel generator it imports changes. |
 | Coverage | `dotnet test --solution NanoQL.slnx -c Release --filter-trait "Oracle=QuantLib" --coverlet --coverlet-output-format cobertura --results-directory TestResults\G7` and the whole suite's run, `dotnet test --solution NanoQL.slnx -c Release --coverlet --coverlet-output-format cobertura --results-directory TestResults\G7all`, each from the repository root into an emptied folder; then `.venv\Scripts\python -I tools/check-coverage.py TestResults\G7 --all TestResults\G7all` | Every public type the commit ports that has executable lines has covered lines from the tests marked `Oracle=QuantLib` (§9.5). Types the report doesn't list (enums, interfaces, delegates, abstract types with no bodies, types holding only fields or constants) are listed apart by name and count, and so are types whose only code is equality nanoql adds. The line coverage of the commit's ported files is reported, with no threshold. It also prints, without failing, the commit's public members that no test of any kind reaches (§9.5); a missing or second whole-suite report is a red. |
 

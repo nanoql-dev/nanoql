@@ -20,10 +20,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,211 | 166 |
-| partial | 13 | 13 |
-| ported | 51 | 3 |
-| replaced | 16 | 6 |
+| not started | 1,195 | 160 |
+| partial | 14 | 17 |
+| ported | 65 | 5 |
+| replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
 ## Library
@@ -68,9 +68,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rebatedexercise` | not started |  | no nanoql type: RebatedExercise |
 | `settings` | replaced: EvaluationContext | EvaluationContext.cs |  |
 | `shared_ptr` | not ported: C++ platform header |  |  |
-| `stochasticprocess` | not started |  | no nanoql type: StochasticProcess, StochasticProcessDiscretization, StochasticProcess1D, StochasticProcess1DDiscretization |
+| `stochasticprocess` | partial | StochasticProcess/StochasticProcess.cs, StochasticProcess/StochasticProcess1D.cs, StochasticProcess/StochasticProcess1DDiscretization.cs, StochasticProcess/StochasticProcessDiscretization.cs | partial: StochasticProcess's defaults of expectation, stdDeviation and covariance, which call the discretization, wait for S-eq's EulerDiscretization; StochasticProcess1D's defaults of expectation, stdDeviation and variance, which call the discretization, wait for S-eq's EulerDiscretization |
 | `termstructure` | partial | TermStructure.cs | partial: the constructors taking a day counter only, for structures that manage their own reference date, which no pilot curve uses |
-| `timegrid` | not started |  | no nanoql type: TimeGrid |
+| `timegrid` | ported | TimeGrid.cs |  |
 | `timeseries` | not started |  | no nanoql type: TimeSeries, TimeSeriesReverse |
 | `tuple` | not ported: deprecated |  |  |
 | `types` | replaced: global type aliases | Types.cs |  |
@@ -930,22 +930,22 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `burley2020sobolrsg` | not started |  | no nanoql type: Burley2020SobolRsg |
 | `centrallimitgaussianrng` | not started |  | no nanoql type: CLGaussianRng |
 | `faurersg` | not started |  | no nanoql type: FaureRsg |
-| `haltonrsg` | not started |  | no nanoql type: HaltonRsg |
-| `inversecumulativerng` | not started |  | no nanoql type: InverseCumulativeRng |
-| `inversecumulativersg` | not started |  | no nanoql type: InverseCumulativeRsg |
+| `haltonrsg` | ported | Numerics/RandomNumbers/HaltonRsg.cs |  |
+| `inversecumulativerng` | ported | Numerics/RandomNumbers/InverseCumulativeRng/IInverseCumulative.cs, Numerics/RandomNumbers/InverseCumulativeRng/InvCumulativeMersenneTwisterGaussianRng.cs, Numerics/RandomNumbers/InverseCumulativeRng/InverseCumulativeRng{TRng,TIc}.cs, Numerics/RandomNumbers/InverseCumulativeRng/MoroInvCumulativeMersenneTwisterGaussianRng.cs |  |
+| `inversecumulativersg` | ported | Numerics/RandomNumbers/InverseCumulativeRsg/IRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/ISeedableRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeHaltonGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeMersenneTwisterGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeSobolGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InverseCumulativeRsg{TUsg,TIc}.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeHaltonGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeMersenneTwisterGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeSobolGaussianRsg.cs |  |
 | `knuthuniformrng` | not started |  | no nanoql type: KnuthUniformRng |
 | `latticersg` | not started |  | no nanoql type: LatticeRsg |
 | `latticerules` | not started |  | no nanoql type: LatticeRule, LatticeRuleType |
 | `lecuyeruniformrng` | not started |  | no nanoql type: LecuyerUniformRng |
-| `mt19937uniformrng` | not started |  | no nanoql type: MersenneTwisterUniformRng |
-| `primitivepolynomials` | not started |  |  |
+| `mt19937uniformrng` | ported | Numerics/RandomNumbers/MersenneTwisterUniformRng.cs |  |
+| `primitivepolynomials` | ported | Numerics/RandomNumbers/PrimitivePolynomials.cs |  |
 | `randomizedlds` | not started |  | no nanoql type: RandomizedLDS |
-| `randomsequencegenerator` | not started |  | no nanoql type: RandomSequenceGenerator |
+| `randomsequencegenerator` | ported | Numerics/RandomNumbers/RandomSequenceGenerator/IInt32Rng.cs, Numerics/RandomNumbers/RandomSequenceGenerator/IRng.cs, Numerics/RandomNumbers/RandomSequenceGenerator/ISeedableRng.cs, Numerics/RandomNumbers/RandomSequenceGenerator/MersenneTwisterUniformRsg.cs, Numerics/RandomNumbers/RandomSequenceGenerator/RandomSequenceGenerator.cs, Numerics/RandomNumbers/RandomSequenceGenerator/RandomSequenceGenerator{TRng}.cs |  |
 | `ranluxuniformrng` | not started |  | no nanoql type: Ranlux64UniformRng, Ranlux3UniformRng, Ranlux4UniformRng |
-| `rngtraits` | not started |  | no nanoql type: GenericPseudoRandom, PseudoRandom, PoissonPseudoRandom, GenericLowDiscrepancy, LowDiscrepancy |
-| `seedgenerator` | not started |  | no nanoql type: SeedGenerator |
+| `rngtraits` | ported | Numerics/RandomNumbers/RngTraits/GenericLowDiscrepancy{TUrsg,TIc}.cs, Numerics/RandomNumbers/RngTraits/GenericPseudoRandom{TUrng,TIc}.cs, Numerics/RandomNumbers/RngTraits/IRngTraits.cs, Numerics/RandomNumbers/RngTraits/LowDiscrepancy.cs, Numerics/RandomNumbers/RngTraits/PoissonPseudoRandom.cs, Numerics/RandomNumbers/RngTraits/PseudoRandom.cs |  |
+| `seedgenerator` | replaced: explicit seeds | Numerics/RandomNumbers/Seeds.cs |  |
 | `sobolbrownianbridgersg` | not started |  | no nanoql type: SobolBrownianBridgeRsg, Burley2020SobolBrownianBridgeRsg |
-| `sobolrsg` | not started |  | no nanoql type: SobolRsg, SobolRsgDirectionIntegers |
+| `sobolrsg` | ported | Numerics/RandomNumbers/SobolRsg/SobolRsg.cs, Numerics/RandomNumbers/SobolRsg/SobolRsgDirectionIntegers.cs, Numerics/RandomNumbers/SobolRsg/SobolRsgTables.cs |  |
 | `stochasticcollocationinvcdf` | not started |  | no nanoql type: StochasticCollocationInvCDF |
 | `xoshiro256starstaruniformrng` | not started |  | no nanoql type: Xoshiro256StarStarUniformRng |
 | `zigguratgaussianrng` | not started |  | no nanoql type: ZigguratGaussianRng |
@@ -1161,7 +1161,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `brownianbridge` | not started |  | no nanoql type: BrownianBridge |
+| `brownianbridge` | ported | Methods/MonteCarlo/BrownianBridge.cs |  |
 | `earlyexercisepathpricer` | not started |  | no nanoql type: EarlyExerciseTraits, EarlyExercisePathPricer |
 | `exercisestrategy` | not started |  | no nanoql type: ExerciseStrategy |
 | `genericlsregression` | not started |  |  |
@@ -1173,10 +1173,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `multipathgenerator` | not started |  | no nanoql type: MultiPathGenerator |
 | `nodedata` | not started |  | no nanoql type: NodeData |
 | `parametricexercise` | not started |  | no nanoql type: ParametricExercise |
-| `path` | not started |  | no nanoql type: Path |
-| `pathgenerator` | not started |  | no nanoql type: PathGenerator |
+| `path` | ported | Methods/MonteCarlo/MonteCarloPath.cs |  |
+| `pathgenerator` | ported | Methods/MonteCarlo/GaussianSobolPathGenerator.cs, Methods/MonteCarlo/InvCumulativeMersenneTwisterPathGenerator.cs, Methods/MonteCarlo/PathGenerator{TGsg}.cs |  |
 | `pathpricer` | not started |  | no nanoql type: PathPricer |
-| `sample` | not started |  | no nanoql type: Sample |
+| `sample` | ported | Methods/MonteCarlo/Sample.cs |  |
 
 ### `ql/models/`
 
@@ -1736,7 +1736,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `jointstochasticprocess` | not started |  | no nanoql type: JointStochasticProcess |
 | `merton76process` | not started |  | no nanoql type: Merton76Process |
 | `mfstateprocess` | not started |  | no nanoql type: MfStateProcess |
-| `ornsteinuhlenbeckprocess` | not started |  | no nanoql type: OrnsteinUhlenbeckProcess |
+| `ornsteinuhlenbeckprocess` | ported | Processes/OrnsteinUhlenbeckProcess.cs |  |
 | `squarerootprocess` | not started |  | no nanoql type: SquareRootProcess |
 | `stochasticprocessarray` | not started |  | no nanoql type: StochasticProcessArray |
 
@@ -2081,7 +2081,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackvolsurfacedelta` | not started |  | 5 cases |
 | `bondforward` | not started |  | 3 cases |
 | `bonds` | not started |  | 22 cases |
-| `brownianbridge` | not started |  | 2 cases |
+| `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
 | `businessdayconventions` | not started |  | 1 cases |
 | `calendars` | partial | TestSuite/CalendarsTests.cs | 15 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testCanadaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
 | `callablebonds` | not started |  | 14 cases |
@@ -2167,7 +2167,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `libormarketmodelprocess` | not started |  | 3 cases |
 | `linearleastsquaresregression` | not started |  | 3 cases |
 | `lookbackoptions` | not started |  | 5 cases |
-| `lowdiscrepancysequences` | not started |  | 20 cases |
+| `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 6 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy, testSobolBurleySkipping, testBurley2020SobolRsgOutputBounds |
 | `margrabeoption` | not started |  | 3 cases |
 | `marketmodel` | not started |  | 19 cases |
 | `marketmodel_cms` | not started |  | 1 cases |
@@ -2178,7 +2178,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `markovfunctional` | not started |  | 7 cases |
 | `matrices` | partial | TestSuite/MatricesTests.cs | 4 of 20 cases; not yet: testEigenvectors, testSqrt, testHighamSqrt, testSVD, testQRDecomposition, testQRSolve, testOrthogonalProjection, testCholeskyDecomposition, testMoorePenroseInverse, testIterativeSolvers, testSparseMatrixMemory, testPrincipalMatrixSqrt, testCholeskySolverFor, testCholeskySolverForIncomplete, testHouseholderTransformation, testHouseholderReflection |
 | `mclongstaffschwartzengine` | not started |  | 2 cases |
-| `mersennetwister` | not started |  | 1 cases |
+| `mersennetwister` | ported | TestSuite/MersenneTwisterTests.cs | 1 of 1 cases |
 | `money` | not started |  | 4 cases |
 | `mtmcrosscurrencybasisswap` | not started |  | 15 cases |
 | `multipleresetscoupons` | not started |  | 5 cases |
@@ -2199,7 +2199,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `pagodaoption` | not started |  | 1 cases |
 | `paralleltestrunner` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `partialtimebarrieroption` | not started |  | 3 cases |
-| `pathgenerator` | not started |  | 2 cases |
+| `pathgenerator` | partial | TestSuite/PathGeneratorTests.cs | 1 of 2 cases; not yet: testMultiPathGenerator |
 | `period` | ported | TestSuite/PeriodTests.cs | 9 of 9 cases |
 | `perpetualfutures` | not started |  | 1 cases |
 | `piecewiseblackvariancesurface` | not started |  | 20 cases |
@@ -2215,7 +2215,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rangeaccrual` | not started |  | 3 cases |
 | `riskneutraldensitycalculator` | not started |  | 14 cases |
 | `riskstats` | not started |  | 1 cases |
-| `rngtraits` | not started |  | 4 cases |
+| `rngtraits` | partial | TestSuite/RngTraitsTests.cs | 3 of 4 cases; not yet: testRanLux |
 | `roughhestonmodel` | not started |  | 24 cases |
 | `rounding` | not started |  | 5 cases |
 | `schedule` | partial | TestSuite/ScheduleTests.cs | 18 of 28 cases; not yet: testEndDateWithEomAdjustment, testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured, testTruncation |
@@ -2235,7 +2235,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `swaptionvolstructuresutilities` | not started |  | 0 cases |
 | `swingoption` | not started |  | 6 cases |
 | `termstructures` | partial | TestSuite/TermStructuresTests.cs | 2 of 15 cases; replaced: testReferenceChange by Vectors/TermStructures/FlatForwardVectorTests.cs; not yet: testImplied, testImpliedObs, testFSpreaded, testFSpreadedObs, testZSpreaded, testZSpreadedObs, testCreateWithNullUnderlying, testLinearInterpolationSpreadedForwardRate, testForwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationZeroRate, testLinkToNullUnderlying, testCompositeZeroYieldStructures |
-| `timegrid` | not started |  | 10 cases |
+| `timegrid` | ported | TestSuite/TimeGridTests.cs | 10 of 10 cases |
 | `timeseries` | not started |  | 6 cases |
 | `toplevelfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `tqreigendecomposition` | not started |  | 3 cases |

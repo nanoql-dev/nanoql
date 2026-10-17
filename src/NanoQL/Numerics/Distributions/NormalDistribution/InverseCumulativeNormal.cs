@@ -28,7 +28,7 @@ namespace NanoQL.Numerics;
 /// <c>InvCumulativeNormalDistribution</c>.
 /// </para>
 /// </remarks>
-public readonly struct InverseCumulativeNormal
+public readonly struct InverseCumulativeNormal : IInverseCumulative
 {
     // Coefficients for the rational approximation.
     private const double a1_ = -3.969683028665376e+01;

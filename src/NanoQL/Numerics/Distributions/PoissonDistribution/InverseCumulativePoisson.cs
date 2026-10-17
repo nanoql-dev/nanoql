@@ -15,7 +15,7 @@ namespace NanoQL.Numerics;
 /// A configuration struct: its zero value (<c>default</c>, <c>new InverseCumulativePoisson()</c>, an unassigned field
 /// or array element) is QuantLib's default construction, λ = 1.
 /// </remarks>
-public readonly struct InverseCumulativePoisson
+public readonly struct InverseCumulativePoisson : IInverseCumulative
 {
     // QuantLib's lambda. The constructor refuses 0, so a stored 0 is the zero value, which reads as QuantLib's
     // default, 1.

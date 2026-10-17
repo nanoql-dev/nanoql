@@ -49,6 +49,25 @@ public static class PrimeNumbers
         return primeNumbers[absoluteIndex];
     }
 
+    /// <summary>
+    /// The primes at indices 0 to <paramref name="count"/> − 1, as <see cref="Get"/> gives them, computed in one pass
+    /// for a caller that needs them all (<see cref="HaltonRsg"/>, one per dimension).
+    /// </summary>
+    /// <param name="count">How many primes, non-negative.</param>
+    /// <returns>The primes, QuantLib's <c>BigNatural</c>s.</returns>
+    internal static uint[] First(int count)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        var primeNumbers = new List<uint>(Math.Max(count, FirstPrimes.Length));
+        primeNumbers.AddRange(FirstPrimes);
+        while (primeNumbers.Count < count)
+        {
+            NextPrimeNumber(primeNumbers);
+        }
+
+        return [.. primeNumbers.Take(count)];
+    }
+
     // Appends the prime after the list's last, by trial division by the primes up to its square root.
     private static uint NextPrimeNumber(List<uint> primeNumbers)
     {

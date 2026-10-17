@@ -15,3 +15,22 @@ SPDX-License-Identifier = "Apache-2.0"
 path = "THIRD_PARTY_NOTICES.md"
 precedence = "aggregate"
 SPDX-License-Identifier = "BSD-3-Clause"
+
+# QuantLib's table of primitive polynomials modulo two, generated from primitivepolynomials.cpp by
+# tools/tables/primitivepolynomials.py: data only, under Jäckel's notice as QuantLib distributes it.
+[[annotations]]
+path = "src/NanoQL/Numerics/RandomNumbers/PrimitivePolynomials.bin"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Copyright (C) 2002 Peter Jäckel \"Monte Carlo Methods in Finance\"."
+SPDX-License-Identifier = "BSD-3-Clause AND LicenseRef-Jaeckel"
+
+# QuantLib's tables for its Sobol generator, generated from sobolrsg.cpp by tools/tables/sobolrsg.py: data only,
+# among them the Joe-Kuo and Kuo direction numbers under their licence.
+[[annotations]]
+path = "src/NanoQL/Numerics/RandomNumbers/SobolRsg/*.bin"
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+  "Copyright (C) 2003, 2004 Ferdinando Ametrano", "Copyright (C) 2006 Richard Gould", "Copyright (C) 2007 Mark Joshi",
+  "Copyright (C) 2013 Cheng Li", "Copyright (c) 2008, Frances Y. Kuo and Stephen Joe",
+]
+SPDX-License-Identifier = "BSD-3-Clause AND LicenseRef-JoeKuo"

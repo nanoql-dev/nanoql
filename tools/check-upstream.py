@@ -21,6 +21,8 @@ Usage: .venv\\Scripts\\python -I tools/check-upstream.py <QuantLib v1.44 worktre
 (4) The files with a "// Partial:" line are exactly those docs/porting-plan.md lists under "Partial ports".
 (5) docs/porting-map.md reproduces (tools/porting-map.py --check); every entry of the name table exists at the pin;
     and no Upstream line names a file that a rule or the name table marks not ported.
+(6) The generated tables reproduce: each script under tools/tables/, run on QuantLib at the pin into a temporary
+    folder, writes bytes identical to the committed files, and every .bin file under src/NanoQL/ is one they write.
 
 A Boost port's Upstream line (boost/<path> @ boost-1.90.0) needs --boost, the root of Boost 1.90.0's release tree
 (tools/cxx/build.py's boost_1_90_0, or the release zip checked against its SHA-256). Its pin is the name table's
@@ -33,6 +35,7 @@ names QuantLib paths or Boost paths, never both.
 and applies one perturbation per check to a fresh copy each time; it exits 0 only if every perturbation is caught by
 the check it targets.
 """
+import hashlib
 import importlib.util
 import json
 import os
@@ -56,6 +59,13 @@ BOOST_SRC = SRC + "Boost/"
 BOOST_NAMESPACE = "NanoQL.Numerics"
 BOOST_VERSION = "109000"
 CHECKED = (".cs", ".py", ".cpp", ".hpp")
+# (6): the scripts that generate QuantLib's data tables (docs/porting-playbook.md §1), each with a write(ql_root,
+# out_root) that writes its tables under out_root at their paths in the repository and returns those paths.
+TABLES = "tools/tables/"
+TABLE = ".bin"
+# A table script's output, by its source's digest and the QuantLib root: the self-test runs the checker once per
+# perturbation over copies holding the same scripts.
+_generated = {}
 
 
 def glob_regex(pattern):
@@ -176,6 +186,7 @@ class Checker:
         self.check_notices()
         self.check_table()
         self.check_map()
+        self.check_tables(files)
 
     def read_notices(self):
         """tools/third-party-notices.txt's rows, as (QuantLib file, first line, last line, SPDX id, the block's
@@ -440,6 +451,54 @@ class Checker:
         if not porting_map.reproduces(self.root, self.ql):
             self.error("map", "docs/porting-map.md differs from a fresh generation (tools/porting-map.py)")
 
+    def generate_tables(self, script):
+        """A table script's tables, {path in the repository: bytes}, written into a temporary folder and read back."""
+        path = os.path.join(self.root, script)
+        with open(path, "rb") as f:
+            key = (hashlib.sha256(f.read()).hexdigest(), os.path.abspath(self.ql))
+        if key not in _generated:
+            spec = importlib.util.spec_from_file_location("table_" + os.path.basename(script)[:-3], path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            out = {}
+            with tempfile.TemporaryDirectory() as tmp:
+                for rel in module.write(self.ql, tmp):
+                    with open(os.path.join(tmp, *rel.split("/")), "rb") as f:
+                        out[rel] = f.read()
+            _generated[key] = out
+        return _generated[key]
+
+    def check_tables(self, files):
+        """(6) Regenerating the tables reproduces the committed files, byte for byte, and no other .bin file sits under
+        src/NanoQL/."""
+        scripts = [p for p in files if p.startswith(TABLES) and p.endswith(".py")]
+        generated = {}
+        for script in scripts:
+            try:
+                for rel, data in self.generate_tables(script).items():
+                    generated[rel] = (script, data)
+            except SystemExit as e:
+                self.error("tables", f"{script}: stopped generating its tables ({e})")
+        same, size = 0, 0
+        for rel, (script, data) in sorted(generated.items()):
+            path = os.path.join(self.root, *rel.split("/"))
+            if rel not in files or not os.path.isfile(path):
+                self.error("tables", f"{rel}: {script} generates it, but the tree doesn't hold it")
+                continue
+            with open(path, "rb") as f:
+                committed = f.read()
+            if committed != data:
+                at = next((i for i, (a, b) in enumerate(zip(committed, data)) if a != b), min(len(committed), len(data)))
+                self.error("tables", f"{rel}: differs from a fresh generation by {script} (first at byte {at}; "
+                                     f"{len(committed)} bytes, {len(data)} generated)")
+                continue
+            same += 1
+            size += len(data)
+        for rel in files:
+            if rel.startswith(SRC) and rel.endswith(TABLE) and rel not in generated:
+                self.error("tables", f"{rel}: a table under {SRC} that no script under {TABLES} generates")
+        self.counts["tables"] = (same, len(generated), size, len(scripts))
+
 
 def report(checker):
     c = checker.counts
@@ -452,6 +511,8 @@ def report(checker):
     print(f"(4) partial files: {c['partial']}, listed in docs/porting-plan.md: {c['partial']}")
     print(f"(5) table entries at the pin: {c['table'][0]}/{c['table'][1]} "
           f"(replaced and not-ported: {c['table-lists']}); porting map reproduces")
+    print(f"(6) generated tables reproducing: {c['tables'][0]}/{c['tables'][1]} files, {c['tables'][2]:,} bytes, from "
+          f"{c['tables'][3]} scripts under {TABLES}")
     for code, message in checker.errors:
         print(f"RED [{code}] {message}")
     print("check-upstream: " + ("passed" if not checker.errors else f"{len(checker.errors)} errors"))
@@ -473,6 +534,8 @@ BOOST_LAYOUTS = [
      ["Copyright (c) 2000-2007 Joerg Walter, Mathias Koch, Gunter Winkler"]),
 ]
 UBLAS_PROBE = "src/NanoQL/Boost/Numeric/Ublas/SelfTestMatrixSparseProbe.cs"
+# A committed table that tools/tables/sobolrsg.py generates (6).
+TABLE_FILE = "src/NanoQL/Numerics/RandomNumbers/SobolRsg/Initializers.bin"
 DATES_TESTS = "tests/NanoQL.Tests/TestSuite/DatesTests.cs"
 # Third-party blocks (§1), each probe a synthetic port of real QuantLib files whose copyright lines and blocks are
 # written out as those files have them at the pin, never read through the checker.
@@ -644,6 +707,15 @@ def perturbations(ql_root, boost_root, tmp):
     def boost_moved(root):
         shutil.move(os.path.join(root, BOOST_PROBE), os.path.join(root, "src/NanoQL/Boost/Math/SelfTestBoostProbe.cs"))
 
+    def changed_byte(root):
+        # One bit of Jäckel's first coefficients for the second dimension, a value no other check reads.
+        path = os.path.join(root, TABLE_FILE)
+        with open(path, "rb") as f:
+            data = bytearray(f.read())
+        data[4] ^= 0x01
+        with open(path, "wb") as f:
+            f.write(data)
+
     return [
         ("missing Upstream line", "allowlist", "no Upstream line, and not listed",
          lambda r: edit(r, PROBE, "// Upstream: ql/time/weekday.hpp ql/time/weekday.cpp @ v1.44\n", "")),
@@ -779,6 +851,8 @@ def perturbations(ql_root, boost_root, tmp):
          f"tools/third-party-notices.txt: {FIFTH_SOURCE}:4 holds U+FFFD in {FIFTH_UPSTREAM[0]}'s block, and a "
          "fifth-column source has no twin",
          lambda r: edit(r, FIFTH_SOURCE, "Redistribution", "Redistributi" + sources.FFFD + "n")),
+        ("a generated table with one changed byte", "tables", f"{TABLE_FILE}: differs from a fresh generation",
+         changed_byte),
     ]
 
 

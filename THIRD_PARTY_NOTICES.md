@@ -305,7 +305,8 @@ is preserved.
 ====================================================
 ```
 
-### Peter Jäckel's prime numbers, in `ql/math/primenumbers.hpp` and `primenumbers.cpp`
+### Peter Jäckel's prime numbers, Halton sequence and Brownian bridge, in `ql/math/primenumbers.hpp`, `primenumbers.cpp`,
+`ql/math/randomnumbers/haltonrsg.cpp`, `ql/methods/montecarlo/brownianbridge.hpp` and `brownianbridge.cpp`
 
 ```text
 ===========================================================================
@@ -382,4 +383,136 @@ C translation Copyright (C) Steve Moshier
 
 What you see here may be used freely but it comes with no support
 or guarantee.
+```
+
+### MT19937, in `ql/math/randomnumbers/mt19937uniformrng.cpp`
+
+QuantLib's Mersenne Twister is based on the original C implementation, under the notice below. Its second
+condition asks that a redistribution in binary form reproduce the notice in its documentation or other
+materials: nanoql's binary distributions carry this file.
+
+```text
+A C-program for MT19937, with initialization improved 2002/1/26.
+Coded by Takuji Nishimura and Makoto Matsumoto.
+
+Before using, initialize the state by using init_genrand(seed)
+or init_by_array(init_key, key_length).
+
+Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+3. The names of its contributors may not be used to endorse or promote
+products derived from this software without specific prior written
+permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+Any feedback is very welcome.
+http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
+email: matumoto@math.keio.ac.jp
+```
+
+### Peter Jäckel's primitive polynomials, in `ql/math/randomnumbers/primitivepolynomials.hpp` and
+`primitivepolynomials.cpp`
+
+nanoql generates its table of primitive polynomials modulo two from `primitivepolynomials.cpp`. The header
+and the source carry these notices.
+
+```text
+this file is a slightly edited version of
+PrimitivePolynomialsModuloTwoUpToDegree27.h
+© 2002 "Monte Carlo Methods in Finance"
+as provided ready for compilation in the directory
+"PrimitivePolynomialsModuloTwo" on the CD accompanying the book
+"Monte Carlo Methods in Finance" by Peter Jäckel.
+
+===========================================================================
+NOTE: The following copyright notice applies to the original code,
+
+Copyright (C) 2002 Peter Jäckel "Monte Carlo Methods in Finance".
+All rights reserved.
+
+Permission to use, copy, modify, and distribute this software is freely
+granted, provided that this notice is preserved.
+===========================================================================
+```
+
+```text
+This file contains 21200 polinomials, that is all primitive polynomials
+modulo two up to degree 18. Another version does contain
+8129334 polinomials, that is all primitive polynomials
+modulo two up to degree 27. Both are slightly edited versions of
+PrimitivePolynomialsModuloTwoUpToDegree27.c
+
+© 2002 "Monte Carlo Methods in Finance"
+
+
+=========================================================================
+Copyright (C) 2002 Peter Jäckel "Monte Carlo Methods in Finance".
+All rights reserved.
+
+Permission to use, copy, modify, and distribute this software is freely
+granted, provided that this notice is preserved.
+=========================================================================
+```
+
+### The Joe–Kuo direction numbers, in `ql/math/randomnumbers/sobolrsg.cpp`
+
+QuantLib's Sobol generator carries Stephen Joe and Frances Kuo's direction numbers, which nanoql generates
+its tables from; QuantLib's `sobolrsg.hpp` says they are available under a BSD-style license at
+<http://web.maths.unsw.edu.au/~fkuo/sobol/>. The licence's text, as that page gives it, is below and in
+`LICENSES/LicenseRef-JoeKuo.txt`. Its second condition asks that a redistribution in binary form reproduce the
+notice in its documentation or other materials: nanoql's binary distributions carry this file.
+
+```text
+Copyright (c) 2008, Frances Y. Kuo and Stephen Joe
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+    * Neither the names of the copyright holders nor the names of the
+      University of New South Wales and the University of Waikato
+      and its contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
