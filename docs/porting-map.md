@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,222 | 168 |
-| partial | 13 | 11 |
-| ported | 40 | 3 |
+| not started | 1,211 | 166 |
+| partial | 13 | 13 |
+| ported | 51 | 3 |
 | replaced | 16 | 6 |
 | total | 1,456 | 194 |
 
@@ -772,7 +772,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `quadratic` | not started |  | no nanoql type: Quadratic |
 | `richardsonextrapolation` | not started |  | no nanoql type: RichardsonExtrapolation |
 | `rounding` | not started |  | no nanoql type: Rounding, RoundingType, UpRounding, DownRounding, ClosestRounding, CeilingTruncation, FloorTruncation |
-| `solver1d` | not started |  | no nanoql type: Solver1D |
+| `solver1d` | ported | Numerics/Solver1D/IDerivativeSolver1DFunction.cs, Numerics/Solver1D/ISolver1DFunction.cs, Numerics/Solver1D/Solver1D.cs, Numerics/Solver1D/Solver1DBracket.cs |  |
 | `transformedgrid` | not ported: deprecated |  |  |
 
 ### `ql/math/copulas/`
@@ -900,23 +900,23 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bfgs` | not started |  | no nanoql type: BFGS |
 | `cmaes` | not started |  | no nanoql type: Cmaes, CmaesConfiguration |
 | `conjugategradient` | not started |  | no nanoql type: ConjugateGradient |
-| `constraint` | not started |  | no nanoql type: Constraint, NoConstraint, PositiveConstraint, BoundaryConstraint, CompositeConstraint, NonhomogeneousBoundaryConstraint |
-| `costfunction` | not started |  | no nanoql type: CostFunction, SimpleCostFunction, ParametersTransformation |
+| `constraint` | ported | Numerics/Optimization/Constraint/BoundaryConstraint.cs, Numerics/Optimization/Constraint/CompositeConstraint.cs, Numerics/Optimization/Constraint/Constraint.cs, Numerics/Optimization/Constraint/NoConstraint.cs, Numerics/Optimization/Constraint/NonhomogeneousBoundaryConstraint.cs, Numerics/Optimization/Constraint/PositiveConstraint.cs |  |
+| `costfunction` | ported | Numerics/Optimization/CostFunction/CostFunction.cs, Numerics/Optimization/CostFunction/ParametersTransformation.cs, Numerics/Optimization/CostFunction/SimpleCostFunction.cs |  |
 | `differentialevolution` | not started |  | no nanoql type: DifferentialEvolution, DifferentialEvolutionStrategy, DifferentialEvolutionCrossoverType, DifferentialEvolutionCandidate, DifferentialEvolutionConfiguration |
-| `endcriteria` | not started |  | no nanoql type: EndCriteria, EndCriteriaType |
+| `endcriteria` | ported | Numerics/Optimization/EndCriteria/EndCriteria.cs, Numerics/Optimization/EndCriteria/EndCriteriaCheck.cs, Numerics/Optimization/EndCriteria/EndCriteriaType.cs |  |
 | `goldstein` | not started |  | no nanoql type: GoldsteinLineSearch |
 | `lbfgsb` | not started |  | no nanoql type: LBFGSB |
 | `leastsquare` | not started |  | no nanoql type: LeastSquareProblem, LeastSquareFunction, NonLinearLeastSquare |
-| `levenbergmarquardt` | not started |  | no nanoql type: LevenbergMarquardt |
+| `levenbergmarquardt` | ported | Numerics/Optimization/LevenbergMarquardt.cs |  |
 | `linesearch` | not started |  | no nanoql type: LineSearch |
 | `linesearchbasedmethod` | not started |  | no nanoql type: LineSearchBasedMethod |
-| `lmdif` | not started |  |  |
-| `method` | not started |  | no nanoql type: OptimizationMethod |
-| `problem` | not started |  | no nanoql type: Problem |
+| `lmdif` | ported | Numerics/Optimization/LmdifFunctions.cs |  |
+| `method` | ported | Numerics/Optimization/OptimizationMethod.cs |  |
+| `problem` | ported | Numerics/Optimization/Problem/Problem.cs, Numerics/Optimization/Problem/ProblemResults.cs, Numerics/Optimization/Problem/ProblemState.cs |  |
 | `projectedconstraint` | not started |  | no nanoql type: ProjectedConstraint |
 | `projectedcostfunction` | not started |  | no nanoql type: ProjectedCostFunction |
 | `projection` | not started |  | no nanoql type: Projection |
-| `simplex` | not started |  | no nanoql type: Simplex |
+| `simplex` | ported | Numerics/Optimization/Simplex.cs |  |
 | `simulatedannealing` | not started |  | no nanoql type: SimulatedAnnealing, SimulatedAnnealingScheme |
 | `spherecylinder` | not started |  | no nanoql type: SphereCylinderOptimizer |
 | `steepestdescent` | not started |  | no nanoql type: SteepestDescent |
@@ -956,12 +956,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `bisection` | not started |  | no nanoql type: Bisection |
-| `brent` | not started |  | no nanoql type: Brent |
+| `brent` | ported | Numerics/Solvers1D/Brent.cs |  |
 | `falseposition` | not started |  | no nanoql type: FalsePosition |
 | `finitedifferencenewtonsafe` | not started |  | no nanoql type: FiniteDifferenceNewtonSafe |
 | `halley` | not started |  | no nanoql type: Halley |
 | `newton` | not started |  | no nanoql type: Newton |
-| `newtonsafe` | not started |  | no nanoql type: NewtonSafe |
+| `newtonsafe` | ported | Numerics/Solvers1D/NewtonSafe.cs |  |
 | `ridder` | not started |  | no nanoql type: Ridder |
 | `secant` | not started |  | no nanoql type: Secant |
 
@@ -2191,7 +2191,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `observable` | not ported: tests Observable, which is removed |  |  |
 | `ode` | not started |  | 3 cases |
 | `operators` | partial | TestSuite/OperatorsTests.cs | 1 of 2 cases; not yet: testConsistency |
-| `optimizers` | not started |  | 10 cases |
+| `optimizers` | partial | TestSuite/OptimizersTests.cs | 2 of 10 cases; not yet: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination, testLBFGSB, testLBFGSBActiveBounds, testLBFGSBCoverage, testDifferentialEvolution, testCMAES |
 | `optionletstripper` | not started |  | 19 cases |
 | `overnightindexedcoupon` | not started |  | 45 cases |
 | `overnightindexedfundingratehelper` | not started |  | 3 cases |
@@ -2223,7 +2223,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `shortratemodels` | not started |  | 9 cases |
 | `sofrfutures` | not started |  | 6 cases |
 | `softbarrieroption` | not started |  | 1 cases |
-| `solvers` | not started |  | 9 cases |
+| `solvers` | partial | TestSuite/SolversTests.cs | 2 of 9 cases; not yet: testBisection, testFalsePosition, testNewton, testFiniteDifferenceNewtonSafe, testRidder, testSecant, testHalley |
 | `squarerootclvmodel` | not started |  | 3 cases |
 | `stats` | not started |  | 4 cases |
 | `svivolatility` | not started |  | 1 cases |

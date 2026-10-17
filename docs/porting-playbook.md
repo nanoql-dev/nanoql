@@ -210,9 +210,12 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   content. Opening a sealed class later is a compatible change; sealing an open one is not. Users compose instead, or
   add members through C# 14 extension members.
 - **Extension points so far:** `Calendar`, `DayCounter`, `Event`, `CashFlow`, `Coupon`, `Extrapolator`,
-  `TermStructure`, `YieldTermStructure`, `Instrument`, `TridiagonalOperatorTimeSetter` and `Interpolation` (abstract);
-  `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`, `TridiagonalOperator`, `CubicInterpolation` and
-  `LogCubicInterpolation` (unsealed); `IInterpolator` (the interpolation traits, an interface).
+  `TermStructure`, `YieldTermStructure`, `Instrument`, `TridiagonalOperatorTimeSetter`, `Interpolation`,
+  `Solver1D<TSelf, TFunction>`, `OptimizationMethod`, `CostFunction`, `Constraint` and `ParametersTransformation`
+  (abstract); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`, `TridiagonalOperator`,
+  `CubicInterpolation` and `LogCubicInterpolation` (unsealed); `IInterpolator` (the interpolation traits),
+  `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers' function concepts), interfaces; and
+  `Solver1DBracket` and `ProblemState`, sealed, which a solver's `SolveCore` and a method's `MinimizeCore` receive.
 - **Leg:** QuantLib's `Leg` is the global alias
   `global using Leg = System.Collections.Immutable.ImmutableArray<NanoQL.CashFlow>;` in `Types.cs`. Public signatures
   show `ImmutableArray<CashFlow>`.

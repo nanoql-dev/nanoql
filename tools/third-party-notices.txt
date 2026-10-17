@@ -20,5 +20,6 @@
 # fault in QuantLib's copy, is read as its fault-free twin in another file of the port.
 
 ql/math/errorfunction.cpp	NOTE: The following copyright notice	====================================================	SunPro
+ql/math/optimization/lmdif.cpp	The original Fortran version is Copyright (C) 1999 University of Chicago.	or guarantee.	Minpack
 ql/math/primenumbers.hpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel
 ql/math/primenumbers.cpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel
