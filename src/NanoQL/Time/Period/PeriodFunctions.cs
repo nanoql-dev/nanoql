@@ -9,7 +9,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/time/period.hpp ql/time/period.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Own-tested: Days, LongPeriod
 
 using System.Globalization;
 
@@ -84,7 +83,7 @@ public static class PeriodFunctions
     /// <summary>The period's length in days.</summary>
     /// <param name="p">The period.</param>
     /// <returns>The length in days.</returns>
-    /// <exception cref="NanoQLException">The period is in months or years.</exception>
+    /// <exception cref="NanoQLException">The period is in months, years or a unit below a day.</exception>
     public static double Days(Period p)
     {
         if (p.Length == 0)

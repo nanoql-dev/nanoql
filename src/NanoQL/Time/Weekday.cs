@@ -7,12 +7,14 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/time/weekday.hpp ql/time/weekday.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: io::long_weekday, io::short_weekday, io::shortest_weekday and operator<<, which wait for the C++ harness
 
 namespace NanoQL.Time;
 
 /// <summary>A day's serial number modulo 7; Excel's WEEKDAY function is the same except for Sunday = 7.</summary>
-/// <remarks>The aliases share their day's value, so <see cref="Enum.ToString()"/> may return either name.</remarks>
+/// <remarks>
+/// The aliases share their day's value, so <see cref="Enum.ToString()"/> may return either name; QuantLib's text is
+/// <see cref="WeekdayFunctions.ToString(Weekday)"/>.
+/// </remarks>
 public enum Weekday
 {
     /// <summary>Sunday.</summary>

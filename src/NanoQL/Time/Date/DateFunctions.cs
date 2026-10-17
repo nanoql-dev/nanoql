@@ -12,7 +12,6 @@
 // Upstream: ql/time/date.hpp ql/time/date.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 // Partial: io::formatted_date (not ported: a Date converts to DateOnly, whose ToString(format) does its job)
-// Own-tested: ShortDate
 
 using System.Globalization;
 using NanoQL.Utilities;

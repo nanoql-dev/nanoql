@@ -107,6 +107,17 @@ public class UnknownEnumValueTests
         AssertParam("comp", () => leg.WithCouponRates(0.03, dc, (Compounding)99));
     }
 
+    [Fact]
+    public void WeekdayAndConventionTextRefusesAnUnknownValue()
+    {
+        AssertParam("d", () => WeekdayFunctions.LongWeekday((Weekday)8));
+        AssertParam("d", () => WeekdayFunctions.ShortWeekday((Weekday)0));
+        AssertParam("d", () => WeekdayFunctions.ShortestWeekday((Weekday)8));
+        AssertParam("w", () => WeekdayFunctions.ToString((Weekday)0));
+        AssertParam("b", () => BusinessDayConventionFunctions.ToString((BusinessDayConvention)7));
+        AssertParam("b", () => BusinessDayConventionFunctions.ToString((BusinessDayConvention)(-1)));
+    }
+
     private static EvaluationContext Context() => new() { EvaluationDate = Today };
 
     private static void AssertParam(string paramName, Action action) =>

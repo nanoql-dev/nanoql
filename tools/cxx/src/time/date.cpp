@@ -26,6 +26,12 @@ namespace harness {
                  Integer y = integer(a[0]);
                  return [=] { return json::value(Date::isLeap(y)); };
              }},
+            {"io::short_date",
+             [](const Args& a) -> Call {
+                 arity(a, 1);
+                 DateSpec d = date(a[0]);
+                 return [=] { return json::value(streamed(io::short_date(makeDate(d)))); };
+             }},
         });
 
     }

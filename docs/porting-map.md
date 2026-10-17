@@ -21,8 +21,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---:|---:|
 | not ported | 165 | 6 |
 | not started | 1,238 | 174 |
-| partial | 14 | 6 |
-| ported | 24 | 2 |
+| partial | 12 | 6 |
+| ported | 26 | 2 |
 | replaced | 15 | 6 |
 | total | 1,456 | 194 |
 
@@ -1946,18 +1946,18 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `asx` | not started |  | no nanoql type: ASX, ASXMonth |
-| `businessdayconvention` | partial | Time/BusinessDayConvention.cs | partial: operator<<, which waits for the C++ harness |
+| `businessdayconvention` | ported | Time/BusinessDayConvention.cs, Time/BusinessDayConventionFunctions.cs |  |
 | `calendar` | ported | Time/Calendar.cs |  |
-| `date` | partial | Time/Date/Date.cs, Time/Date/DateFunctions.cs, Time/Date/Month.cs | partial: io::formatted_date (not ported: a Date converts to DateOnly, whose ToString(format) does its job); own-tested: ShortDate |
+| `date` | partial | Time/Date/Date.cs, Time/Date/DateFunctions.cs, Time/Date/Month.cs | partial: io::formatted_date (not ported: a Date converts to DateOnly, whose ToString(format) does its job) |
 | `dategenerationrule` | ported | Time/DateGenerationRule.cs |  |
 | `daycounter` | ported | Time/DayCounter.cs |  |
 | `ecb` | not started |  | no nanoql type: ECB |
 | `frequency` | ported | Time/Frequency.cs, Time/FrequencyFunctions.cs |  |
 | `imm` | partial | Time/IMM.cs, Time/IMMMonth.cs | partial: isIMMcode, code, date, nextDate and nextCode, which the wheel exposes and a later slot ports |
-| `period` | ported | Time/Period/Period.cs, Time/Period/PeriodFunctions.cs, Time/Period/TimeUnitExtensions.cs | own-tested: Days, LongPeriod; TimeUnit * int |
+| `period` | ported | Time/Period/Period.cs, Time/Period/PeriodFunctions.cs, Time/Period/TimeUnitExtensions.cs |  |
 | `schedule` | ported | Time/Schedule/MakeSchedule.cs, Time/Schedule/Schedule.cs, Time/Schedule/ScheduleFunctions.cs |  |
 | `timeunit` | ported | Time/TimeUnit.cs |  |
-| `weekday` | partial | Time/Weekday.cs | partial: io::long_weekday, io::short_weekday, io::shortest_weekday and operator<<, which wait for the C++ harness |
+| `weekday` | ported | Time/Weekday.cs, Time/WeekdayFunctions.cs |  |
 
 ### `ql/time/calendars/`
 
@@ -2044,7 +2044,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `clone` | replaced: references |  |  |
-| `dataformatters` | ported | Utilities/DataFormattersFunctions.cs | own-tested: PowerOfTwo, CheckNull, Sequence; Volatility (plumbing) |
+| `dataformatters` | ported | Utilities/DataFormattersFunctions.cs |  |
 | `dataparsers` | not started |  | no nanoql type: PeriodParser, DateParser |
 | `null` | replaced: nullable types |  |  |
 | `null_deleter` | not ported: C++ platform header |  |  |

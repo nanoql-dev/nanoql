@@ -43,7 +43,7 @@ In this order:
 | Slot | Content |
 |---|---|
 | Pilot | The repository's conventions, the vector harness and the licensing checks; time (`Date`, `Period`, the TARGET, United States, United Kingdom, joint, weekends-only and null calendars, the Actual/360, Actual/365 (Fixed), 30/360 and Actual/Actual day counters, `Schedule` and `MakeSchedule`); and the pattern slice: `EvaluationContext`, `InterestRate`, `TermStructure`, `YieldTermStructure`, `FlatForward`, cash flows and the fixed-rate leg, part of `CashFlows`, `Instrument`, `Swap` and `DiscountingSwapEngine`, with an expired swap among the vectors. |
-| S-cxx | The C++ harness. It ports no QuantLib units. It builds QuantLib 1.44 from source against Boost 1.90.0's headers, sets up the Boost checkout the licensing gate reads for Boost ports, and writes the harness's first vectors: a pilot class the wheel also covers, matched against the wheel, then the pilot's members that only nanoql's own tests check. |
+| S-cxx | The C++ harness. It completes the two partial ports that waited for it, the weekday's text and the business-day convention's, and ports no other QuantLib units. It builds QuantLib 1.44 from source against Boost 1.90.0's headers, sets up the Boost checkout the licensing gate reads for Boost ports, and writes the harness's first vectors: a pilot class the wheel also covers, matched against the wheel, then the pilot's members that only nanoql's own tests check, whose own tests the vectors replace. |
 | S2 | Maths: interpolations, including the linear and log-linear ones and the cubic family; 1-D solvers; optimisers, with MINPACK's licence; distributions, including Boost.Math ports; MT19937, Halton and Sobol, with generated tables and their notices. It settles the state of random numbers and Monte Carlo paths, and how stateful template parameters are ported. 41 units, 6,806 code lines. |
 | S3 | Indexes and coupons: `EvaluationContext.Fixings`; the Ibor and overnight indexes (SOFR, €STR, SONIA, Euribor, TONA, Tibor), with the Japan calendar; Ibor and overnight coupons (compounded and averaged, lookback, lockout, observation shift) and the coupon pricers they need. It adds `context.UseAtParCoupons`. 35 units, 6,129 code lines. |
 | S4 | Swaps and OIS: `VanillaSwap` and `FixedVsFloatingSwap`, `OvernightIndexedSwap`, `MakeVanillaSwap`, `MakeOIS`; `DiscountingSwapEngine` extended with their results derivations. 8 units, 1,599 code lines. |
@@ -91,11 +91,9 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Numerics/ComparisonFunctions.cs`: `earlier_than`, which waits for the bond slot.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only, and the jumps.
-- `src/NanoQL/Time/BusinessDayConvention.cs`: the convention's text, which waits for the C++ harness.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/IMM.cs`: everything but `isIMMdate`.
-- `src/NanoQL/Time/Weekday.cs`: the weekday's text, which waits for the C++ harness.
 - `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
 - `tests/NanoQL.Tests/TestSuite/CashFlowsTests.cs`: the cases needing Ibor coupons, pricers or cash-flow functions not yet ported.
 - `tests/NanoQL.Tests/TestSuite/DatesTests.cs`: the ECB, IMM, ASX, parsing and intraday cases.

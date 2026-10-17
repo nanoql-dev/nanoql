@@ -9,7 +9,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/time/period.hpp ql/time/period.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Own-tested: TimeUnit * int
 
 namespace NanoQL.Time;
 

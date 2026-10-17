@@ -198,6 +198,7 @@ def self_test():
         recorded = {
             "a QuantLib::Error (Date(29, February, 2023))":
                 lambda: H.call("Date(Day,Month,Year)", 29, 2, 2023),
+            "a QuantLib::Error (days(1, Months))": lambda: H.call("days", {"length": 1, "units": 2}),
             "a constructor's refusal of an argument (Date(200000) through a date-taking method)":
                 lambda: H.call("InterestRate::compoundFactor(Date,Date)", rate, 46310, 200000),
             "a constructor's refusal of an argument (Thirty360 with convention 99)":

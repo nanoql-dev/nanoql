@@ -60,10 +60,12 @@ namespace harness {
     void arity(const Args& a, std::size_t n);
     QuantLib::Real real(const json::value& v);         // a number, or null for Null<Real>()
     QuantLib::Integer integer(const json::value& v);   // an integer in Integer's range, or null for Null<Integer>()
+    long long int64(const json::value& v);             // a 64-bit integer, or null for Null<long long>()
     bool boolean(const json::value& v);
     std::optional<bool> optionalBoolean(const json::value& v);  // a boolean, or null for none
     std::string text(const json::value& v);
     std::vector<QuantLib::Real> reals(const json::value& v);    // an array of reals
+    std::vector<QuantLib::Integer> integers(const json::value& v);  // an array of Integers
 
     template <class E>
     E enumeration(const json::value& v) {

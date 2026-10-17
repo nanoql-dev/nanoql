@@ -8,13 +8,16 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/time/businessdayconvention.hpp ql/time/businessdayconvention.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: operator<<, which waits for the C++ harness
 
 namespace NanoQL.Time;
 
 /// <summary>
 /// Business-day conventions: the algorithm used to adjust a date in case it is not a valid business day.
 /// </summary>
+/// <remarks>
+/// QuantLib's text, which differs from three members' names, is
+/// <see cref="BusinessDayConventionFunctions.ToString(BusinessDayConvention)"/>.
+/// </remarks>
 public enum BusinessDayConvention
 {
     /// <summary>Choose the first business day after the given holiday (ISDA).</summary>

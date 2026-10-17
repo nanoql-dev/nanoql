@@ -52,8 +52,8 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
   - `// Partial: <members left>`: the type ports only part of its QuantLib file. A test class that ports only some of
     its QuantLib file's cases carries `// Partial: <cases left>`. Every file with a `// Partial:` line is listed in
     [porting-plan.md](porting-plan.md), and the port that completes the type removes the line.
-  - `// Own-tested: <members>`: members ported with nanoql's own tests because nothing checks them against QuantLib
-    yet (§9.4).
+  - `// Own-tested: <members> (<reason>)`: members the C++ harness can't drive, ported with nanoql's own tests,
+    with the reason (§9.4).
   - `// Equality-tested: <test file>`: a type whose only code is equality that nanoql adds, checked by its own test
     (§9.5).
   - `// Adapted: <reason>` on a ported test method that QuantLib's case doesn't run as written, naming the lines it
@@ -300,7 +300,7 @@ NanoQL/
   - `Harness/`: the vector loader's and the tolerance's own tests.
   - `Divergences/`: each documented divergence from QuantLib.
   - `Conventions/`: nanoql's own types and rules.
-  - `NoOracle/`: members ported with nanoql's own tests (§9.4).
+  - `NoOracle/`: members the C++ harness can't drive, ported with nanoql's own tests (§9.4); none today.
 - **The `Oracle` trait:** `[Trait("Oracle", "QuantLib")]` sits on the class, on every test class in `TestSuite/` and
   `Vectors/`, and on nothing else. A ported case asserts only QuantLib's expectations; where nanoql diverges, the
   assertion moves to `Divergences/`. A test checks the placement.
@@ -346,7 +346,7 @@ Every port is checked against QuantLib itself:
    - **Build flags:** a port of a feature that a build flag controls checks the wheel's setting first (at-par Ibor
      coupons are on), and the settings are rechecked whenever the pin moves.
 3. **A C++ harness** built from the `v1.44` sources, for every public type that no wheel class and no ported QuantLib
-   test can run, and for the members only nanoql's own tests check (§9.4). Its vectors use the same format (§7.2).
+   test can run, and for the members nothing else checks (§9.4). Its vectors use the same format (§7.2).
    - **Build:** `tools/cxx/build.py` sets it up outside the repository, under one root. Boost 1.90.0 comes from its
      release zip, refused unless its SHA-256 is Boost's published one. QuantLib is a `git archive` copy of the pin,
      built out of source with QuantLib's own CMake project (Release, the unity build, the static runtime, every code
@@ -481,13 +481,13 @@ A member with no oracle in its port (not exposed by the wheel, not asserted by a
 through a checked caller):
 - **waits** for the later port that will check it (a QuantLib test case it ports, or a wheel binding), named on its
   file's `// Partial:` line;
-- or, if nothing will ever check it, **is ported with nanoql's own tests** in `NoOracle/`. Each test cites the
-  QuantLib lines its expected values come from and carries no `Oracle` trait. The file's `// Own-tested:` line names
-  the member, and the porting map lists it;
-- the C++ harness then writes vectors for every own-tested member that computes; once it exists, a port vectors such
-  a member itself. Plumbing, such as returning a constructor argument, needs no vector;
-- a member whose public type would then hold no QuantLib-checked code waits for the harness instead, because the
-  coverage gate counts only checked types.
+- or, if nothing else ever will, **is vectored through the C++ harness** (§7.1) in its own port: a harness generator
+  writes QuantLib's own outputs, every input the port's reasoning names among them, and a test under `Vectors/Cxx/`
+  checks nanoql against them. Where a vector records a throw, which accepts either exception type, a test in
+  `Conventions/` asserts the type nanoql throws;
+- `NoOracle/` keeps only a member the harness can't drive. Its file's `// Own-tested:` line names the member and the
+  reason, each test cites the QuantLib lines its expected values come from and carries no `Oracle` trait, the code
+  review rechecks the derivation, and the porting map lists the member. None is known.
 
 ### 9.5 The coverage gate's type check
 

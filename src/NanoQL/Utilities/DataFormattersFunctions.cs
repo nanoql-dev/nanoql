@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/utilities/dataformatters.hpp ql/utilities/dataformatters.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Own-tested: PowerOfTwo, CheckNull, Sequence; Volatility (plumbing)
 
 using System.Globalization;
 using System.Numerics;
@@ -72,8 +71,23 @@ public static class DataFormattersFunctions
     /// <summary>A real as a percentage with six decimals, e.g. "3.250000 %".</summary>
     /// <param name="value">The value, or <see langword="null"/>.</param>
     /// <returns>The text, or "null".</returns>
-    public static string Percent(double? value) =>
-        value is double v ? (v * 100.0).ToString("F6", CultureInfo.InvariantCulture) + " %" : "null";
+    /// <remarks>
+    /// As in QuantLib, the percentage is the product <c>value * 100.0</c>, so a value whose product overflows is
+    /// written as infinite; a NaN or infinite percentage is written as a C++ stream writes it, "nan", "inf" or "-inf".
+    /// </remarks>
+    public static string Percent(double? value)
+    {
+        if (value is not double v)
+        {
+            return "null";
+        }
+
+        double percentage = v * 100.0;
+        string text = double.IsFinite(percentage)
+            ? percentage.ToString("F6", CultureInfo.InvariantCulture)
+            : General(percentage);
+        return text + " %";
+    }
 
     /// <summary>A rate or spread as a percentage.</summary>
     /// <param name="r">The rate, or <see langword="null"/>.</param>

@@ -64,6 +64,14 @@ namespace harness {
         return static_cast<Integer>(v.get_int64());
     }
 
+    long long int64(const json::value& v) {
+        if (v.is_null())
+            return Null<long long>();
+        if (!v.is_int64())
+            throw InvalidParams("expected a 64-bit integer, got " + shown(v));
+        return v.get_int64();
+    }
+
     bool boolean(const json::value& v) {
         if (!v.is_bool())
             throw InvalidParams("expected a boolean, got " + shown(v));
@@ -88,6 +96,15 @@ namespace harness {
         std::vector<Real> out;
         for (const json::value& x : v.get_array())
             out.push_back(real(x));
+        return out;
+    }
+
+    std::vector<Integer> integers(const json::value& v) {
+        if (!v.is_array())
+            throw InvalidParams("expected an array of Integers, got " + shown(v));
+        std::vector<Integer> out;
+        for (const json::value& x : v.get_array())
+            out.push_back(integer(x));
         return out;
     }
 
