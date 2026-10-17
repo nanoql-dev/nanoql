@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,227 | 169 |
-| partial | 12 | 10 |
-| ported | 36 | 3 |
+| not started | 1,222 | 168 |
+| partial | 13 | 11 |
+| ported | 40 | 3 |
 | replaced | 16 | 6 |
 | total | 1,456 | 194 |
 
@@ -761,7 +761,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `functional` | not started |  |  |
 | `generallinearleastsquares` | not started |  | no nanoql type: GeneralLinearLeastSquares |
 | `incompletegamma` | ported | Numerics/IncompleteGammaFunctions.cs |  |
-| `interpolation` | not started |  | no nanoql type: Interpolation, InterpolationImpl, InterpolationTemplateImpl |
+| `interpolation` | ported | Numerics/IInterpolator.cs, Numerics/Interpolation.cs | no nanoql type: InterpolationImpl, InterpolationTemplateImpl |
 | `kernelfunctions` | not started |  | no nanoql type: KernelFunction, GaussianKernel |
 | `linearleastsquaresregression` | not started |  | no nanoql type: LinearFct, LinearFcts, LinearRegression, LinearLeastSquaresRegression |
 | `matrix` | ported | Numerics/Matrix.cs, Numerics/MatrixFunctions.cs |  |
@@ -837,13 +837,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `abcdinterpolation` | not started |  | no nanoql type: AbcdInterpolation, Abcd |
 | `all` | not ported: include-only header |  |  |
-| `backwardflatinterpolation` | not started |  | no nanoql type: BackwardFlatInterpolation, BackwardFlat |
+| `backwardflatinterpolation` | ported | Numerics/Interpolations/BackwardFlat.cs, Numerics/Interpolations/BackwardFlatInterpolation.cs |  |
 | `backwardflatlinearinterpolation` | not started |  | no nanoql type: BackwardflatLinearInterpolation, BackwardflatLinear |
 | `bicubicsplineinterpolation` | not started |  | no nanoql type: BicubicSpline, Bicubic |
 | `bilinearinterpolation` | not started |  | no nanoql type: BilinearInterpolation, Bilinear |
 | `chebyshevinterpolation` | not started |  | no nanoql type: ChebyshevInterpolation, ChebyshevInterpolationPointsType |
 | `convexmonotoneinterpolation` | not started |  | no nanoql type: ConvexMonotoneInterpolation, ConvexMonotone |
-| `cubicinterpolation` | not started |  | no nanoql type: CubicInterpolation, CubicInterpolationDerivativeApprox, CubicInterpolationBoundaryCondition, CubicNaturalSpline, MonotonicCubicNaturalSpline, CubicSplineOvershootingMinimization1, CubicSplineOvershootingMinimization2, AkimaCubicInterpolation, KrugerCubic, HarmonicCubic, FritschButlandCubic, Parabolic, MonotonicParabolic, Cubic |
+| `cubicinterpolation` | ported | Numerics/Interpolations/CubicInterpolation/AkimaCubicInterpolation.cs, Numerics/Interpolations/CubicInterpolation/Cubic.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolation.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolationBoundaryCondition.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolationDerivativeApprox.cs, Numerics/Interpolations/CubicInterpolation/CubicNaturalSpline.cs, Numerics/Interpolations/CubicInterpolation/CubicSplineOvershootingMinimization1.cs, Numerics/Interpolations/CubicInterpolation/CubicSplineOvershootingMinimization2.cs, Numerics/Interpolations/CubicInterpolation/FritschButlandCubic.cs, Numerics/Interpolations/CubicInterpolation/HarmonicCubic.cs, Numerics/Interpolations/CubicInterpolation/KrugerCubic.cs, Numerics/Interpolations/CubicInterpolation/MonotonicCubicNaturalSpline.cs, Numerics/Interpolations/CubicInterpolation/MonotonicParabolic.cs, Numerics/Interpolations/CubicInterpolation/Parabolic.cs |  |
 | `extrapolation` | ported | Numerics/Interpolations/Extrapolator.cs, Numerics/Interpolations/ExtrapolatorExtensions.cs |  |
 | `flatextrapolation` | not started |  | no nanoql type: FlatExtrapolator |
 | `flatextrapolation2d` | not started |  | no nanoql type: FlatExtrapolator2D |
@@ -852,8 +852,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `kernelinterpolation` | not started |  | no nanoql type: KernelInterpolation |
 | `kernelinterpolation2d` | not started |  | no nanoql type: KernelInterpolation2D |
 | `lagrangeinterpolation` | not started |  | no nanoql type: LagrangeInterpolation |
-| `linearinterpolation` | not started |  | no nanoql type: LinearInterpolation, Linear |
-| `loginterpolation` | not started |  | no nanoql type: LogLinearInterpolation, LogLinear, LogCubicInterpolation, LogCubic, DefaultLogCubic, MonotonicLogCubic, KrugerLog, LogCubicNaturalSpline, MonotonicLogCubicNaturalSpline, KrugerLogCubic, HarmonicLogCubic, FritschButlandLogCubic, LogParabolic, MonotonicLogParabolic, LogMixedLinearCubicInterpolation, LogMixedLinearCubic, DefaultLogMixedLinearCubic, MonotonicLogMixedLinearCubic, KrugerLogMixedLinearCubic, LogMixedLinearCubicNaturalSpline |
+| `linearinterpolation` | ported | Numerics/Interpolations/Linear.cs, Numerics/Interpolations/LinearInterpolation.cs |  |
+| `loginterpolation` | partial | Numerics/Interpolations/LogInterpolation/FritschButlandLogCubic.cs, Numerics/Interpolations/LogInterpolation/HarmonicLogCubic.cs, Numerics/Interpolations/LogInterpolation/KrugerLog.cs, Numerics/Interpolations/LogInterpolation/KrugerLogCubic.cs, Numerics/Interpolations/LogInterpolation/LogCubic.cs, Numerics/Interpolations/LogInterpolation/LogCubicInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/LogInterpolationImpl.cs, Numerics/Interpolations/LogInterpolation/LogLinear.cs, Numerics/Interpolations/LogInterpolation/LogLinearInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogParabolic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogCubic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogParabolic.cs | partial: the LogMixedLinearCubic family (LogMixedLinearCubicInterpolation, LogMixedLinearCubic, MonotonicLogMixedLinearCubic, KrugerLogMixedLinearCubic, LogMixedLinearCubicNaturalSpline), which waits for S5 with mixedinterpolation; the deprecated DefaultLogCubic and DefaultLogMixedLinearCubic aren't ported; no nanoql type: DefaultLogCubic, LogMixedLinearCubicInterpolation, LogMixedLinearCubic, DefaultLogMixedLinearCubic, MonotonicLogMixedLinearCubic, KrugerLogMixedLinearCubic, LogMixedLinearCubicNaturalSpline |
 | `mixedinterpolation` | not started |  | no nanoql type: MixedInterpolationBehavior, MixedLinearCubicInterpolation, MixedLinearCubic, MixedLinearCubicNaturalSpline, MixedLinearMonotonicCubicNaturalSpline, MixedLinearKrugerCubic, MixedLinearFritschButlandCubic, MixedLinearParabolic, MixedLinearMonotonicParabolic |
 | `multicubicspline` | not started |  | no nanoql type: MultiCubicSpline |
 | `sabrinterpolation` | not started |  | no nanoql type: SABRInterpolation, SABR |
@@ -2160,7 +2160,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `integrals` | not started |  | 21 cases |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | not started |  | 8 cases |
-| `interpolations` | not started |  | 40 cases |
+| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 12 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testSplineErrorOnGaussianValues, testMultiSpline, testForwardFlat, testMixedLinearCubicMatchDerivatives, testMixedLinearCubicSwitchPoint, testSabrInterpolation, testSabrGuess, testKernelInterpolation, testKernelInterpolation2D, testBicubicDerivatives, testBicubicUpdate, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testSabrSingleCases, testTransformations, testFlochKennedySabrIsSmoothAroundATM, testLeFlochKennedySabrExample, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testBSplines, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation, testFlatExtrapolation |
 | `jumpdiffusion` | not started |  | 2 cases |
 | `lazyobject` | not ported: tests LazyObject, which is replaced |  |  |
 | `libormarketmodel` | not started |  | 4 cases |

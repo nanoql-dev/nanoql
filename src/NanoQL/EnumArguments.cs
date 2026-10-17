@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Numerics;
 using NanoQL.Time;
 
 namespace NanoQL;
@@ -101,6 +102,30 @@ internal static class EnumArguments
         if (value is < Weekday.Sunday or > Weekday.Saturday)
         {
             throw new ArgumentOutOfRangeException(paramName, value, "unknown weekday");
+        }
+    }
+
+    /// <summary>Refuses a derivative approximation outside <see cref="CubicInterpolationDerivativeApprox"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(CubicInterpolationDerivativeApprox value, string paramName)
+    {
+        if (value is < CubicInterpolationDerivativeApprox.Spline or > CubicInterpolationDerivativeApprox.Harmonic)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown scheme");
+        }
+    }
+
+    /// <summary>Refuses a boundary condition outside <see cref="CubicInterpolationBoundaryCondition"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(CubicInterpolationBoundaryCondition value, string paramName)
+    {
+        if (value is < CubicInterpolationBoundaryCondition.NotAKnot or > CubicInterpolationBoundaryCondition.Lagrange)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown end condition");
         }
     }
 }

@@ -89,6 +89,7 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Instrument.cs`: `result<T>`, which waits for the first engine that sets additional results.
 - `src/NanoQL/InterestRate.cs`: the discount factor's two derivatives, which wait for the slot that ports the cash-flow duration and convexity.
 - `src/NanoQL/Numerics/ComparisonFunctions.cs`: `earlier_than`, which waits for the bond slot.
+- `src/NanoQL/Numerics/Interpolations/LogInterpolation/LogLinearInterpolation.cs`: the LogMixedLinearCubic family, which waits for S5 with `mixedinterpolation`.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only, and the jumps.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
@@ -100,6 +101,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/DayCountersTests.cs`: the cases for day counters not yet ported.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, binomial, Student t, chi-square, stochastic-collocation and Sankaran cases, whose distributions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/FunctionsTests.cs`: the modified Bessel, expm1 and log1p cases, whose functions aren't ported yet.
+- `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations, integrals or extrapolators not yet ported (Simpson, Lagrange, Chebyshev, multi-dimensional and bicubic splines, forward-flat, mixed, SABR, kernel, Richardson, Laplace, B-splines, flat extrapolation).
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the cases needing matrix utilities not yet ported (decompositions, square roots, iterative solvers, sparse matrices, projections, Moore-Penrose).
 - `tests/NanoQL.Tests/TestSuite/OperatorsTests.cs`: `testConsistency`, which waits for `DZero` and `DPlusDMinus`.
 - `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases and those needing the Japan calendar.

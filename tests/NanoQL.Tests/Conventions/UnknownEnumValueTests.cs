@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Coupons;
+using NanoQL.Numerics;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 
@@ -116,6 +117,31 @@ public class UnknownEnumValueTests
         AssertParam("w", () => WeekdayFunctions.ToString((Weekday)0));
         AssertParam("b", () => BusinessDayConventionFunctions.ToString((BusinessDayConvention)7));
         AssertParam("b", () => BusinessDayConventionFunctions.ToString((BusinessDayConvention)(-1)));
+    }
+
+    [Fact]
+    public void CubicInterpolationsAndTheirFactoriesRefuseAnUnknownSchemeOrCondition()
+    {
+        double[] x = [0.0, 1.0, 2.0], y = [1.0, 2.0, 1.5];
+        const CubicInterpolationDerivativeApprox spline = CubicInterpolationDerivativeApprox.Spline;
+        const CubicInterpolationBoundaryCondition second = CubicInterpolationBoundaryCondition.SecondDerivative;
+        var unknownScheme = (CubicInterpolationDerivativeApprox)99;
+        var unknownCondition = (CubicInterpolationBoundaryCondition)(-1);
+
+        // QuantLib reads the values only where it uses them (a local scheme on two points never switches on its
+        // scheme); here each constructor checks them on entry, since it stores them.
+        AssertParam("da", () => new CubicInterpolation(x[..2], y[..2], unknownScheme, false, second, 0.0, second, 0.0));
+        AssertParam("leftCond", () => new CubicInterpolation(x, y, spline, false, unknownCondition, 0.0, second, 0.0));
+        AssertParam("rightCond", () => new CubicInterpolation(x, y, spline, false, second, 0.0, unknownCondition, 0.0));
+        AssertParam("da", () => new LogCubicInterpolation(x, y, unknownScheme, false, second, 0.0, second, 0.0));
+        AssertParam("leftC", () => new LogCubicInterpolation(x, y, spline, false, unknownCondition, 0.0, second, 0.0));
+        AssertParam("rightC", () => new LogCubicInterpolation(x, y, spline, false, second, 0.0, unknownCondition, 0.0));
+        AssertParam("da", () => new Cubic(unknownScheme));
+        AssertParam("leftCondition", () => new Cubic(spline, false, unknownCondition));
+        AssertParam("rightCondition", () => new Cubic(spline, false, second, 0.0, unknownCondition));
+        AssertParam("da", () => new LogCubic(unknownScheme));
+        AssertParam("leftCondition", () => new LogCubic(spline, true, unknownCondition));
+        AssertParam("rightCondition", () => new LogCubic(spline, true, second, 0.0, unknownCondition));
     }
 
     private static EvaluationContext Context() => new() { EvaluationDate = Today };
