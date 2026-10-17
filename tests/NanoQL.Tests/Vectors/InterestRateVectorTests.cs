@@ -16,9 +16,16 @@ namespace NanoQL.Tests.Vectors;
 public class InterestRateVectorTests
 {
     [Fact]
-    public void InterestRateVector()
+    public void InterestRateVector() => Check("interestrate");
+
+    /// <summary>
+    /// Compares nanoql with one interest-rate vector file: the wheel's, or its twin from the C++ harness
+    /// (<see cref="InterestRateCxxVectorTests"/>).
+    /// </summary>
+    /// <param name="path">The file's path under <c>tests/vectors</c>, without <c>.json</c>.</param>
+    internal static void Check(string path)
     {
-        var file = VectorFile.Load("interestrate");
+        var file = VectorFile.Load(path);
         var check = new VectorAssert(file);
         foreach (VectorCase c in file.Cases)
         {

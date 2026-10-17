@@ -42,7 +42,9 @@ public sealed class VectorFile
     /// <summary>Gets the QuantLib file the vectors check, or <see langword="null"/> for the harness's own.</summary>
     public string? Upstream { get; }
 
-    /// <summary>Gets the QuantLib-Python version that generated the file.</summary>
+    /// <summary>
+    /// Gets the QuantLib version that generated the file: the wheel's, or for a C++ harness vector the library's.
+    /// </summary>
     public string QuantLib { get; }
 
     /// <summary>Gets the generator's path.</summary>

@@ -5,9 +5,10 @@ working tree's, byte for byte (docs/porting-playbook.md §8).
 
 Usage: .venv\\Scripts\\python -I tools/vectors/reproduce.py [<generator> ...]
 
-A generator is named by its path under tools/vectors/gen/ without ".py" (for example time/date); with none, every
-generator runs. The comparison reads the files themselves, outside git, so it sees untracked files and line endings.
-Prints files V/V and exits 1 on any difference.
+A generator is named by its path under tools/vectors/gen/ without ".py" (for example time/date), and a folder by its
+path ending in "/" (cxx/ reruns every harness generator); with none, every generator runs. A harness generator needs
+NANOQL_HARNESS (docs/porting-playbook.md §7.2). The comparison reads the files themselves, outside git, so it sees
+untracked files and line endings. Prints files V/V and exits 1 on any difference.
 """
 import filecmp
 import os
@@ -21,9 +22,22 @@ REPO = os.path.dirname(os.path.dirname(TOOLS_VECTORS))
 VECTORS = os.path.join(REPO, "tests", "vectors")
 
 
-def all_generators():
+def all_generators(folder=""):
+    root = os.path.join(GEN_ROOT, *folder.split("/"))
     return sorted(os.path.relpath(os.path.join(dp, fn), GEN_ROOT).replace(os.sep, "/")[:-3]
-                  for dp, _, fns in os.walk(GEN_ROOT) for fn in fns if fn.endswith(".py"))
+                  for dp, _, fns in os.walk(root) for fn in fns if fn.endswith(".py"))
+
+
+def selected(args):
+    names = []
+    for a in args:
+        a = a.replace("\\", "/")
+        if a.endswith("/"):
+            under = all_generators(a.rstrip("/"))
+            names += under or [a]
+        else:
+            names.append(a.removesuffix(".py"))
+    return names
 
 
 def written(root):
@@ -32,10 +46,13 @@ def written(root):
 
 
 def main(args):
-    names = [a.replace("\\", "/").removesuffix(".py") for a in args] or all_generators()
+    names = selected(args) or all_generators()
     same, failures = 0, []
     for name in names:
         script = os.path.join(GEN_ROOT, *name.split("/")) + ".py"
+        if name.endswith("/"):
+            failures.append(f"{name}: no generator under tools/vectors/gen/{name}")
+            continue
         if not os.path.isfile(script):
             failures.append(f"{name}: no generator at {script}")
             continue

@@ -13,9 +13,16 @@ namespace NanoQL.Tests.Vectors;
 public class EncodingVectorTests
 {
     [Fact]
-    public void Encoding()
+    public void Encoding() => Check("harness/encoding");
+
+    /// <summary>
+    /// Reads back one encoding self-vector: the wheel's, or its twin from the C++ harness
+    /// (<see cref="EncodingCxxVectorTests"/>).
+    /// </summary>
+    /// <param name="path">The file's path under <c>tests/vectors</c>, without <c>.json</c>.</param>
+    internal static void Check(string path)
     {
-        var file = VectorFile.Load("harness/encoding");
+        var file = VectorFile.Load(path);
         var check = new VectorAssert(file);
         foreach (VectorCase c in file.Cases)
         {

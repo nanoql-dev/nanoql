@@ -264,8 +264,10 @@ NanoQL/
   src/NanoQL/<Dir>/[<File>/]<Type>.cs   one type per file, QuantLib's directories mirrored in PascalCase
   src/NanoQL/Boost/<Path>/<Type>.cs     Boost-derived internal types
   tests/NanoQL.Tests/           xUnit v3 on Microsoft.Testing.Platform, with Coverlet's extension (coverlet.MTP)
-  tests/vectors/<ql path>.json  committed vectors (§7.2)
-  tools/vectors/                the hash-pinned requirements, the generators gen/<ql path>.py, the shared helpers
+  tests/vectors/<ql path>.json  committed vectors (§7.2); tests/vectors/cxx/<ql path>.json, the C++ harness's
+  tools/vectors/                the hash-pinned requirements, the generators gen/<ql path>.py and gen/cxx/<ql path>.py,
+                                the shared helpers, the harness's client cxx.py and the twins' check agree.py
+  tools/cxx/                    the C++ harness (§7.1): CMakeLists.txt, src/<ql path>.cpp, build.py
   tools/check-upstream.py       the licensing gate's upstream checks; tools/no-upstream.txt, its allowlist
   tools/porting-map.json        the name table
   tools/third-party-notices.txt the third-party notice blocks the licensing gate checks
@@ -279,7 +281,7 @@ NanoQL/
   - `TestSuite/`: QuantLib's own test cases, one class per QuantLib test file
     (`test-suite/daycounters.cpp` → `DayCountersTests.cs`). Methods keep the case name, capitalised
     (`testConsistency` → `TestConsistency`). Only this folder's files carry Upstream lines.
-  - `Vectors/`: one test class per vector file.
+  - `Vectors/`: one test class per vector file; `Vectors/Cxx/` for the C++ harness's.
   - `Harness/`: the vector loader's and the tolerance's own tests.
   - `Divergences/`: each documented divergence from QuantLib.
   - `Conventions/`: nanoql's own types and rules.
@@ -329,8 +331,42 @@ Every port is checked against QuantLib itself:
    - **Build flags:** a port of a feature that a build flag controls checks the wheel's setting first (at-par Ibor
      coupons are on), and the settings are rechecked whenever the pin moves.
 3. **A C++ harness** built from the `v1.44` sources, for every public type that no wheel class and no ported QuantLib
-   test can run, and for the members only nanoql's own tests check (§9.4). Its vectors use the same format, and its
-   first vectors cover a class the wheel also covers, matched within the tolerance, which checks the harness itself.
+   test can run, and for the members only nanoql's own tests check (§9.4). Its vectors use the same format (§7.2).
+   - **Build:** `tools/cxx/build.py` sets it up outside the repository, under one root. Boost 1.90.0 comes from its
+     release zip, refused unless its SHA-256 is Boost's published one. QuantLib is a `git archive` copy of the pin,
+     built out of source with QuantLib's own CMake project (Release, the unity build, the static runtime, every code
+     option off except `QL_FASTER_LAZY_OBJECTS`, as in the wheel) and installed. The harness, `tools/cxx/`, is a CMake
+     project that finds that QuantLib as a package (`find_package(QuantLib 1.44 EXACT CONFIG)`). The compiler is the
+     wheel's, VS 2022's MSVC 14.44; the harness uses Windows SDK 10.0.26100.0 and VS 2022's CMake and Ninja.
+     ```
+     .venv\Scripts\python -I tools\cxx\build.py <root> --quantlib <QuantLib v1.44 worktree>
+     ```
+     Each step runs only when its output is missing and prints its wall-clock. QuantLib is rebuilt from empty folders
+     whenever its configure command or the toolchain's versions change, and the harness builds incrementally on every
+     run. `--clean` is the run for a pin move or a toolchain change, each a slot plan's decision.
+   - **Protocol:** one executable, `cxx-harness`, reads JSON-RPC 2.0 requests from standard input, one per line, and
+     answers each on one line. A method is named after the QuantLib function it calls, qualified as in C++, with an
+     overload's parameter types where QuantLib needs them to choose (`Date::isLeap`,
+     `InterestRate::compoundFactor(Date,Date)`); the harness's own methods start `harness.`. Arguments follow the
+     vectors' encoding, and an object is a spec with the vectors' input names (a day counter
+     `{"type": "Thirty360", "convention": 0}`); a member function takes its object's spec first. Numbers round-trip
+     exactly, and NaN and ±∞ travel as the bare tokens `NaN`, `Infinity` and `-Infinity`.
+   - **Exceptions:** an exception from QuantLib, the construction of QuantLib values from the arguments included, is
+     classed as the wheel classes it. A `QuantLib::Error` (code 1) and any other exception (code 2) raise
+     `RuntimeError` in the client, recorded as `{"throws": true}`; `std::out_of_range` (code 3) raises `IndexError`,
+     which stops the generator, as in the wheel. A failure of the harness itself (a malformed request, an unknown
+     method, an argument it can't read, a spec type or key it doesn't know) uses JSON-RPC's own codes and stops the
+     generator, so it never passes for a QuantLib throw.
+   - **Its guard:** the binary carries a digest of its own sources, `tools/cxx/CMakeLists.txt` and every file under
+     `tools/cxx/src/`. The client refuses a harness whose digest isn't the working tree's, or that reports another
+     QuantLib, Boost, option set or compiler.
+   - **Its self-check:** twins of wheel vectors, harness vectors that reproduce a wheel generator's cases
+     (`cxx/harness/encoding`, `cxx/interestrate`). `tools/vectors/agree.py` lists them and checks each against its
+     wheel file (§8), and each has its own test, nanoql against the harness.
+   - **Adding methods:** each QuantLib unit's methods live in `tools/cxx/src/<ql path>.cpp`. A method first checks
+     everything the harness itself reads, and builds every QuantLib value inside the call, so that a constructor's
+     refusal is QuantLib's. A port adds its methods there, its generators under `tools/vectors/gen/cxx/` and its test
+     classes under `Vectors/Cxx/`, then reruns `build.py`.
 
 ### 7.2 Vectors
 
@@ -370,6 +406,16 @@ Every port is checked against QuantLib itself:
 - **One test per vector file:** it compares every case and output, collects every mismatch, fails with the first 50
   and the total, and asserts that the outputs it compared equal the outputs the file holds, so no output is skipped.
 - **Counting:** `python -I tools/vectors/count.py` prints each file's cases, outputs, overridden outputs and bytes.
+- **Harness generators:** `tools/vectors/gen/cxx/<ql path>.py` calls the C++ harness (§7.1) through
+  `tools/vectors/cxx.py` (`with cxx.connect() as H:`, then `H.call(<method>, <arguments>)` where a wheel generator
+  calls `ql.…`) and uses `vectors.py` for the encoding and the document. It writes `tests/vectors/cxx/<ql path>.json`,
+  read by a test class under `Vectors/Cxx/` named `<Name>CxxVectorTests`. The client finds the harness through the
+  environment variable `NANOQL_HARNESS`, set to the path `build.py` prints;
+  `.venv\Scripts\python -I tools\vectors\cxx.py --self-test` checks it: the exact round trip, the exception
+  classes, the faults, and the refusal of a mismatched harness.
+- **Reproducing a harness vector:** rerun its generator with a harness built from the committed sources, which the
+  client checks through the digest, and compare the bytes, as for the wheel's. QuantLib and Boost are pinned, so
+  QuantLib's from-scratch build isn't part of it; it reruns only at a pin move or a toolchain change.
 
 ### 7.3 Tolerance
 
@@ -390,9 +436,9 @@ Every commit that ports code passes these gates, each with its denominator.
 |---|---|---|
 | Build | `dotnet build NanoQL.slnx -c Release` | 0 errors, 0 warnings, all projects built. The AOT and trim analyzers run through `IsAotCompatible`; SA1402 and SA1649 run as errors. |
 | Tests | `dotnet test --solution NanoQL.slnx -c Release` | passed = total, failed 0, skipped 0. |
-| Vectors | part of the tests, counted per vector file by `tools/vectors/count.py` | every compared output within tolerance, counting outputs, not cases; with the number of overridden outputs. |
+| Vectors | part of the tests, counted per vector file by `tools/vectors/count.py`; then `.venv\Scripts\python -I tools/vectors/agree.py` | every compared output within tolerance, counting outputs, not cases; with the number of overridden outputs. Every twin on `agree.py`'s list agrees with its wheel file: the same case names and inputs, every output within tolerance, and kinds and scales exactly; it prints the outputs agreeing M/M and how many are bit-identical. |
 | Licensing | `.venv\Scripts\reuse lint`, then `.venv\Scripts\python -I tools/check-upstream.py <QuantLib v1.44 worktree>`, and the same with `--self-test` | (1) `reuse lint` reports the project compliant. (2) Every `.cs` file under `src/NanoQL/` and `tests/NanoQL.Tests/TestSuite/` carries an Upstream line whose paths exist at the pin, in the folder and namespace the name table gives, or is listed in `tools/no-upstream.txt`; so is every other `.cs` and `.py` file; and every test file's namespace names its folder. (3) Every `Copyright (C)` line of the named upstream files appears verbatim, with every third-party block `tools/third-party-notices.txt` lists for them. (4) The files with a `// Partial:` line are exactly those `porting-plan.md` lists. (5) Regenerating `porting-map.md` reproduces the committed file; every file the name table marks replaced or not ported exists at the pin; and no Upstream line names a not-ported file. The self-test perturbs a copy of the tree once per check and passes only if each perturbation is caught. `reuse lint` also lints the ignored build output under a folder none of whose files is in git's index yet, a false red: in a change that adds such a folder, run it on a tree without build output (`git clean -fdX -- <new folders>`) or after `git add -N <new folders>`. |
-| Reproducibility | `.venv\Scripts\python -I tools/vectors/reproduce.py [<generators>]` | rerunning each generator the commit adds or changes, or all of them when the shared helpers or the requirements change, writes bytes identical to the committed files, compared outside git. |
+| Reproducibility | `.venv\Scripts\python -I tools/vectors/reproduce.py [<generators>]`, a folder named by its path ending in `/` (`cxx/`); for harness generators, after `tools/cxx/build.py`, with `NANOQL_HARNESS` set and `tools/vectors/cxx.py --self-test` passing | rerunning each generator the commit adds or changes, or all of them when the shared helpers or the requirements change, writes bytes identical to the committed files, compared outside git. Harness generators rerun when the commit adds or changes them; all of them when the harness's source, its client, the shared helpers or the requirements change; and one also when a wheel generator it imports changes. |
 | Coverage | `dotnet test --solution NanoQL.slnx -c Release --filter-trait "Oracle=QuantLib" --coverlet --coverlet-output-format cobertura --results-directory TestResults\G7`, from the repository root into an emptied folder; then `.venv\Scripts\python -I tools/check-coverage.py TestResults\G7` | Every public type the commit ports that has executable lines has covered lines from the tests marked `Oracle=QuantLib` (§9.5). Types the report doesn't list (enums, interfaces, delegates, abstract types with no bodies, types holding only fields or constants) are listed apart by name and count, and so are types whose only code is equality nanoql adds. The line coverage of the commit's ported files is reported, with no threshold. |
 
 ## 9 Checking every member
