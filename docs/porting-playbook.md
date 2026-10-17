@@ -29,13 +29,30 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
   ```
 
   - **QuantLib's copyright lines:** one `SPDX-FileCopyrightText` line per distinct `Copyright (C)` line in the upstream
-    files' header blocks, verbatim, in order of first appearance, the `.hpp` before the `.cpp`.
+    files' header blocks, verbatim, in order of first appearance, the `.hpp` before the `.cpp`, read as below.
   - **QuantLib's standard notice** ("This file is part of QuantLib … WITHOUT ANY WARRANTY …") is not copied. The SPDX
     expression and `THIRD_PARTY_NOTICES.md`, which carries QuantLib's `LICENSE.TXT` verbatim, take its place.
-  - **Third-party notice blocks** inside QuantLib files (for example MINPACK's licence in `lmdif.cpp`, or FDLIBM's
-    permission notice) are reproduced verbatim as a comment block after the header, their licence joins the SPDX
-    expression (`Minpack`, `SunPro`, otherwise `LicenseRef-<name>` with its text in `LICENSES/`), and each block is
-    listed in `tools/third-party-notices.txt`. A port that meets a new block adds its row.
+  - **Third-party notice blocks** inside QuantLib files (MINPACK's licence in `lmdif.cpp`, MT19937's licence, FDLIBM's
+    and Peter Jäckel's permission notices) are reproduced whole, every line in order, as a comment block after the
+    header (`//` for a blank line), and once in `THIRD_PARTY_NOTICES.md`.
+    - **The licence** joins the SPDX expression as SPDX's own templates match the text: `Minpack`, `SunPro`,
+      `BSD-3-Clause` for MT19937's, otherwise `LicenseRef-<name>` with its text in `LICENSES/`. The Joe–Kuo
+      direction numbers' licence matches no template, so it is `LicenseRef-JoeKuo`; `BSD-3-Clause` for QuantLib's own
+      clause-3 variant is a label for QuantLib's code only.
+    - **The list:** each block is a row of `tools/third-party-notices.txt`, with its QuantLib file, its first and last
+      lines, its licence and, where the block's text isn't in the QuantLib file (a licence the file points to), its
+      source under `LICENSES/`. A row covers every file whose Upstream line names its QuantLib file, so each type split
+      from a pair carries the block. A port that meets a new block adds its row.
+  - **Reading a notice:**
+    - a block comment's leading `*` is comment syntax, not text (`primitivepolynomials.hpp` writes
+      ` * Copyright (C) 2002 Peter Jäckel …`);
+    - a block starts at its provenance paragraph when that paragraph carries a notice, as the `©` lines above Jäckel's
+      notice in the primitive polynomials pair do;
+    - a line that differs from a line of another file of the same port only by the replacement character U+FFFD,
+      where that line has one character, is read as that line: the replacement character is a byte fault in
+      QuantLib's copy, not the notice's text (`brownianbridge.hpp` has one where `brownianbridge.cpp` has the "ä" of
+      "Jäckel"). A replacement character with no such twin fails the licensing gate, naming the file and line, and
+      waits for a ruling.
   - **The nanoql line:** its year is the year the file was created.
   - **Ported tests** (`test-suite/<name>.cpp`) use the same form.
   - **Boost ports:** Boost's copyright lines, `AND BSL-1.0`, and an Upstream line of the form
@@ -86,9 +103,15 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
 | `Calendar`, `DayCounter` (Pimpl) | An abstract class with sealed implementations (§2.4). `addHoliday` and `removeHoliday` return a new calendar, as `ImmutableList<T>.Add` does. In QuantLib the change applies process-wide, because all instances of a calendar share one implementation; in nanoql it is part of the calendar's value. |
 | An empty Pimpl value (`Calendar()`, `DayCounter()`, `empty()`) | `null` (`Calendar?`, `DayCounter?`). |
 | Visitor (`accept(AcyclicVisitor&)`) | A `switch` pattern match at the call site. |
-| Templates and traits | Static abstract interface members for stateless traits; generic struct parameters for stateful ones, with named non-generic classes for the combinations QuantLib-Python exposes. A template over plain values becomes an ordinary generic method. |
+| Templates and traits | Static abstract interface members for stateless traits. A parameter that is configuration is a generic struct parameter, and a generator is a class parameter (§2.6). A template over plain values becomes an ordinary generic method. A template member that needs more of its parameter than its class does (C++ instantiates only the members a caller uses) becomes a generic method with that constraint on the class's companion static class: a constructor becomes a factory (`RandomSequenceGenerator.Create<TRng>(dimensionality, seed)`), an instance member an extension method (`NextInt32Sequence<TRng>()`). A call that breaks the constraint fails to compile, as the C++ instantiation does. |
+| `Array`, `Matrix`, `TridiagonalOperator` | Mutable working types (§2.5). `Array` is renamed `Vector` (§3). |
+| `Array::operator+=` and the other compound assignments of `Array` and `Matrix` | In place, through C# 14's instance compound-assignment operators (`public void operator +=(Vector other)`, and `-=`, `*=`, `/=` with vectors and scalars), as QuantLib's change their target; the binary operators return new objects, and `Clone()` is a deep copy. C# uses the instance operator only when the target is a variable (a local, a parameter, a field, an array element). On a property, or an indexer that doesn't return a `ref`, `x.P += y` calls the binary operator and the setter, so it rebinds. So a `std::vector<Array>` whose elements change in place becomes an array (`Vector[]`), never a `List<Vector>`, and the review checks every compound assignment whose target is a property or an indexer. |
+| A function-call `operator()` (a distribution, an interpolation, a solver's function, `EndCriteria`'s check) | A method named `Evaluate`. An `operator()` that reads an element (`Matrix(i, j)`) becomes an indexer. |
+| Random-number and path generators | Mutable working types with QuantLib's API (§2.7). |
+| `OptimizationMethod::minimize(Problem&, …)` | `Minimize(problem, endCriteria)` returns a `ProblemResults` record holding what QuantLib leaves in the `Problem` it changes: `CurrentValue`, `FunctionValue`, `GradientNormValue`, the two evaluation counts, and the `EndCriteriaType`. `Problem` is an immutable description (cost function, constraint, initial value), and a method holds only its configuration. The methods work on a `ProblemState`, a working type built from a `Problem` that carries QuantLib's mutable `Problem` API (`Reset`, `Value` and `Gradient`, which count, `CurrentValue`, whose setter copies, and `FunctionValue`). `Minimize(problemState, endCriteria)` continues from the state's current value, for line searches and hybrid methods; both call `protected abstract MinimizeCore(ProblemState, EndCriteria)`. A second `minimize` on one QuantLib `Problem` starts from the last optimum, where `Minimize(problem, …)` starts from the initial value each time: a documented divergence. |
+| `Solver1D<Impl>` (the curiously recurring base) | `Solver1D<TSelf, TFunction>`. `TSelf` types the setters that return a modified copy (`SetMaxEvaluations`, `SetLowerBound`, `SetUpperBound`), and `TFunction` is the function concept the solver needs (`ISolver1DFunction`; `IDerivativeSolver1DFunction` for `NewtonSafe`). The public non-virtual `Solve<TF>(f, accuracy, guess, step)` and `Solve<TF>(f, accuracy, guess, xMin, xMax)`, `where TF : struct, TFunction`, run QuantLib's bracketing and then call `protected abstract SolveCore<TF>(f, accuracy, bracket)`, whose `Solver1DBracket` record holds what QuantLib's base sets before `solveImpl`. Each solver adds overloads taking delegates. |
 | `CalibratedModel::calibrate` | A static `Calibrate` that returns an immutable parameter object. |
-| `SeedGenerator` | An explicit input: a seed is a parameter. |
+| `SeedGenerator` | An explicit input: a seed is a parameter, a `long` in [1, 4294967295] with no default, refused otherwise with `ArgumentOutOfRangeException`. QuantLib's seed 0, which draws a seed from the clock, is refused: a documented divergence. No library code reads the clock. |
 | `QL_REQUIRE` on a public method's parameter | `ArgumentException`, with `ParamName` set. A null argument a member doesn't accept throws `ArgumentNullException`. |
 | An enum argument a member always refuses: a value outside the type's members (C# lets any integer be cast to an enum), or a member it never handles (`Period(OtherFrequency)`) | `ArgumentOutOfRangeException`, naming the parameter, with QuantLib's message. A public member that switches on the value, stores it or computes with it checks it on entry, before any work that reads it; one that passes it on under the same parameter name to such a member relies on that member's check; one that only compares it with named members needs no check. This replaces QuantLib's `QL_FAIL`, in a switch's default or on a `case` label, wherever the value is an argument the member always refuses. A value refused only together with other arguments keeps the other rows' mapping: a mixed compounding in `ImpliedRate`, refused unless the compound factor is 1, and an intraday unit in `Calendar.Advance`, refused unless the count is 0, throw `NanoQLException`. |
 | Other `QL_REQUIRE`, `QL_FAIL`, `QL_ENSURE` | `NanoQLException`, including a `QL_FAIL` on a value already stored. A value outside its enum can no longer be stored, so such a branch fails only for a member the operation doesn't handle (`Period(3, Hours).Frequency()`), as in QuantLib. The wording is kept; numbers in it use C# formatting. |
@@ -101,7 +124,8 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
 | `begin()`/`end()` iterators | A public `GetEnumerator()` over the stored array, so `foreach` works. A function returning an iterator position (`lower_bound`) returns an index (`int`). |
 | A mutator on a value type with a non-mutating counterpart (`Period::normalize()`, `Date::operator+=`) | Not ported: `Normalized()`, and C#'s compound operators, built from `+`. |
 | A mutator on an immutable class (`Extrapolator::enableExtrapolation`) | The same name returns a modified copy. Where the copy must keep the receiver's static type, it is a generic extension method. |
-| `boost::math::…`, uBLAS | Ported from Boost 1.90.0. uBLAS-backed `Matrix` operations wait until a port needs them. |
+| `boost::math::…`, uBLAS | Ported from Boost 1.90.0, uBLAS's LU among them; other uBLAS-backed `Matrix` operations wait until a port needs them. |
+| A Boost.Math error under the default policy, which throws | A C# exception with Boost's message, its numbers in C# formatting: a domain error on the caller's argument (a probability outside [0, 1], a NaN) throws `ArgumentOutOfRangeException`; a domain error on a stored parameter (an infinite mean) and an overflow (the quantile of 0 or 1) throw `NanoQLException`. A `Conventions/` test asserts each type, which a vector's `{"throws": true}` can't. |
 | `namespace detail` | `internal` types. |
 | Anonymous namespaces | `file` types, and a `file static class` for their functions. Helpers shared by types split from one `.cpp` become an `internal` type named `<QuantLib file in PascalCase><Name>`. |
 | Free functions | Static methods of a public static class per header, `<Header>Functions` (§3). |
@@ -172,7 +196,10 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
 
 ### 2.4 Kinds, sealing and extension points
 
-- **Classes, not structs,** unless the type's instance is under 16 bytes, immutable and value-like (`Date`, `Period`).
+- **Classes, not structs,** unless the type's instance is under 16 bytes, immutable and value-like (`Date`, `Period`),
+  or it is a generic pair such as `Sample<T>`, which .NET's own pairs (`KeyValuePair<TKey,TValue>`,
+  `ValueTuple<T1,T2>`) make structs whatever their type arguments: as a class, a sample would allocate on every draw.
+  The configuration structs of §2.6 are the other structs.
 - **Extension points:** the public bases that QuantLib's hierarchy derives from, abstract or unsealed, are nanoql's
   extension points: term structures, stochastic processes, volatility structures, calendars, day counters, the
   interpolation traits, events, cash flows, coupons, extrapolators, and instruments with their results records,
@@ -189,16 +216,106 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `global using Leg = System.Collections.Immutable.ImmutableArray<NanoQL.CashFlow>;` in `Types.cs`. Public signatures
   show `ImmutableArray<CashFlow>`.
 
+### 2.5 Working types, views and values
+
+- **Working types** are mutable, owned by one computation and not thread-safe, as an array is: `Vector`, `Matrix` and
+  `TridiagonalOperator` (an indexer that sets, compound assignment, `Resize`, the in-place operations QuantLib's
+  algorithms use, `TridiagonalOperator`'s row setters), `ProblemState`, and the random-number and path generators
+  (§2.7). Later ports add lattice assets, finite-difference operators and schemes, and market-model evolvers and
+  accumulators, and each names the working types it adds. Every other public type is immutable.
+- **A copy where C++ copies:** a C# class is a reference, so a port copies explicitly (`Clone()`) wherever C++ copies
+  an `Array` or `Matrix` by value (an assignment, a copy construction, a by-value parameter) and then changes either
+  copy. The review checks each such site.
+- **The boundary:** an immutable object never holds a working type it was given, and never exposes one it holds. It
+  copies its inputs (into an `ImmutableArray<double>` or a private copy), and returns a fresh object, or an
+  `ImmutableArray<double>` where the value is data it holds. Each constructor that takes a `Vector` or a `Matrix` has
+  a `Conventions/` test that changing the argument afterwards changes nothing.
+- **Views:** a generator's draw returns a view of its own buffer (§2.7), read-only to the caller and valid until the
+  generator's next draw, which changes it, as QuantLib's `const&` is. The immutability promise doesn't cover a view; a
+  caller that keeps one copies it.
+
+### 2.6 Configuration as generic structs
+
+- **A template parameter that configures a computation** (an interpolator factory, an inverse cumulative, a solver's
+  function) is a generic parameter `where T : struct, I<Concept>`: a `readonly struct` implementing the concept,
+  stateless (`Linear`) or holding its parameters (`Cubic`), passed as an instance. The interpolation factories
+  implement `IInterpolator`: an instance `Interpolate(x, y)` and the static abstract `Global` and `RequiredPoints`.
+  A consumer is generic over `TInterpolator : struct, IInterpolator` and takes the instance.
+- **The zero value is QuantLib's default construction:** `default(T)`, `new T()`, an unassigned field and an array
+  element are QuantLib's default-constructed object.
+  - A field whose QuantLib default isn't zero is stored so that zero reads as that default: a value the constructor
+    refuses (`InverseCumulativeNormal`'s sigma, where 0 reads as 1), or a nullable enum (`Cubic`'s derivative
+    approximation, where null reads as Kruger).
+  - No such struct declares a parameterless constructor. QuantLib's `const Interpolator& i = {}` becomes
+    `TInterpolator i = default`, and a functor member QuantLib never assigns is a field initialised `= default`.
+  - A type QuantLib can't default-construct (`LogCubic`, whose derivative approximation has no default) refuses its
+    zero value in every member with `InvalidOperationException`, as `ImmutableArray<T>`'s default does.
+  - QuantLib's presets that derive from a factory (`MonotonicLogCubic` and `KrugerLog`, from `LogCubic`) are
+    parameterless structs of their own, so they can be type arguments, each with an implicit conversion to the
+    factory for the calls that pass a preset where the factory is taken.
+  - Each such struct has a `Conventions/` test that its zero value is QuantLib's default, or is refused.
+- **Stepping state is a class parameter:** a generator changes on every draw, so a template over one takes a class
+  (§2.7).
+- **Named classes:** QuantLib's typedef names for traits (`PseudoRandom`, `LowDiscrepancy`, `PoissonPseudoRandom`) are
+  named structs. QuantLib-Python's `%template` names are sealed subclasses of their closed generic class, one per
+  closed generic, added by the port that ports the last of its type arguments; where QuantLib-Python names one type
+  twice, the name whose arguments are QuantLib's own names. nanoql's own code uses the generic types, so a named class
+  is a convenience, never a type argument. A generic struct (`Sample<T>`) gets none.
+
+### 2.7 Random numbers and Monte Carlo paths
+
+- **Generators** (`MersenneTwisterUniformRng`, `SobolRsg`, `HaltonRsg`, `RandomSequenceGenerator<TRng>`, the
+  inverse-cumulative compositions, `PathGenerator<TGsg>`) are mutable classes with QuantLib's API: their draws
+  (`Next()`, `NextSequence()`, `NextInt32()`, `SkipTo(n)`, `Antithetic()`) change them, as `System.Random`'s do.
+  They aren't thread-safe, which their docs say.
+- **A draw's sample** is a `Sample<T>`, a value and its weight, whose value is a view of the generator's buffer, valid
+  until its next draw: `Sample<ReadOnlyMemory<double>>` for a sequence, `Sample<MonteCarloPath>` for a path. No draw
+  allocates.
+- **Inside a computation:** an engine or another immutable object takes a seed and builds its generators inside the
+  call. No immutable object holds a generator, so engines stay pure functions of their inputs, the seed among them.
+  Across the C interface and Excel, a generator is a pure function of its seed, drawn in batches.
+- **Seeds and integers:** a seed is a `long` in [1, 4294967295] with no default (§2's `SeedGenerator` row). QuantLib's
+  32-bit unsigned values (seeds, `NextInt32()`, Sobol's integer sequences, `SkipTo`'s argument, `BigNatural`
+  arguments) are `long` in public members, each range-checked. Internals use `uint`, because QuantLib's
+  `unsigned long` and `BigNatural` are 32 bits under MSVC, where the vectors are generated: their sums wrap at 2^32.
+- **The concepts** are QuantLib's `RNG` and `RSG`, named in its vocabulary: `IRng` (`Sample<double> Next()`,
+  `IRng Clone()`), `IInt32Rng : IRng` (`long NextInt32()`), and `IRsg` (`Dimension`, `NextSequence()`,
+  `LastSequence()`, `IRsg Clone()`). They carry uniform and Gaussian generators alike, as QuantLib's templates do; a
+  template whose input must be uniform says so in its docs. Construction from a seed in generic code is a static
+  abstract factory on separate interfaces, used only as constraints: `ISeedableRng<TSelf>` (`static abstract TSelf
+  Create(long seed)`) and `ISeedableRsg<TSelf>` (`static abstract TSelf Create(int dimension, long seed)`). An
+  interface with a static abstract member can't be a type argument, hence the split.
+- **A generic class asks of its parameter only what all its members need:** `RandomSequenceGenerator<TRng> where TRng
+  : class, IRng`, since QuantLib's takes any generator. Its seed constructor is the companion's
+  `RandomSequenceGenerator.Create<TRng>(dimensionality, seed)`, constrained to an `ISeedableRng`, and
+  `nextInt32Sequence` the extension `NextInt32Sequence<TRng>()`, constrained to an `IInt32Rng` (§2's templates row).
+  A composite whose QuantLib seed constructor builds a `RandomSequenceGenerator<RNG>` from a seed takes the RNG as its
+  type parameter and builds the sequence generator through `Create<TRng>`; a seedable sequence generator of another
+  type needs a factory of its own name, since C# can't overload on constraints alone.
+- **Copies:** `Clone()` is a deep copy, the state and the buffers: the copy's next draw equals the original's, into
+  its own buffer. Each generator declares it with its own return type, and a named class overrides it covariantly. A
+  composite (`RandomSequenceGenerator`, `InverseCumulativeRng`, `InverseCumulativeRsg`, `PathGenerator`) clones the
+  generator it is given, as QuantLib's by-value constructors copy it, so the caller's and the composite's states never
+  alias. A factory that has just built its generator (the traits, `Create`) adopts it without a copy.
+- **The traits:** `IRngTraits` declares `static abstract bool AllowsErrorEstimate` and `static abstract IRsg
+  MakeSequenceGenerator(int dimension, long seed)`. A Monte Carlo engine keeps QuantLib's one traits parameter
+  (`where TTraits : struct, IRngTraits`) and builds a `PathGenerator<IRsg>`. Called on the traits struct itself,
+  `MakeSequenceGenerator` returns the closed generic, QuantLib's `rsg_type`, and an explicit implementation provides
+  the interface's form. QuantLib's static `icInstance` isn't ported: an overload of `MakeSequenceGenerator` takes the
+  inverse cumulative.
+
 ## 3 Naming
 
 - **Types:**
   - QuantLib's names are kept, acronyms included (`NPV`, `OISRateHelper`), so a QuantLib name maps to one nanoql
-    name. Three are renamed: `Array` becomes `Vector`, and `Index` and `Path` get names in the ports that bring them.
-    A user who imports a clashing `System.*` namespace writes an alias (`using Calendar = NanoQL.Time.Calendar;`).
+    name. Three are renamed: `Array` becomes `Vector`, `Path` becomes `MonteCarloPath`, and `Index` gets its name in
+    the port that brings it. A user who imports a clashing `System.*` namespace writes an alias
+    (`using Calendar = NanoQL.Time.Calendar;`).
   - **Public nested types** move to the top level as `<Outer><Inner>`: `Option::Type` → `OptionType`,
     `Swap::Type` → `SwapType`, `DateGeneration::Rule` (a struct holding an enum) → `DateGenerationRule`.
-  - **Renames** are recorded here. So far: `Array` → `Vector`. `Vector` clashes with `System.Numerics.Vector` in
-    files that also import `System.Numerics`.
+  - **Renames** are recorded here. So far: `Array` → `Vector`, which clashes with `System.Numerics.Vector` in files
+    that also import `System.Numerics`; and `Path` → `MonteCarloPath`, after its folder, `montecarlo`, since `Path`
+    would clash with `System.IO.Path`. QuantLib's other names around it stay (`PathGenerator`, `MultiPath`).
 - **Members:** the first letter is capitalised and the rest kept (`yearFraction` → `YearFraction`; `NPV` stays).
   - **Property or method:** a member is a property when it takes no arguments, has no side effect, is cheap, has no
     precondition that throws, doesn't return a copy or a new array, and is an attribute of the object, stored or
@@ -245,8 +362,10 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
 - **Collections:** stored as `ImmutableArray<T>`; inputs are taken as `IEnumerable<T>` or `ReadOnlySpan<T>` and
   copied. A record that holds collections and needs value equality writes it out, because `ImmutableArray<T>`
   compares references.
-- **Integers:** public members use `int` for `Size`, `Natural` and `Integer`, and `long` for `BigInteger`. Internals
-  use unsigned types where QuantLib relies on unsigned arithmetic (MT19937 state, Sobol direction integers, seeds).
+- **Integers:** public members use `int` for `Size`, `Natural` and `Integer`, and `long` for `BigInteger` and for
+  QuantLib's 32-bit unsigned values (seeds, `BigNatural`, generators' integers; §2.7). Internals use unsigned types
+  where QuantLib relies on unsigned arithmetic (MT19937 state, Sobol direction integers, Halton's sums): `uint` for
+  QuantLib's `unsigned long` and `BigNatural`, their width under MSVC.
 - **Aliases:** `Types.cs` makes global aliases for `Real`, `Rate`, `Spread`, `DiscountFactor`, `Volatility`,
   `Probability` (`double`), `Size`, `Integer`, `Natural` (`int`) and `BigInteger` (`long`), and the `Leg` alias (§2.4).
   `Decimal` and `Time` are written as `double`. The test project links `Types.cs`, so ported tests keep QuantLib's
@@ -325,7 +444,7 @@ NanoQL/
 - the test suite's infrastructure, which xUnit and the vector harness replace, and its files with nothing to port,
   among them the tests of `Settings`, `Observable` and `LazyObject`;
 - data tables, which are generated instead, with their notices;
-- uBLAS-backed `Matrix` operations until a port needs them;
+- uBLAS-backed `Matrix` operations other than the LU, until a port needs them;
 - what the default QuantLib build leaves out.
 
 `ql/experimental` is ported, marked `[Experimental]` (§4). [porting-map.md](porting-map.md) gives every QuantLib
@@ -452,7 +571,7 @@ Every commit that ports code passes these gates, each with its denominator.
 | Build | `dotnet build NanoQL.slnx -c Release` | 0 errors, 0 warnings, all projects built. The AOT and trim analyzers run through `IsAotCompatible`; SA1402 and SA1649 run as errors. |
 | Tests | `dotnet test --solution NanoQL.slnx -c Release` | passed = total, failed 0, skipped 0. |
 | Vectors | part of the tests, counted per vector file by `tools/vectors/count.py`; then `.venv\Scripts\python -I tools/vectors/agree.py` | every compared output within tolerance, counting outputs, not cases; with the number of overridden outputs. Every twin on `agree.py`'s list agrees with its wheel file: the same case names and inputs, every output within tolerance, and kinds and scales exactly; it prints the outputs agreeing M/M and how many are bit-identical. |
-| Licensing | `.venv\Scripts\reuse lint`, then `.venv\Scripts\python -I tools/check-upstream.py <QuantLib v1.44 worktree> --boost <Boost 1.90.0 root>`, and the same with `--self-test` | (1) `reuse lint` reports the project compliant. (2) Every `.cs` file under `src/NanoQL/` and `tests/NanoQL.Tests/TestSuite/` carries an Upstream line whose paths exist at the pin, in the folder and namespace the name table gives, or is listed in `tools/no-upstream.txt`; so is every other `.cs`, `.py`, `.cpp` and `.hpp` file; every test file's namespace names its folder; and every `// Replaced:` line holds (§1). (3) Every `Copyright (C)` line of the named upstream files appears verbatim, with every third-party block `tools/third-party-notices.txt` lists for them; a Boost port's header holds as §1 says. (4) The files with a `// Partial:` line are exactly those `porting-plan.md` lists. (5) Regenerating `porting-map.md` reproduces the committed file; every file the name table marks replaced or not ported exists at the pin; and no Upstream line names a not-ported file. The self-test perturbs a copy of the tree once per check, with a synthetic Boost port among them, and passes only if each perturbation is caught. **The Boost root** is Boost 1.90.0's release tree: `tools/cxx/build.py`'s `boost_1_90_0` (§7.1), or `boost_1_90_0.zip` from `https://archives.boost.io/release/1.90.0/source/`, checked against its SHA-256, `bdc79f179d1a4a60c10fe764172946d0eeafad65e576a8703c4d89d49949973c`, and extracted with Python's `zipfile` (Windows' `tar` skips one file). `--boost` is required for `--self-test` and whenever an Upstream line names a Boost path. `reuse lint` also lints the ignored build output under a folder none of whose files is in git's index yet, a false red: in a change that adds such a folder, run it on a tree without build output (`git clean -fdX -- <new folders>`) or after `git add -N <new folders>`. |
+| Licensing | `.venv\Scripts\reuse lint`, then `.venv\Scripts\python -I tools/check-upstream.py <QuantLib v1.44 worktree> --boost <Boost 1.90.0 root>`, and the same with `--self-test` | (1) `reuse lint` reports the project compliant. (2) Every `.cs` file under `src/NanoQL/` and `tests/NanoQL.Tests/TestSuite/` carries an Upstream line whose paths exist at the pin, in the folder and namespace the name table gives, or is listed in `tools/no-upstream.txt`; so is every other `.cs`, `.py`, `.cpp` and `.hpp` file; every test file's namespace names its folder; and every `// Replaced:` line holds (§1). (3) Every `Copyright (C)` line of the named upstream files appears verbatim, read as §1 says; every third-party block `tools/third-party-notices.txt` lists for them appears whole, every line in order, in the file's header and in `THIRD_PARTY_NOTICES.md`, read from the row's source, with its licence in the SPDX expression; a Boost port's header holds as §1 says. (4) The files with a `// Partial:` line are exactly those `porting-plan.md` lists. (5) Regenerating `porting-map.md` reproduces the committed file; every file the name table marks replaced or not ported exists at the pin; and no Upstream line names a not-ported file. The self-test perturbs a copy of the tree once per check, with a synthetic Boost port among them and synthetic ports carrying third-party blocks (a starred notice and a replacement character among them), whose expected lines are written out rather than read through the checker, and passes only if each perturbation is caught. **The Boost root** is Boost 1.90.0's release tree: `tools/cxx/build.py`'s `boost_1_90_0` (§7.1), or `boost_1_90_0.zip` from `https://archives.boost.io/release/1.90.0/source/`, checked against its SHA-256, `bdc79f179d1a4a60c10fe764172946d0eeafad65e576a8703c4d89d49949973c`, and extracted with Python's `zipfile` (Windows' `tar` skips one file). `--boost` is required for `--self-test` and whenever an Upstream line names a Boost path. `reuse lint` also lints the ignored build output under a folder none of whose files is in git's index yet, a false red: in a change that adds such a folder, run it on a tree without build output (`git clean -fdX -- <new folders>`) or after `git add -N <new folders>`. |
 | Reproducibility | `.venv\Scripts\python -I tools/vectors/reproduce.py [<generators>]`, a folder named by its path ending in `/` (`cxx/`); for harness generators, after `tools/cxx/build.py`, with `NANOQL_HARNESS` set and `tools/vectors/cxx.py --self-test` passing | rerunning each generator the commit adds or changes, or all of them when the shared helpers or the requirements change, writes bytes identical to the committed files, compared outside git. Harness generators rerun when the commit adds or changes them; all of them when the harness's source, its client, the shared helpers or the requirements change; and one also when a wheel generator it imports changes. |
 | Coverage | `dotnet test --solution NanoQL.slnx -c Release --filter-trait "Oracle=QuantLib" --coverlet --coverlet-output-format cobertura --results-directory TestResults\G7` and the whole suite's run, `dotnet test --solution NanoQL.slnx -c Release --coverlet --coverlet-output-format cobertura --results-directory TestResults\G7all`, each from the repository root into an emptied folder; then `.venv\Scripts\python -I tools/check-coverage.py TestResults\G7 --all TestResults\G7all` | Every public type the commit ports that has executable lines has covered lines from the tests marked `Oracle=QuantLib` (§9.5). Types the report doesn't list (enums, interfaces, delegates, abstract types with no bodies, types holding only fields or constants) are listed apart by name and count, and so are types whose only code is equality nanoql adds. The line coverage of the commit's ported files is reported, with no threshold. It also prints, without failing, the commit's public members that no test of any kind reaches (§9.5); a missing or second whole-suite report is a red. |
 

@@ -196,14 +196,21 @@ def boost_copyrights(boost_root, rel):
 
 
 def upstream_copyrights(ql_root, rel):
-    """The Copyright (C) lines of a QuantLib file's header comments, verbatim and in order, before its first code."""
+    """The Copyright (C) lines of a QuantLib file's header comments, verbatim and in order, before its first code. A
+    block comment's leading "*" is comment syntax and isn't part of the line (primitivepolynomials.hpp's
+    " * Copyright (C) 2002 Peter Jäckel ...")."""
+    return [text for _, text in upstream_copyright_lines(ql_root, rel)]
+
+
+def upstream_copyright_lines(ql_root, rel):
+    """upstream_copyrights, each line with its 1-based line number."""
     lines = []
     in_block = False
-    for line in ql_read(ql_root, rel).splitlines():
+    for number, line in enumerate(ql_read(ql_root, rel).splitlines(), 1):
         stripped = line.strip()
         if in_block:
             if COPYRIGHT.search(stripped):
-                lines.append(stripped)
+                lines.append((number, stripped.lstrip("*").strip()))
             if "*/" in stripped:
                 in_block = False
             continue
@@ -211,13 +218,131 @@ def upstream_copyrights(ql_root, rel):
             continue
         if stripped.startswith("/*"):
             if COPYRIGHT.search(stripped):
-                lines.append(stripped.lstrip("/*").strip())
+                lines.append((number, stripped.lstrip("/*").strip()))
             in_block = "*/" not in stripped
             continue
         if stripped.startswith("//"):
             if COPYRIGHT.search(stripped):
-                lines.append(stripped.lstrip("/").strip())
+                lines.append((number, stripped.lstrip("/").strip()))
             continue
         break
     return lines
+
+
+# U+FFFD, the replacement character: a byte fault in QuantLib's copy of a notice, not the notice's text
+# (brownianbridge.hpp:29 has "J\ufffdckel" where brownianbridge.cpp has "Jäckel").
+FFFD = "\ufffd"
+
+
+def comment_lines(text):
+    """Every line of a C++ file as (1-based number, text without comment markers, whether it is code). A comment
+    line loses its "//", or its "/*", "*/" and a block comment's leading "*"; a blank line is "" and not code."""
+    out = []
+    in_block = False
+    for number, line in enumerate(text.splitlines(), 1):
+        stripped = line.strip()
+        if in_block:
+            if "*/" in stripped:
+                stripped = stripped[:stripped.index("*/")]
+                in_block = False
+            out.append((number, stripped.strip().lstrip("*").strip(), False))
+        elif not stripped:
+            out.append((number, "", False))
+        elif stripped.startswith("//"):
+            out.append((number, stripped.lstrip("/").strip(), False))
+        elif stripped.startswith("/*"):
+            body = stripped[2:]
+            if "*/" in body:
+                body = body[:body.index("*/")]
+            else:
+                in_block = True
+            out.append((number, body.strip().lstrip("*").strip(), False))
+        else:
+            out.append((number, stripped, True))
+    return out
+
+
+def source_lines(root, ql_root, rel):
+    """A notice source as comment_lines gives it: a QuantLib file (a path under ql/ or test-suite/, read at the pin),
+    or a text file of the repository (a third-party row's fifth column), each of whose lines is text, stripped."""
+    if rel.startswith(("ql/", "test-suite/")):
+        return comment_lines(ql_read(ql_root, rel))
+    return [(n, line.strip(), False) for n, line in enumerate(read_text(os.path.join(root, rel)).splitlines(), 1)]
+
+
+def twin(line, others):
+    """The fault-free reading of a line holding U+FFFD: the one distinct line among others (lines of the port's other
+    files) that differs from it only by one character where it has each U+FFFD, or None if there is no such line, or
+    more than one."""
+    pattern = re.compile("[^\ufffd]".join(re.escape(part) for part in line.split(FFFD)))
+    found = {o for o in others if FFFD not in o and pattern.fullmatch(o)}
+    return next(iter(found)) if len(found) == 1 else None
+
+
+def read_fault_free(line, others):
+    """(the reading of line, whether it is fault-free): a line holding U+FFFD is read as its twin among others."""
+    if FFFD not in line:
+        return line, True
+    fixed = twin(line, others)
+    return (fixed, True) if fixed is not None else (line, False)
+
+
+def port_copyrights(ql_root, rels):
+    """The Copyright (C) lines of a port's upstream files (those its Upstream line names), verbatim, deduplicated, in
+    order of first appearance. A line holding U+FFFD is read as its fault-free twin in another of the port's files
+    (§1); one with no twin is a fault. Returns (lines, faults), each fault "<file>:<line number>"."""
+    texts = {rel: [t for _, t, code in comment_lines(ql_read(ql_root, rel)) if not code] for rel in rels}
+    lines, faults = [], []
+    for rel in rels:
+        others = [t for other in rels if other != rel for t in texts[other]]
+        for number, text in upstream_copyright_lines(ql_root, rel):
+            text, ok = read_fault_free(text, others)
+            if not ok:
+                faults.append(f"{rel}:{number}")
+            if text not in lines:
+                lines.append(text)
+    return lines, faults
+
+
+def notice_block(root, ql_root, rel, first, last, port=()):
+    """A third-party notice block (tools/third-party-notices.txt): the lines of rel, without comment markers, from the
+    first line that reads first, through the last line that reads last before the code that follows it. rel is the
+    row's QuantLib file, or its fifth column. Each line holding U+FFFD is read as its fault-free twin in another file of
+    port, the QuantLib files the porting file's Upstream line names. Returns (lines, faults, error): faults as
+    port_copyrights gives them, error a message when the block can't be read."""
+    lines = source_lines(root, ql_root, rel)
+    start = next((i for i, (_, text, code) in enumerate(lines) if not code and text == first), None)
+    if start is None:
+        return [], [], f"{rel} has no comment line '{first}', the row's first line"
+    end = None
+    for i in range(start, len(lines)):
+        if lines[i][2]:
+            break
+        if lines[i][1] == last:
+            end = i
+    if end is None:
+        return [], [], f"{rel} has no comment line '{last}', the row's last line, after its first line"
+    others = [t for other in port if other != rel
+              for _, t, code in comment_lines(ql_read(ql_root, other)) if not code]
+    block, faults = [], []
+    for number, text, _ in lines[start:end + 1]:
+        text, ok = read_fault_free(text, others)
+        if not ok:
+            faults.append(f"{rel}:{number}")
+        block.append(text)
+    return block, faults, None
+
+
+def find_run(lines, block):
+    """Where block's lines appear in lines as one run, in order: (its index, len(block)), or (None, the longest
+    partial run's length), so that a failure can name the block's first line that differs."""
+    best = 0
+    for i in range(len(lines)):
+        n = 0
+        while n < len(block) and i + n < len(lines) and lines[i + n] == block[n]:
+            n += 1
+        if n == len(block):
+            return i, n
+        best = max(best, n)
+    return None, best
 # REUSE-IgnoreEnd

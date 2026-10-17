@@ -6,6 +6,17 @@
 # header, and adds the block's licence to its SPDX expression. tools/check-upstream.py reads this list.
 #
 # One row per block, tab-separated:
-#   <QuantLib path>	<the block's first line>	<the block's last line>	<SPDX licence id>
+#   <QuantLib path>	<the block's first line>	<the block's last line>	<SPDX licence id>[	<source>]
+#
+# The block is the source's lines, comment markers removed ("//", "/*", "*/" and a block comment's leading "*"), from
+# the first line that reads <first line> through the last line that reads <last line> before the code that follows.
+# Its source is the QuantLib file, or the optional fifth column: a text file of this repository holding the licence
+# the QuantLib file points to (LICENSES/LicenseRef-<name>.txt). A block starts at its provenance paragraph when that
+# paragraph carries a notice ("©" lines, as primitivepolynomials.hpp's).
+#
+# A row covers every nanoql file whose Upstream line names its QuantLib path, so each type split from a pair carries
+# the block. Each such file carries every line of the block, in order, in its header comment ("//" for a blank line),
+# and so does THIRD_PARTY_NOTICES.md, once for every row whose block reads the same. A line holding U+FFFD, a byte
+# fault in QuantLib's copy, is read as its fault-free twin in another file of the port.
 #
 # No ported file carries a third-party notice yet.

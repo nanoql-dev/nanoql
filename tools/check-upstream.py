@@ -12,9 +12,12 @@ Usage: .venv\\Scripts\\python -I tools/check-upstream.py <QuantLib v1.44 worktre
     table (tools/porting-map.json) gives that path. Every test file's namespace names its folder. A test class's
     "// Replaced:" line names cases of its QuantLib test file that it neither ports nor lists as partial, each with
     a test file that exists under tests/NanoQL.Tests/.
-(3) The QuantLib copyright lines of the named upstream files appear verbatim and in order, with every third-party
-    block tools/third-party-notices.txt lists for them, and its licence in the SPDX expression. THIRD_PARTY_NOTICES.md's
-    fenced block is QuantLib's LICENSE.TXT at the pin, verbatim.
+(3) The QuantLib copyright lines of the named upstream files appear verbatim and in order, a line holding U+FFFD read
+    as its fault-free twin in another file the Upstream line names (one with no twin is a red). Every third-party
+    block that tools/third-party-notices.txt lists for a named file appears whole, every line in order, in the file's
+    header and in THIRD_PARTY_NOTICES.md, read from the row's source (the QuantLib file, or its fifth column), with its
+    licence in the SPDX expression. THIRD_PARTY_NOTICES.md's first fenced block is QuantLib's LICENSE.TXT at the pin,
+    verbatim.
 (4) The files with a "// Partial:" line are exactly those docs/porting-plan.md lists under "Partial ports".
 (5) docs/porting-map.md reproduces (tools/porting-map.py --check); every entry of the name table exists at the pin;
     and no Upstream line names a file that a rule or the name table marks not ported.
@@ -123,7 +126,10 @@ class Checker:
     def run(self):
         files = sources.git_files(self.root)
         allow = [glob_regex(p.strip()) for p in read_list(self.root, "tools/no-upstream.txt")]
-        notices = [ln.split("\t") for ln in read_list(self.root, "tools/third-party-notices.txt")]
+        notices = self.read_notices()
+        self.notices_lines = [ln.strip() for ln in
+                              sources.read_text(os.path.join(self.root, "THIRD_PARTY_NOTICES.md")).splitlines()]
+        self.counts["blocks"] = 0
         upstream_files, copyright_ok, partial = 0, 0, set()
         if self.boost is not None:
             version = boost_version(self.boost)
@@ -170,6 +176,36 @@ class Checker:
         self.check_notices()
         self.check_table()
         self.check_map()
+
+    def read_notices(self):
+        """tools/third-party-notices.txt's rows, as (QuantLib file, first line, last line, SPDX id, the block's
+        source). Each row's QuantLib file exists at the pin, a fifth column names a file of the repository, and the
+        block reads from its source, each U+FFFD with its twin in the QuantLib file's pair."""
+        rows = []
+        for line in read_list(self.root, "tools/third-party-notices.txt"):
+            row = line.split("\t")
+            if len(row) not in (4, 5):
+                self.error("third-party", f"tools/third-party-notices.txt: '{line}' has {len(row)} columns, not 4 or 5")
+                continue
+            rel, first, last, spdx = row[:4]
+            source = row[4] if len(row) == 5 else rel
+            if not os.path.isfile(os.path.join(self.ql, rel)):
+                self.error("third-party", f"tools/third-party-notices.txt: {rel} doesn't exist at the pin")
+                continue
+            if source != rel and not os.path.isfile(os.path.join(self.root, source)):
+                self.error("third-party", f"tools/third-party-notices.txt: {rel}'s source {source} doesn't exist")
+                continue
+            port = self.units.get(sources.unit_of(rel), [rel]) if source == rel else ()
+            _, faults, problem = sources.notice_block(self.root, self.ql, source, first, last, port)
+            if problem:
+                self.error("third-party", f"tools/third-party-notices.txt: {problem}")
+                continue
+            twins = "no other file of its pair has the fault-free line" if source == rel else \
+                "a fifth-column source has no twin"
+            for fault in faults:
+                self.error("fffd", f"tools/third-party-notices.txt: {fault} holds U+FFFD in {rel}'s block, and {twins}")
+            rows.append((rel, first, last, spdx, source))
+        return rows
 
     def check_test_namespace(self, path, header):
         folder = path[len(TESTS):].split("/")[0]
@@ -321,11 +357,12 @@ class Checker:
         return True
 
     def check_copyrights(self, path, header, notices):
-        expected = []
-        for up in header.upstream:
-            for line in sources.upstream_copyrights(self.ql, up):
-                if line not in expected:
-                    expected.append(line)
+        expected, faults = sources.port_copyrights(self.ql, header.upstream)
+        if faults:
+            for fault in faults:
+                self.error("fffd", f"{path}: {fault} holds U+FFFD in a copyright line, and no other file its Upstream "
+                                   "line names has the fault-free line")
+            return False
         if header.copyrights != expected:
             missing = [c for c in expected if c not in header.copyrights]
             extra = [c for c in header.copyrights if c not in expected]
@@ -339,15 +376,36 @@ class Checker:
         if not re.fullmatch(r"Apache-2\.0 AND BSD-3-Clause(?: AND [\w.+-]+)*", licence):
             self.error("copyright", f"{path}: SPDX-License-Identifier '{licence}', expected Apache-2.0 AND BSD-3-Clause")
             return False
-        for row in notices:
-            if len(row) != 4 or row[0] not in header.upstream:
+        ok = True
+        for rel, first, last, spdx, source in notices:
+            if rel not in header.upstream:
                 continue
-            _, first, last, spdx = row
-            body = "\n".join(header.lines)
-            if first.strip() not in body or last.strip() not in body or spdx not in licence.split(" AND "):
-                self.error("copyright", f"{path}: the third-party block of {row[0]} or its licence {spdx} is missing")
-                return False
-        return True
+            self.counts["blocks"] += 1
+            port = header.upstream if source == rel else ()
+            block, faults, _ = sources.notice_block(self.root, self.ql, source, first, last, port)
+            twins = "no other file its Upstream line names has the fault-free line" if source == rel else \
+                "a fifth-column source has no twin"
+            for fault in faults:
+                self.error("fffd", f"{path}: {fault} holds U+FFFD in {rel}'s third-party block, and {twins}")
+                ok = False
+            if faults:
+                continue
+            at, matched = sources.find_run(header.lines, block)
+            if at is None:
+                self.error("third-party", f"{path}: doesn't carry the third-party block of {rel} whole and in order; "
+                                          f"the block's line {matched + 1} differs: '{block[matched]}'")
+                ok = False
+            at, matched = sources.find_run(self.notices_lines, block)
+            if at is None:
+                self.error("third-party", f"THIRD_PARTY_NOTICES.md doesn't carry the third-party block of {rel} (for "
+                                          f"{path}) whole and in order; the block's line {matched + 1} differs: "
+                                          f"'{block[matched]}'")
+                ok = False
+            if spdx not in licence.split(" AND "):
+                self.error("third-party", f"{path}: the licence {spdx} of {rel}'s third-party block isn't in its SPDX "
+                                          "expression")
+                ok = False
+        return ok
 
     def check_notices(self):
         lines = sources.read_text(os.path.join(self.root, "THIRD_PARTY_NOTICES.md")).splitlines()
@@ -388,7 +446,8 @@ def report(checker):
     if checker.boost is not None:
         print(f"Boost root: {checker.boost}")
     print(f"(2) files with an Upstream line: {c['upstream']}; every other .cs, .py, .cpp and .hpp file is allowlisted")
-    print(f"(3) copyright lines verbatim: {c['copyright']}/{c['upstream']} files")
+    print(f"(3) copyright lines verbatim: {c['copyright']}/{c['upstream']} files; third-party blocks whole: "
+          f"{c['blocks']} (file, block) pairs, each in the file's header and in THIRD_PARTY_NOTICES.md")
     print("(3) THIRD_PARTY_NOTICES.md carries LICENSE.TXT verbatim")
     print(f"(4) partial files: {c['partial']}, listed in docs/porting-plan.md: {c['partial']}")
     print(f"(5) table entries at the pin: {c['table'][0]}/{c['table'][1]} "
@@ -415,6 +474,82 @@ BOOST_LAYOUTS = [
 ]
 UBLAS_PROBE = "src/NanoQL/Boost/Numeric/Ublas/SelfTestMatrixSparseProbe.cs"
 DATES_TESTS = "tests/NanoQL.Tests/TestSuite/DatesTests.cs"
+# Third-party blocks (§1), each probe a synthetic port of real QuantLib files whose copyright lines and blocks are
+# written out as those files have them at the pin, never read through the checker.
+RULE = "=" * 75
+JAECKEL = "Copyright (C) 2002 Peter Jäckel \"Monte Carlo Methods in Finance\"."
+# Jäckel's permission notice: primenumbers.hpp:20-28 and .cpp:20-28, brownianbridge.hpp:26-34 (U+FFFD at line 29)
+# and .cpp:20-28.
+JAECKEL_BLOCK = [RULE, "NOTE: The following copyright notice applies to the original code,", "", JAECKEL,
+                 "All rights reserved.", "", "Permission to use, copy, modify, and distribute this software is freely",
+                 "granted, provided that this notice is preserved.", RULE]
+# primitivepolynomials.hpp:3-18: the block starts at its provenance paragraph, whose "©" line is a notice the copyright
+# reader doesn't match.
+PRIMITIVE_BLOCK = ["this file is a slightly edited version of", "PrimitivePolynomialsModuloTwoUpToDegree27.h",
+                   "© 2002 \"Monte Carlo Methods in Finance\"", "as provided ready for compilation in the directory",
+                   "\"PrimitivePolynomialsModuloTwo\" on the CD accompanying the book",
+                   "\"Monte Carlo Methods in Finance\" by Peter Jäckel.", ""] + JAECKEL_BLOCK
+# A block whose source is a fifth column, a text file of the repository rather than the QuantLib file.
+FIFTH_SOURCE = "LICENSES/LicenseRef-SelfTest.txt"
+FIFTH_BLOCK = ["SELF-TEST LICENCE", "Copyright (c) 2026, the self-test.", "",
+               "Redistribution of this text is permitted, provided that it is kept whole.", "END OF SELF-TEST LICENCE"]
+PRIMES = ("ql/math/primenumbers.hpp", "ql/math/primenumbers.cpp")
+BRIDGE = ("ql/methods/montecarlo/brownianbridge.hpp", "ql/methods/montecarlo/brownianbridge.cpp")
+PRIMITIVE = ("ql/math/randomnumbers/primitivepolynomials.hpp",)
+FIFTH_UPSTREAM = ("ql/patterns/curiouslyrecurring.hpp",)
+PROBE_PRIMES = "src/NanoQL/Numerics/SelfTestPrimesProbe.cs"
+PROBE_PRIMES_SECOND = "src/NanoQL/Numerics/SelfTestPrimesSecondProbe.cs"
+PROBE_PRIMITIVE = "src/NanoQL/Numerics/RandomNumbers/SelfTestPrimitiveProbe.cs"
+PROBE_BRIDGE = "src/NanoQL/Methods/MonteCarlo/SelfTestBridgeProbe.cs"
+PROBE_FIFTH = "src/NanoQL/Patterns/SelfTestFifthColumnProbe.cs"
+# Each block probe: (path, Upstream files, namespace, its copyright lines as written out, licence, its blocks).
+BLOCK_PROBES = [
+    (PROBE_PRIMES, PRIMES, "NanoQL.Numerics", ["Copyright (C) 2003 Ferdinando Ametrano", JAECKEL],
+     "Apache-2.0 AND BSD-3-Clause AND LicenseRef-Jaeckel", [JAECKEL_BLOCK]),
+    (PROBE_PRIMES_SECOND, PRIMES, "NanoQL.Numerics", ["Copyright (C) 2003 Ferdinando Ametrano", JAECKEL],
+     "Apache-2.0 AND BSD-3-Clause AND LicenseRef-Jaeckel", [JAECKEL_BLOCK]),
+    # The starred layout: the reader drops primitivepolynomials.hpp's " * " (§1).
+    (PROBE_PRIMITIVE, PRIMITIVE, "NanoQL.Numerics", [JAECKEL],
+     "Apache-2.0 AND BSD-3-Clause AND LicenseRef-Jaeckel", [PRIMITIVE_BLOCK]),
+    # The pair whose .hpp line carries U+FFFD and whose .cpp line has "ä": read once, as "Jäckel".
+    (PROBE_BRIDGE, BRIDGE, "NanoQL.Methods", ["Copyright (C) 2003 Ferdinando Ametrano",
+                                              "Copyright (C) 2006 StatPro Italia srl",
+                                              "Copyright (C) 2009 Bojan Nikolic", JAECKEL],
+     "Apache-2.0 AND BSD-3-Clause AND LicenseRef-Jaeckel", [JAECKEL_BLOCK]),
+    (PROBE_FIFTH, FIFTH_UPSTREAM, "NanoQL.Patterns", ["Copyright (C) 2003 RiskMap srl"],
+     "Apache-2.0 AND BSD-3-Clause AND LicenseRef-SelfTest", [FIFTH_BLOCK]),
+]
+BLOCK_ROWS = ([f"{rel}\t{RULE}\t{RULE}\tLicenseRef-Jaeckel" for rel in PRIMES + BRIDGE]
+              + [f"{PRIMITIVE[0]}\t{PRIMITIVE_BLOCK[0]}\t{RULE}\tLicenseRef-Jaeckel",
+                 f"{FIFTH_UPSTREAM[0]}\t{FIFTH_BLOCK[0]}\t{FIFTH_BLOCK[-1]}\tLicenseRef-SelfTest\t{FIFTH_SOURCE}"])
+# The name table's entries the probes need, added only where the real table has none.
+BLOCK_TABLE = {
+    "directories": {"ql/math/randomnumbers": {"folder": "Numerics/RandomNumbers", "namespace": "NanoQL.Numerics"},
+                    "ql/methods/montecarlo": {"folder": "Methods/MonteCarlo", "namespace": "NanoQL.Methods"},
+                    "ql/patterns": {"folder": "Patterns", "namespace": "NanoQL.Patterns"}},
+    "files": {"ql/math/primenumbers": {"words": "Prime Numbers"},
+              "ql/math/randomnumbers/primitivepolynomials": {"words": "Primitive Polynomials"},
+              "ql/methods/montecarlo/brownianbridge": {"words": "Brownian Bridge"}},
+}
+
+
+def block_probe_text(upstream, namespace, copyrights, licence, blocks, name):
+    lines = ["// SPDX-FileCopyrightText: " + c for c in copyrights]
+    lines += ["// SPDX-FileCopyrightText: 2026 The nanoql Authors",
+              f"// SPDX-License-Identifier: {licence}",
+              f"// Upstream: {' '.join(upstream)} @ v1.44",
+              "// Ported to C# from QuantLib and modified by the nanoql Authors."]
+    for block in blocks:
+        lines += [("// " + line).rstrip() for line in block]
+    return "\n".join(lines + ["", f"namespace {namespace};", "", f"internal static class {name}", "{", "}", ""])
+
+
+def notices_text(blocks):
+    """THIRD_PARTY_NOTICES.md's sections for blocks, each in a fenced text block, as the real file lays them out."""
+    out = ""
+    for block in blocks:
+        out += "\n```text\n" + "\n".join(block) + "\n```\n"
+    return out
 
 
 def probe_text(ql_root, upstream=("ql/time/weekday.hpp", "ql/time/weekday.cpp"), namespace="NanoQL.Time",
@@ -473,6 +608,14 @@ def append(root, rel, text):
         f.write(text)
 
 
+def replace_all(root, rel, old, new):
+    path = os.path.join(root, rel)
+    text = sources.read_text(path)
+    assert old in text, (rel, old)
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(text.replace(old, new))
+
+
 def perturbations(ql_root, boost_root, tmp):
     """(name, the error code it must raise, a text that error must contain, how to apply it). Applying one may
     return the Boost root the checker then runs with, or "none" for a run without --boost."""
@@ -520,7 +663,8 @@ def perturbations(ql_root, boost_root, tmp):
          lambda r: edit(r, PROBE, "// SPDX-FileCopyrightText: 2026 The nanoql Authors\n", "")),
         ("a bare SPDX expression", "copyright", "expected Apache-2.0 AND BSD-3-Clause",
          lambda r: edit(r, PROBE, "Apache-2.0 AND BSD-3-Clause", "Apache-2.0")),
-        ("a missing third-party block", "copyright", "third-party block",
+        ("a third-party row whose first line isn't in its file", "third-party",
+         "ql/time/weekday.hpp has no comment line 'BEGIN SELF-TEST BLOCK'",
          lambda r: append(r, "tools/third-party-notices.txt",
                           "ql/time/weekday.hpp\tBEGIN SELF-TEST BLOCK\tEND SELF-TEST BLOCK\tMIT\n")),
         ("an unlisted // Partial: line", "partial", "doesn't list it",
@@ -577,6 +721,64 @@ def perturbations(ql_root, boost_root, tmp):
         ("a // Replaced: line outside a TestSuite class", "replaced", "belongs on a TestSuite class",
          lambda r: edit(r, PROBE, "// Ported to C#",
                         "// Replaced: nullDate (Divergences/NullDateTests.cs)\n// Ported to C#")),
+        ("a third-party block missing a middle line", "third-party",
+         f"{PROBE_PRIMES}: doesn't carry the third-party block of {PRIMES[0]} whole and in order; the block's line 5",
+         lambda r: edit(r, PROBE_PRIMES, "// All rights reserved.\n", "")),
+        ("a third-party block out of order", "third-party",
+         f"{PROBE_PRIMES}: doesn't carry the third-party block of {PRIMES[0]} whole and in order; the block's line 4",
+         lambda r: edit(r, PROBE_PRIMES, f"// {JAECKEL}\n// All rights reserved.\n",
+                        f"// All rights reserved.\n// {JAECKEL}\n")),
+        ("a third-party block absent from THIRD_PARTY_NOTICES.md", "third-party",
+         f"THIRD_PARTY_NOTICES.md doesn't carry the third-party block of {PRIMES[0]} (for {PROBE_PRIMES})",
+         lambda r: replace_all(r, "THIRD_PARTY_NOTICES.md", "granted, provided that this notice is preserved.\n", "")),
+        ("a fifth-column source with one changed line", "third-party",
+         f"{PROBE_FIFTH}: doesn't carry the third-party block of {FIFTH_UPSTREAM[0]} whole and in order; the block's "
+         "line 4",
+         lambda r: edit(r, FIFTH_SOURCE, "provided that it is kept whole.", "provided that it is kept.")),
+        ("a starred notice carried with its star", "copyright",
+         f"{PROBE_PRIMITIVE}: QuantLib copyright lines differ from the upstream files' (missing",
+         lambda r: edit(r, PROBE_PRIMITIVE, f"// SPDX-FileCopyrightText: {JAECKEL}",
+                        f"// SPDX-FileCopyrightText: * {JAECKEL}")),
+        ("a U+FFFD line carried instead of its fault-free twin", "copyright",
+         f"{PROBE_BRIDGE}: QuantLib copyright lines differ from the upstream files' (missing",
+         lambda r: edit(r, PROBE_BRIDGE, f"// SPDX-FileCopyrightText: {JAECKEL}",
+                        "// SPDX-FileCopyrightText: " + JAECKEL.replace("ä", sources.FFFD))),
+        ("a U+FFFD line with no fault-free twin", "fffd",
+         f"{PROBE_BRIDGE}: {BRIDGE[0]}:29 holds U+FFFD in a copyright line",
+         lambda r: edit(r, PROBE_BRIDGE, f"// Upstream: {' '.join(BRIDGE)} @", f"// Upstream: {BRIDGE[0]} @")),
+        ("a primitive-polynomials block missing its © line", "third-party",
+         f"{PROBE_PRIMITIVE}: doesn't carry the third-party block of {PRIMITIVE[0]} whole and in order; the block's "
+         "line 3",
+         lambda r: edit(r, PROBE_PRIMITIVE, "// © 2002 \"Monte Carlo Methods in Finance\"\n", "")),
+        ("a split pair's second file missing the block", "third-party",
+         f"{PROBE_PRIMES_SECOND}: doesn't carry the third-party block of {PRIMES[0]} whole and in order; the block's "
+         "line 1",
+         lambda r: edit(r, PROBE_PRIMES_SECOND, "\n".join("// " + line if line else "//" for line in JAECKEL_BLOCK)
+                        + "\n", "")),
+        ("a third-party block's licence missing from the SPDX expression", "third-party",
+         f"{PROBE_PRIMES}: the licence LicenseRef-Jaeckel of {PRIMES[0]}'s third-party block isn't in its SPDX "
+         "expression",
+         lambda r: edit(r, PROBE_PRIMES, "Apache-2.0 AND BSD-3-Clause AND LicenseRef-Jaeckel",
+                        "Apache-2.0 AND BSD-3-Clause")),
+        ("a third-party row of three columns", "third-party", f"'{PRIMES[0]}\t{RULE}\t{RULE}' has 3 columns, not 4 or 5",
+         lambda r: append(r, "tools/third-party-notices.txt", f"{PRIMES[0]}\t{RULE}\t{RULE}\n")),
+        ("a third-party row whose QuantLib file isn't at the pin", "third-party",
+         "tools/third-party-notices.txt: ql/math/noprimenumbers.hpp doesn't exist at the pin",
+         lambda r: append(r, "tools/third-party-notices.txt",
+                          f"ql/math/noprimenumbers.hpp\t{RULE}\t{RULE}\tLicenseRef-Jaeckel\n")),
+        ("a third-party row whose fifth column doesn't exist", "third-party",
+         f"{FIFTH_UPSTREAM[0]}'s source LICENSES/LicenseRef-Missing.txt doesn't exist",
+         lambda r: append(r, "tools/third-party-notices.txt",
+                          f"{FIFTH_UPSTREAM[0]}\t{FIFTH_BLOCK[0]}\t{FIFTH_BLOCK[-1]}\tLicenseRef-SelfTest\t"
+                          "LICENSES/LicenseRef-Missing.txt\n")),
+        ("a third-party row whose last line comes before its first", "third-party",
+         f"{PRIMES[0]} has no comment line '{JAECKEL_BLOCK[1]}', the row's last line, after its first line",
+         lambda r: append(r, "tools/third-party-notices.txt",
+                          f"{PRIMES[0]}\t{JAECKEL_BLOCK[-2]}\t{JAECKEL_BLOCK[1]}\tLicenseRef-Jaeckel\n")),
+        ("a U+FFFD in a fifth-column source", "fffd",
+         f"tools/third-party-notices.txt: {FIFTH_SOURCE}:4 holds U+FFFD in {FIFTH_UPSTREAM[0]}'s block, and a "
+         "fifth-column source has no twin",
+         lambda r: edit(r, FIFTH_SOURCE, "Redistribution", "Redistributi" + sources.FFFD + "n")),
     ]
 
 
@@ -598,6 +800,20 @@ def self_test(root, ql_root, boost_root):
             write(base, f"{BOOST_SRC}{folder}/{name}.cs", boost_probe_text(copyrights, upstream, name))
             boost_table[upstream.rsplit("/", 1)[0]] = {"folder": folder}
         edit(base, "tools/porting-map.json", '"boost": {}', '"boost": ' + json.dumps(boost_table))
+        table_path = os.path.join(base, "tools", "porting-map.json")
+        table = sources.load_table(base)
+        for section, entries in BLOCK_TABLE.items():
+            for key, value in entries.items():
+                table[section].setdefault(key, value)
+        with open(table_path, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(table, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        for path, upstream, namespace, copyrights, licence, blocks in BLOCK_PROBES:
+            name = path.rsplit("/", 1)[1][:-3]
+            write(base, path, block_probe_text(upstream, namespace, copyrights, licence, blocks, name))
+        append(base, "tools/third-party-notices.txt", "\n".join(BLOCK_ROWS) + "\n")
+        write(base, FIFTH_SOURCE, "\n".join(FIFTH_BLOCK) + "\n")
+        append(base, "THIRD_PARTY_NOTICES.md", notices_text([JAECKEL_BLOCK, PRIMITIVE_BLOCK, FIFTH_BLOCK]))
         porting_map.main([ql_root, "--root", base])
         baseline = Checker(base, ql_root, boost_root)
         baseline.run()
@@ -621,6 +837,8 @@ def self_test(root, ql_root, boost_root):
 
 
 def main(argv):
+    # Notices quote names such as "Jäckel" and "©", which a console's code page may not hold.
+    sys.stdout.reconfigure(errors="backslashreplace")
     argv = list(argv)
     boost_root = None
     if "--boost" in argv:
