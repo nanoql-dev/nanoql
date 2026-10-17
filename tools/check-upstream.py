@@ -799,9 +799,10 @@ def self_test(root, ql_root, boost_root):
         for upstream, folder, name, copyrights in BOOST_LAYOUTS:
             write(base, f"{BOOST_SRC}{folder}/{name}.cs", boost_probe_text(copyrights, upstream, name))
             boost_table[upstream.rsplit("/", 1)[0]] = {"folder": folder}
-        edit(base, "tools/porting-map.json", '"boost": {}', '"boost": ' + json.dumps(boost_table))
         table_path = os.path.join(base, "tools", "porting-map.json")
         table = sources.load_table(base)
+        for directory, entry in boost_table.items():
+            table["boost"].setdefault(directory, entry)
         for section, entries in BLOCK_TABLE.items():
             for key, value in entries.items():
                 table[section].setdefault(key, value)

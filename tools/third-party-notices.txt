@@ -18,5 +18,7 @@
 # the block. Each such file carries every line of the block, in order, in its header comment ("//" for a blank line),
 # and so does THIRD_PARTY_NOTICES.md, once for every row whose block reads the same. A line holding U+FFFD, a byte
 # fault in QuantLib's copy, is read as its fault-free twin in another file of the port.
-#
-# No ported file carries a third-party notice yet.
+
+ql/math/errorfunction.cpp	NOTE: The following copyright notice	====================================================	SunPro
+ql/math/primenumbers.hpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel
+ql/math/primenumbers.cpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel

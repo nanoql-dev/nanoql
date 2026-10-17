@@ -210,8 +210,8 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   content. Opening a sealed class later is a compatible change; sealing an open one is not. Users compose instead, or
   add members through C# 14 extension members.
 - **Extension points so far:** `Calendar`, `DayCounter`, `Event`, `CashFlow`, `Coupon`, `Extrapolator`,
-  `TermStructure`, `YieldTermStructure` and `Instrument` (abstract); `Swap`, `SimpleCashFlow`, `InstrumentResults`
-  and `SwapResults` (unsealed).
+  `TermStructure`, `YieldTermStructure`, `Instrument` and `TridiagonalOperatorTimeSetter` (abstract); `Swap`,
+  `SimpleCashFlow`, `InstrumentResults`, `SwapResults` and `TridiagonalOperator` (unsealed).
 - **Leg:** QuantLib's `Leg` is the global alias
   `global using Leg = System.Collections.Immutable.ImmutableArray<NanoQL.CashFlow>;` in `Types.cs`. Public signatures
   show `ImmutableArray<CashFlow>`.

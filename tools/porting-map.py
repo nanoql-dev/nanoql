@@ -310,7 +310,8 @@ def build(root, ql_root):
                 if h.partial:
                     partial.append(h.partial)
             status = "not started" if not mine else ("partial" if partial else "ported")
-            left = [n for n in declared if n not in ported]
+            # A renamed type (the name table's renames: Array is Vector) counts under its nanoql name.
+            left = [n for n in declared if table["renames"].get(n, n) not in ported]
             if partial:
                 # Files split from one unit may carry the same text; it is printed once.
                 notes.append("partial: " + "; ".join(dict.fromkeys(partial)))

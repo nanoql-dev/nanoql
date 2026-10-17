@@ -6,7 +6,10 @@
     "ql/cashflows": {"folder": "Coupons", "namespace": "NanoQL.Coupons"},
     "ql/instruments": {"folder": "Instruments", "namespace": "NanoQL.Instruments"},
     "ql/math": {"folder": "Numerics", "namespace": "NanoQL.Numerics"},
+    "ql/math/distributions": {"folder": "Numerics/Distributions", "namespace": "NanoQL.Numerics"},
     "ql/math/interpolations": {"folder": "Numerics/Interpolations", "namespace": "NanoQL.Numerics"},
+    "ql/methods": {"folder": "Methods", "namespace": "NanoQL.Methods"},
+    "ql/methods/finitedifferences": {"folder": "Methods/FiniteDifferences", "namespace": "NanoQL.Methods"},
     "ql/pricingengines": {"folder": "PricingEngines", "namespace": "NanoQL.PricingEngines"},
     "ql/pricingengines/swap": {"folder": "PricingEngines/Swap", "namespace": "NanoQL.PricingEngines"},
     "ql/termstructures": {"folder": "TermStructures", "namespace": "NanoQL.TermStructures"},
@@ -27,8 +30,18 @@
     "ql/instrument": {"words": "Instrument"},
     "ql/instruments/swap": {"words": "Swap", "subfolder": true},
     "ql/interestrate": {"words": "Interest Rate"},
+    "ql/math/array": {"words": "Array"},
     "ql/math/comparison": {"words": "Comparison"},
+    "ql/math/distributions/gammadistribution": {"words": "Gamma Distribution"},
+    "ql/math/distributions/normaldistribution": {"words": "Normal Distribution", "subfolder": true},
+    "ql/math/distributions/poissondistribution": {"words": "Poisson Distribution", "subfolder": true},
+    "ql/math/errorfunction": {"words": "Error Function"},
+    "ql/math/factorial": {"words": "Factorial"},
+    "ql/math/incompletegamma": {"words": "Incomplete Gamma"},
     "ql/math/interpolations/extrapolation": {"words": "Extrapolation"},
+    "ql/math/matrix": {"words": "Matrix"},
+    "ql/math/primenumbers": {"words": "Prime Numbers"},
+    "ql/methods/finitedifferences/tridiagonaloperator": {"words": "Tridiagonal Operator"},
     "ql/pricingengines/swap/discountingswapengine": {"words": "Discounting Swap Engine"},
     "ql/termstructure": {"words": "Term Structure"},
     "ql/termstructures/yield/flatforward": {"words": "Flat Forward"},
@@ -57,11 +70,16 @@
     "ql/utilities/dataformatters": {"words": "Data Formatters"}
   },
   "tests": {
+    "test-suite/array": {"words": "Array"},
     "test-suite/calendars": {"words": "Calendars"},
     "test-suite/cashflows": {"words": "Cash Flows"},
     "test-suite/dates": {"words": "Dates"},
     "test-suite/daycounters": {"words": "Day Counters"},
+    "test-suite/distributions": {"words": "Distributions"},
+    "test-suite/functions": {"words": "Functions"},
     "test-suite/interestrates": {"words": "Interest Rates"},
+    "test-suite/matrices": {"words": "Matrices"},
+    "test-suite/operators": {"words": "Operators"},
     "test-suite/period": {"words": "Period"},
     "test-suite/schedule": {"words": "Schedule"},
     "test-suite/termstructures": {"words": "Term Structures"}
@@ -81,6 +99,7 @@
     "ql/types": "global type aliases",
     "ql/utilities/clone": "references",
     "ql/utilities/null": "nullable types",
+    "ql/utilities/steppingiterator": "indices into the matrix",
     "ql/utilities/variants": "pattern matching",
     "test-suite/paralleltestrunner": "test infrastructure: xUnit and the vector harness",
     "test-suite/preconditions": "test infrastructure: xUnit and the vector harness",
@@ -114,6 +133,15 @@
     "test-suite/settings": "tests Settings, which EvaluationContext replaces",
     "test-suite/tracing": "tests the C++ platform"
   },
-  "renames": {},
-  "boost": {}
+  "renames": {
+    "Array": "Vector"
+  },
+  "boost": {
+    "boost/math/distributions": {"folder": "Math/Distributions"},
+    "boost/math/distributions/detail": {"folder": "Math/Distributions/Detail"},
+    "boost/math/special_functions": {"folder": "Math/SpecialFunctions"},
+    "boost/math/special_functions/detail": {"folder": "Math/SpecialFunctions/Detail"},
+    "boost/math/tools/detail": {"folder": "Math/Tools/Detail"},
+    "boost/numeric/ublas": {"folder": "Numeric/Ublas"}
+  }
 }

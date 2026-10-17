@@ -20,7 +20,7 @@ public sealed class VectorAssert
 {
     private const int MaxReported = 50;
 
-    private static readonly JsonSerializerOptions Reals = new()
+    private static readonly JsonSerializerOptions RealOptions = new()
     {
         NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals,
     };
@@ -41,6 +41,15 @@ public sealed class VectorAssert
 
     /// <summary>Gets the number of outputs where an expected throw was mapped to a documented value.</summary>
     public int MappedOutputs { get; private set; }
+
+    /// <summary>Gets the number of real outputs compared so far, each a number or a <c>{value, scale}</c> object.</summary>
+    public int Reals { get; private set; }
+
+    /// <summary>
+    /// Gets how many of the real outputs compared so far are bit-identical to QuantLib's (the same IEEE 754 bits), a
+    /// reading beside the tolerance, as <c>tools/vectors/agree.py</c> gives for the twins.
+    /// </summary>
+    public int BitIdentical { get; private set; }
 
     /// <summary>Gets the mismatches found so far.</summary>
     public IReadOnlyList<string> Mismatches => mismatches;
@@ -303,7 +312,7 @@ public sealed class VectorAssert
         double e;
         try
         {
-            e = expected.Deserialize<double>(Reals);
+            e = expected.Deserialize<double>(RealOptions);
         }
         catch (JsonException)
         {
@@ -318,6 +327,12 @@ public sealed class VectorAssert
         }
 
         double a = Convert.ToDouble(actual, CultureInfo.InvariantCulture);
+        Reals++;
+        if (BitConverter.DoubleToInt64Bits(e) == BitConverter.DoubleToInt64Bits(a))
+        {
+            BitIdentical++;
+        }
+
         bool equal = double.IsNaN(e) || double.IsInfinity(e) || double.IsNaN(a) || double.IsInfinity(a)
             ? e.Equals(a)
             : Tolerance.Within(e, a, scale, relative);

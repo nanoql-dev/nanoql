@@ -123,8 +123,9 @@ public static class DataFormattersFunctions
         _ => value?.ToString() ?? string.Empty,
     };
 
-    // A C++ stream's default floating-point output: %g with six significant digits.
-    private static string General(double x)
+    // A C++ stream's default floating-point output: %g with six significant digits. Also the element text of
+    // Vector's and Matrix's ToString, QuantLib's operator<< for Array and Matrix.
+    internal static string General(double x)
     {
         if (double.IsNaN(x))
         {

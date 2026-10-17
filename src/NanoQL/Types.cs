@@ -8,7 +8,8 @@
 // QuantLib's scalar type names, kept as global aliases so ported code reads as QuantLib's does. They are compile-time
 // only: public signatures show double, int and long. Decimal and Time are not aliased, and are written as double:
 // Decimal would clash with System.Decimal, and Time with the NanoQL.Time namespace. BigNatural is not aliased:
-// internals that rely on unsigned arithmetic use ulong.
+// internals that rely on QuantLib's unsigned long or BigNatural use uint, its width on MSVC, where the vectors are
+// generated; public members take QuantLib's 32-bit unsigned values as long.
 global using Integer = int;
 global using BigInteger = long;
 global using Natural = int;
