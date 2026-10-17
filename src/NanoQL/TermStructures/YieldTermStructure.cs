@@ -61,6 +61,7 @@ public abstract class YieldTermStructure : TermStructure
     /// <param name="freq">The result's frequency.</param>
     /// <param name="extrapolate">Whether to extrapolate past the curve's maximum date.</param>
     /// <returns>The zero rate.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public InterestRate ZeroRate(
         Date d, DayCounter resultDayCounter, Compounding comp, Frequency freq = Frequency.Annual, bool extrapolate = false)
     {
@@ -86,6 +87,7 @@ public abstract class YieldTermStructure : TermStructure
     /// <param name="freq">The result's frequency.</param>
     /// <param name="extrapolate">Whether to extrapolate past the curve's maximum time.</param>
     /// <returns>The zero rate, with the curve's day counter.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public InterestRate ZeroRate(double t, Compounding comp, Frequency freq = Frequency.Annual, bool extrapolate = false)
     {
         if (t == 0.0)
@@ -108,6 +110,7 @@ public abstract class YieldTermStructure : TermStructure
     /// <param name="freq">The result's frequency.</param>
     /// <param name="extrapolate">Whether to extrapolate past the curve's maximum date.</param>
     /// <returns>The forward rate.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public InterestRate ForwardRate(
         Date d1,
         Date d2,
@@ -148,6 +151,7 @@ public abstract class YieldTermStructure : TermStructure
     /// <param name="freq">The result's frequency.</param>
     /// <param name="extrapolate">Whether to extrapolate past the curve's maximum date.</param>
     /// <returns>The forward rate.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public InterestRate ForwardRate(
         Date d,
         Period p,
@@ -171,6 +175,7 @@ public abstract class YieldTermStructure : TermStructure
     /// <param name="freq">The result's frequency.</param>
     /// <param name="extrapolate">Whether to extrapolate past the curve's maximum time.</param>
     /// <returns>The forward rate, with the curve's day counter.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public InterestRate ForwardRate(
         double t1, double t2, Compounding comp, Frequency freq = Frequency.Annual, bool extrapolate = false)
     {

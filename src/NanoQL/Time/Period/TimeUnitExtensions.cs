@@ -22,12 +22,14 @@ public static class TimeUnitExtensions
         /// <param name="n">The length.</param>
         /// <param name="units">The time unit.</param>
         /// <returns>The period.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The unit isn't a member of the enum.</exception>
         public static Period operator *(int n, TimeUnit units) => new(n, units);
 
         /// <summary>A period of the given length in the given unit.</summary>
         /// <param name="units">The time unit.</param>
         /// <param name="n">The length.</param>
         /// <returns>The period.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The unit isn't a member of the enum.</exception>
         public static Period operator *(TimeUnit units, int n) => new(n, units);
     }
 }

@@ -1,0 +1,106 @@
+// SPDX-FileCopyrightText: 2026 The nanoql Authors
+// SPDX-License-Identifier: Apache-2.0
+
+using NanoQL.Time;
+
+namespace NanoQL;
+
+/// <summary>
+/// Checks of enum arguments: C# lets any integer be cast to an enum, so a member that switches on, stores or computes
+/// with an enum argument refuses a value outside the type's members, naming the parameter.
+/// </summary>
+/// <remarks>
+/// The checks compare against the members explicitly rather than calling <see cref="Enum.IsDefined{TEnum}(TEnum)"/>,
+/// as the .NET design guidelines advise, and use QuantLib's message for the same failure. A member that also refuses
+/// some of the type's members checks those itself (<see cref="Period.FromFrequency"/> refuses
+/// <see cref="Frequency.OtherFrequency"/>).
+/// </remarks>
+internal static class EnumArguments
+{
+    /// <summary>Refuses a compounding rule outside <see cref="Compounding"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(Compounding value, string paramName)
+    {
+        if (value is < Compounding.Simple or > Compounding.CompoundedThenSimple)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown compounding convention");
+        }
+    }
+
+    /// <summary>Refuses a frequency outside <see cref="Frequency"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(Frequency value, string paramName)
+    {
+        switch (value)
+        {
+            case Frequency.NoFrequency:
+            case Frequency.Once:
+            case Frequency.Annual:
+            case Frequency.Semiannual:
+            case Frequency.EveryFourthMonth:
+            case Frequency.Quarterly:
+            case Frequency.Bimonthly:
+            case Frequency.Monthly:
+            case Frequency.EveryFourthWeek:
+            case Frequency.Biweekly:
+            case Frequency.Weekly:
+            case Frequency.Daily:
+            case Frequency.OtherFrequency:
+                return;
+            default:
+                throw new ArgumentOutOfRangeException(paramName, value, $"unknown frequency ({(int)value})");
+        }
+    }
+
+    /// <summary>Refuses a time unit outside <see cref="TimeUnit"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(TimeUnit value, string paramName)
+    {
+        if (value is < TimeUnit.Days or > TimeUnit.Microseconds)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown time unit ({(int)value})");
+        }
+    }
+
+    /// <summary>Refuses a business-day convention outside <see cref="BusinessDayConvention"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(BusinessDayConvention value, string paramName)
+    {
+        if (value is < BusinessDayConvention.Following or > BusinessDayConvention.Nearest)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown business-day convention");
+        }
+    }
+
+    /// <summary>Refuses a date-generation rule outside <see cref="DateGenerationRule"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(DateGenerationRule value, string paramName)
+    {
+        if (value is < DateGenerationRule.Backward or > DateGenerationRule.CDS2015)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown rule ({(int)value})");
+        }
+    }
+
+    /// <summary>Refuses a weekday outside <see cref="Weekday"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(Weekday value, string paramName)
+    {
+        if (value is < Weekday.Sunday or > Weekday.Saturday)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown weekday");
+        }
+    }
+}

@@ -35,7 +35,7 @@ public sealed class JointCalendar : Calendar
     /// <param name="c2">The second calendar.</param>
     /// <param name="r">The rule for joining them.</param>
     /// <exception cref="ArgumentNullException">A calendar is <see langword="null"/>.</exception>
-    /// <exception cref="NanoQLException">The rule is unknown.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The rule isn't a member of the enum.</exception>
     public JointCalendar(Calendar c1, Calendar c2, JointCalendarRule r = JointCalendarRule.JoinHolidays)
         : this(r, [Required(c1), Required(c2)])
     {
@@ -47,7 +47,7 @@ public sealed class JointCalendar : Calendar
     /// <param name="c3">The third calendar.</param>
     /// <param name="r">The rule for joining them.</param>
     /// <exception cref="ArgumentNullException">A calendar is <see langword="null"/>.</exception>
-    /// <exception cref="NanoQLException">The rule is unknown.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The rule isn't a member of the enum.</exception>
     public JointCalendar(Calendar c1, Calendar c2, Calendar c3, JointCalendarRule r = JointCalendarRule.JoinHolidays)
         : this(r, [Required(c1), Required(c2), Required(c3)])
     {
@@ -60,7 +60,7 @@ public sealed class JointCalendar : Calendar
     /// <param name="c4">The fourth calendar.</param>
     /// <param name="r">The rule for joining them.</param>
     /// <exception cref="ArgumentNullException">A calendar is <see langword="null"/>.</exception>
-    /// <exception cref="NanoQLException">The rule is unknown.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The rule isn't a member of the enum.</exception>
     public JointCalendar(
         Calendar c1, Calendar c2, Calendar c3, Calendar c4, JointCalendarRule r = JointCalendarRule.JoinHolidays)
         : this(r, [Required(c1), Required(c2), Required(c3), Required(c4)])
@@ -74,7 +74,7 @@ public sealed class JointCalendar : Calendar
     /// <exception cref="ArgumentException">
     /// <paramref name="cv"/> is empty or holds a <see langword="null"/> calendar.
     /// </exception>
-    /// <exception cref="NanoQLException">The rule is unknown.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The rule isn't a member of the enum.</exception>
     public JointCalendar(IEnumerable<Calendar> cv, JointCalendarRule r = JointCalendarRule.JoinHolidays)
         : this(r, Copy(cv))
     {
@@ -211,7 +211,7 @@ public sealed class JointCalendar : Calendar
                 text.Append("JoinBusinessDays(");
                 break;
             default:
-                throw new NanoQLException("unknown joint calendar rule");
+                throw new ArgumentOutOfRangeException(nameof(r), r, "unknown joint calendar rule");
         }
 
         text.Append(calendars[0].Name);

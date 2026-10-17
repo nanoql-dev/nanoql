@@ -275,8 +275,10 @@ public readonly struct Date : IEquatable<Date>, IComparable<Date>, IComparable
     /// <param name="d">The date.</param>
     /// <param name="w">The weekday.</param>
     /// <returns>The date; e.g., the Friday following Tuesday, January 15th, 2002 was January 18th, 2002.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The weekday isn't a member of the enum.</exception>
     public static Date NextWeekday(Date d, Weekday w)
     {
+        EnumArguments.Check(w, nameof(w));
         Weekday wd = d.Weekday;
         return d + ((wd > w ? 7 : 0) - (int)wd + (int)w);
     }
@@ -287,6 +289,9 @@ public readonly struct Date : IEquatable<Date>, IComparable<Date>, IComparable
     /// <param name="m">The month.</param>
     /// <param name="y">The year.</param>
     /// <returns>The date; e.g., the 4th Thursday of March, 1998 was March 26th, 1998.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="n"/> isn't 1 to 5, or the weekday or the month isn't a member of its enum.
+    /// </exception>
     public static Date NthWeekday(int n, Weekday w, Month m, int y)
     {
         if (!(n > 0))
@@ -299,6 +304,7 @@ public readonly struct Date : IEquatable<Date>, IComparable<Date>, IComparable
             throw new ArgumentOutOfRangeException(nameof(n), "no more than 5 weekday in a given (month, year)");
         }
 
+        EnumArguments.Check(w, nameof(w));
         Weekday first = new Date(1, m, y).Weekday;
         int skip = n - (w >= first ? 1 : 0);
         return new Date((1 + (int)w + (skip * 7)) - (int)first, m, y);

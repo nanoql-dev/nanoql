@@ -15,7 +15,7 @@ public static class FrequencyFunctions
     /// <summary>A frequency's text, as QuantLib writes it; it differs from the member name for four members.</summary>
     /// <param name="f">The frequency.</param>
     /// <returns>The text.</returns>
-    /// <exception cref="NanoQLException">The value is not a frequency.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a frequency.</exception>
     public static string ToString(Frequency f) => f switch
     {
         Frequency.NoFrequency => "No-Frequency",
@@ -31,6 +31,6 @@ public static class FrequencyFunctions
         Frequency.Weekly => "Weekly",
         Frequency.Daily => "Daily",
         Frequency.OtherFrequency => "Unknown frequency",
-        _ => throw new NanoQLException($"unknown frequency ({(int)f})"),
+        _ => throw new ArgumentOutOfRangeException(nameof(f), f, $"unknown frequency ({(int)f})"),
     };
 }

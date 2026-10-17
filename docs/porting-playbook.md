@@ -78,7 +78,8 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
 | `CalibratedModel::calibrate` | A static `Calibrate` that returns an immutable parameter object. |
 | `SeedGenerator` | An explicit input: a seed is a parameter. |
 | `QL_REQUIRE` on a public method's parameter | `ArgumentException`, with `ParamName` set. A null argument a member doesn't accept throws `ArgumentNullException`. |
-| Other `QL_REQUIRE`, `QL_FAIL`, `QL_ENSURE` | `NanoQLException`, including a `QL_FAIL` in a switch's default that rejects an unknown enum value, even one passed in as an argument. The wording is kept; numbers in it use C# formatting. |
+| An enum argument a member always refuses: a value outside the type's members (C# lets any integer be cast to an enum), or a member it never handles (`Period(OtherFrequency)`) | `ArgumentOutOfRangeException`, naming the parameter, with QuantLib's message. A public member that switches on the value, stores it or computes with it checks it on entry, before any work that reads it; one that passes it on under the same parameter name to such a member relies on that member's check; one that only compares it with named members needs no check. This replaces QuantLib's `QL_FAIL`, in a switch's default or on a `case` label, wherever the value is an argument the member always refuses. A value refused only together with other arguments keeps the other rows' mapping: a mixed compounding in `ImpliedRate`, refused unless the compound factor is 1, and an intraday unit in `Calendar.Advance`, refused unless the count is 0, throw `NanoQLException`. |
+| Other `QL_REQUIRE`, `QL_FAIL`, `QL_ENSURE` | `NanoQLException`, including a `QL_FAIL` on a value already stored. A value outside its enum can no longer be stored, so such a branch fails only for a member the operation doesn't handle (`Period(3, Hours).Frequency()`), as in QuantLib. The wording is kept; numbers in it use C# formatting. |
 | `Null<T>()`, `ext::optional<T>` | `T?`. QuantLib's null `Date()` is `Date?` null; `default(Date)` is never a valid date, and public members given it throw `ArgumentException`. Ported `d == Date()` becomes `d is null`. |
 | `ext::shared_ptr<T>`, `ext::make_shared` | A plain `T` reference; `new T(...)`. |
 | `ext::function` | `Func<…>` or `Action<…>`. |
@@ -238,7 +239,8 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `Probability` (`double`), `Size`, `Integer`, `Natural` (`int`) and `BigInteger` (`long`), and the `Leg` alias (§2.4).
   `Decimal` and `Time` are written as `double`. The test project links `Types.cs`, so ported tests keep QuantLib's
   names.
-- **Errors:** `ArgumentException` for a `QL_REQUIRE` on a public method's parameter; QuantLib's other checks throw
+- **Errors:** `ArgumentException` for a `QL_REQUIRE` on a public method's parameter, and
+  `ArgumentOutOfRangeException` for an enum argument a member always refuses; QuantLib's other checks throw
   `NanoQLException` (§2's table), which derives from `Exception` and has the three standard constructors.
 - **Experimental code:** types ported from `ql/experimental` carry `[Experimental("NQL0001")]`. NanoQL's own projects
   consent with `<NoWarn>$(NoWarn);NQL0001</NoWarn>`; a consumer that references one still gets the diagnostic.

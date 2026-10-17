@@ -26,55 +26,22 @@ public readonly struct Period : IEquatable<Period>, IComparable<Period>, ICompar
     /// <summary>Initializes a new instance of the <see cref="Period"/> struct.</summary>
     /// <param name="n">The length.</param>
     /// <param name="units">The time unit.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The unit isn't a member of <see cref="TimeUnit"/>.</exception>
     public Period(int n, TimeUnit units)
     {
+        EnumArguments.Check(units, nameof(units));
         Length = n;
         Units = units;
     }
 
     /// <summary>Initializes a new instance of the <see cref="Period"/> struct from a frequency.</summary>
     /// <param name="f">The frequency.</param>
-    /// <exception cref="NanoQLException">The frequency is <see cref="Time.Frequency.OtherFrequency"/> or unknown.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The frequency is <see cref="Time.Frequency.OtherFrequency"/> or not a member of <see cref="Time.Frequency"/>.
+    /// </exception>
     public Period(Frequency f)
     {
-        switch (f)
-        {
-            case Time.Frequency.NoFrequency:
-                // same as Period()
-                Units = TimeUnit.Days;
-                Length = 0;
-                break;
-            case Time.Frequency.Once:
-                Units = TimeUnit.Years;
-                Length = 0;
-                break;
-            case Time.Frequency.Annual:
-                Units = TimeUnit.Years;
-                Length = 1;
-                break;
-            case Time.Frequency.Semiannual:
-            case Time.Frequency.EveryFourthMonth:
-            case Time.Frequency.Quarterly:
-            case Time.Frequency.Bimonthly:
-            case Time.Frequency.Monthly:
-                Units = TimeUnit.Months;
-                Length = 12 / (int)f;
-                break;
-            case Time.Frequency.EveryFourthWeek:
-            case Time.Frequency.Biweekly:
-            case Time.Frequency.Weekly:
-                Units = TimeUnit.Weeks;
-                Length = 52 / (int)f;
-                break;
-            case Time.Frequency.Daily:
-                Units = TimeUnit.Days;
-                Length = 1;
-                break;
-            case Time.Frequency.OtherFrequency:
-                throw new NanoQLException("unknown frequency"); // no point in showing 999...
-            default:
-                throw new NanoQLException($"unknown frequency ({(int)f})");
-        }
+        this = FromFrequency(f, nameof(f));
     }
 
     /// <summary>Gets the length.</summary>
@@ -398,18 +365,53 @@ public readonly struct Period : IEquatable<Period>, IComparable<Period>, ICompar
         _ => throw new ArgumentException($"Object must be of type {nameof(Period)}.", nameof(obj)),
     };
 
+    /// <summary>The period of a frequency, refusing the frequencies QuantLib can't turn into one.</summary>
+    /// <param name="f">The frequency.</param>
+    /// <param name="paramName">The caller's parameter name.</param>
+    /// <returns>The period.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The frequency is <see cref="Time.Frequency.OtherFrequency"/> or not a member of <see cref="Time.Frequency"/>.
+    /// </exception>
+    internal static Period FromFrequency(Frequency f, string paramName)
+    {
+        switch (f)
+        {
+            case Time.Frequency.NoFrequency:
+                // same as Period()
+                return new Period(0, TimeUnit.Days);
+            case Time.Frequency.Once:
+                return new Period(0, TimeUnit.Years);
+            case Time.Frequency.Annual:
+                return new Period(1, TimeUnit.Years);
+            case Time.Frequency.Semiannual:
+            case Time.Frequency.EveryFourthMonth:
+            case Time.Frequency.Quarterly:
+            case Time.Frequency.Bimonthly:
+            case Time.Frequency.Monthly:
+                return new Period(12 / (int)f, TimeUnit.Months);
+            case Time.Frequency.EveryFourthWeek:
+            case Time.Frequency.Biweekly:
+            case Time.Frequency.Weekly:
+                return new Period(52 / (int)f, TimeUnit.Weeks);
+            case Time.Frequency.Daily:
+                return new Period(1, TimeUnit.Days);
+            case Time.Frequency.OtherFrequency:
+                throw new ArgumentOutOfRangeException(paramName, f, "unknown frequency"); // no point in showing 999...
+            default:
+                throw new ArgumentOutOfRangeException(paramName, f, $"unknown frequency ({(int)f})");
+        }
+    }
+
     /// <summary>
     /// The period in QuantLib's short format, e.g. "6M". Milliseconds and microseconds, which that format can't print,
-    /// are written "1ms" and "1us", and a value outside <see cref="TimeUnit"/> as its number, so the text never throws.
+    /// are written "1ms" and "1us", so the text never throws; a unit outside <see cref="TimeUnit"/> can't be constructed.
     /// </summary>
     /// <returns>The short-format text.</returns>
     public override string ToString() => Units switch
     {
         TimeUnit.Milliseconds => Length.ToString(CultureInfo.InvariantCulture) + "ms",
         TimeUnit.Microseconds => Length.ToString(CultureInfo.InvariantCulture) + "us",
-        TimeUnit.Days or TimeUnit.Weeks or TimeUnit.Months or TimeUnit.Years
-            or TimeUnit.Hours or TimeUnit.Minutes or TimeUnit.Seconds => PeriodFunctions.ShortPeriod(this),
-        _ => Length.ToString(CultureInfo.InvariantCulture) + " (time unit " + ((int)Units).ToString(CultureInfo.InvariantCulture) + ")",
+        _ => PeriodFunctions.ShortPeriod(this),
     };
 
     private static void RequireZero(Period p1, Period p2)

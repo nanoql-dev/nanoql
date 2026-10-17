@@ -242,7 +242,9 @@ public class PeriodTests
             Assert.True(new Period(f).Frequency() == f);
         }
 
-        Assert.Throws<NanoQLException>(() => new Period(Frequency.OtherFrequency).Frequency());
+        // BOOST_CHECK_THROW(..., QuantLib::Error): QuantLib's errors are ArgumentException or NanoQLException here.
+        Exception error = Assert.ThrowsAny<Exception>(() => new Period(Frequency.OtherFrequency).Frequency());
+        Assert.True(error is ArgumentException or NanoQLException, error.GetType().Name);
 
         // test Period(count, timeUnit).frequency()
         Assert.True(new Period(1, TimeUnit.Years).Frequency() == Frequency.Annual);

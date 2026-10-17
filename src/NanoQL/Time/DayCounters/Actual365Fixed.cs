@@ -22,7 +22,7 @@ public sealed class Actual365Fixed : DayCounter
 
     /// <summary>Initializes a new instance of the <see cref="Actual365Fixed"/> class.</summary>
     /// <param name="c">The convention.</param>
-    /// <exception cref="NanoQLException">The convention is unknown.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
     public Actual365Fixed(Actual365FixedConvention c = Actual365FixedConvention.Standard)
     {
         impl = Implementation(c);
@@ -50,7 +50,7 @@ public sealed class Actual365Fixed : DayCounter
         Actual365FixedConvention.Standard => new StandardImpl(),
         Actual365FixedConvention.Canadian => new CAImpl(),
         Actual365FixedConvention.NoLeap => new NLImpl(),
-        _ => throw new NanoQLException("unknown Actual/365 (Fixed) convention"),
+        _ => throw new ArgumentOutOfRangeException(nameof(c), c, "unknown Actual/365 (Fixed) convention"),
     };
 
     // QuantLib's DayCounter::Impl.

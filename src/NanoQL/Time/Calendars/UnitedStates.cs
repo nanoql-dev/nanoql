@@ -122,7 +122,7 @@ public sealed class UnitedStates : Calendar
 
     /// <summary>Initializes a new instance of the <see cref="UnitedStates"/> class for the given market.</summary>
     /// <param name="market">The market whose holidays the calendar follows.</param>
-    /// <exception cref="NanoQLException">The market is unknown.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The market isn't a member of the enum.</exception>
     public UnitedStates(UnitedStatesMarket market)
     {
         switch (market)
@@ -149,7 +149,7 @@ public sealed class UnitedStates : Calendar
                 impl = FederalReserveImplInstance;
                 break;
             default:
-                throw new NanoQLException("unknown market");
+                throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
     }
 

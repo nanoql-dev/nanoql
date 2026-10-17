@@ -32,7 +32,7 @@ public sealed class ActualActual : DayCounter
     /// conventions. When it is <see langword="null"/> (QuantLib's empty default) or empty, the reference periods are
     /// the ones passed to <see cref="YearFraction"/>.
     /// </param>
-    /// <exception cref="NanoQLException">The convention is unknown.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
     public ActualActual(ActualActualConvention c, Schedule? schedule = null)
     {
         impl = Implementation(c, schedule);
@@ -75,7 +75,7 @@ public sealed class ActualActual : DayCounter
             case ActualActualConvention.Euro:
                 return new AFBImpl();
             default:
-                throw new NanoQLException("unknown act/act convention");
+                throw new ArgumentOutOfRangeException(nameof(c), c, "unknown act/act convention");
         }
     }
 

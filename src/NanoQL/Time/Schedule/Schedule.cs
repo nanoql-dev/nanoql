@@ -42,6 +42,7 @@ public sealed class Schedule
     /// <param name="endOfMonth">The end-of-month flag, if known.</param>
     /// <param name="isRegular">Whether each period is regular: empty, or one flag per period.</param>
     /// <exception cref="ArgumentException"><paramref name="isRegular"/> has the wrong size.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">A convention or the rule isn't a member of its enum.</exception>
     public Schedule(
         IEnumerable<Date> dates,
         Calendar? calendar = null,
@@ -53,6 +54,17 @@ public sealed class Schedule
         IEnumerable<bool>? isRegular = null)
     {
         ArgumentNullException.ThrowIfNull(dates);
+        EnumArguments.Check(convention, nameof(convention));
+        if (terminationDateConvention is BusinessDayConvention tdc)
+        {
+            EnumArguments.Check(tdc, nameof(terminationDateConvention));
+        }
+
+        if (rule is DateGenerationRule r)
+        {
+            EnumArguments.Check(r, nameof(rule));
+        }
+
         this.tenor = tenor;
         Calendar = calendar ?? new NullCalendar();
         BusinessDayConvention = convention;
@@ -91,6 +103,7 @@ public sealed class Schedule
     /// <param name="firstDate">The first date after the effective date, for an irregular first period.</param>
     /// <param name="nextToLastDate">The date before the termination date, for an irregular last period.</param>
     /// <exception cref="ArgumentException">A date or the tenor is inconsistent with the others.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">A convention or the rule isn't a member of its enum.</exception>
     /// <exception cref="NanoQLException">The rule can't generate the schedule.</exception>
     public Schedule(
         Date? effectiveDate,
@@ -133,6 +146,9 @@ public sealed class Schedule
         Date? nextToLastDate)
     {
         ArgumentNullException.ThrowIfNull(calendar);
+        EnumArguments.Check(convention, nameof(convention));
+        EnumArguments.Check(terminationDateConvention, nameof(terminationDateConvention));
+        EnumArguments.Check(rule, nameof(rule));
         RequireDate(terminationDate, "null termination date", nameof(terminationDate));
         RequireDate(effectiveDate, "null effective date", nameof(effectiveDate));
         NanoQL.Time.Date.ThrowIfDefault(firstDate, nameof(firstDate));
@@ -830,6 +846,7 @@ public sealed class Schedule
         EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+        EnumArguments.Check(rule, nameof(rule));
         RequireDate(terminationDate, "null termination date", nameof(terminationDate));
         NanoQL.Time.Date.ThrowIfDefault(firstDate, nameof(firstDate));
         NanoQL.Time.Date.ThrowIfDefault(nextToLastDate, nameof(nextToLastDate));

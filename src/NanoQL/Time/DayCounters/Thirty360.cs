@@ -52,7 +52,7 @@ public sealed class Thirty360 : DayCounter
     /// by the other conventions.
     /// </param>
     /// <exception cref="ArgumentException">The termination date is <c>default(Date)</c>.</exception>
-    /// <exception cref="NanoQLException">The convention is unknown.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
     public Thirty360(Thirty360Convention c, Date? terminationDate = null)
     {
         if (terminationDate is Date t && t.SerialNumber == 0)
@@ -97,7 +97,7 @@ public sealed class Thirty360 : DayCounter
             case Thirty360Convention.NASD:
                 return new NASDImpl();
             default:
-                throw new NanoQLException("unknown 30/360 convention");
+                throw new ArgumentOutOfRangeException(nameof(c), c, "unknown 30/360 convention");
         }
     }
 

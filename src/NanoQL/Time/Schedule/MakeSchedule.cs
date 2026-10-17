@@ -55,7 +55,11 @@ public sealed record MakeSchedule
     /// <summary>Sets the tenor from a frequency.</summary>
     /// <param name="frequency">The frequency.</param>
     /// <returns>The modified builder.</returns>
-    public MakeSchedule WithFrequency(Frequency frequency) => this with { Tenor = new Period(frequency) };
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The frequency is <see cref="Frequency.OtherFrequency"/> or not a member of the enum.
+    /// </exception>
+    public MakeSchedule WithFrequency(Frequency frequency) =>
+        this with { Tenor = Period.FromFrequency(frequency, nameof(frequency)) };
 
     /// <summary>Sets the calendar.</summary>
     /// <param name="calendar">The calendar.</param>
@@ -69,18 +73,32 @@ public sealed record MakeSchedule
     /// <summary>Sets the business-day convention.</summary>
     /// <param name="conv">The convention.</param>
     /// <returns>The modified builder.</returns>
-    public MakeSchedule WithConvention(BusinessDayConvention conv) => this with { Convention = conv };
+    /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
+    public MakeSchedule WithConvention(BusinessDayConvention conv)
+    {
+        EnumArguments.Check(conv, nameof(conv));
+        return this with { Convention = conv };
+    }
 
     /// <summary>Sets the termination date's business-day convention.</summary>
     /// <param name="conv">The convention.</param>
     /// <returns>The modified builder.</returns>
-    public MakeSchedule WithTerminationDateConvention(BusinessDayConvention conv) =>
-        this with { TerminationDateConvention = conv };
+    /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
+    public MakeSchedule WithTerminationDateConvention(BusinessDayConvention conv)
+    {
+        EnumArguments.Check(conv, nameof(conv));
+        return this with { TerminationDateConvention = conv };
+    }
 
     /// <summary>Sets the date-generation rule.</summary>
     /// <param name="r">The rule.</param>
     /// <returns>The modified builder.</returns>
-    public MakeSchedule WithRule(DateGenerationRule r) => this with { Rule = r };
+    /// <exception cref="ArgumentOutOfRangeException">The rule isn't a member of the enum.</exception>
+    public MakeSchedule WithRule(DateGenerationRule r)
+    {
+        EnumArguments.Check(r, nameof(r));
+        return this with { Rule = r };
+    }
 
     /// <summary>Generates the dates forward from the effective date.</summary>
     /// <returns>The modified builder.</returns>

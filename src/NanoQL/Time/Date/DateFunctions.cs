@@ -76,7 +76,7 @@ public static class DateFunctions
     /// <summary>A month's name, as QuantLib writes it.</summary>
     /// <param name="m">The month.</param>
     /// <returns>The month's full name.</returns>
-    /// <exception cref="NanoQLException">The value is not a month.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a month.</exception>
     public static string ToString(Month m) => m switch
     {
         Month.January => "January",
@@ -91,6 +91,6 @@ public static class DateFunctions
         Month.October => "October",
         Month.November => "November",
         Month.December => "December",
-        _ => throw new NanoQLException($"unknown month ({(int)m})"),
+        _ => throw new ArgumentOutOfRangeException(nameof(m), m, $"unknown month ({(int)m})"),
     };
 }

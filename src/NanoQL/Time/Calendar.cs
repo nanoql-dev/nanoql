@@ -200,6 +200,7 @@ public abstract class Calendar : IEquatable<Calendar>
     /// <param name="d">The date.</param>
     /// <param name="c">The business-day convention.</param>
     /// <returns>The adjusted date.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
     public Date Adjust(Date d, BusinessDayConvention c = BusinessDayConvention.Following)
     {
         RequireDate(d, nameof(d));
@@ -255,7 +256,7 @@ public abstract class Calendar : IEquatable<Calendar>
         }
         else
         {
-            throw new NanoQLException("unknown business-day convention");
+            throw new ArgumentOutOfRangeException(nameof(c), c, "unknown business-day convention");
         }
 
         return d1;
@@ -268,9 +269,12 @@ public abstract class Calendar : IEquatable<Calendar>
     /// <param name="c">The business-day convention applied to the result.</param>
     /// <param name="endOfMonth">Whether a month-end date stays at month end.</param>
     /// <returns>The advanced date; the input is not modified.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The unit or the convention isn't a member of its enum.</exception>
     public Date Advance(Date d, int n, TimeUnit unit, BusinessDayConvention c = BusinessDayConvention.Following, bool endOfMonth = false)
     {
         RequireDate(d, nameof(d));
+        EnumArguments.Check(unit, nameof(unit));
+        EnumArguments.Check(c, nameof(c));
         if (n == 0)
         {
             return Adjust(d, c);
@@ -343,6 +347,7 @@ public abstract class Calendar : IEquatable<Calendar>
     /// <param name="c">The business-day convention applied to the result.</param>
     /// <param name="endOfMonth">Whether a month-end date stays at month end.</param>
     /// <returns>The advanced date; the input is not modified.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
     public Date Advance(Date date, Period period, BusinessDayConvention c = BusinessDayConvention.Following, bool endOfMonth = false) =>
         Advance(date, period.Length, period.Units, c, endOfMonth);
 

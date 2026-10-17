@@ -30,9 +30,12 @@ public sealed record InterestRate
     /// <param name="comp">The compounding rule.</param>
     /// <param name="freq">The compounding frequency, which compounded rules need.</param>
     /// <exception cref="ArgumentException">A compounded rule with no frequency or <see cref="Frequency.Once"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public InterestRate(double r, DayCounter dc, Compounding comp, Frequency freq)
     {
         ArgumentNullException.ThrowIfNull(dc);
+        EnumArguments.Check(comp, nameof(comp));
+        EnumArguments.Check(freq, nameof(freq));
         Rate = r;
         DayCounter = dc;
         Compounding = comp;
@@ -67,9 +70,12 @@ public sealed record InterestRate
     /// <param name="freq">The result's frequency.</param>
     /// <param name="t">The time.</param>
     /// <returns>The implied rate.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public static InterestRate ImpliedRate(double compound, DayCounter resultDC, Compounding comp, Frequency freq, double t)
     {
         ArgumentNullException.ThrowIfNull(resultDC);
+        EnumArguments.Check(comp, nameof(comp));
+        EnumArguments.Check(freq, nameof(freq));
         if (!(compound > 0.0))
         {
             throw new ArgumentException("positive compound factor required", nameof(compound));
@@ -125,6 +131,7 @@ public sealed record InterestRate
     /// <param name="refStart">The reference period's start, for day counters that use one.</param>
     /// <param name="refEnd">The reference period's end, for day counters that use one.</param>
     /// <returns>The implied rate.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public static InterestRate ImpliedRate(
         double compound,
         DayCounter resultDC,
@@ -200,6 +207,7 @@ public sealed record InterestRate
     /// <param name="freq">The result's frequency.</param>
     /// <param name="t">The time, measured by the rate's day counter.</param>
     /// <returns>The equivalent rate.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public InterestRate EquivalentRate(Compounding comp, Frequency freq, double t) =>
         ImpliedRate(CompoundFactor(t), DayCounter, comp, freq, t);
 
@@ -212,6 +220,7 @@ public sealed record InterestRate
     /// <param name="refStart">The reference period's start, for day counters that use one.</param>
     /// <param name="refEnd">The reference period's end, for day counters that use one.</param>
     /// <returns>The equivalent rate.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public InterestRate EquivalentRate(
         DayCounter resultDC,
         Compounding comp,

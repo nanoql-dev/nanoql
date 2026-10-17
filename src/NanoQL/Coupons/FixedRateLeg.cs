@@ -74,6 +74,7 @@ public sealed record FixedRateLeg
     /// <param name="comp">The compounding rule.</param>
     /// <param name="freq">The compounding frequency.</param>
     /// <returns>The modified builder.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public FixedRateLeg WithCouponRates(
         double rate,
         DayCounter paymentDayCounter,
@@ -87,6 +88,7 @@ public sealed record FixedRateLeg
     /// <param name="comp">The compounding rule.</param>
     /// <param name="freq">The compounding frequency.</param>
     /// <returns>The modified builder.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public FixedRateLeg WithCouponRates(
         IEnumerable<double> rates,
         DayCounter paymentDayCounter,
@@ -124,8 +126,12 @@ public sealed record FixedRateLeg
     /// <summary>Sets the business-day convention of the payment dates.</summary>
     /// <param name="convention">The convention.</param>
     /// <returns>The modified builder.</returns>
-    public FixedRateLeg WithPaymentAdjustment(BusinessDayConvention convention) =>
-        this with { PaymentAdjustment = convention };
+    /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
+    public FixedRateLeg WithPaymentAdjustment(BusinessDayConvention convention)
+    {
+        EnumArguments.Check(convention, nameof(convention));
+        return this with { PaymentAdjustment = convention };
+    }
 
     /// <summary>Sets the day counter of the first period, in place of the rate's.</summary>
     /// <param name="dayCounter">The day counter.</param>
@@ -156,6 +162,7 @@ public sealed record FixedRateLeg
     /// <param name="convention">The business-day convention of the ex-coupon dates.</param>
     /// <param name="endOfMonth">Whether the ex-coupon dates stay at month end.</param>
     /// <returns>The modified builder.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
     public FixedRateLeg WithExCouponPeriod(
         Period period,
         Calendar cal,
@@ -163,6 +170,7 @@ public sealed record FixedRateLeg
         bool endOfMonth = false)
     {
         ArgumentNullException.ThrowIfNull(cal);
+        EnumArguments.Check(convention, nameof(convention));
         return this with
         {
             ExCouponPeriod = period,
