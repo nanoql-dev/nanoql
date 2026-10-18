@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/daycounters.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testActualActualWithSchedule, testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter
+// Partial: testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter
 
 using NanoQL.Time;
 using static NanoQL.Time.Month;
@@ -381,6 +381,151 @@ public class DayCountersTests
             }
 
             testDate = calendar.Advance(testDate, 1, TimeUnit.Days);
+        }
+    }
+
+    [Fact]
+    public void TestActualActualWithSchedule()
+    {
+        // Testing actual/actual day counter with schedule...
+
+        // long first coupon
+        var issueDateExpected = new Date(17, January, 2017);
+        var firstCouponDateExpected = new Date(31, August, 2017);
+
+        Schedule schedule = new MakeSchedule()
+            .From(issueDateExpected)
+            .WithFirstDate(firstCouponDateExpected)
+            .To(new Date(28, February, 2026))
+            .WithFrequency(Frequency.Semiannual)
+            .WithCalendar(new Canada())
+            .WithConvention(BusinessDayConvention.Unadjusted)
+            .Backwards()
+            .EndOfMonth()
+            .ToSchedule();
+
+        Date issueDate = schedule.Date(0);
+        Assert.True(
+            issueDate == issueDateExpected,
+            $"This is not the expected issue date {issueDate} expected {issueDateExpected}");
+        Date firstCouponDate = schedule.Date(1);
+        Assert.True(
+            firstCouponDate == firstCouponDateExpected,
+            $"This is not the expected first coupon date {firstCouponDate} expected: {firstCouponDateExpected}");
+
+        // Make thw quasi coupon dates:
+        Date quasiCouponDate2 = schedule.Calendar.Advance(
+            firstCouponDate,
+            -schedule.Tenor(),
+            schedule.BusinessDayConvention,
+            schedule.EndOfMonth());
+        Date quasiCouponDate1 = schedule.Calendar.Advance(
+            quasiCouponDate2,
+            -schedule.Tenor(),
+            schedule.BusinessDayConvention,
+            schedule.EndOfMonth());
+
+        var quasiCouponDate1Expected = new Date(31, August, 2016);
+        var quasiCouponDate2Expected = new Date(28, February, 2017);
+
+        Assert.True(
+            quasiCouponDate2 == quasiCouponDate2Expected,
+            $"Expected {quasiCouponDate2Expected} as the later quasi coupon date but received {quasiCouponDate2}");
+        Assert.True(
+            quasiCouponDate1 == quasiCouponDate1Expected,
+            $"Expected {quasiCouponDate1Expected} as the earlier quasi coupon date but received {quasiCouponDate1}");
+
+        DayCounter dayCounter = new ActualActual(ActualActualConvention.ISMA, schedule);
+
+        // full coupon
+        double t_with_reference = dayCounter.YearFraction(
+            issueDate, firstCouponDate,
+            quasiCouponDate2, firstCouponDate);
+        double t_no_reference = dayCounter.YearFraction(
+            issueDate,
+            firstCouponDate);
+        double t_total =
+            ISMAYearFractionWithReferenceDates(
+                dayCounter,
+                issueDate, quasiCouponDate2,
+                quasiCouponDate1, quasiCouponDate2)
+            + 0.5;
+        double expected = 0.6160220994;
+
+        if (Math.Abs(t_total - expected) > 1.0e-10)
+        {
+            Assert.Fail(
+                "Failed to reproduce expected time:\n"
+                + $"    calculated: {t_total}\n"
+                + $"    expected:   {expected}");
+        }
+
+        if (Math.Abs(t_with_reference - expected) > 1.0e-10)
+        {
+            Assert.Fail(
+                "Failed to reproduce expected time:\n"
+                + $"    calculated: {t_with_reference}\n"
+                + $"    expected:   {expected}");
+        }
+
+        if (Math.Abs(t_no_reference - t_with_reference) > 1.0e-10)
+        {
+            Assert.Fail("Should produce the same time whether or not references are present");
+        }
+
+        // settlement date in the first quasi-period
+        var settlementDate = new Date(29, January, 2017);
+
+        t_with_reference = ISMAYearFractionWithReferenceDates(
+            dayCounter,
+            issueDate, settlementDate,
+            quasiCouponDate1, quasiCouponDate2);
+        t_no_reference = dayCounter.YearFraction(issueDate, settlementDate);
+        double t_expected_first_qp = 0.03314917127071823; // 12.0/362
+        if (Math.Abs(t_with_reference - t_expected_first_qp) > 1.0e-10)
+        {
+            Assert.Fail(
+                "Failed to reproduce expected time:\n"
+                + $"    calculated: {t_no_reference}\n"
+                + $"    expected:   {t_expected_first_qp}");
+        }
+
+        if (Math.Abs(t_no_reference - t_with_reference) > 1.0e-10)
+        {
+            Assert.Fail("Should produce the same time whether or not references are present");
+        }
+
+        double t2 = dayCounter.YearFraction(settlementDate, firstCouponDate);
+        if (Math.Abs(t_expected_first_qp + t2 - expected) > 1.0e-10)
+        {
+            Assert.Fail("Sum of quasiperiod2 split is not consistent");
+        }
+
+        // settlement date in the second quasi-period
+        settlementDate = new Date(29, July, 2017);
+
+        t_no_reference = dayCounter.YearFraction(issueDate, settlementDate);
+        t_with_reference = ISMAYearFractionWithReferenceDates(
+            dayCounter,
+            issueDate, quasiCouponDate2,
+            quasiCouponDate1, quasiCouponDate2)
+            + ISMAYearFractionWithReferenceDates(
+                dayCounter,
+                quasiCouponDate2, settlementDate,
+                quasiCouponDate2, firstCouponDate);
+        if (Math.Abs(t_no_reference - t_with_reference) > 1.0e-10)
+        {
+            Assert.Fail("These two cases should be identical");
+        }
+
+        t2 = dayCounter.YearFraction(settlementDate, firstCouponDate);
+
+        if (Math.Abs(t_total - (t_no_reference + t2)) > 1.0e-10)
+        {
+            Assert.Fail(
+                "Failed to reproduce expected time:\n"
+                + $"    calculated: {t_total}\n"
+                + $"    expected:   {t_no_reference + t2}");
         }
     }
 

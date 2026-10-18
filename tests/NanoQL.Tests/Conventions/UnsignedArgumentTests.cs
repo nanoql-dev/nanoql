@@ -70,6 +70,7 @@ public class UnsignedArgumentTests
             () => new IborIndex("Euribor", new Period(6, TimeUnit.Months), -1, null, calendar, BusinessDayConvention.Following, false, dc),
             () => new OvernightIndex("ESTR", int.MinValue, null, calendar, dc),
             () => FlatForward.Create(-1, calendar, 0.03, dc, context),
+            () => ConstantOptionletVolatility.Create(-1, calendar, BusinessDayConvention.Following, 0.2, dc, context),
         })
         {
             ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(create);

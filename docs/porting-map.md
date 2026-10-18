@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,189 | 157 |
-| partial | 13 | 18 |
-| ported | 72 | 7 |
+| not started | 1,167 | 155 |
+| partial | 18 | 20 |
+| ported | 89 | 7 |
 | replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
@@ -56,10 +56,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `mathconstants` | not started |  |  |
 | `money` | not started |  | no nanoql type: Money, MoneyConversionType, MoneySettings |
 | `numericalmethod` | not started |  | no nanoql type: Lattice |
-| `option` | not started |  | no nanoql type: Option, OptionType, Greeks, MoreGreeks |
+| `option` | partial | OptionType.cs | partial: Option, Option::arguments, Greeks and MoreGreeks, which wait for S6's Swaption and S-eq's engines; no nanoql type: Option, Greeks, MoreGreeks |
 | `optional` | not ported: C++ platform header |  |  |
 | `payoff` | not started |  | no nanoql type: Payoff |
-| `position` | not started |  | no nanoql type: PositionType |
+| `position` | ported | PositionType.cs |  |
 | `prices` | not started |  | no nanoql type: PriceType, IntervalPrice, IntervalPriceType |
 | `pricingengine` | replaced: static engines |  |  |
 | `qldefines` | not ported: C++ platform header |  |  |
@@ -99,7 +99,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `digitalcoupon` | not started |  | no nanoql type: DigitalCoupon |
 | `digitaliborcoupon` | not started |  | no nanoql type: DigitalIborCoupon, DigitalIborLeg |
 | `dividend` | not started |  | no nanoql type: Dividend, FixedDividend, FractionalDividend |
-| `duration` | not started |  | no nanoql type: DurationType |
+| `duration` | ported | Coupons/DurationType.cs |  |
 | `equitycashflow` | not started |  | no nanoql type: EquityCashFlow, EquityCashFlowPricer, EquityQuantoCashFlowPricer |
 | `fixedratecoupon` | partial | Coupons/FixedRateCoupon.cs, Coupons/FixedRateLeg.cs | partial: withLastPeriodDayCounter, which waits for the credit-default-swap slot, whose tests use it |
 | `floatingratecoupon` | not started |  | no nanoql type: FloatingRateCoupon |
@@ -112,7 +112,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `overnightindexedcoupon` | not started |  | no nanoql type: OvernightIndexedCoupon, CappedFlooredOvernightIndexedCoupon, OvernightLeg |
 | `overnightindexedcouponpricer` | not started |  | no nanoql type: OvernightIndexedCouponPricer, CompoundingOvernightIndexedCouponPricer, ArithmeticAveragedOvernightIndexedCouponPricer |
 | `rangeaccrual` | not started |  | no nanoql type: RangeAccrualFloatersCoupon, RangeAccrualPricer, RangeAccrualPricerByBgm, RangeAccrualLeg |
-| `rateaveraging` | not started |  | no nanoql type: RateAveragingType |
+| `rateaveraging` | ported | Coupons/RateAveragingType.cs |  |
 | `replication` | not started |  | no nanoql type: ReplicationType, DigitalReplication |
 | `simplecashflow` | ported | Coupons/SimpleCashFlow/AmortizingPayment.cs, Coupons/SimpleCashFlow/Redemption.cs, Coupons/SimpleCashFlow/SimpleCashFlow.cs |  |
 | `stubiborcoupon` | not started |  | no nanoql type: StubIndexSelection, StubIndexSelectionConvention, StubIborCoupon, StubIborCouponWeightedIndex |
@@ -126,12 +126,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `africa` | not started |  | no nanoql type: AOACurrency, BWPCurrency, EGPCurrency, ETBCurrency, GHSCurrency, KESCurrency, MADCurrency, MURCurrency, NGNCurrency, TNDCurrency, UGXCurrency, XOFCurrency, ZARCurrency, ZMWCurrency |
 | `all` | not ported: include-only header |  |  |
-| `america` | not started |  | no nanoql type: ARSCurrency, BRLCurrency, CADCurrency, CLPCurrency, COPCurrency, MXNCurrency, PENCurrency, PEICurrency, PEHCurrency, TTDCurrency, USDCurrency, VEBCurrency, MXVCurrency, COUCurrency, CLFCurrency, UYUCurrency |
-| `asia` | not started |  | no nanoql type: BDTCurrency, CNYCurrency, HKDCurrency, IDRCurrency, ILSCurrency, INRCurrency, IQDCurrency, IRRCurrency, JPYCurrency, KRWCurrency, KWDCurrency, KZTCurrency, MYRCurrency, NPRCurrency, PKRCurrency, SARCurrency, SGDCurrency, THBCurrency, TWDCurrency, VNDCurrency, QARCurrency, BHDCurrency, OMRCurrency, JODCurrency, AEDCurrency, PHPCurrency, CNHCurrency, LKRCurrency, UZSCurrency |
+| `america` | ported | Currencies/America/ARSCurrency.cs, Currencies/America/BRLCurrency.cs, Currencies/America/CADCurrency.cs, Currencies/America/CLFCurrency.cs, Currencies/America/CLPCurrency.cs, Currencies/America/COPCurrency.cs, Currencies/America/COUCurrency.cs, Currencies/America/MXNCurrency.cs, Currencies/America/MXVCurrency.cs, Currencies/America/PEHCurrency.cs, Currencies/America/PEICurrency.cs, Currencies/America/PENCurrency.cs, Currencies/America/TTDCurrency.cs, Currencies/America/USDCurrency.cs, Currencies/America/UYUCurrency.cs, Currencies/America/VEBCurrency.cs |  |
+| `asia` | ported | Currencies/Asia/AEDCurrency.cs, Currencies/Asia/BDTCurrency.cs, Currencies/Asia/BHDCurrency.cs, Currencies/Asia/CNHCurrency.cs, Currencies/Asia/CNYCurrency.cs, Currencies/Asia/HKDCurrency.cs, Currencies/Asia/IDRCurrency.cs, Currencies/Asia/ILSCurrency.cs, Currencies/Asia/INRCurrency.cs, Currencies/Asia/IQDCurrency.cs, Currencies/Asia/IRRCurrency.cs, Currencies/Asia/JODCurrency.cs, Currencies/Asia/JPYCurrency.cs, Currencies/Asia/KRWCurrency.cs, Currencies/Asia/KWDCurrency.cs, Currencies/Asia/KZTCurrency.cs, Currencies/Asia/LKRCurrency.cs, Currencies/Asia/MYRCurrency.cs, Currencies/Asia/NPRCurrency.cs, Currencies/Asia/OMRCurrency.cs, Currencies/Asia/PHPCurrency.cs, Currencies/Asia/PKRCurrency.cs, Currencies/Asia/QARCurrency.cs, Currencies/Asia/SARCurrency.cs, Currencies/Asia/SGDCurrency.cs, Currencies/Asia/THBCurrency.cs, Currencies/Asia/TWDCurrency.cs, Currencies/Asia/UZSCurrency.cs, Currencies/Asia/VNDCurrency.cs |  |
 | `crypto` | not started |  | no nanoql type: BTCCurrency, ETHCurrency, ETCCurrency, BCHCurrency, XRPCurrency, LTCCurrency, DASHCurrency, ZECCurrency |
-| `europe` | not started |  | no nanoql type: BGLCurrency, BGNCurrency, BYRCurrency, CHFCurrency, CZKCurrency, DKKCurrency, EEKCurrency, EURCurrency, GBPCurrency, GELCurrency, HUFCurrency, ISKCurrency, LTLCurrency, LVLCurrency, MKDCurrency, NOKCurrency, PLNCurrency, ROLCurrency, RONCurrency, RSDCurrency, RUBCurrency, SEKCurrency, SITCurrency, TRLCurrency, TRYCurrency, UAHCurrency, ATSCurrency, BEFCurrency, CYPCurrency, DEMCurrency, ESPCurrency, FIMCurrency, FRFCurrency, GRDCurrency, HRKCurrency, IEPCurrency, ITLCurrency, LUFCurrency, MTLCurrency, NLGCurrency, PTECurrency, SKKCurrency |
+| `europe` | ported | Currencies/Europe/ATSCurrency.cs, Currencies/Europe/BEFCurrency.cs, Currencies/Europe/BGLCurrency.cs, Currencies/Europe/BGNCurrency.cs, Currencies/Europe/BYRCurrency.cs, Currencies/Europe/CHFCurrency.cs, Currencies/Europe/CYPCurrency.cs, Currencies/Europe/CZKCurrency.cs, Currencies/Europe/DEMCurrency.cs, Currencies/Europe/DKKCurrency.cs, Currencies/Europe/EEKCurrency.cs, Currencies/Europe/ESPCurrency.cs, Currencies/Europe/EURCurrency.cs, Currencies/Europe/FIMCurrency.cs, Currencies/Europe/FRFCurrency.cs, Currencies/Europe/GBPCurrency.cs, Currencies/Europe/GELCurrency.cs, Currencies/Europe/GRDCurrency.cs, Currencies/Europe/HRKCurrency.cs, Currencies/Europe/HUFCurrency.cs, Currencies/Europe/IEPCurrency.cs, Currencies/Europe/ISKCurrency.cs, Currencies/Europe/ITLCurrency.cs, Currencies/Europe/LTLCurrency.cs, Currencies/Europe/LUFCurrency.cs, Currencies/Europe/LVLCurrency.cs, Currencies/Europe/MKDCurrency.cs, Currencies/Europe/MTLCurrency.cs, Currencies/Europe/NLGCurrency.cs, Currencies/Europe/NOKCurrency.cs, Currencies/Europe/PLNCurrency.cs, Currencies/Europe/PTECurrency.cs, Currencies/Europe/ROLCurrency.cs, Currencies/Europe/RONCurrency.cs, Currencies/Europe/RSDCurrency.cs, Currencies/Europe/RUBCurrency.cs, Currencies/Europe/SEKCurrency.cs, Currencies/Europe/SITCurrency.cs, Currencies/Europe/SKKCurrency.cs, Currencies/Europe/TRLCurrency.cs, Currencies/Europe/TRYCurrency.cs, Currencies/Europe/UAHCurrency.cs |  |
 | `exchangeratemanager` | not started |  | no nanoql type: ExchangeRateManager, ExchangeRateManagerEntry |
-| `oceania` | not started |  | no nanoql type: AUDCurrency, NZDCurrency |
+| `oceania` | ported | Currencies/Oceania/AUDCurrency.cs, Currencies/Oceania/NZDCurrency.cs |  |
 
 ### `ql/experimental/`
 
@@ -552,13 +552,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `cdi` | not started |  | no nanoql type: Cdi |
 | `cdor` | not started |  | no nanoql type: Cdor |
 | `chflibor` | not started |  | no nanoql type: CHFLibor, DailyTenorCHFLibor |
-| `corra` | not started |  | no nanoql type: Corra |
+| `corra` | ported | Indexes/Ibor/Corra.cs |  |
 | `custom` | not started |  | no nanoql type: CustomIborIndex |
 | `destr` | not started |  | no nanoql type: Destr |
 | `dkklibor` | not started |  | no nanoql type: DKKLibor |
 | `eonia` | not started |  | no nanoql type: Eonia |
-| `estr` | not started |  | no nanoql type: Estr |
-| `euribor` | not started |  | no nanoql type: Euribor, Euribor365, Euribor1W, Euribor1M, Euribor3M, Euribor6M, Euribor1Y |
+| `estr` | ported | Indexes/Ibor/Estr.cs |  |
+| `euribor` | ported | Indexes/Ibor/Euribor/Euribor.cs, Indexes/Ibor/Euribor/Euribor1M.cs, Indexes/Ibor/Euribor/Euribor1W.cs, Indexes/Ibor/Euribor/Euribor1Y.cs, Indexes/Ibor/Euribor/Euribor365.cs, Indexes/Ibor/Euribor/Euribor3M.cs, Indexes/Ibor/Euribor/Euribor6M.cs, Indexes/Ibor/Euribor/EuriborConventions.cs |  |
 | `eurlibor` | not started |  | no nanoql type: EURLibor, DailyTenorEURLibor, EURLiborON, EURLibor1M, EURLibor3M, EURLibor6M, EURLibor1Y |
 | `fedfunds` | not started |  | no nanoql type: FedFunds |
 | `gbplibor` | not started |  | no nanoql type: GBPLibor, DailyTenorGBPLibor, GBPLiborON |
@@ -576,12 +576,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `seklibor` | not started |  | no nanoql type: SEKLibor |
 | `shibor` | not started |  | no nanoql type: Shibor |
 | `shir` | not started |  | no nanoql type: Shir |
-| `sofr` | not started |  | no nanoql type: Sofr |
-| `sonia` | not started |  | no nanoql type: Sonia |
+| `sofr` | ported | Indexes/Ibor/Sofr.cs |  |
+| `sonia` | ported | Indexes/Ibor/Sonia.cs |  |
 | `swestr` | not started |  | no nanoql type: Swestr |
 | `thbfix` | not started |  | no nanoql type: THBFIX |
-| `tibor` | not started |  | no nanoql type: Tibor |
-| `tonar` | not started |  | no nanoql type: Tonar |
+| `tibor` | ported | Indexes/Ibor/Tibor.cs |  |
+| `tonar` | ported | Indexes/Ibor/Tonar.cs |  |
 | `trlibor` | not started |  | no nanoql type: TRLibor |
 | `usdlibor` | not started |  | no nanoql type: USDLibor, DailyTenorUSDLibor, USDLiborON |
 | `wibor` | not started |  | no nanoql type: Wibor |
@@ -1464,7 +1464,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bacheliercalculator` | not started |  | no nanoql type: BachelierCalculator |
 | `blackcalculator` | not started |  | no nanoql type: BlackCalculator |
 | `blackdeltacalculator` | not started |  | no nanoql type: BlackDeltaCalculator, BlackDeltaPremiumAdjustedSolverClass, BlackDeltaPremiumAdjustedMaxStrikeClass |
-| `blackformula` | not started |  |  |
+| `blackformula` | partial | PricingEngines/BlackFormulaFunctions.cs | partial: every function but checkParameters, blackFormula(Option::Type, ...) and bachelierBlackFormula(Option::Type, ...), which wait for S6 |
 | `blackscholescalculator` | not started |  | no nanoql type: BlackScholesCalculator |
 | `genericmodelengine` | not started |  | no nanoql type: GenericModelEngine |
 | `greeks` | not started |  |  |
@@ -1772,7 +1772,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `iterativebootstrap` | not started |  | no nanoql type: IterativeBootstrap |
 | `localbootstrap` | not started |  | no nanoql type: PenaltyFunction, LocalBootstrap |
 | `multicurve` | not started |  | no nanoql type: MultiCurveBootstrapProvider, MultiCurve |
-| `voltermstructure` | not started |  | no nanoql type: VolatilityTermStructure |
+| `voltermstructure` | partial | TermStructures/VolatilityTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc), which waits for its first user (S8's StrippedOptionletAdapter or S-eq's Black volatility structures) |
 | `yieldtermstructure` | partial | TermStructures/YieldTermStructure.cs | partial: the constructors taking a day counter only, and the jumps (jumpDates, jumpTimes), which no pilot curve uses |
 
 ### `ql/termstructures/credit/`
@@ -1823,7 +1823,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `smilesection` | not started |  | no nanoql type: SmileSection |
 | `smilesectionutils` | not started |  | no nanoql type: SmileSectionUtils |
 | `spreadedsmilesection` | not started |  | no nanoql type: SpreadedSmileSection |
-| `volatilitytype` | not started |  | no nanoql type: VolatilityType |
+| `volatilitytype` | ported | TermStructures/Volatility/VolatilityType.cs |  |
 | `zabr` | not started |  | no nanoql type: ZabrModel |
 | `zabrinterpolatedsmilesection` | not started |  | no nanoql type: ZabrInterpolatedSmileSection |
 | `zabrsmilesection` | not started |  | no nanoql type: ZabrShortMaturityLognormal, ZabrShortMaturityNormal, ZabrLocalVolatility, ZabrFullFd, ZabrSmileSection |
@@ -1878,11 +1878,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `capletvariancecurve` | not started |  | no nanoql type: CapletVarianceCurve |
-| `constantoptionletvol` | not started |  | no nanoql type: ConstantOptionletVolatility |
+| `constantoptionletvol` | partial | TermStructures/Volatility/Optionlet/ConstantOptionletVolatility.cs | partial: smileSectionImpl, which waits for S6's FlatSmileSection |
 | `optionletstripper` | not started |  | no nanoql type: OptionletStripper |
 | `optionletstripper1` | not started |  | no nanoql type: OptionletStripper1 |
 | `optionletstripper2` | not started |  | no nanoql type: OptionletStripper2 |
-| `optionletvolatilitystructure` | not started |  | no nanoql type: OptionletVolatilityStructure |
+| `optionletvolatilitystructure` | partial | TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs | partial: smileSection and smileSectionImpl, which wait for S6's SmileSection; the constructor for a structure that manages its own reference date, which waits for its first user (S8) |
 | `spreadedoptionletvol` | not started |  | no nanoql type: SpreadedOptionletVolatility |
 | `strippedoptionlet` | not started |  | no nanoql type: StrippedOptionlet |
 | `strippedoptionletadapter` | not started |  | no nanoql type: StrippedOptionletAdapter |
@@ -1970,7 +1970,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bespokecalendar` | not started |  | no nanoql type: BespokeCalendar |
 | `botswana` | not started |  | no nanoql type: Botswana |
 | `brazil` | not started |  | no nanoql type: Brazil, BrazilMarket |
-| `canada` | not started |  | no nanoql type: Canada, CanadaMarket |
+| `canada` | ported | Time/Calendars/Canada.cs, Time/Calendars/CanadaMarket.cs |  |
 | `chile` | not started |  | no nanoql type: Chile, ChileMarket |
 | `china` | not started |  | no nanoql type: China, ChinaMarket |
 | `croatia` | not started |  | no nanoql type: Croatia, CroatiaMarket |
@@ -1987,7 +1987,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `islamicholidays` | not started |  |  |
 | `israel` | not started |  | no nanoql type: Israel, IsraelMarket |
 | `italy` | not started |  | no nanoql type: Italy, ItalyMarket |
-| `japan` | not started |  | no nanoql type: Japan |
+| `japan` | ported | Time/Calendars/Japan.cs |  |
 | `jointcalendar` | ported | Time/Calendars/JointCalendar.cs, Time/Calendars/JointCalendarRule.cs |  |
 | `malaysia` | not started |  | no nanoql type: Malaysia, MalaysiaMarket |
 | `malta` | not started |  | no nanoql type: Malta, MaltaMarket |
@@ -2077,13 +2077,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `binaryoption` | not started |  | 3 cases |
 | `blackcalculator` | not started |  | 6 cases |
 | `blackdeltacalculator` | not started |  | 4 cases |
-| `blackformula` | not started |  | 15 cases |
+| `blackformula` | partial | TestSuite/BlackFormulaTests.cs | 1 of 15 cases; not yet: testBachelierImpliedVol, testChambersImpliedVol, testRadoicicStefanicaImpliedVol, testRadoicicStefanicaLowerBound, testImpliedVolAdaptiveSuccessiveOverRelaxation, testBlackFormulaForwardDerivative, testBlackFormulaForwardDerivativeWithZeroStrike, testBlackFormulaForwardDerivativeWithZeroVolatility, testBachelierBlackFormulaForwardDerivative, testBachelierBlackFormulaForwardDerivativeWithZeroVolatility, testItmProbabilitiesWithZeroVolatility, testBachelierImpliedVolAtIntrinsic, testImpliedStdDevApproximationRSStaysFinite, testImpliedStdDevLiRSAtIntrinsic |
 | `blackvolsurfacedelta` | not started |  | 5 cases |
 | `bondforward` | not started |  | 3 cases |
 | `bonds` | not started |  | 22 cases |
 | `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
 | `businessdayconventions` | not started |  | 1 cases |
-| `calendars` | partial | TestSuite/CalendarsTests.cs | 15 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testCanadaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
+| `calendars` | partial | TestSuite/CalendarsTests.cs | 16 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
 | `callablebonds` | not started |  | 14 cases |
 | `capfloor` | not started |  | 10 cases |
 | `capflooredcoupon` | not started |  | 2 cases |
@@ -2110,7 +2110,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `currency` | ported | TestSuite/CurrencyTests.cs | 1 of 1 cases |
 | `curvestates` | not started |  | 3 cases |
 | `dates` | partial | TestSuite/DatesTests.cs | 4 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; not yet: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, immDates, asxDates, asxDatesSpecific, isoDates, parseDates, intraday |
-| `daycounters` | partial | TestSuite/DayCountersTests.cs | 10 of 22 cases; not yet: testActualActualWithSchedule, testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter |
+| `daycounters` | partial | TestSuite/DayCountersTests.cs | 11 of 22 cases; not yet: testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter |
 | `defaultprobabilitycurves` | not started |  | 10 cases |
 | `digitalcoupon` | not started |  | 8 cases |
 | `digitaloption` | not started |  | 10 cases |
@@ -2148,7 +2148,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `hestonslvmodel` | not started |  | 19 cases |
 | `himalayaoption` | not started |  | 1 cases |
 | `hybridhestonhullwhiteprocess` | not started |  | 13 cases |
-| `indexes` | not started |  | 6 cases |
+| `indexes` | partial | TestSuite/IndexesTests.cs | 2 of 6 cases; not yet: testFixingObservability, testCustomIborIndex, testCdiIndex, testShirIndex |
 | `inflation` | not started |  | 28 cases |
 | `inflationcapfloor` | not started |  | 4 cases |
 | `inflationcapflooredcoupon` | not started |  | 2 cases |
@@ -2218,7 +2218,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rngtraits` | partial | TestSuite/RngTraitsTests.cs | 3 of 4 cases; not yet: testRanLux |
 | `roughhestonmodel` | not started |  | 24 cases |
 | `rounding` | ported | TestSuite/RoundingTests.cs | 5 of 5 cases |
-| `schedule` | partial | TestSuite/ScheduleTests.cs | 18 of 28 cases; not yet: testEndDateWithEomAdjustment, testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured, testTruncation |
+| `schedule` | partial | TestSuite/ScheduleTests.cs | 20 of 28 cases; not yet: testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured |
 | `settings` | not ported: tests Settings, which EvaluationContext replaces |  |  |
 | `shortratemodels` | not started |  | 9 cases |
 | `sofrfutures` | not started |  | 6 cases |

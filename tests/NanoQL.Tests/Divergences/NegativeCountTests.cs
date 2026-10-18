@@ -34,6 +34,27 @@ public class NegativeCountTests
         Assert.Equal(0, new TestCurve(0).SettlementDays);
     }
 
+    [Fact]
+    public void NegativeSettlementDaysOfAVolatilityStructureAreRefused()
+    {
+        var calendar = new TARGET();
+        var dc = new Actual365Fixed();
+        var context = new EvaluationContext { EvaluationDate = new Date(15, Month.January, 2024) };
+
+        // QuantLib's volatility bases take their settlement days as a Natural (voltermstructure.hpp:55,
+        // optionletvolatilitystructure.hpp:62, constantoptionletvol.hpp:39, 55) and advance by it in
+        // termstructure.cpp:42.
+        AssertRefused(() => ConstantOptionletVolatility.Create(-1, calendar, BusinessDayConvention.Following, 0.2, dc, context));
+        AssertRefused(() => ConstantOptionletVolatility.Create(int.MinValue, calendar, BusinessDayConvention.Following, 0.2, dc, context));
+        AssertRefused(() => new TestVolatility(-1));
+
+        // Zero stays QuantLib's.
+        Assert.Equal(
+            0,
+            ConstantOptionletVolatility.Create(0, calendar, BusinessDayConvention.Following, 0.2, dc, context).SettlementDays);
+        Assert.Equal(0, new TestVolatility(0).SettlementDays);
+    }
+
     private static void AssertRefused(Func<object> create) =>
         Assert.Equal("settlementDays", Assert.Throws<ArgumentOutOfRangeException>(create).ParamName);
 
@@ -51,5 +72,18 @@ public class NegativeCountTests
         public override Date MaxDate => Date.MaxDate;
 
         protected override double DiscountImpl(double t) => 1.0;
+    }
+
+    private sealed class TestVolatility(int settlementDays)
+        : OptionletVolatilityStructure(
+            new Date(15, Month.January, 2024), new TARGET(), BusinessDayConvention.Following, new Actual365Fixed(), settlementDays)
+    {
+        public override Date MaxDate => Date.MaxDate;
+
+        public override double MinStrike() => double.MinValue;
+
+        public override double MaxStrike() => double.MaxValue;
+
+        protected override double VolatilityImpl(double optionTime, double strike) => 0.2;
     }
 }

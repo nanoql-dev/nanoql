@@ -1,0 +1,24 @@
+// SPDX-FileCopyrightText: Copyright (C) 2004, 2005, 2006 StatPro Italia srl
+// SPDX-FileCopyrightText: Copyright (C) 2016 Quaternion Risk Management Ltd
+// SPDX-FileCopyrightText: 2026 The nanoql Authors
+// SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
+// Upstream: ql/currencies/europe.hpp ql/currencies/europe.cpp @ v1.44
+// Ported to C# from QuantLib and modified by the nanoql Authors.
+
+using NanoQL.Numerics;
+
+namespace NanoQL.Currencies;
+
+/// <summary>The Bulgarian lev.</summary>
+/// <remarks>The ISO three-letter code is BGL; the numeric code is 100. It is divided in 100 stotinki.</remarks>
+public sealed class BGLCurrency : Currency
+{
+    // Built once and shared by every instance, as QuantLib's static data is.
+    private static readonly Rounding DataRounding = new();
+
+    /// <summary>Initializes a new instance of the <see cref="BGLCurrency"/> class.</summary>
+    public BGLCurrency()
+        : base("Bulgarian lev", "BGL", 100, "lv", "", 100, DataRounding)
+    {
+    }
+}

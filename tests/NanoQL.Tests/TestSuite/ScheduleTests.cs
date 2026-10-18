@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/schedule.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testEndDateWithEomAdjustment, testTruncation (Japan); testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured (cdsMaturity)
+// Partial: testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured (cdsMaturity)
 
 using NanoQL.Time;
 
@@ -120,6 +120,34 @@ public class ScheduleTests
             new(31, Month.January, 2025),
             new(28, Month.February, 2025),
         ]);
+    }
+
+    [Fact]
+    public void TestEndDateWithEomAdjustment()
+    {
+        // Testing end date for schedule with end-of-month adjustment...
+        Schedule s = new MakeSchedule().From(new Date(30, Month.September, 2009))
+            .To(new Date(15, Month.June, 2012))
+            .WithCalendar(new Japan())
+            .WithTenor(new Period(6, TimeUnit.Months))
+            .WithConvention(BusinessDayConvention.ModifiedFollowing)
+            .WithTerminationDateConvention(BusinessDayConvention.ModifiedFollowing)
+            .Forwards()
+            .EndOfMonth()
+            .ToSchedule();
+
+        Date[] expected =
+        [
+            new(30, Month.September, 2009),
+            new(31, Month.March, 2010),
+            new(30, Month.September, 2010),
+            new(31, Month.March, 2011),
+            new(30, Month.September, 2011),
+            new(30, Month.March, 2012),
+            new(15, Month.June, 2012),
+        ];
+
+        CheckDates(s, expected);
     }
 
     [Fact]
@@ -533,6 +561,95 @@ public class ScheduleTests
             .Backwards()
             .ToSchedule();
         CheckDates(schedule, expected);
+    }
+
+    [Fact]
+    public void TestTruncation()
+    {
+        // Testing schedule truncation...
+        Schedule s = new MakeSchedule().From(new Date(30, Month.September, 2009))
+            .To(new Date(15, Month.June, 2020))
+            .WithCalendar(new Japan())
+            .WithTenor(new Period(6, TimeUnit.Months))
+            .WithConvention(BusinessDayConvention.ModifiedFollowing)
+            .WithTerminationDateConvention(BusinessDayConvention.ModifiedFollowing)
+            .Forwards()
+            .EndOfMonth()
+            .ToSchedule();
+
+        Schedule t;
+        Date[] expected;
+
+        // Until
+        t = s.Until(new Date(1, Month.January, 2014));
+        expected =
+        [
+            new(30, Month.September, 2009),
+            new(31, Month.March, 2010),
+            new(30, Month.September, 2010),
+            new(31, Month.March, 2011),
+            new(30, Month.September, 2011),
+            new(30, Month.March, 2012),
+            new(28, Month.September, 2012),
+            new(29, Month.March, 2013),
+            new(30, Month.September, 2013),
+            new(1, Month.January, 2014),
+        ];
+        CheckDates(t, expected);
+        Assert.True(t.IsRegular()[^1] == false);
+
+        // Until, with truncation date falling on a schedule date
+        t = s.Until(new Date(30, Month.September, 2013));
+        expected =
+        [
+            new(30, Month.September, 2009),
+            new(31, Month.March, 2010),
+            new(30, Month.September, 2010),
+            new(31, Month.March, 2011),
+            new(30, Month.September, 2011),
+            new(30, Month.March, 2012),
+            new(28, Month.September, 2012),
+            new(29, Month.March, 2013),
+            new(30, Month.September, 2013),
+        ];
+        CheckDates(t, expected);
+        Assert.True(t.IsRegular()[^1] == true);
+
+        // After
+        t = s.After(new Date(1, Month.January, 2014));
+        expected =
+        [
+            new(1, Month.January, 2014),
+            new(31, Month.March, 2014),
+            new(30, Month.September, 2014),
+            new(31, Month.March, 2015),
+            new(30, Month.September, 2015),
+            new(31, Month.March, 2016),
+            new(30, Month.September, 2016),
+            new(31, Month.March, 2017),
+            new(29, Month.September, 2017),
+            new(30, Month.March, 2018),
+            new(28, Month.September, 2018),
+            new(29, Month.March, 2019),
+            new(30, Month.September, 2019),
+            new(31, Month.March, 2020),
+            new(15, Month.June, 2020),
+        ];
+        CheckDates(t, expected);
+        Assert.True(t.IsRegular()[0] == false);
+
+        // After, with truncation date falling on a schedule date
+        t = s.After(new Date(28, Month.September, 2018));
+        expected =
+        [
+            new(28, Month.September, 2018),
+            new(29, Month.March, 2019),
+            new(30, Month.September, 2019),
+            new(31, Month.March, 2020),
+            new(15, Month.June, 2020),
+        ];
+        CheckDates(t, expected);
+        Assert.True(t.IsRegular()[0] == true);
     }
 
     [Fact]

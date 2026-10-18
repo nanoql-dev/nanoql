@@ -89,13 +89,19 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/InterestRate.cs`: the discount factor's two derivatives, which wait for the slot that ports the cash-flow duration and convexity.
 - `src/NanoQL/Numerics/ComparisonFunctions.cs`: `earlier_than`, which waits for the bond slot.
 - `src/NanoQL/Numerics/Interpolations/LogInterpolation/LogLinearInterpolation.cs`: the LogMixedLinearCubic family, which waits for S5 with `mixedinterpolation`.
+- `src/NanoQL/OptionType.cs`: `Option`, its arguments, `Greeks` and `MoreGreeks`, which wait for S6 and S-eq.
+- `src/NanoQL/PricingEngines/BlackFormulaFunctions.cs`: every function but `checkParameters`, `blackFormula` and `bachelierBlackFormula` on an option type, which wait for S6.
 - `src/NanoQL/StochasticProcess/StochasticProcess.cs`: `StochasticProcess`'s defaults of `expectation`, `stdDeviation` and `covariance`, which call the discretization and wait for S-eq's `EulerDiscretization`.
 - `src/NanoQL/StochasticProcess/StochasticProcess1D.cs`: `StochasticProcess1D`'s defaults of `expectation`, `stdDeviation` and `variance`, which call the discretization and wait for S-eq's `EulerDiscretization`.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
+- `src/NanoQL/TermStructures/Volatility/Optionlet/ConstantOptionletVolatility.cs`: `smileSectionImpl`, which waits for S6's `FlatSmileSection`.
+- `src/NanoQL/TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs`: the smile sections, which wait for S6, and the constructor for a structure managing its own reference date, which waits for S8.
+- `src/NanoQL/TermStructures/VolatilityTermStructure.cs`: the constructor for a structure managing its own reference date, which waits for its first user (S8 or S-eq).
 - `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only, and the jumps.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/IMM.cs`: everything but `isIMMdate`.
+- `tests/NanoQL.Tests/TestSuite/BlackFormulaTests.cs`: `testBachelierImpliedVol`, `testChambersImpliedVol`, `testRadoicicStefanicaImpliedVol`, `testRadoicicStefanicaLowerBound`, `testImpliedVolAdaptiveSuccessiveOverRelaxation`, `testBlackFormulaForwardDerivative`, `testBlackFormulaForwardDerivativeWithZeroStrike`, `testBlackFormulaForwardDerivativeWithZeroVolatility`, `testBachelierBlackFormulaForwardDerivative`, `testBachelierBlackFormulaForwardDerivativeWithZeroVolatility`, `testItmProbabilitiesWithZeroVolatility`, `testBachelierImpliedVolAtIntrinsic`, `testImpliedStdDevApproximationRSStaysFinite`, `testImpliedStdDevLiRSAtIntrinsic`, which need the Black formula's other functions and wait for S6.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for S-eq's Black-Scholes process.
 - `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
 - `tests/NanoQL.Tests/TestSuite/CashFlowsTests.cs`: the cases needing Ibor coupons, pricers or cash-flow functions not yet ported.
@@ -103,6 +109,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/DayCountersTests.cs`: the cases for day counters not yet ported.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, binomial, Student t, chi-square, stochastic-collocation and Sankaran cases, whose distributions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/FunctionsTests.cs`: the modified Bessel, expm1 and log1p cases, whose functions aren't ported yet.
+- `tests/NanoQL.Tests/TestSuite/IndexesTests.cs`: `testFixingObservability`, which waits for S5's `BMAIndex`, and the custom-index, CDI and SHIR cases, which wait for batch 2's indexes and calendars.
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations, integrals or extrapolators not yet ported (Simpson, Lagrange, Chebyshev, multi-dimensional and bicubic splines, forward-flat, mixed, SABR, kernel, Richardson, Laplace, B-splines, flat extrapolation).
 - `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice, Faure and Burley 2020 cases and the discrepancy cases, whose generators and statistics aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the cases needing matrix utilities not yet ported (decompositions, square roots, iterative solvers, sparse matrices, projections, Moore-Penrose).
@@ -110,7 +117,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing, L-BFGS-B, differential evolution and CMA-ES cases, whose optimizers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/PathGeneratorTests.cs`: `testMultiPathGenerator`, which waits for `MultiPathGenerator` (B3.2).
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
-- `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases and those needing the Japan calendar.
+- `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases, which need `cdsMaturity`.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant, Newton, Ridder, Halley and finite-difference Newton-safe cases, whose solvers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported.
 - `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, B4.2).

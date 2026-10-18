@@ -13,7 +13,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/calendars.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testCanadaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia
+// Partial: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia
 
 using System.Collections.Immutable;
 using NanoQL.Time;
@@ -93,25 +93,28 @@ public class CalendarsTests
         }
     }
 
-    // Adapted: without its Japan and Germany joins (lines 225-241) and what only they use: c4 and c5 (line 175), the
-    // vector of calendars (177-183), c1234h, c1234b and cvh (189-191), and b4 and b5 (199). Japan and Germany aren't
-    // ported yet.
+    // Adapted: without its Germany join (lines 237-241) and what only it uses: c5 (line 175), the vector of calendars
+    // (177-183), cvh (191) and b5 (199). Germany isn't ported yet.
     [Fact]
     public void TestJointCalendars()
     {
-        Calendar c1 = new TARGET(), c2 = new UnitedKingdom(), c3 = new UnitedStates(UnitedStatesMarket.NYSE);
+        Calendar c1 = new TARGET(), c2 = new UnitedKingdom(), c3 = new UnitedStates(UnitedStatesMarket.NYSE),
+                 c4 = new Japan();
 
         Calendar c12h = new JointCalendar(c1, c2, JointCalendarRule.JoinHolidays),
                  c12b = new JointCalendar(c1, c2, JointCalendarRule.JoinBusinessDays),
                  c123h = new JointCalendar(c1, c2, c3, JointCalendarRule.JoinHolidays),
-                 c123b = new JointCalendar(c1, c2, c3, JointCalendarRule.JoinBusinessDays);
+                 c123b = new JointCalendar(c1, c2, c3, JointCalendarRule.JoinBusinessDays),
+                 c1234h = new JointCalendar(c1, c2, c3, c4, JointCalendarRule.JoinHolidays),
+                 c1234b = new JointCalendar(c1, c2, c3, c4, JointCalendarRule.JoinBusinessDays);
 
         // test one year, starting today
         Date firstDate = Date.TodaysDate(), endDate = firstDate + (1 * TimeUnit.Years);
 
         for (Date d = firstDate; d < endDate; d++)
         {
-            bool b1 = c1.IsBusinessDay(d), b2 = c2.IsBusinessDay(d), b3 = c3.IsBusinessDay(d);
+            bool b1 = c1.IsBusinessDay(d), b2 = c2.IsBusinessDay(d), b3 = c3.IsBusinessDay(d),
+                 b4 = c4.IsBusinessDay(d);
 
             if ((b1 && b2) != c12h.IsBusinessDay(d))
             {
@@ -134,6 +137,18 @@ public class CalendarsTests
             if ((b1 || b2 || b3) != c123b.IsBusinessDay(d))
             {
                 Assert.Fail($"At date {d}:\n    inconsistency between joint calendar {c123b.Name} (joining business days)\n"
+                            + "    and its components");
+            }
+
+            if ((b1 && b2 && b3 && b4) != c1234h.IsBusinessDay(d))
+            {
+                Assert.Fail($"At date {d}:\n    inconsistency between joint calendar {c1234h.Name} (joining holidays)\n"
+                            + "    and its components");
+            }
+
+            if ((b1 || b2 || b3 || b4) != c1234b.IsBusinessDay(d))
+            {
+                Assert.Fail($"At date {d}:\n    inconsistency between joint calendar {c1234b.Name} (joining business days)\n"
                             + "    and its components");
             }
         }
@@ -575,6 +590,19 @@ public class CalendarsTests
 
         Calendar c = new UnitedKingdom(UnitedKingdomMarket.Metals);
         CheckHolidays(c.HolidayList(new Date(1, January, 2004), new Date(31, December, 2007)), expectedHol);
+    }
+
+    [Fact]
+    public void TestCanadaCalendars()
+    {
+        Calendar settlement = new Canada(CanadaMarket.Settlement);
+        Calendar exchange = new Canada(CanadaMarket.TSX);
+        Assert.True(settlement.IsHoliday(new Date(1, January, 2024)));
+        Assert.True(settlement.IsHoliday(new Date(19, February, 2024))); // Family Day
+        Assert.True(settlement.IsHoliday(new Date(1, July, 2024)));
+        Assert.True(exchange.IsHoliday(new Date(29, March, 2024))); // Good Friday
+        Assert.True(exchange.IsHoliday(new Date(11, November, 2024)) == false);
+        Assert.True(exchange.IsBusinessDay(new Date(2, January, 2024)));
     }
 
     [Fact]

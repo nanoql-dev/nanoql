@@ -241,9 +241,10 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `TermStructure`, `YieldTermStructure`, `Instrument`, `TridiagonalOperatorTimeSetter`, `Interpolation`,
   `Solver1D<TSelf, TFunction>`, `OptimizationMethod`, `CostFunction`, `Constraint`, `ParametersTransformation`,
   `StochasticProcess`, `StochasticProcess1D`, `StochasticProcessDiscretization`,
-  `StochasticProcess1DDiscretization`, `FinancialIndex` and `InterestRateIndex` (abstract); `Swap`, `SimpleCashFlow`,
-  `InstrumentResults`, `SwapResults`, `IborIndex`, `OvernightIndex`, `Currency`, `Rounding`,
-  `TridiagonalOperator`, `CubicInterpolation`, `LogCubicInterpolation`, `RandomSequenceGenerator<TRng>`,
+  `StochasticProcess1DDiscretization`, `FinancialIndex`, `InterestRateIndex`, `VolatilityTermStructure` and
+  `OptionletVolatilityStructure` (abstract); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
+  `IborIndex`, `OvernightIndex`, `Euribor`, `Currency`, `Rounding`, `TridiagonalOperator`, `CubicInterpolation`,
+  `LogCubicInterpolation`, `RandomSequenceGenerator<TRng>`,
   `InverseCumulativeRng<TRng, TIc>`, `InverseCumulativeRsg<TUsg, TIc>` and `PathGenerator<TGsg>` (unsealed);
   `IInterpolator` (the interpolation traits), `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers'
   function concepts), and the generator concepts `IRng`, `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`,

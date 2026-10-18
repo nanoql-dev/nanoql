@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Coupons;
 using NanoQL.Numerics;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 
 namespace NanoQL;
@@ -138,6 +140,42 @@ internal static class EnumArguments
         if (value is < RoundingType.None or > RoundingType.Ceiling)
         {
             throw new ArgumentOutOfRangeException(paramName, value, "unknown rounding method");
+        }
+    }
+
+    /// <summary>Refuses a volatility type outside <see cref="VolatilityType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(VolatilityType value, string paramName)
+    {
+        if (value is < VolatilityType.ShiftedLognormal or > VolatilityType.Normal)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"Unknown volatility type ({(int)value})");
+        }
+    }
+
+    /// <summary>Refuses an option type outside <see cref="OptionType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(OptionType value, string paramName)
+    {
+        if (value is not (OptionType.Call or OptionType.Put))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown option type");
+        }
+    }
+
+    /// <summary>Refuses an averaging method outside <see cref="RateAveragingType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(RateAveragingType value, string paramName)
+    {
+        if (value is < RateAveragingType.Simple or > RateAveragingType.Compound)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown compounding convention ({(int)value})");
         }
     }
 }

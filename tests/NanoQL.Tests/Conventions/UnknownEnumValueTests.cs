@@ -24,6 +24,7 @@ public class UnknownEnumValueTests
     {
         AssertParam("market", () => new UnitedStates((UnitedStatesMarket)99));
         AssertParam("market", () => new UnitedKingdom((UnitedKingdomMarket)99));
+        AssertParam("market", () => new Canada((CanadaMarket)99));
         AssertParam("r", () => new JointCalendar(new TARGET(), new TARGET(), (JointCalendarRule)99));
         AssertParam("r", () => new JointCalendar([new TARGET()], (JointCalendarRule)99));
         AssertParam("c", () => new Actual365Fixed((Actual365FixedConvention)99));

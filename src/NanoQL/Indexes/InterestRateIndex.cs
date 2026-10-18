@@ -25,6 +25,8 @@ public abstract class InterestRateIndex : FinancialIndex
     /// <param name="fixingCalendar">The calendar defining valid fixing dates.</param>
     /// <param name="dayCounter">The day counter.</param>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="settlementDays"/> is negative.</exception>
+    /// <exception cref="NanoQLException">The tenor is a non-zero number of hours, minutes, seconds, milliseconds or
+    /// microseconds.</exception>
     protected InterestRateIndex(
         string familyName,
         Period tenor,
@@ -47,6 +49,14 @@ public abstract class InterestRateIndex : FinancialIndex
         Tenor = tenor.Units == TimeUnit.Months && tenor.Length % 12 == 0
             ? new Period(tenor.Length / 12, TimeUnit.Years)
             : tenor;
+
+        // QuantLib's tenor_ == 1*Days compares through daysMinMax, which refuses an intraday unit of non-zero length
+        // (period.cpp:262-277, 350-380); nanoql's Period equality never throws, so the refusal is made here.
+        if (Tenor.Length != 0 && Tenor.Units is TimeUnit.Hours or TimeUnit.Minutes or TimeUnit.Seconds
+            or TimeUnit.Milliseconds or TimeUnit.Microseconds)
+        {
+            throw new NanoQLException($"unknown time unit ({(int)Tenor.Units})");
+        }
 
         string period = Tenor == new Period(1, TimeUnit.Days)
             ? FixingDays switch
