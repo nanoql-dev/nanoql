@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,160 | 154 |
-| partial | 21 | 21 |
-| ported | 93 | 7 |
+| not started | 1,157 | 153 |
+| partial | 21 | 22 |
+| ported | 96 | 7 |
 | replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
@@ -84,7 +84,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `averagebmacoupon` | not started |  | no nanoql type: AverageBMACoupon, AverageBMALeg |
-| `blackovernightindexedcouponpricer` | not started |  | no nanoql type: BlackCompoundingOvernightIndexedCouponPricer, BlackAveragingOvernightIndexedCouponPricer |
+| `blackovernightindexedcouponpricer` | ported | Coupons/BlackAveragingOvernightIndexedCouponPricer.cs, Coupons/BlackCompoundingOvernightIndexedCouponPricer.cs |  |
 | `capflooredcoupon` | partial | Coupons/CappedFlooredCoupon.cs, Coupons/CappedFlooredIborCoupon.cs | partial: CappedFlooredCmsCoupon, which waits for S-rx with CmsCoupon; no nanoql type: CappedFlooredCmsCoupon |
 | `capflooredinflationcoupon` | not started |  | no nanoql type: CappedFlooredYoYInflationCoupon |
 | `cashflows` | partial | Coupons/CashFlows.cs | partial: every function but startDate, maturityDate, accruedPeriod, accruedDays, accruedAmount, and npv, bps and npvbps on a yield term structure, which wait for the slots whose code and tests use them |
@@ -109,8 +109,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcouponpricer` | not started |  | no nanoql type: InflationCouponPricer, YoYInflationCouponPricer, BlackYoYInflationCouponPricer, UnitDisplacedBlackYoYInflationCouponPricer, BachelierYoYInflationCouponPricer |
 | `lineartsrpricer` | not started |  | no nanoql type: LinearTsrPricer, LinearTsrPricerSettings, LinearTsrPricerSettingsStrategy |
 | `multipleresetscoupon` | not started |  | no nanoql type: MultipleResetsCoupon, MultipleResetsPricer, AveragingMultipleResetsPricer, CompoundingMultipleResetsPricer, MultipleResetsLeg |
-| `overnightindexedcoupon` | not started |  | no nanoql type: OvernightIndexedCoupon, CappedFlooredOvernightIndexedCoupon, OvernightLeg |
-| `overnightindexedcouponpricer` | not started |  | no nanoql type: OvernightIndexedCouponPricer, CompoundingOvernightIndexedCouponPricer, ArithmeticAveragedOvernightIndexedCouponPricer |
+| `overnightindexedcoupon` | ported | Coupons/OvernightIndexedCoupon/CappedFlooredOvernightIndexedCoupon.cs, Coupons/OvernightIndexedCoupon/OvernightIndexedCoupon.cs, Coupons/OvernightIndexedCoupon/OvernightLeg.cs |  |
+| `overnightindexedcouponpricer` | ported | Coupons/OvernightIndexedCouponPricer/ArithmeticAveragedOvernightIndexedCouponPricer.cs, Coupons/OvernightIndexedCouponPricer/CompoundingOvernightIndexedCouponPricer.cs, Coupons/OvernightIndexedCouponPricer/OvernightIndexedCouponPricer.cs, Coupons/OvernightIndexedCouponPricer/OvernightIndexedCouponPricerExtensions.cs |  |
 | `rangeaccrual` | not started |  | no nanoql type: RangeAccrualFloatersCoupon, RangeAccrualPricer, RangeAccrualPricerByBgm, RangeAccrualLeg |
 | `rateaveraging` | ported | Coupons/RateAveragingType.cs |  |
 | `replication` | not started |  | no nanoql type: ReplicationType, DigitalReplication |
@@ -2193,7 +2193,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `operators` | partial | TestSuite/OperatorsTests.cs | 1 of 2 cases; not yet: testConsistency |
 | `optimizers` | partial | TestSuite/OptimizersTests.cs | 2 of 10 cases; not yet: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination, testLBFGSB, testLBFGSBActiveBounds, testLBFGSBCoverage, testDifferentialEvolution, testCMAES |
 | `optionletstripper` | not started |  | 19 cases |
-| `overnightindexedcoupon` | not started |  | 45 cases |
+| `overnightindexedcoupon` | partial | TestSuite/OvernightIndexedCouponTests.cs | 43 of 45 cases; not yet: testOvernightLegNPV, testOvernightLegWithCapsAndFloors |
 | `overnightindexedfundingratehelper` | not started |  | 3 cases |
 | `overnightindexedswap` | not started |  | 25 cases |
 | `pagodaoption` | not started |  | 1 cases |

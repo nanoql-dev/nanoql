@@ -152,7 +152,33 @@ public static class CouponPricerFunctions
             ? c.SetPricer(pricer)
             : throw new ArgumentException("pricer not compatible with Ibor coupon", nameof(pricer)),
 
-        // The overnight coupons' cases go here, after the Ibor ones.
+
+        // The overnight-indexed coupons (couponpricer.cpp:340-375). A capped or floored coupon takes the pricer and
+        // then its underlying is visited with it, as QuantLib's visitor does; the copy carries both, its cap and floor
+        // as stored.
+        CappedFlooredOvernightIndexedCoupon c => c.WithPricers(
+            (pricer as OvernightIndexedCouponPricer
+                ?? throw new ArgumentException(
+                    "pricer not compatible with capped-floored overnight indexed coupon", nameof(pricer))) switch
+            {
+                CompoundingOvernightIndexedCouponPricer p when c.AveragingMethod == RateAveragingType.Compound => p,
+                ArithmeticAveragedOvernightIndexedCouponPricer p when c.AveragingMethod != RateAveragingType.Compound => p,
+                _ when c.AveragingMethod == RateAveragingType.Compound => throw new ArgumentException(
+                    "pricer not compatible with capped-floored overnight indexed coupon", nameof(pricer)),
+                _ => throw new ArgumentException(
+                    "pricer not compatible with arithmetic averaged capped-floored overnight indexed coupon",
+                    nameof(pricer)),
+            },
+            (OvernightIndexedCoupon)Visit(c.Underlying, pricer)),
+        OvernightIndexedCoupon c => c.SetPricer(
+            c.AveragingMethod == RateAveragingType.Compound
+                ? pricer as CompoundingOvernightIndexedCouponPricer
+                    ?? throw new ArgumentException(
+                        "pricer not compatible with overnight indexed coupon", nameof(pricer))
+                : pricer as ArithmeticAveragedOvernightIndexedCouponPricer
+                    ?? throw new ArgumentException(
+                        "pricer not compatible with arithmetic averaged overnight indexed coupon", nameof(pricer))),
+
         FloatingRateCoupon c => c.SetPricer(pricer),
         _ => cf,
     };

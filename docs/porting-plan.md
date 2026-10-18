@@ -119,6 +119,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the cases needing matrix utilities not yet ported (decompositions, square roots, iterative solvers, sparse matrices, projections, Moore-Penrose).
 - `tests/NanoQL.Tests/TestSuite/OperatorsTests.cs`: `testConsistency`, which waits for `DZero` and `DPlusDMinus`.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing, L-BFGS-B, differential evolution and CMA-ES cases, whose optimizers aren't ported yet.
+- `tests/NanoQL.Tests/TestSuite/OvernightIndexedCouponTests.cs`: `testOvernightLegNPV` and `testOvernightLegWithCapsAndFloors`, whose expected values come from S5's `InterpolatedZeroCurve<Cubic>`.
 - `tests/NanoQL.Tests/TestSuite/PathGeneratorTests.cs`: `testMultiPathGenerator`, which waits for `MultiPathGenerator` (B3.2).
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
 - `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases, which need `cdsMaturity`.
