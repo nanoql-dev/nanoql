@@ -4,10 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/cashflows.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testAccessViolation, testNullFixingDays, testFixedIborCouponWithoutForecastCurve, testIborCouponKnowsWhenitHasFixed, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices
+// Partial: testAccessViolation, which waits for batch 2's USDLibor; testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking and testIborStubCouponHasFixedUsesSelectedIndices, which wait for batch 2's NewZealand calendar and Bkbm indexes
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Indexes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 using static NanoQL.Time.Month;
@@ -217,14 +218,41 @@ public class CashFlowsTests
         }
     }
 
-    // Adapted: the fixed-rate legs only. Dropped: the Ibor legs l2, l6 and l8 with their index, lines 296-304, 320-330
-    // and 346-356, since IborLeg and Euribor3M aren't ported yet.
+    // Adapted: Euribor 6M in place of USDLibor 6M (line 268), which waits for batch 2; the case's index is incidental.
+    // QuantLib's precondition, at-par coupons, is the context's default; the conversion to a leg (lines 269-273) takes
+    // the context.
+    [Fact]
+    public void TestNullFixingDays()
+    {
+        // Testing ibor leg construction with null fixing days...
+        Date today = Context.EvaluationDate;
+        Schedule schedule =
+            new MakeSchedule()
+            .From(today - (2 * TimeUnit.Months)).To(today + (4 * TimeUnit.Months))
+            .WithFrequency(Frequency.Semiannual)
+            .WithCalendar(new TARGET())
+            .WithConvention(BusinessDayConvention.Following)
+            .Backwards()
+            .ToSchedule();
+
+        IborIndex index = new Euribor6M();
+        Leg leg = new IborLeg(schedule, index)
+            .WithNotionals(100.0)
+            // this can happen with default values, and caused an
+            // exception when the null was not managed properly
+            .WithFixingDays((int?)null)
+            .ToLeg(Context);
+        Assert.False(leg.IsDefaultOrEmpty);
+    }
+
+    // Adapted: the Ibor legs' conversions (lines 298, 320 and 346) take a context with today as the evaluation date.
     [Fact]
     public void TestExCouponDates()
     {
         // Testing ex-coupon date calculation...
 
         Date today = Date.TodaysDate();
+        var context = new EvaluationContext { EvaluationDate = today };
         Schedule schedule = new MakeSchedule()
             .From(today)
             .To(today + (5 * TimeUnit.Years))
@@ -236,6 +264,18 @@ public class CashFlowsTests
         // no ex-coupon dates
         Leg l1 = new FixedRateLeg(schedule).WithNotionals(100.0).WithCouponRates(0.03, new Actual360()).ToLeg();
         foreach (CashFlow i in l1)
+        {
+            Coupon c = CouponCast(i);
+            if (c.ExCouponDate is not null)
+            {
+                Assert.Fail("ex-coupon date found (none expected)");
+            }
+        }
+
+        // same for floating legs
+        IborIndex index = new Euribor3M();
+        Leg l2 = new IborLeg(schedule, index).WithNotionals(100.0).ToLeg(context);
+        foreach (CashFlow i in l2)
         {
             Coupon c = CouponCast(i);
             if (c.ExCouponDate is not null)
@@ -261,6 +301,21 @@ public class CashFlowsTests
             }
         }
 
+        Leg l6 = new IborLeg(schedule, index)
+            .WithNotionals(100.0)
+            .WithExCouponPeriod(
+                new Period(2, TimeUnit.Days), new NullCalendar(), BusinessDayConvention.Unadjusted, false)
+            .ToLeg(context);
+        foreach (CashFlow i in l6)
+        {
+            Coupon c = CouponCast(i);
+            Date expected = c.AccrualEndDate - 2;
+            if (c.ExCouponDate != expected)
+            {
+                Assert.Fail($"ex-coupon date = {Show(c.ExCouponDate)} ({expected} expected)");
+            }
+        }
+
         // business days
         Leg l7 = new FixedRateLeg(schedule)
             .WithNotionals(100.0)
@@ -268,6 +323,20 @@ public class CashFlowsTests
             .WithExCouponPeriod(new Period(2, TimeUnit.Days), new TARGET(), BusinessDayConvention.Preceding, false)
             .ToLeg();
         foreach (CashFlow i in l7)
+        {
+            Coupon c = CouponCast(i);
+            Date expected = new TARGET().Advance(c.AccrualEndDate, -2, TimeUnit.Days);
+            if (c.ExCouponDate != expected)
+            {
+                Assert.Fail($"ex-coupon date = {Show(c.ExCouponDate)} ({expected} expected)");
+            }
+        }
+
+        Leg l8 = new IborLeg(schedule, index)
+            .WithNotionals(100.0)
+            .WithExCouponPeriod(new Period(2, TimeUnit.Days), new TARGET(), BusinessDayConvention.Preceding, false)
+            .ToLeg(context);
+        foreach (CashFlow i in l8)
         {
             Coupon c = CouponCast(i);
             Date expected = new TARGET().Advance(c.AccrualEndDate, -2, TimeUnit.Days);
@@ -369,8 +438,8 @@ public class CashFlowsTests
         }
     }
 
-    // Adapted: the fixed-rate legs only. Dropped: the floating legs and their checks, lines 492-536, since IborLeg and
-    // USDLibor aren't ported yet.
+    // Adapted: the fixed-rate legs only. Dropped: the floating legs and their checks, lines 492-536, since USDLibor
+    // waits for batch 2.
     [Fact]
     public void TestPartialScheduleLegConstruction()
     {
@@ -430,6 +499,114 @@ public class CashFlowsTests
         Assert.Equal(new Date(25, Sep, 2017), firstCpn3.ReferencePeriodEnd);
         Assert.Equal(new Date(25, Sep, 2020), lastCpn3.ReferencePeriodStart);
         Assert.Equal(new Date(30, Sep, 2020), lastCpn3.ReferencePeriodEnd);
+    }
+
+    // Adapted: Euribor 6M in place of USDLibor 6M (line 544), which waits for batch 2; the case's index is incidental.
+    // The fixing added to the index (line 549) is stored in the context, and the coupon's pricer (line 555), built
+    // with QuantLib's defaults, reads the context's at-par switch.
+    [Fact]
+    public void TestFixedIborCouponWithoutForecastCurve()
+    {
+        // Testing past ibor coupon without forecast curve...
+
+        Date today = Context.EvaluationDate;
+
+        var index = new Euribor6M();
+        Calendar calendar = index.FixingCalendar;
+
+        Date fixingDate = calendar.Advance(today, -2, TimeUnit.Months);
+        Rate pastFixing = 0.01;
+        EvaluationContext context = Context with
+        {
+            Fixings = Context.Fixings.AddFixing(index, fixingDate, pastFixing),
+        };
+
+        Date startDate = index.ValueDate(fixingDate);
+        Date endDate = index.MaturityDate(fixingDate);
+
+        IborCoupon coupon = new IborCoupon(endDate, 100.0, startDate, endDate, index.FixingDays, index)
+            .SetPricer(new BlackIborCouponPricer(context));
+
+        Assert.Null(Record.Exception(() => coupon.Amount(context)));
+
+        // the main check is the one above, but let's check for consistency too:
+        Real amount = coupon.Amount(context);
+        Real expected = pastFixing * coupon.Nominal(context) * coupon.AccrualPeriod();
+        if (Math.Abs(amount - expected) > 1e-8)
+        {
+            Assert.Fail("amount mismatch:"
+                        + $"\n    calculated: {amount}"
+                        + $"\n    expected: {expected}");
+        }
+    }
+
+    // Adapted: each block's setting of enforcesTodaysHistoricFixings and its change to the index's fixings (lines
+    // 589, 598-599, 605-606 and 612-613) build that block's own context; the coupons' pricers, built with QuantLib's
+    // defaults, read the context's at-par switch.
+    [Fact]
+    public void TestIborCouponKnowsWhenitHasFixed()
+    {
+        // Testing that ibor coupon knows when it has fixed...
+
+        Date today = Context.EvaluationDate;
+
+        var index = new Euribor3M();
+        Calendar calendar = index.FixingCalendar;
+
+        {
+            IborCoupon coupon = IborCouponForFixingDate(index, calendar.Advance(today, -1, TimeUnit.Days));
+            EvaluationContext context = Context with { Fixings = IndexFixings.Empty };
+            // this should not throw an exception if the fixing is missing
+            Assert.True(coupon.HasFixed(context));
+            // but this should
+            Assert.ThrowsAny<NanoQLException>(() => coupon.Rate(context));
+        }
+
+        {
+            IborCoupon coupon = IborCouponForFixingDate(index, today);
+            EvaluationContext context = Context with
+            {
+                EnforcesTodaysHistoricFixings = false,
+                Fixings = IndexFixings.Empty,
+            };
+            Assert.False(coupon.HasFixed(context));
+        }
+
+        {
+            IborCoupon coupon = IborCouponForFixingDate(index, today);
+            EvaluationContext context = Context with
+            {
+                EnforcesTodaysHistoricFixings = false,
+                Fixings = IndexFixings.Empty.AddFixing(index, coupon.FixingDate(), 0.01),
+            };
+            Assert.True(coupon.HasFixed(context));
+        }
+
+        {
+            IborCoupon coupon = IborCouponForFixingDate(index, today);
+            EvaluationContext context = Context with
+            {
+                EnforcesTodaysHistoricFixings = true,
+                Fixings = IndexFixings.Empty,
+            };
+            Assert.True(coupon.HasFixed(context));
+            Assert.ThrowsAny<NanoQLException>(() => coupon.Rate(context));
+        }
+
+        {
+            IborCoupon coupon = IborCouponForFixingDate(index, calendar.Advance(today, 1, TimeUnit.Days));
+            EvaluationContext context = Context with { EnforcesTodaysHistoricFixings = true };
+            Assert.False(coupon.HasFixed(context));
+        }
+    }
+
+    private static IborCoupon IborCouponForFixingDate(IborIndex index, Date fixingDate)
+    {
+        Date startDate = index.ValueDate(fixingDate);
+        Date endDate = index.MaturityDate(fixingDate);
+
+        return new IborCoupon(endDate, 100.0, startDate, endDate, index.FixingDays, index)
+            .SetPricer(new BlackIborCouponPricer(Context));
     }
 
     // coupon_cast: the cash flow as a coupon. QuantLib's returns null for any other cash flow, which these cases would

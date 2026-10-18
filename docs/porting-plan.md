@@ -82,7 +82,10 @@ Files that port only part of their QuantLib file, each with a `// Partial:` line
 The licensing gate checks that this list and the files match.
 
 - `src/NanoQL/CashFlow.cs`: `earlier_than<CashFlow>`, which waits for the bond slot.
+- `src/NanoQL/Coupons/CappedFlooredCoupon.cs`: `CappedFlooredCmsCoupon`, which waits for S-rx with `CmsCoupon`.
+- `src/NanoQL/Coupons/CashFlowVectorsFunctions.cs`: `FloatingDigitalLeg`, which waits for B3.4 with the digital coupons.
 - `src/NanoQL/Coupons/CashFlows.cs`: every function but `startDate`, `maturityDate`, `accruedPeriod`, `accruedDays`, `accruedAmount`, and `npv`, `bps` and `npvbps` on a yield term structure.
+- `src/NanoQL/Coupons/CouponPricer/CouponPricerFunctions.cs`: the visitor's cases for the CMS, CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS and CMS-spread checks among them), which wait for S-rx and batch 3; the CMS pricer bases, which wait for B3.3.
 - `src/NanoQL/Coupons/FixedRateLeg.cs`: `withLastPeriodDayCounter`, which waits for the credit default swap slot.
 - `src/NanoQL/Event.cs`: `detail::simple_event`, which only experimental code uses.
 - `src/NanoQL/Instrument.cs`: `result<T>`, which waits for the first engine that sets additional results.
@@ -104,7 +107,8 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/BlackFormulaTests.cs`: `testBachelierImpliedVol`, `testChambersImpliedVol`, `testRadoicicStefanicaImpliedVol`, `testRadoicicStefanicaLowerBound`, `testImpliedVolAdaptiveSuccessiveOverRelaxation`, `testBlackFormulaForwardDerivative`, `testBlackFormulaForwardDerivativeWithZeroStrike`, `testBlackFormulaForwardDerivativeWithZeroVolatility`, `testBachelierBlackFormulaForwardDerivative`, `testBachelierBlackFormulaForwardDerivativeWithZeroVolatility`, `testItmProbabilitiesWithZeroVolatility`, `testBachelierImpliedVolAtIntrinsic`, `testImpliedStdDevApproximationRSStaysFinite`, `testImpliedStdDevLiRSAtIntrinsic`, which need the Black formula's other functions and wait for S6.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for S-eq's Black-Scholes process.
 - `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
-- `tests/NanoQL.Tests/TestSuite/CashFlowsTests.cs`: the cases needing Ibor coupons, pricers or cash-flow functions not yet ported.
+- `tests/NanoQL.Tests/TestSuite/CapFlooredCouponTests.cs`: `testDecomposition`, which waits for S8's cap and floor instruments.
+- `tests/NanoQL.Tests/TestSuite/CashFlowsTests.cs`: the cases needing batch 2's USDLibor, NewZealand calendar and Bkbm indexes.
 - `tests/NanoQL.Tests/TestSuite/DatesTests.cs`: the ECB, IMM, ASX, parsing and intraday cases.
 - `tests/NanoQL.Tests/TestSuite/DayCountersTests.cs`: the cases for day counters not yet ported.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, binomial, Student t, chi-square, stochastic-collocation and Sankaran cases, whose distributions aren't ported yet.

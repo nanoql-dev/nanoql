@@ -241,10 +241,11 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `TermStructure`, `YieldTermStructure`, `Instrument`, `TridiagonalOperatorTimeSetter`, `Interpolation`,
   `Solver1D<TSelf, TFunction>`, `OptimizationMethod`, `CostFunction`, `Constraint`, `ParametersTransformation`,
   `StochasticProcess`, `StochasticProcess1D`, `StochasticProcessDiscretization`,
-  `StochasticProcess1DDiscretization`, `FinancialIndex`, `InterestRateIndex`, `VolatilityTermStructure` and
-  `OptionletVolatilityStructure` (abstract); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
-  `IborIndex`, `OvernightIndex`, `Euribor`, `Currency`, `Rounding`, `TridiagonalOperator`, `CubicInterpolation`,
-  `LogCubicInterpolation`, `RandomSequenceGenerator<TRng>`,
+  `StochasticProcess1DDiscretization`, `FinancialIndex`, `InterestRateIndex`, `VolatilityTermStructure`,
+  `OptionletVolatilityStructure`, `FloatingRateCouponPricer` and `IborCouponPricer` (abstract); `Swap`,
+  `SimpleCashFlow`, `InstrumentResults`, `SwapResults`, `IborIndex`, `OvernightIndex`, `Euribor`, `Currency`,
+  `Rounding`, `FloatingRateCoupon`, `IborCoupon`, `CappedFlooredCoupon`, `BlackIborCouponPricer`,
+  `TridiagonalOperator`, `CubicInterpolation`, `LogCubicInterpolation`, `RandomSequenceGenerator<TRng>`,
   `InverseCumulativeRng<TRng, TIc>`, `InverseCumulativeRsg<TUsg, TIc>` and `PathGenerator<TGsg>` (unsealed);
   `IInterpolator` (the interpolation traits), `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers'
   function concepts), and the generator concepts `IRng`, `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`,

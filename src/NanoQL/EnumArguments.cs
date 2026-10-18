@@ -178,4 +178,28 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, $"unknown compounding convention ({(int)value})");
         }
     }
+
+    /// <summary>Refuses a stub index convention outside <see cref="StubIndexSelectionConvention"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(StubIndexSelectionConvention value, string paramName)
+    {
+        if (value is not (StubIndexSelectionConvention.ClosestIndex or StubIndexSelectionConvention.Interpolated))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown stub index convention");
+        }
+    }
+
+    /// <summary>Refuses a timing adjustment outside <see cref="BlackIborCouponPricerTimingAdjustment"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(BlackIborCouponPricerTimingAdjustment value, string paramName)
+    {
+        if (value is not (BlackIborCouponPricerTimingAdjustment.Black76 or BlackIborCouponPricerTimingAdjustment.BivariateLognormal))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown timing adjustment (code {(int)value})");
+        }
+    }
 }

@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,167 | 155 |
-| partial | 18 | 20 |
-| ported | 89 | 7 |
+| not started | 1,160 | 154 |
+| partial | 21 | 21 |
+| ported | 93 | 7 |
 | replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
@@ -85,14 +85,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `averagebmacoupon` | not started |  | no nanoql type: AverageBMACoupon, AverageBMALeg |
 | `blackovernightindexedcouponpricer` | not started |  | no nanoql type: BlackCompoundingOvernightIndexedCouponPricer, BlackAveragingOvernightIndexedCouponPricer |
-| `capflooredcoupon` | not started |  | no nanoql type: CappedFlooredCoupon, CappedFlooredIborCoupon, CappedFlooredCmsCoupon |
+| `capflooredcoupon` | partial | Coupons/CappedFlooredCoupon.cs, Coupons/CappedFlooredIborCoupon.cs | partial: CappedFlooredCmsCoupon, which waits for S-rx with CmsCoupon; no nanoql type: CappedFlooredCmsCoupon |
 | `capflooredinflationcoupon` | not started |  | no nanoql type: CappedFlooredYoYInflationCoupon |
 | `cashflows` | partial | Coupons/CashFlows.cs | partial: every function but startDate, maturityDate, accruedPeriod, accruedDays, accruedAmount, and npv, bps and npvbps on a yield term structure, which wait for the slots whose code and tests use them |
-| `cashflowvectors` | not started |  |  |
+| `cashflowvectors` | partial | Coupons/CashFlowVectorsFunctions.cs | partial: FloatingDigitalLeg, which waits for B3.4 with the digital coupons |
 | `cmscoupon` | not started |  | no nanoql type: CmsCoupon, CmsLeg |
 | `conundrumpricer` | not started |  | no nanoql type: VanillaOptionPricer, MarketQuotedOptionPricer, GFunction, GFunctionFactory, GFunctionFactoryYieldCurveModel, HaganPricer, NumericHaganPricer, NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand, AnalyticHaganPricer |
 | `coupon` | ported | Coupons/Coupon.cs |  |
-| `couponpricer` | not started |  | no nanoql type: FloatingRateCouponPricer, IborCouponPricer, BlackIborCouponPricer, BlackIborCouponPricerTimingAdjustment, CmsCouponPricer, MeanRevertingPricer |
+| `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the CMS, CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS and CMS-spread checks among them), which wait for S-rx and batch 3; the CMS pricer bases CmsCouponPricer and MeanRevertingPricer, which wait for B3.3; no nanoql type: CmsCouponPricer, MeanRevertingPricer |
 | `cpicoupon` | not started |  | no nanoql type: CPICoupon, CPICashFlow, CPILeg |
 | `cpicouponpricer` | not started |  | no nanoql type: CPICouponPricer |
 | `digitalcmscoupon` | not started |  | no nanoql type: DigitalCmsCoupon, DigitalCmsLeg |
@@ -102,8 +102,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `duration` | ported | Coupons/DurationType.cs |  |
 | `equitycashflow` | not started |  | no nanoql type: EquityCashFlow, EquityCashFlowPricer, EquityQuantoCashFlowPricer |
 | `fixedratecoupon` | partial | Coupons/FixedRateCoupon.cs, Coupons/FixedRateLeg.cs | partial: withLastPeriodDayCounter, which waits for the credit-default-swap slot, whose tests use it |
-| `floatingratecoupon` | not started |  | no nanoql type: FloatingRateCoupon |
-| `iborcoupon` | not started |  | no nanoql type: IborCoupon, IborCouponSettings, IborLeg |
+| `floatingratecoupon` | ported | Coupons/FloatingRateCoupon.cs, Coupons/FloatingRateCouponExtensions.cs |  |
+| `iborcoupon` | ported | Coupons/IborCoupon.cs, Coupons/IborLeg.cs | no nanoql type: IborCouponSettings |
 | `indexedcashflow` | not started |  | no nanoql type: IndexedCashFlow |
 | `inflationcoupon` | not started |  | no nanoql type: InflationCoupon |
 | `inflationcouponpricer` | not started |  | no nanoql type: InflationCouponPricer, YoYInflationCouponPricer, BlackYoYInflationCouponPricer, UnitDisplacedBlackYoYInflationCouponPricer, BachelierYoYInflationCouponPricer |
@@ -115,7 +115,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rateaveraging` | ported | Coupons/RateAveragingType.cs |  |
 | `replication` | not started |  | no nanoql type: ReplicationType, DigitalReplication |
 | `simplecashflow` | ported | Coupons/SimpleCashFlow/AmortizingPayment.cs, Coupons/SimpleCashFlow/Redemption.cs, Coupons/SimpleCashFlow/SimpleCashFlow.cs |  |
-| `stubiborcoupon` | not started |  | no nanoql type: StubIndexSelection, StubIndexSelectionConvention, StubIborCoupon, StubIborCouponWeightedIndex |
+| `stubiborcoupon` | ported | Coupons/StubIborCoupon/StubIborCoupon.cs, Coupons/StubIborCoupon/StubIborCouponWeightedIndex.cs, Coupons/StubIborCoupon/StubIndexSelection.cs, Coupons/StubIborCoupon/StubIndexSelectionConvention.cs |  |
 | `timebasket` | not started |  | no nanoql type: TimeBasket |
 | `yoyinflationcoupon` | not started |  | no nanoql type: YoYInflationCoupon, YoyInflationLeg |
 | `zeroinflationcashflow` | not started |  | no nanoql type: ZeroInflationCashFlow |
@@ -2052,7 +2052,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `steppingiterator` | replaced: indices into the matrix |  |  |
 | `tracing` | not ported: C++ platform header |  |  |
 | `variants` | replaced: pattern matching |  |  |
-| `vectors` | not started |  |  |
+| `vectors` | ported | Utilities/VectorsFunctions.cs |  |
 
 ## Test suite
 
@@ -2086,8 +2086,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `calendars` | partial | TestSuite/CalendarsTests.cs | 16 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
 | `callablebonds` | not started |  | 14 cases |
 | `capfloor` | not started |  | 10 cases |
-| `capflooredcoupon` | not started |  | 2 cases |
-| `cashflows` | partial | TestSuite/CashFlowsTests.cs | 7 of 16 cases; not yet: testAccessViolation, testNullFixingDays, testFixedIborCouponWithoutForecastCurve, testIborCouponKnowsWhenitHasFixed, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices |
+| `capflooredcoupon` | partial | TestSuite/CapFlooredCouponTests.cs | 1 of 2 cases; not yet: testDecomposition |
+| `cashflows` | partial | TestSuite/CashFlowsTests.cs | 10 of 16 cases; not yet: testAccessViolation, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices |
 | `catbonds` | not started |  | 9 cases |
 | `cdo` | not started |  | 0 cases |
 | `cdsoption` | not started |  | 1 cases |
