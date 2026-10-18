@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,195 | 160 |
-| partial | 14 | 17 |
-| ported | 65 | 5 |
+| not started | 1,189 | 157 |
+| partial | 13 | 18 |
+| ported | 72 | 7 |
 | replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
@@ -40,7 +40,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `config.mingw` | not ported: C++ platform header |  |  |
 | `config.msvc` | not ported: C++ platform header |  |  |
 | `config.sun` | not ported: C++ platform header |  |  |
-| `currency` | not started |  | no nanoql type: Currency, CurrencyData |
+| `currency` | ported | Currency.cs | no nanoql type: CurrencyData |
 | `default` | not started |  | no nanoql type: ProtectionSide |
 | `discretizedasset` | not started |  | no nanoql type: DiscretizedAsset, DiscretizedDiscountBond, DiscretizedOption |
 | `errors` | replaced: ArgumentException and NanoQLException |  |  |
@@ -50,7 +50,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `functional` | not ported: deprecated |  |  |
 | `grid` | not ported: deprecated |  |  |
 | `handle` | replaced: the object itself |  |  |
-| `index` | not started |  | no nanoql type: Index |
+| `index` | ported | FinancialIndex.cs |  |
 | `instrument` | partial | Instrument.cs, InstrumentResults.cs | partial: result<T>(tag), which waits for the first engine that sets additional results |
 | `interestrate` | partial | InterestRate.cs | partial: discountFactorFirstDerivative and discountFactorSecondDerivative, which wait for the slot that ports the cash-flow duration and convexity, whose wheel functions check them |
 | `mathconstants` | not started |  |  |
@@ -71,7 +71,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `stochasticprocess` | partial | StochasticProcess/StochasticProcess.cs, StochasticProcess/StochasticProcess1D.cs, StochasticProcess/StochasticProcess1DDiscretization.cs, StochasticProcess/StochasticProcessDiscretization.cs | partial: StochasticProcess's defaults of expectation, stdDeviation and covariance, which call the discretization, wait for S-eq's EulerDiscretization; StochasticProcess1D's defaults of expectation, stdDeviation and variance, which call the discretization, wait for S-eq's EulerDiscretization |
 | `termstructure` | partial | TermStructure.cs | partial: the constructors taking a day counter only, for structures that manage their own reference date, which no pilot curve uses |
 | `timegrid` | ported | TimeGrid.cs |  |
-| `timeseries` | not started |  | no nanoql type: TimeSeries, TimeSeriesReverse |
+| `timeseries` | ported | TimeSeries{T}.cs | no nanoql type: TimeSeriesReverse |
 | `tuple` | not ported: deprecated |  |  |
 | `types` | replaced: global type aliases | Types.cs |  |
 | `userconfig` | not ported: C++ platform header |  |  |
@@ -87,11 +87,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackovernightindexedcouponpricer` | not started |  | no nanoql type: BlackCompoundingOvernightIndexedCouponPricer, BlackAveragingOvernightIndexedCouponPricer |
 | `capflooredcoupon` | not started |  | no nanoql type: CappedFlooredCoupon, CappedFlooredIborCoupon, CappedFlooredCmsCoupon |
 | `capflooredinflationcoupon` | not started |  | no nanoql type: CappedFlooredYoYInflationCoupon |
-| `cashflows` | partial | Coupons/CashFlows.cs | partial: every function but startDate, maturityDate, and npv, bps and npvbps on a yield term structure, which wait for the slots whose code and tests use them |
+| `cashflows` | partial | Coupons/CashFlows.cs | partial: every function but startDate, maturityDate, accruedPeriod, accruedDays, accruedAmount, and npv, bps and npvbps on a yield term structure, which wait for the slots whose code and tests use them |
 | `cashflowvectors` | not started |  |  |
 | `cmscoupon` | not started |  | no nanoql type: CmsCoupon, CmsLeg |
 | `conundrumpricer` | not started |  | no nanoql type: VanillaOptionPricer, MarketQuotedOptionPricer, GFunction, GFunctionFactory, GFunctionFactoryYieldCurveModel, HaganPricer, NumericHaganPricer, NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand, AnalyticHaganPricer |
-| `coupon` | partial | Coupons/Coupon.cs | partial: accruedPeriod(d) and accruedDays(d), which wait for the slot that ports the cash-flow functions using them |
+| `coupon` | ported | Coupons/Coupon.cs |  |
 | `couponpricer` | not started |  | no nanoql type: FloatingRateCouponPricer, IborCouponPricer, BlackIborCouponPricer, BlackIborCouponPricerTimingAdjustment, CmsCouponPricer, MeanRevertingPricer |
 | `cpicoupon` | not started |  | no nanoql type: CPICoupon, CPICashFlow, CPILeg |
 | `cpicouponpricer` | not started |  | no nanoql type: CPICouponPricer |
@@ -531,10 +531,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `bmaindex` | not started |  | no nanoql type: BMAIndex |
 | `equityindex` | not started |  | no nanoql type: EquityIndex |
-| `iborindex` | not started |  | no nanoql type: IborIndex, OvernightIndex |
-| `indexmanager` | replaced: the evaluation context's fixings |  |  |
+| `iborindex` | ported | Indexes/IborIndex.cs, Indexes/OvernightIndex.cs |  |
+| `indexmanager` | replaced: the evaluation context's fixings | Indexes/IndexFixings.cs |  |
 | `inflationindex` | not started |  | no nanoql type: CPI, CPIInterpolationType, InflationIndex, ZeroInflationIndex, YoYInflationIndex |
-| `interestrateindex` | not started |  | no nanoql type: InterestRateIndex |
+| `interestrateindex` | ported | Indexes/InterestRateIndex.cs |  |
 | `region` | not started |  | no nanoql type: Region, RegionData, CustomRegion, AustraliaRegion, EURegion, FranceRegion, UKRegion, USRegion, ZARegion |
 | `swapindex` | not started |  | no nanoql type: SwapIndex, OvernightIndexedSwapIndex |
 
@@ -771,7 +771,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `primenumbers` | ported | Numerics/PrimeNumbers.cs |  |
 | `quadratic` | not started |  | no nanoql type: Quadratic |
 | `richardsonextrapolation` | not started |  | no nanoql type: RichardsonExtrapolation |
-| `rounding` | not started |  | no nanoql type: Rounding, RoundingType, UpRounding, DownRounding, ClosestRounding, CeilingTruncation, FloorTruncation |
+| `rounding` | ported | Numerics/Rounding/CeilingTruncation.cs, Numerics/Rounding/ClosestRounding.cs, Numerics/Rounding/DownRounding.cs, Numerics/Rounding/FloorTruncation.cs, Numerics/Rounding/Rounding.cs, Numerics/Rounding/RoundingType.cs, Numerics/Rounding/UpRounding.cs |  |
 | `solver1d` | ported | Numerics/Solver1D/IDerivativeSolver1DFunction.cs, Numerics/Solver1D/ISolver1DFunction.cs, Numerics/Solver1D/Solver1D.cs, Numerics/Solver1D/Solver1DBracket.cs |  |
 | `transformedgrid` | not ported: deprecated |  |  |
 
@@ -2087,7 +2087,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `callablebonds` | not started |  | 14 cases |
 | `capfloor` | not started |  | 10 cases |
 | `capflooredcoupon` | not started |  | 2 cases |
-| `cashflows` | partial | TestSuite/CashFlowsTests.cs | 6 of 16 cases; not yet: testAccessViolation, testDefaultSettlementDate, testNullFixingDays, testFixedIborCouponWithoutForecastCurve, testIborCouponKnowsWhenitHasFixed, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices |
+| `cashflows` | partial | TestSuite/CashFlowsTests.cs | 7 of 16 cases; not yet: testAccessViolation, testNullFixingDays, testFixedIborCouponWithoutForecastCurve, testIborCouponKnowsWhenitHasFixed, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices |
 | `catbonds` | not started |  | 9 cases |
 | `cdo` | not started |  | 0 cases |
 | `cdsoption` | not started |  | 1 cases |
@@ -2107,7 +2107,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `covariance` | not started |  | 3 cases |
 | `creditdefaultswap` | not started |  | 10 cases |
 | `crosscurrencyratehelpers` | not started |  | 30 cases |
-| `currency` | not started |  | 1 cases |
+| `currency` | ported | TestSuite/CurrencyTests.cs | 1 of 1 cases |
 | `curvestates` | not started |  | 3 cases |
 | `dates` | partial | TestSuite/DatesTests.cs | 4 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; not yet: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, immDates, asxDates, asxDatesSpecific, isoDates, parseDates, intraday |
 | `daycounters` | partial | TestSuite/DayCountersTests.cs | 10 of 22 cases; not yet: testActualActualWithSchedule, testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter |
@@ -2217,7 +2217,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `riskstats` | not started |  | 1 cases |
 | `rngtraits` | partial | TestSuite/RngTraitsTests.cs | 3 of 4 cases; not yet: testRanLux |
 | `roughhestonmodel` | not started |  | 24 cases |
-| `rounding` | not started |  | 5 cases |
+| `rounding` | ported | TestSuite/RoundingTests.cs | 5 of 5 cases |
 | `schedule` | partial | TestSuite/ScheduleTests.cs | 18 of 28 cases; not yet: testEndDateWithEomAdjustment, testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured, testTruncation |
 | `settings` | not ported: tests Settings, which EvaluationContext replaces |  |  |
 | `shortratemodels` | not started |  | 9 cases |
@@ -2236,7 +2236,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `swingoption` | not started |  | 6 cases |
 | `termstructures` | partial | TestSuite/TermStructuresTests.cs | 2 of 15 cases; replaced: testReferenceChange by Vectors/TermStructures/FlatForwardVectorTests.cs; not yet: testImplied, testImpliedObs, testFSpreaded, testFSpreadedObs, testZSpreaded, testZSpreadedObs, testCreateWithNullUnderlying, testLinearInterpolationSpreadedForwardRate, testForwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationZeroRate, testLinkToNullUnderlying, testCompositeZeroYieldStructures |
 | `timegrid` | ported | TestSuite/TimeGridTests.cs | 10 of 10 cases |
-| `timeseries` | not started |  | 6 cases |
+| `timeseries` | partial | TestSuite/TimeSeriesTests.cs | 5 of 6 cases; not yet: testIntervalPrice |
 | `toplevelfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `tqreigendecomposition` | not started |  | 3 cases |
 | `tracing` | not ported: tests the C++ platform |  |  |

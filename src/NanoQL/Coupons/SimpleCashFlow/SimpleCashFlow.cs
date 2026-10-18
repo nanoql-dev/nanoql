@@ -35,5 +35,9 @@ public class SimpleCashFlow : CashFlow
     public override Date Date => date;
 
     /// <inheritdoc/>
-    public override double Amount() => amount;
+    public override double Amount(EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        return amount;
+    }
 }

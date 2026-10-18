@@ -3,6 +3,7 @@
 
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using NanoQL.Indexes;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Conventions;
@@ -25,6 +26,37 @@ public class EvaluationContextTests
         Assert.False(context.IncludeReferenceDateEvents);
         Assert.Null(context.IncludeTodaysCashFlows);
         Assert.False(context.EnforcesTodaysHistoricFixings);
+        Assert.Same(IndexFixings.Empty, context.Fixings);
+        Assert.True(context.UseAtParCoupons);
+    }
+
+    [Fact]
+    public void EqualityAndTheHashFollowTheFixingsContent()
+    {
+        var euribor = new IborIndex(
+            "Euribor", new Period(6, TimeUnit.Months), 2, null, new TARGET(), BusinessDayConvention.ModifiedFollowing,
+            true, new Actual360());
+        var shouting = new IborIndex(
+            "EURIBOR", new Period(6, TimeUnit.Months), 2, null, new TARGET(), BusinessDayConvention.ModifiedFollowing,
+            true, new Actual360());
+        var sofr = new OvernightIndex("SOFR", 0, null, new UnitedStates(UnitedStatesMarket.SOFR), new Actual360());
+        Date d1 = new(13, Month.October, 2026), d2 = new(14, Month.October, 2026);
+
+        // The same fixings, stored in different orders and under names differing in ASCII case.
+        IndexFixings a = IndexFixings.Empty.AddFixing(euribor, d1, 0.01).AddFixing(euribor, d2, 0.02).AddFixing(sofr, d1, 0.03);
+        IndexFixings b = IndexFixings.Empty.AddFixing(sofr, d1, 0.03).AddFixings(shouting, [d2, d1], [0.02, 0.01]);
+        var first = new EvaluationContext { EvaluationDate = Today, Fixings = a };
+        var second = new EvaluationContext { EvaluationDate = Today, Fixings = b };
+
+        Assert.NotSame(a, b);
+        Assert.Equal(first, second);
+        Assert.Equal(first.GetHashCode(), second.GetHashCode());
+
+        // A changed fixing, an extra history, the switch: each makes the contexts unequal.
+        Assert.NotEqual(first, second with { Fixings = b.AddFixing(euribor, d1, 0.015, forceOverwrite: true) });
+        Assert.NotEqual(first, second with { Fixings = b.AddFixings(new OvernightIndex("ESTR", 0, null, new TARGET(), new Actual360()), [], []) });
+        Assert.NotEqual(first, second with { UseAtParCoupons = false });
+        Assert.Throws<ArgumentNullException>(() => first with { Fixings = null! });
     }
 
     [Fact]

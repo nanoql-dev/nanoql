@@ -146,7 +146,7 @@ public class NullDateTests
         AssertParam("refPeriodEnd", () => new FixedRateCoupon(valid + 180, 100.0, 0.03, dc, valid, valid + 180, valid, d));
         AssertParam("exCouponDate", () => new FixedRateCoupon(
             valid + 180, 100.0, 0.03, dc, valid, valid + 180, valid, valid + 180, d));
-        AssertParam("d", () => coupon.AccruedAmount(d));
+        AssertParam("d", () => coupon.AccruedAmount(d, context));
 
         var rate = new InterestRate(0.03, dc, Compounding.Simple, Frequency.Annual);
         AssertParam("d1", () => rate.CompoundFactor(d, valid));

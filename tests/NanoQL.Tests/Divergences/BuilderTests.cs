@@ -17,6 +17,7 @@ public class BuilderTests
 {
     private static readonly Date Start = new(15, Month.January, 2027);
     private static readonly Date End = new(15, Month.January, 2030);
+    private static readonly EvaluationContext Context = new() { EvaluationDate = Start };
 
     [Fact]
     public void AMakeScheduleReusedAfterAWithCallIsUnchanged()
@@ -47,15 +48,15 @@ public class BuilderTests
     {
         Schedule schedule = new MakeSchedule().From(Start).To(End).WithFrequency(Frequency.Annual).ToSchedule();
         FixedRateLeg builder = new FixedRateLeg(schedule).WithNotionals(100.0).WithCouponRates(0.03, new Actual360());
-        double[] before = [.. builder.ToLeg().Select(cf => cf.Amount())];
+        double[] before = [.. builder.ToLeg().Select(cf => cf.Amount(Context))];
 
         FixedRateLeg other = builder.WithNotionals(200.0).WithCouponRates(0.05, new Actual365Fixed())
             .WithPaymentLag(2).WithFirstPeriodDayCounter(new Thirty360(Thirty360Convention.BondBasis));
 
         Assert.NotSame(builder, other);
-        Assert.Equal(before, builder.ToLeg().Select(cf => cf.Amount()));
-        Assert.All(builder.ToLeg(), cf => Assert.Equal(100.0, ((Coupon)cf).Nominal()));
-        Assert.All(other.ToLeg(), cf => Assert.Equal(200.0, ((Coupon)cf).Nominal()));
+        Assert.Equal(before, builder.ToLeg().Select(cf => cf.Amount(Context)));
+        Assert.All(builder.ToLeg(), cf => Assert.Equal(100.0, ((Coupon)cf).Nominal(Context)));
+        Assert.All(other.ToLeg(), cf => Assert.Equal(200.0, ((Coupon)cf).Nominal(Context)));
     }
 
     [Fact]
@@ -110,5 +111,5 @@ public class BuilderTests
         Assert.Equal("no notional given", noNotional.Message);
     }
 
-    private static double[] Amounts(FixedRateLeg builder) => [.. builder.ToLeg().Select(cf => cf.Amount())];
+    private static double[] Amounts(FixedRateLeg builder) => [.. builder.ToLeg().Select(cf => cf.Amount(Context))];
 }

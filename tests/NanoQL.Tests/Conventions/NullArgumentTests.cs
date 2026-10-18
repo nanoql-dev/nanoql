@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Numerics;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 
@@ -25,6 +26,27 @@ public class NullArgumentTests
         AssertParam("resultDC", () => InterestRate.ImpliedRate(1.05, null!, Compounding.Simple, Frequency.Annual, 1.0));
         AssertParam("resultDC", () => InterestRate.ImpliedRate(
             1.05, null!, Compounding.Simple, Frequency.Annual, today, today + 365));
+    }
+
+    [Fact]
+    public void CurrenciesAndTimeSeriesRefuseNullArguments()
+    {
+        var rounding = new Rounding();
+        AssertParam("name", () => new Currency(null!, "CCY", 1, "#", string.Empty, 100, rounding));
+        AssertParam("code", () => new Currency("Some Currency", null!, 1, "#", string.Empty, 100, rounding));
+        AssertParam("symbol", () => new Currency("Some Currency", "CCY", 1, null!, string.Empty, 100, rounding));
+        AssertParam("fractionSymbol", () => new Currency("Some Currency", "CCY", 1, "#", null!, 100, rounding));
+        AssertParam("rounding", () => new Currency("Some Currency", "CCY", 1, "#", string.Empty, 100, null!));
+
+        // A std::set<std::string> holds no null.
+        ArgumentException e = Assert.Throws<ArgumentException>(
+            () => new Currency("Some Currency", "CCY", 1, "#", string.Empty, 100, rounding, null, ["CCy", null!]));
+        Assert.Equal("minorUnitCodes", e.ParamName);
+
+        Date today = new(15, Month.October, 2026);
+        AssertParam("dates", () => new TimeSeries<double>(null!, [1.0]));
+        AssertParam("values", () => new TimeSeries<double>([today], null!));
+        AssertParam("values", () => new TimeSeries<double>(today, null!));
     }
 
     private static void AssertParam(string paramName, Action action) =>

@@ -3,6 +3,7 @@
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
@@ -79,6 +80,28 @@ public class ContextChecksTests
         AssertContext(() => swap.IsExpired(null!));
         AssertContext(() => DiscountingSwapEngine.Calculate(swap, null!, curve));
         AssertContext(() => FlatForward.Create(2, new TARGET(), 0.03, new Actual365Fixed(), null!));
+
+        // The cash-flow contract: every amount, rate and nominal takes the context, and a flow that knows its amount
+        // checks it all the same.
+        var coupon = new FixedRateCoupon(valid + 180, 100.0, 0.03, new Actual360(), valid, valid + 180);
+        AssertContext(() => cashFlow.Amount(null!));
+        AssertContext(() => coupon.Amount(null!));
+        AssertContext(() => coupon.Rate(null!));
+        AssertContext(() => coupon.Nominal(null!));
+        AssertContext(() => coupon.AccruedAmount(valid + 10, null!));
+        AssertContext(() => CashFlows.AccruedPeriod([], null!));
+        AssertContext(() => CashFlows.AccruedDays([], null!));
+        AssertContext(() => CashFlows.AccruedAmount([], null!));
+
+        // The index reads.
+        var euribor = new IborIndex(
+            "Euribor", new Period(6, TimeUnit.Months), 2, null, new TARGET(), BusinessDayConvention.ModifiedFollowing,
+            true, new Actual360(), curve);
+        AssertContext(() => euribor.Fixing(valid, null!));
+        AssertContext(() => euribor.PastFixing(valid, null!));
+        AssertContext(() => euribor.HasHistoricalFixing(valid, null!));
+        AssertContext(() => euribor.TimeSeries(null!));
+        AssertContext(() => euribor.ForecastFixing(valid, null!));
     }
 
     [Fact]

@@ -24,9 +24,15 @@ public abstract class TermStructure : Extrapolator
     /// <param name="calendar">The calendar used for reference and option date calculation, if any.</param>
     /// <param name="dc">The day counter used for date/time conversion.</param>
     /// <param name="settlementDays">The settlement days the reference date was calculated with, if any.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="settlementDays"/> is negative.</exception>
     protected TermStructure(Date referenceDate, Calendar? calendar, DayCounter dc, int? settlementDays = null)
     {
         ArgumentNullException.ThrowIfNull(dc);
+        if (settlementDays is int days)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(days, nameof(settlementDays));
+        }
+
         if (referenceDate.SerialNumber == 0)
         {
             throw new ArgumentException("null reference date", nameof(referenceDate));

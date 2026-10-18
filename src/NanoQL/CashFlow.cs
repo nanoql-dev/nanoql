@@ -19,8 +19,10 @@ public abstract class CashFlow : Event
     public virtual Date? ExCouponDate => null;
 
     /// <summary>The amount of the cash flow, not discounted: the amount paid at the cash-flow date.</summary>
+    /// <param name="context">The evaluation context, which a cash flow whose amount depends on fixings or the
+    /// evaluation date reads; one that knows its amount checks it and reads nothing.</param>
     /// <returns>The amount.</returns>
-    public abstract double Amount();
+    public abstract double Amount(EvaluationContext context);
 
     /// <summary>
     /// Whether the cash flow has already occurred before a date. On the evaluation date, the context's

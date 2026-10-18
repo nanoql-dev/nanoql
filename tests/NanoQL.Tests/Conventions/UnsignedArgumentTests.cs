@@ -1,8 +1,11 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Indexes;
 using NanoQL.Methods;
 using NanoQL.Numerics;
+using NanoQL.TermStructures;
+using NanoQL.Time;
 
 namespace NanoQL.Tests.Conventions;
 
@@ -53,5 +56,25 @@ public class UnsignedArgumentTests
         Assert.Equal("i", Assert.Throws<ArgumentOutOfRangeException>(() => m.At(-1)).ParamName);
         Assert.Equal("j", Assert.Throws<ArgumentOutOfRangeException>(() => m.Column(-1)).ParamName);
         Assert.Equal("size", Assert.Throws<ArgumentOutOfRangeException>(() => new TridiagonalOperator(-1)).ParamName);
+    }
+
+    [Fact]
+    public void FixingAndSettlementDaysAreNotNegative()
+    {
+        var calendar = new TARGET();
+        var dc = new Actual360();
+        var context = new EvaluationContext { EvaluationDate = new Date(15, Month.January, 2024) };
+
+        foreach (Func<object> create in new Func<object>[]
+        {
+            () => new IborIndex("Euribor", new Period(6, TimeUnit.Months), -1, null, calendar, BusinessDayConvention.Following, false, dc),
+            () => new OvernightIndex("ESTR", int.MinValue, null, calendar, dc),
+            () => FlatForward.Create(-1, calendar, 0.03, dc, context),
+        })
+        {
+            ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(create);
+            Assert.Equal("settlementDays", e.ParamName);
+            Assert.True(e.ActualValue is int days && days < 0);
+        }
     }
 }

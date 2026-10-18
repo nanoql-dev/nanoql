@@ -82,15 +82,23 @@ public sealed class FixedRateCoupon : Coupon
     public override DayCounter DayCounter => rate.DayCounter;
 
     /// <inheritdoc/>
-    public override double Amount() =>
-        Nominal() * (rate.CompoundFactor(AccrualStartDate, AccrualEndDate, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
-
-    /// <inheritdoc/>
-    public override double Rate() => rate.Rate;
-
-    /// <inheritdoc/>
-    public override double AccruedAmount(Date d)
+    public override double Amount(EvaluationContext context)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        return Nominal(context) * (rate.CompoundFactor(AccrualStartDate, AccrualEndDate, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
+    }
+
+    /// <inheritdoc/>
+    public override double Rate(EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        return rate.Rate;
+    }
+
+    /// <inheritdoc/>
+    public override double AccruedAmount(Date d, EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
         NanoQL.Time.Date.ThrowIfDefault(d, nameof(d));
         if (d <= AccrualStartDate || d > Date)
         {
@@ -100,13 +108,13 @@ public sealed class FixedRateCoupon : Coupon
         else if (TradingExCouponOn(d))
         {
             Date end = d > AccrualEndDate ? d : AccrualEndDate;
-            return -Nominal() * (rate.CompoundFactor(d, end, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
+            return -Nominal(context) * (rate.CompoundFactor(d, end, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
         }
         else
         {
             // usual case
             Date end = d < AccrualEndDate ? d : AccrualEndDate;
-            return Nominal() * (rate.CompoundFactor(AccrualStartDate, end, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
+            return Nominal(context) * (rate.CompoundFactor(AccrualStartDate, end, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
         }
     }
 }

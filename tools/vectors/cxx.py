@@ -16,6 +16,7 @@ itself (a malformed request, an unknown method, an argument it can't read), whic
 
 Usage: .venv\\Scripts\\python -I tools/vectors/cxx.py --self-test     (needs NANOQL_HARNESS)
 """
+import contextlib
 import hashlib
 import json
 import math
@@ -36,6 +37,14 @@ QUANTLIB = "1.44"
 BOOST = "1_90"
 OPTIONS = ["QL_FASTER_LAZY_OBJECTS"]
 MSC = 1944
+
+
+def _encoded(x):
+    """A real as the vectors encode it (vectors.enc): NaN and the infinities as "NaN", "Infinity" and "-Infinity",
+    since JSON has no literal for them; None, the harness's Null<Real>(), stays None."""
+    if isinstance(x, float) and not math.isfinite(x):
+        return "NaN" if math.isnan(x) else ("Infinity" if x > 0 else "-Infinity")
+    return x
 
 
 class HarnessFault(Exception):
@@ -113,14 +122,34 @@ class Harness:
         raise HarnessFault(f"{code} {message} in {line}")
 
     def settings(self, evaluation_date, include_reference_date_events=False, include_todays_cash_flows=None,
-                 enforces_todays_historic_fixings=False):
+                 enforces_todays_historic_fixings=False, use_at_par_coupons=None, fixings=None):
         """Sets every Settings value QuantLib reads, as vectors.settings does, and returns them as a case's
-        inputs.settings. The evaluation date is a serial."""
-        self.call("Settings", evaluation_date, include_reference_date_events, include_todays_cash_flows,
-                  enforces_todays_historic_fixings)
-        return {"evaluationDate": evaluation_date, "includeReferenceDateEvents": include_reference_date_events,
-                "includeTodaysCashFlows": include_todays_cash_flows,
-                "enforcesTodaysHistoricFixings": enforces_todays_historic_fixings}
+        inputs.settings. The evaluation date is a serial. use_at_par_coupons, when given, sets the at-par switch;
+        fixings, when given, is {name: [[serial, value], ...]}, stored through an index of each name that accepts
+        every date, and written as given. A key not given is not written. Use case_settings() to restore both
+        globals after the case."""
+        args = [evaluation_date, include_reference_date_events, include_todays_cash_flows,
+                enforces_todays_historic_fixings]
+        out = {"evaluationDate": evaluation_date, "includeReferenceDateEvents": include_reference_date_events,
+               "includeTodaysCashFlows": include_todays_cash_flows,
+               "enforcesTodaysHistoricFixings": enforces_todays_historic_fixings}
+        if use_at_par_coupons is not None or fixings is not None:
+            args += [use_at_par_coupons, fixings]
+            if use_at_par_coupons is not None:
+                out["useAtParCoupons"] = bool(use_at_par_coupons)
+            if fixings is not None:
+                out["fixings"] = {name: [[d, _encoded(v)] for d, v in pairs] for name, pairs in fixings.items()}
+        self.call("Settings", *args)
+        return out
+
+    @contextlib.contextmanager
+    def case_settings(self, evaluation_date, **kw):
+        """settings(evaluation_date, **kw) for one case, restoring the at-par switch to the wheel's default (at par)
+        and clearing every stored fixing afterwards, whatever the case did."""
+        try:
+            yield self.settings(evaluation_date, **kw)
+        finally:
+            self.call("Settings::clearCaseGlobals")
 
     def close(self):
         if self.p.stdin and not self.p.stdin.closed:
@@ -238,6 +267,17 @@ def self_test():
         check("a response with another id is refused",
               raises(lambda: H.exchange('{"jsonrpc":"2.0","id":999,"method":"harness.version"}', 1000),
                      HarnessFault, "isn't its own"))
+
+        with H.case_settings(46310, use_at_par_coupons=False, fixings={"Foo3M Actual/360": [[46300, 0.01]]}) as s:
+            stored = H.call("IndexManager::histories")
+            switch = H.call("IborCoupon::Settings::usingAtParCoupons")
+        check("a case's fixings are stored under their name, and its at-par switch set, then both restored",
+              stored == ["Foo3M Actual/360"] and switch is False
+              and s["fixings"] == {"Foo3M Actual/360": [[46300, 0.01]]} and s["useAtParCoupons"] is False
+              and H.call("IndexManager::histories") == [] and H.call("IborCoupon::Settings::usingAtParCoupons"))
+        check("settings without the two globals writes neither key",
+              set(H.settings(46310)) == {"evaluationDate", "includeReferenceDateEvents", "includeTodaysCashFlows",
+                                         "enforcesTodaysHistoricFixings"})
 
         info = H.call("harness.version")
         digest = source_digest()

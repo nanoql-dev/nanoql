@@ -72,7 +72,8 @@ public sealed class FlatForward : YieldTermStructure
     /// <param name="compounding">The compounding rule of the forward rate.</param>
     /// <param name="frequency">The compounding frequency of the forward rate.</param>
     /// <returns>The curve, with a fixed reference date.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="settlementDays"/> is negative, or the compounding
+    /// or the frequency isn't a member of its enum.</exception>
     public static FlatForward Create(
         int settlementDays,
         Calendar calendar,
@@ -83,6 +84,7 @@ public sealed class FlatForward : YieldTermStructure
         Frequency frequency = Frequency.Annual)
     {
         ArgumentNullException.ThrowIfNull(context);
+        ArgumentOutOfRangeException.ThrowIfNegative(settlementDays);
         ArgumentNullException.ThrowIfNull(calendar);
         Date referenceDate = calendar.Advance(context.EvaluationDate, settlementDays, TimeUnit.Days);
         return new FlatForward(referenceDate, calendar, settlementDays, forward, dayCounter, compounding, frequency);

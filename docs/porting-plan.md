@@ -82,8 +82,7 @@ Files that port only part of their QuantLib file, each with a `// Partial:` line
 The licensing gate checks that this list and the files match.
 
 - `src/NanoQL/CashFlow.cs`: `earlier_than<CashFlow>`, which waits for the bond slot.
-- `src/NanoQL/Coupons/CashFlows.cs`: every function but `startDate`, `maturityDate`, and `npv`, `bps` and `npvbps` on a yield term structure.
-- `src/NanoQL/Coupons/Coupon.cs`: `accruedPeriod(d)` and `accruedDays(d)`.
+- `src/NanoQL/Coupons/CashFlows.cs`: every function but `startDate`, `maturityDate`, `accruedPeriod`, `accruedDays`, `accruedAmount`, and `npv`, `bps` and `npvbps` on a yield term structure.
 - `src/NanoQL/Coupons/FixedRateLeg.cs`: `withLastPeriodDayCounter`, which waits for the credit default swap slot.
 - `src/NanoQL/Event.cs`: `detail::simple_event`, which only experimental code uses.
 - `src/NanoQL/Instrument.cs`: `result<T>`, which waits for the first engine that sets additional results.
@@ -114,3 +113,4 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases and those needing the Japan calendar.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant, Newton, Ridder, Halley and finite-difference Newton-safe cases, whose solvers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported.
+- `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, B4.2).

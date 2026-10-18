@@ -107,8 +107,12 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
 | A `mutable` cache outside `LazyObject` (`Coupon::accrualPeriod_`) | Recomputed on each call. |
 | `Instrument` + `PricingEngine` | The instrument is an immutable object holding its terms. The engine is a static class whose `Calculate` runs QuantLib's four steps (§2.1). `swap.setPricingEngine(e); swap.NPV()` becomes `DiscountingSwapEngine.Calculate(swap, context, discountCurve).NPV`. |
 | `Settings::instance()` | `EvaluationContext`, passed to every function that reads it (§2.2). `Settings::instance().evaluationDate()` becomes `context.EvaluationDate`. |
-| `IndexManager` fixing histories | `context.Fixings`. Index objects hold conventions only. |
-| `IborCoupon::Settings`, `ExchangeRateManager`, `Money::Settings`, the commodity settings | Fields of `EvaluationContext`: every QuantLib global that pricing reads becomes one field, added by the port that first needs it. |
+| `IndexManager` fixing histories | `context.Fixings`, an immutable `IndexFixings` with value equality (§2.2). Its writers take the index and return a new store (`AddFixing`, `AddFixings`, `ClearFixings`), since QuantLib's checks read the index's name, `IsValidFixingDate` and `AllowsNativeFixings`; an index's `HasHistoricalFixing`, `PastFixing` (`double?`, null where QuantLib returns `Null<Real>()`) and `TimeSeries` take the context. Names compare as QuantLib's do, ASCII letters upper-cased and every other character as it is, the first spelling kept. A refused batch changes nothing, reads never write, and a fixing equal to QuantLib's null sentinel `Null<Real>()` is a value where QuantLib reads it as no fixing: three documented divergences. Index objects hold their conventions and, for an Ibor or overnight index, its forecasting curve, never fixings: the curve is an optional constructor argument, `null` being QuantLib's empty handle, and `Clone(forwarding)` is QuantLib's `clone(h)`, returning a plain `IborIndex` (an `OvernightIndex` for an overnight index) as QuantLib's does. QuantLib's `Index` is `FinancialIndex` (§3). |
+| `IborCoupon::Settings`, `ExchangeRateManager`, `Money::Settings`, the commodity settings | Fields of `EvaluationContext`: every QuantLib global that pricing reads becomes one field, added by the port that first needs it. `IborCoupon::Settings`' at-par switch is `context.UseAtParCoupons` (default `true`, QuantLib-Python's), read where QuantLib reads it: when an Ibor coupon pricer is built without an explicit choice. So a constructor that builds such a pricer (an Ibor leg's conversion, `VanillaSwap`) takes the context, a pricer resolves the switch once, and a leg keeps the choice it was built with. |
+| `CashFlow::amount()`, `Coupon::rate()`, `nominal()` and `accruedAmount(d)`, and every member that reaches a fixing or the evaluation date | Take the context: `Amount(EvaluationContext context)`, `Rate(context)`, `Nominal(context)`, `AccruedAmount(Date d, context)`; a floating coupon's fixing members (`IndexFixing`, `AdjustedFixing`, `ConvexityAdjustment`, `Price`); an index's `Fixing`, `PastFixing`, `HasHistoricalFixing`, `TimeSeries` and `ForecastFixing`. A flow that knows its amount checks the context for null and doesn't read it otherwise. A member that no QuantLib override, in any port, reads it from takes none: `AccrualPeriod`, `AccrualDays`, `AccruedPeriod`, `AccruedDays`, `FixingDate`, and an index's `FixingDate`, `ValueDate`, `MaturityDate` and `IsValidFixingDate`. |
+| The nominal a constructor copies from another coupon (a capped coupon's underlying, a `Bond`'s notional schedule) | `Coupon.ContractNominal`, public and non-virtual: the nominal the coupon was built with. Pricing calls `Nominal(context)`, which equals it for every coupon whose nominal doesn't depend on market data (QuantLib's FX-reset coupon is the exception); a constructor, which has no context, reads `ContractNominal`. |
+| `FloatingRateCouponPricer` (`initialize(coupon)`, then its queries), `setPricer`, `setCouponPricer` | The coupon holds its pricer, given at construction or by `SetPricer`, a generic extension method that returns a copy of the receiver's static type through a `protected internal virtual WithPricer`; a capped or floored coupon's copy carries the pricer into a copy of its underlying. Pricers are stateless functions of the coupon and the context: `SwapletRate(coupon, context)`, `CapletRate(coupon, effectiveCap, context)` and the rest compute QuantLib's per-coupon state inside each call, and a by-product QuantLib keeps after a query is a member computed from the same arguments. `setCouponPricer(leg, pricer)` becomes `CouponPricerFunctions.SetCouponPricer(leg, pricer)`, which returns a new leg, all or nothing; its visitor is a `switch` that each later coupon type extends in its own port. On a built swap, `SetCouponPricer(swap, int leg, pricer)` returns a copy of the swap's own type through `Swap`'s `protected internal virtual WithLeg`. The builders attach QuantLib's default pricers. |
+| `telescopicValueDates` (the overnight coupon, `OvernightLeg`, the OIS constructors, `MakeOIS`, the OIS rate helper) | Kept wherever QuantLib takes it, with QuantLib's check (no lookback without the observation shift) and its one deliberate effect on results: on an averaged coupon it selects the averaging pricer's approximation. Its date optimisation isn't ported: every daily value date is built, so a telescopic coupon gives QuantLib's full-schedule result on any date, which is QuantLib's own result wherever its shortened dates are right, and the coupon's constructors read no evaluation date. Its date lists are a documented divergence. |
 | Term structures whose reference date moves with the evaluation date | `Create(..., EvaluationContext context)` factories. Every built term structure has a fixed reference date. |
 | `Calendar`, `DayCounter` (Pimpl) | An abstract class with sealed implementations (§2.4). `addHoliday` and `removeHoliday` return a new calendar, as `ImmutableList<T>.Add` does. In QuantLib the change applies process-wide, because all instances of a calendar share one implementation; in nanoql it is part of the calendar's value. |
 | An empty Pimpl value (`Calendar()`, `DayCounter()`, `empty()`) | `null` (`Calendar?`, `DayCounter?`). |
@@ -124,10 +128,12 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
 | `SeedGenerator` | An explicit input: a seed is a parameter, a `long` in [1, 4294967295] with no default, refused otherwise with `ArgumentOutOfRangeException`. QuantLib's seed 0, which draws a seed from the clock, is refused: a documented divergence. No library code reads the clock. |
 | `QL_REQUIRE` on a public method's parameter | `ArgumentException`, with `ParamName` set. A null argument a member doesn't accept throws `ArgumentNullException`. |
 | An enum argument a member always refuses: a value outside the type's members (C# lets any integer be cast to an enum), or a member it never handles (`Period(OtherFrequency)`) | `ArgumentOutOfRangeException`, naming the parameter, with QuantLib's message. A public member that switches on the value, stores it or computes with it checks it on entry, before any work that reads it; one that passes it on under the same parameter name to such a member relies on that member's check; one that only compares it with named members needs no check. This replaces QuantLib's `QL_FAIL`, in a switch's default or on a `case` label, wherever the value is an argument the member always refuses. A value refused only together with other arguments keeps the other rows' mapping: a mixed compounding in `ImpliedRate`, refused unless the compound factor is 1, and an intraday unit in `Calendar.Advance`, refused unless the count is 0, throw `NanoQLException`. |
+| Behaviour QuantLib leaves undefined for an input: a read past an array's or a container's end, an unsigned `Size` wrapping below zero, a NaN given to a sort, the front or back of an empty container, a signed overflow | Refused before the undefined step, as the rows on either side map a check: `ArgumentException` (`ArgumentOutOfRangeException` for a value outside a range) for an argument the member checks on entry, `NanoQLException` for a value already stored. A documented divergence, with a `Divergences/` test that names QuantLib's lines; where QuantLib defines the error, its text is kept. Each refusal's type, message and `ParamName` is asserted by a `Conventions/` test (§9.4). **`Natural` and `Size`:** a negative `int` for one of QuantLib's unsigned parameters (fixing, settlement, lookback and lockout days) is refused on entry with `ArgumentOutOfRangeException` naming the parameter; QuantLib's `Integer` parameters (a payment lag) stay signed. |
 | Other `QL_REQUIRE`, `QL_FAIL`, `QL_ENSURE` | `NanoQLException`, including a `QL_FAIL` on a value already stored. A value outside its enum can no longer be stored, so such a branch fails only for a member the operation doesn't handle (`Period(3, Hours).Frequency()`), as in QuantLib. The wording is kept; numbers in it use C# formatting. |
 | `Null<T>()`, `ext::optional<T>` | `T?`. QuantLib's null `Date()` is `Date?` null; `default(Date)` is never a valid date, and public members given it throw `ArgumentException`. Ported `d == Date()` becomes `d is null`. |
 | `ext::shared_ptr<T>`, `ext::make_shared` | A plain `T` reference; `new T(...)`. |
 | `ext::function` | `Func<…>` or `Action<…>`. |
+| `std::max`, `std::min` where an input can be NaN | QuantLib's semantics: `std::max(a, b)` is `a < b ? b : a` and `std::min(a, b)` is `b < a ? b : a`, never `Math.Max` or `Math.Min`, which propagate NaN where `std::max` keeps or drops it by position. |
 | `std::vector<T>` / `std::map` stored in an object or taken as a public input | `ImmutableArray<T>` / `ImmutableSortedDictionary<,>`. Local computations may use arrays and spans. Public immutable objects never expose mutable containers. |
 | `std::set<T>` stored | `ImmutableSortedSet<T>`. |
 | A collection returned by a public method (`holidayList`, `dates()`) | `ImmutableArray<T>`, never null. |
@@ -192,6 +198,12 @@ input throws, where QuantLib returns its expired results.
   and existing binaries keep running.
 - **Equality:** the record's synthesized equality holds while every field is a value. The port that adds a collection
   or registry field states that field's equality, because records compare such members by reference.
+- **The fixings and the at-par switch:** `Fixings` (`IndexFixings`, default `IndexFixings.Empty`, never null) and
+  `UseAtParCoupons` (`bool`, default `true`). `IndexFixings` compares by content: the same names, by QuantLib's ASCII
+  case-insensitive comparison and whichever spelling was kept, each with an equal history. `TimeSeries<T>` compares
+  its dates and values element by element and computes its hash when it is built, so the store's hash combines one
+  stored hash per history. So the record's synthesized equality holds: two contexts holding the same fixings are
+  equal however their stores were built.
 - **"Today":** the context has no "today". `Date.TodaysDate(TimeProvider?)` reads the clock at the API's edge, and no
   library code calls it.
 
@@ -202,7 +214,13 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
 - A builder is a `sealed record` holding its settings as init properties, and each method returns a modified copy
   (`with`), so a builder kept and reused is never changed under its holder.
 - QuantLib's conversion operator becomes a method named `To<Type>()` (`MakeSchedule.ToSchedule()`,
-  `FixedRateLeg.ToLeg()`). There is no implicit conversion, since the conversion can throw.
+  `FixedRateLeg.ToLeg()`). There is no implicit conversion, since the conversion can throw. A conversion that reads a
+  context field takes the context (`IborLeg.ToLeg(context)`, whose default pricer reads the at-par switch).
+- **QuantLib's members and defaults are kept.** `WithPricingEngine` takes the engine as a delegate,
+  `Func<TInstrument, EvaluationContext, TResults>`, and `WithDiscountingTermStructure` stays as QuantLib's shortcut.
+  An engine or curve given to a builder computes what QuantLib's builder computes at build time (the par rate when no
+  fixed rate is given; an at-the-money strike) and is never stored, since the built instrument holds no engine
+  (§2.1).
 
 ### 2.4 Kinds, sealing and extension points
 
@@ -222,8 +240,9 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
 - **Extension points so far:** `Calendar`, `DayCounter`, `Event`, `CashFlow`, `Coupon`, `Extrapolator`,
   `TermStructure`, `YieldTermStructure`, `Instrument`, `TridiagonalOperatorTimeSetter`, `Interpolation`,
   `Solver1D<TSelf, TFunction>`, `OptimizationMethod`, `CostFunction`, `Constraint`, `ParametersTransformation`,
-  `StochasticProcess`, `StochasticProcess1D`, `StochasticProcessDiscretization` and
-  `StochasticProcess1DDiscretization` (abstract); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
+  `StochasticProcess`, `StochasticProcess1D`, `StochasticProcessDiscretization`,
+  `StochasticProcess1DDiscretization`, `FinancialIndex` and `InterestRateIndex` (abstract); `Swap`, `SimpleCashFlow`,
+  `InstrumentResults`, `SwapResults`, `IborIndex`, `OvernightIndex`, `Currency`, `Rounding`,
   `TridiagonalOperator`, `CubicInterpolation`, `LogCubicInterpolation`, `RandomSequenceGenerator<TRng>`,
   `InverseCumulativeRng<TRng, TIc>`, `InverseCumulativeRsg<TUsg, TIc>` and `PathGenerator<TGsg>` (unsealed);
   `IInterpolator` (the interpolation traits), `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers'
@@ -326,14 +345,16 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
 
 - **Types:**
   - QuantLib's names are kept, acronyms included (`NPV`, `OISRateHelper`), so a QuantLib name maps to one nanoql
-    name. Three are renamed: `Array` becomes `Vector`, `Path` becomes `MonteCarloPath`, and `Index` gets its name in
-    the port that brings it. A user who imports a clashing `System.*` namespace writes an alias
+    name. Three are renamed: `Array` becomes `Vector`, `Path` becomes `MonteCarloPath`, and `Index` becomes
+    `FinancialIndex`. A user who imports a clashing `System.*` namespace writes an alias
     (`using Calendar = NanoQL.Time.Calendar;`).
   - **Public nested types** move to the top level as `<Outer><Inner>`: `Option::Type` → `OptionType`,
     `Swap::Type` → `SwapType`, `DateGeneration::Rule` (a struct holding an enum) → `DateGenerationRule`.
   - **Renames** are recorded here. So far: `Array` → `Vector`, which clashes with `System.Numerics.Vector` in files
     that also import `System.Numerics`; and `Path` → `MonteCarloPath`, after its folder, `montecarlo`, since `Path`
-    would clash with `System.IO.Path`. QuantLib's other names around it stay (`PathGenerator`, `MultiPath`).
+    would clash with `System.IO.Path`. QuantLib's other names around it stay (`PathGenerator`, `MultiPath`). And
+    `Index` → `FinancialIndex`, in namespace `NanoQL`, since `Index` clashes with `System.Index`, which every C# file
+    sees; QuantLib's derived names stay (`InterestRateIndex`, `IborIndex`).
 - **Members:** the first letter is capitalised and the rest kept (`yearFraction` → `YearFraction`; `NPV` stays).
   - **Property or method:** a member is a property when it takes no arguments, has no side effect, is cheap, has no
     precondition that throws, doesn't return a copy or a new array, and is an attribute of the object, stored or
@@ -342,7 +363,7 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   - A zero-argument accessor that shares its name with an overload taking arguments stays a method, since C# can't
     overload a property with a method (`Schedule.IsRegular()` beside `IsRegular(int)`).
   - A virtual accessor is a property only if every QuantLib override passes the test (`CashFlow.Date`); otherwise it
-    is a method (`CashFlow.Amount()`, which some overrides compute).
+    is a method (QuantLib's `CashFlow::amount()`, which some overrides compute, and which takes the context here).
   - A method named after a type hides that type inside the class (CS0119); a property named after its type doesn't.
     Where a method must keep such a name (`Schedule.Date(int)`), the class writes the type fully qualified.
 - **Parameters:** QuantLib's camelCase names, unchanged.
@@ -535,6 +556,16 @@ Every port is checked against QuantLib itself:
   explicitly and writes them into `inputs.settings`, and sets, and clears afterwards, any other QuantLib global its
   case reads, writing it there too. An unset evaluation date reads as today's date, which would make a vector depend
   on the day it was generated. A generator that changes a shared QuantLib object (a calendar's holidays) restores it.
+- **The at-par switch and the fixings:** `vectors.settings(..., use_at_par_coupons=..., fixings=[(index, [(date,
+  value), ...]), ...])` sets the switch before the case builds its legs, since QuantLib reads it then, adds the
+  fixings through each index, so QuantLib's checks run, and writes `"useAtParCoupons"` and `"fixings"`
+  (`{name: [[serial, value], ...]}`, each name as QuantLib forms it) into `inputs.settings`; a key not given is not
+  written. `vectors.case_settings(...)`, a context manager, restores the switch and clears the stored fixings after
+  the case; the harness's client has the same pair, its fixings stored through an index of each name that accepts
+  every date. `VectorCase.Context()` reads both keys, storing each history under its name through
+  `VectorFixingIndex`, so the case's own index of that name reads it. The wheel inserts null entries on some reads
+  (`hasHistoricalFixing` or `pastFixing` on a missing date), so a generator never reads a series after such a read,
+  and a refused batch records only its throw, since the store after it differs by design.
 - **Schema.** A plain number in `expected` has scale 1.0; an object carries its own scale (§7.3):
 
   ```json
@@ -626,6 +657,10 @@ through a checked caller):
 - `NoOracle/` keeps only a member the harness can't drive. Its file's `// Own-tested:` line names the member and the
   reason, each test cites the QuantLib lines its expected values come from and carries no `Oracle` trait, the code
   review rechecks the derivation, and the porting map lists the member. None is known.
+
+**Refusals of undefined paths** (§2) have no QuantLib oracle, since QuantLib's behaviour there is undefined. Each has a
+`Divergences/` test naming QuantLib's lines, and a `Conventions/` test asserting its exception's type, message and
+`ParamName`, one test per group of refusals.
 
 ### 9.5 The coverage gate's type check
 

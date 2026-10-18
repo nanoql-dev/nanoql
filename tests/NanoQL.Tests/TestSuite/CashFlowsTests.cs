@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/cashflows.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testAccessViolation, testDefaultSettlementDate, testNullFixingDays, testFixedIborCouponWithoutForecastCurve, testIborCouponKnowsWhenitHasFixed, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices
+// Partial: testAccessViolation, testNullFixingDays, testFixedIborCouponWithoutForecastCurve, testIborCouponKnowsWhenitHasFixed, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -17,6 +17,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class CashFlowsTests
 {
+    // The evaluation date QuantLib's test runner sets globally (playbook §9.2).
+    private static readonly EvaluationContext Context = new() { EvaluationDate = new Date(16, September, 2015) };
+
     // Adapted: where QuantLib sets the global Settings before each block (lines 56, 75-76, 91-92, 108-109, 125-126,
     // 142-143, 172 and 177), each block builds its own evaluation context, with today as the evaluation date, and passes
     // it to HasOccurred and CashFlows.Npv. The NPV checks (lines 157-180) discount on a zero-rate FlatForward from
@@ -174,6 +177,46 @@ public class CashFlowsTests
         CheckNpv(settings, true, 2.0);
     }
 
+    [Fact]
+    public void TestDefaultSettlementDate()
+    {
+        // Testing default evaluation date in cashflows methods...
+        Date today = Context.EvaluationDate;
+        Schedule schedule =
+            new MakeSchedule()
+            .From(today - (2 * TimeUnit.Months)).To(today + (4 * TimeUnit.Months))
+            .WithFrequency(Frequency.Semiannual)
+            .WithCalendar(new TARGET())
+            .WithConvention(BusinessDayConvention.Unadjusted)
+            .Backwards()
+            .ToSchedule();
+
+        Leg leg = new FixedRateLeg(schedule)
+            .WithNotionals(100.0)
+            .WithCouponRates(0.03, new Actual360())
+            .WithPaymentCalendar(new TARGET())
+            .WithPaymentAdjustment(BusinessDayConvention.Following)
+            .ToLeg();
+
+        double accruedPeriod = CashFlows.AccruedPeriod(leg, Context, false);
+        if (accruedPeriod == 0.0)
+        {
+            Assert.Fail("null accrued period with default settlement date");
+        }
+
+        int accruedDays = CashFlows.AccruedDays(leg, Context, false);
+        if (accruedDays == 0)
+        {
+            Assert.Fail("no accrued days with default settlement date");
+        }
+
+        double accruedAmount = CashFlows.AccruedAmount(leg, Context, false);
+        if (accruedAmount == 0.0)
+        {
+            Assert.Fail("null accrued amount with default settlement date");
+        }
+    }
+
     // Adapted: the fixed-rate legs only. Dropped: the Ibor legs l2, l6 and l8 with their index, lines 296-304, 320-330
     // and 346-356, since IborLeg and Euribor3M aren't ported yet.
     [Fact]
@@ -294,7 +337,7 @@ public class CashFlowsTests
         }
 
         // Expect first cashflow to be 0.9375
-        Close(0.9375, firstCoupon.Amount(), 0.0001);
+        Close(0.9375, firstCoupon.Amount(Context), 0.0001);
     }
 
     [Fact]

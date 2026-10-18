@@ -9,6 +9,7 @@ A generator builds its cases with these helpers and calls main(), which writes t
 
 The output root defaults to the repository's tests/vectors; tools/vectors/reproduce.py passes a temporary one.
 """
+import contextlib
 import json
 import math
 import os
@@ -61,17 +62,70 @@ def enc(x):
 
 
 def settings(evaluation_date, include_reference_date_events=False, include_todays_cash_flows=None,
-             enforces_todays_historic_fixings=False):
-    """Sets every Settings value QuantLib reads, and returns them as a case's inputs.settings."""
+             enforces_todays_historic_fixings=False, use_at_par_coupons=None, fixings=None):
+    """Sets every Settings value QuantLib reads, and returns them as a case's inputs.settings.
+
+    use_at_par_coupons, when given, sets the wheel's at-par switch (IborCoupon.createAtParCoupons() or
+    createIndexedCoupons()); call settings() before building the case's legs, since QuantLib reads the switch when a
+    leg's pricer is built. fixings, when given, is a list of (index, [(date, value), ...]) pairs: each is added through
+    its index (index.addFixings), so QuantLib's checks run, and the stored histories are written as
+    {name: [[serial, value], ...]}, each name as QuantLib forms it, in the store's order. A key not given is not
+    written, so a case that sets neither writes the same bytes as before. Use case_settings() to restore both globals
+    after the case."""
     s = ql.Settings.instance()
     s.evaluationDate = evaluation_date
     s.includeReferenceDateEvents = include_reference_date_events
     s.includeTodaysCashFlows = include_todays_cash_flows
     s.enforcesTodaysHistoricFixings = enforces_todays_historic_fixings
-    return {"evaluationDate": evaluation_date.serialNumber(),
-            "includeReferenceDateEvents": include_reference_date_events,
-            "includeTodaysCashFlows": include_todays_cash_flows,
-            "enforcesTodaysHistoricFixings": enforces_todays_historic_fixings}
+    out = {"evaluationDate": evaluation_date.serialNumber(),
+           "includeReferenceDateEvents": include_reference_date_events,
+           "includeTodaysCashFlows": include_todays_cash_flows,
+           "enforcesTodaysHistoricFixings": enforces_todays_historic_fixings}
+    if use_at_par_coupons is not None:
+        if use_at_par_coupons:
+            ql.IborCoupon.createAtParCoupons()
+        else:
+            ql.IborCoupon.createIndexedCoupons()
+        out["useAtParCoupons"] = bool(use_at_par_coupons)
+    if fixings is not None:
+        indexes = {}
+        for index, pairs in fixings:
+            index.addFixings([d for d, _ in pairs], [v for _, v in pairs])
+            indexes.setdefault(name_key(index.name()), index)
+        out["fixings"] = written_fixings(indexes)
+    return out
+
+
+def name_key(name):
+    """An index name as QuantLib's IndexManager compares it: its ASCII letters upper-cased, every other character as
+    it is, so "Euribor6M" and "EURIBOR6M" share a key while names differing by "é" and "É" don't (Python's
+    str.upper() would fold those too)."""
+    return "".join(chr(ord(c) - 32) if "a" <= c <= "z" else c for c in name)
+
+
+def written_fixings(indexes):
+    """The stored histories of the given indexes (by name_key()), as {name: [[serial, value], ...]}, in the order and
+    with the spellings of IndexManager.histories(). A history is read through its index's timeSeries() right after
+    the adds, before any read that would insert null entries."""
+    out = {}
+    for name in ql.IndexManager.instance().histories():
+        index = indexes.get(name_key(name))
+        if index is None:
+            raise ValueError(f"a history for {name}, which no index of the case added")
+        series = index.timeSeries()
+        out[name] = [[d.serialNumber(), enc(v)] for d, v in zip(series.dates(), series.values())]
+    return out
+
+
+@contextlib.contextmanager
+def case_settings(evaluation_date, **kw):
+    """settings(evaluation_date, **kw) for one case, restoring the at-par switch to QuantLib-Python's default (at par)
+    and clearing every stored fixing afterwards, whatever the case did."""
+    try:
+        yield settings(evaluation_date, **kw)
+    finally:
+        ql.IborCoupon.createAtParCoupons()
+        ql.IndexManager.instance().clearHistories()
 
 
 THROWS = {"throws": True}

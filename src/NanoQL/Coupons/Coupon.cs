@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/coupon.hpp ql/cashflows/coupon.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: accruedPeriod(d) and accruedDays(d), which wait for the slot that ports the cash-flow functions using them
 
 using NanoQL.Time;
 
@@ -14,7 +13,15 @@ namespace NanoQL.Coupons;
 /// The base class of coupons accruing over a fixed period: still abstract, it gives derived classes the accrual-period
 /// calculations.
 /// </summary>
-/// <remarks>QuantLib's <c>coupon_cast</c> is C#'s <c>cashFlow as Coupon</c>.</remarks>
+/// <remarks>
+/// <para>QuantLib's <c>coupon_cast</c> is C#'s <c>cashFlow as Coupon</c>.</para>
+/// <para>
+/// The members that may reach a fixing or the evaluation date take the context (<see cref="Rate"/>,
+/// <see cref="Nominal"/>, <see cref="AccruedAmount"/>, <see cref="CashFlow.Amount"/>); the accrual members, which no
+/// coupon computes from either, take none. <see cref="ContractNominal"/> is the nominal the coupon was built with,
+/// which a constructor copying another coupon's nominal reads.
+/// </para>
+/// </remarks>
 public abstract class Coupon : CashFlow
 {
     private readonly Date paymentDate;
@@ -74,13 +81,26 @@ public abstract class Coupon : CashFlow
     /// <summary>Gets the day counter used for accrual.</summary>
     public abstract DayCounter DayCounter { get; }
 
-    /// <summary>The nominal.</summary>
-    /// <returns>The nominal.</returns>
-    public virtual double Nominal() => nominal;
+    /// <summary>
+    /// Gets the nominal the coupon was built with. It equals <see cref="Nominal"/> for every coupon whose nominal
+    /// doesn't depend on market data; a constructor that copies another coupon's nominal (a capped coupon, a bond's
+    /// notional schedule) reads it, since it has no context.
+    /// </summary>
+    public double ContractNominal => nominal;
+
+    /// <summary>The nominal that pricing uses.</summary>
+    /// <param name="context">The evaluation context, which a coupon whose nominal depends on market data reads.</param>
+    /// <returns>The nominal; this base returns <see cref="ContractNominal"/>.</returns>
+    public virtual double Nominal(EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        return nominal;
+    }
 
     /// <summary>The coupon's rate.</summary>
+    /// <param name="context">The evaluation context.</param>
     /// <returns>The rate.</returns>
-    public abstract double Rate();
+    public abstract double Rate(EvaluationContext context);
 
     /// <summary>The accrual period as a fraction of a year, by the coupon's day counter.</summary>
     /// <returns>The accrual period.</returns>
@@ -91,8 +111,45 @@ public abstract class Coupon : CashFlow
     /// <returns>The day count.</returns>
     public int AccrualDays() => DayCounter.DayCount(AccrualStartDate, AccrualEndDate);
 
+    /// <summary>The accrued period up to a date, as a fraction of a year; negative after the ex-coupon date.</summary>
+    /// <param name="d">The date.</param>
+    /// <returns>The accrued period; 0 outside the coupon's range.</returns>
+    public double AccruedPeriod(Date d)
+    {
+        Date.ThrowIfDefault(d, nameof(d));
+        if (d <= AccrualStartDate || d > paymentDate)
+        {
+            return 0.0;
+        }
+        else if (TradingExCouponOn(d))
+        {
+            return -DayCounter.YearFraction(d, d > AccrualEndDate ? d : AccrualEndDate, ReferencePeriodStart, ReferencePeriodEnd);
+        }
+        else
+        {
+            return DayCounter.YearFraction(AccrualStartDate, d < AccrualEndDate ? d : AccrualEndDate, ReferencePeriodStart, ReferencePeriodEnd);
+        }
+    }
+
+    /// <summary>The accrued days up to a date.</summary>
+    /// <param name="d">The date.</param>
+    /// <returns>The day count; 0 outside the coupon's range.</returns>
+    public int AccruedDays(Date d)
+    {
+        Date.ThrowIfDefault(d, nameof(d));
+        if (d <= AccrualStartDate || d > paymentDate)
+        {
+            return 0;
+        }
+        else
+        {
+            return DayCounter.DayCount(AccrualStartDate, d < AccrualEndDate ? d : AccrualEndDate);
+        }
+    }
+
     /// <summary>The amount accrued up to a date.</summary>
     /// <param name="d">The date.</param>
+    /// <param name="context">The evaluation context.</param>
     /// <returns>The accrued amount.</returns>
-    public abstract double AccruedAmount(Date d);
+    public abstract double AccruedAmount(Date d, EvaluationContext context);
 }

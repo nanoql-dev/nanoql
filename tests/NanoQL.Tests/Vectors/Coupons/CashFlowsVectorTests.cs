@@ -11,8 +11,9 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The cash-flow analysis vectors, <c>tests/vectors/cashflows/cashflows.json</c>: the start and maturity dates of
-/// fixed-rate legs, some followed by redemptions and amortizing payments, and their NPV, BPS and the pair from
-/// <see cref="CashFlows.NpvBps"/> on a flat curve, under sampled evaluation contexts and settlement settings.
+/// fixed-rate legs, some followed by redemptions and amortizing payments, their NPV, BPS and the pair from
+/// <see cref="CashFlows.NpvBps"/> on a flat curve, and their accrued period, days and amount, under sampled evaluation
+/// contexts and settlement settings.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class CashFlowsVectorTests
@@ -32,6 +33,11 @@ public class CashFlowsVectorTests
                     s.GetProperty("includeSettlementDateFlows").GetBoolean(),
                     CashFlowInputs.NullableDate(s.GetProperty("settlementDate")),
                     CashFlowInputs.NullableDate(s.GetProperty("npvDate"))))
+                .ToArray();
+            Accrual[] accruals = c.Input("accruals").EnumerateArray()
+                .Select(s => new Accrual(
+                    s.GetProperty("includeSettlementDateFlows").GetBoolean(),
+                    CashFlowInputs.NullableDate(s.GetProperty("settlementDate"))))
                 .ToArray();
 
             check.Output(c, "startDate", () => CashFlows.StartDate(leg));
@@ -55,13 +61,27 @@ public class CashFlowsVectorTests
                         leg, curve, context, s.IncludeFlows, s.SettlementDate, s.NpvDate);
                     return new object[] { npv, bps };
                 }));
+            check.Output(
+                c,
+                "accruedPeriod",
+                Each(accruals, a => CashFlows.AccruedPeriod(leg, context, a.IncludeFlows, a.SettlementDate)));
+            check.Output(
+                c,
+                "accruedDays",
+                Each(accruals, a => CashFlows.AccruedDays(leg, context, a.IncludeFlows, a.SettlementDate)));
+            check.Output(
+                c,
+                "accruedAmount",
+                Each(accruals, a => CashFlows.AccruedAmount(leg, context, a.IncludeFlows, a.SettlementDate)));
         }
 
         check.Complete();
     }
 
-    private static Func<object?>[] Each<TOut>(Settlement[] settlements, Func<Settlement, TOut> f) =>
+    private static Func<object?>[] Each<TIn, TOut>(TIn[] settlements, Func<TIn, TOut> f) =>
         settlements.Select(s => (Func<object?>)(() => f(s))).ToArray();
 
     private sealed record Settlement(bool IncludeFlows, Date? SettlementDate, Date? NpvDate);
+
+    private sealed record Accrual(bool IncludeFlows, Date? SettlementDate);
 }

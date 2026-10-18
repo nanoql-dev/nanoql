@@ -25,9 +25,16 @@ public sealed record FixedRateLeg
 {
     /// <summary>Initializes a new instance of the <see cref="FixedRateLeg"/> class.</summary>
     /// <param name="schedule">The schedule of accrual dates.</param>
+    /// <exception cref="ArgumentException">The schedule is empty.</exception>
     public FixedRateLeg(Schedule schedule)
     {
         ArgumentNullException.ThrowIfNull(schedule);
+        if (schedule.Empty)
+        {
+            // QuantLib reads the first date of an empty schedule, which is undefined.
+            throw new ArgumentException("empty schedule", nameof(schedule));
+        }
+
         Schedule = schedule;
         PaymentCalendar = schedule.Calendar;
     }

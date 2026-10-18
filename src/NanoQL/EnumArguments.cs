@@ -128,4 +128,16 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, "unknown end condition");
         }
     }
+
+    /// <summary>Refuses a rounding method outside <see cref="RoundingType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(RoundingType value, string paramName)
+    {
+        if (value is < RoundingType.None or > RoundingType.Ceiling)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown rounding method");
+        }
+    }
 }

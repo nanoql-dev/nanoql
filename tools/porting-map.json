@@ -4,6 +4,7 @@
   "directories": {
     "ql": {"folder": "", "namespace": "NanoQL"},
     "ql/cashflows": {"folder": "Coupons", "namespace": "NanoQL.Coupons"},
+    "ql/indexes": {"folder": "Indexes", "namespace": "NanoQL.Indexes"},
     "ql/instruments": {"folder": "Instruments", "namespace": "NanoQL.Instruments"},
     "ql/math": {"folder": "Numerics", "namespace": "NanoQL.Numerics"},
     "ql/math/distributions": {"folder": "Numerics/Distributions", "namespace": "NanoQL.Numerics"},
@@ -31,7 +32,11 @@
     "ql/cashflows/fixedratecoupon": {"words": "Fixed Rate Coupon"},
     "ql/cashflows/simplecashflow": {"words": "Simple Cash Flow", "subfolder": true},
     "ql/compounding": {"words": "Compounding"},
+    "ql/currency": {"words": "Currency"},
     "ql/event": {"words": "Event"},
+    "ql/index": {"words": "Index"},
+    "ql/indexes/iborindex": {"words": "Ibor Index"},
+    "ql/indexes/interestrateindex": {"words": "Interest Rate Index"},
     "ql/instrument": {"words": "Instrument"},
     "ql/instruments/swap": {"words": "Swap", "subfolder": true},
     "ql/interestrate": {"words": "Interest Rate"},
@@ -67,6 +72,7 @@
     "ql/math/randomnumbers/randomsequencegenerator": {"words": "Random Sequence Generator", "subfolder": true},
     "ql/math/randomnumbers/rngtraits": {"words": "Rng Traits", "subfolder": true},
     "ql/math/randomnumbers/sobolrsg": {"words": "Sobol Rsg", "subfolder": true},
+    "ql/math/rounding": {"words": "Rounding", "subfolder": true},
     "ql/math/solver1d": {"words": "Solver1D", "subfolder": true},
     "ql/math/solvers1d/brent": {"words": "Brent"},
     "ql/math/solvers1d/newtonsafe": {"words": "Newton Safe"},
@@ -103,6 +109,7 @@
     "ql/time/timeunit": {"words": "Time Unit"},
     "ql/time/weekday": {"words": "Weekday"},
     "ql/timegrid": {"words": "Time Grid"},
+    "ql/timeseries": {"words": "Time Series"},
     "ql/utilities/dataformatters": {"words": "Data Formatters"}
   },
   "tests": {
@@ -110,6 +117,7 @@
     "test-suite/brownianbridge": {"words": "Brownian Bridge"},
     "test-suite/calendars": {"words": "Calendars"},
     "test-suite/cashflows": {"words": "Cash Flows"},
+    "test-suite/currency": {"words": "Currency"},
     "test-suite/dates": {"words": "Dates"},
     "test-suite/daycounters": {"words": "Day Counters"},
     "test-suite/distributions": {"words": "Distributions"},
@@ -124,10 +132,12 @@
     "test-suite/pathgenerator": {"words": "Path Generator"},
     "test-suite/period": {"words": "Period"},
     "test-suite/rngtraits": {"words": "Rng Traits"},
+    "test-suite/rounding": {"words": "Rounding"},
     "test-suite/schedule": {"words": "Schedule"},
     "test-suite/solvers": {"words": "Solvers"},
     "test-suite/termstructures": {"words": "Term Structures"},
-    "test-suite/timegrid": {"words": "Time Grid"}
+    "test-suite/timegrid": {"words": "Time Grid"},
+    "test-suite/timeseries": {"words": "Time Series"}
   },
   "replaced": {
     "ql/errors": "ArgumentException and NanoQLException",
@@ -181,6 +191,7 @@
   },
   "renames": {
     "Array": "Vector",
+    "Index": "FinancialIndex",
     "Path": "MonteCarloPath"
   },
   "boost": {

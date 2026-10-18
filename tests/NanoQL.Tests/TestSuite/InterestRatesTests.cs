@@ -4,6 +4,7 @@
 // Upstream: test-suite/interestrates.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
+using NanoQL.Numerics;
 using NanoQL.Time;
 using NanoQL.Utilities;
 using static NanoQL.Compounding;
@@ -14,11 +15,8 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class InterestRatesTests
 {
-    // Adapted: without the two checks of the converted rate against Haug's value rounded to the case's precision, lines
-    // 138-146 and 160-169 (the second with its comment), and the rounding they use: line 72, line 83, and r3 on line
-    // 73. ql/math/rounding isn't ported yet. The checks of the converted rate's day counter, compounding and frequency
-    // (lines 147-158) are kept. Without lines 179-180 too, whose discountFactorFirstDerivative and
-    // discountFactorSecondDerivative wait for the slot that ports the cash-flow duration and convexity.
+    // Adapted: without lines 179-180, whose discountFactorFirstDerivative and discountFactorSecondDerivative wait for
+    // the slot that ports the cash-flow duration and convexity.
     [Fact]
     public void TestConversions()
     {
@@ -48,7 +46,8 @@ public class InterestRatesTests
             new(0.1000,     Simple,           Annual, 1.0 / 12, Compounded,           Monthly, 0.1000, 4),
         ];
 
-        Rate r2;
+        Rounding roundingPrecision;
+        Rate r3, r2;
 
         // d2 is set by every row; the checks after the loop use the last row's.
         Date d1 = Date.TodaysDate(), d2 = d1;
@@ -60,6 +59,7 @@ public class InterestRatesTests
         {
             ir = new InterestRate(i.R, new Actual360(), i.Comp, i.Freq);
             d2 = d1 + TimeToDays(i.T);
+            roundingPrecision = new Rounding(i.Precision);
 
             // check that the compound factor is the inverse of the discount factor
             compoundf = ir.CompoundFactor(d1, d2);
@@ -126,6 +126,18 @@ public class InterestRatesTests
             // compounding, and frequency is the *expected* InterestRate
             ir3 = ir.EquivalentRate(ir.DayCounter, i.Comp2, i.Freq2, d1, d2);
             expectedIR = new InterestRate(i.Expected, ir.DayCounter, i.Comp2, i.Freq2);
+            r3 = roundingPrecision.Evaluate(ir3.Rate);
+            error = Math.Abs(r3 - expectedIR.Rate);
+            if (error > 1.0e-17)
+            {
+                Assert.Fail(
+                    $"\n               original interest rate: {ir}"
+                    + $"\n  calculated equivalent interest rate: {ir3}"
+                    + $"\n            truncated equivalent rate: {DataFormattersFunctions.Rate(r3)}"
+                    + $"\n    expected equivalent interest rate: {expectedIR}"
+                    + $"\n                           rate error: {error:R}");
+            }
+
             if (ir3.DayCounter != expectedIR.DayCounter)
             {
                 Assert.Fail(
@@ -148,6 +160,19 @@ public class InterestRatesTests
                     "\n frequency error"
                     + $"\n    original interest rate: {ir3}"
                     + $"\n  equivalent interest rate: {expectedIR}");
+            }
+
+            // check that the equivalent rate with *different*
+            // compounding, and frequency is the *expected* rate
+            r3 = ir.EquivalentRate(ir.DayCounter, i.Comp2, i.Freq2, d1, d2).Rate;
+            r3 = roundingPrecision.Evaluate(r3);
+            error = Math.Abs(r3 - i.Expected);
+            if (error > 1.0e-17)
+            {
+                Assert.Fail(
+                    $"\n  calculated equivalent rate: {DataFormattersFunctions.Rate(r3)}"
+                    + $"\n    expected equivalent rate: {DataFormattersFunctions.Rate(i.Expected)}"
+                    + $"\n                       error: {error:R}");
             }
         }
 

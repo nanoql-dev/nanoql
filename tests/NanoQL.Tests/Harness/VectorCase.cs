@@ -74,20 +74,56 @@ public sealed class VectorCase
     /// <returns>The value.</returns>
     public string String(string name) => Input(name).GetString()!;
 
-    /// <summary>The evaluation context the case's generator set, from <c>inputs.settings</c>.</summary>
+    /// <summary>
+    /// The evaluation context the case's generator set, from <c>inputs.settings</c>: the four settings, and, when the
+    /// case wrote them, the at-par switch (<c>useAtParCoupons</c>) and the stored fixings (<c>fixings</c>, as
+    /// <c>{name: [[serial, value], ...]}</c>), each history stored under its name through a
+    /// <see cref="VectorFixingIndex"/>. A value is encoded as the vectors encode reals: "NaN", "Infinity" and
+    /// "-Infinity" as strings, and QuantLib's <c>Null&lt;Real&gt;()</c> as <c>null</c>, which QuantLib reads as no fixing,
+    /// so that date stores none.
+    /// </summary>
     /// <returns>The context.</returns>
     public EvaluationContext Context()
     {
         JsonElement s = Input("settings");
         JsonElement todays = s.GetProperty("includeTodaysCashFlows");
-        return new EvaluationContext
+        var context = new EvaluationContext
         {
             EvaluationDate = new NanoQL.Time.Date(s.GetProperty("evaluationDate").GetInt32()),
             IncludeReferenceDateEvents = s.GetProperty("includeReferenceDateEvents").GetBoolean(),
             IncludeTodaysCashFlows = todays.ValueKind == JsonValueKind.Null ? null : todays.GetBoolean(),
             EnforcesTodaysHistoricFixings = s.GetProperty("enforcesTodaysHistoricFixings").GetBoolean(),
         };
+        if (s.TryGetProperty("useAtParCoupons", out JsonElement atPar))
+        {
+            context = context with { UseAtParCoupons = atPar.GetBoolean() };
+        }
+
+        if (s.TryGetProperty("fixings", out JsonElement fixings))
+        {
+            NanoQL.Indexes.IndexFixings store = NanoQL.Indexes.IndexFixings.Empty;
+            foreach (JsonProperty history in fixings.EnumerateObject())
+            {
+                JsonElement[] pairs = [.. history.Value.EnumerateArray().Where(p => p[1].ValueKind != JsonValueKind.Null)];
+                store = store.AddFixings(
+                    new VectorFixingIndex(history.Name),
+                    pairs.Select(p => new NanoQL.Time.Date(p[0].GetInt32())),
+                    pairs.Select(p => Real(p[1])));
+            }
+
+            context = context with { Fixings = store };
+        }
+
+        return context;
     }
+
+    /// <summary>A real as the vectors encode it: a number, or "NaN", "Infinity" or "-Infinity".</summary>
+    /// <param name="e">The JSON value.</param>
+    /// <returns>The real.</returns>
+    private static double Real(JsonElement e) =>
+        e.ValueKind == JsonValueKind.String
+            ? double.Parse(e.GetString()!, System.Globalization.CultureInfo.InvariantCulture)
+            : e.GetDouble();
 
     /// <summary>Gets a date input, written as its serial number.</summary>
     /// <param name="name">The input's name.</param>

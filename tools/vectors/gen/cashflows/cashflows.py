@@ -1,11 +1,13 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
-"""Vectors for QuantLib's CashFlows (ql/cashflows/cashflows.hpp): startDate, maturityDate, and npv, bps and npvbps on
-a yield term structure, over 45 legs. 35 are fixed-rate legs (5 schedules x 7 variants, as in the fixed-rate coupon
-vectors); each schedule adds a bullet leg, its flat 3% coupons followed by a Redemption of the notional on the last
-payment date, and an amortizing leg, its amortizing coupons followed by an AmortizingPayment of each notional step on
-the date of the coupon before the step and a Redemption of the last notional on the last payment date. These give
-the branches for cash flows that are not coupons an oracle.
+"""Vectors for QuantLib's CashFlows (ql/cashflows/cashflows.hpp): startDate, maturityDate, accruedPeriod,
+accruedDays, accruedAmount, and npv, bps and npvbps on a yield term structure, over 47 legs. 35 are fixed-rate legs
+(5 schedules x 7 variants, as in the fixed-rate coupon vectors); each schedule adds a bullet leg, its flat 3% coupons
+followed by a Redemption of the notional on the last payment date, and an amortizing leg, its amortizing coupons
+followed by an AmortizingPayment of each notional step on the date of the coupon before the step and a Redemption of
+the last notional on the last payment date. These give the branches for cash flows that are not coupons an oracle.
+The last two legs have no coupons: one has no flows at all, and one only a Redemption, so the next cash flow the
+accrued functions find is no coupon. They come after the other 45, so the draws for those are unchanged.
 
 A case is one leg under one of 6 of 18 evaluation contexts (3 evaluation dates x includeReferenceDateEvents x
 includeTodaysCashFlows null, false or true), drawn with the seed, on a flat 3% continuous Actual/365 curve whose
@@ -15,13 +17,24 @@ takes no null), the settlement date (null, which means the evaluation date, or t
 (null, which means the settlement date, or a later date). NPVs are compared at the leg's largest notional and BPS at
 that notional times 1e-4.
 
+The accrued functions are read under 4 more settlement settings per case: the evaluation date (a null settlement
+date), and 3 of the leg's 18 settlement dates drawn from its accrual dates (each coupon's accrual start and end, the
+day after the start, the mid-point, its payment date and the days either side, three days before it, its ex-coupon
+date and the day before; each other flow's date and the days either side; dates before the leg's start and after its
+end; and, for a leg with fewer, dates every 91 days from 1 January 2026), each of the leg's 6 cases taking 3 of them;
+includeSettlementDateFlows is drawn for each. These draws use a second generator, seeded with the seed plus 1, so the
+other outputs' draws are those of the file before the accrued outputs were added. Accrued amounts are compared at the
+leg's largest notional.
+
 Each case's inputs describe the leg in full, once: "leg" holds "fixedRateLeg" (its schedule and every FixedRateLeg
 setting, as in the fixed-rate coupon vectors; null for no coupons) and "extraFlows", the flows that follow the
 coupons, in order, each {"type": "Redemption" or "AmortizingPayment", "amount", "date"}; "curve" holds the curve's
 reference date, forward rate, day counter, compounding and frequency; "settlements" holds the three settlement
-settings, in the order of the npv, bps and npvbps outputs. Calendars are {"type": <class>}, with a "market" integer
-for UnitedStates and UnitedKingdom; day counters {"type": <class>}, with a "convention" integer for Thirty360 and
-ActualActual; enums and time units are QuantLib's integers.
+settings, in the order of the npv, bps and npvbps outputs; "accruals" holds the four settlement settings
+({"includeSettlementDateFlows", "settlementDate"}), in the order of the accruedPeriod, accruedDays and accruedAmount
+outputs. Calendars are {"type": <class>}, with a "market" integer for UnitedStates and UnitedKingdom; day counters
+{"type": <class>}, with a "convention" integer for Thirty360 and ActualActual; enums and time units are QuantLib's
+integers.
 
 The schedules are built with ql.Schedule, the wheel's proxy of C++ QuantLib::Schedule's rule-based constructor. The
 legs are built with ql.FixedRateLeg, which forwards to the wheel's C++ helper _FixedRateLeg (QuantLib-SWIG 1.44,
@@ -170,7 +183,7 @@ def flow(kind, amount, date):
 
 
 def legs():
-    """(name, leg spec, scale) for the 45 legs."""
+    """(name, leg spec, scale) for the 47 legs."""
     out = []
     for sname, sspec in SCHEDULES:
         for vname, lspec in VARIANTS:
@@ -191,7 +204,33 @@ def legs():
         extra.append(flow("Redemption", nominals[-1], coupons[len(coupons) - 1].date()))
         out.append((f"{sname} / {AMORTIZING} + payments", {"fixedRateLeg": amortizing, "extraFlows": extra},
                     max(nominals)))
+    out.append(("no flows", {"fixedRateLeg": None, "extraFlows": []}, 1e6))
+    out.append(("a redemption only",
+                {"fixedRateLeg": None, "extraFlows": [flow("Redemption", 1e6, ql.Date(15, ql.June, 2028))]}, 1e6))
     return out
+
+
+def accrual_dates(cfs):
+    """The settlement dates at which a leg's accrued functions are read: around each coupon's accrual period and
+    payment date and each other flow's date, before the leg's start and after its end, and for a leg with fewer than
+    18, dates every 91 days from 1 January 2026."""
+    out = set()
+    for cf in cfs:
+        c = ql.as_coupon(cf)
+        if c is None:
+            out |= {cf.date() - 1, cf.date(), cf.date() + 1}
+            continue
+        start, end, pay = c.accrualStartDate(), c.accrualEndDate(), c.date()
+        out |= {start, start + 1, start + (end - start) // 2, end, pay - 3, pay - 1, pay, pay + 1}
+        if c.exCouponDate() != ql.Date():
+            out |= {c.exCouponDate() - 1, c.exCouponDate()}
+    if len(cfs) > 0:
+        out |= {ql.CashFlows.startDate(cfs) - 10, ql.CashFlows.maturityDate(cfs) + 10}
+    n = 0
+    while len(out) < 18:
+        out.add(ql.Date(1, ql.January, 2026) + 91 * n)
+        n += 1
+    return sorted(out)
 
 
 def contexts():
@@ -201,10 +240,12 @@ def contexts():
 
 def cases():
     rnd = random.Random(v.SEED)
+    acc = random.Random(v.SEED + 1)
     out = []
     for name, spec, scale in legs():
         cfs = leg(spec)
-        for ev, ref_events, todays in rnd.sample(contexts(), 6):
+        accrual = acc.sample(accrual_dates(cfs), 18)
+        for k, (ev, ref_events, todays) in enumerate(rnd.sample(contexts(), 6)):
             st = v.settings(ev, ref_events, todays)
             curve = {"referenceDate": v.enc(ev), "forward": CURVE_RATE, "dayCounter": A365,
                      "compounding": int(ql.Continuous), "frequency": int(ql.Annual)}
@@ -220,12 +261,22 @@ def cases():
                 bps.append(v.amount(v.attempt(lambda: ql.CashFlows.bps(*args)), scale * 1e-4))
                 pair = ql.CashFlows.npvbps(*args)  # never throws on these legs and curves
                 npvbps.append([v.amount(pair[0], scale), v.amount(pair[1], scale * 1e-4)])
+            accruals, accrued_period, accrued_days, accrued_amount = [], [], [], []
+            for settlement in [ql.Date()] + accrual[3 * k:3 * k + 3]:
+                include = acc.random() < 0.5
+                accruals.append({"includeSettlementDateFlows": include, "settlementDate": v.enc(settlement)})
+                accrued_period.append(v.attempt(lambda: ql.CashFlows.accruedPeriod(cfs, include, settlement)))
+                accrued_days.append(v.attempt(lambda: ql.CashFlows.accruedDays(cfs, include, settlement)))
+                accrued_amount.append(v.amount(v.attempt(lambda: ql.CashFlows.accruedAmount(cfs, include, settlement)),
+                                               scale))
             out.append({
                 "name": f"{name} / {ev.ISO()} {ref_events} {todays}",
-                "inputs": {"settings": st, "leg": spec, "curve": curve, "settlements": settlements},
+                "inputs": {"settings": st, "leg": spec, "curve": curve, "settlements": settlements,
+                           "accruals": accruals},
                 "expected": {"startDate": v.attempt(lambda: ql.CashFlows.startDate(cfs)),
                              "maturityDate": v.attempt(lambda: ql.CashFlows.maturityDate(cfs)),
-                             "npv": npv, "bps": bps, "npvbps": npvbps}})
+                             "npv": npv, "bps": bps, "npvbps": npvbps, "accruedPeriod": accrued_period,
+                             "accruedDays": accrued_days, "accruedAmount": accrued_amount}})
     return out
 
 

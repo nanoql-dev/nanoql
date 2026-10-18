@@ -53,7 +53,9 @@ public readonly struct Period : IEquatable<Period>, IComparable<Period>, ICompar
     /// <summary>Returns the period with the opposite sign.</summary>
     /// <param name="p">The period.</param>
     /// <returns>The negated period.</returns>
-    public static Period operator -(Period p) => new(-p.Length, p.Units);
+    /// <exception cref="NanoQLException">The length is <see cref="int.MinValue"/>, which has no negation; QuantLib's
+    /// negation overflows there, which is undefined.</exception>
+    public static Period operator -(Period p) => new(Negated(p.Length), p.Units);
 
     /// <summary>Multiplies a period's length.</summary>
     /// <param name="n">The factor.</param>
@@ -267,11 +269,12 @@ public readonly struct Period : IEquatable<Period>, IComparable<Period>, ICompar
 
     /// <summary>The frequency the period corresponds to.</summary>
     /// <returns>The frequency, or <see cref="Frequency.OtherFrequency"/>.</returns>
-    /// <exception cref="NanoQLException">The time unit is not a calendar unit.</exception>
+    /// <exception cref="NanoQLException">The time unit is not a calendar unit, or the length is
+    /// <see cref="int.MinValue"/>.</exception>
     public Frequency Frequency()
     {
-        // unsigned version
-        int length = Math.Abs(Length);
+        // unsigned version; QuantLib's std::abs overflows on the most negative length, which is undefined
+        int length = Length < 0 ? Negated(Length) : Length;
         if (length == 0)
         {
             return Units == TimeUnit.Years ? Time.Frequency.Once : Time.Frequency.NoFrequency;
@@ -443,4 +446,10 @@ public readonly struct Period : IEquatable<Period>, IComparable<Period>, ICompar
         TimeUnit.Years => p.Length >= 0 ? (365L * p.Length, 366L * p.Length) : (366L * p.Length, 365L * p.Length),
         _ => throw new NanoQLException($"unknown time unit ({(int)p.Units})"),
     };
+
+    private static int Negated(int length) =>
+        length != int.MinValue
+            ? -length
+            : throw new NanoQLException(
+                $"period length {length.ToString(System.Globalization.CultureInfo.InvariantCulture)} can't be negated");
 }

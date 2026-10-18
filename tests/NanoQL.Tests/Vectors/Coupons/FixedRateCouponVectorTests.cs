@@ -22,16 +22,20 @@ public class FixedRateCouponVectorTests
         var check = new VectorAssert(file);
         foreach (VectorCase c in file.Cases)
         {
-            FixedRateCoupon[] coupons = CashFlowInputs.FixedRateLegOf(c.Input("fixedRateLeg"), c.Context())
+            EvaluationContext context = c.Context();
+            FixedRateCoupon[] coupons = CashFlowInputs.FixedRateLegOf(c.Input("fixedRateLeg"), context)
                 .Cast<FixedRateCoupon>()
                 .ToArray();
             check.Output(c, "date", coupons.Select(x => x.Date).ToArray());
-            check.Output(c, "amount", coupons.Select(x => x.Amount()).ToArray());
-            check.Output(c, "nominal", coupons.Select(x => x.Nominal()).ToArray());
-            check.Output(c, "rate", coupons.Select(x => x.Rate()).ToArray());
+            check.Output(c, "amount", coupons.Select(x => x.Amount(context)).ToArray());
+            check.Output(c, "nominal", coupons.Select(x => x.ContractNominal).ToArray());
+            check.Output(c, "rate", coupons.Select(x => x.Rate(context)).ToArray());
+
+            // The nominal pricing uses is the one the coupon was built with.
+            Assert.All(coupons, x => Assert.Equal(x.ContractNominal, x.Nominal(context)));
 
             // The coupon's InterestRate carries the rate and the day counter the coupon reports.
-            Assert.All(coupons, x => Assert.Equal(x.Rate(), x.InterestRate.Rate));
+            Assert.All(coupons, x => Assert.Equal(x.Rate(context), x.InterestRate.Rate));
             Assert.All(coupons, x => Assert.Equal(x.DayCounter, x.InterestRate.DayCounter));
             check.Output(c, "accrualStartDate", coupons.Select(x => x.AccrualStartDate).ToArray());
             check.Output(c, "accrualEndDate", coupons.Select(x => x.AccrualEndDate).ToArray());
@@ -40,14 +44,14 @@ public class FixedRateCouponVectorTests
             check.Output(c, "accrualPeriod", coupons.Select(x => x.AccrualPeriod()).ToArray());
             check.Output(c, "accrualDays", coupons.Select(x => x.AccrualDays()).ToArray());
             check.Output(c, "exCouponDate", coupons.Select(x => x.ExCouponDate).ToArray());
-            check.Output(c, "accruedAmountMid", Accrued(coupons, c.DateInputs("midDates")));
-            check.Output(c, "accruedAmountLate", Accrued(coupons, c.DateInputs("lateDates")));
+            check.Output(c, "accruedAmountMid", Accrued(coupons, c.DateInputs("midDates"), context));
+            check.Output(c, "accruedAmountLate", Accrued(coupons, c.DateInputs("lateDates"), context));
         }
 
         check.Complete();
     }
 
     // Each coupon's accrued amount at its own date, from the case's inputs.
-    private static double[] Accrued(FixedRateCoupon[] coupons, Date[] dates) =>
-        coupons.Zip(dates, (x, d) => x.AccruedAmount(d)).ToArray();
+    private static double[] Accrued(FixedRateCoupon[] coupons, Date[] dates, EvaluationContext context) =>
+        coupons.Zip(dates, (x, d) => x.AccruedAmount(d, context)).ToArray();
 }
