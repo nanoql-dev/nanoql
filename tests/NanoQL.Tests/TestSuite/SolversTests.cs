@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/solvers.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBisection, testFalsePosition, testSecant (B6.2's solvers); testNewton (B3.4); testRidder (B4.5); testHalley (B4.7); testFiniteDifferenceNewtonSafe (S5)
+// Partial: testBisection, testFalsePosition, testSecant (B6.2's solvers); testNewton (B3.4); testRidder (B4.5); testHalley (B4.7)
 
 using System.Runtime.CompilerServices;
 using NanoQL.Numerics;
@@ -29,6 +29,13 @@ public class SolversTests
     {
         // Testing Newton-safe solver...
         TestSolver(new NewtonSafe(), "NewtonSafe", 1.0e-9);
+    }
+
+    [Fact]
+    public void TestFiniteDifferenceNewtonSafe()
+    {
+        // Testing finite-difference Newton-safe solver...
+        TestSolver(new FiniteDifferenceNewtonSafe(), "FiniteDifferenceNewtonSafe", null);
     }
 
     private static void TestNotBracketed<TSelf, TFunction, TF>(
@@ -130,6 +137,9 @@ public class SolversTests
         TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
 
     private static void TestSolver(NewtonSafe solver, string name, Real? accuracy) =>
+        TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
+
+    private static void TestSolver(FiniteDifferenceNewtonSafe solver, string name, Real? accuracy) =>
         TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
 
     private static void TestSolver<TSelf, TFunction, TF1, TF2, TF3, TProbe>(

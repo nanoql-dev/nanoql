@@ -12,8 +12,7 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The swaps' and their builders' undefined paths, each refused before the undefined step (the playbook's
-/// undefined-path rule), and the rounding precision <see cref="MakeOIS"/> refuses on entry, where QuantLib's builder
-/// stores it and its swap's constructor refuses it.
+/// undefined-path rule).
 /// </summary>
 public class SwapRefusalTests
 {
@@ -39,28 +38,6 @@ public class SwapRefusalTests
         ArgumentNullException e = Assert.Throws<ArgumentNullException>(() =>
             new MakeVanillaSwap(new Period(5, TimeUnit.Years), null!));
         Assert.Equal("index", e.ParamName);
-    }
-
-    // O4 for MakeOIS: QuantLib's withRoundingPrecision stores any value (makeois.cpp:401-404), and the swap's
-    // constructor refuses one outside [0, 16] when the builder converts (overnightindexedswap.cpp:177-181); nanoql's
-    // setter refuses it on entry, with the same text, so a builder never holds a precision its swap can't take.
-    [Fact]
-    public void MakeOISRefusesARoundingPrecisionOutsideItsRangeOnEntry()
-    {
-        var builder = new MakeOIS(new Period(1, TimeUnit.Years), new Estr(Curve)).WithFixedRate(0.03);
-        foreach (int precision in new[] { 17, -1 })
-        {
-            ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(() =>
-                builder.WithRoundingPrecision(precision));
-            Assert.Equal("roundingPrecision", e.ParamName);
-            Assert.StartsWith(
-                $"rounding precision ({precision}) must be between 0 and 16", e.Message, StringComparison.Ordinal);
-        }
-
-        // The range itself, and no rounding, stay QuantLib's.
-        Assert.Equal(16, builder.WithRoundingPrecision(16).ToOvernightIndexedSwap(Context).RoundingPrecision);
-        Assert.Null(builder.WithRoundingPrecision(6).WithRoundingPrecision(null).ToOvernightIndexedSwap(Context)
-            .RoundingPrecision);
     }
 
     // F1: QuantLib's settlement, lookback and lockout days are Natural, and a swap's leg index Size, unsigned types; a

@@ -78,6 +78,10 @@ public readonly struct LogCubic : IInterpolator
         new LogCubicInterpolation(
             x, y, DerivativeApprox(), monotonic, leftType, leftValue, rightType, rightValue);
 
+    /// <inheritdoc/>
+    public void CheckPoints(int points) =>
+        CubicInterpolation.CheckConstruction(points, DerivativeApprox(), leftType, rightType);
+
     private CubicInterpolationDerivativeApprox DerivativeApprox() =>
         da ?? throw new InvalidOperationException(
             "a LogCubic's derivative approximation has no default: build it with a derivative approximation");

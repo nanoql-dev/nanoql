@@ -60,8 +60,9 @@ public sealed class OvernightIndexedSwap : FixedVsFloatingSwap
     /// <exception cref="ArgumentNullException">An argument but a day counter or the calendar is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">An enum isn't a member of its type; the lookback or the lockout is
     /// negative; or the rounding precision is outside [0, 16].</exception>
-    /// <exception cref="ArgumentException">The schedule is empty.</exception>
-    /// <exception cref="NanoQLException">A leg can't be built from the arguments.</exception>
+    /// <exception cref="NanoQLException">
+    /// A leg can't be built from the arguments, an empty schedule among them.
+    /// </exception>
     public OvernightIndexedSwap(
         SwapType type,
         double nominal,
@@ -130,8 +131,9 @@ public sealed class OvernightIndexedSwap : FixedVsFloatingSwap
     /// <exception cref="ArgumentNullException">An argument but a day counter or the calendar is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">An enum isn't a member of its type; the lookback or the lockout is
     /// negative; or the rounding precision is outside [0, 16].</exception>
-    /// <exception cref="ArgumentException">The schedule is empty.</exception>
-    /// <exception cref="NanoQLException">A leg can't be built from the arguments.</exception>
+    /// <exception cref="NanoQLException">
+    /// A leg can't be built from the arguments, an empty schedule among them.
+    /// </exception>
     public OvernightIndexedSwap(
         SwapType type,
         IEnumerable<double> nominals,
@@ -201,8 +203,9 @@ public sealed class OvernightIndexedSwap : FixedVsFloatingSwap
     /// <exception cref="ArgumentNullException">An argument but a day counter or the calendar is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">An enum isn't a member of its type; the lookback or the lockout is
     /// negative; or the rounding precision is outside [0, 16].</exception>
-    /// <exception cref="ArgumentException">A schedule is empty.</exception>
-    /// <exception cref="NanoQLException">A leg can't be built from the arguments.</exception>
+    /// <exception cref="NanoQLException">
+    /// A leg can't be built from the arguments, an empty schedule among them.
+    /// </exception>
     public OvernightIndexedSwap(
         SwapType type,
         double nominal,
@@ -274,8 +277,9 @@ public sealed class OvernightIndexedSwap : FixedVsFloatingSwap
     /// <exception cref="ArgumentNullException">An argument but a day counter or the calendar is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">An enum isn't a member of its type; the lookback or the lockout is
     /// negative; or the rounding precision is outside [0, 16].</exception>
-    /// <exception cref="ArgumentException">A schedule is empty.</exception>
-    /// <exception cref="NanoQLException">A leg can't be built from the arguments.</exception>
+    /// <exception cref="NanoQLException">
+    /// A leg can't be built from the arguments, an empty schedule among them.
+    /// </exception>
     public OvernightIndexedSwap(
         SwapType type,
         IEnumerable<double> fixedNominals,
@@ -357,7 +361,6 @@ public sealed class OvernightIndexedSwap : FixedVsFloatingSwap
             () => OvernightLegOf(
                 nominals.Overnight,
                 overnightSchedule,
-                scheduleNames.Overnight,
                 overnightIndex,
                 spread,
                 paymentLag,
@@ -475,7 +478,6 @@ public sealed class OvernightIndexedSwap : FixedVsFloatingSwap
     private static ImmutableArray<CashFlow> OvernightLegOf(
         ImmutableArray<double> overnightNominals,
         Schedule overnightSchedule,
-        string overnightScheduleName,
         OvernightIndex overnightIndex,
         double spread,
         int paymentLag,
@@ -488,13 +490,8 @@ public sealed class OvernightIndexedSwap : FixedVsFloatingSwap
         bool applyObservationShift,
         int? roundingPrecision)
     {
-        if (overnightSchedule.Empty)
-        {
-            // QuantLib's conversion counts schedule_.size()-1 periods, a Size that wraps below zero: refused as the
-            // overnight leg's builder refuses it, under the calling constructor's name.
-            throw new ArgumentException("empty schedule", overnightScheduleName);
-        }
-
+        // An empty overnight schedule is refused by the leg's conversion, after its notional check, as QuantLib's leg
+        // reaches it.
         OvernightLeg leg = new OvernightLeg(overnightSchedule, overnightIndex)
             .WithNotionals(overnightNominals)
             .WithSpreads(spread)
@@ -502,13 +499,8 @@ public sealed class OvernightIndexedSwap : FixedVsFloatingSwap
             .WithPaymentLag(paymentLag)
             .WithPaymentAdjustment(paymentAdjustment)
             .WithPaymentCalendar(paymentCalendar ?? overnightSchedule.Calendar)
-            .WithAveragingMethod(averagingMethod);
-        if (lookbackDays is int days)
-        {
-            leg = leg.WithLookbackDays(days);
-        }
-
-        leg = leg
+            .WithAveragingMethod(averagingMethod)
+            .WithLookbackDays(lookbackDays)
             .WithLockoutDays(lockoutDays)
             .WithObservationShift(applyObservationShift);
         if (roundingPrecision is int precision)

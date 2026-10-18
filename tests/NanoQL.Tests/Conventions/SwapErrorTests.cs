@@ -51,6 +51,27 @@ public class SwapErrorTests
         Assert.Equal("roundingPrecision", r.ParamName);
         Assert.StartsWith("rounding precision (17) must be between 0 and 16", r.Message, StringComparison.Ordinal);
 
+        // An empty schedule, refused by the conversion of the leg built on it, as QuantLib's legs reach it: the
+        // undefined-path refusal of a value the leg builder stores (EmptyScheduleTests).
+        var empty = new Schedule(Array.Empty<Date>(), new TARGET());
+        var euribor = new Euribor6M(Curve);
+        Func<object>[] emptySchedules =
+        [
+            () => new OvernightIndexedSwap(SwapType.Payer, 1e6, empty, 0.03, null, estr),
+            () => new OvernightIndexedSwap(SwapType.Payer, [1e6], empty, 0.03, null, estr),
+            () => new OvernightIndexedSwap(SwapType.Payer, 1e6, empty, 0.03, null, schedule, estr),
+            () => new OvernightIndexedSwap(SwapType.Payer, 1e6, schedule, 0.03, null, empty, estr),
+            () => new OvernightIndexedSwap(SwapType.Payer, [1e6], empty, 0.03, null, [1e6], schedule, estr),
+            () => new OvernightIndexedSwap(SwapType.Payer, [1e6], schedule, 0.03, null, [1e6], empty, estr),
+            () => new VanillaSwap(SwapType.Payer, 1e6, empty, 0.03, null, schedule, euribor, 0.0, null, Context),
+            () => new VanillaSwap(SwapType.Payer, 1e6, schedule, 0.03, null, empty, euribor, 0.0, null, Context),
+            () => new BuiltLegSwap(empty, schedule, euribor, () => []),
+        ];
+        foreach (Func<object> build in emptySchedules)
+        {
+            Assert.Equal("empty schedule", Assert.Throws<NanoQLException>(build).Message);
+        }
+
         // A null index, with QuantLib's text, and a type outside the enum.
         ArgumentNullException n = Assert.Throws<ArgumentNullException>(() => new OvernightIndexedSwap(
             SwapType.Payer, 1e6, schedule, 0.03, new Actual360(), null!));
@@ -103,9 +124,7 @@ public class SwapErrorTests
         var estr = new Estr(Curve);
         var euribor = new Euribor6M(Curve);
         Schedule schedule = Annual(new Date(17, Month.January, 2025), 2, new TARGET());
-        var empty = new Schedule(Array.Empty<Date>(), new TARGET());
         const BusinessDayConvention Unknown = (BusinessDayConvention)99;
-        const string EmptySchedule = "empty schedule";
 
         // The payment adjustment, which the base checks as its payment convention, in each constructor.
         const string UnknownConvention = "unknown business-day convention";
@@ -145,45 +164,7 @@ public class SwapErrorTests
             "schedule",
             "Value cannot be null.");
 
-        // An empty schedule, which the legs' builders refuse under their own parameter's name.
-        AssertRefused<ArgumentException>(
-            () => _ = new OvernightIndexedSwap(SwapType.Payer, 1e6, empty, 0.03, null, estr),
-            "schedule",
-            EmptySchedule);
-        AssertRefused<ArgumentException>(
-            () => _ = new OvernightIndexedSwap(SwapType.Payer, [1e6], empty, 0.03, null, estr),
-            "schedule",
-            EmptySchedule);
-        AssertRefused<ArgumentException>(
-            () => _ = new OvernightIndexedSwap(SwapType.Payer, 1e6, empty, 0.03, null, schedule, estr),
-            "fixedSchedule",
-            EmptySchedule);
-        AssertRefused<ArgumentException>(
-            () => _ = new OvernightIndexedSwap(SwapType.Payer, 1e6, schedule, 0.03, null, empty, estr),
-            "overnightSchedule",
-            EmptySchedule);
-        AssertRefused<ArgumentException>(
-            () => _ = new OvernightIndexedSwap(SwapType.Payer, [1e6], empty, 0.03, null, [1e6], schedule, estr),
-            "fixedSchedule",
-            EmptySchedule);
-        AssertRefused<ArgumentException>(
-            () => _ = new OvernightIndexedSwap(SwapType.Payer, [1e6], schedule, 0.03, null, [1e6], empty, estr),
-            "overnightSchedule",
-            EmptySchedule);
-        AssertRefused<ArgumentException>(
-            () => _ = new VanillaSwap(SwapType.Payer, 1e6, empty, 0.03, null, schedule, euribor, 0.0, null, Context),
-            "fixedSchedule",
-            EmptySchedule);
-        AssertRefused<ArgumentException>(
-            () => _ = new VanillaSwap(SwapType.Payer, 1e6, schedule, 0.03, null, empty, euribor, 0.0, null, Context),
-            "floatSchedule",
-            EmptySchedule);
-
-        // The base's own constructor: an empty fixed schedule, and a floating leg the swap base refuses.
-        AssertRefused<ArgumentException>(
-            () => _ = new BuiltLegSwap(empty, schedule, euribor, () => []),
-            "fixedSchedule",
-            EmptySchedule);
+        // The base's own constructor: a floating leg the swap base refuses.
         AssertRefused<ArgumentException>(
             () => _ = new BuiltLegSwap(schedule, schedule, euribor, () => default),
             "floatingLeg",
@@ -315,22 +296,48 @@ public class SwapErrorTests
             "settlementDays",
             Assert.Throws<ArgumentOutOfRangeException>(() => new MakeVanillaSwap(fiveYears, euribor)
                 .WithSettlementDays(-2)).ParamName);
-        ArgumentOutOfRangeException r = Assert.Throws<ArgumentOutOfRangeException>(() =>
-            new MakeOIS(fiveYears, estr).WithRoundingPrecision(17));
-        Assert.Equal("roundingPrecision", r.ParamName);
-        Assert.StartsWith("rounding precision (17) must be between 0 and 16", r.Message, StringComparison.Ordinal);
         Assert.Equal(
             "effectiveDate",
             Assert.Throws<ArgumentException>(() => new MakeOIS(fiveYears, estr).WithEffectiveDate(default(Date)))
                 .ParamName);
-        Assert.Equal(
-            "engine",
-            Assert.Throws<ArgumentNullException>(() => new MakeOIS(fiveYears, estr).WithPricingEngine(null!))
-                .ParamName);
-        Assert.Equal(
-            "discountCurve",
-            Assert.Throws<ArgumentNullException>(() =>
-                new MakeVanillaSwap(fiveYears, euribor).WithDiscountingTermStructure(null!)).ParamName);
+
+        // No discounting curve, QuantLib's empty handle: the engine set on it refuses a par build with QuantLib's text
+        // (discountingswapengine.cpp:42).
+        const string EmptyHandle = "discounting term structure handle is empty";
+        e = Assert.Throws<NanoQLException>(() =>
+            new MakeVanillaSwap(fiveYears, euribor).WithDiscountingTermStructure(null).ToVanillaSwap(Context));
+        Assert.Equal(EmptyHandle, e.Message);
+        e = Assert.Throws<NanoQLException>(() =>
+            new MakeOIS(fiveYears, estr).WithDiscountingTermStructure(null).ToOvernightIndexedSwap(Context));
+        Assert.Equal(EmptyHandle, e.Message);
+    }
+
+    [Fact]
+    public void MakeOISRefusesARoundingPrecisionOutsideItsRangeAtItsConversion()
+    {
+        // QuantLib's withRoundingPrecision stores any value (makeois.cpp:401-404), and the swap's constructor refuses
+        // one outside [0, 16] when the builder converts (overnightindexedswap.cpp:177-181): an argument of the swap's,
+        // with its type, name and text.
+        var builder = new MakeOIS(new Period(1, TimeUnit.Years), new Estr(Curve)).WithFixedRate(0.03);
+        foreach (int precision in new[] { 17, -1 })
+        {
+            MakeOIS stored = builder.WithRoundingPrecision(precision);
+            ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(() =>
+                stored.ToOvernightIndexedSwap(Context));
+            Assert.Equal("roundingPrecision", e.ParamName);
+            Assert.StartsWith(
+                $"rounding precision ({precision}) must be between 0 and 16", e.Message, StringComparison.Ordinal);
+        }
+
+        // A refusal QuantLib's conversion raises before it builds the swap comes first (wheel: "cannot set both...").
+        NanoQLException both = Assert.Throws<NanoQLException>(() => builder.WithRoundingPrecision(17)
+            .WithEffectiveDate(new Date(20, Month.January, 2025)).WithSettlementDays(2).ToOvernightIndexedSwap(Context));
+        Assert.Equal("cannot set both an explicit effective date and settlement days; use one or the other", both.Message);
+
+        // The range itself, and no rounding, stay QuantLib's.
+        Assert.Equal(16, builder.WithRoundingPrecision(16).ToOvernightIndexedSwap(Context).RoundingPrecision);
+        Assert.Null(builder.WithRoundingPrecision(6).WithRoundingPrecision(null).ToOvernightIndexedSwap(Context)
+            .RoundingPrecision);
     }
 
     [Fact]

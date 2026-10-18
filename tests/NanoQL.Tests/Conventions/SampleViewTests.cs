@@ -3,6 +3,7 @@
 
 using NanoQL.Methods;
 using NanoQL.Numerics;
+using NanoQL.Processes;
 
 namespace NanoQL.Tests.Conventions;
 
@@ -51,5 +52,46 @@ public class SampleViewTests
         ReadOnlyMemory<long> next = sobol.NextInt32Sequence();
         Assert.True(integers.Span.Overlaps(next.Span));
         Assert.NotEqual(keptIntegers, integers.ToArray());
+    }
+
+    /// <summary>
+    /// A path draw allocates nothing either: <see cref="PathGenerator{TGsg}.Next"/> and
+    /// <see cref="PathGenerator{TGsg}.Antithetic"/> return a view of the generator's path, which the next draw
+    /// overwrites, with and without the Brownian bridge, on pseudo-random and Sobol sequences.
+    /// </summary>
+    [Fact]
+    public void APathDrawAllocatesNothing()
+    {
+        var process = new OrnsteinUhlenbeckProcess(0.1, 0.2, 0.05, 0.03);
+        AssertNoAllocation(new InvCumulativeMersenneTwisterPathGenerator(
+            process, 1.0, 12, new InvCumulativeMersenneTwisterGaussianRsg(
+                RandomSequenceGenerator.Create<MersenneTwisterUniformRng>(12, 42)), false));
+        AssertNoAllocation(new InvCumulativeMersenneTwisterPathGenerator(
+            process, 1.0, 12, new InvCumulativeMersenneTwisterGaussianRsg(
+                RandomSequenceGenerator.Create<MersenneTwisterUniformRng>(12, 42)), true));
+        AssertNoAllocation(new GaussianSobolPathGenerator(
+            process, 1.0, 12, new InvCumulativeSobolGaussianRsg(new SobolRsg(12, 42)), false));
+        AssertNoAllocation(new GaussianSobolPathGenerator(
+            process, 1.0, 12, new InvCumulativeSobolGaussianRsg(new SobolRsg(12, 42)), true));
+    }
+
+    // dotnet/runtime's own allocation tests' pattern: warmed up, then the thread's allocation counter unchanged.
+    private static void AssertNoAllocation<TGsg>(PathGenerator<TGsg> generator)
+        where TGsg : class, IRsg
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            generator.Next();
+            generator.Antithetic();
+        }
+
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < 100; i++)
+        {
+            generator.Next();
+            generator.Antithetic();
+        }
+
+        Assert.Equal(before, GC.GetAllocatedBytesForCurrentThread());
     }
 }

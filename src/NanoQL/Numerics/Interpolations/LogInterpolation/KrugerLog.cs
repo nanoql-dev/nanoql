@@ -42,4 +42,7 @@ public readonly struct KrugerLog : IInterpolator
     /// <returns>The interpolation.</returns>
     /// <exception cref="ArgumentException">The sizes differ, there are fewer than 2 points, or a y value isn't positive.</exception>
     public Interpolation Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y) => ((LogCubic)this).Interpolate(x, y);
+
+    /// <inheritdoc/>
+    public void CheckPoints(int points) => ((LogCubic)this).CheckPoints(points);
 }

@@ -44,7 +44,8 @@ public static class CashFlowVectorsFunctions
     /// <param name="nominals">The nominals.</param>
     /// <param name="index">The index.</param>
     /// <param name="paymentDayCounter">The accrual day counter, or <see langword="null"/>, QuantLib's empty day
-    /// counter, which leaves each floating coupon the index's.</param>
+    /// counter, which leaves each floating coupon the index's; a period with a zero gearing then refuses the leg, once
+    /// every period is built.</param>
     /// <param name="paymentAdj">The business-day convention of the payment dates.</param>
     /// <param name="fixingDays">The fixing days, null elements taking the index's.</param>
     /// <param name="gearings">The gearings.</param>
@@ -63,9 +64,9 @@ public static class CashFlowVectorsFunctions
     /// <param name="exCouponEndOfMonth">Whether the ex-coupon dates stay at month end.</param>
     /// <param name="fixingConvention">The convention adjusting the fixing dates.</param>
     /// <returns>The leg.</returns>
-    /// <exception cref="ArgumentException">The schedule is empty; no nominal is given; a vector has more elements than
-    /// the schedule has periods; the leg is both in arrears and zero; or a period has a zero gearing and no payment day
-    /// counter is given.</exception>
+    /// <exception cref="ArgumentException">No nominal is given; a vector has more elements than the schedule has
+    /// periods; the leg is both in arrears and zero; the schedule is empty; or a period has a zero gearing and no
+    /// payment day counter is given.</exception>
     /// <exception cref="ArgumentOutOfRangeException">A fixing-days element is negative, or a convention isn't a member
     /// of its type.</exception>
     public static ImmutableArray<CashFlow> FloatingLeg<TIndex>(
@@ -104,12 +105,6 @@ public static class CashFlowVectorsFunctions
         ArgumentNullException.ThrowIfNull(spreads);
         ArgumentNullException.ThrowIfNull(caps);
         ArgumentNullException.ThrowIfNull(floors);
-        if (schedule.Empty)
-        {
-            // QuantLib's period count wraps below zero for an empty schedule.
-            throw new ArgumentException("empty schedule", nameof(schedule));
-        }
-
         ImmutableArray<int?> days = [.. fixingDays];
         foreach (int? d in days)
         {
@@ -122,7 +117,7 @@ public static class CashFlowVectorsFunctions
         EnumArguments.Check(paymentAdj, nameof(paymentAdj));
         EnumArguments.Check(exCouponAdjustment, nameof(exCouponAdjustment));
         EnumArguments.Check(fixingConvention, nameof(fixingConvention));
-        return Build(
+        ImmutableArray<CashFlow> leg = Build(
             floatingCoupon,
             cappedFlooredCoupon,
             schedule,
@@ -144,7 +139,9 @@ public static class CashFlowVectorsFunctions
             exCouponAdjustment,
             exCouponEndOfMonth,
             fixingConvention,
-            stored: false);
+            stored: false,
+            out Exception? zeroGearingRefusal);
+        return zeroGearingRefusal is null ? leg : throw zeroGearingRefusal;
     }
 
     /// <summary>
@@ -190,7 +187,10 @@ public static class CashFlowVectorsFunctions
 
     /// <summary>
     /// The leg, from checked arguments. The size checks refuse with <see cref="ArgumentException"/> for a caller's
-    /// arguments, and with <see cref="NanoQLException"/> for a builder's stored settings.
+    /// arguments, and with <see cref="NanoQLException"/> for a builder's stored settings. A period with a zero gearing
+    /// and no payment day counter, which QuantLib builds and fails to price, is built with a placeholder day counter,
+    /// and the refusal is returned in <paramref name="zeroGearingRefusal"/>, for the caller to raise once it has done
+    /// what QuantLib does with the leg: so every refusal QuantLib raises while building comes first.
     /// </summary>
     internal static ImmutableArray<CashFlow> Build<TIndex>(
         Func<Date, double, Date, Date, int?, TIndex, double, double, Date, Date, DayCounter?, bool, Date?,
@@ -216,10 +216,15 @@ public static class CashFlowVectorsFunctions
         BusinessDayConvention exCouponAdjustment,
         bool exCouponEndOfMonth,
         BusinessDayConvention fixingConvention,
-        bool stored)
+        bool stored,
+        out Exception? zeroGearingRefusal)
         where TIndex : InterestRateIndex
     {
-        int n = schedule.Size - 1;
+        zeroGearingRefusal = null;
+
+        // QuantLib's period count is a Size, which wraps to its largest value for an empty schedule: every size check
+        // passes, and the schedule is refused after QuantLib's checks, before the leg reserves its coupons.
+        int n = schedule.Empty ? int.MaxValue : schedule.Size - 1;
         if (nominals.IsEmpty)
         {
             throw Refused("no notional given", nameof(nominals), stored);
@@ -255,10 +260,15 @@ public static class CashFlowVectorsFunctions
             throw Refused("in-arrears and zero features are not compatible", nameof(isZero), stored);
         }
 
+        if (schedule.Empty)
+        {
+            throw Refused("empty schedule", nameof(schedule), stored);
+        }
+
         ImmutableArray<CashFlow>.Builder leg = ImmutableArray.CreateBuilder<CashFlow>(n);
 
-        // the following is not always correct
-        Calendar calendar = schedule.Calendar;
+        // the following is not always correct. QuantLib's empty calendar, null here, is used unchecked.
+        Calendar calendar = schedule.Calendar ?? EmptyCalendar.Instance;
 
         paymentCalendar ??= calendar;
 
@@ -293,9 +303,15 @@ public static class CashFlowVectorsFunctions
             if (Get(gearings, i, 1.0) == 0.0)
             {
                 // fixed coupon; QuantLib builds it on an empty day counter and fails only when it is priced, where
-                // nanoql's FixedRateCoupon needs one, so the leg is refused here with QuantLib's text
-                DayCounter dayCounter = paymentDayCounter
-                    ?? throw Refused("no day counter implementation provided", nameof(paymentDayCounter), stored);
+                // nanoql's FixedRateCoupon needs one: the leg is refused with QuantLib's text once it is built, and
+                // the coupon takes a placeholder day counter meanwhile
+                if (paymentDayCounter is null)
+                {
+                    zeroGearingRefusal ??=
+                        Refused("no day counter implementation provided", nameof(paymentDayCounter), stored);
+                }
+
+                DayCounter dayCounter = paymentDayCounter ?? new Actual365Fixed();
                 leg.Add(new FixedRateCoupon(
                     paymentDate,
                     Get(nominals, i, 1.0),

@@ -23,4 +23,7 @@ public readonly struct Linear : IInterpolator
     /// <returns>The interpolation.</returns>
     /// <exception cref="ArgumentException">The sizes differ, or there are fewer than 2 points.</exception>
     public Interpolation Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y) => new LinearInterpolation(x, y);
+
+    /// <inheritdoc/>
+    public void CheckPoints(int points) => Interpolation.CheckRequiredPoints(points, RequiredPoints);
 }

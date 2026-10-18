@@ -93,7 +93,6 @@ public class CouponErrorTests
         var selection = new StubIndexSelection(StubIndexSelectionConvention.Interpolated, [new Euribor3M(Curve), index]);
 
         // The builder: its arguments, then its stored settings at the conversion.
-        AssertArgument("schedule", "empty schedule", () => new IborLeg(empty, index));
         AssertNull("schedule", () => new IborLeg(null!, index));
         AssertNull("index", () => new IborLeg(schedule, null!), "no index provided");
         var leg = new IborLeg(schedule, index);
@@ -118,6 +117,7 @@ public class CouponErrorTests
         AssertStored("too many caps (5), only 4 required", () => leg.WithNotionals(1).WithCaps([1, 2, 3, 4, 5]).ToLeg(Context));
         AssertStored("too many floors (5), only 4 required", () => leg.WithNotionals(1).WithFloors([1, 2, 3, 4, 5]).ToLeg(Context));
         AssertStored("in-arrears and zero features are not compatible", () => leg.WithNotionals(1).InArrears().WithZeroPayments().ToLeg(Context));
+        AssertStored("empty schedule", () => new IborLeg(empty, index).WithNotionals(1).ToLeg(Context));
 
         IborLeg stub = new IborLeg(stubbed, index).WithNotionals(1e6).WithStubIndexSelection(selection);
         AssertStored("stub index conventions are not supported for capped/floored Ibor legs", () => stub.WithIndexedCoupons().WithCaps(0.05).ToLeg(Context));
@@ -129,15 +129,69 @@ public class CouponErrorTests
             () => new IborLeg(new Schedule(stubbed.Dates), index).WithNotionals(1e6).WithIndexedCoupons().WithStubIndexSelection(selection).ToLeg(Context));
 
         // The function: its arguments.
-        AssertArgument("schedule", "empty schedule", () => FloatingLeg(empty, index, [1e6]));
         AssertNull("index", () => FloatingLeg(schedule, null!, [1e6]));
         AssertArgument("nominals", "no notional given", () => FloatingLeg(schedule, index, []));
         AssertArgument("nominals", "too many nominals (5), only 4 required", () => FloatingLeg(schedule, index, [1, 2, 3, 4, 5]));
         AssertArgument("gearings", "too many gearings (5), only 4 required", () => FloatingLeg(schedule, index, [1], gearings: [1, 2, 3, 4, 5]));
         AssertArgument("isZero", "in-arrears and zero features are not compatible", () => FloatingLeg(schedule, index, [1], inArrears: true, isZero: true));
+        AssertArgument("schedule", "empty schedule", () => FloatingLeg(empty, index, [1e6]));
         AssertArgument("paymentDayCounter", "no day counter implementation provided", () => FloatingLeg(schedule, index, [1], gearings: [0.0]));
         AssertRange("fixingDays", () => FloatingLeg(schedule, index, [1], fixingDays: [-1]));
         AssertRange("paymentAdj", () => FloatingLeg(schedule, index, [1], paymentAdj: (BusinessDayConvention)99));
+    }
+
+    [Fact]
+    public void AZeroGearingPeriodWithoutADayCounterIsRefusedAfterTheLegIsBuilt()
+    {
+        // QuantLib builds a zero-gearing period's fixed coupon on the empty day counter and fails only when it is
+        // priced (cashflowvectors.hpp:134-142, iborcoupon.cpp:286-331), so every refusal it raises while building the
+        // leg comes first (the wheel's refusals): a later period's cap below its floor, and the stub checks.
+        var index = new Euribor6M(Curve);
+        Schedule schedule = new MakeSchedule().From(new Date(15, Month.January, 2026)).To(new Date(15, Month.January, 2027))
+            .WithTenor(new Period(6, TimeUnit.Months)).WithCalendar(new TARGET()).ToSchedule();
+        IborLeg leg = new IborLeg(schedule, index).WithNotionals(100.0);
+
+        AssertArgument(
+            "cap",
+            "cap level (0.01) less than floor level (0.02)",
+            () => leg.WithGearings([0.0, 1.0]).WithCaps(0.01).WithFloors(0.02).ToLeg(Context));
+        AssertArgument(
+            "cap",
+            "cap level (0.01) less than floor level (0.02)",
+            () => CashFlowVectorsFunctions.FloatingLeg<IborIndex>(
+                (pd, n, s, e, fd, i, g, sp, rs, re, dc, ia, ex, fc) => new IborCoupon(pd, n, s, e, fd, i, g, sp, rs, re, dc, ia, ex, fc),
+                (pd, n, s, e, fd, i, g, sp, cap, floor, rs, re, dc, ia, ex, fc) =>
+                    new CappedFlooredIborCoupon(pd, n, s, e, fd, i, g, sp, cap, floor, rs, re, dc, ia, ex, fc),
+                schedule,
+                [100.0],
+                index,
+                null,
+                BusinessDayConvention.Following,
+                [],
+                [0.0, 1.0],
+                [],
+                [0.01],
+                [0.02],
+                false,
+                false));
+
+        var stub = new Schedule(
+            [new Date(16, Month.March, 2026), new Date(15, Month.July, 2026), new Date(15, Month.January, 2027)],
+            new TARGET(), BusinessDayConvention.Following, BusinessDayConvention.Following,
+            new Period(6, TimeUnit.Months), DateGenerationRule.Backward, false, [false, true]);
+        var selection = new StubIndexSelection(StubIndexSelectionConvention.ClosestIndex, [new Euribor3M(Curve), index]);
+        AssertStored(
+            "stub index conventions are not supported for capped/floored Ibor legs",
+            () => new IborLeg(stub, index).WithNotionals(100.0).WithGearings(0.0).WithCaps(0.05).WithIndexedCoupons()
+                .WithStubIndexSelection(selection).ToLeg(Context));
+
+        // Its own refusal stays, once the leg is built (ZeroGearingWithoutDayCounterTests).
+        AssertStored("no day counter implementation provided", () => leg.WithGearings(0.0).ToLeg(Context));
+        AssertStored(
+            "no day counter implementation provided",
+            () => new IborLeg(stub, index).WithNotionals(100.0).WithGearings(0.0).WithIndexedCoupons()
+                .WithStubIndexSelection(selection).ToLeg(Context));
+        AssertArgument("paymentDayCounter", "no day counter implementation provided", () => FloatingLeg(schedule, index, [1], gearings: [0.0]));
     }
 
     [Fact]

@@ -12,8 +12,7 @@ namespace NanoQL.Tests.Vectors;
 /// <see cref="MakeOIS"/>'s setters, at the par rate where no fixed rate is given, the default settlement days of the
 /// presets among them, telescopic builds by the plan's telescopic rule, and QuantLib's refusals; with the built swap's
 /// dates, schedules, terms and overnight conventions, and its results on the engine QuantLib's builder attaches, which
-/// nanoql's swap doesn't hold. A rounding precision QuantLib refuses when it builds the swap is refused by
-/// <see cref="MakeOIS.WithRoundingPrecision"/> already, so the build is refused either way.
+/// nanoql's swap doesn't hold. A builder setting QuantLib's empty calendar or curve takes <see langword="null"/>.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class MakeOISVectorTests

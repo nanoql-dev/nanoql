@@ -43,4 +43,7 @@ public readonly struct MonotonicLogCubic : IInterpolator
     /// <exception cref="ArgumentException">The sizes differ, there are fewer than 2 points, or a y value isn't positive.</exception>
     /// <exception cref="NanoQLException">The spline's system has a zero pivot.</exception>
     public Interpolation Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y) => ((LogCubic)this).Interpolate(x, y);
+
+    /// <inheritdoc/>
+    public void CheckPoints(int points) => ((LogCubic)this).CheckPoints(points);
 }

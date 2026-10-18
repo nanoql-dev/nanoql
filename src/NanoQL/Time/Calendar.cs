@@ -26,7 +26,13 @@ namespace NanoQL.Time;
 /// <para>
 /// Two calendars are equal when they are of the same type and have the same name and the same added and removed
 /// holidays, compared by content; the type keeps equality symmetric between a calendar and a subclass that compares
-/// more, such as <see cref="JointCalendar"/>. QuantLib's empty calendar, <c>Calendar()</c>, is <see langword="null"/>.
+/// more, such as <see cref="JointCalendar"/>. QuantLib's empty calendar, <c>Calendar()</c>, is <see langword="null"/>,
+/// and two empty calendars are equal: <see langword="null"/> equals <see langword="null"/> and no calendar.
+/// </para>
+/// <para>
+/// A member that QuantLib lets take its empty calendar and uses unchecked takes <see langword="null"/> and behaves as
+/// QuantLib does: the empty calendar adjusts by <see cref="BusinessDayConvention.Unadjusted"/> and moves by weeks,
+/// months and years, and any other use throws <see cref="NanoQLException"/>, "no calendar implementation provided".
 /// </para>
 /// </remarks>
 public abstract class Calendar : IEquatable<Calendar>

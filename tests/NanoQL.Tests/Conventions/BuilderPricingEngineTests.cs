@@ -83,4 +83,26 @@ public class BuilderPricingEngineTests
         Assert.Equal(0.0, DiscountingSwapEngine.Calculate(onOwnCurve, Context, Forecast, false).NPV!.Value, 1e-14);
         Assert.NotEqual(ois.FixedRate, onOwnCurve.FixedRate);
     }
+
+    [Fact]
+    public void ANullEngineIsQuantLibsNullEngine()
+    {
+        // QuantLib's withPricingEngine(nullptr) leaves no engine, so the par rate is priced by the default engine on
+        // the index's forwarding curve, also after another engine was set (makevanillaswap.cpp:178-189,
+        // makeois.cpp:156-167). The wheel's par rates on a 3% curve, after a 5% discounting curve and then a null
+        // engine: 0.030470963573 and 0.030037616985, those of the builds with neither.
+        var curve = new FlatForward(Today, 0.03, new Actual365Fixed());
+        var other = new FlatForward(Today, 0.05, new Actual365Fixed());
+        var fiveYears = new Period(5, TimeUnit.Years);
+
+        double vanilla = new MakeVanillaSwap(fiveYears, new Euribor6M(curve)).WithDiscountingTermStructure(other)
+            .WithPricingEngine(null).ToVanillaSwap(Context).FixedRate;
+        Assert.Equal(0.030470963573, vanilla, 1e-12);
+        Assert.Equal(new MakeVanillaSwap(fiveYears, new Euribor6M(curve)).ToVanillaSwap(Context).FixedRate, vanilla);
+
+        double ois = new MakeOIS(fiveYears, new Estr(curve)).WithDiscountingTermStructure(other)
+            .WithPricingEngine(null).ToOvernightIndexedSwap(Context).FixedRate;
+        Assert.Equal(0.030037616985, ois, 1e-12);
+        Assert.Equal(new MakeOIS(fiveYears, new Estr(curve)).ToOvernightIndexedSwap(Context).FixedRate, ois);
+    }
 }

@@ -5,9 +5,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/yieldtermstructure.hpp ql/termstructures/yieldtermstructure.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the constructors taking a day counter only, and the jumps (jumpDates, jumpTimes), which no pilot curve uses
+// Partial: the constructors taking a day counter only, for structures that manage their own reference date, which no curve ported so far uses
 
+using System.Collections.Immutable;
 using NanoQL.Time;
+using NanoQL.Utilities;
 
 namespace NanoQL.TermStructures;
 
@@ -19,14 +21,70 @@ public abstract class YieldTermStructure : TermStructure
     // time interval used in finite differences
     private const double Dt = 0.0001;
 
+    private readonly ImmutableArray<double> jumps;
+    private readonly ImmutableArray<Date> jumpDates;
+    private readonly ImmutableArray<double> jumpTimes;
+
     /// <summary>Initializes a new instance of the <see cref="YieldTermStructure"/> class with a fixed reference date.</summary>
     /// <param name="referenceDate">The reference date.</param>
     /// <param name="cal">The calendar used for reference and option date calculation, if any.</param>
     /// <param name="dc">The day counter used for date/time conversion.</param>
     /// <param name="settlementDays">The settlement days the reference date was calculated with, if any.</param>
-    protected YieldTermStructure(Date referenceDate, Calendar? cal, DayCounter dc, int? settlementDays = null)
+    /// <param name="jumps">
+    /// The discount-factor jumps, each applied to the discount factors past its date; none when <see langword="null"/>.
+    /// </param>
+    /// <param name="jumpDates">
+    /// The jumps' dates, one per jump; when <see langword="null"/> or empty, the jumps fall on 31 December of the
+    /// reference date's year and of the years after it, one per jump.
+    /// </param>
+    /// <exception cref="ArgumentException">
+    /// Jump dates are given and their number differs from the jumps', or one of them is <c>default(Date)</c>.
+    /// </exception>
+    protected YieldTermStructure(
+        Date referenceDate,
+        Calendar? cal,
+        DayCounter dc,
+        int? settlementDays = null,
+        IEnumerable<double>? jumps = null,
+        IEnumerable<Date>? jumpDates = null)
         : base(referenceDate, cal, dc, settlementDays)
     {
+        this.jumps = jumps is null ? [] : [.. jumps];
+        ImmutableArray<Date> dates = jumpDates is null ? [] : [.. jumpDates];
+        foreach (Date d in dates)
+        {
+            Date.ThrowIfDefault(d, nameof(jumpDates));
+        }
+
+        // setJumps
+        int nJumps = this.jumps.Length;
+        if (dates.IsEmpty && nJumps != 0)
+        {
+            // turn of year dates
+            int y = ReferenceDate.Year;
+            var builder = ImmutableArray.CreateBuilder<Date>(nJumps);
+            for (int i = 0; i < nJumps; ++i)
+            {
+                builder.Add(new Date(31, Month.December, y + i));
+            }
+
+            dates = builder.MoveToImmutable();
+        }
+        else if (!(dates.Length == nJumps))
+        {
+            // fixed dates
+            throw new ArgumentException(
+                $"mismatch between number of jumps ({nJumps}) and jump dates ({dates.Length})", nameof(jumpDates));
+        }
+
+        this.jumpDates = dates;
+        var times = ImmutableArray.CreateBuilder<double>(nJumps);
+        foreach (Date d in dates)
+        {
+            times.Add(TimeFromReference(d));
+        }
+
+        jumpTimes = times.MoveToImmutable();
     }
 
     /// <summary>The discount factor from a date to the reference date.</summary>
@@ -45,10 +103,33 @@ public abstract class YieldTermStructure : TermStructure
     /// <param name="t">The time.</param>
     /// <param name="extrapolate">Whether to extrapolate past the curve's maximum time.</param>
     /// <returns>The discount factor.</returns>
+    /// <exception cref="NanoQLException">A jump before the time isn't positive.</exception>
     public double Discount(double t, bool extrapolate = false)
     {
         CheckRange(t, extrapolate);
-        return DiscountImpl(t);
+        if (jumps.IsEmpty)
+        {
+            return DiscountImpl(t);
+        }
+
+        double jumpEffect = 1.0;
+        for (int i = 0; i < jumps.Length; ++i)
+        {
+            if (jumpTimes[i] > 0 && jumpTimes[i] < t)
+            {
+                double thisJump = jumps[i];
+                if (!(thisJump > 0.0))
+                {
+                    throw new NanoQLException(
+                        $"invalid {DataFormattersFunctions.Ordinal(i + 1)} jump value: "
+                        + thisJump.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                }
+
+                jumpEffect *= thisJump;
+            }
+        }
+
+        return jumpEffect * DiscountImpl(t);
     }
 
     /// <summary>
@@ -200,6 +281,14 @@ public abstract class YieldTermStructure : TermStructure
 
         return InterestRate.ImpliedRate(compound, DayCounter, comp, freq, t2 - t1);
     }
+
+    /// <summary>The dates of the discount-factor jumps, one per jump.</summary>
+    /// <returns>The dates, empty for a curve without jumps.</returns>
+    public ImmutableArray<Date> JumpDates() => jumpDates;
+
+    /// <summary>The times of the discount-factor jumps, measured from the reference date by the curve's day counter.</summary>
+    /// <returns>The times, one per jump, empty for a curve without jumps.</returns>
+    public ImmutableArray<double> JumpTimes() => jumpTimes;
 
     /// <summary>
     /// The discount factor at a time, which derived curves calculate. Range checks have already been performed, so it

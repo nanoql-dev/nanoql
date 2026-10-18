@@ -165,6 +165,27 @@ public class CubicInterpolation : Interpolation
         }
     }
 
+    // What the cubic refuses for a point count alone, in QuantLib's order: templateImpl's minimum, the constructor's
+    // checks, then nanoql's refusal of a not-a-knot spline end on two points, which reads the configuration and the
+    // count only. A left Periodic end, which QuantLib's update refuses before it reaches the right end, keeps that
+    // refusal, so the not-a-knot right end isn't refused here then. Cubic.CheckPoints and LogCubic.CheckPoints run it.
+    internal static void CheckConstruction(
+        int points,
+        CubicInterpolationDerivativeApprox da,
+        CubicInterpolationBoundaryCondition leftCondition,
+        CubicInterpolationBoundaryCondition rightCondition)
+    {
+        CheckRequiredPoints(points, Cubic.RequiredPoints);
+        CheckPoints(points, da, leftCondition, rightCondition);
+        if (da == CubicInterpolationDerivativeApprox.Spline
+            && (leftCondition == CubicInterpolationBoundaryCondition.NotAKnot
+                || (leftCondition != CubicInterpolationBoundaryCondition.Periodic
+                    && rightCondition == CubicInterpolationBoundaryCondition.NotAKnot)))
+        {
+            RequireNotAKnotPoints(points);
+        }
+    }
+
     /// <inheritdoc/>
     protected sealed override double ValueCore(double x)
     {

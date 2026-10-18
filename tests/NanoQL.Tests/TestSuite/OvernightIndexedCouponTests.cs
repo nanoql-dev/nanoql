@@ -4,6 +4,7 @@
 // Upstream: test-suite/overnightindexedcoupon.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 // Partial: testOvernightLegNPV and testOvernightLegWithCapsAndFloors, whose expected values come from S5's InterpolatedZeroCurve<Cubic>
+// Moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 (Divergences/TelescopicValueDatesTests.cs)
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;

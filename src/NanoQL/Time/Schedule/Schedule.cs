@@ -94,7 +94,11 @@ public sealed class Schedule
     /// </param>
     /// <param name="terminationDate">The termination date.</param>
     /// <param name="tenor">The tenor.</param>
-    /// <param name="calendar">The calendar.</param>
+    /// <param name="calendar">
+    /// The calendar, or <see langword="null"/> for QuantLib's empty calendar, which adjusts only by
+    /// <see cref="BusinessDayConvention.Unadjusted"/>: a schedule that needs another adjustment, or the end-of-month
+    /// one, is refused, and the schedule built answers <see langword="null"/> for <see cref="Calendar"/>.
+    /// </param>
     /// <param name="convention">The business-day convention.</param>
     /// <param name="terminationDateConvention">The termination date's business-day convention.</param>
     /// <param name="rule">The date-generation rule.</param>
@@ -104,12 +108,14 @@ public sealed class Schedule
     /// <param name="nextToLastDate">The date before the termination date, for an irregular last period.</param>
     /// <exception cref="ArgumentException">A date or the tenor is inconsistent with the others.</exception>
     /// <exception cref="ArgumentOutOfRangeException">A convention or the rule isn't a member of its enum.</exception>
-    /// <exception cref="NanoQLException">The rule can't generate the schedule.</exception>
+    /// <exception cref="NanoQLException">
+    /// The rule can't generate the schedule, or the calendar is <see langword="null"/> and a date is adjusted.
+    /// </exception>
     public Schedule(
         Date? effectiveDate,
         Date terminationDate,
         Period tenor,
-        Calendar calendar,
+        Calendar? calendar,
         BusinessDayConvention convention,
         BusinessDayConvention terminationDateConvention,
         DateGenerationRule rule,
@@ -137,7 +143,7 @@ public sealed class Schedule
         Date effectiveDate,
         Date terminationDate,
         Period tenor,
-        Calendar calendar,
+        Calendar? calendar,
         BusinessDayConvention convention,
         BusinessDayConvention terminationDateConvention,
         DateGenerationRule rule,
@@ -145,7 +151,6 @@ public sealed class Schedule
         Date? firstDate,
         Date? nextToLastDate)
     {
-        ArgumentNullException.ThrowIfNull(calendar);
         EnumArguments.Check(convention, nameof(convention));
         EnumArguments.Check(terminationDateConvention, nameof(terminationDateConvention));
         EnumArguments.Check(rule, nameof(rule));
@@ -154,7 +159,10 @@ public sealed class Schedule
         NanoQL.Time.Date.ThrowIfDefault(firstDate, nameof(firstDate));
         NanoQL.Time.Date.ThrowIfDefault(nextToLastDate, nameof(nextToLastDate));
         this.tenor = tenor;
+
+        // QuantLib's empty calendar is kept as null, and the dates are generated on it, as QuantLib generates them.
         Calendar = calendar;
+        calendar ??= EmptyCalendar.Instance;
         BusinessDayConvention = convention;
         this.terminationDateConvention = terminationDateConvention;
         DateGenerationRule generation = rule;
@@ -555,8 +563,11 @@ public sealed class Schedule
     /// <summary>Gets a value indicating whether the schedule has no dates.</summary>
     public bool Empty => dates.IsEmpty;
 
-    /// <summary>Gets the calendar.</summary>
-    public Calendar Calendar { get; }
+    /// <summary>
+    /// Gets the calendar: <see langword="null"/>, QuantLib's empty calendar, for a schedule generated on it; a schedule
+    /// built from dates without one has a <see cref="NullCalendar"/>.
+    /// </summary>
+    public Calendar? Calendar { get; }
 
     /// <summary>Gets the business-day convention.</summary>
     public BusinessDayConvention BusinessDayConvention { get; }

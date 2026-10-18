@@ -8,12 +8,21 @@ and its accrued amount at two dates, the middle of the accrual period and a late
 the ex-coupon date where the coupon has one, inside the ex-coupon window, so accruedAmount's ex-coupon branch is
 checked; otherwise two days before the payment date. Amounts are compared at the leg's largest notional.
 
+Twelve more legs, appended after those, use QuantLib's empty calendar, which QuantLib uses unchecked: a rule-based
+schedule built on it with Unadjusted conventions, whose calendar is then the leg's payment calendar and gives its
+reference dates, with Unadjusted payments, Following payments or a payment lag, and an ex-coupon period on it; the
+schedule refused with an adjusting convention or the end-of-month flag; and ex-coupon periods counted on it from a
+TARGET schedule, in weeks, months with the end-of-month flag and zero days and weeks, which build, and in days or
+with a Following convention, which QuantLib refuses. A refused leg is the one output "date", QuantLib's throw.
+
 Each case's inputs describe the leg in full, once: "fixedRateLeg" holds its schedule (effective and termination
 dates, tenor, calendar, conventions, rule, end of month, first and next-to-last dates) and every FixedRateLeg
 setting (notionals; coupon rates with their day counter, compounding and frequency; first-period day counter;
 payment calendar, lag and adjustment; ex-coupon period, calendar, convention and end of month). A null setting is
-one the leg leaves at its default. Calendars are {"type": <class>}, with a "market" integer for UnitedStates and
-UnitedKingdom; day counters are {"type": <class>}, with a "convention" integer for Thirty360 and ActualActual;
+one the leg leaves at its default, but for the schedule's and the ex-coupon period's calendars, where null is QuantLib's
+empty calendar, which the wheel gives as a default-constructed schedule's calendar. Calendars are {"type": <class>},
+with a "market" integer for UnitedStates and UnitedKingdom; day counters are {"type": <class>}, with a "convention"
+integer for Thirty360 and ActualActual;
 enums and time units are QuantLib's integers. "midDates" and "lateDates" give the accrued-amount dates per coupon.
 
 The schedules are built with ql.Schedule, the wheel's proxy of C++ QuantLib::Schedule's rule-based constructor. The
@@ -85,7 +94,61 @@ VARIANTS = [
 ]
 
 
+# QuantLib's empty calendar, Calendar(): the wheel gives it only as a default-constructed schedule's calendar, whose
+# proxy refers to the schedule's member, so the schedule is kept alive with it.
+_EMPTY_CALENDAR_OWNER = ql.Schedule()
+EMPTY_CALENDAR = _EMPTY_CALENDAR_OWNER.calendar()
+
+EMPTY_SCHEDULE = schedule_spec(ql.Date(15, 11, 2025), ql.Date(15, 6, 2029), ql.Period(3, ql.Months), None,
+                               ql.Unadjusted, ql.DateGeneration.Backward, False)
+
+
+def ex_coupon_spec(length, units, cal, convention, eom=False):
+    return {"period": [length, int(units)], "calendar": cal, "convention": int(convention), "endOfMonth": eom}
+
+
+EMPTY_CALENDAR_LEGS = [
+    ("3M U short front, empty calendar / Unadjusted payments",
+     dict(leg_spec(A360, [1e6], [0.03], payment_adjustment=ql.Unadjusted), schedule=EMPTY_SCHEDULE)),
+    ("3M U short front, empty calendar / Following payments refused",
+     dict(leg_spec(A360, [1e6], [0.03]), schedule=EMPTY_SCHEDULE)),
+    ("3M U short front, empty calendar / payment lag refused",
+     dict(leg_spec(A360, [1e6], [0.03], payment_lag=2, payment_adjustment=ql.Unadjusted), schedule=EMPTY_SCHEDULE)),
+    ("3M U short front, empty calendar / ex-coupon 1M on it",
+     dict(leg_spec(THIRTY360_BB, [1e6], [0.025], payment_adjustment=ql.Unadjusted,
+                   ex_coupon=ex_coupon_spec(1, ql.Months, None, ql.Unadjusted)), schedule=EMPTY_SCHEDULE)),
+    ("3M MF short front, empty calendar / schedule refused",
+     dict(leg_spec(A360, [1e6], [0.03], payment_adjustment=ql.Unadjusted),
+          schedule=dict(EMPTY_SCHEDULE, convention=int(ql.ModifiedFollowing),
+                        terminationDateConvention=int(ql.ModifiedFollowing)))),
+    ("1M U end of month, empty calendar / schedule refused",
+     dict(leg_spec(A360, [1e6], [0.03], payment_adjustment=ql.Unadjusted),
+          schedule=schedule_spec(ql.Date(31, 1, 2026), ql.Date(31, 1, 2027), ql.Period(1, ql.Months), None,
+                                 ql.Unadjusted, ql.DateGeneration.Backward, True))),
+    ("6M MF EOM / ex-coupon 2W on the empty calendar",
+     dict(leg_spec(A360, [1e6], [0.03], ex_coupon=ex_coupon_spec(2, ql.Weeks, None, ql.Unadjusted)),
+          schedule=SCHEDULES[0][1])),
+    ("6M MF EOM / ex-coupon 1M end of month on the empty calendar",
+     dict(leg_spec(A360, [1e6], [0.03], ex_coupon=ex_coupon_spec(1, ql.Months, None, ql.Unadjusted, True)),
+          schedule=SCHEDULES[0][1])),
+    ("6M MF EOM / ex-coupon 0D on the empty calendar",
+     dict(leg_spec(A360, [1e6], [0.03], ex_coupon=ex_coupon_spec(0, ql.Days, None, ql.Following)),
+          schedule=SCHEDULES[0][1])),
+    ("6M MF EOM / ex-coupon 0W on the empty calendar",
+     dict(leg_spec(A360, [1e6], [0.03], ex_coupon=ex_coupon_spec(0, ql.Weeks, None, ql.Following)),
+          schedule=SCHEDULES[0][1])),
+    ("6M MF EOM / ex-coupon 5D on the empty calendar refused",
+     dict(leg_spec(A360, [1e6], [0.03], ex_coupon=ex_coupon_spec(5, ql.Days, None, ql.Unadjusted)),
+          schedule=SCHEDULES[0][1])),
+    ("6M MF EOM / ex-coupon 1M Following on the empty calendar refused",
+     dict(leg_spec(A360, [1e6], [0.03], ex_coupon=ex_coupon_spec(1, ql.Months, None, ql.Following)),
+          schedule=SCHEDULES[0][1])),
+]
+
+
 def calendar(spec):
+    if spec is None:
+        return EMPTY_CALENDAR
     t = spec["type"]
     if t == "TARGET":
         return ql.TARGET()
@@ -153,28 +216,40 @@ def cases():
     out = []
     for sname, sspec in SCHEDULES:
         for vname, lspec in VARIANTS:
-            spec = dict(lspec, schedule=sspec)
-            coupons = [ql.as_fixed_rate_coupon(cf) for cf in fixed_rate_leg(spec)]
-            scale = max(spec["notionals"])
-            mids, lates = [mid_date(c) for c in coupons], [late_date(c) for c in coupons]
-            out.append({
-                "name": f"{sname} / {vname}",
-                "inputs": {"settings": st, "fixedRateLeg": spec, "midDates": v.enc(mids), "lateDates": v.enc(lates)},
-                "expected": {
-                    "date": [v.enc(c.date()) for c in coupons],
-                    "amount": [v.amount(c.amount(), scale) for c in coupons],
-                    "nominal": [v.amount(c.nominal(), scale) for c in coupons],
-                    "rate": [c.rate() for c in coupons],
-                    "accrualStartDate": [v.enc(c.accrualStartDate()) for c in coupons],
-                    "accrualEndDate": [v.enc(c.accrualEndDate()) for c in coupons],
-                    "referencePeriodStart": [v.enc(c.referencePeriodStart()) for c in coupons],
-                    "referencePeriodEnd": [v.enc(c.referencePeriodEnd()) for c in coupons],
-                    "accrualPeriod": [c.accrualPeriod() for c in coupons],
-                    "accrualDays": [c.accrualDays() for c in coupons],
-                    "exCouponDate": [v.enc(c.exCouponDate()) for c in coupons],
-                    "accruedAmountMid": [v.amount(c.accruedAmount(d), scale) for c, d in zip(coupons, mids)],
-                    "accruedAmountLate": [v.amount(c.accruedAmount(d), scale) for c, d in zip(coupons, lates)]}})
+            out.append(leg_case(f"{sname} / {vname}", dict(lspec, schedule=sspec), st))
+    for name, spec in EMPTY_CALENDAR_LEGS:
+        out.append(leg_case(name, spec, st))
+    refused = [c["name"] for c in out if c["expected"].get("date") == v.THROWS]
+    assert refused == [name for name, _ in EMPTY_CALENDAR_LEGS if name.endswith("refused")], refused
     return out
+
+
+def leg_case(name, spec, st):
+    """A leg's case: its coupons' outputs, or QuantLib's refusal as the one output "date"."""
+    try:
+        coupons = [ql.as_fixed_rate_coupon(cf) for cf in fixed_rate_leg(spec)]
+    except RuntimeError:
+        return {"name": name, "inputs": {"settings": st, "fixedRateLeg": spec, "midDates": [], "lateDates": []},
+                "expected": {"date": dict(v.THROWS)}}
+    scale = max(spec["notionals"])
+    mids, lates = [mid_date(c) for c in coupons], [late_date(c) for c in coupons]
+    return {
+        "name": name,
+        "inputs": {"settings": st, "fixedRateLeg": spec, "midDates": v.enc(mids), "lateDates": v.enc(lates)},
+        "expected": {
+            "date": [v.enc(c.date()) for c in coupons],
+            "amount": [v.amount(c.amount(), scale) for c in coupons],
+            "nominal": [v.amount(c.nominal(), scale) for c in coupons],
+            "rate": [c.rate() for c in coupons],
+            "accrualStartDate": [v.enc(c.accrualStartDate()) for c in coupons],
+            "accrualEndDate": [v.enc(c.accrualEndDate()) for c in coupons],
+            "referencePeriodStart": [v.enc(c.referencePeriodStart()) for c in coupons],
+            "referencePeriodEnd": [v.enc(c.referencePeriodEnd()) for c in coupons],
+            "accrualPeriod": [c.accrualPeriod() for c in coupons],
+            "accrualDays": [c.accrualDays() for c in coupons],
+            "exCouponDate": [v.enc(c.exCouponDate()) for c in coupons],
+            "accruedAmountMid": [v.amount(c.accruedAmount(d), scale) for c, d in zip(coupons, mids)],
+            "accruedAmountLate": [v.amount(c.accruedAmount(d), scale) for c, d in zip(coupons, lates)]}}
 
 
 if __name__ == "__main__":

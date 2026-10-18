@@ -38,20 +38,12 @@ public sealed record OvernightLeg
     /// <param name="schedule">The schedule; its calendar is the default payment calendar.</param>
     /// <param name="overnightIndex">The overnight index.</param>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">The schedule is empty.</exception>
     public OvernightLeg(Schedule schedule, OvernightIndex overnightIndex)
     {
         ArgumentNullException.ThrowIfNull(schedule);
         if (overnightIndex is null)
         {
             throw new ArgumentNullException(nameof(overnightIndex), "no index provided");
-        }
-
-        if (schedule.Empty)
-        {
-            // QuantLib's conversion counts schedule_.size()-1 periods, a Size that wraps below zero, and reads the
-            // schedule's first date, which is undefined.
-            throw new ArgumentException("empty schedule", nameof(schedule));
         }
 
         Schedule = schedule;
@@ -125,7 +117,8 @@ public sealed record OvernightLeg
 
     /// <summary>Sets the coupons' accrual day counter; the index's when none is set.</summary>
     /// <param name="dc">The day counter; the index's when <see langword="null"/>, QuantLib's empty day counter. A
-    /// period with a zero gearing then refuses the conversion, its fixed-rate coupon needing one.</param>
+    /// period with a zero gearing then refuses the conversion, its fixed-rate coupon needing one, after every refusal
+    /// QuantLib raises while it builds the leg.</param>
     /// <returns>The modified builder.</returns>
     public OvernightLeg WithPaymentDayCounter(DayCounter? dc) => this with { PaymentDayCounter = dc };
 
@@ -139,7 +132,8 @@ public sealed record OvernightLeg
     }
 
     /// <summary>Sets the payment calendar; the schedule's when none is set.</summary>
-    /// <param name="cal">The calendar; the schedule's when <see langword="null"/>, QuantLib's empty calendar.</param>
+    /// <param name="cal">The calendar; the schedule's when <see langword="null"/>, QuantLib's empty calendar, and
+    /// <see cref="WeekendsOnly"/> when the schedule's is empty too.</param>
     /// <returns>The modified builder.</returns>
     public OvernightLeg WithPaymentCalendar(Calendar? cal) => this with { PaymentCalendar = cal };
 
@@ -195,12 +189,19 @@ public sealed record OvernightLeg
     }
 
     /// <summary>Sets the lookback days.</summary>
-    /// <param name="lookbackDays">The lookback.</param>
+    /// <param name="lookbackDays">
+    /// The lookback, or <see langword="null"/>, QuantLib's <c>Null&lt;Natural&gt;()</c> and its default, for none: the
+    /// coupons then fix by the index's fixing days.
+    /// </param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The lookback is negative.</exception>
-    public OvernightLeg WithLookbackDays(int lookbackDays)
+    public OvernightLeg WithLookbackDays(int? lookbackDays)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(lookbackDays);
+        if (lookbackDays is int days)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(days, nameof(lookbackDays));
+        }
+
         return this with { LookbackDays = lookbackDays };
     }
 
@@ -237,9 +238,12 @@ public sealed record OvernightLeg
     }
 
     /// <summary>Sets one cap for every coupon.</summary>
-    /// <param name="cap">The cap.</param>
+    /// <param name="cap">
+    /// The cap, or <see langword="null"/>, QuantLib's <c>Null&lt;Rate&gt;()</c>, for none: the coupons are then
+    /// uncapped.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public OvernightLeg WithCaps(double cap) => this with { Caps = [cap] };
+    public OvernightLeg WithCaps(double? cap) => this with { Caps = [cap] };
 
     /// <summary>Sets the coupons' caps, <see langword="null"/> for none; the last one repeats past the end.</summary>
     /// <param name="caps">The caps.</param>
@@ -251,9 +255,12 @@ public sealed record OvernightLeg
     }
 
     /// <summary>Sets one floor for every coupon.</summary>
-    /// <param name="floor">The floor.</param>
+    /// <param name="floor">
+    /// The floor, or <see langword="null"/>, QuantLib's <c>Null&lt;Rate&gt;()</c>, for none: the coupons are then
+    /// unfloored.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public OvernightLeg WithFloors(double floor) => this with { Floors = [floor] };
+    public OvernightLeg WithFloors(double? floor) => this with { Floors = [floor] };
 
     /// <summary>Sets the coupons' floors, <see langword="null"/> for none; the last one repeats past the end.</summary>
     /// <param name="floors">The floors.</param>
@@ -325,7 +332,8 @@ public sealed record OvernightLeg
     /// <summary>The leg: QuantLib's conversion to <c>Leg</c>.</summary>
     /// <returns>The leg; empty for a schedule of one date.</returns>
     /// <exception cref="NanoQLException">No nominal is given, the coupon pricer doesn't suit the averaging method, the
-    /// explicit payment dates don't match the periods, or a period of zero gearing has no payment day counter.</exception>
+    /// schedule is empty, the explicit payment dates don't match the periods, or, after every refusal QuantLib raises
+    /// while it builds the leg, a period of zero gearing has no payment day counter.</exception>
     public ImmutableArray<CashFlow> ToLeg()
     {
         if (Notionals.IsEmpty)
@@ -351,12 +359,20 @@ public sealed record OvernightLeg
         }
 
         var cashflows = ImmutableArray.CreateBuilder<CashFlow>();
+        NanoQLException? zeroGearingRefusal = null;
 
-        // the following is not always correct. QuantLib falls back on the payment calendar, then on WeekendsOnly, for
-        // an empty schedule calendar; a schedule's calendar is never null here. An empty payment calendar is the
-        // schedule's.
-        Calendar calendar = Schedule.Calendar;
-        Calendar paymentCalendar = PaymentCalendar ?? calendar;
+        // the following is not always correct
+        Calendar? calendar = Schedule.Calendar;
+        Calendar? paymentCalendar = PaymentCalendar;
+        calendar ??= paymentCalendar;
+        calendar ??= new WeekendsOnly();
+        paymentCalendar ??= calendar;
+
+        if (Schedule.Empty)
+        {
+            // QuantLib counts schedule_.size()-1 periods, a Size that wraps below zero, which is undefined.
+            throw new NanoQLException("empty schedule");
+        }
 
         int n = Schedule.Size - 1;
 
@@ -427,9 +443,14 @@ public sealed record OvernightLeg
             if (ComparisonFunctions.CloseEnough(gearing, 0.0))
             {
                 // fixed coupon. QuantLib builds it with an empty day counter when none is set, and its accrual
-                // members throw this text when they read it; a coupon here can't hold a null day counter.
-                DayCounter dayCounter = PaymentDayCounter
-                    ?? throw new NanoQLException("no day counter implementation provided");
+                // members throw this text when they read it; a coupon here can't hold a null day counter, so the leg
+                // is refused once it is built, and the coupon takes a placeholder day counter meanwhile.
+                if (PaymentDayCounter is null)
+                {
+                    zeroGearingRefusal ??= new NanoQLException("no day counter implementation provided");
+                }
+
+                DayCounter dayCounter = PaymentDayCounter ?? new Actual365Fixed();
                 cashflows.Add(new FixedRateCoupon(
                     paymentDate, nominal, CashFlowVectorsFunctions.EffectiveFixedRate(Spreads, Caps, Floors, i), dayCounter, start, end, refStart, refEnd));
             }
@@ -481,6 +502,6 @@ public sealed record OvernightLeg
             }
         }
 
-        return cashflows.ToImmutable();
+        return zeroGearingRefusal is null ? cashflows.ToImmutable() : throw zeroGearingRefusal;
     }
 }

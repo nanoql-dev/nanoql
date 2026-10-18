@@ -11,7 +11,9 @@ The status comes, in order, from a rule (legacy, deprecated, include-only), from
 ported, with the reason; the table wins over an Upstream line), from the Upstream lines of nanoql's files (partial if
 any has a "// Partial:" line, otherwise ported), and otherwise "not started". A test file is ported when every case
 has a test method or is named on its class's "// Replaced:" line, which the map lists as "replaced: <case> by <test
-file>". With --check, it writes nothing and exits 1 if the committed map differs from a fresh one.
+file>". A "// Moved:" line, a check moved out of a ported case to a Divergences/ test, is listed on the row whatever its
+status, as "moved: <case> line <n> to <test file>". With --check, it writes nothing and exits 1 if the committed map
+differs from a fresh one.
 """
 import os
 import re
@@ -317,6 +319,10 @@ def build(root, ql_root):
                 notes.append("partial: " + "; ".join(dict.fromkeys(partial)))
             if left:
                 notes.append("no nanoql type: " + cell(left))
+        # A check moved out of a ported case to a Divergences/ test is noted whatever the row's status.
+        moved = [(c, n, f) for _, h in mine for c, n, f in h.moved if c is not None]
+        if moved:
+            notes.append("moved: " + "; ".join(f"{c} line {n} to {f}" for c, n, f in moved))
         own = [h.own_tested for _, h in mine if h.own_tested]
         if own:
             notes.append("own-tested: " + "; ".join(own))

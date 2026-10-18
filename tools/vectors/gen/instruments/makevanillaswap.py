@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
-"""Vectors for QuantLib's MakeVanillaSwap (ql/instruments/makevanillaswap.hpp): 51 builds over its 32 keyword setters
+"""Vectors for QuantLib's MakeVanillaSwap (ql/instruments/makevanillaswap.hpp): 60 builds over its 32 keyword setters
 on the wheel, on the evaluation date 15 January 2025 (one on Saturday 18 January): the default build at the par rate
 on the index's own forecasting curve, a given fixed rate and forward starts, the type both ways, nominals, settlement
 days and explicit effective and termination dates (a termination date clearing the tenor, so the fixed leg's default
@@ -10,7 +10,11 @@ its own (the maturity following the floating leg's flag by default), the par rat
 on a pricing engine (DiscountingSwapEngine with the settlement date's flows), indexed and at-par coupons and the
 at-par switch, and the fixed leg's defaults for the index's currency (EUR, USD, CHF, SEK, GBP below and above a year,
 JPY, AUD below and from four years, HKD, THB, and CAD, which QuantLib refuses); and QuantLib's refusals: settlement
-days with an effective date, and no fixed rate with neither an engine nor a forecasting curve.
+days with an effective date, and no fixed rate with neither an engine nor a forecasting curve. The last nine builds,
+appended after the others, give the leg calendars QuantLib's empty calendar and the discounting term structure
+QuantLib's empty handle, both of which QuantLib uses unchecked: the calendar builds where every use is an Unadjusted
+adjustment and refuses a settlement advance in days, a forward start's adjustment and the maturity's end of month;
+the handle builds a swap with a fixed rate, whose pricing it refuses, and refuses a par build.
 
 Each build's outputs are whether it builds, QuantLib's refusals recorded as its one throw; the swap's start and
 maturity dates, both schedules' dates, type, nominal, fixed rate (the par rate where none was given), spread, day
@@ -27,7 +31,9 @@ start), which calls withFixedRate and withForwardStart, then calls each keyword'
 instruments/fixedvsfloatingswap.py), the fixed rate (null for none), the forward start, and the setters as
 [keyword, value] pairs in order, a value encoded as the vectors encode it (a period [length, units], a calendar or
 day counter spec, a curve spec, or an engine {"type": "DiscountingSwapEngine", "curve",
-"includeSettlementDateFlows"}). Read back by tests/NanoQL.Tests/Vectors/Instruments/MakeVanillaSwapVectorTests.cs."""
+"includeSettlementDateFlows"}); a null calendar is QuantLib's empty calendar, which the wheel gives as a
+default-constructed schedule's calendar, and a null curve QuantLib's empty handle. Read back by
+tests/NanoQL.Tests/Vectors/Instruments/MakeVanillaSwapVectorTests.cs."""
 import importlib.util
 import os
 import sys
@@ -60,6 +66,16 @@ DATES = {"effectiveDate", "terminationDate", "fixedLegFirstDate", "fixedLegNextT
 CALENDARS = {"fixedLegCalendar", "floatingLegCalendar"}
 DAY_COUNTERS = {"fixedLegDayCount", "floatingLegDayCount"}
 
+# QuantLib's empty calendar, Calendar(), which the wheel gives only as a default-constructed schedule's calendar: its
+# proxy refers to the schedule's member, so the schedule is kept alive with it.
+_EMPTY_CALENDAR_OWNER = ql.Schedule()
+EMPTY_CALENDAR = _EMPTY_CALENDAR_OWNER.calendar()
+
+
+def calendar_or_empty(spec):
+    """The calendar a spec describes, or QuantLib's empty calendar for a null spec."""
+    return EMPTY_CALENDAR if spec is None else irx.calendar(spec)
+
 
 def period(n, units):
     return [n, int(units)]
@@ -84,7 +100,7 @@ def wheel_value(key, x):
     if key in DATES:
         return ql.Date(x)
     if key in CALENDARS:
-        return irx.calendar(x)
+        return calendar_or_empty(x)
     if key in DAY_COUNTERS:
         return irx.day_counter(x)
     if key == "discountingTermStructure":
@@ -101,7 +117,7 @@ def make(spec):
 
 
 def builds():
-    """(name, build spec, at-par switch or None, evaluation date) for the 51 builds."""
+    """(name, build spec, at-par switch or None, evaluation date) for the 60 builds."""
     usd = fvf.preset("Sofr", fvf.curve(0.043, fvf.A360))
     jpy = fvf.preset("Tibor", fvf.curve(0.006), ql.Period(6, ql.Months))
     gbp = ibor("GbpIbor", (6, ql.Months), 0, fvf.UK_EXCHANGE, fvf.A365, "GBP")
@@ -201,6 +217,33 @@ def builds():
     add("weekend evaluation date, settlement days", build((5, ql.Years), E6M, 0.03, settlementDays=2),
         today=D(18, 1, 2025))
     add("weekend evaluation date, the index's spot", build((5, ql.Years), E6M, 0.03), today=D(18, 1, 2025))
+    # QuantLib's empty calendar and handle, appended so that the cases above keep their bytes.
+    unadjusted = int(ql.Unadjusted)
+    fixed_unadjusted = {"fixedLegConvention": unadjusted, "fixedLegTerminationDateConvention": unadjusted,
+                        "paymentConvention": unadjusted}
+    floating_unadjusted = {"floatingLegConvention": unadjusted, "floatingLegTerminationDateConvention": unadjusted,
+                           "paymentConvention": unadjusted}
+    five_y = (5, ql.Years)
+    add("empty fixed-leg calendar, Unadjusted", build(five_y, E6M, None, fixedLegCalendar=None, **fixed_unadjusted))
+    add("empty fixed-leg calendar, Following refused", build(five_y, E6M, 0.03, fixedLegCalendar=None))
+    add("empty floating-leg calendar, Unadjusted", build(five_y, E6M, None, floatingLegCalendar=None,
+                                                         **floating_unadjusted))
+    add("empty floating-leg calendar, settlement days refused", build(five_y, E6M, 0.03, settlementDays=2,
+                                                                      floatingLegCalendar=None,
+                                                                      **floating_unadjusted))
+    add("empty floating-leg calendar, forward start refused", build(five_y, E6M, 0.03, (1, ql.Months),
+                                                                    floatingLegCalendar=None, **floating_unadjusted))
+    add("empty floating-leg calendar, end of month refused", build(five_y, E6M, 0.03, floatingLegCalendar=None,
+                                                                   floatingLegEndOfMonth=True,
+                                                                   **floating_unadjusted))
+    add("empty leg calendars, Unadjusted, from the end of a month", build((3, ql.Years), E6M, None,
+                                                                          effectiveDate=v.enc(eom_start),
+                                                                          fixedLegCalendar=None,
+                                                                          floatingLegCalendar=None,
+                                                                          **{**fixed_unadjusted, **floating_unadjusted}))
+    add("empty discounting term structure, a fixed rate", build(five_y, E6M, 0.03, discountingTermStructure=None))
+    add("empty discounting term structure, at the par rate refused", build(five_y, E6M, None,
+                                                                          discountingTermStructure=None))
     return out
 
 
@@ -249,9 +292,18 @@ def cases():
 
 def check_rows(out):
     by_name = {c["name"]: c["expected"] for c in out}
-    for refused in ("CAD refused", "settlement days with an effective date", "no curve, no rate"):
+    for refused in ("CAD refused", "settlement days with an effective date", "no curve, no rate",
+                    "empty fixed-leg calendar, Following refused",
+                    "empty floating-leg calendar, settlement days refused",
+                    "empty floating-leg calendar, forward start refused",
+                    "empty floating-leg calendar, end of month refused",
+                    "empty discounting term structure, at the par rate refused"):
         assert by_name[refused] == {"built": v.THROWS}, refused
-    assert by_name["no curve, a rate"].get("calculate") == v.THROWS
+    for priced_nothing in ("no curve, a rate", "empty discounting term structure, a fixed rate"):
+        assert by_name[priced_nothing].get("calculate") == v.THROWS, priced_nothing
+    for built in ("empty fixed-leg calendar, Unadjusted", "empty floating-leg calendar, Unadjusted",
+                  "empty leg calendars, Unadjusted, from the end of a month"):
+        assert by_name[built]["built"] is True, built
     assert abs(by_name["default, at the par rate"]["NPV"]["value"]) < 1e-10
     assert by_name["GBP 1Y"]["fixedSchedule"] != by_name["GBP 5Y"]["fixedSchedule"]
     check_short_month_ends(by_name)

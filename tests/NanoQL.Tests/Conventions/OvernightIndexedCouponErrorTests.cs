@@ -133,7 +133,6 @@ public class OvernightIndexedCouponErrorTests
         var schedule = new Schedule([Start, End, End + 28], new TARGET());
         OvernightLeg leg = new OvernightLeg(schedule, sofr).WithNotionals(1e6);
 
-        AssertArgument<ArgumentException>(() => new OvernightLeg(new Schedule([], new TARGET()), sofr), "schedule", "empty schedule");
         AssertArgument<ArgumentNullException>(() => new OvernightLeg(schedule, null!), "overnightIndex", "no index provided");
         AssertArgument<ArgumentNullException>(() => new OvernightLeg(null!, sofr), "schedule", null);
 
@@ -167,6 +166,7 @@ public class OvernightIndexedCouponErrorTests
                 .WithCouponPricer(new CompoundingOvernightIndexedCouponPricer())
                 .ToLeg(),
             "Wrong coupon pricer provided, provide a ArithmeticAveragedOvernightIndexedCouponPricer");
+        AssertStored(() => new OvernightLeg(new Schedule([], new TARGET()), sofr).WithNotionals(1e6).ToLeg(), "empty schedule");
         AssertStored(
             () => leg.WithPaymentDates([End]).ToLeg(),
             "Expected the number of explicit payment dates (1) to equal the number of calculation periods (2)");
@@ -174,6 +174,26 @@ public class OvernightIndexedCouponErrorTests
         AssertStored(
             () => new OvernightLeg(new Schedule([Start, End], new TARGET(), isRegular: [false]), sofr).WithNotionals(1e6).ToLeg(),
             "full interface (tenor) not available");
+    }
+
+    [Fact]
+    public void AZeroGearingPeriodWithoutADayCounterIsRefusedAfterTheLegIsBuilt()
+    {
+        // QuantLib builds a zero-gearing period's fixed coupon on the empty day counter and fails only when it is
+        // priced (overnightindexedcoupon.cpp:653-683), so every refusal it raises while building the leg comes first
+        // (the wheel's refusals): a later period's payment date before its accrual end, and its cap below its floor.
+        var estr = new Estr(new FlatForward(Today, 0.03, new Actual365Fixed()));
+        Schedule schedule = new MakeSchedule().From(new Date(15, January, 2026)).To(new Date(15, January, 2027))
+            .WithTenor(new Period(6, TimeUnit.Months)).WithCalendar(new TARGET()).ToSchedule();
+        OvernightLeg leg = new OvernightLeg(schedule, estr).WithNotionals(100.0).WithGearings([0.0, 1.0]);
+
+        AssertArgument<ArgumentException>(
+            () => leg.WithPaymentLag(-3).ToLeg(), "paymentDate", "Payment date cannot be earlier than accrual end date");
+        AssertArgument<ArgumentException>(
+            () => leg.WithCaps(0.01).WithFloors(0.02).ToLeg(), "cap", "cap level (0.01) less than floor level (0.02)");
+
+        // Its own refusal stays, once the leg is built (ZeroGearingWithoutDayCounterTests).
+        AssertStored(() => leg.ToLeg(), "no day counter implementation provided");
     }
 
     [Fact]

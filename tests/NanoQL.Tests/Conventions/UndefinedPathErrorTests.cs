@@ -26,10 +26,13 @@ public class UndefinedPathErrorTests
     [Fact]
     public void TheFixedRateLegsRefusal()
     {
-        ArgumentException e = Assert.Throws<ArgumentException>(() => new FixedRateLeg(new Schedule([], new TARGET())));
+        // The empty schedule is a value the builder stores, refused by its conversion.
+        FixedRateLeg leg = new FixedRateLeg(new Schedule([], new TARGET()))
+            .WithNotionals(100.0)
+            .WithCouponRates(0.03, new Actual360());
+        NanoQLException e = Assert.Throws<NanoQLException>(() => leg.ToLeg());
 
-        Assert.Equal(typeof(ArgumentException), e.GetType());
-        Assert.Equal("schedule", e.ParamName);
-        Assert.StartsWith("empty schedule", e.Message, StringComparison.Ordinal);
+        Assert.Equal(typeof(NanoQLException), e.GetType());
+        Assert.Equal("empty schedule", e.Message);
     }
 }

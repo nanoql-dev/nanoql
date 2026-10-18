@@ -1,0 +1,488 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+
+# Divergences
+
+Every documented divergence from QuantLib v1.44, one entry per test class under
+`tests/NanoQL.Tests/Divergences/` with its file, its summary and its facts, generated from those files by
+`tools/divergences.py`: regenerate it with `.venv\Scripts\python -I tools/divergences.py` rather than
+editing it by hand.
+
+## BootstrapNullHelperTests
+
+[`Divergences/BootstrapNullHelperTests.cs`](../tests/NanoQL.Tests/Divergences/BootstrapNullHelperTests.cs)
+
+A null helper among a curve's instruments is refused when the curve is built, with `ArgumentException` naming the instruments. QuantLib's bootstrap sorts its helpers by their pillar dates (`iterativebootstrap.hpp:158-159`, `bootstraphelper.hpp:251-255`), dereferencing a null one, a result C++ leaves undefined; the wheel's helper vector refuses `None` before QuantLib sees it.
+
+Facts:
+
+- `ANullHelperAmongACurvesInstrumentsIsRefused`
+
+## BuilderTests
+
+[`Divergences/BuilderTests.cs`](../tests/NanoQL.Tests/Divergences/BuilderTests.cs)
+
+QuantLib's builders (`MakeSchedule`, `FixedRateLeg`) change themselves and return a reference to themselves, and convert implicitly. nanoql's return a modified copy, so a builder kept and reused never changes under its holder, and convert through `ToSchedule()` and `ToLeg()`, which throw where QuantLib's conversions throw. And a leg builder can't be given a schedule built from dates on QuantLib's empty calendar: `Schedule`'s dates constructor reads `null` as QuantLib's default there, `NullCalendar`, so such a schedule has no spelling, and `OvernightLeg` pays on the schedule's own dates where QuantLib's falls back to `WeekendsOnly` for an empty schedule calendar (`overnightindexedcoupon.cpp:583-586`).
+
+Facts:
+
+- `AMakeScheduleReusedAfterAWithCallIsUnchanged`
+- `AFixedRateLegReusedAfterAWithCallIsUnchanged`
+- `TheInterestRateOverloadsBuildTheSameLeg`
+- `ToScheduleThrowsWhereQuantLibsConversionThrows`
+- `ToLegThrowsWhereQuantLibsConversionThrows`
+- `ADatesScheduleOnQuantLibsEmptyCalendarHasNoSpelling`
+
+## CalendarEqualityTests
+
+[`Divergences/CalendarEqualityTests.cs`](../tests/NanoQL.Tests/Divergences/CalendarEqualityTests.cs)
+
+Calendars are immutable values. QuantLib compares calendars by name only, and its `addHoliday`, `removeHoliday` and `resetAddedAndRemovedHolidays` change the holidays of every instance of the calendar, since all instances share one implementation. In nanoql an edit returns a modified copy, the added and removed holidays are part of the calendar's value, and a joint calendar also compares its rule and its components.
+
+Facts:
+
+- `CalendarsAreEqualByNameAndByTheirAddedAndRemovedHolidaysComparedByContent`
+- `AddHolidayRemoveHolidayAndResetLeaveTheReceiverUnchanged`
+- `ANewTargetAndTheOriginalDontSeeAnEditMadeThroughACopy`
+- `JointCalendarsWhoseComponentsDifferByAnAddedHolidayAreUnequal`
+- `JointCalendarsBuiltFromEqualComponentsAreEqualWithEqualHashes`
+- `CalendarsOfDifferentKindsAreUnequalFromEitherSide`
+
+## CappedFlooredCouponNullUnderlyingTests
+
+[`Divergences/CappedFlooredCouponNullUnderlyingTests.cs`](../tests/NanoQL.Tests/Divergences/CappedFlooredCouponNullUnderlyingTests.cs)
+
+A capped coupon over a null underlying. QuantLib's constructor reads the underlying's terms in its base initializer (`capflooredcoupon.cpp:30-43`), dereferencing the null pointer: a Boost assertion in the default build, undefined under `std::shared_ptr`. nanoql refuses it with `ArgumentNullException`.
+
+Facts:
+
+- `ANullUnderlyingIsRefused`
+
+## CouponPricerSettingTests
+
+[`Divergences/CouponPricerSettingTests.cs`](../tests/NanoQL.Tests/Divergences/CouponPricerSettingTests.cs)
+
+Setting pricers on a leg. QuantLib's `setCouponPricer` and `setCouponPricers` change the coupons in place, one after another (`couponpricer.cpp:461-466, 480-483`): a coupon that refuses the pricer leaves the earlier ones holding it. Their undefined steps: an empty pricer list on a non-empty leg reads the pricer before the list's start (`:481`), and a null cash flow is dereferenced (`:464, 482`; the first-matching forms swallow the failure and skip it, `:446-456`). nanoql returns a new leg, all or nothing, and refuses both inputs.
+
+Facts:
+
+- `ACouponRefusingThePricerLeavesNoNewLeg`
+- `AnEmptyPricerListIsRefused`
+- `ANullCashFlowInTheLegIsRefused`
+
+## CubicNotAKnotTwoPointsTests
+
+[`Divergences/CubicNotAKnotTwoPointsTests.cs`](../tests/NanoQL.Tests/Divergences/CubicNotAKnotTwoPointsTests.cs)
+
+A cubic spline on 2 points with a not-a-knot end condition: QuantLib's rows for that condition read `dx_[1]` and `dx_[n_-3]` (`cubicinterpolation.hpp:428-431,460-463`), past the end of `dx_`, whose one element is the only interval, a result C++ leaves undefined. nanoql refuses it with `NanoQLException`, directly and through the log-cubic interpolation, which builds the same spline.
+
+Facts:
+
+- `ANotAKnotSplineOnTwoPointsIsRefused`
+- `ACubicCurveWithANotAKnotEndBuildsThroughTheFirstPassFallback`
+
+## CurveRecalculationTests
+
+[`Divergences/CurveRecalculationTests.cs`](../tests/NanoQL.Tests/Divergences/CurveRecalculationTests.cs)
+
+A bootstrapped curve is always built afresh, under the context it is given. QuantLib's piecewise curve is a lazy object that recalculates when a quote or the evaluation date changes, and its recalculation differs from a fresh bootstrap in three ways: it starts from its previous data (`iterativebootstrap.hpp:211-218, 253-255`), it re-runs `initialize()`, which takes the pillar dates from the helpers, only on first use or for a moving curve (`iterativebootstrap.hpp:224-231`), and a moving curve never re-runs `YieldTermStructure::update()`, which re-sets its jumps (`piecewiseyieldcurve.hpp:220-231`, `yieldtermstructure.cpp:174-189`). nanoql's curve is QuantLib's fresh curve in each case. The expected values are the wheel's.
+
+Facts:
+
+- `ACurveOnAChangedQuoteIsBootstrappedAfresh`
+- `AFixedReferenceCurveTakesItsContextsPillars`
+- `AMovingCurvesJumpsFollowItsReferenceDate`
+
+## DateAdvanceOverflowTests
+
+[`Divergences/DateAdvanceOverflowTests.cs`](../tests/NanoQL.Tests/Divergences/DateAdvanceOverflowTests.cs)
+
+Advancing a date by a length whose product overflows `int`: QuantLib computes `7*n` weeks, `month + n` months and `year + n` years in `Integer` (`date.cpp:172-201`), which overflows for lengths near the type's range, undefined. nanoql computes in `long` and refuses the out-of-range result with its range messages, so no change was needed; this test pins it.
+
+Facts:
+
+- `AnOverflowingAdvanceIsRefusedByTheDateRange`
+
+## DefaultRoundingTests
+
+[`Divergences/DefaultRoundingTests.cs`](../tests/NanoQL.Tests/Divergences/DefaultRoundingTests.cs)
+
+QuantLib's default `Rounding()` initializes only its type, to `None`: `precision_` and `digit_` have no initializer (`rounding.hpp:74, 87, 89`), so `precision()` and `roundingDigit()` read indeterminate values, a result C++ leaves undefined. nanoql's default rounding has no precision or digit: `Rounding.Precision` and `Rounding.RoundingDigit` throw `NanoQLException`. Its type and its rounding are QuantLib's: `RoundingType.None`, and every value back unchanged.
+
+Facts:
+
+- `ADefaultRoundingHasNoPrecisionOrDigit`
+
+## EmptyScheduleTests
+
+[`Divergences/EmptyScheduleTests.cs`](../tests/NanoQL.Tests/Divergences/EmptyScheduleTests.cs)
+
+A leg builder given an empty schedule, or a swap building its legs on one. QuantLib's conversion to a leg counts `schedule_.size()-1` periods, a `Size` wrapping below zero, and reserves them or reads `schedule_.date(0)` past the end of the schedule's dates (`fixedratecoupon.cpp:182-185`, `cashflowvectors.hpp:82-102`, `overnightindexedcoupon.cpp:592-603`), which is undefined. nanoql refuses the schedule at that point of the conversion, with `NanoQLException`, "empty schedule", after the checks QuantLib makes before it, so that with several bad inputs QuantLib's first refusal is nanoql's; the pilot's `FixedRateLeg` threw `ArgumentOutOfRangeException` from the read.
+
+Facts:
+
+- `ALegBuilderRefusesAnEmptyScheduleAfterQuantLibsEarlierChecks`
+
+## EngineSequenceTests
+
+[`Divergences/EngineSequenceTests.cs`](../tests/NanoQL.Tests/Divergences/EngineSequenceTests.cs)
+
+A static engine reproduces QuantLib's `Instrument::calculate` in order: if the instrument has expired, its expired results; otherwise the arguments' validation, the engine body, and the instrument's fetch of the results. The engine checks its own arguments first, so an expired swap priced without a curve throws, where QuantLib returns the expired results without reading the engine.
+
+Facts:
+
+- `ALiveSwapRunsValidateThenTheBodyThenFetchResults`
+- `AnExpiredSwapReturnsItsExpiredResultsWithoutTheBody`
+- `ValidateRunsBeforeTheBody`
+- `TheResultsAreWhatFetchResultsReturns`
+- `TheArgumentChecksRunBeforeTheExpiryCheck`
+- `ALegFailureNamesTheLegAndKeepsTheCause`
+
+## ExtrapolatorCopyTests
+
+[`Divergences/ExtrapolatorCopyTests.cs`](../tests/NanoQL.Tests/Divergences/ExtrapolatorCopyTests.cs)
+
+QuantLib's `enableExtrapolation` and `disableExtrapolation` set a flag on the object, for every holder of it. In nanoql they return a modified copy, of the receiver's own type, and leave the receiver unchanged.
+
+Facts:
+
+- `TheCopysFlagChangesAndTheReceiversDoesNot`
+- `TheCopyKeepsItsTypeAndItsValues`
+- `ANullReceiverThrows`
+
+## FloatingLegUndefinedInputsTests
+
+[`Divergences/FloatingLegUndefinedInputsTests.cs`](../tests/NanoQL.Tests/Divergences/FloatingLegUndefinedInputsTests.cs)
+
+The floating leg builders' undefined inputs. An empty schedule: QuantLib's `FloatingLeg` takes `schedule.size()-1` periods, a `Size` wrapping below zero, so its size checks all pass and `leg.reserve(n)` fails (`cashflowvectors.hpp:82-102`; `IborLeg` reaches it at `iborcoupon.cpp:286`). A null index: `FloatingLeg` reads `index->fixingDays()` as a default argument (`cashflowvectors.hpp:156, 169, 188, 204`). nanoql refuses the empty schedule where QuantLib reserves the leg, after its notional and in-arrears checks, with "empty schedule": `NanoQLException` from `IborLeg`'s conversion, and `ArgumentException` from `CashFlowVectorsFunctions.FloatingLeg`, whose schedule is an argument; and the null index with `ArgumentNullException`.
+
+Facts:
+
+- `AnEmptyScheduleIsRefusedByBothBuilders`
+- `ANullIndexIsRefused`
+
+## IborNegativeCountTests
+
+[`Divergences/IborNegativeCountTests.cs`](../tests/NanoQL.Tests/Divergences/IborNegativeCountTests.cs)
+
+The Ibor coupons' fixing days are QuantLib's `Natural`, an unsigned type, which can't hold a negative value; nanoql takes an `int` (or `Nullable{T}` for QuantLib's `Null<Natural>()`) and refuses a negative one on entry. From C++ a negative wraps to a large unsigned value, which QuantLib negates back where it advances by it (`floatingratecoupon.cpp:84-85`, `couponpricer.cpp:71-72`, `stubiborcoupon.cpp:214-215`): the wheel's coupon with -1 fixing days looks a day forward for its fixing, and the wrap of 2^31 negates `INT_MIN`, which is undefined.
+
+Facts:
+
+- `NegativeFixingDaysAreRefused`
+
+## IndexFixingsTests
+
+[`Divergences/IndexFixingsTests.cs`](../tests/NanoQL.Tests/Divergences/IndexFixingsTests.cs)
+
+QuantLib's `IndexManager` is a mutable singleton; nanoql's `IndexFixings` is an immutable value in the evaluation context. Three behaviours differ.
+
+Facts:
+
+- `ARefusedBatchChangesNothing`
+- `ReadingNeverWrites`
+- `QuantLibsNullSentinelIsAValue`
+- `FewerValuesThanDatesAreRefused`
+
+## MinimizeContinuationTests
+
+[`Divergences/MinimizeContinuationTests.cs`](../tests/NanoQL.Tests/Divergences/MinimizeContinuationTests.cs)
+
+QuantLib's `minimize` changes the `Problem` it is given, so a second `minimize` on the same problem starts from the first's optimum, its current value then. nanoql's `Problem` is immutable, and `OptimizationMethod.Minimize(Problem, EndCriteria)` starts from the problem's initial value each time (S2R11). `OptimizationMethod.Minimize(ProblemState, EndCriteria)` is QuantLib's: a second minimization of one state continues from the first's optimum, as QuantLib's `HybridSimulatedAnnealing` runs its local optimizer on the same problem.
+
+Facts:
+
+- `MinimizeProblemStartsFromTheInitialValueAndMinimizeStateContinues`
+
+## MonteCarloUndefinedInputsTests
+
+[`Divergences/MonteCarloUndefinedInputsTests.cs`](../tests/NanoQL.Tests/Divergences/MonteCarloUndefinedInputsTests.cs)
+
+Inputs for which QuantLib's time grid, path, Brownian bridge and path generator are undefined (they read or write outside a vector, or call std::sort or std::lround outside their contracts) are refused explicitly in nanoql: an `ArgumentOutOfRangeException` naming the caller's argument, or a `NanoQLException` where the object itself is empty.
+
+Facts:
+
+- `ABrownianBridgeOfNoStepOrAShortOutputIsRefused`
+- `ATimeGridsUndefinedInputsAreRefused`
+- `AnEmptyPathsEndsAreRefused`
+- `APathGeneratorOfNoStepIsRefused`
+
+## NegativeCountTests
+
+[`Divergences/NegativeCountTests.cs`](../tests/NanoQL.Tests/Divergences/NegativeCountTests.cs)
+
+QuantLib's fixing and settlement days are `Natural`, an unsigned type, which can't hold a negative value; nanoql takes an `int` and refuses a negative one on entry. From C++ a negative wraps to a large unsigned value, which QuantLib negates back where it advances by it (`interestrateindex.hpp:43, 106`, `termstructure.cpp:42`), and the wrap of 2^31 negates `INT_MIN`, which is undefined.
+
+Facts:
+
+- `NegativeFixingAndSettlementDaysAreRefused`
+- `NegativeSettlementDaysOfAVolatilityStructureAreRefused`
+
+## NullDateTests
+
+[`Divergences/NullDateTests.cs`](../tests/NanoQL.Tests/Divergences/NullDateTests.cs)
+
+QuantLib's null date, `Date()`, is a `Date?` null in nanoql, and `default(Date)` (serial 0) is never a valid date: no constructor produces it, and public members given it throw `ArgumentException`, whether they read it or not. QuantLib's `nullDate` case, which checks that the null date's serial number and hash can be read, becomes the last test.
+
+Facts:
+
+- `NoConstructorProducesSerialZero`
+- `MembersGivenTheDefaultDateThrow`
+- `MembersThatDontReadTheDefaultDateRefuseItToo`
+- `AMissingDateIsNull`
+- `SerialNumberEqualityHashAndTextOfTheDefaultDateDontThrow`
+- `CashFlowRateCurveAndEngineMembersRefuseTheDefaultDate`
+
+## NullRealSentinelTests
+
+[`Divergences/NullRealSentinelTests.cs`](../tests/NanoQL.Tests/Divergences/NullRealSentinelTests.cs)
+
+An optional real input is a `double?`, whose `null` is "not given", so a value equal to QuantLib's null sentinel, `Null<Real>()` (3.4028234663852886e38, the largest `float`), is a value. QuantLib reads its sentinel as "not given" wherever a real input defaults to it. Each fact is one such input.
+
+Facts:
+
+- `AnIterativeBootstrapsBoundOfQuantLibsNullIsAValue`
+
+## OvernightIndexedCouponRefusalTests
+
+[`Divergences/OvernightIndexedCouponRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/OvernightIndexedCouponRefusalTests.cs)
+
+The overnight coupons' undefined paths, each refused before the undefined step (the playbook's undefined-path rule), and the lookback of `int.MaxValue` days, which `int`? treats as a value where QuantLib's `Null<Natural>()` means none.
+
+Facts:
+
+- `AnEmptyValueDateListIsADegenerateSchedule`
+- `ACappedCouponRefusesANullUnderlying`
+- `AnOvernightLegRefusesAnEmptySchedule`
+- `ARoundingPrecisionOutsideItsRangeIsRefused`
+- `NegativeLookbackAndLockoutDaysAreRefused`
+- `ALookbackOfIntMaxValueIsAValue`
+
+## PathGeneratorProcessTests
+
+[`Divergences/PathGeneratorProcessTests.cs`](../tests/NanoQL.Tests/Divergences/PathGeneratorProcessTests.cs)
+
+QuantLib's `PathGenerator` takes any `StochasticProcess` and casts it to `StochasticProcess1D` (`ext::dynamic_pointer_cast` in `pathgenerator.hpp`): a process that isn't 1-D casts to null, which QuantLib keeps, and its first draw dereferences it (`process_->x0()`). nanoql refuses such a process when the generator is built, in both constructors, with an `ArgumentException` naming the process.
+
+Facts:
+
+- `AProcessThatIsNotOneDimensionalIsRefused`
+
+## PeriodEqualityTests
+
+[`Divergences/PeriodEqualityTests.cs`](../tests/NanoQL.Tests/Divergences/PeriodEqualityTests.cs)
+
+Period equality never throws: QuantLib's `==` is `!(p1 < p2 || p2 < p1)` and throws where the order can't be decided (1M against 30D); nanoql's returns `false` there. Ordering still throws, as QuantLib's does.
+
+Facts:
+
+- `UndecidablePairsCompareUnequalWithoutThrowing`
+- `OrderingStillThrowsOnUndecidablePairs`
+- `CompareToFollowsQuantLibsOrderingWhereItIsDecidable`
+- `EveryZeroLengthPeriodIsEqualWithOneHash`
+- `ExactlyComparablePeriodsCompareNormalisedWithEqualHashes`
+- `PeriodsHashConsistentlyInHashSets`
+
+## PeriodNegationTests
+
+[`Divergences/PeriodNegationTests.cs`](../tests/NanoQL.Tests/Divergences/PeriodNegationTests.cs)
+
+A period of length `int.MinValue` has no negation. QuantLib's unary minus negates the length (`period.hpp:156`) and `frequency()` takes its absolute value (`period.cpp:71`), both overflowing there, which is undefined; nanoql refuses both with `NanoQLException`, where it used to wrap and to throw `OverflowException`. An ex-coupon, last-recent or tenor period reaches them.
+
+Facts:
+
+- `NegatingTheMostNegativeLengthIsRefused`
+- `TheFrequencyOfTheMostNegativeLengthIsRefused`
+
+## PeriodTextTests
+
+[`Divergences/PeriodTextTests.cs`](../tests/NanoQL.Tests/Divergences/PeriodTextTests.cs)
+
+QuantLib's short period text throws "unknown time unit" for milliseconds and microseconds (`period.cpp`). `PeriodFunctions.ShortPeriod` keeps that throw, while `Period.ToString`, which .NET expects never to throw, falls back to a text of its own. A unit outside the enum can't be constructed.
+
+Facts:
+
+- `ToStringNeverThrows`
+- `ShortPeriodThrowsAsQuantLibDoes`
+
+## QuoteSentinelTests
+
+[`Divergences/QuoteSentinelTests.cs`](../tests/NanoQL.Tests/Divergences/QuoteSentinelTests.cs)
+
+A quote is a `double`, so a quote equal to QuantLib's null sentinel, `Null<Real>()` (3.4028234663852886e38, the largest `float`), is a value. QuantLib's quotes are `SimpleQuote`s, and a `SimpleQuote` holding the sentinel is invalid: a bootstrap refuses a helper quoting it ("has an invalid quote", `iterativebootstrap.hpp:236-240`), and a curve refuses such a jump ("invalid 1st jump quote", `yieldtermstructure.cpp:86-87`). nanoql has no invalid quote: a helper quoting it is bootstrapped, which fails in the solver as any unreachable quote does, and such a jump is applied.
+
+Facts:
+
+- `AQuoteEqualToQuantLibsNullIsAValue`
+
+## RateHelperNullIndexTests
+
+[`Divergences/RateHelperNullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/RateHelperNullIndexTests.cs)
+
+A rate helper given a null index is refused on entry, naming the parameter. QuantLib's helpers dereference their index before any check (`ratehelpers.cpp:198, 206` for the deposit helper, `:533` for the swap helper), a result C++ leaves undefined; the wheel stops on Boost's assertion.
+
+Facts:
+
+- `AHelperGivenANullIndexIsRefused`
+
+## ResultsNullTests
+
+[`Divergences/ResultsNullTests.cs`](../tests/NanoQL.Tests/Divergences/ResultsNullTests.cs)
+
+A result QuantLib leaves null is `null` in nanoql's results records. QuantLib's accessors throw on reading such a result: `NPV()` "NPV not provided", `errorEstimate()` "error estimate not provided", `valuationDate()` "valuation date not provided", and the swap's per-leg accessors "result not available" (`instrument.hpp`, `swap.hpp`).
+
+Facts:
+
+- `UnsetResultsAreNull`
+- `TheDiscountingEngineLeavesTheErrorEstimateNull`
+- `ALegStartingBeforeTheCurveHasNoStartDiscount`
+- `AnEmptyLegHasNoStartOrEndDiscount`
+- `AnExpiredSwapHasNoValuationDate`
+- `PerLegResultsAnEngineDoesNotReturnAreNull`
+
+## RoundingPrecisionRangeTests
+
+[`Divergences/RoundingPrecisionRangeTests.cs`](../tests/NanoQL.Tests/Divergences/RoundingPrecisionRangeTests.cs)
+
+QuantLib documents a rounding's precision as lying in [0, 16] and doesn't check it: "supplying an unsupported rounding value may result in undefined behavior" (`rounding.hpp:31-34`). Its code reads a 32-entry table of powers of ten at `precision & 0x1F` (`rounding.cpp:30-37`), whose entries past 16 are zero: a precision of 17 to 31, or -1, scales by zero and gives NaN, and others alias (32 rounds as 0, 33 as 1, -16 as 16). nanoql refuses a precision outside the documented range when the rounding is built, with `ArgumentOutOfRangeException` on `precision` and the text QuantLib's overnight-indexed swap uses for the same check (`overnightindexedswap.cpp:178-180`).
+
+Facts:
+
+- `APrecisionOutsideZeroToSixteenIsRefused`
+
+## SeedZeroTests
+
+[`Divergences/SeedZeroTests.cs`](../tests/NanoQL.Tests/Divergences/SeedZeroTests.cs)
+
+QuantLib reads a seed of 0 as "no seed" and draws one from its `SeedGenerator` singleton, itself seeded from the clock; nanoql's seeds are explicit and no library code reads the clock, so every generator refuses 0 with `ArgumentOutOfRangeException`. QuantLib's `testSeedGenerator`, which only draws from the singleton, becomes this test. Two of QuantLib's seeds of 0 are deterministic, and nanoql refuses them too, one rule for every generator: `SobolRsg` reads its seed only for the dimensions beyond its set's table of direction integers, so `SobolRsg(32, 0)` draws what `SobolRsg(32, 1)` does; and `HaltonRsg` without a random start or shift never reads it.
+
+Facts:
+
+- `EveryGeneratorRefusesSeedZero`
+
+## SettlementDaysSentinelTests
+
+[`Divergences/SettlementDaysSentinelTests.cs`](../tests/NanoQL.Tests/Divergences/SettlementDaysSentinelTests.cs)
+
+Settlement days that QuantLib may leave unset are an `int?`, so `int.MaxValue` is a value. QuantLib reads its null sentinel, `Null<Natural>()`, which equals `INT_MAX`, as "not given": a swap rate helper given it starts at the index's spot date (`ratehelpers.cpp:573-575`), 18 June 2025 from 16 June. nanoql counts that many days from the evaluation date, and the date leaves its range.
+
+Facts:
+
+- `SettlementDaysOfIntMaxValueAreAValue`
+
+## SharedPricerStateTests
+
+[`Divergences/SharedPricerStateTests.cs`](../tests/NanoQL.Tests/Divergences/SharedPricerStateTests.cs)
+
+Two capped coupons sharing one pricer. QuantLib's capped coupon prices its caplet with whatever per-coupon state the last `initialize(coupon)` left in the shared pricer (`capflooredcoupon.cpp:86-96`, `couponpricer.cpp:96-113, 139-148`): once both underlyings' rates have been read, the first capped coupon's caplet reads the second underlying's dates, gearing and spread, and its rate is 0.02266598964839617 against 0.030228654513094377 alone. nanoql's pricers hold no per-coupon state, so each capped coupon prices as it would alone, whatever was read before.
+
+Facts:
+
+- `ACappedCouponPricesAsItWouldAloneWithASharedPricer`
+
+## ShortUniformSequenceTests
+
+[`Divergences/ShortUniformSequenceTests.cs`](../tests/NanoQL.Tests/Divergences/ShortUniformSequenceTests.cs)
+
+QuantLib's `InverseCumulativeRsg::nextSequence` maps the uniform sample at every index below the dimension it read at construction (`inversecumulativersg.hpp:89-90`), so a uniform sequence generator that draws fewer values reads past the end of its sample, which C++ leaves undefined. None of QuantLib's generators does, but `IRsg` is an extension point: nanoql's composite refuses such a draw with `NanoQLException`. A longer draw is read as QuantLib reads it, its first values only.
+
+Facts:
+
+- `ADrawShorterThanTheDimensionIsRefused`
+
+## SimplexEmptyInitialValueTests
+
+[`Divergences/SimplexEmptyInitialValueTests.cs`](../tests/NanoQL.Tests/Divergences/SimplexEmptyInitialValueTests.cs)
+
+Simplex on a problem with no variables: QuantLib sizes its function values at n + 1 = 1 and then reads the second (`simplex.cpp:99-106,119`), a result C++ leaves undefined. nanoql refuses it with `NanoQLException`, as Levenberg–Marquardt refuses it with QuantLib's own "no variables given".
+
+Facts:
+
+- `ASimplexWithNoVariablesIsRefused`
+
+## SobolPeriodEndTests
+
+[`Divergences/SobolPeriodEndTests.cs`](../tests/NanoQL.Tests/Divergences/SobolPeriodEndTests.cs)
+
+The Sobol generator's period end with the Gray code, where QuantLib's behaviour is undefined. Its `skipTo(4294967295)` computes `skip + 1`, which wraps to 0, and converts `log(0)`'s −∞ to an `unsigned int`, which C++ leaves undefined; its draw that takes the counter to 4294967295 finds the rightmost zero bit at 32 and reads row 32 of its 32 rows of direction integers (the wheel crashes there). nanoql refuses that skip with `ArgumentOutOfRangeException`, and throws "period exceeded" on that draw, one draw before QuantLib's own check. Without the Gray code QuantLib's end is defined, and nanoql keeps it (the harness's vectors, `cxx/math/randomnumbers/sobolrsg`).
+
+Facts:
+
+- `SkipToTheLastIndexIsRefusedWithTheGrayCode`
+- `TheDrawThatWouldReachTheLastCounterThrowsWithTheGrayCode`
+
+## SwapRefusalTests
+
+[`Divergences/SwapRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/SwapRefusalTests.cs)
+
+The swaps' and their builders' undefined paths, each refused before the undefined step (the playbook's undefined-path rule).
+
+Facts:
+
+- `MakeOISRefusesANullIndex`
+- `MakeVanillaSwapRefusesANullIndex`
+- `NegativeCountsAreRefused`
+
+## TelescopicValueDatesTests
+
+[`Divergences/TelescopicValueDatesTests.cs`](../tests/NanoQL.Tests/Divergences/TelescopicValueDatesTests.cs)
+
+A coupon built with `telescopicValueDates`. QuantLib builds its daily value dates only to 7 business days after the evaluation date it is built with, then jumps to the lockout or end dates (`overnightindexedcoupon.cpp:107-132`), and wherever the skipped dates are read its results are wrong, with no error. nanoql builds every daily value date whatever the flag says (the flag keeps its check and, on an averaged coupon, its choice of the averaging pricer's approximation), so a telescopic coupon gives QuantLib's full-schedule result: here, each expected value is QuantLib's for the same coupon built without the flag, the approximating pricer set on an averaged one, as the flag sets it.
+
+Facts:
+
+- `ATelescopicCouponGivesTheFullSchedulesResults`
+- `ATelescopicCouponListsEveryDailyDate`
+
+## TimeSeriesFewerValuesTests
+
+[`Divergences/TimeSeriesFewerValuesTests.cs`](../tests/NanoQL.Tests/Divergences/TimeSeriesFewerValuesTests.cs)
+
+QuantLib's constructor from two sequences reads one value per date from the values' start, with no bound (`timeseries.hpp:64-69`: `values_[*(dBegin++)] = *(vBegin++)`), so fewer values than dates reads past their end, a result C++ leaves undefined. nanoql refuses it with `ArgumentException` on `values`, "fewer values than dates", and builds nothing. Surplus values stay unread, as in QuantLib.
+
+Facts:
+
+- `FewerValuesThanDatesAreRefused`
+
+## TimeSeriesFindTests
+
+[`Divergences/TimeSeriesFindTests.cs`](../tests/NanoQL.Tests/Divergences/TimeSeriesFindTests.cs)
+
+QuantLib's `TimeSeries::find` inserts a date the series doesn't hold, with a `Null<T>()` datum, and returns an iterator to it (`timeseries.hpp:233-242`), as its non-const `operator[]` does (`timeseries.hpp:102-105`): `testUtilities` checks that the size grows from 3 to 4 (`test-suite/timeseries.cpp:173-174`). nanoql's series is immutable and ports neither: `TimeSeries{T}.TryGetValue` reads a missing date as absent and leaves the series unchanged.
+
+Facts:
+
+- `LookingUpAMissingDateLeavesTheSeriesUnchanged`
+
+## TridiagonalOperatorSizeOneTests
+
+[`Divergences/TridiagonalOperatorSizeOneTests.cs`](../tests/NanoQL.Tests/Divergences/TridiagonalOperatorSizeOneTests.cs)
+
+A tridiagonal operator of size 1 can be built (QuantLib's `identity(1)`, or three diagonals of sizes 0, 1 and 0), but QuantLib's `applyTo`, `solveFor` and `SOR` then read past its arrays (`tridiagonaloperator.cpp:70-74,106-108,131-133`; `solveFor`'s `n_-2` wraps), a result C++ leaves undefined. nanoql refuses the three with `NanoQLException`.
+
+Facts:
+
+- `ApplyingOrSolvingASizeOneOperatorIsRefused`
+
+## WeightedIndexNullComponentTests
+
+[`Divergences/WeightedIndexNullComponentTests.cs`](../tests/NanoQL.Tests/Divergences/WeightedIndexNullComponentTests.cs)
+
+A weighted index with a null component. QuantLib's `StubIborCoupon::WeightedIndex` reads every component's tenor, and the first one's conventions, in its base initializer (`stubiborcoupon.cpp:37-56`), before its own check, "null component index" (`:64`), so a null component is dereferenced. nanoql refuses it first, with `ArgumentException` and QuantLib's text, wherever it stands.
+
+Facts:
+
+- `ANullComponentIsRefusedBeforeItIsRead`
+
+## ZeroGearingWithoutDayCounterTests
+
+[`Divergences/ZeroGearingWithoutDayCounterTests.cs`](../tests/NanoQL.Tests/Divergences/ZeroGearingWithoutDayCounterTests.cs)
+
+A floating leg whose period has a zero gearing becomes a fixed-rate coupon on the leg's payment day counter (`cashflowvectors.hpp:134-136`; for an overnight leg, `overnightindexedcoupon.cpp`'s `OvernightLeg`). Without one, QuantLib builds that coupon on an empty day counter and fails only when it is priced, "no day counter implementation provided" (`daycounter.hpp:118`); nanoql's `FixedRateCoupon` needs a day counter, so the leg is refused once it is built, after every refusal QuantLib raises while building it, with QuantLib's text: a builder's stored setting with `NanoQLException`, and the function form's argument with `ArgumentException`.
+
+Facts:
+
+- `AZeroGearingPeriodWithoutAPaymentDayCounterIsRefusedAtBuild`
+- `AnOvernightLegsZeroGearingPeriodWithoutAPaymentDayCounterIsRefusedAtBuild`

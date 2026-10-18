@@ -7,6 +7,7 @@
 
 How the port of QuantLib v1.44 proceeds. The rules each port follows are in
 [porting-playbook.md](porting-playbook.md), and every QuantLib file's status is in [porting-map.md](porting-map.md).
+Every documented divergence from QuantLib, with the tests that assert it, is in [divergences.md](divergences.md).
 
 ## All of QuantLib, in batches
 
@@ -100,7 +101,16 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/TermStructures/Volatility/Optionlet/ConstantOptionletVolatility.cs`: `smileSectionImpl`, which waits for S6's `FlatSmileSection`.
 - `src/NanoQL/TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs`: the smile sections, which wait for S6, and the constructor for a structure managing its own reference date, which waits for S8.
 - `src/NanoQL/TermStructures/VolatilityTermStructure.cs`: the constructor for a structure managing its own reference date, which waits for its first user (S8 or S-eq).
-- `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only, and the jumps.
+- `src/NanoQL/TermStructures/Yield/BootstrapTraits/Discount.cs`: `Discount`'s `globalGuess`, `transformDirect` and `transformInverse`, the global bootstrap's hooks, which S5's second commit ports with `GlobalBootstrap`.
+- `src/NanoQL/TermStructures/Yield/BootstrapTraits/ForwardRate.cs`: `ForwardRate`'s `globalGuess`, the global bootstrap's hook, which S5's second commit ports with `GlobalBootstrap`.
+- `src/NanoQL/TermStructures/Yield/BootstrapTraits/SimpleZeroYield.cs`: `SimpleZeroYield`'s `globalGuess`, `transformDirect` and `transformInverse`, the global bootstrap's hooks, which S5's second commit ports with `GlobalBootstrap`.
+- `src/NanoQL/TermStructures/Yield/BootstrapTraits/ZeroYield.cs`: `ZeroYield`'s `globalGuess`, the global bootstrap's hook, which S5's second commit ports with `GlobalBootstrap`.
+- `src/NanoQL/TermStructures/Yield/ForwardCurve/ForwardCurveFormula.cs`: `InterpolatedForwardCurve`, its constructors, inspectors and forward formula, and the named curves on it, which S5's second commit ports.
+- `src/NanoQL/TermStructures/Yield/InterpolatedSimpleZeroCurve/InterpolatedSimpleZeroCurveFormula.cs`: `InterpolatedSimpleZeroCurve`, its constructors and inspectors, and the named curve on it, which S5's second commit ports.
+- `src/NanoQL/TermStructures/Yield/PiecewiseYieldCurve/PiecewiseYieldCurve{TTraits,TInterpolator,TBootstrap}.cs`: `multiCurveBootstrapContributor`, the hook a multicurve bootstrap reads, which S5's second commit ports with `GlobalBootstrap` and `MultiCurve`.
+- `src/NanoQL/TermStructures/Yield/RateHelpers/SwapRateHelper.cs`: the constructor from a swap index, which waits for S5's fourth commit with `SwapIndex`.
+- `src/NanoQL/TermStructures/Yield/ZeroCurve/ZeroCurveFormula.cs`: `InterpolatedZeroCurve`, its constructors and inspectors, and the named curves on it, which S5's second commit ports.
+- `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/IMM.cs`: everything but `isIMMdate`.
@@ -122,9 +132,10 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/OvernightIndexedCouponTests.cs`: `testOvernightLegNPV` and `testOvernightLegWithCapsAndFloors`, whose expected values come from S5's `InterpolatedZeroCurve<Cubic>`.
 - `tests/NanoQL.Tests/TestSuite/OvernightIndexedSwapTests.cs`: `testBaseBootstrap`, `testBootstrapWithArithmeticAverage`, `testBootstrapWithTelescopicDates`, `testBootstrapWithTelescopicDatesAndArithmeticAverage`, `testBootstrapWithCustomPricer`, `testBootstrapWithLookbackDays`, `testBootstrapWithLookbackDaysAndShift`, `testBootstrapWithLockoutDays`, `testBootstrapWithLockoutDaysAndShift`, `testBootstrapRegression`, `test131BootstrapRegression` and `testBootstrapWithDifferentCalendars`, which wait for S5's rate helpers and piecewise curves; `testMakeOisEndOfMonthRegression2453`, which waits for batch 2's `Aonia`; `testNonstandardSwapConversionPreservesObservationConventions`, which waits for B3.2's `NonstandardSwap`; and `testMakeOISDefaultSettlementDays`' lines for the indexes of batch 2 (EONIA, FedFunds, AONIA, SARON, NZOCR, DESTR, SWESTR, KOFR).
 - `tests/NanoQL.Tests/TestSuite/PathGeneratorTests.cs`: `testMultiPathGenerator`, which waits for `MultiPathGenerator` (B3.2).
+- `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: the consistency cases' bond check (S-bond), their FRA and futures checks (S-rx) and `testBMACurveConsistency` (batch 2's USDLibor); `testDefaultInstantiation`'s ForwardFlat (S-cds) and ConvexMonotone (B6.2) curves; `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (B6.2); the cases that wait for S5's second and third commits; and the cases that need B6.2's, S-rx's, S-bond's, B3.5's and batch 2's units.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
 - `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases, which need `cdsMaturity`.
-- `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant, Newton, Ridder, Halley and finite-difference Newton-safe cases, whose solvers aren't ported yet.
+- `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant, Newton, Ridder and Halley cases, whose solvers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/SwapTests.cs`: `testInArrears`, which waits for batch 2's `SimpleDayCounter`; `testFixedTenorInferenceWithTerminationDate`, which waits for batch 2's `GBPLibor` and `Bbsw`; and `testSpotDateUsesFixingCalendar`, which waits for batch 2's Taiwan calendar.
 - `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported.
 - `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, B4.2).

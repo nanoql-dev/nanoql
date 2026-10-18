@@ -215,4 +215,16 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, "Unknown vanilla-swap type");
         }
     }
+
+    /// <summary>Refuses a pillar choice outside <see cref="PillarChoice"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(PillarChoice value, string paramName)
+    {
+        if (value is not (PillarChoice.MaturityDate or PillarChoice.LastRelevantDate or PillarChoice.CustomDate))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown Pillar::Choice({(int)value})");
+        }
+    }
 }

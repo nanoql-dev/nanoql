@@ -11,7 +11,6 @@
 
 using NanoQL.Coupons;
 using NanoQL.Indexes;
-using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
 using NanoQL.Time;
@@ -68,9 +67,9 @@ public sealed record MakeOIS
 
     private Date? TerminationDate { get; init; }
 
-    private Calendar FixedCalendar { get; init; }
+    private Calendar? FixedCalendar { get; init; }
 
-    private Calendar OvernightCalendar { get; init; }
+    private Calendar? OvernightCalendar { get; init; }
 
     private Calendar? SettlementCalendar { get; init; }
 
@@ -164,12 +163,19 @@ public sealed record MakeOIS
     /// Sets the settlement days, counted from the evaluation date on the settlement calendar; by default 0 for SONIA,
     /// 1 for CORRA and 2 for any other index.
     /// </summary>
-    /// <param name="settlementDays">The settlement days.</param>
+    /// <param name="settlementDays">
+    /// The settlement days, or <see langword="null"/>, QuantLib's <c>Null&lt;Natural&gt;()</c> and its default, for the
+    /// index's default, which an explicit effective date doesn't clash with.
+    /// </param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The settlement days are negative.</exception>
-    public MakeOIS WithSettlementDays(int settlementDays)
+    public MakeOIS WithSettlementDays(int? settlementDays)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(settlementDays);
+        if (settlementDays is int days)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(days, nameof(settlementDays));
+        }
+
         return this with { SettlementDays = settlementDays };
     }
 
@@ -286,27 +292,31 @@ public sealed record MakeOIS
     public MakeOIS WithPaymentCalendar(Calendar? cal) => this with { PaymentCalendar = cal };
 
     /// <summary>Sets both legs' calendar.</summary>
-    /// <param name="cal">The calendar.</param>
+    /// <param name="cal">
+    /// The calendar, or <see langword="null"/> for QuantLib's empty calendar, which the conversion uses as the
+    /// fixed-leg and overnight-leg setters say.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public MakeOIS WithCalendar(Calendar cal) => WithFixedLegCalendar(cal).WithOvernightLegCalendar(cal);
+    public MakeOIS WithCalendar(Calendar? cal) => WithFixedLegCalendar(cal).WithOvernightLegCalendar(cal);
 
     /// <summary>Sets the fixed leg's calendar; the index's fixing calendar by default.</summary>
-    /// <param name="cal">The calendar.</param>
+    /// <param name="cal">
+    /// The calendar, or <see langword="null"/> for QuantLib's empty calendar, which the conversion uses as QuantLib
+    /// does: the fixed schedule and, with no payment calendar, the fixed payment dates are built only where every
+    /// adjustment is <see cref="BusinessDayConvention.Unadjusted"/>, and refused otherwise.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public MakeOIS WithFixedLegCalendar(Calendar cal)
-    {
-        ArgumentNullException.ThrowIfNull(cal);
-        return this with { FixedCalendar = cal };
-    }
+    public MakeOIS WithFixedLegCalendar(Calendar? cal) => this with { FixedCalendar = cal };
 
     /// <summary>Sets the overnight leg's calendar; the index's fixing calendar by default.</summary>
-    /// <param name="cal">The calendar.</param>
+    /// <param name="cal">
+    /// The calendar, or <see langword="null"/> for QuantLib's empty calendar, which the conversion uses as QuantLib
+    /// does: the start date, the end-of-month default, the maturity and the overnight schedule are built only where
+    /// no date is adjusted or moved by business days on it, and refused otherwise; the overnight coupons are then paid
+    /// on the payment calendar, or on <see cref="WeekendsOnly"/> when none is set.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public MakeOIS WithOvernightLegCalendar(Calendar cal)
-    {
-        ArgumentNullException.ThrowIfNull(cal);
-        return this with { OvernightCalendar = cal };
-    }
+    public MakeOIS WithOvernightLegCalendar(Calendar? cal) => this with { OvernightCalendar = cal };
 
     /// <summary>Sets both legs' business-day convention.</summary>
     /// <param name="bdc">The convention.</param>
@@ -405,17 +415,19 @@ public sealed record MakeOIS
     /// engine that computes the par rate when no fixed rate is given. With a fixed rate given it changes nothing: the
     /// swap returned holds no engine, where QuantLib's builder attaches it.
     /// </summary>
-    /// <param name="discountingTermStructure">The discount curve.</param>
+    /// <param name="discountingTermStructure">
+    /// The discount curve, or <see langword="null"/>, QuantLib's empty handle: the engine then refuses to price, so a
+    /// build at the par rate is refused, and a build with a fixed rate isn't.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public MakeOIS WithDiscountingTermStructure(YieldTermStructure discountingTermStructure)
-    {
-        ArgumentNullException.ThrowIfNull(discountingTermStructure);
-        return this with
+    public MakeOIS WithDiscountingTermStructure(YieldTermStructure? discountingTermStructure) =>
+        this with
         {
-            Engine = (swap, context) => DiscountingSwapEngine.Calculate(
-                swap, context, discountingTermStructure, includeSettlementDateFlows: false),
+            Engine = (swap, context) => discountingTermStructure is null
+                ? DiscountingSwapEngine.CalculateWithoutCurve(swap, context)
+                : DiscountingSwapEngine.Calculate(
+                    swap, context, discountingTermStructure, includeSettlementDateFlows: false),
         };
-    }
 
     /// <summary>
     /// Sets QuantLib's telescopic value dates, which on averaged coupons select the averaging pricer's approximation;
@@ -437,12 +449,19 @@ public sealed record MakeOIS
     }
 
     /// <summary>Sets the lookback days; the index's fixing days by default.</summary>
-    /// <param name="lookbackDays">The lookback.</param>
+    /// <param name="lookbackDays">
+    /// The lookback, or <see langword="null"/>, QuantLib's <c>Null&lt;Natural&gt;()</c> and its default, for none: the
+    /// coupons then fix by the index's fixing days.
+    /// </param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The lookback is negative.</exception>
-    public MakeOIS WithLookbackDays(int lookbackDays)
+    public MakeOIS WithLookbackDays(int? lookbackDays)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(lookbackDays);
+        if (lookbackDays is int days)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(days, nameof(lookbackDays));
+        }
+
         return this with { LookbackDays = lookbackDays };
     }
 
@@ -464,46 +483,43 @@ public sealed record MakeOIS
 
     /// <summary>
     /// Sets the decimal places the overnight coupons' rates are rounded to before their amounts are computed, or
-    /// <see langword="null"/> for none.
+    /// <see langword="null"/> for none. Any value is stored, as QuantLib stores it: the swap's constructor refuses one
+    /// outside [0, 16] when the builder converts.
     /// </summary>
     /// <param name="roundingPrecision">The precision.</param>
     /// <returns>The modified builder.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">The precision is outside [0, 16].</exception>
-    public MakeOIS WithRoundingPrecision(int? roundingPrecision)
-    {
-        // QuantLib stores any value, which the swap's constructor refuses outside [0, 16]; it is refused here.
-        if (roundingPrecision is int precision)
-        {
-            Rounding.CheckPrecision(precision, nameof(roundingPrecision));
-        }
-
-        return this with { RoundingPrecision = roundingPrecision };
-    }
+    public MakeOIS WithRoundingPrecision(int? roundingPrecision) => this with { RoundingPrecision = roundingPrecision };
 
     /// <summary>
     /// Sets the engine that computes the par rate when no fixed rate is given: a function of the swap and the context,
     /// such as <c>(s, c) =&gt; DiscountingSwapEngine.Calculate(s, c, curve, includeSettlementDateFlows: false)</c>. It
     /// is never stored on the swap.
     /// </summary>
-    /// <param name="engine">The engine.</param>
+    /// <param name="engine">
+    /// The engine, or <see langword="null"/>, QuantLib's null engine, for the default: a
+    /// <see cref="DiscountingSwapEngine"/> on the index's forwarding curve.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public MakeOIS WithPricingEngine(Func<FixedVsFloatingSwap, EvaluationContext, FixedVsFloatingSwapResults> engine)
-    {
-        ArgumentNullException.ThrowIfNull(engine);
-        return this with { Engine = engine };
-    }
+    public MakeOIS WithPricingEngine(
+        Func<FixedVsFloatingSwap, EvaluationContext, FixedVsFloatingSwapResults>? engine) =>
+        this with { Engine = engine };
 
     /// <summary>The swap: QuantLib's conversion to <c>OvernightIndexedSwap</c>.</summary>
     /// <param name="context">The evaluation context, whose evaluation date the default start date counts from.</param>
     /// <returns>The swap, which holds no engine.</returns>
     /// <exception cref="ArgumentNullException">The context is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The rounding precision is outside [0, 16].</exception>
     /// <exception cref="NanoQLException">
-    /// Both an effective date and settlement days are set; a payment frequency has no period; a leg can't be built;
-    /// or, with no fixed rate, there is neither an engine nor a forwarding curve, or the par rate is not available.
+    /// Both an effective date and settlement days are set; a date is needed that QuantLib's empty calendar can't give;
+    /// a payment frequency has no period; a leg can't be built; or, with no fixed rate, there is neither an engine nor
+    /// a forwarding curve, the engine has no discount curve, or the par rate is not available.
     /// </exception>
     public OvernightIndexedSwap ToOvernightIndexedSwap(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        // QuantLib's empty calendar, null here, is used unchecked, as QuantLib uses it
+        Calendar overnightCalendar = OvernightCalendar ?? EmptyCalendar.Instance;
 
         if (!(EffectiveDate is null || SettlementDays is null))
         {
@@ -530,18 +546,18 @@ public sealed record MakeOIS
 
             // settlement days are counted from the actual evaluation
             // date, even when it is not a business day (see issue #753)
-            Calendar settlementCalendar = SettlementCalendar ?? OvernightCalendar;
+            Calendar settlementCalendar = SettlementCalendar ?? overnightCalendar;
             Date spotDate = settlementCalendar.Advance(refDate, settlementDays, TimeUnit.Days);
             startDate = spotDate + ForwardStart;
             startDate = ForwardStart.Length < 0
-                ? OvernightCalendar.Adjust(startDate, BusinessDayConvention.Preceding)
-                : OvernightCalendar.Adjust(startDate, BusinessDayConvention.Following);
+                ? overnightCalendar.Adjust(startDate, BusinessDayConvention.Preceding)
+                : overnightCalendar.Adjust(startDate, BusinessDayConvention.Following);
         }
 
         bool fixedEndOfMonth, overnightEndOfMonth, maturityEndOfMonth;
         if (IsDefaultEOM)
         {
-            fixedEndOfMonth = overnightEndOfMonth = maturityEndOfMonth = OvernightCalendar.IsEndOfMonth(startDate);
+            fixedEndOfMonth = overnightEndOfMonth = maturityEndOfMonth = overnightCalendar.IsEndOfMonth(startDate);
         }
         else
         {
@@ -559,9 +575,9 @@ public sealed record MakeOIS
         {
             endDate = startDate + SwapTenor;
             if (maturityEndOfMonth && ScheduleFunctions.AllowsEndOfMonth(SwapTenor)
-                && OvernightCalendar.IsEndOfMonth(startDate))
+                && overnightCalendar.IsEndOfMonth(startDate))
             {
-                endDate = OvernightCalendar.EndOfMonth(endDate);
+                endDate = overnightCalendar.EndOfMonth(endDate);
             }
         }
 

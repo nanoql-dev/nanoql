@@ -18,7 +18,8 @@ namespace NanoQL.Tests.Vectors;
 /// <remarks>
 /// A calendar is <c>{"type"}</c>, with a <c>"market"</c> integer for the US and UK calendars; a day counter is
 /// <c>{"type"}</c>, with a <c>"convention"</c> integer for 30/360 and Actual/Actual. Enums and time units are
-/// QuantLib's integers, dates serial numbers, and a null setting is one left at its default.
+/// QuantLib's integers, dates serial numbers, and a null setting is one left at its default, but for a rule-based
+/// schedule's calendar and an ex-coupon calendar, where null is QuantLib's empty calendar.
 /// </remarks>
 internal static class CashFlowInputs
 {
@@ -37,6 +38,12 @@ internal static class CashFlowInputs
             _ => throw new InvalidOperationException($"unknown calendar type '{type}'"),
         };
     }
+
+    /// <summary>The calendar a spec describes, or <see langword="null"/>, QuantLib's empty calendar, for JSON null.</summary>
+    /// <param name="spec">The spec, or JSON <c>null</c>.</param>
+    /// <returns>The calendar, or <see langword="null"/>.</returns>
+    public static Calendar? NullableCalendarOf(JsonElement spec) =>
+        spec.ValueKind == JsonValueKind.Null ? null : CalendarOf(spec);
 
     /// <summary>The day counter a spec describes.</summary>
     /// <param name="spec">The spec.</param>
@@ -67,7 +74,7 @@ internal static class CashFlowInputs
             NullableDate(spec.GetProperty("effectiveDate")),
             new Date(spec.GetProperty("terminationDate").GetInt32()),
             new Period(tenor[0].GetInt32(), (TimeUnit)tenor[1].GetInt32()),
-            CalendarOf(spec.GetProperty("calendar")),
+            NullableCalendarOf(spec.GetProperty("calendar")),
             (BusinessDayConvention)spec.GetProperty("convention").GetInt32(),
             (BusinessDayConvention)spec.GetProperty("terminationDateConvention").GetInt32(),
             (DateGenerationRule)spec.GetProperty("rule").GetInt32(),
@@ -107,7 +114,7 @@ internal static class CashFlowInputs
             JsonElement period = exCoupon.GetProperty("period");
             builder = builder.WithExCouponPeriod(
                 new Period(period[0].GetInt32(), (TimeUnit)period[1].GetInt32()),
-                CalendarOf(exCoupon.GetProperty("calendar")),
+                NullableCalendarOf(exCoupon.GetProperty("calendar")),
                 (BusinessDayConvention)exCoupon.GetProperty("convention").GetInt32(),
                 exCoupon.GetProperty("endOfMonth").GetBoolean());
         }

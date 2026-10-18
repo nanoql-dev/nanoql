@@ -76,9 +76,11 @@ public abstract class FixedVsFloatingSwap : Swap
     /// The type or the payment convention isn't a member of its enum.
     /// </exception>
     /// <exception cref="ArgumentException">
-    /// The fixed schedule is empty, or the floating leg is <see langword="default"/> or holds a null cash flow.
+    /// The floating leg is <see langword="default"/> or holds a null cash flow.
     /// </exception>
-    /// <exception cref="NanoQLException">The fixed leg can't be built from the arguments.</exception>
+    /// <exception cref="NanoQLException">
+    /// The fixed leg can't be built from the arguments, an empty fixed schedule among them.
+    /// </exception>
     protected FixedVsFloatingSwap(
         SwapType type,
         IEnumerable<double> fixedNominals,
@@ -427,13 +429,8 @@ public abstract class FixedVsFloatingSwap : Swap
                 ResolvePaymentConvention(paymentConvention, floatingSchedule, paymentConventionName);
             ImmutableArray<double> fixedNotionals = [.. fixedNominals];
 
-            if (fixedSchedule.Empty)
-            {
-                // QuantLib reads the first date of an empty schedule, which is undefined: refused as the fixed leg's
-                // builder refuses it, under the name of the swap constructor's parameter.
-                throw new ArgumentException("empty schedule", fixedScheduleName);
-            }
-
+            // An empty fixed schedule is refused by the fixed leg's conversion, after its notional check, as QuantLib's
+            // leg reaches it.
             ImmutableArray<CashFlow> fixedLeg = new FixedRateLeg(fixedSchedule)
                 .WithNotionals(fixedNotionals)
                 .WithCouponRates(fixedRate, fixedDc)

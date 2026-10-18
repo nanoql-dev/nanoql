@@ -9,8 +9,9 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The fixed-rate coupon vectors, <c>tests/vectors/cashflows/fixedratecoupon.json</c>: every coupon of legs built with
-/// <see cref="FixedRateLeg"/> on five schedules and seven builder settings, with its dates, amounts, rate, accrual,
-/// ex-coupon date and accrued amounts in the middle of the accrual period and late in it.
+/// <see cref="FixedRateLeg"/> on five schedules and seven builder settings, and of legs using QuantLib's empty calendar
+/// (<see langword="null"/>), with its dates, amounts, rate, accrual, ex-coupon date and accrued amounts in the middle
+/// of the accrual period and late in it; a leg QuantLib refuses is the one output <c>date</c>, its throw.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class FixedRateCouponVectorTests
@@ -23,10 +24,17 @@ public class FixedRateCouponVectorTests
         foreach (VectorCase c in file.Cases)
         {
             EvaluationContext context = c.Context();
-            FixedRateCoupon[] coupons = CashFlowInputs.FixedRateLegOf(c.Input("fixedRateLeg"), context)
-                .Cast<FixedRateCoupon>()
-                .ToArray();
-            check.Output(c, "date", coupons.Select(x => x.Date).ToArray());
+            FixedRateCoupon[]? built = null;
+            check.Output(c, "date", () =>
+            {
+                built = [.. CashFlowInputs.FixedRateLegOf(c.Input("fixedRateLeg"), context).Cast<FixedRateCoupon>()];
+                return built.Select(x => x.Date).ToArray();
+            });
+            if (built is not FixedRateCoupon[] coupons)
+            {
+                continue;
+            }
+
             check.Output(c, "amount", coupons.Select(x => x.Amount(context)).ToArray());
             check.Output(c, "nominal", coupons.Select(x => x.ContractNominal).ToArray());
             check.Output(c, "rate", coupons.Select(x => x.Rate(context)).ToArray());

@@ -57,8 +57,9 @@ public sealed class VanillaSwap : FixedVsFloatingSwap
     /// <exception cref="ArgumentOutOfRangeException">
     /// The type or the payment convention isn't a member of its enum.
     /// </exception>
-    /// <exception cref="ArgumentException">A schedule is empty.</exception>
-    /// <exception cref="NanoQLException">A leg can't be built from the arguments.</exception>
+    /// <exception cref="NanoQLException">
+    /// A leg can't be built from the arguments, an empty schedule among them.
+    /// </exception>
     public VanillaSwap(
         SwapType type,
         double nominal,
@@ -123,13 +124,8 @@ public sealed class VanillaSwap : FixedVsFloatingSwap
         BusinessDayConvention? paymentConvention,
         bool? useIndexedCoupons)
     {
-        if (floatSchedule.Empty)
-        {
-            // QuantLib's period count wraps below zero for an empty schedule: refused as the Ibor leg's builder refuses
-            // it, under this constructor's name.
-            throw new ArgumentException("empty schedule", nameof(floatSchedule));
-        }
-
+        // An empty floating schedule is refused by the Ibor leg's conversion, after its notional check, as QuantLib's
+        // leg reaches it.
         IborLeg leg = new IborLeg(floatSchedule, iborIndex)
             .WithNotionals(nominal);
         if (floatingDayCount is not null)

@@ -350,7 +350,7 @@ internal static class SwapInputs
                 "dateGenerationRule" => b.WithRule((DateGenerationRule)x.GetInt32()),
                 "paymentConvention" => b.WithPaymentConvention((BusinessDayConvention)x.GetInt32()),
                 "fixedLegTenor" => b.WithFixedLegTenor(PeriodOf(x)),
-                "fixedLegCalendar" => b.WithFixedLegCalendar(CashFlowInputs.CalendarOf(x)),
+                "fixedLegCalendar" => b.WithFixedLegCalendar(CashFlowInputs.NullableCalendarOf(x)),
                 "fixedLegConvention" => b.WithFixedLegConvention((BusinessDayConvention)x.GetInt32()),
                 "fixedLegTerminationDateConvention" =>
                     b.WithFixedLegTerminationDateConvention((BusinessDayConvention)x.GetInt32()),
@@ -360,7 +360,7 @@ internal static class SwapInputs
                 "fixedLegNextToLastDate" => b.WithFixedLegNextToLastDate(new Date(x.GetInt32())),
                 "fixedLegDayCount" => b.WithFixedLegDayCount(CashFlowInputs.DayCounterOf(x)),
                 "floatingLegTenor" => b.WithFloatingLegTenor(PeriodOf(x)),
-                "floatingLegCalendar" => b.WithFloatingLegCalendar(CashFlowInputs.CalendarOf(x)),
+                "floatingLegCalendar" => b.WithFloatingLegCalendar(CashFlowInputs.NullableCalendarOf(x)),
                 "floatingLegConvention" => b.WithFloatingLegConvention((BusinessDayConvention)x.GetInt32()),
                 "floatingLegTerminationDateConvention" =>
                     b.WithFloatingLegTerminationDateConvention((BusinessDayConvention)x.GetInt32()),
@@ -370,7 +370,7 @@ internal static class SwapInputs
                 "floatingLegNextToLastDate" => b.WithFloatingLegNextToLastDate(new Date(x.GetInt32())),
                 "floatingLegDayCount" => b.WithFloatingLegDayCount(CashFlowInputs.DayCounterOf(x)),
                 "floatingLegSpread" => b.WithFloatingLegSpread(IndexInputs.Real(x)),
-                "discountingTermStructure" => b.WithDiscountingTermStructure(CashFlowInputs.CurveOf(x)),
+                "discountingTermStructure" => b.WithDiscountingTermStructure(IndexInputs.CurveOf(x)),
                 "pricingEngine" => b.WithPricingEngine(EngineOf(x)),
                 "withIndexedCoupons" => b.WithIndexedCoupons(x.GetBoolean()),
                 "atParCoupons" => b.WithAtParCoupons(x.GetBoolean()),
@@ -415,9 +415,9 @@ internal static class SwapInputs
                 "paymentAdjustmentConvention" => b.WithPaymentAdjustment((BusinessDayConvention)x.GetInt32()),
                 "paymentLag" => b.WithPaymentLag(x.GetInt32()),
                 "paymentCalendar" => b.WithPaymentCalendar(CashFlowInputs.CalendarOf(x)),
-                "calendar" => b.WithCalendar(CashFlowInputs.CalendarOf(x)),
-                "fixedLegCalendar" => b.WithFixedLegCalendar(CashFlowInputs.CalendarOf(x)),
-                "overnightLegCalendar" => b.WithOvernightLegCalendar(CashFlowInputs.CalendarOf(x)),
+                "calendar" => b.WithCalendar(CashFlowInputs.NullableCalendarOf(x)),
+                "fixedLegCalendar" => b.WithFixedLegCalendar(CashFlowInputs.NullableCalendarOf(x)),
+                "overnightLegCalendar" => b.WithOvernightLegCalendar(CashFlowInputs.NullableCalendarOf(x)),
                 "convention" => b.WithConvention((BusinessDayConvention)x.GetInt32()),
                 "fixedLegConvention" => b.WithFixedLegConvention((BusinessDayConvention)x.GetInt32()),
                 "overnightLegConvention" => b.WithOvernightLegConvention((BusinessDayConvention)x.GetInt32()),
@@ -433,7 +433,7 @@ internal static class SwapInputs
                 "overnightLegEndOfMonth" => b.WithOvernightLegEndOfMonth(x.GetBoolean()),
                 "fixedLegDayCount" => b.WithFixedLegDayCount(CashFlowInputs.DayCounterOf(x)),
                 "overnightLegSpread" => b.WithOvernightLegSpread(IndexInputs.Real(x)),
-                "discountingTermStructure" => b.WithDiscountingTermStructure(CashFlowInputs.CurveOf(x)),
+                "discountingTermStructure" => b.WithDiscountingTermStructure(IndexInputs.CurveOf(x)),
                 "telescopicValueDates" => b.WithTelescopicValueDates(x.GetBoolean()),
                 "averagingMethod" => b.WithAveragingMethod((RateAveragingType)x.GetInt32()),
                 "lookbackDays" => b.WithLookbackDays(x.GetInt32()),
@@ -452,7 +452,8 @@ internal static class SwapInputs
     /// <summary>
     /// The engine QuantLib's builder attaches to the swap it builds: the last one given, as an engine or a discounting
     /// term structure, or, with neither, a <see cref="DiscountingSwapEngine"/> on the index's forecasting curve without
-    /// the settlement date's flows, which prices nothing when the index has no curve.
+    /// the settlement date's flows, which prices nothing when the index has no curve, as one on a null discounting term
+    /// structure, QuantLib's empty handle, prices nothing.
     /// </summary>
     /// <param name="spec">The <c>"build"</c> spec.</param>
     /// <param name="index">The index the swap was built on.</param>
@@ -466,8 +467,12 @@ internal static class SwapInputs
             switch (setter[0].GetString())
             {
                 case "discountingTermStructure":
-                    FlatForward curve = CashFlowInputs.CurveOf(setter[1]);
-                    chosen = (s, c) => DiscountingSwapEngine.Calculate(s, c, curve, includeSettlementDateFlows: false);
+                    YieldTermStructure? curve = IndexInputs.CurveOf(setter[1]);
+                    chosen = (s, c) => DiscountingSwapEngine.Calculate(
+                        s,
+                        c,
+                        curve ?? throw new NanoQLException("discounting term structure handle is empty"),
+                        includeSettlementDateFlows: false);
                     break;
                 case "pricingEngine":
                     chosen = EngineOf(setter[1]);

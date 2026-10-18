@@ -40,4 +40,23 @@ public interface IInterpolator
     /// <param name="y">The y values, one per x value.</param>
     /// <returns>The interpolation.</returns>
     Interpolation Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y);
+
+    /// <summary>
+    /// Runs the checks QuantLib's interpolation makes when it is built over a number of points, before it reads their
+    /// values: the fewest points its implementation takes, and the counts its configuration needs.
+    /// </summary>
+    /// <remarks>
+    /// The bootstraps read it on their first pass: QuantLib builds a curve's interpolation over its first nodes before
+    /// their values are solved (<c>interpolateWithoutUpdate</c>), and takes linear interpolation where a global
+    /// interpolation refuses to be built over that many points (<c>iterativebootstrap.hpp:295-310</c>).
+    /// <see cref="Interpolate"/> runs every check, these and the ones on the values alike. The default refuses none, so a
+    /// factory of one's own keeps compiling; a factory overrides it with its construction checks, so that a curve on it
+    /// takes the fallback where QuantLib's would.
+    /// </remarks>
+    /// <param name="points">The number of points.</param>
+    /// <exception cref="ArgumentException">The interpolation can't be built over that many points.</exception>
+    /// <exception cref="NanoQLException">The interpolation's configuration can't be built over that many points.</exception>
+    void CheckPoints(int points)
+    {
+    }
 }

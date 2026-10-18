@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # The code below quotes licence tags as data; REUSE reads only the two lines above.
 # REUSE-IgnoreStart
-"""The licensing gate's upstream checks, (2) to (5) (docs/porting-playbook.md §8).
+"""The licensing gate's upstream checks, (2) to (7) (docs/porting-playbook.md §8).
 
 Usage: .venv\\Scripts\\python -I tools/check-upstream.py <QuantLib v1.44 worktree> [--boost <Boost 1.90.0 root>]
        [--self-test]
@@ -11,7 +11,9 @@ Usage: .venv\\Scripts\\python -I tools/check-upstream.py <QuantLib v1.44 worktre
     Every Upstream path exists at the pin, and the file sits in the folder, and declares the namespace, that the name
     table (tools/porting-map.json) gives that path. Every test file's namespace names its folder. A test class's
     "// Replaced:" line names cases of its QuantLib test file that it neither ports nor lists as partial, each with
-    a test file that exists under tests/NanoQL.Tests/.
+    a test file that exists under tests/NanoQL.Tests/. Its "// Moved:" line names cases of its QuantLib test file,
+    each with a line that holds code of the case's body at the pin and a test file that exists under
+    tests/NanoQL.Tests/Divergences/.
 (3) The QuantLib copyright lines of the named upstream files appear verbatim and in order, a line holding U+FFFD read
     as its fault-free twin in another file the Upstream line names (one with no twin is a red). Every third-party
     block that tools/third-party-notices.txt lists for a named file appears whole, every line in order, in the file's
@@ -23,6 +25,8 @@ Usage: .venv\\Scripts\\python -I tools/check-upstream.py <QuantLib v1.44 worktre
     and no Upstream line names a file that a rule or the name table marks not ported.
 (6) The generated tables reproduce: each script under tools/tables/, run on QuantLib at the pin into a temporary
     folder, writes bytes identical to the committed files, and every .bin file under src/NanoQL/ is one they write.
+(7) docs/divergences.md reproduces: tools/divergences.py's page, generated from the Divergences/ tests, is the
+    committed file byte for byte; a red names the first entry that differs, or the missing page.
 
 A Boost port's Upstream line (boost/<path> @ boost-1.90.0) needs --boost, the root of Boost 1.90.0's release tree
 (tools/cxx/build.py's boost_1_90_0, or the release zip checked against its SHA-256). Its pin is the name table's
@@ -46,6 +50,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import divergences  # noqa: E402
 import sources  # noqa: E402
 
 TOOLS = os.path.dirname(os.path.abspath(__file__))
@@ -55,6 +60,7 @@ _spec.loader.exec_module(porting_map)
 SRC = "src/NanoQL/"
 TESTS = "tests/NanoQL.Tests/"
 TEST_SUITE = TESTS + "TestSuite/"
+DIVERGENCES = "Divergences/"
 BOOST_SRC = SRC + "Boost/"
 BOOST_NAMESPACE = "NanoQL.Numerics"
 BOOST_VERSION = "109000"
@@ -66,6 +72,8 @@ TABLE = ".bin"
 # A table script's output, by its source's digest and the QuantLib root: the self-test runs the checker once per
 # perturbation over copies holding the same scripts.
 _generated = {}
+# A QuantLib test file's text with its comments and string contents blanked, by the QuantLib root and its unit.
+_blanked = {}
 
 
 def glob_regex(pattern):
@@ -102,6 +110,36 @@ def listed_partials(root):
     if not m:
         return None
     return {p for p in re.findall(r"^\s*[-*]\s+`([^`]+)`", m.group(1), re.M)}
+
+
+def case_body(ql_root, unit, case):
+    """The numbers (1-based) of the lines that hold code of a QuantLib test case's body, between its braces, in the
+    unit's .cpp at the pin: comments and string contents aren't code. Empty if the file has no such case."""
+    key = (os.path.abspath(ql_root), unit)
+    if key not in _blanked:
+        text = sources.ql_read(ql_root, unit + ".cpp")
+        _blanked[key] = porting_map.STRIP.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), text)
+    code = _blanked[key]
+    m = re.search(r"BOOST_(?:AUTO|DATA|FIXTURE)_TEST_CASE\s*\(\s*" + re.escape(case) + r"\b", code)
+    if not m:
+        return []
+    i, depth = m.end(), 1
+    while i < len(code) and depth:
+        depth += {"(": 1, ")": -1}.get(code[i], 0)
+        i += 1
+    i = code.find("{", i)
+    if i < 0:
+        return []
+    line, depth, lines = code.count("\n", 0, i) + 1, 1, []
+    for ch in code[i + 1:]:
+        depth += {"{": 1, "}": -1}.get(ch, 0)
+        if not depth:
+            break
+        if ch == "\n":
+            line += 1
+        elif not ch.isspace() and (not lines or lines[-1] != line):
+            lines.append(line)
+    return lines
 
 
 def boost_version(boost_root):
@@ -157,6 +195,8 @@ class Checker:
                 self.check_test_namespace(path, header)
             if header.replaced:
                 self.check_replaced(path, header)
+            if header.moved:
+                self.check_moved(path, header)
             if not header.upstream:
                 if not allowed:
                     self.error("allowlist", f"{path}: no Upstream line, and not listed in tools/no-upstream.txt")
@@ -187,6 +227,7 @@ class Checker:
         self.check_table()
         self.check_map()
         self.check_tables(files)
+        self.check_divergences()
 
     def read_notices(self):
         """tools/third-party-notices.txt's rows, as (QuantLib file, first line, last line, SPDX id, the block's
@@ -251,6 +292,47 @@ class Checker:
                 self.error("replaced", f"{path}: Replaced names {case}, which is also on its // Partial: line")
             if not os.path.isfile(os.path.join(self.root, TESTS, test)):
                 self.error("replaced", f"{path}: Replaced names {test}, which doesn't exist under {TESTS}")
+
+    def check_moved(self, path, header):
+        """A "// Moved:" line: checks of the class's QuantLib cases, each at a line of the case's body at the pin, moved
+        to a Divergences/ test."""
+        units = {sources.unit_of(up) for up in header.upstream}
+        if not path.startswith(TEST_SUITE) or len(units) != 1:
+            self.error("moved", f"{path}: a // Moved: line belongs on a TestSuite class naming one test file")
+            return
+        unit = next(iter(units))
+        cases = porting_map.quantlib_side(self.ql).get(unit, {}).get("cases", [])
+        for case, line, test in header.moved:
+            if case is None:
+                self.error("moved", f"{path}: '{test}' on its // Moved: line isn't '<case> line <n> "
+                                    f"({DIVERGENCES}<file>)'")
+                continue
+            if case not in cases:
+                self.error("moved", f"{path}: Moved names {case}, which isn't a case of {unit}.cpp")
+            else:
+                body = case_body(self.ql, unit, case)
+                if line not in body:
+                    span = f"{body[0]}-{body[-1]}" if body else "none"
+                    self.error("moved", f"{path}: Moved names {case} line {line}, which holds no code of the case's "
+                                        f"body in {unit}.cpp at the pin (its body's lines: {span})")
+            if not test.startswith(DIVERGENCES) or not os.path.isfile(os.path.join(self.root, TESTS, test)):
+                self.error("moved", f"{path}: Moved names {test}, which doesn't exist under {TESTS}{DIVERGENCES}")
+
+    def check_divergences(self):
+        """(7) docs/divergences.md is, byte for byte, the page tools/divergences.py generates."""
+        try:
+            entries = divergences.build(self.root)
+            self.counts["divergences"] = len(entries)
+            detail = divergences.difference(self.root, entries)
+        except divergences.DivergenceError as e:
+            self.counts["divergences"] = 0
+            self.error("divergences", f"{divergences.PAGE}: can't be generated: {e}")
+            return
+        if detail == "missing page":
+            self.error("divergences", f"{divergences.PAGE}: missing page")
+        elif detail is not None:
+            self.error("divergences", f"{divergences.PAGE} differs from a fresh generation (tools/divergences.py): "
+                                      f"{detail}")
 
     def check_boost(self, path, header):
         """A Boost port (D19). Returns whether its header holds."""
@@ -513,6 +595,7 @@ def report(checker):
           f"(replaced and not-ported: {c['table-lists']}); porting map reproduces")
     print(f"(6) generated tables reproducing: {c['tables'][0]}/{c['tables'][1]} files, {c['tables'][2]:,} bytes, from "
           f"{c['tables'][3]} scripts under {TABLES}")
+    print(f"(7) the divergence page reproduces, {c['divergences']} entries")
     for code, message in checker.errors:
         print(f"RED [{code}] {message}")
     print("check-upstream: " + ("passed" if not checker.errors else f"{len(checker.errors)} errors"))
@@ -537,6 +620,13 @@ UBLAS_PROBE = "src/NanoQL/Boost/Numeric/Ublas/SelfTestMatrixSparseProbe.cs"
 # A committed table that tools/tables/sobolrsg.py generates (6).
 TABLE_FILE = "src/NanoQL/Numerics/RandomNumbers/SobolRsg/Initializers.bin"
 DATES_TESTS = "tests/NanoQL.Tests/TestSuite/DatesTests.cs"
+# A ported test class with a // Moved: line, and a Divergences/ test whose summary the page carries (7).
+OIS_COUPON_TESTS = "tests/NanoQL.Tests/TestSuite/OvernightIndexedCouponTests.cs"
+NULL_DATE_TESTS = "tests/NanoQL.Tests/Divergences/NullDateTests.cs"
+# An entry in the divergence page's form for a class no test file declares, written out.
+EXTRA_ENTRY = ("\n## SelfTestExtraTests\n\n"
+               "[`Divergences/SelfTestExtraTests.cs`](../tests/NanoQL.Tests/Divergences/SelfTestExtraTests.cs)\n\n"
+               "A divergence no test asserts.\n\nFacts:\n\n- `ADivergenceNoTestAsserts`\n")
 # Third-party blocks (§1), each probe a synthetic port of real QuantLib files whose copyright lines and blocks are
 # written out as those files have them at the pin, never read through the checker.
 RULE = "=" * 75
@@ -793,6 +883,10 @@ def perturbations(ql_root, boost_root, tmp):
         ("a // Replaced: line outside a TestSuite class", "replaced", "belongs on a TestSuite class",
          lambda r: edit(r, PROBE, "// Ported to C#",
                         "// Replaced: nullDate (Divergences/NullDateTests.cs)\n// Ported to C#")),
+        ("a // Moved: line naming a missing test file", "moved",
+         "Moved names Divergences/NoSuchTests.cs, which doesn't exist under",
+         lambda r: edit(r, OIS_COUPON_TESTS, "line 1936 (Divergences/TelescopicValueDatesTests.cs)",
+                        "line 1936 (Divergences/NoSuchTests.cs)")),
         ("a third-party block missing a middle line", "third-party",
          f"{PROBE_PRIMES}: doesn't carry the third-party block of {PRIMES[0]} whole and in order; the block's line 5",
          lambda r: edit(r, PROBE_PRIMES, "// All rights reserved.\n", "")),
@@ -853,6 +947,15 @@ def perturbations(ql_root, boost_root, tmp):
          lambda r: edit(r, FIFTH_SOURCE, "Redistribution", "Redistributi" + sources.FFFD + "n")),
         ("a generated table with one changed byte", "tables", f"{TABLE_FILE}: differs from a fresh generation",
          changed_byte),
+        ("a missing divergence page", "divergences", f"{divergences.PAGE}: missing page",
+         lambda r: os.remove(os.path.join(r, *divergences.PAGE.split("/")))),
+        ("a divergence entry stale against its test's summary", "divergences",
+         "first differing entry: NullDateTests, whose text differs",
+         lambda r: edit(r, NULL_DATE_TESTS, "is a <c>Date?</c> null in nanoql",
+                        "is a <c>Date?</c> null value in nanoql")),
+        ("a divergence entry no test class has", "divergences",
+         "first differing entry: SelfTestExtraTests, which no test class has",
+         lambda r: append(r, divergences.PAGE, EXTRA_ENTRY)),
     ]
 
 

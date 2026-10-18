@@ -3,6 +3,8 @@
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Indexes;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Divergences;
@@ -11,7 +13,11 @@ namespace NanoQL.Tests.Divergences;
 /// QuantLib's builders (<c>MakeSchedule</c>, <c>FixedRateLeg</c>) change themselves and return a reference to
 /// themselves, and convert implicitly. nanoql's return a modified copy, so a builder kept and reused never changes
 /// under its holder, and convert through <c>ToSchedule()</c> and <c>ToLeg()</c>, which throw where QuantLib's
-/// conversions throw.
+/// conversions throw. And a leg builder can't be given a schedule built from dates on QuantLib's empty calendar:
+/// <see cref="Schedule"/>'s dates constructor reads <see langword="null"/> as QuantLib's default there,
+/// <see cref="NullCalendar"/>, so such a schedule has no spelling, and <see cref="OvernightLeg"/> pays on the
+/// schedule's own dates where QuantLib's falls back to <see cref="WeekendsOnly"/> for an empty schedule calendar
+/// (<c>overnightindexedcoupon.cpp:583-586</c>).
 /// </summary>
 public class BuilderTests
 {
@@ -109,6 +115,29 @@ public class BuilderTests
         var noNotional = Assert.Throws<NanoQLException>(() =>
             new FixedRateLeg(schedule).WithCouponRates(0.03, new Actual360()).ToLeg());
         Assert.Equal("no notional given", noNotional.Message);
+    }
+
+    [Fact]
+    public void ADatesScheduleOnQuantLibsEmptyCalendarHasNoSpelling()
+    {
+        // QuantLib's Schedule({15 January 2026, Saturday 18 April 2026}, Calendar()) pays its overnight coupon on
+        // WeekendsOnly's Monday, 20 April 2026, and the same schedule on NullCalendar on the Saturday, the wheel's
+        // dates. nanoql's null is NullCalendar, so its leg pays on the Saturday.
+        var estr = new Estr(new FlatForward(Start, 0.03, new Actual365Fixed()));
+        var schedule = new Schedule([new Date(15, Month.January, 2026), new Date(18, Month.April, 2026)], calendar: null);
+
+        Assert.Equal(new NullCalendar(), schedule.Calendar);
+        Assert.Equal([new Date(18, Month.April, 2026)], new OvernightLeg(schedule, estr).WithNotionals(100.0).ToLeg()
+            .Select(cf => cf.Date));
+
+        // A rule-based schedule can hold QuantLib's empty calendar, and its leg pays on WeekendsOnly, as QuantLib's.
+        var ruleBased = new Schedule(
+            new Date(15, Month.January, 2026), new Date(18, Month.April, 2026), new Period(1, TimeUnit.Years), null,
+            BusinessDayConvention.Unadjusted, BusinessDayConvention.Unadjusted, DateGenerationRule.Backward, false,
+            Context);
+        Assert.Null(ruleBased.Calendar);
+        Assert.Equal([new Date(20, Month.April, 2026)], new OvernightLeg(ruleBased, estr).WithNotionals(100.0).ToLeg()
+            .Select(cf => cf.Date));
     }
 
     private static double[] Amounts(FixedRateLeg builder) => [.. builder.ToLeg().Select(cf => cf.Amount(Context))];

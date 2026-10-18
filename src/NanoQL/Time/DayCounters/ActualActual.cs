@@ -370,12 +370,15 @@ file static class ActualActualHelpers
         Date issueDate = schedule.Date(0);
         List<Date> newDates = [.. schedule.Dates];
 
+        // QuantLib's empty calendar, null in a schedule built on it, is used unchecked.
+        Calendar calendar = schedule.Calendar ?? EmptyCalendar.Instance;
+
         if (!schedule.HasIsRegular || !schedule.IsRegular(1))
         {
             Date firstCoupon = schedule.Date(1);
 
             Date notionalFirstCoupon =
-                schedule.Calendar.Advance(
+                calendar.Advance(
                     firstCoupon,
                     -schedule.Tenor(),
                     schedule.BusinessDayConvention,
@@ -387,7 +390,7 @@ file static class ActualActualHelpers
             if (notionalFirstCoupon > issueDate)
             {
                 Date priorNotionalCoupon =
-                    schedule.Calendar.Advance(
+                    calendar.Advance(
                         notionalFirstCoupon,
                         -schedule.Tenor(),
                         schedule.BusinessDayConvention,
@@ -399,7 +402,7 @@ file static class ActualActualHelpers
         if (!schedule.HasIsRegular || !schedule.IsRegular(schedule.Size - 1))
         {
             Date notionalLastCoupon =
-                schedule.Calendar.Advance(
+                calendar.Advance(
                     schedule.Date(schedule.Size - 2),
                     schedule.Tenor(),
                     schedule.BusinessDayConvention,
@@ -411,7 +414,7 @@ file static class ActualActualHelpers
             if (notionalLastCoupon < schedule.EndDate())
             {
                 Date nextNotionalCoupon =
-                    schedule.Calendar.Advance(
+                    calendar.Advance(
                         notionalLastCoupon,
                         schedule.Tenor(),
                         schedule.BusinessDayConvention,

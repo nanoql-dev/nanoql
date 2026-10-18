@@ -13,9 +13,9 @@ namespace NanoQL.Tests.Divergences;
 /// (<c>cashflowvectors.hpp:134-136</c>; for an overnight leg, <c>overnightindexedcoupon.cpp</c>'s
 /// <c>OvernightLeg</c>). Without one, QuantLib builds that coupon on an empty day counter and fails only when it is
 /// priced, "no day counter implementation provided" (<c>daycounter.hpp:118</c>); nanoql's
-/// <see cref="FixedRateCoupon"/> needs a day counter, so the leg is refused when it is built, with QuantLib's text: a
-/// builder's stored setting with <see cref="NanoQLException"/>, and the function form's argument with
-/// <see cref="ArgumentException"/>.
+/// <see cref="FixedRateCoupon"/> needs a day counter, so the leg is refused once it is built, after every refusal
+/// QuantLib raises while building it, with QuantLib's text: a builder's stored setting with
+/// <see cref="NanoQLException"/>, and the function form's argument with <see cref="ArgumentException"/>.
 /// </summary>
 public class ZeroGearingWithoutDayCounterTests
 {

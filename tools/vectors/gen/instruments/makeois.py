@@ -11,7 +11,12 @@ date's month end), from 31 January 2025 and from 30 April 2025, the end of a sho
 of its own, the fixed leg's day counter, the overnight spread, the par rate on a discounting term structure and on a
 pricing engine, averaged rates, lookbacks, lockouts, the observation shift, the rounding precision, and telescopic
 value dates; and QuantLib's refusals: settlement days with an effective date, no fixed rate with neither an engine nor
-a forecasting curve, a telescopic lookback without the shift, and a rounding precision of 17.
+a forecasting curve, a telescopic lookback without the shift, and a rounding precision of 17. The last nine builds,
+appended after the others, give the calendars QuantLib's empty calendar and the discounting term structure QuantLib's
+empty handle, both of which QuantLib uses unchecked: the calendar builds where every use is an Unadjusted adjustment,
+the overnight coupons then paid on the payment calendar or on WeekendsOnly, and refuses a settlement advance in days
+and a following payment adjustment; the handle builds a swap with a fixed rate, whose pricing it refuses, and refuses
+a par build.
 
 Each build's outputs are whether it builds, QuantLib's refusals recorded as its one throw; the swap's start and
 maturity dates, both schedules' dates, type, nominal, fixed rate (the par rate where none was given), spread, fixed
@@ -31,8 +36,8 @@ The builds call QuantLib-Python's MakeOIS, a Python function that builds the C++
 deprecated four-argument constructor (the tenor, the index, the fixed rate or Null<Rate>(), the forward start), which
 calls withFixedRate and withForwardStart, then calls each keyword's setter in the order given (QuantLib-SWIG 1.44,
 SWIG/swap.i), and converts the builder to an OvernightIndexedSwap. Each case's inputs hold its settings and its
-"build", as instruments/makevanillaswap.py writes it. Read back by
-tests/NanoQL.Tests/Vectors/Instruments/MakeOISVectorTests.cs."""
+"build", as instruments/makevanillaswap.py writes it, a null calendar being QuantLib's empty calendar and a null curve
+its empty handle. Read back by tests/NanoQL.Tests/Vectors/Instruments/MakeOISVectorTests.cs."""
 import importlib.util
 import os
 import sys
@@ -74,7 +79,7 @@ def wheel_value(key, x):
     if key in DATES:
         return ql.Date(x)
     if key in CALENDARS:
-        return irx.calendar(x)
+        return mvs.calendar_or_empty(x)
     if key in DAY_COUNTERS:
         return irx.day_counter(x)
     if key == "discountingTermStructure":
@@ -124,7 +129,7 @@ def make_by_rule(spec):
 
 
 def builds():
-    """(name, build spec, evaluation date) for the 57 builds."""
+    """(name, build spec, evaluation date) for the 66 builds."""
     def curve(forward, dc=fvf.A365):
         return fvf.curve(forward, dc)
     sonia = fvf.preset("Sonia", curve(0.047))
@@ -215,6 +220,31 @@ def builds():
                                                         settlementDays=2))
     add("no curve, no rate", build(two_y, fvf.preset("Estr"), None))
     add("no curve, a rate", build(two_y, fvf.preset("Estr"), 0.03))
+    # QuantLib's empty calendar and handle, appended so that the cases above keep their bytes. From 1 May 2025, two
+    # annual periods end on Friday 1 May 2026, a TARGET holiday, and Saturday 1 May 2027.
+    unadjusted = int(ql.Unadjusted)
+    may_day = v.enc(D(1, 5, 2025))
+    overnight_unadjusted = {"endOfMonth": False, "overnightLegConvention": unadjusted,
+                            "overnightLegTerminationDateConvention": unadjusted}
+    fixed_unadjusted = {"fixedLegConvention": unadjusted, "fixedLegTerminationDateConvention": unadjusted}
+    add("empty calendar, Unadjusted", build(two_y, estr, None, effectiveDate=may_day, calendar=None, endOfMonth=False,
+                                            convention=unadjusted, terminationDateConvention=unadjusted,
+                                            paymentAdjustmentConvention=unadjusted))
+    add("empty calendar, defaults refused", build(two_y, estr, 0.03, calendar=None))
+    add("empty fixed-leg calendar, Unadjusted, a payment calendar", build(two_y, estr, None, fixedLegCalendar=None,
+                                                                          paymentCalendar=fvf.TARGET,
+                                                                          **fixed_unadjusted))
+    add("empty fixed-leg calendar, Following payments refused", build(two_y, estr, 0.03, fixedLegCalendar=None,
+                                                                      **fixed_unadjusted))
+    add("empty overnight-leg calendar, Unadjusted", build(two_y, estr, None, effectiveDate=may_day,
+                                                          overnightLegCalendar=None, **overnight_unadjusted))
+    add("empty overnight-leg calendar, Unadjusted, a payment lag", build(two_y, estr, None, effectiveDate=may_day,
+                                                                         overnightLegCalendar=None, paymentLag=2,
+                                                                         **overnight_unadjusted))
+    add("empty overnight-leg calendar, defaults refused", build(two_y, estr, 0.03, overnightLegCalendar=None))
+    add("empty discounting term structure, a fixed rate", build(two_y, estr, 0.03, discountingTermStructure=None))
+    add("empty discounting term structure, at the par rate refused", build(two_y, estr, None,
+                                                                          discountingTermStructure=None))
     return out
 
 
@@ -257,9 +287,16 @@ def check_rows(out):
     assert starts["cloned SONIA"] == ql.UnitedKingdom(ql.UnitedKingdom.Exchange).advance(TODAY, 2,
                                                                                         ql.Days).serialNumber()
     for refused in ("telescopic lookback without shift refused", "rounding 17 refused",
-                    "settlement days with an effective date", "no curve, no rate"):
+                    "settlement days with an effective date", "no curve, no rate",
+                    "empty calendar, defaults refused", "empty fixed-leg calendar, Following payments refused",
+                    "empty overnight-leg calendar, defaults refused",
+                    "empty discounting term structure, at the par rate refused"):
         assert by_name[refused] == {"built": v.THROWS}, refused
-    assert by_name["no curve, a rate"].get("calculate") == v.THROWS
+    for priced_nothing in ("no curve, a rate", "empty discounting term structure, a fixed rate"):
+        assert by_name[priced_nothing].get("calculate") == v.THROWS, priced_nothing
+    for built in ("empty calendar, Unadjusted", "empty fixed-leg calendar, Unadjusted, a payment calendar",
+                  "empty overnight-leg calendar, Unadjusted", "empty overnight-leg calendar, Unadjusted, a payment lag"):
+        assert by_name[built]["built"] is True, built
     for name in ("SONIA default", "telescopic, averaged", "rounding 6"):
         assert abs(by_name[name]["NPV"]["value"]) < 1e-12 * by_name[name]["NPV"]["scale"] + 1e-12, name
     check_short_month_ends(by_name)

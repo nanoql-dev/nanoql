@@ -24,17 +24,10 @@ namespace NanoQL.Coupons;
 public sealed record FixedRateLeg
 {
     /// <summary>Initializes a new instance of the <see cref="FixedRateLeg"/> class.</summary>
-    /// <param name="schedule">The schedule of accrual dates.</param>
-    /// <exception cref="ArgumentException">The schedule is empty.</exception>
+    /// <param name="schedule">The schedule of accrual dates; its calendar is the default payment calendar.</param>
     public FixedRateLeg(Schedule schedule)
     {
         ArgumentNullException.ThrowIfNull(schedule);
-        if (schedule.Empty)
-        {
-            // QuantLib reads the first date of an empty schedule, which is undefined.
-            throw new ArgumentException("empty schedule", nameof(schedule));
-        }
-
         Schedule = schedule;
         PaymentCalendar = schedule.Calendar;
     }
@@ -47,7 +40,7 @@ public sealed record FixedRateLeg
 
     private DayCounter? FirstPeriodDC { get; init; }
 
-    private Calendar PaymentCalendar { get; init; }
+    private Calendar? PaymentCalendar { get; init; }
 
     private BusinessDayConvention PaymentAdjustment { get; init; } = BusinessDayConvention.Following;
 
@@ -81,20 +74,27 @@ public sealed record FixedRateLeg
     /// <param name="comp">The compounding rule.</param>
     /// <param name="freq">The compounding frequency.</param>
     /// <returns>The modified builder.</returns>
+    /// <exception cref="ArgumentNullException">The day counter is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public FixedRateLeg WithCouponRates(
         double rate,
         DayCounter paymentDayCounter,
         Compounding comp = Compounding.Simple,
         Frequency freq = Frequency.Annual) =>
-        this with { CouponRates = [new InterestRate(rate, paymentDayCounter, comp, freq)] };
+        this with { CouponRates = [CouponRate(rate, paymentDayCounter, comp, freq)] };
 
     /// <summary>Sets the coupon rates; the last one repeats for any further coupons.</summary>
     /// <param name="rates">The rates.</param>
-    /// <param name="paymentDayCounter">The day counter.</param>
+    /// <param name="paymentDayCounter">
+    /// The day counter, checked with each rate, as QuantLib builds one interest rate per rate: an empty list of rates
+    /// checks nothing.
+    /// </param>
     /// <param name="comp">The compounding rule.</param>
     /// <param name="freq">The compounding frequency.</param>
     /// <returns>The modified builder.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// The rates are <see langword="null"/>, or rates are given with a <see langword="null"/> day counter.
+    /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     public FixedRateLeg WithCouponRates(
         IEnumerable<double> rates,
@@ -103,7 +103,7 @@ public sealed record FixedRateLeg
         Frequency freq = Frequency.Annual)
     {
         ArgumentNullException.ThrowIfNull(rates);
-        return this with { CouponRates = [.. rates.Select(r => new InterestRate(r, paymentDayCounter, comp, freq))] };
+        return this with { CouponRates = [.. rates.Select(r => CouponRate(r, paymentDayCounter, comp, freq))] };
     }
 
     /// <summary>Sets one interest rate for every coupon.</summary>
@@ -141,22 +141,20 @@ public sealed record FixedRateLeg
     }
 
     /// <summary>Sets the day counter of the first period, in place of the rate's.</summary>
-    /// <param name="dayCounter">The day counter.</param>
+    /// <param name="dayCounter">
+    /// The day counter, or <see langword="null"/>, QuantLib's empty day counter, for the rate's.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public FixedRateLeg WithFirstPeriodDayCounter(DayCounter dayCounter)
-    {
-        ArgumentNullException.ThrowIfNull(dayCounter);
-        return this with { FirstPeriodDC = dayCounter };
-    }
+    public FixedRateLeg WithFirstPeriodDayCounter(DayCounter? dayCounter) => this with { FirstPeriodDC = dayCounter };
 
     /// <summary>Sets the calendar of the payment dates; the schedule's calendar by default.</summary>
-    /// <param name="cal">The calendar.</param>
+    /// <param name="cal">
+    /// The calendar, or <see langword="null"/> for QuantLib's empty calendar, which gives a payment date only with no
+    /// payment lag and an <see cref="BusinessDayConvention.Unadjusted"/> payment adjustment; the conversion refuses
+    /// any other, as QuantLib's does.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public FixedRateLeg WithPaymentCalendar(Calendar cal)
-    {
-        ArgumentNullException.ThrowIfNull(cal);
-        return this with { PaymentCalendar = cal };
-    }
+    public FixedRateLeg WithPaymentCalendar(Calendar? cal) => this with { PaymentCalendar = cal };
 
     /// <summary>Sets the number of business days from each accrual end to its payment date.</summary>
     /// <param name="lag">The lag.</param>
@@ -165,18 +163,22 @@ public sealed record FixedRateLeg
 
     /// <summary>Sets the ex-coupon period, counted back from each payment date.</summary>
     /// <param name="period">The period; a zero-length period means no ex-coupon dates.</param>
-    /// <param name="cal">The calendar the period is counted on.</param>
+    /// <param name="cal">
+    /// The calendar the period is counted on, or <see langword="null"/> for QuantLib's empty calendar, which a
+    /// zero-length period never reads, and which gives an ex-coupon date only for a period of weeks, months or years
+    /// with an <see cref="BusinessDayConvention.Unadjusted"/> convention; the conversion refuses any other, as
+    /// QuantLib's does.
+    /// </param>
     /// <param name="convention">The business-day convention of the ex-coupon dates.</param>
     /// <param name="endOfMonth">Whether the ex-coupon dates stay at month end.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
     public FixedRateLeg WithExCouponPeriod(
         Period period,
-        Calendar cal,
+        Calendar? cal,
         BusinessDayConvention convention,
         bool endOfMonth = false)
     {
-        ArgumentNullException.ThrowIfNull(cal);
         EnumArguments.Check(convention, nameof(convention));
         return this with
         {
@@ -189,7 +191,10 @@ public sealed record FixedRateLeg
 
     /// <summary>Builds the leg.</summary>
     /// <returns>The leg, one coupon per schedule period.</returns>
-    /// <exception cref="NanoQLException">No coupon rates or no notionals were given.</exception>
+    /// <exception cref="NanoQLException">
+    /// No coupon rates or no notionals were given; the schedule is empty; or a date is computed on QuantLib's empty
+    /// calendar where it can't give one.
+    /// </exception>
     public ImmutableArray<CashFlow> ToLeg()
     {
         if (CouponRates.IsEmpty)
@@ -203,16 +208,26 @@ public sealed record FixedRateLeg
         }
 
         Schedule schedule = Schedule;
+        if (schedule.Empty)
+        {
+            // QuantLib reserves schedule_.size()-1 coupons, a Size that wraps below zero, which is undefined.
+            throw new NanoQLException("empty schedule");
+        }
+
         var leg = ImmutableArray.CreateBuilder<CashFlow>();
+
+        // QuantLib's empty calendars, null here, are used unchecked, as QuantLib uses them
+        Calendar paymentCalendar = PaymentCalendar ?? EmptyCalendar.Instance;
+        Calendar scheduleCalendar = schedule.Calendar ?? EmptyCalendar.Instance;
 
         // first period might be short or long
         Date start = schedule.Date(0), end = schedule.Date(1);
-        Date paymentDate = PaymentCalendar.Advance(end, PaymentLag, TimeUnit.Days, PaymentAdjustment);
+        Date paymentDate = paymentCalendar.Advance(end, PaymentLag, TimeUnit.Days, PaymentAdjustment);
         Date? exCouponDate = ExCouponDateFor(paymentDate);
         InterestRate rate = CouponRates[0];
         double nominal = Notionals[0];
         Date reference = schedule.HasTenor && schedule.HasIsRegular && !schedule.IsRegular(1)
-            ? schedule.Calendar.Advance(end, -schedule.Tenor(), schedule.BusinessDayConvention, schedule.EndOfMonth())
+            ? scheduleCalendar.Advance(end, -schedule.Tenor(), schedule.BusinessDayConvention, schedule.EndOfMonth())
             : start;
         var r = new InterestRate(rate.Rate, FirstPeriodDC ?? rate.DayCounter, rate.Compounding, rate.Frequency);
         leg.Add(new FixedRateCoupon(paymentDate, nominal, r, start, end, reference, end, exCouponDate));
@@ -222,7 +237,7 @@ public sealed record FixedRateLeg
         {
             start = end;
             end = schedule.Date(i);
-            paymentDate = PaymentCalendar.Advance(end, PaymentLag, TimeUnit.Days, PaymentAdjustment);
+            paymentDate = paymentCalendar.Advance(end, PaymentLag, TimeUnit.Days, PaymentAdjustment);
             exCouponDate = ExCouponDateFor(paymentDate);
             rate = (i - 1) < CouponRates.Length ? CouponRates[i - 1] : CouponRates[^1];
             nominal = (i - 1) < Notionals.Length ? Notionals[i - 1] : Notionals[^1];
@@ -235,7 +250,7 @@ public sealed record FixedRateLeg
             int n = schedule.Size;
             start = end;
             end = schedule.Date(n - 1);
-            paymentDate = PaymentCalendar.Advance(end, PaymentLag, TimeUnit.Days, PaymentAdjustment);
+            paymentDate = paymentCalendar.Advance(end, PaymentLag, TimeUnit.Days, PaymentAdjustment);
             exCouponDate = ExCouponDateFor(paymentDate);
             rate = (n - 2) < CouponRates.Length ? CouponRates[n - 2] : CouponRates[^1];
             nominal = (n - 2) < Notionals.Length ? Notionals[n - 2] : Notionals[^1];
@@ -245,7 +260,7 @@ public sealed record FixedRateLeg
             }
             else
             {
-                Date referenceEnd = schedule.Calendar.Advance(
+                Date referenceEnd = scheduleCalendar.Advance(
                     start, schedule.Tenor(), schedule.BusinessDayConvention, schedule.EndOfMonth());
                 leg.Add(new FixedRateCoupon(paymentDate, nominal, rate, start, end, start, referenceEnd, exCouponDate));
             }
@@ -254,8 +269,17 @@ public sealed record FixedRateLeg
         return leg.ToImmutable();
     }
 
+    // QuantLib's InterestRate(rate, dc, comp, freq) for one coupon rate; nanoql's InterestRate needs the day counter,
+    // which is refused under the setter's own parameter's name.
+    private static InterestRate CouponRate(double rate, DayCounter paymentDayCounter, Compounding comp, Frequency freq)
+    {
+        ArgumentNullException.ThrowIfNull(paymentDayCounter);
+        return new InterestRate(rate, paymentDayCounter, comp, freq);
+    }
+
     private Date? ExCouponDateFor(Date paymentDate) =>
         ExCouponPeriod != default
-            ? ExCouponCalendar!.Advance(paymentDate, -ExCouponPeriod, ExCouponAdjustment, ExCouponEndOfMonth)
+            ? (ExCouponCalendar ?? EmptyCalendar.Instance)
+                .Advance(paymentDate, -ExCouponPeriod, ExCouponAdjustment, ExCouponEndOfMonth)
             : null;
 }

@@ -40,12 +40,22 @@ public sealed record MakeSchedule
     /// <summary>Sets the effective date.</summary>
     /// <param name="effectiveDate">The effective date.</param>
     /// <returns>The modified builder.</returns>
-    public MakeSchedule From(Date effectiveDate) => this with { EffectiveDate = effectiveDate };
+    /// <exception cref="ArgumentException">The date is <c>default(Date)</c>.</exception>
+    public MakeSchedule From(Date effectiveDate)
+    {
+        Date.ThrowIfDefault(effectiveDate, nameof(effectiveDate));
+        return this with { EffectiveDate = effectiveDate };
+    }
 
     /// <summary>Sets the termination date.</summary>
     /// <param name="terminationDate">The termination date.</param>
     /// <returns>The modified builder.</returns>
-    public MakeSchedule To(Date terminationDate) => this with { TerminationDate = terminationDate };
+    /// <exception cref="ArgumentException">The date is <c>default(Date)</c>.</exception>
+    public MakeSchedule To(Date terminationDate)
+    {
+        Date.ThrowIfDefault(terminationDate, nameof(terminationDate));
+        return this with { TerminationDate = terminationDate };
+    }
 
     /// <summary>Sets the tenor.</summary>
     /// <param name="tenor">The tenor.</param>
@@ -62,13 +72,12 @@ public sealed record MakeSchedule
         this with { Tenor = Period.FromFrequency(frequency, nameof(frequency)) };
 
     /// <summary>Sets the calendar.</summary>
-    /// <param name="calendar">The calendar.</param>
+    /// <param name="calendar">
+    /// The calendar, or <see langword="null"/>, QuantLib's empty calendar, for none: the schedule is then built on a
+    /// <see cref="NullCalendar"/>, with <see cref="BusinessDayConvention.Unadjusted"/> as the default convention.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public MakeSchedule WithCalendar(Calendar calendar)
-    {
-        ArgumentNullException.ThrowIfNull(calendar);
-        return this with { Calendar = calendar };
-    }
+    public MakeSchedule WithCalendar(Calendar? calendar) => this with { Calendar = calendar };
 
     /// <summary>Sets the business-day convention.</summary>
     /// <param name="conv">The convention.</param>
@@ -116,12 +125,22 @@ public sealed record MakeSchedule
     /// <summary>Sets the first date after the effective date, for an irregular first period.</summary>
     /// <param name="d">The date, or <see langword="null"/> for none.</param>
     /// <returns>The modified builder.</returns>
-    public MakeSchedule WithFirstDate(Date? d) => this with { FirstDate = d };
+    /// <exception cref="ArgumentException">The date is <c>default(Date)</c>.</exception>
+    public MakeSchedule WithFirstDate(Date? d)
+    {
+        Date.ThrowIfDefault(d, nameof(d));
+        return this with { FirstDate = d };
+    }
 
     /// <summary>Sets the date before the termination date, for an irregular last period.</summary>
     /// <param name="d">The date, or <see langword="null"/> for none.</param>
     /// <returns>The modified builder.</returns>
-    public MakeSchedule WithNextToLastDate(Date? d) => this with { NextToLastDate = d };
+    /// <exception cref="ArgumentException">The date is <c>default(Date)</c>.</exception>
+    public MakeSchedule WithNextToLastDate(Date? d)
+    {
+        Date.ThrowIfDefault(d, nameof(d));
+        return this with { NextToLastDate = d };
+    }
 
     /// <summary>Builds the schedule.</summary>
     /// <returns>The schedule.</returns>

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Coupons;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
 using NanoQL.Time;
@@ -47,6 +48,23 @@ public class NullArgumentTests
         AssertParam("dates", () => new TimeSeries<double>(null!, [1.0]));
         AssertParam("values", () => new TimeSeries<double>([today], null!));
         AssertParam("values", () => new TimeSeries<double>(today, null!));
+    }
+
+    [Fact]
+    public void AFixedRateLegsNullRateDayCounterNamesTheSettersParameter()
+    {
+        // QuantLib builds one InterestRate per rate with the day counter given (fixedratecoupon.cpp:105-128), which
+        // nanoql's InterestRate needs: refused naming the setter's parameter, not InterestRate's "dc". An empty list of
+        // rates builds none and checks nothing, so the conversion's "no coupon rates given" stays QuantLib's first
+        // refusal (:178).
+        Schedule schedule = new MakeSchedule().From(new Date(15, Month.January, 2027)).To(new Date(15, Month.January, 2030))
+            .WithFrequency(Frequency.Annual).WithCalendar(new TARGET()).ToSchedule();
+        FixedRateLeg leg = new FixedRateLeg(schedule).WithNotionals(100.0);
+
+        AssertParam("paymentDayCounter", () => leg.WithCouponRates(0.05, null!));
+        AssertParam("paymentDayCounter", () => leg.WithCouponRates([0.05, 0.06], null!, Compounding.Compounded));
+        FixedRateLeg empty = leg.WithCouponRates([], null!);
+        Assert.Equal("no coupon rates given", Assert.Throws<NanoQLException>(() => empty.ToLeg()).Message);
     }
 
     private static void AssertParam(string paramName, Action action) =>

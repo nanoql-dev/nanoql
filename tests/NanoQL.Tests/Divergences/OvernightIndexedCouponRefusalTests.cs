@@ -55,14 +55,16 @@ public class OvernightIndexedCouponRefusalTests
 
     // O3: QuantLib's conversion counts schedule_.size()-1 periods, a Size that wraps below zero
     // (overnightindexedcoupon.cpp:593), and reads schedule_.date(0) past the end, or prints the wrapped count in its
-    // payment-date check (:596-601).
+    // payment-date check (:596-601). nanoql's conversion refuses the schedule where the count wraps, after the
+    // notional and pricer checks QuantLib makes before it.
     [Fact]
     public void AnOvernightLegRefusesAnEmptySchedule()
     {
-        ArgumentException e = Assert.Throws<ArgumentException>(() =>
-            new OvernightLeg(new Schedule([], new TARGET()), Sofr()));
-        Assert.Equal("schedule", e.ParamName);
-        Assert.StartsWith("empty schedule", e.Message, StringComparison.Ordinal);
+        var leg = new OvernightLeg(new Schedule([], new TARGET()), Sofr());
+        NanoQLException e = Assert.Throws<NanoQLException>(() => leg.WithNotionals(1e6).ToLeg());
+        Assert.Equal("empty schedule", e.Message);
+        e = Assert.Throws<NanoQLException>(() => leg.WithNotionals(1e6).WithPaymentDates([Today]).ToLeg());
+        Assert.Equal("empty schedule", e.Message);
 
         // A one-date schedule stays QuantLib's: an empty leg (D12).
         Assert.Empty(new OvernightLeg(new Schedule([Today], new TARGET()), Sofr()).WithNotionals(1e6).ToLeg());

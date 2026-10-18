@@ -81,4 +81,12 @@ public readonly struct Cubic : IInterpolator
             leftValue,
             rightType ?? CubicInterpolationBoundaryCondition.SecondDerivative,
             rightValue);
+
+    /// <inheritdoc/>
+    public void CheckPoints(int points) =>
+        CubicInterpolation.CheckConstruction(
+            points,
+            da ?? CubicInterpolationDerivativeApprox.Kruger,
+            leftType ?? CubicInterpolationBoundaryCondition.SecondDerivative,
+            rightType ?? CubicInterpolationBoundaryCondition.SecondDerivative);
 }

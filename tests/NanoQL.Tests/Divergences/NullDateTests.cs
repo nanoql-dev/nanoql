@@ -74,10 +74,10 @@ public class NullDateTests
         AssertParam("refDate", () => schedule.PreviousDate(d, context));
         AssertParam("truncationDate", () => schedule.After(d));
         AssertParam("truncationDate", () => schedule.Until(d));
-        AssertParam("firstDate", () => new MakeSchedule().From(valid).To(valid + 730)
-            .WithFrequency(Frequency.Annual).WithFirstDate(d).ToSchedule());
-        AssertParam("nextToLastDate", () => new MakeSchedule().From(valid).To(valid + 730)
-            .WithFrequency(Frequency.Annual).WithNextToLastDate(d).ToSchedule());
+        AssertParam("d", () => new MakeSchedule().From(valid).To(valid + 730)
+            .WithFrequency(Frequency.Annual).WithFirstDate(d));
+        AssertParam("d", () => new MakeSchedule().From(valid).To(valid + 730)
+            .WithFrequency(Frequency.Annual).WithNextToLastDate(d));
 
         DayCounter[] dayCounters =
         [

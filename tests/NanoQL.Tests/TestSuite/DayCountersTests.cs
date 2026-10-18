@@ -414,12 +414,12 @@ public class DayCountersTests
             $"This is not the expected first coupon date {firstCouponDate} expected: {firstCouponDateExpected}");
 
         // Make thw quasi coupon dates:
-        Date quasiCouponDate2 = schedule.Calendar.Advance(
+        Date quasiCouponDate2 = schedule.Calendar!.Advance(
             firstCouponDate,
             -schedule.Tenor(),
             schedule.BusinessDayConvention,
             schedule.EndOfMonth());
-        Date quasiCouponDate1 = schedule.Calendar.Advance(
+        Date quasiCouponDate1 = schedule.Calendar!.Advance(
             quasiCouponDate2,
             -schedule.Tenor(),
             schedule.BusinessDayConvention,

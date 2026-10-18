@@ -25,4 +25,7 @@ public readonly struct BackwardFlat : IInterpolator
     /// <exception cref="ArgumentException">The sizes differ, or there are no points.</exception>
     public Interpolation Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y) =>
         new BackwardFlatInterpolation(x, y);
+
+    /// <inheritdoc/>
+    public void CheckPoints(int points) => Interpolation.CheckRequiredPoints(points, RequiredPoints);
 }

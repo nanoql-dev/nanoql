@@ -27,7 +27,11 @@ date-list schedules, a one-date schedule (an empty leg, D12), vectors of nominal
 (a gearing of 0 making a fixed-rate coupon), payment lags, calendars and explicit payment dates, in-advance fixing,
 and the conventions; each leg's outputs are its length and each cash flow's type, dates, nominal, rate and amount, and
 for overnight and capped coupons the rate-computation dates, gearing and spread, cap and floor. A capped coupon of a
-wheel leg has no pricer (the wheel's OvernightLeg takes none), so its rate is QuantLib's throw.
+wheel leg has no pricer (the wheel's OvernightLeg takes none), so its rate is QuantLib's throw. Five more legs,
+appended after the others, have a rule-based schedule built on QuantLib's empty calendar (a null calendar, which the
+wheel gives as a default-constructed schedule's calendar) with Unadjusted conventions: the leg then adjusts and pays on
+its payment calendar, or on WeekendsOnly when it has none (overnightindexedcoupon.cpp:583-588), with a payment lag, in
+advance and with a short front stub.
 
 The three paths of a spread compounded daily (D23; plan premise SP26): a 3-month SOFR coupon on a flat 3.12345% curve
 with a 1.23456% spread, every fixing ahead, where the telescopic formula applies and QuantLib 1.44 drops the spread;
@@ -194,14 +198,22 @@ def dates_schedule(dates, cal=None, tenor=None, is_regular=None):
             "isRegular": is_regular or []}
 
 
+# QuantLib's empty calendar, Calendar(): the wheel gives it only as a default-constructed schedule's calendar, whose
+# proxy refers to the schedule's member, so the schedule is kept alive with it. A rule-based schedule's null calendar
+# is QuantLib's empty calendar; a dates schedule's is NullCalendar, its constructor's default.
+_EMPTY_CALENDAR_OWNER = ql.Schedule()
+EMPTY_CALENDAR = _EMPTY_CALENDAR_OWNER.calendar()
+
+
 def make_schedule(spec):
     if "dates" in spec:
         cal = ql.NullCalendar() if spec["calendar"] is None else irx.calendar(spec["calendar"])
         dates = [ql.Date(d) for d in spec["dates"]]
         tenor = ql.Period(spec["tenor"][0], spec["tenor"][1]) if spec["tenor"] is not None else None
         return ql.Schedule(dates, cal, ql.Unadjusted, None, tenor, None, None, spec["isRegular"])
+    cal = EMPTY_CALENDAR if spec["calendar"] is None else irx.calendar(spec["calendar"])
     return ql.Schedule(ql.Date(spec["effectiveDate"]), ql.Date(spec["terminationDate"]),
-                       ql.Period(spec["tenor"][0], spec["tenor"][1]), irx.calendar(spec["calendar"]),
+                       ql.Period(spec["tenor"][0], spec["tenor"][1]), cal,
                        spec["convention"], spec["terminationDateConvention"], spec["rule"], spec["endOfMonth"],
                        _date(spec["firstDate"]), ql.Date())
 
@@ -531,6 +543,26 @@ def legs(today):
     ]
 
 
+def empty_calendar_legs(today):
+    """Legs on rule-based schedules built on QuantLib's empty calendar with Unadjusted conventions. Quarterly from Good
+    Friday 18 April 2025, a TARGET holiday, the periods end on Friday 18 July, Saturday 18 October, Sunday 18 January
+    2026 and Saturday 18 April 2026; the stub schedule starts on 1 May 2025, a TARGET holiday too."""
+    sofr = index_spec(0, today, 0.0405)
+    estr = index_spec(1, today, 0.0291, A360, ql.Simple)
+    q = rule_schedule(ql.Date(18, 4, 2025), ql.Date(18, 4, 2026), ql.Period(3, ql.Months), None, ql.Unadjusted)
+    stub = rule_schedule(ql.Date(1, 5, 2025), ql.Date(18, 4, 2026), ql.Period(3, ql.Months), None, ql.Unadjusted,
+                         ql.DateGeneration.Backward)
+    return [
+        ("empty schedule calendar, WeekendsOnly payments", leg_spec(q, estr, [1e6])),
+        ("empty schedule calendar, a payment lag", leg_spec(q, estr, [1e6], payment_lag=2)),
+        ("empty schedule calendar, a payment calendar", leg_spec(q, estr, [1e6], payment_lag=1,
+                                                                 payment_calendar=irx.TARGET)),
+        ("empty schedule calendar, in advance", leg_spec(q, sofr, [1e6], A360, in_arrears=False)),
+        ("empty schedule calendar, a short front stub", leg_spec(stub, estr, [1e6],
+                                                                 payment_convention=ql.ModifiedFollowing)),
+    ]
+
+
 def leg_case(name, spec, today, rng):
     index = make_index(spec["index"])
     pairs = fixings_for(index, today - 120, today - 1, rng)
@@ -564,6 +596,8 @@ def cases():
     for name, spec, today, dates, window in named_coupons():
         out.append(coupon_case(name, spec, today, dates, window, rng))
     for name, spec in legs(ql.Date(3, 3, 2025)):
+        out.append(leg_case(name, spec, ql.Date(3, 3, 2025), rng))
+    for name, spec in empty_calendar_legs(ql.Date(3, 3, 2025)):
         out.append(leg_case(name, spec, ql.Date(3, 3, 2025), rng))
     return out
 

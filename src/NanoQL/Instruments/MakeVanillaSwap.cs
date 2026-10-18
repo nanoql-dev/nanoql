@@ -66,9 +66,9 @@ public sealed record MakeVanillaSwap
 
     private Date? TerminationDate { get; init; }
 
-    private Calendar FixedCalendar { get; init; }
+    private Calendar? FixedCalendar { get; init; }
 
-    private Calendar FloatCalendar { get; init; }
+    private Calendar? FloatCalendar { get; init; }
 
     private Calendar? SettlementCalendar { get; init; }
 
@@ -156,12 +156,19 @@ public sealed record MakeVanillaSwap
     /// Sets the settlement days, counted from the evaluation date on the settlement calendar; by default the index's
     /// value date is the spot date.
     /// </summary>
-    /// <param name="settlementDays">The settlement days.</param>
+    /// <param name="settlementDays">
+    /// The settlement days, or <see langword="null"/>, QuantLib's <c>Null&lt;Natural&gt;()</c> and its default, for the
+    /// index's value date, which an explicit effective date doesn't clash with.
+    /// </param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The settlement days are negative.</exception>
-    public MakeVanillaSwap WithSettlementDays(int settlementDays)
+    public MakeVanillaSwap WithSettlementDays(int? settlementDays)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(settlementDays);
+        if (settlementDays is int days)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(days, nameof(settlementDays));
+        }
+
         return this with { SettlementDays = settlementDays };
     }
 
@@ -224,13 +231,13 @@ public sealed record MakeVanillaSwap
     public MakeVanillaSwap WithFixedLegTenor(Period t) => this with { FixedTenor = t };
 
     /// <summary>Sets the fixed leg's calendar; the index's fixing calendar by default.</summary>
-    /// <param name="cal">The calendar.</param>
+    /// <param name="cal">
+    /// The calendar, or <see langword="null"/> for QuantLib's empty calendar, which the conversion uses as QuantLib
+    /// does: the fixed schedule and the fixed payment dates are built only where every adjustment is
+    /// <see cref="BusinessDayConvention.Unadjusted"/>, and refused otherwise.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public MakeVanillaSwap WithFixedLegCalendar(Calendar cal)
-    {
-        ArgumentNullException.ThrowIfNull(cal);
-        return this with { FixedCalendar = cal };
-    }
+    public MakeVanillaSwap WithFixedLegCalendar(Calendar? cal) => this with { FixedCalendar = cal };
 
     /// <summary>Sets the fixed leg's business-day convention.</summary>
     /// <param name="bdc">The convention.</param>
@@ -303,13 +310,13 @@ public sealed record MakeVanillaSwap
     public MakeVanillaSwap WithFloatingLegTenor(Period t) => this with { FloatTenor = t };
 
     /// <summary>Sets the floating leg's calendar; the index's fixing calendar by default.</summary>
-    /// <param name="cal">The calendar.</param>
+    /// <param name="cal">
+    /// The calendar, or <see langword="null"/> for QuantLib's empty calendar, which the conversion uses as QuantLib
+    /// does: the start date, the maturity and the floating schedule and payment dates are built only where no date is
+    /// adjusted or moved by business days on it, and refused otherwise.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public MakeVanillaSwap WithFloatingLegCalendar(Calendar cal)
-    {
-        ArgumentNullException.ThrowIfNull(cal);
-        return this with { FloatCalendar = cal };
-    }
+    public MakeVanillaSwap WithFloatingLegCalendar(Calendar? cal) => this with { FloatCalendar = cal };
 
     /// <summary>Sets the floating leg's business-day convention; the index's by default.</summary>
     /// <param name="bdc">The convention.</param>
@@ -396,31 +403,32 @@ public sealed record MakeVanillaSwap
     /// engine that computes the par rate when no fixed rate is given. With a fixed rate given it changes nothing: the
     /// swap returned holds no engine, where QuantLib's builder attaches it.
     /// </summary>
-    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="discountCurve">
+    /// The discount curve, or <see langword="null"/>, QuantLib's empty handle: the engine then refuses to price, so a
+    /// build at the par rate is refused, and a build with a fixed rate isn't.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public MakeVanillaSwap WithDiscountingTermStructure(YieldTermStructure discountCurve)
-    {
-        ArgumentNullException.ThrowIfNull(discountCurve);
-        return this with
+    public MakeVanillaSwap WithDiscountingTermStructure(YieldTermStructure? discountCurve) =>
+        this with
         {
-            Engine = (swap, context) =>
-                DiscountingSwapEngine.Calculate(swap, context, discountCurve, includeSettlementDateFlows: false),
+            Engine = (swap, context) => discountCurve is null
+                ? DiscountingSwapEngine.CalculateWithoutCurve(swap, context)
+                : DiscountingSwapEngine.Calculate(swap, context, discountCurve, includeSettlementDateFlows: false),
         };
-    }
 
     /// <summary>
     /// Sets the engine that computes the par rate when no fixed rate is given: a function of the swap and the context,
     /// such as <c>(s, c) =&gt; DiscountingSwapEngine.Calculate(s, c, curve, includeSettlementDateFlows: false)</c>. It
     /// is never stored on the swap.
     /// </summary>
-    /// <param name="engine">The engine.</param>
+    /// <param name="engine">
+    /// The engine, or <see langword="null"/>, QuantLib's null engine, for the default: a
+    /// <see cref="DiscountingSwapEngine"/> on the index's forwarding curve.
+    /// </param>
     /// <returns>The modified builder.</returns>
     public MakeVanillaSwap WithPricingEngine(
-        Func<FixedVsFloatingSwap, EvaluationContext, FixedVsFloatingSwapResults> engine)
-    {
-        ArgumentNullException.ThrowIfNull(engine);
-        return this with { Engine = engine };
-    }
+        Func<FixedVsFloatingSwap, EvaluationContext, FixedVsFloatingSwapResults>? engine) =>
+        this with { Engine = engine };
 
     /// <summary>
     /// Sets whether the floating coupons use indexed coupons rather than par coupons; <see langword="null"/> for the
@@ -442,8 +450,9 @@ public sealed record MakeVanillaSwap
     /// <exception cref="ArgumentNullException">The context is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">
     /// Both an effective date and settlement days are set; the fixed leg's default tenor or day counter is unknown for
-    /// the index's currency; or, with no fixed rate, there is neither an engine nor a forwarding curve, or the par rate
-    /// is not available.
+    /// the index's currency; a date is needed that QuantLib's empty calendar can't give; or, with no fixed rate, there
+    /// is neither an engine nor a forwarding curve, the engine has no discount curve, or the par rate is not
+    /// available.
     /// </exception>
     public VanillaSwap ToVanillaSwap(EvaluationContext context)
     {
@@ -455,6 +464,8 @@ public sealed record MakeVanillaSwap
                 "cannot set both an explicit effective date and settlement days; use one or the other");
         }
 
+        // QuantLib's empty calendars, null here, are used unchecked, as QuantLib uses them
+        Calendar floatCalendar = FloatCalendar ?? EmptyCalendar.Instance;
         Date startDate;
         if (EffectiveDate is Date effective)
         {
@@ -480,18 +491,18 @@ public sealed record MakeVanillaSwap
             {
                 // settlement days are counted from the actual evaluation
                 // date, even when it is not a business day (see issue #753)
-                Calendar settlementCalendar = SettlementCalendar ?? FloatCalendar;
+                Calendar settlementCalendar = SettlementCalendar ?? floatCalendar;
                 spotDate = settlementCalendar.Advance(refDate, settlementDays, TimeUnit.Days);
             }
 
             startDate = spotDate + ForwardStart;
             if (ForwardStart.Length < 0)
             {
-                startDate = FloatCalendar.Adjust(startDate, BusinessDayConvention.Preceding);
+                startDate = floatCalendar.Adjust(startDate, BusinessDayConvention.Preceding);
             }
             else if (ForwardStart.Length > 0)
             {
-                startDate = FloatCalendar.Adjust(startDate, BusinessDayConvention.Following);
+                startDate = floatCalendar.Adjust(startDate, BusinessDayConvention.Following);
             }
 
             // no explicit date adjustment needed for forwardStart_.length()==0
@@ -508,9 +519,9 @@ public sealed record MakeVanillaSwap
             endDate = startDate + SwapTenor;
             bool maturityEndOfMonth = MaturityEndOfMonth ?? FloatEndOfMonth;
             if (maturityEndOfMonth && ScheduleFunctions.AllowsEndOfMonth(SwapTenor)
-                && FloatCalendar.IsEndOfMonth(startDate))
+                && floatCalendar.IsEndOfMonth(startDate))
             {
-                endDate = FloatCalendar.EndOfMonth(endDate);
+                endDate = floatCalendar.EndOfMonth(endDate);
             }
         }
 

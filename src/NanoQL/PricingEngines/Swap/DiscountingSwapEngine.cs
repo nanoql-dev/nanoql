@@ -125,6 +125,30 @@ public static class DiscountingSwapEngine
         return swap.FetchResults(results);
     }
 
+    /// <summary>
+    /// Prices a swap as QuantLib's engine does on an empty discount-curve handle, the engine a builder's
+    /// <c>WithDiscountingTermStructure(null)</c> sets: an expired swap's results, which QuantLib's instrument gives
+    /// before it calls the engine, and otherwise QuantLib's refusal, once the swap's arguments are validated
+    /// (<c>discountingswapengine.cpp:42</c>).
+    /// </summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <returns>The expired swap's results.</returns>
+    /// <exception cref="NanoQLException">The swap has not expired.</exception>
+    internal static FixedVsFloatingSwapResults CalculateWithoutCurve(
+        FixedVsFloatingSwap swap, EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(swap);
+        ArgumentNullException.ThrowIfNull(context);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        throw new NanoQLException("discounting term structure handle is empty");
+    }
+
     private static void CheckArguments(
         Swap swap,
         EvaluationContext context,
@@ -239,8 +263,8 @@ public static class DiscountingSwapEngine
     }
 
     // The failure's text as QuantLib's what() gives it: without the parameter suffix .NET appends to an
-    // ArgumentException's message.
-    private static string QuantLibText(Exception e)
+    // ArgumentException's message. The bootstraps' wrapped texts call it too.
+    internal static string QuantLibText(Exception e)
     {
         if (e is ArgumentException { ParamName: { } name })
         {

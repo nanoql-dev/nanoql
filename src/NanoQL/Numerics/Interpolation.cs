@@ -51,15 +51,19 @@ public abstract class Interpolation : Extrapolator
             throw new ArgumentException($"{y.Length} y values given for {x.Length} x values", nameof(y));
         }
 
-        if (!(x.Length >= requiredPoints))
-        {
-            throw new ArgumentException(
-                $"not enough points to interpolate: at least {requiredPoints} required, {x.Length} provided",
-                nameof(x));
-        }
-
+        CheckRequiredPoints(x.Length, requiredPoints);
         xValues = [.. x];
         yValues = [.. y];
+    }
+
+    // QuantLib's templateImpl check, which a factory's CheckPoints runs for a point count alone.
+    internal static void CheckRequiredPoints(int points, int requiredPoints)
+    {
+        if (!(points >= requiredPoints))
+        {
+            throw new ArgumentException(
+                $"not enough points to interpolate: at least {requiredPoints} required, {points} provided", "x");
+        }
     }
 
     /// <summary>Gets the first x value, the smallest of the sorted values.</summary>

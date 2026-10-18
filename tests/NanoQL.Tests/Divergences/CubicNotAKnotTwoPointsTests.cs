@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Indexes;
 using NanoQL.Numerics;
+using NanoQL.TermStructures;
+using NanoQL.Time;
 
 namespace NanoQL.Tests.Divergences;
 
@@ -39,5 +42,54 @@ public class CubicNotAKnotTwoPointsTests
         // other end conditions on two, stay QuantLib's.
         _ = new CubicInterpolation([1.0, 2.0, 3.0], [0.5, 0.75, 0.6], spline, false, notAKnot, 0.0, second, 0.0);
         _ = new CubicInterpolation(x, y, spline, false, second, 0.0, second, 0.0);
+    }
+
+    /// <summary>
+    /// A bootstrapped cubic curve with a not-a-knot end: on its first node QuantLib's bootstrap builds the spline over
+    /// two points, whose update reads past <c>dx_</c>'s end. nanoql's refusal reads only the configuration and the point
+    /// count, so it is one of the cubic's construction checks (<see cref="Cubic.CheckPoints"/>): the bootstrap's first
+    /// pass takes linear interpolation on that node, as QuantLib takes it for a global interpolation that can't be
+    /// built over the first nodes, and the curve reprices its helpers.
+    /// </summary>
+    [Fact]
+    public void ACubicCurveWithANotAKnotEndBuildsThroughTheFirstPassFallback()
+    {
+        var cubic = new Cubic(
+            CubicInterpolationDerivativeApprox.Spline,
+            false,
+            CubicInterpolationBoundaryCondition.NotAKnot,
+            0.0,
+            CubicInterpolationBoundaryCondition.SecondDerivative,
+            0.0);
+        Assert.Throws<NanoQLException>(() => cubic.CheckPoints(2));
+
+        var today = new Date(15, Month.January, 2024);
+        var context = new EvaluationContext { EvaluationDate = today };
+        var helpers = new List<RateHelper>
+        {
+            new DepositRateHelper(
+                0.039, new Period(6, TimeUnit.Months), 2, new TARGET(), BusinessDayConvention.ModifiedFollowing, true,
+                new Actual360(), context),
+        };
+        foreach ((int years, double rate) in new[] { (2, 0.035), (5, 0.0325), (10, 0.032) })
+        {
+            helpers.Add(new SwapRateHelper(
+                rate,
+                new Period(years, TimeUnit.Years),
+                new TARGET(),
+                Frequency.Annual,
+                BusinessDayConvention.Unadjusted,
+                new Thirty360(Thirty360Convention.BondBasis),
+                new Euribor6M(),
+                context));
+        }
+
+        var curve = new PiecewiseYieldCurve<ZeroYield, Cubic, IterativeBootstrap>(
+            today, helpers, new Actual365Fixed(), context, i: cubic);
+
+        foreach (RateHelper helper in helpers)
+        {
+            Assert.True(Math.Abs(helper.SetTermStructure(curve).QuoteError(context)) < 1e-10);
+        }
     }
 }

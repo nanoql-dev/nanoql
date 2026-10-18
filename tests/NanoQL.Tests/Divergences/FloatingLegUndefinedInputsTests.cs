@@ -13,9 +13,11 @@ namespace NanoQL.Tests.Divergences;
 /// <c>schedule.size()-1</c> periods, a <c>Size</c> wrapping below zero, so its size checks all pass and
 /// <c>leg.reserve(n)</c> fails (<c>cashflowvectors.hpp:82-102</c>; <c>IborLeg</c> reaches it at
 /// <c>iborcoupon.cpp:286</c>). A null index: <c>FloatingLeg</c> reads <c>index-&gt;fixingDays()</c> as a default
-/// argument (<c>cashflowvectors.hpp:156, 169, 188, 204</c>). nanoql refuses the empty schedule where
-/// <see cref="IborLeg"/> is made and where <see cref="CashFlowVectorsFunctions.FloatingLeg"/> is called, with
-/// <see cref="ArgumentException"/>, "empty schedule", and the null index with <see cref="ArgumentNullException"/>.
+/// argument (<c>cashflowvectors.hpp:156, 169, 188, 204</c>). nanoql refuses the empty schedule where QuantLib reserves
+/// the leg, after its notional and in-arrears checks, with "empty schedule": <see cref="NanoQLException"/> from
+/// <see cref="IborLeg"/>'s conversion, and <see cref="ArgumentException"/> from
+/// <see cref="CashFlowVectorsFunctions.FloatingLeg"/>, whose schedule is an argument; and the null index with
+/// <see cref="ArgumentNullException"/>.
 /// </summary>
 public class FloatingLegUndefinedInputsTests
 {
@@ -23,12 +25,13 @@ public class FloatingLegUndefinedInputsTests
     public void AnEmptyScheduleIsRefusedByBothBuilders()
     {
         var empty = new Schedule([], new TARGET());
+        var context = new EvaluationContext { EvaluationDate = new Date(15, Month.January, 2025) };
 
-        ArgumentException e = Assert.Throws<ArgumentException>(() => new IborLeg(empty, new Euribor6M()));
-        Assert.Equal("schedule", e.ParamName);
-        Assert.StartsWith("empty schedule", e.Message, StringComparison.Ordinal);
+        NanoQLException n = Assert.Throws<NanoQLException>(() =>
+            new IborLeg(empty, new Euribor6M()).WithNotionals(1e6).WithCaps(0.05).ToLeg(context));
+        Assert.Equal("empty schedule", n.Message);
 
-        e = Assert.Throws<ArgumentException>(() => FloatingLeg(empty, new Euribor6M()));
+        ArgumentException e = Assert.Throws<ArgumentException>(() => FloatingLeg(empty, new Euribor6M()));
         Assert.Equal("schedule", e.ParamName);
         Assert.StartsWith("empty schedule", e.Message, StringComparison.Ordinal);
 

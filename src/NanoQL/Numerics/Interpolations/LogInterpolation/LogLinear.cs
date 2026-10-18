@@ -23,4 +23,7 @@ public readonly struct LogLinear : IInterpolator
     /// <returns>The interpolation.</returns>
     /// <exception cref="ArgumentException">The sizes differ, there are fewer than 2 points, or a y value isn't positive.</exception>
     public Interpolation Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y) => new LogLinearInterpolation(x, y);
+
+    /// <inheritdoc/>
+    public void CheckPoints(int points) => Interpolation.CheckRequiredPoints(points, Linear.RequiredPoints);
 }

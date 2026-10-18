@@ -37,19 +37,12 @@ public sealed record IborLeg
     /// <param name="schedule">The schedule of accrual dates.</param>
     /// <param name="index">The index.</param>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">The schedule is empty.</exception>
     public IborLeg(Schedule schedule, IborIndex index)
     {
         ArgumentNullException.ThrowIfNull(schedule);
         if (index is null)
         {
             throw new ArgumentNullException(nameof(index), "no index provided");
-        }
-
-        if (schedule.Empty)
-        {
-            // QuantLib's period count wraps below zero for an empty schedule.
-            throw new ArgumentException("empty schedule", nameof(schedule));
         }
 
         Schedule = schedule;
@@ -114,7 +107,8 @@ public sealed record IborLeg
 
     /// <summary>Sets the accrual day counter; the index's by default.</summary>
     /// <param name="dayCounter">The day counter; the index's when <see langword="null"/>, QuantLib's empty day
-    /// counter. A period with a zero gearing then refuses the conversion, its fixed-rate coupon needing one.</param>
+    /// counter. A period with a zero gearing then refuses the conversion, its fixed-rate coupon needing one, after
+    /// every refusal QuantLib raises while it builds the leg.</param>
     /// <returns>The modified builder.</returns>
     public IborLeg WithPaymentDayCounter(DayCounter? dayCounter) => this with { PaymentDayCounter = dayCounter };
 
@@ -193,9 +187,12 @@ public sealed record IborLeg
     }
 
     /// <summary>Sets one cap for every coupon's rate.</summary>
-    /// <param name="cap">The cap.</param>
+    /// <param name="cap">
+    /// The cap, or <see langword="null"/>, QuantLib's <c>Null&lt;Rate&gt;()</c>, for a cap list holding no cap: the
+    /// coupons are then uncapped, and the leg gets no default pricer, as with any cap list.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public IborLeg WithCaps(double cap) => this with { Caps = [cap] };
+    public IborLeg WithCaps(double? cap) => this with { Caps = [cap] };
 
     /// <summary>Sets the caps on the coupons' rates; the last one repeats for any further coupons.</summary>
     /// <param name="caps">The caps, null elements for none.</param>
@@ -207,9 +204,12 @@ public sealed record IborLeg
     }
 
     /// <summary>Sets one floor for every coupon's rate.</summary>
-    /// <param name="floor">The floor.</param>
+    /// <param name="floor">
+    /// The floor, or <see langword="null"/>, QuantLib's <c>Null&lt;Rate&gt;()</c>, for a floor list holding no floor:
+    /// the coupons are then unfloored, and the leg gets no default pricer, as with any floor list.
+    /// </param>
     /// <returns>The modified builder.</returns>
-    public IborLeg WithFloors(double floor) => this with { Floors = [floor] };
+    public IborLeg WithFloors(double? floor) => this with { Floors = [floor] };
 
     /// <summary>Sets the floors on the coupons' rates; the last one repeats for any further coupons.</summary>
     /// <param name="floors">The floors, null elements for none.</param>
@@ -291,9 +291,9 @@ public sealed record IborLeg
     /// when the leg has no explicit choice.</param>
     /// <returns>The leg, one coupon per schedule period.</returns>
     /// <exception cref="NanoQLException">No notional was given; a setting has more values than the schedule has
-    /// periods; the leg is both in arrears and zero; a period has a zero gearing and no payment day counter is set;
-    /// or a stub selection is given with caps, floors, in-arrears fixing, at-par coupons or a schedule without
-    /// regularity information.</exception>
+    /// periods; the leg is both in arrears and zero; the schedule is empty; a stub selection is given with caps,
+    /// floors, in-arrears fixing, at-par coupons or a schedule without regularity information; or, after these, a
+    /// period has a zero gearing and no payment day counter is set.</exception>
     public ImmutableArray<CashFlow> ToLeg(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -353,7 +353,8 @@ public sealed record IborLeg
             ExCouponAdjustment,
             ExCouponEndOfMonth,
             FixingConvention,
-            stored: true);
+            stored: true,
+            out Exception? zeroGearingRefusal);
 
         if (Selection is { Empty: false } selection)
         {
@@ -419,6 +420,7 @@ public sealed record IborLeg
             leg = CouponPricerFunctions.SetCouponPricer(leg, pricer);
         }
 
-        return leg;
+        // QuantLib returns the leg, whose zero-gearing coupons fail when they are priced
+        return zeroGearingRefusal is null ? leg : throw zeroGearingRefusal;
     }
 }
