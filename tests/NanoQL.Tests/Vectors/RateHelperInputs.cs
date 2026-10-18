@@ -23,17 +23,20 @@ namespace NanoQL.Tests.Vectors;
 /// and <c>"endDate"</c> for <c>"tenor"</c> and without <c>"fwdStart"</c> and <c>"settlementDays"</c>; the C++
 /// harness's files may add a <c>"couponPricer"</c>, a pricer spec of <see cref="CouponInputs"/>. A period is
 /// <c>[length, units]</c>; a calendar and a day counter are specs of <see cref="CashFlowInputs"/>, <c>null</c> for
-/// QuantLib's empty one; an index is a spec of <see cref="SwapInputs"/>; the discounting curve is <c>null</c> or a flat
-/// forward spec. A null settlement-day count, custom pillar date, coupon choice or floating convention is the
-/// constructor's default; enums are QuantLib's integers.
+/// QuantLib's empty one; an index is a spec of <see cref="SwapInputs"/>; the discounting curve is <c>null</c>, a flat
+/// forward spec, or <c>{"handle": name}</c>, a curve the caller names (a multicurve's member). A null settlement-day
+/// count, custom pillar date, coupon choice or floating convention is the constructor's default; enums are QuantLib's
+/// integers.
 /// </remarks>
 internal static class RateHelperInputs
 {
     /// <summary>The helper a spec describes, built in a context.</summary>
     /// <param name="spec">The spec.</param>
     /// <param name="context">The evaluation context the helper is built in.</param>
+    /// <param name="handle">The curve a <c>{"handle": name}</c> discounting curve names.</param>
     /// <returns>The helper.</returns>
-    public static BootstrapHelper<YieldTermStructure> HelperOf(JsonElement spec, EvaluationContext context)
+    public static BootstrapHelper<YieldTermStructure> HelperOf(
+        JsonElement spec, EvaluationContext context, Func<string, YieldTermStructure>? handle = null)
     {
         string kind = spec.GetProperty("kind").GetString()!;
         string form = spec.GetProperty("form").GetString()!;
@@ -69,7 +72,7 @@ internal static class RateHelperInputs
                     context,
                     spec.GetProperty("spread").GetDouble(),
                     SwapInputs.PeriodOf(spec.GetProperty("fwdStart")),
-                    IndexInputs.CurveOf(spec.GetProperty("discountingCurve")),
+                    DiscountingCurveOf(spec.GetProperty("discountingCurve"), handle),
                     CouponInputs.NullableInt(spec.GetProperty("settlementDays")),
                     (PillarChoice)spec.GetProperty("pillar").GetInt32(),
                     CashFlowInputs.NullableDate(spec.GetProperty("customPillarDate")),
@@ -89,7 +92,7 @@ internal static class RateHelperInputs
                     SwapInputs.IndexOf(spec.GetProperty("index")),
                     context,
                     spec.GetProperty("spread").GetDouble(),
-                    IndexInputs.CurveOf(spec.GetProperty("discountingCurve")),
+                    DiscountingCurveOf(spec.GetProperty("discountingCurve"), handle),
                     (PillarChoice)spec.GetProperty("pillar").GetInt32(),
                     CashFlowInputs.NullableDate(spec.GetProperty("customPillarDate")),
                     spec.GetProperty("endOfMonth").GetBoolean(),
@@ -104,9 +107,11 @@ internal static class RateHelperInputs
     /// <summary>The helpers a list of specs describes, each built in the context.</summary>
     /// <param name="specs">The specs.</param>
     /// <param name="context">The evaluation context the helpers are built in.</param>
+    /// <param name="handle">The curve a <c>{"handle": name}</c> discounting curve names.</param>
     /// <returns>The helpers, in order.</returns>
-    public static BootstrapHelper<YieldTermStructure>[] HelpersOf(JsonElement specs, EvaluationContext context) =>
-        [.. specs.EnumerateArray().Select(s => HelperOf(s, context))];
+    public static BootstrapHelper<YieldTermStructure>[] HelpersOf(
+        JsonElement specs, EvaluationContext context, Func<string, YieldTermStructure>? handle = null) =>
+        [.. specs.EnumerateArray().Select(s => HelperOf(s, context, handle))];
 
     /// <summary>Compares a helper's five dates with the case's outputs of the same names.</summary>
     /// <param name="check">The file's comparison.</param>
@@ -120,6 +125,11 @@ internal static class RateHelperInputs
         check.Output(c, "pillarDate", h.PillarDate);
         check.Output(c, "latestDate", h.LatestDate);
     }
+
+    private static YieldTermStructure? DiscountingCurveOf(JsonElement spec, Func<string, YieldTermStructure>? handle) =>
+        spec.ValueKind == JsonValueKind.Object && spec.TryGetProperty("handle", out JsonElement name)
+            ? handle!(name.GetString()!)
+            : IndexInputs.CurveOf(spec);
 
     private static Calendar? CalendarOrNull(JsonElement spec) =>
         spec.ValueKind == JsonValueKind.Null ? null : CashFlowInputs.CalendarOf(spec);

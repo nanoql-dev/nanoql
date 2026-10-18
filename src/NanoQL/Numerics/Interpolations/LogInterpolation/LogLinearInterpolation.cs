@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/math/interpolations/loginterpolation.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the LogMixedLinearCubic family (LogMixedLinearCubicInterpolation, LogMixedLinearCubic, MonotonicLogMixedLinearCubic, KrugerLogMixedLinearCubic, LogMixedLinearCubicNaturalSpline), which waits for S5 with mixedinterpolation; the deprecated DefaultLogCubic and DefaultLogMixedLinearCubic aren't ported
 
 namespace NanoQL.Numerics;
 

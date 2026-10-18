@@ -55,4 +55,77 @@ public class NullRealSentinelTests
         Assert.Equal(0.8821578172517457, byDefault.Discount(4.0));
         Assert.Equal(0.8821578172517482, bounded.Discount(4.0));
     }
+
+    /// <summary>
+    /// A mixed interpolation's left condition value: QuantLib reads a first-derivative condition whose value is the
+    /// sentinel as "match the cubic's derivative at the switch point to the linear part's"
+    /// (<c>mixedinterpolation.hpp:73-83</c>), and refuses it under <c>ShareRanges</c>, "matching derivatives is only
+    /// supported with SplitRanges". nanoql's <see langword="null"/> is that reading; the sentinel is a first derivative.
+    /// </summary>
+    [Fact]
+    public void AMixedInterpolationsLeftConditionValueOfQuantLibsNullIsAValue()
+    {
+        double[] x = [0.0, 0.5, 1.0, 2.0, 3.0];
+        double[] y = [1.0, 0.98, 0.95, 0.91, 0.86];
+        const CubicInterpolationDerivativeApprox spline = CubicInterpolationDerivativeApprox.Spline;
+        const CubicInterpolationBoundaryCondition first = CubicInterpolationBoundaryCondition.FirstDerivative;
+        const CubicInterpolationBoundaryCondition second = CubicInterpolationBoundaryCondition.SecondDerivative;
+
+        // ShareRanges: QuantLib refuses the sentinel, as nanoql refuses null; nanoql builds on the value.
+        Assert.Throws<ArgumentException>(
+            () => new LogMixedLinearCubic(1, MixedInterpolationBehavior.ShareRanges, spline, false, first, null)
+                .Interpolate(x, y));
+        Interpolation shared = new LogMixedLinearCubic(
+            1, MixedInterpolationBehavior.ShareRanges, spline, false, first, NullReal).Interpolate(x, y);
+        Assert.Equal(1.0, shared.Evaluate(0.0));
+
+        // SplitRanges: QuantLib matches the derivatives for the sentinel, as nanoql does for null; the value differs.
+        Interpolation matched = new LogMixedLinearCubic(
+            1, MixedInterpolationBehavior.SplitRanges, spline, false, first, null, second).Interpolate(x, y);
+        Interpolation valued = new LogMixedLinearCubic(
+            1, MixedInterpolationBehavior.SplitRanges, spline, false, first, NullReal, second).Interpolate(x, y);
+        Assert.Equal(matched.Derivative(0.5 - 1e-9), matched.Derivative(0.5 + 1e-9), 1e-6);
+        Assert.NotEqual(matched.Derivative(0.5 + 1e-9), valued.Derivative(0.5 + 1e-9));
+    }
+
+    /// <summary>
+    /// A global bootstrap's accuracy: QuantLib takes the curve's, 1e-12, for an accuracy of the sentinel
+    /// (<c>globalbootstrap.hpp:255</c>), so its curve is the default's, 0.8822716504192525 at four years. nanoql's
+    /// optimizer and end criteria take that value as their tolerances, and stop at once, at the traits' guess: a flat 5%
+    /// curve, exp(-0.05 × 4) at four years.
+    /// </summary>
+    [Fact]
+    public void AGlobalBootstrapsAccuracyOfQuantLibsNullIsAValue()
+    {
+        var today = new Date(15, Month.January, 2024);
+        var context = new EvaluationContext { EvaluationDate = today };
+        var helpers = new List<RateHelper>
+        {
+            new DepositRateHelper(
+                0.030, new Period(6, TimeUnit.Months), 2, new TARGET(), BusinessDayConvention.ModifiedFollowing, false,
+                new Actual360(), context),
+        };
+        foreach ((int years, double rate) in new[] { (2, 0.031), (5, 0.032), (10, 0.033) })
+        {
+            helpers.Add(new SwapRateHelper(
+                rate,
+                new Period(years, TimeUnit.Years),
+                new TARGET(),
+                Frequency.Annual,
+                BusinessDayConvention.Unadjusted,
+                new Thirty360(Thirty360Convention.BondBasis),
+                new Euribor6M(),
+                context));
+        }
+
+        var dc = new Actual365Fixed();
+        var referenceDate = new Date(17, Month.January, 2024);
+        var byDefault = new PiecewiseYieldCurve<Discount, LogLinear, GlobalBootstrap>(referenceDate, helpers, dc, context);
+        var sentinel = new PiecewiseYieldCurve<Discount, LogLinear, GlobalBootstrap>(
+            referenceDate, helpers, dc, context, bootstrap: new GlobalBootstrap(NullReal));
+
+        // QuantLib's curve is the first for both; nanoql's sentinel curve is the traits' guess
+        Assert.Equal(0.8822716504192525, byDefault.Discount(4.0));
+        Assert.Equal(0.8187307530779818, sentinel.Discount(4.0));
+    }
 }

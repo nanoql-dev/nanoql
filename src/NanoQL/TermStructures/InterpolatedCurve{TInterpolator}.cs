@@ -90,7 +90,13 @@ public sealed class InterpolatedCurve<TInterpolator>
             Date.ThrowIfDefault(d, nameof(dates));
         }
 
-        // setupTimes
+        return FromTimes(SetupTimes(dates, referenceDate, dayCounter), data, interpolator);
+    }
+
+    // QuantLib's setupTimes: the nodes' times from the reference date, each date after the one before it and at another
+    // time. The zero curve converts its rates at these times before it builds its interpolation.
+    internal static double[] SetupTimes(ReadOnlySpan<Date> dates, Date referenceDate, DayCounter dayCounter)
+    {
         var times = new double[dates.Length];
         times[0] = dayCounter.YearFraction(referenceDate, dates[0]);
         for (int i = 1; i < dates.Length; i++)
@@ -110,7 +116,13 @@ public sealed class InterpolatedCurve<TInterpolator>
             }
         }
 
-        // setupInterpolation
+        return times;
+    }
+
+    // QuantLib's setupInterpolation, over the times setupTimes gave.
+    internal static InterpolatedCurve<TInterpolator> FromTimes(
+        double[] times, ReadOnlySpan<double> data, TInterpolator interpolator)
+    {
         Interpolation interpolation = interpolator.Interpolate(times, data);
         return new InterpolatedCurve<TInterpolator>([.. times], [.. data], interpolator, interpolation, null);
     }

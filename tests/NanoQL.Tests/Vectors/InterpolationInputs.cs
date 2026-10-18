@@ -11,7 +11,8 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The interpolation vectors' inputs: an interpolation from its type and points, with
 /// <see cref="CubicInterpolation"/>'s and <see cref="LogCubicInterpolation"/>'s parameters from the spec, and the
-/// four members read at a case's points with its extrapolation flags.
+/// mixed interpolations' switch point, behavior and parameters; and the four members read at a case's points with its
+/// extrapolation flags.
 /// </summary>
 internal static class InterpolationInputs
 {
@@ -86,8 +87,52 @@ internal static class InterpolationInputs
         "FritschButlandLogCubic" => new FritschButlandLogCubic(x, y),
         "LogParabolic" => new LogParabolic(x, y),
         "MonotonicLogParabolic" => new MonotonicLogParabolic(x, y),
+        "MixedLinearCubicInterpolation" => new MixedLinearCubicInterpolation(
+            x,
+            y,
+            spec.GetProperty("n").GetInt32(),
+            Behavior(spec),
+            DerivativeApprox(spec),
+            spec.GetProperty("monotonic").GetBoolean(),
+            Condition(spec, "leftCondition"),
+            NullableNumber(spec.GetProperty("leftConditionValue")),
+            Condition(spec, "rightCondition"),
+            Number(spec.GetProperty("rightConditionValue"))),
+        "MixedLinearCubicNaturalSpline" => new MixedLinearCubicNaturalSpline(x, y, spec.GetProperty("n").GetInt32(), Behavior(spec)),
+        "MixedLinearMonotonicCubicNaturalSpline" =>
+            new MixedLinearMonotonicCubicNaturalSpline(x, y, spec.GetProperty("n").GetInt32(), Behavior(spec)),
+        "MixedLinearKrugerCubic" => new MixedLinearKrugerCubic(x, y, spec.GetProperty("n").GetInt32(), Behavior(spec)),
+        "MixedLinearFritschButlandCubic" =>
+            new MixedLinearFritschButlandCubic(x, y, spec.GetProperty("n").GetInt32(), Behavior(spec)),
+        "MixedLinearParabolic" => new MixedLinearParabolic(x, y, spec.GetProperty("n").GetInt32(), Behavior(spec)),
+        "MixedLinearMonotonicParabolic" =>
+            new MixedLinearMonotonicParabolic(x, y, spec.GetProperty("n").GetInt32(), Behavior(spec)),
+        "LogMixedLinearCubicInterpolation" => new LogMixedLinearCubicInterpolation(
+            x,
+            y,
+            spec.GetProperty("n").GetInt32(),
+            Behavior(spec),
+            DerivativeApprox(spec),
+            spec.GetProperty("monotonic").GetBoolean(),
+            Condition(spec, "leftCondition"),
+            NullableNumber(spec.GetProperty("leftConditionValue")),
+            Condition(spec, "rightCondition"),
+            Number(spec.GetProperty("rightConditionValue"))),
+        "LogMixedLinearCubicNaturalSpline" =>
+            new LogMixedLinearCubicNaturalSpline(x, y, spec.GetProperty("n").GetInt32(), Behavior(spec)),
         _ => throw new InvalidOperationException($"no interpolation {type}"),
     };
+
+    /// <summary>A number as the vectors encode it, or <see langword="null"/> for QuantLib's <c>Null&lt;Real&gt;()</c>.</summary>
+    /// <param name="e">The JSON value.</param>
+    /// <returns>The number, or <see langword="null"/>.</returns>
+    public static double? NullableNumber(JsonElement e) => e.ValueKind == JsonValueKind.Null ? null : Number(e);
+
+    /// <summary>The mixed interpolations' behavior of a spec.</summary>
+    /// <param name="spec">The spec.</param>
+    /// <returns>Its <c>behavior</c>.</returns>
+    public static MixedInterpolationBehavior Behavior(JsonElement spec) =>
+        (MixedInterpolationBehavior)spec.GetProperty("behavior").GetInt32();
 
     /// <summary>The derivative approximation of a spec.</summary>
     /// <param name="spec">The spec.</param>
@@ -110,10 +155,15 @@ internal static class InterpolationInputs
     /// <param name="check">The file's comparison.</param>
     /// <param name="c">The case.</param>
     /// <param name="build">Builds the case's interpolation.</param>
-    public static void CheckMembers(VectorAssert check, VectorCase c, Func<Interpolation> build)
+    /// <param name="memberPoints">
+    /// How many of the points the derivative, second derivative and primitive are read at, the first ones; all of
+    /// them when <see langword="null"/>.
+    /// </param>
+    public static void CheckMembers(VectorAssert check, VectorCase c, Func<Interpolation> build, int? memberPoints = null)
     {
         double[] points = Numbers(c.Input("points"));
         bool[] allow = Bools(c.Input("allowExtrapolation"));
+        double[] some = points[..(memberPoints ?? points.Length)];
         Interpolation? f = null;
         if (c.Expected.GetProperty("value").ValueKind == JsonValueKind.Array)
         {
@@ -128,9 +178,9 @@ internal static class InterpolationInputs
         }
 
         check.Output(c, "value", Members(f, build, points, allow, (g, p, a) => g.Evaluate(p, a)));
-        check.Output(c, "derivative", Members(f, build, points, allow, (g, p, a) => g.Derivative(p, a)));
-        check.Output(c, "secondDerivative", Members(f, build, points, allow, (g, p, a) => g.SecondDerivative(p, a)));
-        check.Output(c, "primitive", Members(f, build, points, allow, (g, p, a) => g.Primitive(p, a)));
+        check.Output(c, "derivative", Members(f, build, some, allow, (g, p, a) => g.Derivative(p, a)));
+        check.Output(c, "secondDerivative", Members(f, build, some, allow, (g, p, a) => g.SecondDerivative(p, a)));
+        check.Output(c, "primitive", Members(f, build, some, allow, (g, p, a) => g.Primitive(p, a)));
     }
 
     /// <summary>Each value computed when compared, so that a throw is checked.</summary>

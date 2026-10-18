@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSplineErrorOnGaussianValues (SimpsonIntegral, B4.5); testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (B4.5); testMultiSpline (B4.7); testForwardFlat (S-cds); testMixedLinearCubicMatchDerivatives, testMixedLinearCubicSwitchPoint (S5); testSabrInterpolation, testSabrGuess, testSabrSingleCases, testFlochKennedySabrIsSmoothAroundATM, testLeFlochKennedySabrExample (S7); testBicubicDerivatives, testBicubicUpdate (S8); testFlatExtrapolation (B3.1); testBSplines (B3.5); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (B6.2); testLaplaceInterpolation (B7.3); testNoArbSabrInterpolation, testTransformations (B7.5)
+// Partial: testSplineErrorOnGaussianValues (SimpsonIntegral, B4.5); testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (B4.5); testMultiSpline (B4.7); testForwardFlat (S-cds); testSabrInterpolation, testSabrGuess, testSabrSingleCases, testFlochKennedySabrIsSmoothAroundATM, testLeFlochKennedySabrExample (S7); testBicubicDerivatives, testBicubicUpdate (S8); testFlatExtrapolation (B3.1); testBSplines (B3.5); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (B6.2); testLaplaceInterpolation (B7.3); testNoArbSabrInterpolation, testTransformations (B7.5)
 // Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs)
 
 using NanoQL.Numerics;
@@ -599,6 +599,69 @@ public class InterpolationsTests
                 Assert.Fail(
                     $"failed to calculate primitive at {x[i]}"
                     + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestMixedLinearCubicMatchDerivatives()
+    {
+        Size n = 6;
+        Size k = 2;
+
+        Real[] x, y;
+        x = XRange(-2.0, 2.0, n);
+        y = Parabolic(x);
+
+        var f = new MixedLinearCubicInterpolation(
+            x,
+            y,
+            k,
+            MixedInterpolationBehavior.SplitRanges,
+            Spline,
+            false,
+            FirstDerivative,
+            null,
+            SecondDerivative,
+            0.0);
+
+        Real tolerance = 1.0e-12;
+        Real eps = tolerance / 10;
+
+        Real leftSide = f.Derivative(x[k] - eps);
+        Real rightSide = f.Derivative(x[k] + eps);
+        if (Math.Abs(leftSide - rightSide) > tolerance)
+        {
+            Assert.Fail(
+                "derivatives at the switch point do not match"
+                + $"\n    left side:  {leftSide:F6}\n    right side: {rightSide:F6}\n    error:      {Math.Abs(leftSide - rightSide):E}");
+        }
+    }
+
+    [Fact]
+    public void TestMixedLinearCubicSwitchPoint()
+    {
+        // Testing switch point bounds of mixed linear/cubic interpolation...
+
+        Size n = 5;
+        Real[] x = XRange(-2.0, 2.0, n);
+        Real[] y = Parabolic(x);
+
+        // a switch index equal to the number of points puts the switch
+        // iterator one past the end of the x range, which used to be
+        // dereferenced; it must be rejected instead
+        ArgumentException e = Assert.Throws<ArgumentException>(() => new MixedLinearCubicNaturalSpline(x, y, n));
+        Assert.Contains("n is too large", e.Message, StringComparison.Ordinal);
+
+        // the largest valid switch index still reproduces the knots
+        var f = new MixedLinearCubicNaturalSpline(x, y, n - 1);
+        for (Size i = 0; i < n; ++i)
+        {
+            Real interpolated = f.Evaluate(x[i]);
+            if (Math.Abs(interpolated - y[i]) > 1e-12)
+            {
+                Assert.Fail(
+                    $"failed to reproduce knot {i}\n    expected:     {y[i]:E}\n    interpolated: {interpolated:E}");
             }
         }
     }

@@ -14,11 +14,12 @@ editing it by hand.
 
 [`Divergences/BootstrapNullHelperTests.cs`](../tests/NanoQL.Tests/Divergences/BootstrapNullHelperTests.cs)
 
-A null helper among a curve's instruments is refused when the curve is built, with `ArgumentException` naming the instruments. QuantLib's bootstrap sorts its helpers by their pillar dates (`iterativebootstrap.hpp:158-159`, `bootstraphelper.hpp:251-255`), dereferencing a null one, a result C++ leaves undefined; the wheel's helper vector refuses `None` before QuantLib sees it.
+A null helper among a curve's instruments is refused when the curve is built, with `ArgumentException` naming the instruments, and one among a global bootstrap's additional helpers when the bootstrap is built, naming the additional helpers. QuantLib's bootstraps read their helpers' pillar dates (`iterativebootstrap.hpp:158-159`, `bootstraphelper.hpp:251-255`; `globalbootstrap.hpp:281-282, 290-294`), dereferencing a null one, a result C++ leaves undefined; the wheel's helper vector refuses `None` before QuantLib sees it.
 
 Facts:
 
 - `ANullHelperAmongACurvesInstrumentsIsRefused`
+- `ANullHelperAmongAGlobalBootstrapsAdditionalHelpersIsRefused`
 
 ## BuilderTests
 
@@ -87,11 +88,12 @@ Facts:
 
 [`Divergences/CurveRecalculationTests.cs`](../tests/NanoQL.Tests/Divergences/CurveRecalculationTests.cs)
 
-A bootstrapped curve is always built afresh, under the context it is given. QuantLib's piecewise curve is a lazy object that recalculates when a quote or the evaluation date changes, and its recalculation differs from a fresh bootstrap in three ways: it starts from its previous data (`iterativebootstrap.hpp:211-218, 253-255`), it re-runs `initialize()`, which takes the pillar dates from the helpers, only on first use or for a moving curve (`iterativebootstrap.hpp:224-231`), and a moving curve never re-runs `YieldTermStructure::update()`, which re-sets its jumps (`piecewiseyieldcurve.hpp:220-231`, `yieldtermstructure.cpp:174-189`). nanoql's curve is QuantLib's fresh curve in each case. The expected values are the wheel's.
+A bootstrapped curve is always built afresh, under the context it is given. QuantLib's piecewise curve is a lazy object that recalculates when a quote or the evaluation date changes, and its recalculation differs from a fresh bootstrap in three ways: it starts from its previous data (`iterativebootstrap.hpp:211-218, 253-255`; `globalbootstrap.hpp:340-347, 387-390, 409-411`), it re-runs `initialize()`, which takes the pillar dates from the helpers, only on first use or for a moving curve (`iterativebootstrap.hpp:224-231`), and a moving curve never re-runs `YieldTermStructure::update()`, which re-sets its jumps (`piecewiseyieldcurve.hpp:220-231`, `yieldtermstructure.cpp:174-189`). nanoql's curve is QuantLib's fresh curve in each case. The expected values are the wheel's.
 
 Facts:
 
 - `ACurveOnAChangedQuoteIsBootstrappedAfresh`
+- `AGlobalCurveOnAChangedQuoteIsBootstrappedAfresh`
 - `AFixedReferenceCurveTakesItsContextsPillars`
 - `AMovingCurvesJumpsFollowItsReferenceDate`
 
@@ -186,6 +188,17 @@ Facts:
 - `QuantLibsNullSentinelIsAValue`
 - `FewerValuesThanDatesAreRefused`
 
+## InitialGuessSizeTests
+
+[`Divergences/InitialGuessSizeTests.cs`](../tests/NanoQL.Tests/Divergences/InitialGuessSizeTests.cs)
+
+A global bootstrap's initial-guess function that gives fewer values than the curve has nodes after the first is refused when the curve is built, with `NanoQLException` "initial guess has n values but the curve has m pillars", QuantLib-Python's wording. QuantLib's optimizer starts from the guess, and the bootstrap writes each node from the optimizer's argument, whose size is the guess's (`globalbootstrap.hpp:394, 442-448`), reading past its end, a result C++ leaves undefined; the wheel's guess function refuses a guess of any other size than the nodes'. A longer guess is QuantLib's defined path where the traits' transforms don't read a node's time (the discount traits', and the zero-yield and forward-rate traits', which have none), kept: its extra values are variables no error term reads. The simple-zero traits' transforms read each node's time (`bootstraptraits.hpp:408-416`), and for a longer guess QuantLib reads past its times, which nanoql refuses, `NanoQLException` "initial guess longer than the curve's m pillars: the simple-zero transform reads node k".
+
+Facts:
+
+- `AGuessShorterThanTheCurvesPillarsIsRefused`
+- `ALongerGuessUnderTheSimpleZeroTraitsIsRefused`
+
 ## MinimizeContinuationTests
 
 [`Divergences/MinimizeContinuationTests.cs`](../tests/NanoQL.Tests/Divergences/MinimizeContinuationTests.cs)
@@ -244,6 +257,8 @@ An optional real input is a `double?`, whose `null` is "not given", so a value e
 Facts:
 
 - `AnIterativeBootstrapsBoundOfQuantLibsNullIsAValue`
+- `AMixedInterpolationsLeftConditionValueOfQuantLibsNullIsAValue`
+- `AGlobalBootstrapsAccuracyOfQuantLibsNullIsAValue`
 
 ## OvernightIndexedCouponRefusalTests
 
@@ -435,6 +450,7 @@ Facts:
 
 - `ATelescopicCouponGivesTheFullSchedulesResults`
 - `ATelescopicCouponListsEveryDailyDate`
+- `ALockoutLegsNPVIsTheFullSchedules`
 
 ## TimeSeriesFewerValuesTests
 

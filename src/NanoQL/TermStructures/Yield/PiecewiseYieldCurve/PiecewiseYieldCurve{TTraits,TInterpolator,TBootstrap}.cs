@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/yield/piecewiseyieldcurve.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: multiCurveBootstrapContributor, the hook a multicurve bootstrap reads, which S5's second commit ports with GlobalBootstrap and MultiCurve
 
 using System.Collections.Immutable;
 using NanoQL.Numerics;
@@ -19,7 +18,7 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <typeparam name="TTraits">The traits, which name the curve kind (<see cref="Discount"/>, <see cref="ZeroYield"/>, …).</typeparam>
 /// <typeparam name="TInterpolator">The interpolator.</typeparam>
-/// <typeparam name="TBootstrap">The bootstrap (<see cref="IterativeBootstrap"/>).</typeparam>
+/// <typeparam name="TBootstrap">The bootstrap (<see cref="IterativeBootstrap"/>, <see cref="GlobalBootstrap"/>).</typeparam>
 /// <remarks>
 /// <para>
 /// The curve bootstraps in its constructor, as a <c>LazyObject</c>'s work is done at construction. While its bootstrap
@@ -27,7 +26,8 @@ namespace NanoQL.TermStructures;
 /// copies bound to the curve itself, as QuantLib binds them to <c>this</c>; when the bootstrap returns, the state is
 /// frozen into the curve's nodes and dropped, and the bound copies are discarded. Nothing outside the constructor sees
 /// the curve change. The helpers whose dates follow the evaluation date are re-dated for the context's (see
-/// <see cref="BootstrapHelper{TTermStructure}"/>).
+/// <see cref="BootstrapHelper{TTermStructure}"/>). A curve in a cycle of curves, each bootstrapped with the others, is
+/// built by a <see cref="MultiCurve"/>.
 /// </para>
 /// <para>
 /// QuantLib's curve derives from its traits' interpolated curve; this one is that curve through
@@ -105,12 +105,39 @@ public class PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap> : YieldTerm
         IEnumerable<Date>? jumpDates,
         TInterpolator i,
         TBootstrap bootstrap)
+        : this(null, referenceDate, calendar, settlementDays, instruments, dayCounter, context, jumps, jumpDates, i, bootstrap)
+    {
+    }
+
+    // The constructors' work, and QuantLib's multiCurveBootstrapContributor(): a curve a multicurve builds (a parent
+    // given) isn't bootstrapped here. Its bootstrap's contributor joins the multicurve's joint bootstrap, which sets it to
+    // valid, freezing the curve, once the joint optimization has succeeded; only a bootstrap that can join one is given
+    // a parent (MultiCurve builds its members on GlobalBootstrap).
+    internal PiecewiseYieldCurve(
+        MultiCurveBootstrap? parent,
+        Date referenceDate,
+        Calendar? calendar,
+        int? settlementDays,
+        IEnumerable<BootstrapHelper<YieldTermStructure>> instruments,
+        DayCounter dayCounter,
+        EvaluationContext context,
+        IEnumerable<double>? jumps,
+        IEnumerable<Date>? jumpDates,
+        TInterpolator i,
+        TBootstrap bootstrap)
         : base(referenceDate, calendar, CheckArguments(context, instruments, dayCounter), settlementDays, jumps, jumpDates)
     {
         Interpolator = i;
         Bootstrap = bootstrap;
         BootstrapState<YieldTermStructure> s = new(this, instruments, DefaultAccuracy, context, nameof(instruments));
         state = s;
+        if (parent is not null)
+        {
+            parent.Add(((IMultiCurveBootstrap)bootstrap).Contributor<YieldTermStructure, TTraits, TInterpolator>(
+                s, i, context, Freeze));
+            return;
+        }
+
         bootstrap.Calculate<YieldTermStructure, TTraits, TInterpolator>(s, i, context);
         Freeze();
     }
@@ -123,8 +150,13 @@ public class PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap> : YieldTerm
 
     /// <inheritdoc/>
     /// <remarks>The traits' rule: the latest date the helpers need, or the last node's (<see cref="IYieldTraits.MaxDate"/>).</remarks>
+    /// <exception cref="NanoQLException">
+    /// The curve is read from another curve's bootstrap before its own has set its nodes (a multicurve's guess function).
+    /// </exception>
     public sealed override Date MaxDate =>
-        state is { } s ? TTraits.MaxDate(s.Dates, s.MaxDate) : TTraits.MaxDate(dates.AsSpan(), curve!.MaxDate);
+        state is { } s
+            ? TTraits.MaxDate(s.Dates.Length == 0 ? throw NotSetUp() : s.Dates, s.MaxDate)
+            : TTraits.MaxDate(dates.AsSpan(), curve!.MaxDate);
 
     /// <inheritdoc/>
     public sealed override double MaxTime => base.MaxTime;
@@ -217,9 +249,12 @@ public class PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap> : YieldTerm
 
     /// <inheritdoc/>
     /// <remarks>The traits' formula (<see cref="IYieldTraits.DiscountImpl"/>), on the working state while the curve is built.</remarks>
+    /// <exception cref="NanoQLException">
+    /// The curve is read from another curve's bootstrap before its own has set its nodes (a multicurve's guess function).
+    /// </exception>
     protected sealed override double DiscountImpl(double t) =>
         state is { } s
-            ? TTraits.DiscountImpl(s.Times, s.Data, s.Interpolation!, t)
+            ? TTraits.DiscountImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t)
             : TTraits.DiscountImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t);
 
     private static DayCounter CheckArguments(
@@ -230,6 +265,10 @@ public class PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap> : YieldTerm
         ArgumentNullException.ThrowIfNull(dayCounter);
         return dayCounter;
     }
+
+    // A working state with no nodes yet, which only another curve's bootstrap can reach: in a multicurve, a guess
+    // function pricing a helper on a member added after its own curve.
+    private static NanoQLException NotSetUp() => new("curve not set up yet: its bootstrap has set no nodes");
 
     // The bootstrap's result, frozen into the curve's nodes; the working state and the helpers bound to the curve go.
     private void Freeze()

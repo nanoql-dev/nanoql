@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/piecewiseyieldcurve.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the consistency cases' bond check, which waits for S-bond's FixedRateBond, their FRA and futures checks, which wait for S-rx's ForwardRateAgreement, and testBMACurveConsistency, which waits for batch 2's USDLibor; testDefaultInstantiation's ForwardFlat curve (S-cds) and ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testGlobalBootstrapInitialGuessFn and testGlobalBootstrapInstrumentWeights, which wait for S5's second commit; testCA365Futures, testGlobalBootstrap, testGlobalBootstrapPenalty, testIterativeBootstrapRetries, testCustomFuturesHelpers and testHelperDatesFromNonBusinessEvaluationDate, which wait for S5's third commit; testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testParFraRegression, testMultiCurveTwoPiecewiseYieldCurves and testFraForDates (S-rx); testMultiCurvePiecewiseYieldCurveAndSpreadedCurve (S-bond); testPiecewiseSpreadYieldCurve (B3.5); testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate and testBmaHelperSwap (batch 2's Libor indexes); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
+// Partial: the consistency cases' bond check, which waits for S-bond's FixedRateBond, their FRA and futures checks, which wait for S-rx's ForwardRateAgreement, and testBMACurveConsistency, which waits for batch 2's USDLibor; testDefaultInstantiation's ForwardFlat curve (S-cds) and ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testCA365Futures, testGlobalBootstrap, testGlobalBootstrapPenalty, testIterativeBootstrapRetries, testCustomFuturesHelpers and testHelperDatesFromNonBusinessEvaluationDate, which wait for S5's third commit; testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testParFraRegression, testMultiCurveTwoPiecewiseYieldCurves and testFraForDates (S-rx); testMultiCurvePiecewiseYieldCurveAndSpreadedCurve (S-bond); testPiecewiseSpreadYieldCurve (B3.5); testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate and testBmaHelperSwap (batch 2's Libor indexes); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
 // Replaced: testObservability (Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -304,6 +304,156 @@ public class PiecewiseYieldCurveTests
         _ = curve.Discount(0.01);
     }
 
+    // Adapted: the penalties read the fixture's instruments from the working state, whose additional helpers are the
+    // copies the bootstrap has bound to the curve (lines 1571-1573 read the fixture's own, which QuantLib's bootstrap
+    // binds); the dates functor (line 1594) becomes the dates it returns.
+    [Fact]
+    public void TestGlobalBootstrapInitialGuessFn()
+    {
+        var vars = new CommonVars(new Date(25, September, 2019));
+
+        // Create a setup that is sensitive to the initial guess.
+        Calendar calendar = new Euribor6M().FixingCalendar;
+        var pillarDates = new List<Date> { new(1, October, 2019) };
+        for (int i = 0; i < 8; ++i)
+        {
+            pillarDates.Add(calendar.Adjust(pillarDates[^1] + 45));
+        }
+
+        foreach (RateHelper helper in vars.Instruments)
+        {
+            if (helper.PillarDate > pillarDates[^1])
+            {
+                pillarDates.Add(helper.PillarDate!.Value);
+            }
+        }
+
+        Func<IBootstrapState, EvaluationContext, Vector> penalties = (state, context) =>
+        {
+            IReadOnlyList<IBootstrapHelper> instruments = state.AdditionalHelpers;
+            ReadOnlySpan<double> times = state.Times;
+            ReadOnlySpan<double> data = state.Data;
+            int nInst = instruments.Count;
+            var errors = new Vector(nInst + times.Length - 2);
+
+            // instruments errors
+            for (int i = 0; i < nInst; ++i)
+            {
+                errors[i] = instruments[i].QuoteError(context);
+            }
+
+            // gradient penalties
+            var rates = new Vector(data.Length - 1);
+            for (int i = 0; i < times.Length - 1; ++i)
+            {
+                rates[i] = ((data[i] / data[i + 1]) - 1.0) / (times[i + 1] - times[i]);
+            }
+
+            for (int i = 0; i < times.Length - 2; ++i)
+            {
+                errors[nInst + i] = 1e-2 * (rates[i + 1] - rates[i]) / (times[i + 1] - times[i]);
+            }
+
+            return errors;
+        };
+
+        int initialGuessCalls = 0;
+        Func<IBootstrapState, EvaluationContext, Vector> initialGuessFn = (state, _) =>
+        {
+            initialGuessCalls++;
+            return new Vector(state.Times.Length - 1, 1.0);
+        };
+
+        var curve = new PiecewiseYieldCurve<Discount, LogLinear, GlobalBootstrap>(
+            vars.Settlement,
+            [],
+            new Actual365Fixed(),
+            vars.Context,
+            bootstrap: new GlobalBootstrap(
+                1e-12, null, null, null, vars.Instruments, pillarDates, penalties, initialGuessFn));
+
+        Date[] expectedDates =
+        [
+            new(27, September, 2019), new(1, October, 2019), new(15, November, 2019), new(30, December, 2019),
+            new(13, February, 2020), new(30, March, 2020), new(14, May, 2020), new(29, June, 2020),
+            new(13, August, 2020), new(28, September, 2020), new(27, September, 2021), new(27, September, 2022),
+            new(27, September, 2023), new(27, September, 2024), new(29, September, 2025), new(28, September, 2026),
+            new(27, September, 2027), new(27, September, 2028), new(27, September, 2029), new(29, September, 2031),
+            new(27, September, 2034), new(27, September, 2039), new(27, September, 2044), new(27, September, 2049),
+        ];
+        DiscountFactor[] expectedDFs =
+        [
+            1.0, 0.9994923431162580, 0.9938069118457880, 0.9882401711181712,
+            0.9828381250775845, 0.9774079566030049, 0.9721182498392723, 0.9667951580943512,
+            0.9617336341824015, 0.9564548068987965, 0.9135007024272714, 0.8698607442445871,
+            0.8266650007699866, 0.7829682196126155, 0.7399209887960153, 0.6973589159124343,
+            0.6565792747227167, 0.6180250998622848, 0.5818438569698231, 0.5127051907762759,
+            0.4218543471337612, 0.3050840671400172, 0.2225943633033588, 0.165544906093695,
+        ];
+
+        var nodes = curve.Nodes();
+        Assert.Equal(expectedDates.Length, nodes.Length);
+        for (int i = 0; i < nodes.Length; ++i)
+        {
+            Assert.Equal(expectedDates[i], nodes[i].Key);
+            Assert.True(
+                Math.Abs(nodes[i].Value - expectedDFs[i]) <= 1e-10,
+                $"node {i}: {nodes[i].Value:R} differs from {expectedDFs[i]:R}");
+        }
+
+        Assert.Equal(1, initialGuessCalls);
+    }
+
+    // Adapted: the additional penalties read the helpers from the working state, whose additional helpers are the
+    // copies the bootstrap has bound to the curve (line 1852 reads the case's own, which QuantLib's bootstrap binds);
+    // the dates functor (lines 1848-1850) becomes the dates it returns; the unused Euribor 6M index (line 1827) is
+    // dropped.
+    [Fact]
+    public void TestGlobalBootstrapInstrumentWeights()
+    {
+        var vars = new CommonVars(new Date(23, October, 2025));
+
+        var helpers = new List<RateHelper>();
+
+        // build a curve with overdetermined helper set
+        helpers.Add(new DepositRateHelper(
+            0.01, new Period(6, TimeUnit.Months), 2, new TARGET(), BusinessDayConvention.ModifiedFollowing, true,
+            new Actual360(), vars.Context));
+        helpers.Add(new DepositRateHelper(
+            0.02, new Period(6, TimeUnit.Months), 2, new TARGET(), BusinessDayConvention.ModifiedFollowing, true,
+            new Actual360(), vars.Context));
+
+        // curve1 uses traditional helpers with weights w1 and w2
+        Real w1 = 0.1, w2 = 0.9;
+
+        var curve1 = new PiecewiseYieldCurve<Discount, LogLinear, GlobalBootstrap>(
+            vars.Today,
+            helpers,
+            new Actual360(),
+            vars.Context,
+            i: default(LogLinear),
+            bootstrap: new GlobalBootstrap(1E-10, null, null, [w1, w2]));
+
+        // curve2 uses custom dates and penalties using the same weights
+        Date[] addDates = [helpers[0].PillarDate!.Value, helpers[1].PillarDate!.Value];
+        Func<IBootstrapState, EvaluationContext, Vector> addPenalties = (state, context) =>
+            new Vector([
+                w1 * state.AdditionalHelpers[0].QuoteError(context), w2 * state.AdditionalHelpers[1].QuoteError(context)
+            ]);
+
+        var curve2 = new PiecewiseYieldCurve<Discount, LogLinear, GlobalBootstrap>(
+            vars.Today,
+            [],
+            new Actual360(),
+            vars.Context,
+            i: default(LogLinear),
+            bootstrap: new GlobalBootstrap(
+                1E-10, additionalHelpers: helpers, additionalDates: addDates, additionalPenalties: addPenalties));
+
+        // check that both approaches result in the same curve
+        CheckClose(curve1.Discount(0.3), curve2.Discount(0.3), 1E-13);
+    }
+
     [Fact]
     public void TestDepositForDates()
     {
@@ -584,6 +734,32 @@ public class PiecewiseYieldCurveTests
     // settlement date's flows (makevanillaswap.cpp:178-189).
     private static Rate FairRate(VanillaSwap swap, EvaluationContext context, YieldTermStructure curve) =>
         DiscountingSwapEngine.Calculate(swap, context, curve, includeSettlementDateFlows: false).FairRate!.Value;
+
+    // QL_CHECK_CLOSE, Boost's BOOST_CHECK_CLOSE: |actual - expected| within the tolerance, in percent, of both values.
+    private static void CheckClose(double actual, double expected, double tolerancePercent)
+    {
+        double diff = Math.Abs(actual - expected), fraction = tolerancePercent * 0.01;
+        Assert.True(
+            SafeDivision(diff, Math.Abs(expected)) <= fraction && SafeDivision(diff, Math.Abs(actual)) <= fraction,
+            $"difference between {actual:R} and {expected:R} exceeds {tolerancePercent:R}%");
+    }
+
+    // Boost's safe_fpt_division: f1 / f2, without overflow or underflow.
+    private static double SafeDivision(double f1, double f2)
+    {
+        const double NormalMin = 2.2250738585072014e-308;
+        if (f2 < 1.0 && f1 > f2 * double.MaxValue)
+        {
+            return double.MaxValue;
+        }
+
+        if (Math.Abs(f1) <= NormalMin || (f2 > 1.0 && f1 < f2 * NormalMin))
+        {
+            return 0.0;
+        }
+
+        return f1 / f2;
+    }
 
     private readonly record struct Datum(Integer N, TimeUnit Units, Rate Rate);
 

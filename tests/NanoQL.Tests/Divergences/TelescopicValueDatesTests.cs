@@ -123,6 +123,48 @@ public class TelescopicValueDatesTests
         static Calendar cal(OvernightIndex index) => index.FixingCalendar;
     }
 
+    [Fact]
+    public void ALockoutLegsNPVIsTheFullSchedules()
+    {
+        // QuantLib's own testOvernightLegNPV (test-suite/overnightindexedcoupon.cpp:1033): a quarterly SOFR leg on
+        // 1 million with a lockout of 3 days and telescopic value dates, forecast on a cubic zero curve and discounted
+        // flat at 0.15%. QuantLib's telescopic coupons freeze the lockout at the front stub's last fixing date, and
+        // the test asserts their NPV, 34883.949669756257; with every daily value date it is QuantLib's full-schedule
+        // NPV, 34638.786842593545. The leg starts after the evaluation date, so it reads no past fixing.
+        var today = new Date(1, June, 2025);
+        var dc = new Actual360();
+        var context = new EvaluationContext { EvaluationDate = today };
+        var zeroCurve = new InterpolatedZeroCurve<Cubic>(
+            [
+                today, new Date(30, July, 2025), new Date(29, August, 2025), new Date(30, September, 2025),
+                new Date(30, December, 2025), new Date(30, March, 2026), new Date(30, June, 2026),
+            ],
+            [0.0434, 0.0436, 0.0431, 0.0413, 0.0390, 0.0370, 0.0348],
+            dc,
+            new UnitedStates(UnitedStatesMarket.SOFR));
+        var sofr = new Sofr(zeroCurve.EnableExtrapolation());
+        var schedule = new Schedule(
+            new Date(1, July, 2025),
+            new Date(1, July, 2026),
+            new Period(3, TimeUnit.Months),
+            new UnitedStates(UnitedStatesMarket.GovernmentBond),
+            BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing,
+            DateGenerationRule.Forward,
+            false,
+            context);
+        ImmutableArray<CashFlow> leg = new OvernightLeg(schedule, sofr)
+            .WithNotionals(1000000.0)
+            .WithPaymentDayCounter(dc)
+            .WithLockoutDays(3)
+            .WithTelescopicValueDates(true)
+            .ToLeg();
+        YieldTermStructure discountCurve = FlatForward.Create(0, new NullCalendar(), 0.0015, dc, context);
+
+        double npv = leg.Sum(cf => cf.Amount(context) * discountCurve.Discount(cf.Date));
+        AssertQuantLibFull(34638.786842593545, npv, 34883.949669756257);
+    }
+
     // nanoql's value is QuantLib's full-schedule value, and differs from its telescopic one.
     private static void AssertQuantLibFull(double quantLibFull, double actual, double quantLibTelescopic)
     {

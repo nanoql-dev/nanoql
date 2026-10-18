@@ -12,8 +12,18 @@ refuses: the value, derivative, second derivative and primitive (Interpolation's
 QuantLib doesn't implement it. Then HarmonicLogCubic on five node sets of 2 to 13 points, and the refusal of a y value
 of 0 by both classes.
 
+Then the LogMixedLinearCubic family, which the wheel reaches only through its curves: on the 6 and 11 points and their
+sample points, LogMixedLinearCubicInterpolation with three parameter sets (the monotonic spline, Kruger's scheme, and
+the spline matching its derivatives at the switch point) and LogMixedLinearCubicNaturalSpline, each with n in
+{0, 2, 4} under both behaviours, read as above; their refusals of two points and of a y value of 0; the
+LogMixedLinearCubic factory with two parameter sets and its presets MonotonicLogMixedLinearCubic and
+KrugerLogMixedLinearCubic, read back through their values at the sample points ("factory" inputs, "values" outputs);
+and the three factories' global and requiredPoints.
+
 An interpolation is the spec {"type", "x", "y"}, with LogCubicInterpolation's six parameters ("derivativeApprox",
-"monotonic", "leftCondition", "leftConditionValue", "rightCondition", "rightConditionValue") for that type
+"monotonic", "leftCondition", "leftConditionValue", "rightCondition", "rightConditionValue") for that type, and the
+LogMixedLinearCubic family's "n" and "behavior" with them (a null "leftConditionValue" being Null<Real>()); a factory
+is {"type": "LogMixedLinearCubic", "n", "behavior", and the six} or a preset's {"type", "n", "behavior"}
 (tools/cxx/src/math/interpolationspec.hpp). Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Numerics/Interpolations/LogInterpolationCxxVectorTests.cs."""
 import os
@@ -141,7 +151,67 @@ def cases():
                         [False]))
         out.append(case("HarmonicLogCubic refuses a y value of 0", {"type": "HarmonicLogCubic", "x": xs, "y": ys},
                         [0.25], [False]))
+
+        out += mixed_cases(H, st, case, sets[1:])
         return out
+
+
+# CubicInterpolation::FirstDerivative, MixedInterpolation's behaviors and the derivative approximations the
+# LogMixedLinearCubic family's cases take.
+FIRST_DERIVATIVE, KRUGER = 1, 7
+BEHAVIORS = [("ShareRanges", 0), ("SplitRanges", 1)]
+MIXED_SETTINGS = [("monotonic spline", SPLINE, True, SECOND_DERIVATIVE, 0.0),
+                  ("Kruger", KRUGER, False, SECOND_DERIVATIVE, 0.0),
+                  ("spline matching derivatives", SPLINE, False, FIRST_DERIVATIVE, None)]
+MIXED_FACTORIES = ["LogMixedLinearCubic", "MonotonicLogMixedLinearCubic", "KrugerLogMixedLinearCubic"]
+
+
+def mixed_cases(H, st, case, sets):
+    """The LogMixedLinearCubic family, on the six and eleven points with their sample points: its interpolation with
+    three parameter sets, and LogMixedLinearCubicNaturalSpline, with n in {0, 2, 4} under both behaviours, ShareRanges
+    refusing the matched derivatives and SplitRanges with n = 0 a linear part on one point; its refusals of two points
+    and of a y value of 0; the factory and its two presets read back through their values at the sample points; and
+    the three factories' global and requiredPoints."""
+    out = []
+    for name, xs, ys, points, allow in sets:
+        for n in (0, 2, 4):
+            for behavior_name, behavior in BEHAVIORS:
+                switch = {"n": n, "behavior": behavior}
+                for label, da, mono, left, lv in MIXED_SETTINGS:
+                    spec = dict(log_cubic(xs, ys, da, mono, left, lv, SECOND_DERIVATIVE, 0.0),
+                                type="LogMixedLinearCubicInterpolation", **switch)
+                    out.append(case(f"{name} LogMixedLinearCubicInterpolation {label} n={n} {behavior_name}", spec,
+                                    points, allow))
+                spec = {"type": "LogMixedLinearCubicNaturalSpline", "x": xs, "y": ys, **switch}
+                out.append(case(f"{name} LogMixedLinearCubicNaturalSpline n={n} {behavior_name}", spec, points,
+                                allow))
+    out.append(case("LogMixedLinearCubicNaturalSpline refuses two points",
+                    {"type": "LogMixedLinearCubicNaturalSpline", "x": [0.0, 1.0], "y": [1.0, 2.0], "n": 0,
+                     "behavior": 0}, [0.5], [False]))
+    out.append(case("LogMixedLinearCubicNaturalSpline refuses a y value of 0",
+                    {"type": "LogMixedLinearCubicNaturalSpline", "x": [0.0, 0.5, 1.0, 2.0], "y": [1.0, 0.5, 0.0, 2.0],
+                     "n": 1, "behavior": 0}, [0.25], [False]))
+
+    def factory(n, behavior, da, mono, left, lv):
+        return {"type": "LogMixedLinearCubic", "n": n, "behavior": behavior, "derivativeApprox": da,
+                "monotonic": mono, "leftCondition": left, "leftConditionValue": lv,
+                "rightCondition": SECOND_DERIVATIVE, "rightConditionValue": 0.0}
+
+    factories = [("LogMixedLinearCubic Kruger shared", factory(2, 0, KRUGER, False, SECOND_DERIVATIVE, 0.0)),
+                 ("LogMixedLinearCubic spline matching derivatives",
+                  factory(1, 1, SPLINE, False, FIRST_DERIVATIVE, None)),
+                 ("MonotonicLogMixedLinearCubic", {"type": "MonotonicLogMixedLinearCubic", "n": 2, "behavior": 0}),
+                 ("KrugerLogMixedLinearCubic", {"type": "KrugerLogMixedLinearCubic", "n": 3, "behavior": 1})]
+    for name, xs, ys, points, _ in sets:
+        for label, spec in factories:
+            out.append({"name": f"{name} {label}::interpolate",
+                        "inputs": {"settings": st, "factory": spec, "x": xs, "y": ys, "points": v.enc(points)},
+                        "expected": {"values": v.enc(H.call("LogMixedLinearCubic::interpolate", spec, xs, ys,
+                                                            points))}})
+    out.append({"name": "LogMixedLinearCubic family traits", "inputs": {"settings": st, "factories": MIXED_FACTORIES},
+                "expected": {"global": [H.call(f + "::global") for f in MIXED_FACTORIES],
+                             "requiredPoints": [H.call(f + "::requiredPoints") for f in MIXED_FACTORIES]}})
+    return out
 
 
 if __name__ == "__main__":

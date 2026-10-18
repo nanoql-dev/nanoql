@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's PiecewiseYieldCurve (ql/termstructures/yield/piecewiseyieldcurve.hpp) on its iterative
 bootstrap, with the four yield traits (ql/termstructures/yield/bootstraptraits.hpp) and the interpolated curves'
-formulas they carry: 179 curves in 39 cases, on deposit and swap helpers of termstructures/yield/ratehelpers.py.
+formulas they carry: 209 curves in 43 cases, on deposit and swap helpers of termstructures/yield/ratehelpers.py.
 
 - 132 curves in 12 cases: 11 traits and interpolator pairs (discounts: log-linear, spline cubic, log-cubic with the
   spline and with Kruger's derivatives, monotonic log-cubic; zero rates: linear, cubic with Kruger's derivatives and
@@ -30,6 +30,17 @@ formulas they carry: 179 curves in 39 cases, on deposit and swap helpers of term
   the custom pillars'): QuantLib's helpers re-date themselves when the evaluation date moves, so the curves' values are
   those of fresh helpers on the later date, which this generator builds (nanoql's curve re-dates the helpers it was
   given to its own context).
+- 18 curves in 2 cases: the wheel's nine named iterative curves (PiecewiseLinearSimpleZero, PiecewiseFlatForward,
+  PiecewiseLogLinearDiscount, PiecewiseLinearForward, PiecewiseLinearZero, PiecewiseCubicZero,
+  PiecewiseLogCubicDiscount, PiecewiseKrugerLogDiscount, PiecewiseLogMixedLinearCubicDiscount) on the fixture's helpers
+  on the first evaluation date, with a fixed reference date and on 2 TARGET settlement days, each built through its
+  class by nanoql.
+- 12 log-mixed-linear-cubic discount curves in 2 cases, on the fixture's helpers (22 nodes) and on 4 deposits (5
+  nodes): the switch point n = 3 and 5 under both behaviours, whose construction refuses the first pass's first
+  prefixes, so that QuantLib bootstraps them on linear interpolation until it can construct them (on 5 nodes, n = 5
+  never can, and the curve stays linear); and the derivatives matched at the switch point n = 2 (a first-derivative
+  left end with no value), under SplitRanges, and under ShareRanges, whose construction refuses them on every prefix,
+  so that the curve is linear.
 
 A curve's outputs are whether it builds, QuantLib's refusals recorded as its throw; its nodes' dates and data, its
 maximum date, its discounts at 40 dates (35 from its reference date to its maximum date, the earlier ones closer
@@ -46,13 +57,15 @@ and "curves" (curve specs) with "discountDates" and "extrapolate" (one list per 
 "settlementDays" with "settlementDays" and "calendar"; null jumps or jump dates are none, so the jumps take QuantLib's
 default dates; the bootstrap is null for QuantLib's default IterativeBootstrap, or {"accuracy", "minValue", "maxValue",
 "maxAttempts", "maxFactor", "minFactor", "dontThrow", "dontThrowSteps", "maxEvaluations"}, null reals for
-Null<Real>(). An interpolator is {"type": "Linear" | "LogLinear" | "BackwardFlat" | "KrugerLog" |
-"MonotonicLogCubic"}, or {"type": "Cubic" | "LogCubic", "derivativeApprox", "monotonic", "leftCondition",
-"leftConditionValue", "rightCondition", "rightConditionValue"}, every parameter named, since the wheel's defaults for
-LogCubic aren't QuantLib's.
+Null<Real>(); a named curve adds "class", the named class nanoql builds it through. An interpolator is {"type":
+"Linear" | "LogLinear" | "BackwardFlat" | "KrugerLog" | "MonotonicLogCubic"}, or {"type": "Cubic" | "LogCubic",
+"derivativeApprox", "monotonic", "leftCondition", "leftConditionValue", "rightCondition", "rightConditionValue"}, or
+{"type": "LogMixedLinearCubic", "n", "behavior", and those six}, every parameter named, since the wheel's defaults for
+LogCubic and LogMixedLinearCubic aren't QuantLib's (a null "leftConditionValue" is Null<Real>()).
 
 The wheel names each pair's class (PiecewiseLogLinearDiscount, PiecewiseLogCubicDiscount, PiecewiseKrugerLogDiscount,
-PiecewiseLinearZero, PiecewiseCubicZero, PiecewiseFlatForward, PiecewiseLinearForward, PiecewiseLinearSimpleZero), the
+PiecewiseLinearZero, PiecewiseCubicZero, PiecewiseFlatForward, PiecewiseLinearForward, PiecewiseLinearSimpleZero,
+PiecewiseLogMixedLinearCubicDiscount), the
 spline cubic discount curve by its shim's target _PiecewiseSplineCubicDiscount (on the wheel's SplineCubic, QuantLib's
 Cubic with the spline and no monotonicity), and builds each from (reference date or settlement days and calendar,
 helpers, day counter, jumps, jump dates, interpolator, bootstrap). Every curve is built on fresh helpers under the
@@ -93,10 +106,19 @@ def cubic(da, monotonic=False, left=CI.SecondDerivative, left_value=0.0, right=C
             "rightConditionValue": right_value}
 
 
+def log_mixed(n, behavior, da=CI.Spline, monotonic=True, left=CI.SecondDerivative, left_value=0.0,
+              right=CI.SecondDerivative, right_value=0.0):
+    """A LogMixedLinearCubic spec, every parameter named; a None left value is Null<Real>()."""
+    return {"type": "LogMixedLinearCubic", "n": n, "behavior": int(behavior), "derivativeApprox": int(da),
+            "monotonic": monotonic, "leftCondition": int(left), "leftConditionValue": left_value,
+            "rightCondition": int(right), "rightConditionValue": right_value}
+
+
 LINEAR, LOG_LINEAR, BACKWARD_FLAT = {"type": "Linear"}, {"type": "LogLinear"}, {"type": "BackwardFlat"}
 KRUGER_LOG, MONOTONIC_LOG_CUBIC = {"type": "KrugerLog"}, {"type": "MonotonicLogCubic"}
 SPLINE_CUBIC = cubic(CI.Spline)
 KRUGER_CUBIC = cubic(CI.Kruger)
+SHARE_RANGES, SPLIT_RANGES = ql.MixedInterpolation.ShareRanges, ql.MixedInterpolation.SplitRanges
 
 # The 11 pairs, each with its day counter.
 PAIRS = [
@@ -125,11 +147,16 @@ WHEEL = {
     ("ForwardRate", "BackwardFlat"): ql.PiecewiseFlatForward,
     ("ForwardRate", "Linear"): ql.PiecewiseLinearForward,
     ("SimpleZeroYield", "Linear"): ql.PiecewiseLinearSimpleZero,
+    ("Discount", "LogMixedLinearCubic"): ql.PiecewiseLogMixedLinearCubicDiscount,
 }
 
 
 def make_interpolator(traits, spec):
     t = spec["type"]
+    if t == "LogMixedLinearCubic":
+        return ql.LogMixedLinearCubic(spec["n"], spec["behavior"], spec["derivativeApprox"], spec["monotonic"],
+                                      spec["leftCondition"], spec["leftConditionValue"], spec["rightCondition"],
+                                      spec["rightConditionValue"])
     if t in ("Cubic", "LogCubic"):
         args = (spec["derivativeApprox"], spec["monotonic"], spec["leftCondition"], spec["leftConditionValue"],
                 spec["rightCondition"], spec["rightConditionValue"])
@@ -158,13 +185,17 @@ def make_bootstrap(spec):
                                  spec["maxEvaluations"])
 
 
-def curve_spec(traits, interpolator, dc, today, moving=False, jumps=None, jump_dates=None, bootstrap=None):
+def curve_spec(traits, interpolator, dc, today, moving=False, jumps=None, jump_dates=None, bootstrap=None,
+               named=None):
     spec = {"traits": traits, "interpolator": interpolator}
     if moving:
         spec.update({"form": "settlementDays", "settlementDays": 2, "calendar": TARGET})
     else:
         spec.update({"form": "referenceDate", "referenceDate": v.enc(ql.TARGET().advance(today, 2, ql.Days))})
     spec.update({"dayCounter": dc, "jumps": jumps, "jumpDates": v.enc(jump_dates), "bootstrap": bootstrap})
+    if named is not None:
+        # the named class nanoql builds the curve through; the wheel's class of that name is WHEEL's for the pair
+        spec["class"] = named
     return spec
 
 
@@ -172,6 +203,7 @@ def make_curve(spec, helpers):
     """The wheel's curve for a spec on the given helpers, built under the settings already set."""
     traits, t = spec["traits"], spec["interpolator"]["type"]
     cls = WHEEL[(traits, t)]
+    assert spec.get("class", cls.__name__) == cls.__name__, spec
     if spec["form"] == "referenceDate":
         head = (ql.Date(spec["referenceDate"]),)
     else:
@@ -379,8 +411,59 @@ def moved_cases():
     return out
 
 
+# The wheel's named curves, each with the pair it closes and a day counter.
+NAMED = [("PiecewiseLinearSimpleZero", "SimpleZeroYield", LINEAR, A360),
+         ("PiecewiseFlatForward", "ForwardRate", BACKWARD_FLAT, A365),
+         ("PiecewiseLogLinearDiscount", "Discount", LOG_LINEAR, A360),
+         ("PiecewiseLinearForward", "ForwardRate", LINEAR, A360),
+         ("PiecewiseLinearZero", "ZeroYield", LINEAR, A365),
+         ("PiecewiseCubicZero", "ZeroYield", KRUGER_CUBIC, A360),
+         ("PiecewiseLogCubicDiscount", "Discount", cubic(CI.Spline, True, log=True), A365),
+         ("PiecewiseKrugerLogDiscount", "Discount", KRUGER_LOG, A360),
+         ("PiecewiseLogMixedLinearCubicDiscount", "Discount", log_mixed(2, SHARE_RANGES), A365)]
+
+
+def named_cases():
+    """The nine named curves on the fixture's helpers, each built through its class, with a fixed reference date and
+    on settlement days."""
+    today = EVALUATION_DATES[0]
+    out = []
+    for moving in (False, True):
+        with v.case_settings(today) as st:
+            specs = [curve_spec(traits, interpolator, dc, today, moving, named=named)
+                     for named, traits, interpolator, dc in NAMED]
+            form = "on settlement days" if moving else "with a reference date"
+            out.append(group_case(f"{today.ISO()} named classes on fixture {form}", st, "curves", specs, fixture()))
+    return out
+
+
+def four_deposits():
+    """4 deposits, so 5 nodes."""
+    return [deposits_only()[k] for k in (1, 3, 4, 6)]
+
+
+def log_mixed_cases():
+    """Log-mixed-linear-cubic discount curves whose target refuses the first pass's prefix, so that QuantLib bootstraps
+    them on linear interpolation until it can construct them: n = 3 and 5 under both behaviours, on the fixture's 22
+    nodes and on 4 deposits' 5, where n = 5 is never constructed, so the curve stays linear; and the derivatives matched
+    at the switch point (a first-derivative left end with no value) under SplitRanges, and under ShareRanges, whose
+    construction refuses them on every prefix, so the curve is linear."""
+    today = EVALUATION_DATES[0]
+    rows = [log_mixed(n, behavior) for n in (3, 5) for behavior in (SHARE_RANGES, SPLIT_RANGES)]
+    rows += [log_mixed(2, behavior, CI.Spline, False, CI.FirstDerivative, None)
+             for behavior in (SHARE_RANGES, SPLIT_RANGES)]
+    out = []
+    for set_name, helpers in (("fixture", fixture()), ("4 deposits", four_deposits())):
+        with v.case_settings(today) as st:
+            specs = [curve_spec("Discount", interpolator, A365, today) for interpolator in rows]
+            out.append(group_case(f"{today.ISO()} log-mixed-linear-cubic curves on {set_name}", st, "curves", specs,
+                                  helpers))
+    return out
+
+
 def cases():
     out = grid_cases() + jump_cases() + fallback_cases() + bumped_cases() + moved_cases()
+    out += named_cases() + log_mixed_cases()
     check_rows(out)
     return out
 

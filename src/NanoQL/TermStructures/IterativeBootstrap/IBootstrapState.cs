@@ -29,6 +29,12 @@ public interface IBootstrapState
     /// <summary>Gets the curve's helpers, those alive at the curve's first date bound to it.</summary>
     IReadOnlyList<IBootstrapHelper> Instruments { get; }
 
+    /// <summary>
+    /// Gets a global bootstrap's additional helpers, those alive at the curve's first date bound to it; none for another
+    /// bootstrap.
+    /// </summary>
+    IReadOnlyList<IBootstrapHelper> AdditionalHelpers { get; }
+
     /// <summary>Gets the evaluation context the curve is built in.</summary>
     EvaluationContext Context { get; }
 }

@@ -26,7 +26,10 @@ namespace NanoQL.Tests.Vectors;
 /// "maxEvaluations"}</c>, a null real QuantLib's <c>Null&lt;Real&gt;()</c>. An interpolator is <c>{"type": "Linear" |
 /// "LogLinear" | "BackwardFlat" | "KrugerLog" | "MonotonicLogCubic"}</c>, or <c>{"type": "Cubic" | "LogCubic",
 /// "derivativeApprox", "monotonic", "leftCondition", "leftConditionValue", "rightCondition",
-/// "rightConditionValue"}</c>. The helpers are specs of <see cref="RateHelperInputs"/>.
+/// "rightConditionValue"}</c>, or <c>{"type": "LogMixedLinearCubic", "n", "behavior", and those six}</c>, a null
+/// <c>"leftConditionValue"</c> there QuantLib's <c>Null&lt;Real&gt;()</c>. A curve that names a <c>"class"</c> is built
+/// through that named class (<see cref="PiecewiseFlatForward"/>, …), the others through the generic. The helpers are
+/// specs of <see cref="RateHelperInputs"/>.
 /// </para>
 /// <para>
 /// A case of several curves on the same helpers (<c>"curves"</c>, with its <c>"discountDates"</c> and
@@ -50,14 +53,16 @@ internal static class BootstrapInputs
         IReadOnlyList<BootstrapHelper<YieldTermStructure>> helpers,
         EvaluationContext context,
         bool ownLinear = false) =>
-        spec.GetProperty("traits").GetString() switch
-        {
-            "Discount" => WithTraits<Discount>(spec, helpers, context, ownLinear),
-            "ZeroYield" => WithTraits<ZeroYield>(spec, helpers, context, ownLinear),
-            "ForwardRate" => WithTraits<ForwardRate>(spec, helpers, context, ownLinear),
-            "SimpleZeroYield" => WithTraits<SimpleZeroYield>(spec, helpers, context, ownLinear),
-            var t => throw new InvalidOperationException($"unknown traits {t}"),
-        };
+        spec.TryGetProperty("class", out JsonElement named)
+            ? NamedOf(named.GetString()!, spec, helpers, context)
+            : spec.GetProperty("traits").GetString() switch
+            {
+                "Discount" => WithTraits<Discount>(spec, helpers, context, ownLinear),
+                "ZeroYield" => WithTraits<ZeroYield>(spec, helpers, context, ownLinear),
+                "ForwardRate" => WithTraits<ForwardRate>(spec, helpers, context, ownLinear),
+                "SimpleZeroYield" => WithTraits<SimpleZeroYield>(spec, helpers, context, ownLinear),
+                var t => throw new InvalidOperationException($"unknown traits {t}"),
+            };
 
     /// <summary>The bootstrap a spec describes: QuantLib's default for <c>null</c>.</summary>
     /// <param name="spec">The spec, or JSON <c>null</c>.</param>
@@ -100,6 +105,20 @@ internal static class BootstrapInputs
             InterpolationInputs.Condition(i, "rightCondition"),
             InterpolationInputs.Number(i.GetProperty("rightConditionValue")));
 
+    /// <summary>The log-mixed-linear-cubic factory an interpolator spec of type <c>"LogMixedLinearCubic"</c> describes.</summary>
+    /// <param name="i">The spec.</param>
+    /// <returns>The factory.</returns>
+    public static LogMixedLinearCubic LogMixedLinearCubicOf(JsonElement i) =>
+        new(
+            i.GetProperty("n").GetInt32(),
+            InterpolationInputs.Behavior(i),
+            InterpolationInputs.DerivativeApprox(i),
+            i.GetProperty("monotonic").GetBoolean(),
+            InterpolationInputs.Condition(i, "leftCondition"),
+            InterpolationInputs.NullableNumber(i.GetProperty("leftConditionValue")),
+            InterpolationInputs.Condition(i, "rightCondition"),
+            InterpolationInputs.Number(i.GetProperty("rightConditionValue")));
+
     /// <summary>
     /// Compares the curves of a case of several curves on the same helpers: whether each builds, its nodes' dates and
     /// data, its maximum date, its discounts and, when the case has them, each helper's quote error, read from a copy
@@ -110,12 +129,17 @@ internal static class BootstrapInputs
     /// <param name="helpers">The helpers the curves are built on.</param>
     /// <param name="context">The context the curves are built in.</param>
     /// <param name="ownLinear">Whether a linear interpolator is replaced by <see cref="OwnLinear"/>.</param>
+    /// <param name="curveOf">
+    /// How a curve spec is built, for a file whose curves aren't <see cref="CurveOf"/>'s; <see langword="null"/> for
+    /// <see cref="CurveOf"/>.
+    /// </param>
     public static void CheckCurves(
         VectorAssert check,
         VectorCase c,
         BootstrapHelper<YieldTermStructure>[] helpers,
         EvaluationContext context,
-        bool ownLinear = false)
+        bool ownLinear = false,
+        Func<JsonElement, IReadOnlyList<BootstrapHelper<YieldTermStructure>>, EvaluationContext, Built>? curveOf = null)
     {
         JsonElement[] specs = [.. c.Input("curves").EnumerateArray()];
         JsonElement[] dates = [.. c.Input("discountDates").EnumerateArray()];
@@ -123,7 +147,7 @@ internal static class BootstrapInputs
         var curves = new Built?[specs.Length];
         check.Output(c, "built", specs.Select((s, k) => (Func<object?>)(() =>
         {
-            curves[k] = CurveOf(s, helpers, context, ownLinear);
+            curves[k] = curveOf is null ? CurveOf(s, helpers, context, ownLinear) : curveOf(s, helpers, context);
             return true;
         })).ToArray());
         check.Output(c, "dates", curves.Select(b => b is null ? [] : b.Dates.Cast<object?>().ToArray()).ToArray());
@@ -162,9 +186,100 @@ internal static class BootstrapInputs
             "MonotonicLogCubic" => Build<TTraits, MonotonicLogCubic>(spec, default, helpers, context),
             "Cubic" => Build<TTraits, Cubic>(spec, CubicOf(i), helpers, context),
             "LogCubic" => Build<TTraits, LogCubic>(spec, LogCubicOf(i), helpers, context),
+            "LogMixedLinearCubic" => Build<TTraits, LogMixedLinearCubic>(spec, LogMixedLinearCubicOf(i), helpers, context),
             var t => throw new InvalidOperationException($"unknown interpolator {t}"),
         };
     }
+
+    // A curve built through its named class, which passes the spec's interpolator where it takes parameters and leaves
+    // a stateless one to the class's default.
+    private static Built NamedOf(
+        string named,
+        JsonElement spec,
+        IReadOnlyList<BootstrapHelper<YieldTermStructure>> h,
+        EvaluationContext x)
+    {
+        JsonElement i = spec.GetProperty("interpolator");
+        return named switch
+        {
+            "PiecewiseLinearSimpleZero" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseLinearSimpleZero(r, h, dc, x, j, jd, bootstrap: b)),
+                (sd, cal, dc, j, jd, b) => Of(PiecewiseLinearSimpleZero.Create(sd, cal, h, dc, x, j, jd, bootstrap: b))),
+            "PiecewiseFlatForward" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseFlatForward(r, h, dc, x, j, jd, bootstrap: b)),
+                (sd, cal, dc, j, jd, b) => Of(PiecewiseFlatForward.Create(sd, cal, h, dc, x, j, jd, bootstrap: b))),
+            "PiecewiseLogLinearDiscount" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseLogLinearDiscount(r, h, dc, x, j, jd, bootstrap: b)),
+                (sd, cal, dc, j, jd, b) => Of(PiecewiseLogLinearDiscount.Create(sd, cal, h, dc, x, j, jd, bootstrap: b))),
+            "PiecewiseLinearForward" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseLinearForward(r, h, dc, x, j, jd, bootstrap: b)),
+                (sd, cal, dc, j, jd, b) => Of(PiecewiseLinearForward.Create(sd, cal, h, dc, x, j, jd, bootstrap: b))),
+            "PiecewiseLinearZero" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseLinearZero(r, h, dc, x, j, jd, bootstrap: b)),
+                (sd, cal, dc, j, jd, b) => Of(PiecewiseLinearZero.Create(sd, cal, h, dc, x, j, jd, bootstrap: b))),
+            "PiecewiseCubicZero" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseCubicZero(r, h, dc, x, j, jd, CubicOf(i), b)),
+                (sd, cal, dc, j, jd, b) => Of(PiecewiseCubicZero.Create(sd, cal, h, dc, x, j, jd, CubicOf(i), b))),
+            "PiecewiseLogCubicDiscount" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseLogCubicDiscount(r, h, dc, x, j, jd, LogCubicOf(i), b)),
+                (sd, cal, dc, j, jd, b) =>
+                    Of(PiecewiseLogCubicDiscount.Create(sd, cal, h, dc, x, j, jd, LogCubicOf(i), b))),
+            "PiecewiseKrugerLogDiscount" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseKrugerLogDiscount(r, h, dc, x, j, jd, bootstrap: b)),
+                (sd, cal, dc, j, jd, b) => Of(PiecewiseKrugerLogDiscount.Create(sd, cal, h, dc, x, j, jd, bootstrap: b))),
+            "PiecewiseLogMixedLinearCubicDiscount" => Named(
+                spec,
+                (r, dc, j, jd, b) =>
+                    Of(new PiecewiseLogMixedLinearCubicDiscount(r, h, dc, x, j, jd, LogMixedLinearCubicOf(i), b)),
+                (sd, cal, dc, j, jd, b) => Of(PiecewiseLogMixedLinearCubicDiscount.Create(
+                    sd, cal, h, dc, x, j, jd, LogMixedLinearCubicOf(i), b))),
+            _ => throw new InvalidOperationException($"unknown named curve {named}"),
+        };
+    }
+
+    // The spec's form, day counter, jumps and bootstrap, given to the named class's constructor or its Create.
+    private static Built Named(
+        JsonElement spec,
+        Func<Date, DayCounter, double[]?, Date[]?, IterativeBootstrap, Built> byReferenceDate,
+        Func<int, Calendar, DayCounter, double[]?, Date[]?, IterativeBootstrap, Built> bySettlementDays)
+    {
+        DayCounter dayCounter = CashFlowInputs.DayCounterOf(spec.GetProperty("dayCounter"));
+        (double[]? jumps, Date[]? jumpDates) = JumpsOf(spec);
+        IterativeBootstrap bootstrap = BootstrapOf(spec.GetProperty("bootstrap"));
+        return spec.GetProperty("form").GetString() == "referenceDate"
+            ? byReferenceDate(new Date(spec.GetProperty("referenceDate").GetInt32()), dayCounter, jumps, jumpDates, bootstrap)
+            : bySettlementDays(
+                spec.GetProperty("settlementDays").GetInt32(),
+                CashFlowInputs.CalendarOf(spec.GetProperty("calendar")),
+                dayCounter,
+                jumps,
+                jumpDates,
+                bootstrap);
+    }
+
+    private static (double[]? Jumps, Date[]? JumpDates) JumpsOf(JsonElement spec)
+    {
+        JsonElement jumpsSpec = spec.GetProperty("jumps");
+        JsonElement jumpDatesSpec = spec.GetProperty("jumpDates");
+        return (
+            jumpsSpec.ValueKind == JsonValueKind.Null ? null : CouponInputs.Reals(jumpsSpec),
+            jumpDatesSpec.ValueKind == JsonValueKind.Null
+                ? null
+                : [.. jumpDatesSpec.EnumerateArray().Select(d => new Date(d.GetInt32()))]);
+    }
+
+    private static Built Of<TTraits, TInterpolator>(PiecewiseYieldCurve<TTraits, TInterpolator, IterativeBootstrap> curve)
+        where TTraits : struct, IYieldTraits
+        where TInterpolator : struct, IInterpolator =>
+        new(curve, curve.Dates(), curve.Data(), curve.Times(), curve.Nodes());
 
     private static Built Build<TTraits, TInterpolator>(
         JsonElement spec,

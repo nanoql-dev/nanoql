@@ -67,6 +67,12 @@ public sealed class BootstrapState<TTermStructure> : IBootstrapState
     /// </summary>
     public BootstrapHelper<TTermStructure>[] Instruments { get; }
 
+    /// <summary>
+    /// Gets or sets a global bootstrap's additional helpers, which add no pillar of their own: re-dated for the curve's
+    /// evaluation date, and the ones alive at its first date bound to the curve. Empty for another bootstrap.
+    /// </summary>
+    public BootstrapHelper<TTermStructure>[] AdditionalHelpers { get; set; } = [];
+
     /// <summary>Gets or sets the dates of the curve's nodes, the first one the curve's initial date.</summary>
     public Date[] Dates { get; set; } = [];
 
@@ -99,6 +105,9 @@ public sealed class BootstrapState<TTermStructure> : IBootstrapState
 
     /// <inheritdoc/>
     IReadOnlyList<IBootstrapHelper> IBootstrapState.Instruments => Instruments;
+
+    /// <inheritdoc/>
+    IReadOnlyList<IBootstrapHelper> IBootstrapState.AdditionalHelpers => AdditionalHelpers;
 
     // The interpolation's recipe, QuantLib's interpolateWithoutUpdate on the curve's first nodes: how many points, and
     // whether a global interpolator that refused them is replaced by linear interpolation. Rebuild is QuantLib's

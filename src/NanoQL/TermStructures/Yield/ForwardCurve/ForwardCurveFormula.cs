@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/yield/forwardcurve.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: InterpolatedForwardCurve, its constructors, inspectors and forward formula, and the named curves on it, which S5's second commit ports
 
 using NanoQL.Numerics;
 using NanoQL.Time;

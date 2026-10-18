@@ -95,6 +95,107 @@ public class InterpolatorZeroValueTests
         }
     }
 
+    [Fact]
+    public void MixedLinearCubicZeroValueIsRefused()
+    {
+        // QuantLib's MixedLinearCubic has no default: its switch point, behavior and derivative approximation have none.
+        (double[] x, double[] y) = NodeSets[1];
+        MixedLinearCubic[] zeros = [default, new MixedLinearCubic(), (new MixedLinearCubic[1])[0]];
+        foreach (MixedLinearCubic zero in zeros)
+        {
+            Assert.Throws<InvalidOperationException>(() => zero.Interpolate(x, y));
+            Assert.Throws<InvalidOperationException>(() => zero.CheckPoints(5));
+        }
+
+        Assert.Throws<InvalidOperationException>(() => Consumer<MixedLinearCubic>(x, y));
+
+        // A MixedLinearCubic built with its first three parameters takes QuantLib's defaults for the rest: monotonic,
+        // with second-derivative conditions of 0.
+        AssertSame(
+            new MixedLinearMonotonicCubicNaturalSpline(x, y, 2),
+            new MixedLinearCubic(2, MixedInterpolationBehavior.ShareRanges, CubicInterpolationDerivativeApprox.Spline)
+                .Interpolate(x, y));
+    }
+
+    [Fact]
+    public void LogMixedLinearCubicAndPresetsZeroValuesAreRefused()
+    {
+        // QuantLib's LogMixedLinearCubic has no default, and its presets take the switch point, which has none.
+        (double[] x, double[] y) = NodeSets[2];
+        LogMixedLinearCubic[] zeros = [default, new LogMixedLinearCubic(), (new LogMixedLinearCubic[1])[0]];
+        foreach (LogMixedLinearCubic zero in zeros)
+        {
+            Assert.Throws<InvalidOperationException>(() => zero.Interpolate(x, y));
+            Assert.Throws<InvalidOperationException>(() => zero.CheckPoints(5));
+        }
+
+        MonotonicLogMixedLinearCubic[] monotonic =
+            [default, new MonotonicLogMixedLinearCubic(), (new MonotonicLogMixedLinearCubic[1])[0]];
+        foreach (MonotonicLogMixedLinearCubic zero in monotonic)
+        {
+            Assert.Throws<InvalidOperationException>(() => zero.Interpolate(x, y));
+            Assert.Throws<InvalidOperationException>(() => zero.CheckPoints(5));
+            Assert.Throws<InvalidOperationException>(() => (LogMixedLinearCubic)zero);
+        }
+
+        KrugerLogMixedLinearCubic[] kruger =
+            [default, new KrugerLogMixedLinearCubic(), (new KrugerLogMixedLinearCubic[1])[0]];
+        foreach (KrugerLogMixedLinearCubic zero in kruger)
+        {
+            Assert.Throws<InvalidOperationException>(() => zero.Interpolate(x, y));
+            Assert.Throws<InvalidOperationException>(() => zero.CheckPoints(5));
+            Assert.Throws<InvalidOperationException>(() => (LogMixedLinearCubic)zero);
+        }
+
+        Assert.Throws<InvalidOperationException>(() => Consumer<LogMixedLinearCubic>(x, y));
+        Assert.Throws<InvalidOperationException>(() => Consumer<MonotonicLogMixedLinearCubic>(x, y));
+        Assert.Throws<InvalidOperationException>(() => Consumer<KrugerLogMixedLinearCubic>(x, y));
+    }
+
+    [Fact]
+    public void LogMixedLinearCubicPresetsConvertToTheFactoryTheyAre()
+    {
+        (double[] x, double[] y) = NodeSets[2];
+        foreach (MixedInterpolationBehavior behavior in new[] { MixedInterpolationBehavior.ShareRanges, MixedInterpolationBehavior.SplitRanges })
+        {
+            var monotonic = new LogMixedLinearCubic(
+                2,
+                behavior,
+                CubicInterpolationDerivativeApprox.Spline,
+                true,
+                CubicInterpolationBoundaryCondition.SecondDerivative,
+                0.0,
+                CubicInterpolationBoundaryCondition.SecondDerivative,
+                0.0);
+            var kruger = new LogMixedLinearCubic(
+                2,
+                behavior,
+                CubicInterpolationDerivativeApprox.Kruger,
+                false,
+                CubicInterpolationBoundaryCondition.SecondDerivative,
+                0.0,
+                CubicInterpolationBoundaryCondition.SecondDerivative,
+                0.0);
+            LogMixedLinearCubic fromMonotonic = new MonotonicLogMixedLinearCubic(2, behavior);
+            LogMixedLinearCubic fromKruger = new KrugerLogMixedLinearCubic(2, behavior);
+            AssertSame(monotonic.Interpolate(x, y), fromMonotonic.Interpolate(x, y));
+            AssertSame(monotonic.Interpolate(x, y), new MonotonicLogMixedLinearCubic(2, behavior).Interpolate(x, y));
+            AssertSame(kruger.Interpolate(x, y), fromKruger.Interpolate(x, y));
+            AssertSame(kruger.Interpolate(x, y), new KrugerLogMixedLinearCubic(2, behavior).Interpolate(x, y));
+            AssertSame(
+                new LogMixedLinearCubicNaturalSpline(x, y, 2, behavior),
+                new LogMixedLinearCubic(2, behavior, CubicInterpolationDerivativeApprox.Spline, false).Interpolate(x, y));
+        }
+
+        // the presets' behavior defaults to ShareRanges, as QuantLib's
+        AssertSame(
+            new MonotonicLogMixedLinearCubic(2, MixedInterpolationBehavior.ShareRanges).Interpolate(x, y),
+            new MonotonicLogMixedLinearCubic(2).Interpolate(x, y));
+        AssertSame(
+            new KrugerLogMixedLinearCubic(2, MixedInterpolationBehavior.ShareRanges).Interpolate(x, y),
+            new KrugerLogMixedLinearCubic(2).Interpolate(x, y));
+    }
+
     // A consumer generic over the factory, taking QuantLib's const Interpolator& i = {} as TInterpolator i = default.
     private static Interpolation Consumer<TInterpolator>(double[] x, double[] y, TInterpolator interpolator = default)
         where TInterpolator : struct, IInterpolator =>

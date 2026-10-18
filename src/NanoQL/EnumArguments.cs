@@ -132,6 +132,20 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a mixed-interpolation behavior outside <see cref="MixedInterpolationBehavior"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(MixedInterpolationBehavior value, string paramName)
+    {
+        // QuantLib's behavior has no stream operator: its refusal prints the integer.
+        if (value is not (MixedInterpolationBehavior.ShareRanges or MixedInterpolationBehavior.SplitRanges))
+        {
+            throw new ArgumentOutOfRangeException(
+                paramName, value, $"unknown mixed-interpolation behavior: {(int)value}");
+        }
+    }
+
     /// <summary>Refuses a rounding method outside <see cref="RoundingType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

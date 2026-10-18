@@ -8,12 +8,16 @@
 // (LinearInterpolation, BackwardFlatInterpolation, LogLinearInterpolation, CubicInterpolation, LogCubicInterpolation and
 // the named cubic and log-cubic classes), and CubicInterpolation and LogCubicInterpolation add their six parameters,
 // "derivativeApprox", "monotonic", "leftCondition", "leftConditionValue", "rightCondition" and "rightConditionValue".
-// The x and y values must be of one size, since QuantLib reads as many y values as there are x values. QuantLib's
-// interpolations keep iterators into their data, so an interpolation the call builds reads the spec's own vectors,
-// which outlive it.
+// The mixed interpolations (MixedLinearCubicInterpolation, LogMixedLinearCubicInterpolation and their named classes)
+// add the switch point "n" and the "behavior", and the two parameterised ones the six parameters, a null
+// "leftConditionValue" being QuantLib's Null<Real>(). The x and y values must be of one size, since QuantLib reads as
+// many y values as there are x values. QuantLib's interpolations keep iterators into their data, so an interpolation
+// the call builds reads the spec's own vectors, which outlive it.
 //
 // An interpolator (a factory) is the spec {"type"} with type Cubic, LogCubic, MonotonicLogCubic or KrugerLog: Cubic
-// with no parameter (QuantLib's Cubic()) or all six, LogCubic with "derivativeApprox" alone or all six.
+// with no parameter (QuantLib's Cubic()) or all six, LogCubic with "derivativeApprox" alone or all six; or
+// MixedLinearCubic and LogMixedLinearCubic with "n", "behavior" and all six, MonotonicLogMixedLinearCubic and
+// KrugerLogMixedLinearCubic with "n" and "behavior".
 
 #ifndef NANOQL_CXX_MATH_INTERPOLATIONSPEC_HPP
 #define NANOQL_CXX_MATH_INTERPOLATIONSPEC_HPP
@@ -23,6 +27,7 @@
 #include <ql/math/interpolation.hpp>
 #include <ql/math/interpolations/cubicinterpolation.hpp>
 #include <ql/math/interpolations/loginterpolation.hpp>
+#include <ql/math/interpolations/mixedinterpolation.hpp>
 
 #include <string>
 #include <vector>
@@ -39,6 +44,9 @@ namespace harness {
         QuantLib::Real leftValue = 0.0;
         QuantLib::CubicInterpolation::BoundaryCondition rightCondition = QuantLib::CubicInterpolation::NotAKnot;
         QuantLib::Real rightValue = 0.0;
+        // The mixed interpolations' switch point and behavior, read only for those types.
+        QuantLib::Size n = 0;
+        QuantLib::MixedInterpolation::Behavior behavior = QuantLib::MixedInterpolation::ShareRanges;
     };
 
     // The check: any interpolation type, or one of the cubic family (CubicInterpolation and the ten named cubic
@@ -59,6 +67,8 @@ namespace harness {
         QuantLib::Real leftValue = 0.0;
         QuantLib::CubicInterpolation::BoundaryCondition rightCondition = QuantLib::CubicInterpolation::NotAKnot;
         QuantLib::Real rightValue = 0.0;
+        QuantLib::Size n = 0;
+        QuantLib::MixedInterpolation::Behavior behavior = QuantLib::MixedInterpolation::ShareRanges;
     };
 
     // The check, for a factory of the given types.
@@ -67,6 +77,8 @@ namespace harness {
     // The call.
     QuantLib::Cubic makeCubicInterpolator(const InterpolatorSpec& s);
     QuantLib::LogCubic makeLogCubicInterpolator(const InterpolatorSpec& s);
+    QuantLib::MixedLinearCubic makeMixedLinearCubicInterpolator(const InterpolatorSpec& s);
+    QuantLib::LogMixedLinearCubic makeLogMixedLinearCubicInterpolator(const InterpolatorSpec& s);
 
     // An interpolation's values at points, extrapolating where needed: how a factory's interpolate is read back.
     json::value valuesAt(const QuantLib::Interpolation& f, const std::vector<QuantLib::Real>& points);

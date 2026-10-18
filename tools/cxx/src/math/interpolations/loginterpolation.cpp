@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
-// ql/math/interpolations/loginterpolation.hpp: the LogLinear, LogCubic, MonotonicLogCubic and KrugerLog factories'
-// interpolate and traits. A factory's interpolation is read back through its values at the given points,
+// ql/math/interpolations/loginterpolation.hpp: the LogLinear, LogCubic, MonotonicLogCubic, KrugerLog and
+// LogMixedLinearCubic factories' interpolate and traits, and the traits of LogMixedLinearCubic's presets. A factory's interpolation is read back through its values at the given points,
 // extrapolating where needed. LogCubic::interpolate takes the spec {"type": "LogCubic"} with derivativeApprox alone or
 // all six parameters, or one of the presets {"type": "MonotonicLogCubic"} and {"type": "KrugerLog"}, copied into the
-// LogCubic it derives from, as a call taking a LogCubic receives a preset.
+// LogCubic it derives from, as a call taking a LogCubic receives a preset. LogMixedLinearCubic::interpolate takes
+// {"type": "LogMixedLinearCubic"} with its eight parameters, or one of its presets {"type":
+// "MonotonicLogMixedLinearCubic"} and {"type": "KrugerLogMixedLinearCubic"} with "n" and "behavior", copied likewise.
 
 #include "math/interpolationspec.hpp"
 
@@ -60,6 +62,25 @@ namespace harness {
             {"KrugerLog::interpolate", interpolate<KrugerLog>},
             {"KrugerLog::global", global<KrugerLog>},
             {"KrugerLog::requiredPoints", requiredPoints<KrugerLog>},
+            // (spec, x, y, points): LogMixedLinearCubic with its eight parameters, or one of its presets.
+            {"LogMixedLinearCubic::interpolate",
+             [](const Args& a) -> Call {
+                 arity(a, 4);
+                 InterpolatorSpec s = interpolatorSpec(
+                     a[0], {"LogMixedLinearCubic", "MonotonicLogMixedLinearCubic", "KrugerLogMixedLinearCubic"});
+                 std::vector<Real> x = reals(a[1]), y = reals(a[2]), points = reals(a[3]);
+                 checkSizes(x, y);
+                 return [=] {
+                     const LogMixedLinearCubic factory = makeLogMixedLinearCubicInterpolator(s);
+                     return valuesAt(factory.interpolate(x.begin(), x.end(), y.begin()), points);
+                 };
+             }},
+            {"LogMixedLinearCubic::global", global<LogMixedLinearCubic>},
+            {"LogMixedLinearCubic::requiredPoints", requiredPoints<LogMixedLinearCubic>},
+            {"MonotonicLogMixedLinearCubic::global", global<MonotonicLogMixedLinearCubic>},
+            {"MonotonicLogMixedLinearCubic::requiredPoints", requiredPoints<MonotonicLogMixedLinearCubic>},
+            {"KrugerLogMixedLinearCubic::global", global<KrugerLogMixedLinearCubic>},
+            {"KrugerLogMixedLinearCubic::requiredPoints", requiredPoints<KrugerLogMixedLinearCubic>},
         });
 
     }

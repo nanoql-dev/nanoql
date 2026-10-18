@@ -3,8 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/overnightindexedcoupon.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testOvernightLegNPV and testOvernightLegWithCapsAndFloors, whose expected values come from S5's InterpolatedZeroCurve<Cubic>
-// Moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 (Divergences/TelescopicValueDatesTests.cs)
+// Moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 (Divergences/TelescopicValueDatesTests.cs); testOvernightLegNPV line 1033 (Divergences/TelescopicValueDatesTests.cs)
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -772,14 +771,13 @@ public class OvernightIndexedCouponTests
         }
     }
 
-    // Adapted: line 1003, which links S5's InterpolatedZeroCurve<Cubic> as the forecast curve, is dropped: the case
-    // reads only the coupons' gearings and spreads, which no curve affects.
     [Fact]
     public void TestOvernightLegWithGearingsAndSpreads()
     {
         // Testing overnight leg construction with gearings and spreads...
 
         var vars = new CommonVarsONLeg();
+        vars.SetupForecastCurve();
 
         Real[] gearings = [1.0, 1.25, 2.0, 0.5];
         Spread[] spreads = [0.0001, 0.0001, 0.0002, 0.0002];
@@ -799,6 +797,69 @@ public class OvernightIndexedCouponTests
                 CheckClose(oisCoupon.Spread, spreads[i], 1e-12);
             }
         }
+    }
+
+    // Moved: the check of line 1033, QuantLib's NPV of the leg with a lockout and telescopic value dates,
+    // 34883.949669756257, which only its shortened value dates give, moves to Divergences/TelescopicValueDatesTests.cs:
+    // with every daily value date, the leg gives QuantLib's full-schedule NPV (S3R11, S5R5).
+    [Fact]
+    public void TestOvernightLegNPV()
+    {
+        // Testing overnight leg NPV...
+
+        var vars = new CommonVarsONLeg();
+        vars.SetupForecastCurve();
+
+        ImmutableArray<CashFlow> leg = vars.MakeLeg(null, 3, false, true, RateAveragingType.Compound);
+
+        YieldTermStructure discountCurve = vars.FlatRate(0.0015, new Actual360());
+
+        // Calculate NPV
+        Real npv = 0.0;
+        foreach (CashFlow cf in leg)
+        {
+            npv += cf.Amount(vars.Context) * discountCurve.Discount(cf.Date);
+        }
+
+        Assert.True(double.IsFinite(npv));
+    }
+
+    [Fact]
+    public void TestOvernightLegWithCapsAndFloors()
+    {
+        // Testing overnight leg with caps and floors...
+
+        var vars = new CommonVarsONLeg();
+        vars.SetupForecastCurve();
+        YieldTermStructure discountCurve = vars.FlatRate(0.0015, new Actual360());
+
+        Rate?[] caps = [0.0435, 0.0435, 0.04, 0.04];
+        Rate?[] floors = [0.025, 0.025, 0.025, 0.025];
+
+        ImmutableArray<CashFlow> leg =
+            vars.MakeLeg(null, 0, false, false, RateAveragingType.Compound, [], [], caps, floors);
+
+        Assert.Equal(4, leg.Length);
+
+        Real expectedNpv = 34648.328606210489;
+        Real npv = 0.0;
+
+        for (Size i = 0; i < leg.Length; ++i)
+        {
+            var cappedFlooredCoupon = leg[i] as CappedFlooredOvernightIndexedCoupon;
+            Assert.True(cappedFlooredCoupon is not null);
+            if (cappedFlooredCoupon is not null)
+            {
+                CheckClose(cappedFlooredCoupon.Cap!.Value, caps[i]!.Value, 1e-12);
+                CheckClose(cappedFlooredCoupon.Floor!.Value, floors[i]!.Value, 1e-12);
+                Assert.True(cappedFlooredCoupon.IsCapped);
+                Assert.True(cappedFlooredCoupon.IsFloored);
+            }
+
+            npv += cappedFlooredCoupon!.Amount(vars.Context) * discountCurve.Discount(cappedFlooredCoupon.Date);
+        }
+
+        CheckOisCouponResult("Capped-Floored OvernightLeg NPV", npv, expectedNpv, 1e-8);
     }
 
     // Adapted: the forecast curve linked after Sofr is built (line 1081) becomes Sofr built on the curve.
@@ -1606,15 +1667,16 @@ public class OvernightIndexedCouponTests
         }
     }
 
-    // Adapted: lines 1908-1924, which price the coupon on S5's InterpolatedDiscountCurve, are dropped; the
-    // null-curve refusal (lines 1903-1906) is kept.
+    // Adapted: the forecast curve linked after the coupon is built (lines 1919, 1921 and 1923) becomes Sofr built on
+    // the curve and the coupon built again on it, and enableExtrapolation (line 1914), which changes QuantLib's curve,
+    // returns a modified copy here (playbook §2).
     [Fact]
     public void TestErrorWhenCurveNullOrTooNarrow()
     {
         // Test that the expected error is raised when the curve cannot value the coupon...
 
         var vars = new CommonVars(new Date(26, March, 2026));
-        OvernightIndexedCoupon coupon = vars.MakeCoupon(
+        OvernightIndexedCoupon MakeCoupon() => vars.MakeCoupon(
             new Date(31, March, 2026),
             new Date(31, March, 2027),
             0,
@@ -1624,7 +1686,29 @@ public class OvernightIndexedCouponTests
             RateAveragingType.Compound,
             new Date(2, April, 2027),
             1.0);
+        OvernightIndexedCoupon coupon = MakeCoupon();
         CheckException(() => coupon.Rate(vars.Context), "null term structure set to this instance");
+
+        DiscountCurve GetCurve(Date endDate, bool extrapolate = false)
+        {
+            var curve = new DiscountCurve([vars.Today, endDate], [1.0, 0.9], new Actual360());
+            if (extrapolate)
+            {
+                curve = curve.EnableExtrapolation();
+            }
+
+            return curve;
+        }
+
+        vars.LinkForecastCurve(GetCurve(coupon.AccrualEndDate - 1));
+        coupon = MakeCoupon();
+        CheckException(() => coupon.Rate(vars.Context), "coupon requires a range");
+        vars.LinkForecastCurve(GetCurve(coupon.AccrualEndDate));
+        coupon = MakeCoupon();
+        _ = coupon.Rate(vars.Context);
+        vars.LinkForecastCurve(GetCurve(coupon.AccrualEndDate - 1, true));
+        coupon = MakeCoupon();
+        _ = coupon.Rate(vars.Context);
     }
 
     // Adapted: the forecast curve linked after Sofr is built (line 1930) becomes Sofr built on the curve, and the check
@@ -2109,8 +2193,8 @@ public class OvernightIndexedCouponTests
         }
     }
 
-    // QuantLib's CommonVarsONLeg, without setupForecastCurve (lines 297-326), whose InterpolatedZeroCurve<Cubic> waits
-    // for S5 and serves only the cases left. Its relinkable forecast curve becomes Sofr built on the curve.
+    // QuantLib's CommonVarsONLeg. Its relinkable forecast curve becomes Sofr built on the curve, and the zero curve's
+    // enableExtrapolation (line 323) returns a modified copy, the curve Sofr is built on.
     private sealed class CommonVarsONLeg
     {
         public CommonVarsONLeg(Date evaluationDate)
@@ -2183,6 +2267,36 @@ public class OvernightIndexedCouponTests
         // flatRate(forward, dc): a flat curve whose reference date is the evaluation date.
         public YieldTermStructure FlatRate(Rate forward, DayCounter dc) =>
             FlatForward.Create(0, new NullCalendar(), forward, dc, Context);
+
+        public void SetupForecastCurve()
+        {
+            Date[] curveDates =
+            [
+                Today,
+                new Date(30, July, 2025),
+                new Date(29, August, 2025),
+                new Date(30, September, 2025),
+                new Date(30, December, 2025),
+                new Date(30, March, 2026),
+                new Date(30, June, 2026),
+            ];
+
+            Rate[] zeroRates =
+            [
+                0.0434,
+                0.0436,
+                0.0431,
+                0.0413,
+                0.0390,
+                0.0370,
+                0.0348,
+            ];
+
+            InterpolatedZeroCurve<Cubic> zeroCurve = new InterpolatedZeroCurve<Cubic>(
+                curveDates, zeroRates, Dc, new UnitedStates(UnitedStatesMarket.SOFR)).EnableExtrapolation();
+
+            LinkForecastCurve(zeroCurve);
+        }
 
         public OptionletVolatilityStructure ReturnRateVolTS() =>
             new ConstantOptionletVolatility(Today, new TARGET(), BusinessDayConvention.Following, 0.05, Dc);

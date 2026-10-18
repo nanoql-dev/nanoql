@@ -12,8 +12,9 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The interpolated discount curve vectors, <c>tests/vectors/termstructures/yield/discountcurve.json</c>:
-/// <see cref="InterpolatedDiscountCurve{TInterpolator}"/> on six interpolators (as
-/// <see cref="BootstrapInputs"/> reads their specs), with and without jumps, and its constructor's refusals: whether
+/// <see cref="InterpolatedDiscountCurve{TInterpolator}"/> on six interpolators and the log-mixed-linear-cubic ones (as
+/// <see cref="BootstrapInputs"/> reads their specs), with and without jumps, the named curves built through their
+/// classes (<see cref="DiscountCurve"/>, …) where a case names them, and its constructor's refusals: whether
 /// each curve builds, its dates, times, data, discounts and nodes, its maximum date and its discounts at the case's
 /// dates, one element per curve of the case.
 /// </summary>
@@ -37,13 +38,18 @@ public class DiscountCurveVectorTests
             double[]? jumps = jumpsSpec.ValueKind == JsonValueKind.Null ? null : CouponInputs.Reals(jumpsSpec);
             Date[]? jumpDates = c.Input("jumpDates").ValueKind == JsonValueKind.Null ? null : c.DateInputs("jumpDates");
             JsonElement[] interpolators = [.. c.Input("interpolators").EnumerateArray()];
+            string?[] classes = c.Inputs.TryGetProperty("classes", out JsonElement named)
+                ? [.. named.EnumerateArray().Select(e => e.GetString())]
+                : new string?[interpolators.Length];
             Date[] when = c.DateInputs("discountDates");
             bool[] flags = InterpolationInputs.Bools(c.Input("extrapolate"));
 
             var curves = new Built?[interpolators.Length];
             check.Output(c, "built", interpolators.Select((i, k) => (Func<object?>)(() =>
             {
-                curves[k] = CurveOf(i, dates, dfs, dayCounter, calendar, jumps, jumpDates);
+                curves[k] = classes[k] is string cls
+                    ? NamedOf(cls, i, dates, dfs, dayCounter, calendar, jumps, jumpDates)
+                    : CurveOf(i, dates, dfs, dayCounter, calendar, jumps, jumpDates);
                 return true;
             })).ToArray());
             check.Output(c, "dates", curves.Select(b => b is null ? [] : b.Dates.Cast<object?>().ToArray()).ToArray());
@@ -80,7 +86,31 @@ public class DiscountCurveVectorTests
             "KrugerLog" => Build<KrugerLog>(default, dates, dfs, dayCounter, calendar, jumps, jumpDates),
             "LogCubic" => Build(BootstrapInputs.LogCubicOf(i), dates, dfs, dayCounter, calendar, jumps, jumpDates),
             "Cubic" => Build(BootstrapInputs.CubicOf(i), dates, dfs, dayCounter, calendar, jumps, jumpDates),
+            "LogMixedLinearCubic" =>
+                Build(BootstrapInputs.LogMixedLinearCubicOf(i), dates, dfs, dayCounter, calendar, jumps, jumpDates),
             var t => throw new InvalidOperationException($"unknown interpolator {t}"),
+        };
+
+    // The curve through its named class, which passes the spec's interpolator where it takes parameters and leaves a
+    // stateless one to the class's default.
+    private static Built NamedOf(
+        string named,
+        JsonElement i,
+        Date[] dates,
+        double[] dfs,
+        DayCounter dayCounter,
+        Calendar? calendar,
+        double[]? jumps,
+        Date[]? jumpDates) =>
+        named switch
+        {
+            "DiscountCurve" => Of(new DiscountCurve(dates, dfs, dayCounter, calendar, jumps, jumpDates)),
+            "LogCubicDiscountCurve" => Of(new LogCubicDiscountCurve(
+                dates, dfs, dayCounter, calendar, jumps, jumpDates, BootstrapInputs.LogCubicOf(i))),
+            "KrugerLogDiscountCurve" => Of(new KrugerLogDiscountCurve(dates, dfs, dayCounter, calendar, jumps, jumpDates)),
+            "LogMixedLinearCubicDiscountCurve" => Of(new LogMixedLinearCubicDiscountCurve(
+                dates, dfs, dayCounter, calendar, jumps, jumpDates, BootstrapInputs.LogMixedLinearCubicOf(i))),
+            _ => throw new InvalidOperationException($"unknown named curve {named}"),
         };
 
     private static Built Build<TInterpolator>(
@@ -93,10 +123,13 @@ public class DiscountCurveVectorTests
         Date[]? jumpDates)
         where TInterpolator : struct, IInterpolator
     {
-        var curve = new InterpolatedDiscountCurve<TInterpolator>(
-            dates, dfs, dayCounter, calendar, jumps, jumpDates, interpolator);
-        return new Built(curve, curve.Dates(), curve.Times(), curve.Data(), curve.Discounts(), curve.Nodes());
+        return Of(new InterpolatedDiscountCurve<TInterpolator>(
+            dates, dfs, dayCounter, calendar, jumps, jumpDates, interpolator));
     }
+
+    private static Built Of<TInterpolator>(InterpolatedDiscountCurve<TInterpolator> curve)
+        where TInterpolator : struct, IInterpolator =>
+        new(curve, curve.Dates(), curve.Times(), curve.Data(), curve.Discounts(), curve.Nodes());
 
     private sealed record Built(
         YieldTermStructure Curve,

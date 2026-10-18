@@ -11,7 +11,8 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// A bootstrapped curve is always built afresh, under the context it is given. QuantLib's piecewise curve is a lazy
 /// object that recalculates when a quote or the evaluation date changes, and its recalculation differs from a fresh
-/// bootstrap in three ways: it starts from its previous data (<c>iterativebootstrap.hpp:211-218, 253-255</c>), it
+/// bootstrap in three ways: it starts from its previous data (<c>iterativebootstrap.hpp:211-218, 253-255</c>;
+/// <c>globalbootstrap.hpp:340-347, 387-390, 409-411</c>), it
 /// re-runs <c>initialize()</c>, which takes the pillar dates from the helpers, only on first use or for a moving curve
 /// (<c>iterativebootstrap.hpp:224-231</c>), and a moving curve never re-runs <c>YieldTermStructure::update()</c>, which
 /// re-sets its jumps (<c>piecewiseyieldcurve.hpp:220-231</c>, <c>yieldtermstructure.cpp:174-189</c>). nanoql's curve is
@@ -40,6 +41,27 @@ public class CurveRecalculationTests
 
         // the wheel's curve, built on 3.2% and recalculated after the quote moved to 3.7%
         Assert.NotEqual(0.7245126933508267, curve.Data()[^1]);
+    }
+
+    /// <summary>
+    /// After a quote change, QuantLib's globally bootstrapped curve starts its optimization from its previous nodes,
+    /// the traits' guess from valid data; the result agrees with a fresh bootstrap within the optimizer's accuracy, not
+    /// to the last bit. nanoql's curve on the changed quote is the fresh curve: its last node differs from QuantLib's
+    /// warm-started one by 7e-16.
+    /// </summary>
+    [Fact]
+    public void AGlobalCurveOnAChangedQuoteIsBootstrappedAfresh()
+    {
+        var context = new EvaluationContext { EvaluationDate = new Date(15, Month.January, 2024) };
+
+        var curve = new PiecewiseYieldCurve<Discount, LogLinear, GlobalBootstrap>(
+            new Date(17, Month.January, 2024), Helpers(context, 0.037), Act365, context);
+
+        // the wheel's fresh curve on the changed quote
+        Assert.Equal([1.0, 0.985059924478739, 0.9407650152705913, 0.8329539084088886, 0.72451269335083], curve.Data());
+
+        // the wheel's curve, built on 3.2% and recalculated after the quote moved to 3.7%
+        Assert.NotEqual(0.7245126933508307, curve.Data()[^1]);
     }
 
     /// <summary>

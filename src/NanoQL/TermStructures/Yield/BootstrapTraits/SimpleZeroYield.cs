@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/yield/bootstraptraits.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: SimpleZeroYield's globalGuess, transformDirect and transformInverse, the global bootstrap's hooks, which S5's second commit ports with GlobalBootstrap
 
 using NanoQL.Numerics;
 using NanoQL.Time;
@@ -21,6 +20,12 @@ public readonly struct SimpleZeroYield : IYieldTraits
 {
     /// <inheritdoc/>
     public static int MaxIterations => 100;
+
+    /// <inheritdoc/>
+    public static bool HasGlobalGuess => true;
+
+    /// <inheritdoc/>
+    public static bool HasTransform => true;
 
     /// <inheritdoc/>
     public static Date InitialDate(BootstrapState<YieldTermStructure> c)
@@ -52,6 +57,18 @@ public readonly struct SimpleZeroYield : IYieldTraits
         // extrapolate
         Date d = c.Dates[i];
         return c.Curve.ZeroRate(d, c.Curve.DayCounter, Compounding.Simple, Frequency.Annual, true).Rate;
+    }
+
+    /// <inheritdoc/>
+    public static (Vector Guess, bool NeedsTransform) GlobalGuess(BootstrapState<YieldTermStructure> c, bool validData)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        if (validData)
+        {
+            return (new Vector(c.Data.AsSpan(1)), true);
+        }
+
+        return (new Vector(c.Times.Length - 1, BootstrapTraitsDetail.AvgRate), true);
     }
 
     /// <inheritdoc/>
@@ -92,6 +109,20 @@ public readonly struct SimpleZeroYield : IYieldTraits
     }
 
     /// <inheritdoc/>
+    public static double TransformDirect(double x, int i, BootstrapState<YieldTermStructure> c)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        return Math.Exp(x) + ((-1.0 / NodeTime(c, i)) + 1E-8);
+    }
+
+    /// <inheritdoc/>
+    public static double TransformInverse(double x, int i, BootstrapState<YieldTermStructure> c)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        return Math.Log(x - ((-1.0 / NodeTime(c, i)) + 1E-8));
+    }
+
+    /// <inheritdoc/>
     public static void UpdateGuess(double[] data, double rate, int i)
     {
         ArgumentNullException.ThrowIfNull(data);
@@ -112,4 +143,13 @@ public readonly struct SimpleZeroYield : IYieldTraits
     /// <inheritdoc/>
     public static Date MaxDate(ReadOnlySpan<Date> dates, Date? maxDate) =>
         InterpolatedSimpleZeroCurveFormula.MaxDate(dates, maxDate);
+
+    // The time of the node a transform is for. Past the last node it reads a guess longer than the curve's pillars,
+    // which QuantLib reads out of its times' range (bootstraptraits.hpp:408-416).
+    private static double NodeTime(BootstrapState<YieldTermStructure> c, int i) =>
+        i < c.Times.Length
+            ? c.Times[i]
+            : throw new NanoQLException(
+                $"initial guess longer than the curve's {c.Times.Length - 1} pillars: "
+                + $"the simple-zero transform reads node {i}");
 }

@@ -9,9 +9,11 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// A null helper among a curve's instruments is refused when the curve is built, with
-/// <see cref="ArgumentException"/> naming the instruments. QuantLib's bootstrap sorts its helpers by their pillar dates
-/// (<c>iterativebootstrap.hpp:158-159</c>, <c>bootstraphelper.hpp:251-255</c>), dereferencing a null one, a result C++
-/// leaves undefined; the wheel's helper vector refuses <c>None</c> before QuantLib sees it.
+/// <see cref="ArgumentException"/> naming the instruments, and one among a global bootstrap's additional helpers when
+/// the bootstrap is built, naming the additional helpers. QuantLib's bootstraps read their helpers' pillar dates
+/// (<c>iterativebootstrap.hpp:158-159</c>, <c>bootstraphelper.hpp:251-255</c>; <c>globalbootstrap.hpp:281-282,
+/// 290-294</c>), dereferencing a null one, a result C++ leaves undefined; the wheel's helper vector refuses
+/// <c>None</c> before QuantLib sees it.
 /// </summary>
 public class BootstrapNullHelperTests
 {
@@ -28,6 +30,20 @@ public class BootstrapNullHelperTests
             () => new PiecewiseYieldCurve<Discount, LogLinear, IterativeBootstrap>(
                 today, [deposit, null!], new Actual365Fixed(), context));
         Assert.Equal("instruments", e.ParamName);
+        Assert.StartsWith("null rate helper", e.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ANullHelperAmongAGlobalBootstrapsAdditionalHelpersIsRefused()
+    {
+        var context = new EvaluationContext { EvaluationDate = new Date(15, Month.January, 2024) };
+        var deposit = new DepositRateHelper(
+            0.03, new Period(6, TimeUnit.Months), 2, new TARGET(), BusinessDayConvention.ModifiedFollowing, false,
+            new Actual360(), context);
+
+        ArgumentException e = Assert.Throws<ArgumentException>(
+            () => new GlobalBootstrap(additionalHelpers: [deposit, null!]));
+        Assert.Equal("additionalHelpers", e.ParamName);
         Assert.StartsWith("null rate helper", e.Message, StringComparison.Ordinal);
     }
 }

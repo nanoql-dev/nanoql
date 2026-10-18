@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/yield/bootstraptraits.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: ForwardRate's globalGuess, the global bootstrap's hook, which S5's second commit ports with GlobalBootstrap
 
 using NanoQL.Numerics;
 using NanoQL.Time;
@@ -21,6 +20,9 @@ public readonly struct ForwardRate : IYieldTraits
 {
     /// <inheritdoc/>
     public static int MaxIterations => 100;
+
+    /// <inheritdoc/>
+    public static bool HasGlobalGuess => true;
 
     /// <inheritdoc/>
     public static Date InitialDate(BootstrapState<YieldTermStructure> c)
@@ -52,6 +54,18 @@ public readonly struct ForwardRate : IYieldTraits
         // extrapolate
         Date d = c.Dates[i];
         return c.Curve.ForwardRate(d, d, c.Curve.DayCounter, Compounding.Continuous, Frequency.Annual, true).Rate;
+    }
+
+    /// <inheritdoc/>
+    public static (Vector Guess, bool NeedsTransform) GlobalGuess(BootstrapState<YieldTermStructure> c, bool validData)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        if (validData)
+        {
+            return (new Vector(c.Data.AsSpan(1)), true);
+        }
+
+        return (new Vector(c.Times.Length - 1, BootstrapTraitsDetail.AvgRate), true);
     }
 
     /// <inheritdoc/>

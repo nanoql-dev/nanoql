@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/yield/bootstraptraits.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: Discount's globalGuess, transformDirect and transformInverse, the global bootstrap's hooks, which S5's second commit ports with GlobalBootstrap
 
 using NanoQL.Numerics;
 using NanoQL.Time;
@@ -21,6 +20,12 @@ public readonly struct Discount : IYieldTraits
 {
     /// <inheritdoc/>
     public static int MaxIterations => 100;
+
+    /// <inheritdoc/>
+    public static bool HasGlobalGuess => true;
+
+    /// <inheritdoc/>
+    public static bool HasTransform => true;
 
     /// <inheritdoc/>
     public static Date InitialDate(BootstrapState<YieldTermStructure> c)
@@ -55,6 +60,23 @@ public readonly struct Discount : IYieldTraits
     }
 
     /// <inheritdoc/>
+    public static (Vector Guess, bool NeedsTransform) GlobalGuess(BootstrapState<YieldTermStructure> c, bool validData)
+    {
+        ArgumentNullException.ThrowIfNull(c);
+        if (validData)
+        {
+            return (new Vector(c.Data.AsSpan(1)), true);
+        }
+
+        var guess = new Vector(c.Times.AsSpan(1));
+        guess *= -BootstrapTraitsDetail.AvgRate;
+
+        // TransformInverse is log(), so we simply don't call exp() here and return false for NeedsTransform. This saves
+        // one pair of exp()/log() calls per pillar.
+        return (guess, false);
+    }
+
+    /// <inheritdoc/>
     public static double MinValueAfter(int i, BootstrapState<YieldTermStructure> c, bool validData, int firstAliveHelper)
     {
         ArgumentNullException.ThrowIfNull(c);
@@ -74,6 +96,12 @@ public readonly struct Discount : IYieldTraits
         double dt = c.Times[i] - c.Times[i - 1];
         return c.Data[i - 1] * Math.Exp(BootstrapTraitsDetail.MaxRate * dt);
     }
+
+    /// <inheritdoc/>
+    public static double TransformDirect(double x, int i, BootstrapState<YieldTermStructure> c) => Math.Exp(x);
+
+    /// <inheritdoc/>
+    public static double TransformInverse(double x, int i, BootstrapState<YieldTermStructure> c) => Math.Log(x);
 
     /// <inheritdoc/>
     public static void UpdateGuess(double[] data, double discount, int i)

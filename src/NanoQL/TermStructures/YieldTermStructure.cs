@@ -284,11 +284,11 @@ public abstract class YieldTermStructure : TermStructure
 
     /// <summary>The dates of the discount-factor jumps, one per jump.</summary>
     /// <returns>The dates, empty for a curve without jumps.</returns>
-    public ImmutableArray<Date> JumpDates() => jumpDates;
+    public virtual ImmutableArray<Date> JumpDates() => jumpDates;
 
     /// <summary>The times of the discount-factor jumps, measured from the reference date by the curve's day counter.</summary>
     /// <returns>The times, one per jump, empty for a curve without jumps.</returns>
-    public ImmutableArray<double> JumpTimes() => jumpTimes;
+    public virtual ImmutableArray<double> JumpTimes() => jumpTimes;
 
     /// <summary>
     /// The discount factor at a time, which derived curves calculate. Range checks have already been performed, so it

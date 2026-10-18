@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's InterpolatedDiscountCurve (ql/termstructures/yield/discountcurve.hpp), on the data its base
-InterpolatedCurve (ql/termstructures/interpolatedcurve.hpp) checks and interpolates: 70 curves in 12 cases, and 14
+InterpolatedCurve (ql/termstructures/interpolatedcurve.hpp) checks and interpolates: 97 curves in 16 cases, and 17
 refusals.
 
 - 10 node sets, a case each, each on 6 interpolators: log-linear (the wheel's DiscountCurve), monotonic log-cubic and
@@ -20,6 +20,14 @@ refusals.
   order nanoql's tests pin, since a refusal here is recorded only as a throw); and a negative jump, which QuantLib
   builds and whose discounts past it it refuses. An empty list of dates is left out: QuantLib's first failure there is
   dates.at(0)'s std::out_of_range, which the wheel raises as IndexError.
+- 3 cases of the wheel's named discount curves on three node sets, each built through its class by nanoql: DiscountCurve
+  (log-linear), LogCubicDiscountCurve (the monotonic spline, and Kruger's derivatives with a first-derivative left end),
+  KrugerLogDiscountCurve and LogMixedLinearCubicDiscountCurve (n = 2 shared, n = 3 split with Kruger's derivatives, and
+  n = 2 split with the derivatives matched at the switch point).
+- Log-mixed-linear-cubic curves on 12 nodes with the switch point at 0, 4 and 11 under both behaviours, QuantLib
+  refusing a linear part of one node (n = 0) and a cubic part of one (n = 11) under SplitRanges; and 3 refusals: the
+  switch point past the last node, the derivatives matched under ShareRanges, and 2 nodes, fewer than the 3 the
+  interpolation needs.
 
 Each curve's outputs are whether it builds, QuantLib's refusals recorded as its throw; its dates, times, data,
 discounts (its data again, by the discount curve's own inspector) and nodes (each [date, value]); its maximum date;
@@ -27,7 +35,8 @@ and its discount at 60 dates, 50 from its reference date to its last node and 10
 element per curve, a refused curve's empty (its maximum date null). Each case's inputs hold its settings (the
 evaluation date is the reference date; the curves don't read it), "dates", "discounts", "dayCounter", "calendar"
 (null for QuantLib's empty one), "jumps" and "jumpDates" (null for none; null jump dates are QuantLib's default),
-"interpolators" (the interpolator specs of termstructures/yield/piecewiseyieldcurve.py), "discountDates" and
+"interpolators" (the interpolator specs of termstructures/yield/piecewiseyieldcurve.py), for the cases that add it
+"classes" (for each curve, the named class nanoql builds it through, or null for the generic), "discountDates" and
 "extrapolate". The wheel's curves are built from (dates, discounts, day counter, calendar, interpolator), or with jumps
 (…, calendar, jumps, jump dates, interpolator), QuantLib's empty calendar being ql.Schedule().calendar(). Read back by
 tests/NanoQL.Tests/Vectors/TermStructures/Yield/DiscountCurveVectorTests.cs."""
@@ -62,7 +71,7 @@ INTERPOLATORS = [pw.LOG_LINEAR, pw.MONOTONIC_LOG_CUBIC, pw.KRUGER_LOG, pw.cubic(
 # The wheel's curve for each interpolator type.
 WHEEL = {"LogLinear": ql.DiscountCurve, "MonotonicLogCubic": ql.LogCubicDiscountCurve,
          "KrugerLog": ql.KrugerLogDiscountCurve, "LogCubic": ql.LogCubicDiscountCurve,
-         "Cubic": ql.QuantLib._NaturalCubicDiscountCurve}
+         "Cubic": ql.QuantLib._NaturalCubicDiscountCurve, "LogMixedLinearCubic": ql.LogMixedLinearCubicDiscountCurve}
 
 
 def flat(reference, rate, offsets, dc=ql.Actual365Fixed()):
@@ -126,8 +135,9 @@ def discount_dates(dates):
     return v.enc(inside + past), [False] * 50 + [True] * 10
 
 
-def case(name, dates, dfs, dc, cal, interpolators, jumps=None, jump_dates=None):
-    """A case of curves on the same nodes, one per interpolator."""
+def case(name, dates, dfs, dc, cal, interpolators, jumps=None, jump_dates=None, classes=None):
+    """A case of curves on the same nodes, one per interpolator; classes, when given, names for each the class nanoql
+    builds it through (None for the generic), and is written only then, so the earlier cases keep their bytes."""
     dates = v.enc(dates)
     jump_dates = v.enc(jump_dates)
     when, flags = discount_dates(dates)
@@ -151,6 +161,10 @@ def case(name, dates, dfs, dc, cal, interpolators, jumps=None, jump_dates=None):
         inputs = {"settings": st, "dates": dates, "discounts": dfs, "dayCounter": dc, "calendar": cal,
                   "jumps": jumps, "jumpDates": jump_dates, "interpolators": interpolators,
                   "discountDates": when, "extrapolate": flags}
+    if classes is not None:
+        for named, interpolator in zip(classes, interpolators):
+            assert named is None or named == WHEEL[interpolator["type"]].__name__, (named, interpolator)
+        inputs["classes"] = classes
     return {"name": name, "inputs": inputs, "expected": expected}
 
 
@@ -189,14 +203,59 @@ def cases():
     out.append(case("3 jumps on default dates", dates, dfs, dc, cal, INTERPOLATORS[:5], [0.999, 0.9985, 1.0005]))
     for name, dates, dfs, dc, jumps, jump_dates in refusals():
         out.append(case(f"refused: {name}", dates, dfs, dc, TARGET, [pw.LOG_LINEAR], jumps, jump_dates))
+    out += named_cases() + log_mixed_cases()
     check_rows(out)
+    return out
+
+
+# The wheel's named discount curves, each through its nanoql class: (class, interpolator).
+NAMED = [("DiscountCurve", pw.LOG_LINEAR),
+         ("LogCubicDiscountCurve", pw.cubic(CI.Spline, True, log=True)),
+         ("LogCubicDiscountCurve", pw.cubic(CI.Kruger, False, CI.FirstDerivative, 0.01, CI.SecondDerivative, 0.0,
+                                            log=True)),
+         ("KrugerLogDiscountCurve", pw.KRUGER_LOG),
+         ("LogMixedLinearCubicDiscountCurve", pw.log_mixed(2, pw.SHARE_RANGES)),
+         ("LogMixedLinearCubicDiscountCurve", pw.log_mixed(3, pw.SPLIT_RANGES, CI.Kruger, False)),
+         ("LogMixedLinearCubicDiscountCurve", pw.log_mixed(2, pw.SPLIT_RANGES, CI.Spline, False, CI.FirstDerivative,
+                                                           None))]
+
+
+def named_cases():
+    """The named discount curves on three node sets, each built through its class by nanoql."""
+    sets = {s[0]: s for s in node_sets()}
+    out = []
+    for set_name in ("12 nodes to 30 years", "6 nodes with a hump", "9 nodes over leap years"):
+        _, dates, dfs, dc, cal = sets[set_name]
+        out.append(case(f"named classes on {set_name}", dates, dfs, dc, cal, [i for _, i in NAMED],
+                        classes=[named for named, _ in NAMED]))
+    return out
+
+
+def log_mixed_cases():
+    """Log-mixed-linear-cubic curves on the generic: the switch point at 0, 4 and 11 of 12 nodes under both behaviours,
+    which QuantLib refuses for a linear part of one node (n = 0, SplitRanges) and a cubic part of one (n = 11,
+    SplitRanges); the switch point past the last node (n = 12); the derivatives matched under ShareRanges; and 2 nodes,
+    fewer than the 3 the interpolation needs."""
+    sets = {s[0]: s for s in node_sets()}
+    _, dates, dfs, dc, cal = sets["12 nodes to 30 years"]
+    rows = [pw.log_mixed(n, behavior) for n in (0, 4, 11) for behavior in (pw.SHARE_RANGES, pw.SPLIT_RANGES)]
+    out = [case("log-mixed-linear-cubic switch points on 12 nodes", dates, dfs, dc, cal, rows, classes=[None] * 6)]
+    for name, interpolator, nodes in (
+            ("the switch point past the last node", pw.log_mixed(12, pw.SHARE_RANGES), 12),
+            ("the derivatives matched under ShareRanges",
+             pw.log_mixed(2, pw.SHARE_RANGES, CI.Spline, False, CI.FirstDerivative, None), 12),
+            ("2 nodes", pw.log_mixed(0, pw.SHARE_RANGES), 2)):
+        out.append(case(f"refused: log-mixed-linear-cubic, {name}", dates[:nodes], dfs[:nodes], dc, cal,
+                        [interpolator], classes=["LogMixedLinearCubicDiscountCurve"]))
     return out
 
 
 def check_rows(out):
     for c in out:
         built = c["expected"]["built"]
-        if c["name"] == "refused: a negative jump":
+        if c["name"] == "log-mixed-linear-cubic switch points on 12 nodes":
+            assert built == [True, v.THROWS, True, True, True, v.THROWS], c["name"]
+        elif c["name"] == "refused: a negative jump":
             assert built == [True] and v.THROWS in c["expected"]["discountAt"][0], c["name"]
         elif c["name"].startswith("refused: "):
             assert built == [v.THROWS], c["name"]

@@ -15,8 +15,10 @@ namespace NanoQL.Tests.Vectors;
 /// (<see cref="BootstrapInputs"/>): whether each curve builds, its nodes, maximum date, discounts and the helpers'
 /// quote errors. Two kinds of cases replace QuantLib's testObservability: curves rebuilt after a bumped quote, read at
 /// the unbumped pillar's time, and curves built in a context later than the one their helpers were built in, which
-/// re-date the helpers as QuantLib's helpers re-date themselves. A second test builds the linear curves on the
-/// fixture's helpers again on a factory of one's own.
+/// re-date the helpers as QuantLib's helpers re-date themselves. The named curves are built through their classes
+/// (<see cref="PiecewiseFlatForward"/>, …), and the log-mixed-linear-cubic curves take the first pass's linear fallback
+/// where their construction refuses the first nodes. A second test builds the linear curves on the fixture's helpers
+/// again on a factory of one's own.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class PiecewiseYieldCurveVectorTests
