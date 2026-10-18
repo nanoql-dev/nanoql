@@ -23,12 +23,15 @@ public class Swap : Instrument
 {
     private readonly ImmutableArray<double> payer;
 
+    // Written only by the constructors and on a fresh copy (WithLeg).
+    private ImmutableArray<ImmutableArray<CashFlow>> legs;
+
     /// <summary>Initializes a new instance of the <see cref="Swap"/> class with a paid and a received leg.</summary>
     /// <param name="firstLeg">The leg that is paid.</param>
     /// <param name="secondLeg">The leg that is received.</param>
     public Swap(ImmutableArray<CashFlow> firstLeg, ImmutableArray<CashFlow> secondLeg)
     {
-        Legs = [CheckLeg(firstLeg, nameof(firstLeg)), CheckLeg(secondLeg, nameof(secondLeg))];
+        legs = [CheckLeg(firstLeg, nameof(firstLeg)), CheckLeg(secondLeg, nameof(secondLeg))];
         payer = [-1.0, 1.0];
     }
 
@@ -40,22 +43,22 @@ public class Swap : Instrument
     {
         ArgumentNullException.ThrowIfNull(legs);
         ArgumentNullException.ThrowIfNull(payer);
-        Legs = [.. legs.Select(leg => CheckLeg(leg, nameof(legs)))];
+        this.legs = [.. legs.Select(leg => CheckLeg(leg, nameof(legs)))];
         ImmutableArray<bool> paid = [.. payer];
-        if (paid.Length != Legs.Length)
+        if (paid.Length != this.legs.Length)
         {
             throw new ArgumentException(
-                $"size mismatch between payer ({paid.Length}) and legs ({Legs.Length})", nameof(payer));
+                $"size mismatch between payer ({paid.Length}) and legs ({this.legs.Length})", nameof(payer));
         }
 
         this.payer = [.. paid.Select(p => p ? -1.0 : 1.0)];
     }
 
     /// <summary>Gets the number of legs.</summary>
-    public int NumberOfLegs => Legs.Length;
+    public int NumberOfLegs => legs.Length;
 
     /// <summary>Gets the legs.</summary>
-    public ImmutableArray<ImmutableArray<CashFlow>> Legs { get; }
+    public ImmutableArray<ImmutableArray<CashFlow>> Legs => legs;
 
     /// <summary>Gets each leg's multiplier: -1 for a paid leg, 1 for a received one.</summary>
     internal ImmutableArray<double> PayerMultipliers => payer;
@@ -188,7 +191,27 @@ public class Swap : Instrument
         return payer[j] < 0.0;
     }
 
-    private static ImmutableArray<CashFlow> CheckLeg(ImmutableArray<CashFlow> leg, string paramName)
+    /// <summary>
+    /// A copy of the swap holding another leg at an index:
+    /// <see cref="CouponPricerFunctions.SetCouponPricer{T}(T, int, FloatingRateCouponPricer?)"/>'s step, which QuantLib
+    /// does in place on the leg a built swap holds. The base's copy is memberwise, so a derived swap's terms come
+    /// along; a derived swap that caches what it derives from its legs overrides it, and an override returns a copy of
+    /// the same runtime type.
+    /// </summary>
+    /// <param name="j">The leg's index.</param>
+    /// <param name="leg">The new leg.</param>
+    /// <returns>The copy; the receiver is unchanged.</returns>
+    /// <exception cref="ArgumentException">There's no leg at the index, or the leg holds a null cash flow.</exception>
+    protected internal virtual Swap WithLeg(int j, ImmutableArray<CashFlow> leg)
+    {
+        CheckIndex(j);
+        ImmutableArray<CashFlow> checkedLeg = CheckLeg(leg, nameof(leg));
+        var copy = (Swap)MemberwiseClone();
+        copy.legs = legs.SetItem(j, checkedLeg);
+        return copy;
+    }
+
+    private protected static ImmutableArray<CashFlow> CheckLeg(ImmutableArray<CashFlow> leg, string paramName)
     {
         if (leg.IsDefault)
         {

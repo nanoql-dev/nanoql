@@ -36,11 +36,16 @@ public sealed record IborLeg
     /// <summary>Initializes a new instance of the <see cref="IborLeg"/> class.</summary>
     /// <param name="schedule">The schedule of accrual dates.</param>
     /// <param name="index">The index.</param>
+    /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">The schedule is empty.</exception>
     public IborLeg(Schedule schedule, IborIndex index)
     {
         ArgumentNullException.ThrowIfNull(schedule);
-        ArgumentNullException.ThrowIfNull(index);
+        if (index is null)
+        {
+            throw new ArgumentNullException(nameof(index), "no index provided");
+        }
+
         if (schedule.Empty)
         {
             // QuantLib's period count wraps below zero for an empty schedule.
@@ -108,13 +113,10 @@ public sealed record IborLeg
     }
 
     /// <summary>Sets the accrual day counter; the index's by default.</summary>
-    /// <param name="dayCounter">The day counter.</param>
+    /// <param name="dayCounter">The day counter; the index's when <see langword="null"/>, QuantLib's empty day
+    /// counter. A period with a zero gearing then refuses the conversion, its fixed-rate coupon needing one.</param>
     /// <returns>The modified builder.</returns>
-    public IborLeg WithPaymentDayCounter(DayCounter dayCounter)
-    {
-        ArgumentNullException.ThrowIfNull(dayCounter);
-        return this with { PaymentDayCounter = dayCounter };
-    }
+    public IborLeg WithPaymentDayCounter(DayCounter? dayCounter) => this with { PaymentDayCounter = dayCounter };
 
     /// <summary>Sets the business-day convention of the payment dates.</summary>
     /// <param name="convention">The convention.</param>
@@ -132,13 +134,9 @@ public sealed record IborLeg
     public IborLeg WithPaymentLag(int lag) => this with { PaymentLag = lag };
 
     /// <summary>Sets the calendar of the payment dates; the schedule's calendar by default.</summary>
-    /// <param name="cal">The calendar.</param>
+    /// <param name="cal">The calendar; the schedule's when <see langword="null"/>, QuantLib's empty calendar.</param>
     /// <returns>The modified builder.</returns>
-    public IborLeg WithPaymentCalendar(Calendar cal)
-    {
-        ArgumentNullException.ThrowIfNull(cal);
-        return this with { PaymentCalendar = cal };
-    }
+    public IborLeg WithPaymentCalendar(Calendar? cal) => this with { PaymentCalendar = cal };
 
     /// <summary>Sets one count of fixing days for every coupon.</summary>
     /// <param name="fixingDays">The fixing days; the index's when <see langword="null"/>, QuantLib's
@@ -234,18 +232,18 @@ public sealed record IborLeg
 
     /// <summary>Sets the ex-coupon period, counted back from each payment date.</summary>
     /// <param name="period">The period; a zero-length period means no ex-coupon dates.</param>
-    /// <param name="cal">The calendar the period is counted on.</param>
+    /// <param name="cal">The calendar the period is counted on; the schedule's when <see langword="null"/>, QuantLib's
+    /// empty calendar.</param>
     /// <param name="convention">The business-day convention of the ex-coupon dates.</param>
     /// <param name="endOfMonth">Whether the ex-coupon dates stay at month end.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
     public IborLeg WithExCouponPeriod(
         Period period,
-        Calendar cal,
+        Calendar? cal,
         BusinessDayConvention convention,
         bool endOfMonth = false)
     {
-        ArgumentNullException.ThrowIfNull(cal);
         EnumArguments.Check(convention, nameof(convention));
         return this with
         {

@@ -67,7 +67,7 @@ public sealed record OvernightLeg
 
     private DayCounter? PaymentDayCounter { get; init; }
 
-    private Calendar PaymentCalendar { get; init; }
+    private Calendar? PaymentCalendar { get; init; }
 
     private BusinessDayConvention PaymentAdjustment { get; init; } = BusinessDayConvention.Following;
 
@@ -124,13 +124,10 @@ public sealed record OvernightLeg
     }
 
     /// <summary>Sets the coupons' accrual day counter; the index's when none is set.</summary>
-    /// <param name="dc">The day counter.</param>
+    /// <param name="dc">The day counter; the index's when <see langword="null"/>, QuantLib's empty day counter. A
+    /// period with a zero gearing then refuses the conversion, its fixed-rate coupon needing one.</param>
     /// <returns>The modified builder.</returns>
-    public OvernightLeg WithPaymentDayCounter(DayCounter dc)
-    {
-        ArgumentNullException.ThrowIfNull(dc);
-        return this with { PaymentDayCounter = dc };
-    }
+    public OvernightLeg WithPaymentDayCounter(DayCounter? dc) => this with { PaymentDayCounter = dc };
 
     /// <summary>Sets the convention adjusting the payment dates.</summary>
     /// <param name="convention">The convention.</param>
@@ -142,13 +139,9 @@ public sealed record OvernightLeg
     }
 
     /// <summary>Sets the payment calendar; the schedule's when none is set.</summary>
-    /// <param name="cal">The calendar.</param>
+    /// <param name="cal">The calendar; the schedule's when <see langword="null"/>, QuantLib's empty calendar.</param>
     /// <returns>The modified builder.</returns>
-    public OvernightLeg WithPaymentCalendar(Calendar cal)
-    {
-        ArgumentNullException.ThrowIfNull(cal);
-        return this with { PaymentCalendar = cal };
-    }
+    public OvernightLeg WithPaymentCalendar(Calendar? cal) => this with { PaymentCalendar = cal };
 
     /// <summary>Sets the payment lag, in business days after each accrual end.</summary>
     /// <param name="lag">The lag.</param>
@@ -299,13 +292,11 @@ public sealed record OvernightLeg
         this with { LastRecentPeriod = lastRecentPeriod };
 
     /// <summary>Sets the calendar of the last recent period; the schedule's when none is set.</summary>
-    /// <param name="lastRecentPeriodCalendar">The calendar.</param>
+    /// <param name="lastRecentPeriodCalendar">The calendar; the schedule's when <see langword="null"/>, QuantLib's
+    /// empty calendar.</param>
     /// <returns>The modified builder.</returns>
-    public OvernightLeg WithLastRecentPeriodCalendar(Calendar lastRecentPeriodCalendar)
-    {
-        ArgumentNullException.ThrowIfNull(lastRecentPeriodCalendar);
-        return this with { LastRecentPeriodCalendar = lastRecentPeriodCalendar };
-    }
+    public OvernightLeg WithLastRecentPeriodCalendar(Calendar? lastRecentPeriodCalendar) =>
+        this with { LastRecentPeriodCalendar = lastRecentPeriodCalendar };
 
     /// <summary>Sets explicit payment dates, one per period, in place of the lagged and adjusted accrual ends.</summary>
     /// <param name="paymentDates">The dates.</param>
@@ -362,9 +353,10 @@ public sealed record OvernightLeg
         var cashflows = ImmutableArray.CreateBuilder<CashFlow>();
 
         // the following is not always correct. QuantLib falls back on the payment calendar, then on WeekendsOnly, for
-        // an empty schedule calendar; a schedule's calendar is never null here, nor is the payment calendar.
+        // an empty schedule calendar; a schedule's calendar is never null here. An empty payment calendar is the
+        // schedule's.
         Calendar calendar = Schedule.Calendar;
-        Calendar paymentCalendar = PaymentCalendar;
+        Calendar paymentCalendar = PaymentCalendar ?? calendar;
 
         int n = Schedule.Size - 1;
 

@@ -95,8 +95,18 @@ public class CouponErrorTests
         // The builder: its arguments, then its stored settings at the conversion.
         AssertArgument("schedule", "empty schedule", () => new IborLeg(empty, index));
         AssertNull("schedule", () => new IborLeg(null!, index));
-        AssertNull("index", () => new IborLeg(schedule, null!));
+        AssertNull("index", () => new IborLeg(schedule, null!), "no index provided");
         var leg = new IborLeg(schedule, index);
+
+        // QuantLib's empty day counter and calendars, null: the index's day counter and the schedule's calendar
+        // (cashflowvectors.hpp:107, 128; the coupon's empty day counter is the index's).
+        var exCoupon = new Period(2, TimeUnit.Days);
+        Assert.Equal(
+            Describe(leg.WithNotionals(1e6).WithPaymentLag(2).WithPaymentDayCounter(new Actual360())
+                .WithPaymentCalendar(new TARGET()).WithExCouponPeriod(exCoupon, new TARGET(), BusinessDayConvention.Following)
+                .ToLeg(Context)),
+            Describe(leg.WithNotionals(1e6).WithPaymentLag(2).WithPaymentDayCounter(null).WithPaymentCalendar(null)
+                .WithExCouponPeriod(exCoupon, null, BusinessDayConvention.Following).ToLeg(Context)));
         AssertRange("convention", () => leg.WithPaymentAdjustment((BusinessDayConvention)99));
         AssertRange("convention", () => leg.WithFixingConvention((BusinessDayConvention)99));
         AssertRange("fixingDays", () => leg.WithFixingDays(-2));
@@ -242,8 +252,18 @@ public class CouponErrorTests
         Assert.StartsWith(message, e.Message, StringComparison.Ordinal);
     }
 
-    private static void AssertNull(string paramName, Func<object?> f) =>
-        Assert.Equal(paramName, Assert.Throws<ArgumentNullException>(f).ParamName);
+    private static void AssertNull(string paramName, Func<object?> f, string? message = null)
+    {
+        ArgumentNullException e = Assert.Throws<ArgumentNullException>(f);
+        Assert.Equal(paramName, e.ParamName);
+        if (message is not null)
+        {
+            Assert.StartsWith(message, e.Message, StringComparison.Ordinal);
+        }
+    }
+
+    private static (Date Date, Date? ExCouponDate, string DayCounter)[] Describe(ImmutableArray<CashFlow> leg) =>
+        [.. leg.Cast<Coupon>().Select(c => (c.Date, c.ExCouponDate, c.DayCounter.Name))];
 
     private static void AssertRange(string paramName, Func<object?> f, string? message = null)
     {

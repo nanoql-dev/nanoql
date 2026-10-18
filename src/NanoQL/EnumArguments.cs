@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Coupons;
+using NanoQL.Instruments;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
 using NanoQL.Time;
@@ -200,6 +201,18 @@ internal static class EnumArguments
         if (value is not (BlackIborCouponPricerTimingAdjustment.Black76 or BlackIborCouponPricerTimingAdjustment.BivariateLognormal))
         {
             throw new ArgumentOutOfRangeException(paramName, value, $"unknown timing adjustment (code {(int)value})");
+        }
+    }
+
+    /// <summary>Refuses a swap type outside <see cref="SwapType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(SwapType value, string paramName)
+    {
+        if (value is not (SwapType.Payer or SwapType.Receiver))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "Unknown vanilla-swap type");
         }
     }
 }

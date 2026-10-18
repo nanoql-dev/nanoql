@@ -136,6 +136,20 @@ public class OvernightIndexedCouponErrorTests
         AssertArgument<ArgumentException>(() => new OvernightLeg(new Schedule([], new TARGET()), sofr), "schedule", "empty schedule");
         AssertArgument<ArgumentNullException>(() => new OvernightLeg(schedule, null!), "overnightIndex", "no index provided");
         AssertArgument<ArgumentNullException>(() => new OvernightLeg(null!, sofr), "schedule", null);
+
+        // QuantLib's empty day counter and last-recent-period calendar, null: the index's day counter and the leg's
+        // calendar (overnightindexedcoupon.cpp:649; the coupon's empty day counter is the index's).
+        OvernightLeg recent = leg.WithLastRecentPeriod(new Period(10, TimeUnit.Days));
+        Assert.Equal(
+            Describe(recent.WithPaymentDayCounter(new Actual360()).WithLastRecentPeriodCalendar(new TARGET()).ToLeg()),
+            Describe(recent.WithPaymentDayCounter(null).WithLastRecentPeriodCalendar(null).ToLeg()));
+
+        // QuantLib's empty payment calendar, null: the schedule's (overnightindexedcoupon.cpp:587-588). An accrual
+        // ending on Tuesday 29 April 2025, paid 2 business days later, passes TARGET's 1 May holiday.
+        OvernightLeg april = new OvernightLeg(new Schedule([new Date(31, March, 2025), new Date(29, April, 2025)], new TARGET()), sofr)
+            .WithNotionals(1e6).WithPaymentLag(2);
+        Assert.Equal(new Date(2, May, 2025), april.WithPaymentCalendar(new TARGET()).ToLeg()[0].Date);
+        Assert.Equal(new Date(2, May, 2025), april.WithPaymentCalendar(null).ToLeg()[0].Date);
         AssertArgument<ArgumentOutOfRangeException>(() => leg.WithLookbackDays(-1), "lookbackDays", null);
         AssertArgument<ArgumentOutOfRangeException>(() => leg.WithLockoutDays(-1), "lockoutDays", null);
         AssertArgument<ArgumentOutOfRangeException>(
@@ -272,6 +286,10 @@ public class OvernightIndexedCouponErrorTests
             Assert.StartsWith(text, e.Message, StringComparison.Ordinal);
         }
     }
+
+    private static (Date Date, Date? RateComputationStartDate, string DayCounter)[] Describe(
+        ImmutableArray<CashFlow> leg) =>
+        [.. leg.Cast<OvernightIndexedCoupon>().Select(c => (c.Date, c.RateComputationStartDate, c.DayCounter.Name))];
 
     private static void AssertStored(Func<object?> f, string text)
     {

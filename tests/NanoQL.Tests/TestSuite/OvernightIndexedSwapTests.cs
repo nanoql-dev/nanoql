@@ -1,0 +1,684 @@
+// SPDX-FileCopyrightText: Copyright (C) 2009 Roland Lichters
+// SPDX-FileCopyrightText: Copyright (C) 2014 Peter Caspers
+// SPDX-FileCopyrightText: Copyright (C) 2026 Sergio Araujo
+// SPDX-FileCopyrightText: Copyright (C) 2026 Kyrylo Protsenko
+// SPDX-FileCopyrightText: 2026 The nanoql Authors
+// SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
+// Upstream: test-suite/overnightindexedswap.cpp @ v1.44
+// Ported to C# from QuantLib and modified by the nanoql Authors.
+// Partial: testBaseBootstrap, testBootstrapWithArithmeticAverage, testBootstrapWithTelescopicDates, testBootstrapWithTelescopicDatesAndArithmeticAverage, testBootstrapWithCustomPricer, testBootstrapWithLookbackDays, testBootstrapWithLookbackDaysAndShift, testBootstrapWithLockoutDays, testBootstrapWithLockoutDaysAndShift, testBootstrapRegression, test131BootstrapRegression, testBootstrapWithDifferentCalendars, which wait for S5's bootstrap; testMakeOisEndOfMonthRegression2453, which waits for batch 2's Aonia; testNonstandardSwapConversionPreservesObservationConventions, which waits for B3.2's NonstandardSwap; and testMakeOISDefaultSettlementDays' lines for EONIA, FedFunds, AONIA, SARON, NZOCR, DESTR, SWESTR and KOFR, which wait for batch 2's indexes
+// Replaced: testNotifications (Vectors/Instruments/OvernightIndexedSwapVectorTests.cs)
+
+using NanoQL.Coupons;
+using NanoQL.Indexes;
+using NanoQL.Instruments;
+using NanoQL.Numerics;
+using NanoQL.PricingEngines;
+using NanoQL.TermStructures;
+using NanoQL.Time;
+using static NanoQL.Time.Month;
+
+namespace NanoQL.Tests.TestSuite;
+
+[Trait("Oracle", "QuantLib")]
+public class OvernightIndexedSwapTests
+{
+    [Fact]
+    public void TestFairRate()
+    {
+        // Testing Estr-swap calculation of fair fixed rate...
+
+        var vars = new CommonVars();
+
+        Period[] lengths =
+        [
+            new(1, TimeUnit.Years), new(2, TimeUnit.Years), new(5, TimeUnit.Years), new(10, TimeUnit.Years),
+            new(20, TimeUnit.Years),
+        ];
+        Spread[] spreads = [-0.001, -0.01, 0.0, 0.01, 0.001];
+
+        foreach (Period length in lengths)
+        {
+            foreach (Spread spread in spreads)
+            {
+                OvernightIndexedSwap swap = vars.MakeSwap(length, 0.0, spread, false);
+                OvernightIndexedSwap swap2 = vars.MakeSwap(length, 0.0, spread, true);
+                Rate fairRate = vars.Price(swap).FairRate!.Value;
+                Rate fairRate2 = vars.Price(swap2).FairRate!.Value;
+                Assert.True(
+                    Math.Abs(fairRate - fairRate2) <= 1.0e-10,
+                    $"fair rates are different: length {length}, floating spread {spread}, fair rate (non telescopic "
+                    + $"value dates) {fairRate}, fair rate (telescopic value dates) {fairRate2}");
+
+                swap = vars.MakeSwap(length, fairRate, spread, false);
+                Real npv = vars.Price(swap).NPV!.Value;
+                Assert.True(
+                    Math.Abs(npv) <= 1.0e-10,
+                    $"recalculating with implied rate (non telescopic value dates): length {length}, floating spread "
+                    + $"{spread}, swap value {npv}");
+
+                swap = vars.MakeSwap(length, vars.Price(swap).FairRate!.Value, spread, true);
+                npv = vars.Price(swap).NPV!.Value;
+                Assert.True(
+                    Math.Abs(npv) <= 1.0e-10,
+                    $"recalculating with implied rate (telescopic value dates): length {length}, floating spread "
+                    + $"{spread}, swap value {npv}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestFairSpread()
+    {
+        // Testing Estr-swap calculation of fair floating spread...
+
+        var vars = new CommonVars();
+
+        Period[] lengths =
+        [
+            new(1, TimeUnit.Years), new(2, TimeUnit.Years), new(5, TimeUnit.Years), new(10, TimeUnit.Years),
+            new(20, TimeUnit.Years),
+        ];
+        Rate[] rates = [0.04, 0.05, 0.06, 0.07];
+
+        foreach (Period length in lengths)
+        {
+            foreach (Rate j in rates)
+            {
+                OvernightIndexedSwap swap = vars.MakeSwap(length, j, 0.0, false);
+                OvernightIndexedSwap swap2 = vars.MakeSwap(length, j, 0.0, true);
+                Spread fairSpread = vars.Price(swap).FairSpread!.Value;
+                Spread fairSpread2 = vars.Price(swap2).FairSpread!.Value;
+                Assert.True(
+                    Math.Abs(fairSpread - fairSpread2) <= 1.0e-10,
+                    $"fair spreads are different: length {length}, fixed rate {j}, fair spread (non telescopic value "
+                    + $"dates) {fairSpread}, fair spread (telescopic value dates) {fairSpread2}");
+
+                swap = vars.MakeSwap(length, j, fairSpread, false);
+                Real npv = vars.Price(swap).NPV!.Value;
+                Assert.True(
+                    Math.Abs(npv) <= 1.0e-10,
+                    $"recalculating with implied spread (non telescopic value dates): length {length}, fixed rate "
+                    + $"{j}, fair spread {fairSpread}, swap value {npv}");
+
+                swap = vars.MakeSwap(length, j, fairSpread, true);
+                npv = vars.Price(swap).NPV!.Value;
+                Assert.True(
+                    Math.Abs(npv) <= 1.0e-10,
+                    $"recalculating with implied spread (telescopic value dates): length {length}, fixed rate {j}, "
+                    + $"fair spread {fairSpread}, swap value {npv}");
+            }
+        }
+    }
+
+    // Adapted: the curve relinked to the settlement date (line 387) becomes the index and the engine built on the new
+    // curve.
+    [Fact]
+    public void TestCachedValue()
+    {
+        // Testing Estr-swap calculation against cached value...
+
+        var vars = new CommonVars();
+
+        Real flat = 0.05;
+        vars = vars.Relinked(new FlatForward(vars.Settlement, flat, new Actual360()));
+        Rate fixedRate = Math.Exp(flat) - 1;
+        OvernightIndexedSwap swap = vars.MakeSwap(new Period(1, TimeUnit.Years), fixedRate, 0.0, false);
+        OvernightIndexedSwap swap2 = vars.MakeSwap(new Period(1, TimeUnit.Years), fixedRate, 0.0, true);
+        Real cachedNPV = 0.001730450147;
+        Real tolerance = 1.0e-11;
+        Real npv = vars.Price(swap).NPV!.Value;
+        Real npv2 = vars.Price(swap2).NPV!.Value;
+        Assert.True(
+            Math.Abs(npv - cachedNPV) <= tolerance,
+            $"failed to reproduce cached swap value (non telescopic value dates): calculated {npv}, expected "
+            + $"{cachedNPV}");
+        Assert.True(
+            Math.Abs(npv2 - cachedNPV) <= tolerance,
+            $"failed to reproduce cached swap value (telescopic value dates): calculated {npv2}, expected {cachedNPV}");
+    }
+
+    // Adapted: the fixings added to the index (lines 644-647) become the context's store.
+    [Fact]
+    public void TestSeasonedSwaps()
+    {
+        // Testing seasoned Estr-swap calculation...
+
+        var vars = new CommonVars();
+
+        Period[] lengths =
+        [
+            new(1, TimeUnit.Years), new(2, TimeUnit.Years), new(5, TimeUnit.Years), new(10, TimeUnit.Years),
+            new(20, TimeUnit.Years),
+        ];
+        Spread[] spreads = [-0.001, -0.01, 0.0, 0.01, 0.001];
+
+        Date effectiveDate = new(2, February, 2009);
+
+        vars = vars.WithFixings(vars.Context.Fixings
+            .AddFixing(vars.EstrIndex, new Date(2, February, 2009), 0.0010) // fake fixing values
+            .AddFixing(vars.EstrIndex, new Date(3, February, 2009), 0.0011)
+            .AddFixing(vars.EstrIndex, new Date(4, February, 2009), 0.0012)
+            .AddFixing(vars.EstrIndex, new Date(5, February, 2009), 0.0013));
+
+        foreach (Period length in lengths)
+        {
+            foreach (Spread spread in spreads)
+            {
+                OvernightIndexedSwap swap = vars.MakeSwap(length, 0.0, spread, false, effectiveDate);
+                OvernightIndexedSwap swap2 = vars.MakeSwap(length, 0.0, spread, true, effectiveDate);
+                Real npv = vars.Price(swap).NPV!.Value;
+                Real npv2 = vars.Price(swap2).NPV!.Value;
+                Assert.True(
+                    Math.Abs(npv - npv2) <= 1.0e-10,
+                    $"swap npv is different: length {length}, floating spread {spread}, swap value (non telescopic "
+                    + $"value dates) {npv}, swap value (telescopic value dates) {npv2}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestConstructorsAndNominals()
+    {
+        // Testing different constructors for OIS...
+
+        var vars = new CommonVars();
+
+        Date spot = vars.Calendar.Advance(vars.Today, 2, TimeUnit.Days);
+        Real nominal = 100000.0;
+
+        // constant notional, same schedule
+
+        Schedule schedule = new MakeSchedule()
+            .From(spot)
+            .To(vars.Calendar.Advance(spot, 2, TimeUnit.Years))
+            .WithCalendar(vars.Calendar)
+            .WithFrequency(Frequency.Annual)
+            .ToSchedule();
+
+        var ois1 = new OvernightIndexedSwap(SwapType.Payer, nominal, schedule, 0.03, new Actual360(), vars.EstrIndex);
+
+        Assert.Equal(new Period(1, TimeUnit.Years), ois1.FixedSchedule.Tenor());
+        Assert.Equal(new Period(1, TimeUnit.Years), ois1.OvernightSchedule.Tenor());
+        Assert.Equal(Frequency.Annual, ois1.PaymentFrequency());
+
+        Assert.Equal(nominal, ois1.Nominal());
+
+        Assert.Single(ois1.Nominals());
+        Assert.Equal(nominal, ois1.Nominals()[0]);
+
+        Assert.Single(ois1.FixedNominals);
+        Assert.Equal(nominal, ois1.FixedNominals[0]);
+
+        Assert.Single(ois1.OvernightNominals);
+        Assert.Equal(nominal, ois1.OvernightNominals[0]);
+
+        // amortizing notionals, same schedule
+
+        var ois2 = new OvernightIndexedSwap(
+            SwapType.Payer, [nominal, nominal / 2], schedule, 0.03, new Actual360(), vars.EstrIndex);
+
+        Assert.Equal(new Period(1, TimeUnit.Years), ois2.FixedSchedule.Tenor());
+        Assert.Equal(new Period(1, TimeUnit.Years), ois2.OvernightSchedule.Tenor());
+        Assert.Equal(Frequency.Annual, ois2.PaymentFrequency());
+
+        NanoQLException e = Assert.Throws<NanoQLException>(() => ois2.Nominal());
+        Assert.Contains("nominal is not constant", e.Message, StringComparison.Ordinal);
+
+        Assert.Equal(2, ois2.Nominals().Length);
+        Assert.Equal(nominal, ois2.Nominals()[0]);
+        Assert.Equal(nominal / 2, ois2.Nominals()[1]);
+
+        Assert.Equal(2, ois2.FixedNominals.Length);
+        Assert.Equal(nominal, ois2.FixedNominals[0]);
+        Assert.Equal(nominal / 2, ois2.FixedNominals[1]);
+
+        Assert.Equal(2, ois2.OvernightNominals.Length);
+        Assert.Equal(nominal, ois2.OvernightNominals[0]);
+        Assert.Equal(nominal / 2, ois2.OvernightNominals[1]);
+
+        // constant notional, different schedules
+
+        Schedule fixedSchedule = schedule;
+        Schedule overnightSchedule = new MakeSchedule()
+            .From(spot)
+            .To(vars.Calendar.Advance(spot, 2, TimeUnit.Years))
+            .WithCalendar(vars.Calendar)
+            .WithFrequency(Frequency.Semiannual)
+            .ToSchedule();
+
+        var ois3 = new OvernightIndexedSwap(
+            SwapType.Payer, nominal, fixedSchedule, 0.03, new Actual360(), overnightSchedule, vars.EstrIndex);
+
+        Assert.Equal(new Period(1, TimeUnit.Years), ois3.FixedSchedule.Tenor());
+        Assert.Equal(new Period(6, TimeUnit.Months), ois3.OvernightSchedule.Tenor());
+        Assert.Equal(Frequency.Semiannual, ois3.PaymentFrequency());
+
+        Assert.Equal(nominal, ois3.Nominal());
+
+        Assert.Single(ois3.Nominals());
+        Assert.Equal(nominal, ois3.Nominals()[0]);
+
+        Assert.Single(ois3.FixedNominals);
+        Assert.Equal(nominal, ois3.FixedNominals[0]);
+
+        Assert.Single(ois3.OvernightNominals);
+        Assert.Equal(nominal, ois3.OvernightNominals[0]);
+
+        // amortizing notionals, different schedules
+
+        var ois4 = new OvernightIndexedSwap(
+            SwapType.Payer,
+            [nominal, nominal / 2],
+            fixedSchedule,
+            0.03,
+            new Actual360(),
+            [nominal, nominal, nominal / 2, nominal / 2],
+            overnightSchedule,
+            vars.EstrIndex);
+
+        Assert.Equal(new Period(1, TimeUnit.Years), ois4.FixedSchedule.Tenor());
+        Assert.Equal(new Period(6, TimeUnit.Months), ois4.OvernightSchedule.Tenor());
+        Assert.Equal(Frequency.Semiannual, ois4.PaymentFrequency());
+
+        e = Assert.Throws<NanoQLException>(() => ois4.Nominal());
+        Assert.Contains("nominal is not constant", e.Message, StringComparison.Ordinal);
+
+        e = Assert.Throws<NanoQLException>(() => ois4.Nominals());
+        Assert.Contains("different nominals", e.Message, StringComparison.Ordinal);
+
+        Assert.Equal(2, ois4.FixedNominals.Length);
+        Assert.Equal(nominal, ois4.FixedNominals[0]);
+        Assert.Equal(nominal / 2, ois4.FixedNominals[1]);
+
+        Assert.Equal(4, ois4.OvernightNominals.Length);
+        Assert.Equal(nominal, ois4.OvernightNominals[0]);
+        Assert.Equal(nominal, ois4.OvernightNominals[1]);
+        Assert.Equal(nominal / 2, ois4.OvernightNominals[2]);
+        Assert.Equal(nominal / 2, ois4.OvernightNominals[3]);
+    }
+
+    // Adapted: the evaluation dates (lines 965 and 1014) are two contexts; the indexes of batch 2 (EONIA, FedFunds,
+    // AONIA, SARON, NZOCR, DESTR, SWESTR, KOFR) are left out of both loops (lines 968-985), and the weekend block on
+    // EONIA (lines 1030-1035) waits with them.
+    [Fact]
+    public void TestMakeOISDefaultSettlementDays()
+    {
+        // Testing default settlement days in MakeOIS...
+
+        Date today = new(12, May, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        // Create all overnight indices
+        (string Name, OvernightIndex Index)[] indices =
+        [
+            // 0-day settlement index
+            ("SONIA", new Sonia()),
+
+            // 1-day settlement index
+            ("CORRA", new Corra()),
+
+            // 2-day settlement indices
+            ("ESTR", new Estr()),
+            ("SOFR", new Sofr()),
+            ("TONAR", new Tonar()),
+        ];
+
+        // Test default settlement days
+        foreach ((string name, OvernightIndex index) in indices)
+        {
+            OvernightIndexedSwap swap = new MakeOIS(new Period(6, TimeUnit.Months), index)
+                .WithFixedRate(0.01)
+                .ToOvernightIndexedSwap(context);
+            Date expected = name switch
+            {
+                "SONIA" => today, // T+0 settlement for SONIA
+                "CORRA" => today + new Period(1, TimeUnit.Days), // T+1 settlement for CORRA
+                _ => today + new Period(2, TimeUnit.Days), // T+2 settlement for all others
+            };
+            Assert.Equal(expected, swap.StartDate());
+        }
+
+        // Test manual override
+        foreach ((string name, OvernightIndex index) in indices)
+        {
+            // Override settlement days: 2 for CORRA, 1 for all others
+            Natural settlementDaysOverride = name == "CORRA" ? 2 : 1;
+            OvernightIndexedSwap swap = new MakeOIS(new Period(6, TimeUnit.Months), index)
+                .WithFixedRate(0.01)
+                .WithSettlementDays(settlementDaysOverride)
+                .ToOvernightIndexedSwap(context);
+            Date expected = today + new Period(settlementDaysOverride, TimeUnit.Days);
+            Assert.Equal(expected, swap.StartDate());
+        }
+
+        // Test weekend handling
+        Date weekend = new(10, May, 2025); // Saturday
+        EvaluationContext onWeekend = context with { EvaluationDate = weekend };
+
+        // Test 0-day settlement index on weekend
+        {
+            OvernightIndexedSwap swap = new MakeOIS(new Period(6, TimeUnit.Months), indices[0].Index)
+                .WithFixedRate(0.01)
+                .ToOvernightIndexedSwap(onWeekend); // SONIA
+            Date expected = new(12, May, 2025); // Monday
+            Assert.Equal(expected, swap.StartDate());
+        }
+
+        // Test 1-day settlement index on weekend
+        {
+            OvernightIndexedSwap swap = new MakeOIS(new Period(6, TimeUnit.Months), indices[1].Index)
+                .WithFixedRate(0.01)
+                .ToOvernightIndexedSwap(onWeekend); // CORRA
+            Date expected = new(12, May, 2025); // Monday: T+1 from the actual trade date
+            Assert.Equal(expected, swap.StartDate());
+        }
+    }
+
+    // Adapted: the curve linked to a handle (line 1127) and the index built on the handle after it (line 1129) become
+    // the index built on the curve, and the evaluation date (line 1124) is the context's.
+    [Fact]
+    public void TestSettlementDaysEffectiveDateConflict()
+    {
+        // Testing that MakeOIS rejects settlementDays and effectiveDate together...
+
+        Date today = new(5, February, 2009);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        YieldTermStructure yts = new FlatForward(today, 0.05, new Actual365Fixed());
+
+        var index = new Estr(yts);
+        Date effectiveDate = new(9, February, 2009);
+
+        // settlementDays first, then effectiveDate
+        NanoQLException e = Assert.Throws<NanoQLException>(() =>
+            new MakeOIS(new Period(5, TimeUnit.Years), index)
+                .WithFixedRate(0.03)
+                .WithSettlementDays(2)
+                .WithEffectiveDate(effectiveDate)
+                .ToOvernightIndexedSwap(context));
+        Assert.Contains("cannot set both", e.Message, StringComparison.Ordinal);
+
+        // effectiveDate first, then settlementDays
+        e = Assert.Throws<NanoQLException>(() =>
+            new MakeOIS(new Period(5, TimeUnit.Years), index)
+                .WithFixedRate(0.03)
+                .WithEffectiveDate(effectiveDate)
+                .WithSettlementDays(2)
+                .ToOvernightIndexedSwap(context));
+        Assert.Contains("cannot set both", e.Message, StringComparison.Ordinal);
+
+        // withSettlementDays alone works
+        OvernightIndexedSwap swap1 = new MakeOIS(new Period(5, TimeUnit.Years), index)
+            .WithFixedRate(0.03)
+            .WithSettlementDays(2)
+            .ToOvernightIndexedSwap(context);
+        Assert.True(swap1.StartDate() != default);
+
+        // withEffectiveDate alone works
+        OvernightIndexedSwap swap2 = new MakeOIS(new Period(5, TimeUnit.Years), index)
+            .WithFixedRate(0.03)
+            .WithEffectiveDate(effectiveDate)
+            .ToOvernightIndexedSwap(context);
+        Assert.Equal(effectiveDate, swap2.StartDate());
+
+        // neither set (constructor defaults) works
+        OvernightIndexedSwap swap3 = new MakeOIS(new Period(5, TimeUnit.Years), index)
+            .WithFixedRate(0.03)
+            .ToOvernightIndexedSwap(context);
+        Assert.True(swap3.StartDate() != default);
+    }
+
+    [Fact]
+    public void TestRoundingPrecision()
+    {
+        // Testing rounding of the compounded rate in overnight-indexed swaps...
+
+        var vars = new CommonVars();
+        EvaluationContext context = vars.Context;
+
+        Integer precision = 6;
+        Rate fixedRate = 0.03;
+        var length = new Period(2, TimeUnit.Years);
+
+        OvernightIndexedSwap plainSwap = vars.MakeSwap(length, fixedRate, 0.0, false);
+        OvernightIndexedSwap roundedSwap =
+            vars.MakeSwap(length, fixedRate, 0.0, false, null, 0, RateAveragingType.Compound, precision);
+
+        Assert.True(roundedSwap.RoundingPrecision == precision);
+        Assert.True(plainSwap.RoundingPrecision is null);
+
+        var round = new ClosestRounding(precision);
+        bool anyRoundingApplied = false;
+        for (int i = 0; i < roundedSwap.OvernightLeg.Length; ++i)
+        {
+            var rounded = (Coupon)roundedSwap.OvernightLeg[i];
+            var plain = (Coupon)plainSwap.OvernightLeg[i];
+
+            // the projected rate is not affected by the rounding...
+            Assert.True(
+                Math.Abs(rounded.Rate(context) - plain.Rate(context)) <= 1.0e-15,
+                $"rounding changed the projected rate: without rounding {plain.Rate(context)}, with rounding "
+                + $"{rounded.Rate(context)}");
+
+            // ...but the amount is computed off the rounded rate
+            Real expected = rounded.Nominal(context) * round.Evaluate(rounded.Rate(context)) * rounded.AccrualPeriod();
+            Assert.True(
+                Math.Abs(rounded.Amount(context) - expected) <= 1.0e-10,
+                $"amount not consistent with the rounded rate: expected {expected}, calculated "
+                + $"{rounded.Amount(context)}");
+
+            if (rounded.Amount(context) != plain.Amount(context))
+            {
+                anyRoundingApplied = true;
+            }
+        }
+
+        Assert.True(
+            anyRoundingApplied,
+            "all coupon amounts unchanged; rounding precision was not propagated to the overnight leg");
+
+        // the engine prices off the rounded amounts, so the leg NPV
+        // remains consistent with the discounted sum of the cashflows
+        Real calculated = vars.Price(roundedSwap).OvernightLegNPV!.Value;
+        Real expectedNPV = 0.0;
+        foreach (CashFlow cf in roundedSwap.OvernightLeg)
+        {
+            expectedNPV += cf.Amount(context) * vars.EstrTermStructure.Discount(cf.Date);
+        }
+
+        Assert.True(
+            Math.Abs(calculated - expectedNPV) <= 1.0e-10,
+            $"overnight-leg NPV inconsistent with discounted rounded cashflows: NPV {calculated}, discounted sum "
+            + $"{expectedNPV}");
+
+        // MakeOIS solves the ATM rate on the same rounded coupons the
+        // returned swap is built with, so the swap is at market
+        OvernightIndexedSwap atmSwap =
+            vars.MakeSwap(length, null, 0.0, false, null, 0, RateAveragingType.Compound, precision);
+        Real atmNpv = vars.Price(atmSwap).NPV!.Value;
+        Assert.True(Math.Abs(atmNpv) <= 1.0e-10, $"ATM swap with rounding does not price to zero: NPV {atmNpv}");
+
+        // the constructor propagates the rounding precision like MakeOIS
+        var ctorSwap = new OvernightIndexedSwap(
+            SwapType.Payer,
+            vars.Nominal,
+            roundedSwap.FixedSchedule,
+            fixedRate,
+            vars.FixedEstrDayCount,
+            roundedSwap.OvernightSchedule,
+            vars.EstrIndex,
+            0.0,
+            0,
+            BusinessDayConvention.Following,
+            null,
+            false,
+            RateAveragingType.Compound,
+            null,
+            0,
+            false,
+            precision);
+        for (int i = 0; i < ctorSwap.OvernightLeg.Length; ++i)
+        {
+            Real viaCtor = ctorSwap.OvernightLeg[i].Amount(context);
+            Real viaMakeOIS = roundedSwap.OvernightLeg[i].Amount(context);
+            Assert.True(
+                viaCtor == viaMakeOIS,
+                $"constructor and MakeOIS produce different rounded amounts: constructor {viaCtor}, MakeOIS "
+                + $"{viaMakeOIS}");
+        }
+    }
+
+    // Adapted: the evaluation date (line 1269) is the context's.
+    [Fact]
+    public void TestSpotDateFromNonBusinessEvaluationDate()
+    {
+        // Testing that the OIS spot date is calculated from the actual evaluation date when the latter is not a
+        // business day...
+
+        // Saturday
+        Date today = new(20, June, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        var index = new Estr();
+        Calendar calendar = index.FixingCalendar;
+
+        // settlement days are counted from the actual trade date,
+        // not from the next business day
+        Date expectedStart = calendar.Advance(today, 2, TimeUnit.Days);
+
+        OvernightIndexedSwap swap = new MakeOIS(new Period(1, TimeUnit.Years), index)
+            .WithFixedRate(0.03)
+            .WithSettlementDays(2)
+            .ToOvernightIndexedSwap(context);
+
+        Assert.True(
+            swap.StartDate() == expectedStart,
+            $"OIS start date not calculated from the actual evaluation date: expected {expectedStart}, obtained "
+            + $"{swap.StartDate()}");
+    }
+
+    // Adapted: the evaluation date (line 1297) is the context's.
+    [Fact]
+    public void TestSettlementCalendar()
+    {
+        // Testing that the OIS spot date can be calculated on an explicit settlement calendar...
+
+        // 3 July 2026 is a TARGET business day, but a US holiday
+        // (Independence Day observed), so the settlement calendar and the
+        // index fixing calendar diverge between here and the spot date.
+        Date today = new(2, July, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        var index = new Estr();
+        Calendar settlementCalendar = new JointCalendar(new TARGET(), new UnitedStates(UnitedStatesMarket.Settlement));
+
+        Date expectedStart = settlementCalendar.Advance(today, 2, TimeUnit.Days);
+
+        OvernightIndexedSwap swap = new MakeOIS(new Period(1, TimeUnit.Years), index)
+            .WithFixedRate(0.03)
+            .WithSettlementDays(2)
+            .WithSettlementCalendar(settlementCalendar)
+            .ToOvernightIndexedSwap(context);
+
+        Assert.True(
+            swap.StartDate() == expectedStart,
+            $"OIS start date not calculated on the settlement calendar: expected {expectedStart}, obtained "
+            + $"{swap.StartDate()}");
+
+        // sanity check: the two calendars must actually diverge here
+        Assert.True(expectedStart != index.FixingCalendar.Advance(today, 2, TimeUnit.Days));
+    }
+
+    // Adapted: the evaluation date set by the fixture (lines 212-213) is its context; the ESTR term structure, a handle
+    // linked after the index is built on it (lines 206 and 215), becomes the curve the index is built on, and a relink
+    // becomes a copy of the fixture on the new curve; the engine each swap holds (line 171) becomes the pricing of each
+    // swap on that curve, without the settlement date's flows, as withDiscountingTermStructure sets it; the swap index
+    // and its term structure (lines 152-153, 210) are left out, since no ported case reads them.
+    private sealed class CommonVars
+    {
+        public CommonVars()
+            : this(
+                new EvaluationContext { EvaluationDate = new Date(5, February, 2009) },
+                new FlatForward(new Date(5, February, 2009), 0.05, new Actual365Fixed()))
+        {
+        }
+
+        private CommonVars(EvaluationContext context, YieldTermStructure estrTermStructure)
+        {
+            Context = context;
+            Type = SwapType.Payer;
+            SettlementDays = 2;
+            Nominal = 100.0;
+            FixedEstrConvention = BusinessDayConvention.ModifiedFollowing;
+            FloatingEstrConvention = BusinessDayConvention.ModifiedFollowing;
+            FixedEstrPeriod = new Period(1, TimeUnit.Years);
+            FloatingEstrPeriod = new Period(1, TimeUnit.Years);
+            FixedEstrDayCount = new Actual360();
+            EstrTermStructure = estrTermStructure;
+            EstrIndex = new Estr(estrTermStructure);
+            Calendar = EstrIndex.FixingCalendar;
+            Today = context.EvaluationDate;
+            Settlement = Calendar.Advance(Today, SettlementDays, TimeUnit.Days, BusinessDayConvention.Following);
+        }
+
+        public EvaluationContext Context { get; }
+
+        public Date Today { get; }
+
+        public Date Settlement { get; }
+
+        public SwapType Type { get; }
+
+        public Real Nominal { get; }
+
+        public Calendar Calendar { get; }
+
+        public Natural SettlementDays { get; }
+
+        public Period FixedEstrPeriod { get; }
+
+        public Period FloatingEstrPeriod { get; }
+
+        public DayCounter FixedEstrDayCount { get; }
+
+        public BusinessDayConvention FixedEstrConvention { get; }
+
+        public BusinessDayConvention FloatingEstrConvention { get; }
+
+        public Estr EstrIndex { get; }
+
+        public YieldTermStructure EstrTermStructure { get; }
+
+        // The fixture with its curve relinked: the index built on the new curve.
+        public CommonVars Relinked(YieldTermStructure estrTermStructure) => new(Context, estrTermStructure);
+
+        // The fixture with fixings stored.
+        public CommonVars WithFixings(IndexFixings fixings) =>
+            new(Context with { Fixings = fixings }, EstrTermStructure);
+
+        public OvernightIndexedSwap MakeSwap(
+            Period length,
+            Rate? fixedRate,
+            Spread spread,
+            bool telescopicValueDates,
+            Date? effectiveDate = null,
+            Integer paymentLag = 0,
+            RateAveragingType averagingMethod = RateAveragingType.Compound,
+            int? roundingPrecision = null) =>
+            new MakeOIS(length, EstrIndex)
+                .WithFixedRate(fixedRate)
+                .WithEffectiveDate(effectiveDate ?? Settlement)
+                .WithOvernightLegSpread(spread)
+                .WithNominal(Nominal)
+                .WithPaymentLag(paymentLag)
+                .WithDiscountingTermStructure(EstrTermStructure)
+                .WithTelescopicValueDates(telescopicValueDates)
+                .WithAveragingMethod(averagingMethod)
+                .WithRoundingPrecision(roundingPrecision)
+                .ToOvernightIndexedSwap(Context);
+
+        public OvernightIndexedSwapResults Price(OvernightIndexedSwap swap) =>
+            DiscountingSwapEngine.Calculate(swap, Context, EstrTermStructure, includeSettlementDateFlows: false);
+    }
+}

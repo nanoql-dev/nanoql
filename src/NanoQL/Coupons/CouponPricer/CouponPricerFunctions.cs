@@ -9,6 +9,7 @@
 // Partial: the visitor's cases for the CMS, CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS and CMS-spread checks among them), which wait for S-rx and batch 3; the CMS pricer bases CmsCouponPricer and MeanRevertingPricer, which wait for B3.3
 
 using System.Collections.Immutable;
+using NanoQL.Instruments;
 
 namespace NanoQL.Coupons;
 
@@ -44,6 +45,31 @@ public static class CouponPricerFunctions
         }
 
         return result.MoveToImmutable();
+    }
+
+    /// <summary>
+    /// A copy of a built swap, of its own type, with the pricer set on the floating-rate coupons of one of its legs:
+    /// QuantLib's <c>setCouponPricer(swap->leg(j), pricer)</c>, which changes the coupons the swap holds.
+    /// </summary>
+    /// <typeparam name="T">The swap's type.</typeparam>
+    /// <param name="swap">The swap.</param>
+    /// <param name="leg">The leg's index: a fixed-vs-floating swap's floating leg is leg 1.</param>
+    /// <param name="pricer">The pricer.</param>
+    /// <returns>The copy, with the swap's other legs and terms; the given swap is unchanged.</returns>
+    /// <exception cref="ArgumentNullException">The swap is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The leg's index is negative.</exception>
+    /// <exception cref="ArgumentException">The swap has no leg at the index, or a coupon refuses the pricer.</exception>
+    public static T SetCouponPricer<T>(T swap, int leg, FloatingRateCouponPricer? pricer)
+        where T : Swap
+    {
+        ArgumentNullException.ThrowIfNull(swap);
+        ArgumentOutOfRangeException.ThrowIfNegative(leg);
+        if (leg >= swap.NumberOfLegs)
+        {
+            throw new ArgumentException($"leg #{leg} doesn't exist!", nameof(leg));
+        }
+
+        return (T)swap.WithLeg(leg, SetCouponPricer(swap.Legs[leg], pricer));
     }
 
     /// <summary>

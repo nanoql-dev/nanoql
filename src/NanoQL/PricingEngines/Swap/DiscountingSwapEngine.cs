@@ -16,8 +16,10 @@ namespace NanoQL.PricingEngines;
 
 /// <summary>The discounting engine for swaps: it discounts the future cash flows to the curve's reference date.</summary>
 /// <remarks>
-/// A static class: <see cref="Calculate"/> takes the engine's inputs and returns the results, in place of QuantLib's
-/// engine object, whose <c>discountCurve()</c> accessor has no instance to belong to.
+/// A static class: <c>Calculate</c> takes the engine's inputs and returns the results, in place of QuantLib's engine
+/// object, whose <c>discountCurve()</c> accessor has no instance to belong to. Its overloads for
+/// <see cref="FixedVsFloatingSwap"/> and <see cref="OvernightIndexedSwap"/> run the same steps and body and return
+/// those swaps' results records, so a caller needs no cast.
 /// </remarks>
 public static class DiscountingSwapEngine
 {
@@ -44,12 +46,7 @@ public static class DiscountingSwapEngine
         Date? settlementDate = null,
         Date? npvDate = null)
     {
-        ArgumentNullException.ThrowIfNull(swap);
-        ArgumentNullException.ThrowIfNull(context);
-        ArgumentNullException.ThrowIfNull(discountCurve);
-        Date.ThrowIfDefault(settlementDate, nameof(settlementDate));
-        Date.ThrowIfDefault(npvDate, nameof(npvDate));
-
+        CheckArguments(swap, context, discountCurve, settlementDate, npvDate);
         if (swap.IsExpired(context))
         {
             return swap.SetupExpired();
@@ -58,6 +55,88 @@ public static class DiscountingSwapEngine
         swap.Validate();
         SwapResults results = Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate);
         return swap.FetchResults(results);
+    }
+
+    /// <summary>Prices a fixed-vs-floating swap, with the fair rate and spread its results derive.</summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="includeSettlementDateFlows">
+    /// Whether cash flows on the settlement date count; the context's
+    /// <see cref="EvaluationContext.IncludeReferenceDateEvents"/> when <see langword="null"/>.
+    /// </param>
+    /// <param name="settlementDate">The settlement date; the curve's reference date when <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the NPV is given at; the curve's reference date when <see langword="null"/>.</param>
+    /// <returns>The swap's results: the expired results when the swap has expired.</returns>
+    /// <exception cref="ArgumentException">
+    /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
+    /// </exception>
+    /// <exception cref="NanoQLException">A leg fails to price; the message names the leg.</exception>
+    public static FixedVsFloatingSwapResults Calculate(
+        FixedVsFloatingSwap swap,
+        EvaluationContext context,
+        YieldTermStructure discountCurve,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        CheckArguments(swap, context, discountCurve, settlementDate, npvDate);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        SwapResults results = Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate);
+        return swap.FetchResults(results);
+    }
+
+    /// <summary>Prices an overnight-indexed swap, with the fair rate and spread its results derive.</summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="includeSettlementDateFlows">
+    /// Whether cash flows on the settlement date count; the context's
+    /// <see cref="EvaluationContext.IncludeReferenceDateEvents"/> when <see langword="null"/>.
+    /// </param>
+    /// <param name="settlementDate">The settlement date; the curve's reference date when <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the NPV is given at; the curve's reference date when <see langword="null"/>.</param>
+    /// <returns>The swap's results: the expired results when the swap has expired.</returns>
+    /// <exception cref="ArgumentException">
+    /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
+    /// </exception>
+    /// <exception cref="NanoQLException">A leg fails to price; the message names the leg.</exception>
+    public static OvernightIndexedSwapResults Calculate(
+        OvernightIndexedSwap swap,
+        EvaluationContext context,
+        YieldTermStructure discountCurve,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        CheckArguments(swap, context, discountCurve, settlementDate, npvDate);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        SwapResults results = Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate);
+        return swap.FetchResults(results);
+    }
+
+    private static void CheckArguments(
+        Swap swap,
+        EvaluationContext context,
+        YieldTermStructure discountCurve,
+        Date? settlementDate,
+        Date? npvDate)
+    {
+        ArgumentNullException.ThrowIfNull(swap);
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(discountCurve);
+        Date.ThrowIfDefault(settlementDate, nameof(settlementDate));
+        Date.ThrowIfDefault(npvDate, nameof(npvDate));
     }
 
     private static SwapResults Body(

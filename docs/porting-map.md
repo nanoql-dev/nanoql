@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,157 | 153 |
-| partial | 21 | 22 |
-| ported | 96 | 7 |
+| not started | 1,152 | 151 |
+| partial | 21 | 24 |
+| ported | 101 | 7 |
 | replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
@@ -646,7 +646,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `doublebarriertype` | not started |  | no nanoql type: DoubleBarrierType |
 | `equitytotalreturnswap` | not started |  | no nanoql type: EquityTotalReturnSwap |
 | `europeanoption` | not started |  | no nanoql type: EuropeanOption |
-| `fixedvsfloatingswap` | not started |  | no nanoql type: FixedVsFloatingSwap, FixedVsFloatingSwapResults |
+| `fixedvsfloatingswap` | ported | Instruments/FixedVsFloatingSwap.cs, Instruments/FixedVsFloatingSwapResults.cs |  |
 | `floatfloatswap` | not started |  | no nanoql type: FloatFloatSwap, FloatFloatSwapResults |
 | `floatfloatswaption` | not started |  | no nanoql type: FloatFloatSwaption |
 | `forward` | not started |  | no nanoql type: Forward, ForwardTypePayoff |
@@ -662,9 +662,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `makecds` | not started |  | no nanoql type: MakeCreditDefaultSwap |
 | `makecms` | not started |  | no nanoql type: MakeCms |
 | `makemultipleresetsswap` | not started |  | no nanoql type: MakeMultipleResetsSwap |
-| `makeois` | not started |  | no nanoql type: MakeOIS |
+| `makeois` | ported | Instruments/MakeOIS.cs |  |
 | `makeswaption` | not started |  | no nanoql type: MakeSwaption |
-| `makevanillaswap` | not started |  | no nanoql type: MakeVanillaSwap |
+| `makevanillaswap` | ported | Instruments/MakeVanillaSwap.cs |  |
 | `makeyoyinflationcapfloor` | not started |  | no nanoql type: MakeYoYInflationCapFloor |
 | `margrabeoption` | not started |  | no nanoql type: MargrabeOption, MargrabeOptionResults |
 | `multiassetoption` | not started |  | no nanoql type: MultiAssetOption, MultiAssetOptionResults |
@@ -672,7 +672,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `nonstandardswap` | not started |  | no nanoql type: NonstandardSwap, NonstandardSwapResults |
 | `nonstandardswaption` | not started |  | no nanoql type: NonstandardSwaption |
 | `oneassetoption` | not started |  | no nanoql type: OneAssetOption, OneAssetOptionResults |
-| `overnightindexedswap` | not started |  | no nanoql type: OvernightIndexedSwap |
+| `overnightindexedswap` | ported | Instruments/OvernightIndexedSwap.cs, Instruments/OvernightIndexedSwapResults.cs |  |
 | `overnightindexfuture` | not started |  | no nanoql type: OvernightIndexFuture |
 | `partialtimebarrieroption` | not started |  | no nanoql type: PartialBarrierRange, PartialTimeBarrierOption |
 | `payoffs` | not started |  | no nanoql type: NullPayoff, TypePayoff, FloatingTypePayoff, StrikedTypePayoff, PlainVanillaPayoff, PercentageStrikePayoff, AssetOrNothingPayoff, CashOrNothingPayoff, GapPayoff, SuperFundPayoff, SuperSharePayoff |
@@ -691,7 +691,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `twoassetcorrelationoption` | not started |  | no nanoql type: TwoAssetCorrelationOption |
 | `vanillaoption` | not started |  | no nanoql type: VanillaOption |
 | `vanillastorageoption` | not started |  | no nanoql type: VanillaStorageOption |
-| `vanillaswap` | not started |  | no nanoql type: VanillaSwap |
+| `vanillaswap` | ported | Instruments/VanillaSwap.cs |  |
 | `vanillaswingoption` | not started |  | no nanoql type: SwingExercise, VanillaForwardPayoff, VanillaSwingOption |
 | `varianceswap` | not started |  | no nanoql type: VarianceSwap, VarianceSwapResults |
 | `writerextensibleoption` | not started |  | no nanoql type: WriterExtensibleOption |
@@ -2195,7 +2195,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `optionletstripper` | not started |  | 19 cases |
 | `overnightindexedcoupon` | partial | TestSuite/OvernightIndexedCouponTests.cs | 43 of 45 cases; not yet: testOvernightLegNPV, testOvernightLegWithCapsAndFloors |
 | `overnightindexedfundingratehelper` | not started |  | 3 cases |
-| `overnightindexedswap` | not started |  | 25 cases |
+| `overnightindexedswap` | partial | TestSuite/OvernightIndexedSwapTests.cs | 11 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs; not yet: testBaseBootstrap, testBootstrapWithArithmeticAverage, testBootstrapWithTelescopicDates, testBootstrapWithTelescopicDatesAndArithmeticAverage, testBootstrapWithCustomPricer, testBootstrapWithLookbackDays, testBootstrapWithLookbackDaysAndShift, testBootstrapWithLockoutDays, testBootstrapWithLockoutDaysAndShift, testBootstrapRegression, test131BootstrapRegression, testBootstrapWithDifferentCalendars, testMakeOisEndOfMonthRegression2453, testNonstandardSwapConversionPreservesObservationConventions |
 | `pagodaoption` | not started |  | 1 cases |
 | `paralleltestrunner` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `partialtimebarrieroption` | not started |  | 3 cases |
@@ -2227,7 +2227,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `squarerootclvmodel` | not started |  | 3 cases |
 | `stats` | not started |  | 4 cases |
 | `svivolatility` | not started |  | 1 cases |
-| `swap` | not started |  | 15 cases |
+| `swap` | partial | TestSuite/SwapTests.cs | 12 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs; not yet: testInArrears, testFixedTenorInferenceWithTerminationDate, testSpotDateUsesFixingCalendar |
 | `swapforwardmappings` | not started |  | 3 cases |
 | `swaption` | not started |  | 13 cases |
 | `swaptionvolatilitycube` | not started |  | 17 cases |
