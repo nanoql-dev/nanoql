@@ -9,14 +9,17 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// Builds the smile sections that the smile section vector files describe in their inputs, as their generators build
-/// them (<c>tools/vectors/gen/termstructures/volatility/flatsmilesection.py</c>), and the summary the C++ harness gives
-/// of a section a method returns (<c>tools/cxx/src/termstructures/volatility/smilesectionspec.hpp</c>).
+/// them (<c>tools/vectors/gen/termstructures/volatility/flatsmilesection.py</c> and <c>sabrsmilesection.py</c>), and
+/// the summary the C++ harness gives of a section a method returns
+/// (<c>tools/cxx/src/termstructures/volatility/smilesectionspec.hpp</c>).
 /// </summary>
 /// <remarks>
 /// A section is <c>{"type": "FlatSmileSection", "form", ...}</c>, by date with a reference date (<c>"date"</c>), by
 /// date with the evaluation date as its reference date (<c>"floating"</c>, nanoql's
 /// <see cref="FlatSmileSection.Create"/>) or by time (<c>"time"</c>), its day counter null for QuantLib's empty one and
-/// its ATM level null for none; or the C++ harness's own section, <c>{"type": "HarnessSmileSection", ...}</c>.
+/// its ATM level null for none; <c>{"type": "SabrSmileSection", "form", "forward", "sabrParameters", ...}</c> in the
+/// same three forms (<see cref="SabrSmileSection.Create"/> the floating one), its day counter null in the time form;
+/// or the C++ harness's own section, <c>{"type": "HarnessSmileSection", ...}</c>.
 /// </remarks>
 internal static class SmileSectionInputs
 {
@@ -28,6 +31,11 @@ internal static class SmileSectionInputs
     {
         string type = spec.GetProperty("type").GetString()!;
         string form = spec.GetProperty("form").GetString()!;
+        if (type == "SabrSmileSection")
+        {
+            return SabrSectionOf(spec, form, context);
+        }
+
         JsonElement dcSpec = spec.GetProperty("dayCounter");
         DayCounter? dc = dcSpec.ValueKind == JsonValueKind.Null ? null : CashFlowInputs.DayCounterOf(dcSpec);
         double? atmLevel = NullableReal(spec.GetProperty("atmLevel"));
@@ -66,6 +74,34 @@ internal static class SmileSectionInputs
                 shift),
             "floating" => FlatSmileSection.Create(
                 new Date(spec.GetProperty("exerciseDate").GetInt32()), vol, dc!, context, atmLevel, volatilityType, shift),
+            _ => throw new InvalidOperationException($"unknown smile section form '{form}'"),
+        };
+    }
+
+    /// <summary>The SABR smile section a spec of type <c>SabrSmileSection</c> describes.</summary>
+    /// <param name="spec">The spec.</param>
+    /// <param name="form">Its form: <c>"date"</c>, <c>"floating"</c> or <c>"time"</c>.</param>
+    /// <param name="context">The case's evaluation context, from which a floating section takes its reference date.</param>
+    /// <returns>The section.</returns>
+    public static SabrSmileSection SabrSectionOf(JsonElement spec, string form, EvaluationContext context)
+    {
+        double forward = IndexInputs.Real(spec.GetProperty("forward"));
+        double[] parameters = VolatilityInputs.Reals(spec.GetProperty("sabrParameters"));
+        var volatilityType = (VolatilityType)spec.GetProperty("volatilityType").GetInt32();
+        double shift = IndexInputs.Real(spec.GetProperty("shift"));
+        if (form == "time")
+        {
+            return new SabrSmileSection(
+                IndexInputs.Real(spec.GetProperty("exerciseTime")), forward, parameters, shift, volatilityType);
+        }
+
+        DayCounter dc = CashFlowInputs.DayCounterOf(spec.GetProperty("dayCounter"));
+        var d = new Date(spec.GetProperty("exerciseDate").GetInt32());
+        return form switch
+        {
+            "date" => new SabrSmileSection(
+                d, forward, parameters, new Date(spec.GetProperty("referenceDate").GetInt32()), dc, shift, volatilityType),
+            "floating" => SabrSmileSection.Create(d, forward, parameters, context, dc, shift, volatilityType),
             _ => throw new InvalidOperationException($"unknown smile section form '{form}'"),
         };
     }

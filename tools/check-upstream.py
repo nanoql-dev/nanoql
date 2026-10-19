@@ -11,9 +11,10 @@ Usage: .venv\\Scripts\\python -I tools/check-upstream.py <QuantLib v1.44 worktre
     Every Upstream path exists at the pin, and the file sits in the folder, and declares the namespace, that the name
     table (tools/porting-map.json) gives that path. Every test file's namespace names its folder. A test class's
     "// Replaced:" line names cases of its QuantLib test file that it neither ports nor lists as partial, each with
-    a test file that exists under tests/NanoQL.Tests/. Its "// Moved:" line names cases of its QuantLib test file,
-    each with a line that holds code of the case's body at the pin and a test file that exists under
-    tests/NanoQL.Tests/Divergences/.
+    a test file that exists under tests/NanoQL.Tests/. Its "// Not ported:" line names cases of its QuantLib test
+    file that can never port, each with its reason, which it neither ports nor lists as partial or replaced. Its
+    "// Moved:" line names cases of its QuantLib test file, each with a line that holds code of the case's body at the
+    pin and a test file that exists under tests/NanoQL.Tests/Divergences/.
 (3) The QuantLib copyright lines of the named upstream files appear verbatim and in order, a line holding U+FFFD read
     as its fault-free twin in another file the Upstream line names (one with no twin is a red). Every third-party
     block that tools/third-party-notices.txt lists for a named file appears whole, every line in order, in the file's
@@ -195,6 +196,8 @@ class Checker:
                 self.check_test_namespace(path, header)
             if header.replaced:
                 self.check_replaced(path, header)
+            if header.not_ported:
+                self.check_not_ported(path, header)
             if header.moved:
                 self.check_moved(path, header)
             if not header.upstream:
@@ -292,6 +295,34 @@ class Checker:
                 self.error("replaced", f"{path}: Replaced names {case}, which is also on its // Partial: line")
             if not os.path.isfile(os.path.join(self.root, TESTS, test)):
                 self.error("replaced", f"{path}: Replaced names {test}, which doesn't exist under {TESTS}")
+
+    def check_not_ported(self, path, header):
+        """A "// Not ported:" line: cases of the class's QuantLib test file that can never port, each with its reason
+        (a case that exercises only code nanoql doesn't port)."""
+        units = {sources.unit_of(up) for up in header.upstream}
+        if not path.startswith(TEST_SUITE) or len(units) != 1:
+            self.error("not-ported-case", f"{path}: a // Not ported: line belongs on a TestSuite class naming one test "
+                                          "file")
+            return
+        unit = next(iter(units))
+        cases = porting_map.quantlib_side(self.ql).get(unit, {}).get("cases", [])
+        methods = set(porting_map.METHOD.findall(header.text))
+        partial = {c.strip() for c in (header.partial or "").split(",")}
+        replaced = {c for c, _ in header.replaced if c is not None}
+        for case, reason in header.not_ported:
+            if case is None:
+                self.error("not-ported-case", f"{path}: '{reason}' on its // Not ported: line isn't '<case> "
+                                              "(<reason>)'")
+                continue
+            if case not in cases:
+                self.error("not-ported-case", f"{path}: Not ported names {case}, which isn't a case of {unit}.cpp")
+            elif case[0].upper() + case[1:] in methods:
+                self.error("not-ported-case", f"{path}: Not ported names {case}, which is also ported")
+            elif case in partial:
+                self.error("not-ported-case", f"{path}: Not ported names {case}, which is also on its // Partial: line")
+            elif case in replaced:
+                self.error("not-ported-case", f"{path}: Not ported names {case}, which is also on its // Replaced: "
+                                              "line")
 
     def check_moved(self, path, header):
         """A "// Moved:" line: checks of the class's QuantLib cases, each at a line of the case's body at the pin, moved
@@ -620,6 +651,9 @@ UBLAS_PROBE = "src/NanoQL/Boost/Numeric/Ublas/SelfTestMatrixSparseProbe.cs"
 # A committed table that tools/tables/sobolrsg.py generates (6).
 TABLE_FILE = "src/NanoQL/Numerics/RandomNumbers/SobolRsg/Initializers.bin"
 DATES_TESTS = "tests/NanoQL.Tests/TestSuite/DatesTests.cs"
+# A ported test class with a // Not ported: line, and the line.
+OPERATORS_TESTS = "tests/NanoQL.Tests/TestSuite/OperatorsTests.cs"
+OPERATORS_NOT_PORTED = "// Not ported: testConsistency (exercises only deprecated code: DZero and DPlusDMinus, D5)\n"
 # A ported test class with a // Moved: line, and a Divergences/ test whose summary the page carries (7).
 OIS_COUPON_TESTS = "tests/NanoQL.Tests/TestSuite/OvernightIndexedCouponTests.cs"
 NULL_DATE_TESTS = "tests/NanoQL.Tests/Divergences/NullDateTests.cs"
@@ -883,6 +917,25 @@ def perturbations(ql_root, boost_root, tmp):
         ("a // Replaced: line outside a TestSuite class", "replaced", "belongs on a TestSuite class",
          lambda r: edit(r, PROBE, "// Ported to C#",
                         "// Replaced: nullDate (Divergences/NullDateTests.cs)\n// Ported to C#")),
+        ("a // Not ported: line outside a TestSuite class", "not-ported-case",
+         "a // Not ported: line belongs on a TestSuite class",
+         lambda r: edit(r, PROBE, "// Ported to C#", OPERATORS_NOT_PORTED + "// Ported to C#")),
+        ("a not-ported case that isn't a case of the QuantLib file", "not-ported-case",
+         "testConsistencies, which isn't a case of",
+         lambda r: edit(r, OPERATORS_TESTS, "// Not ported: testConsistency (", "// Not ported: testConsistencies (")),
+        ("a not-ported case that is also ported", "not-ported-case", "testTridiagonal, which is also ported",
+         lambda r: edit(r, OPERATORS_TESTS, OPERATORS_NOT_PORTED,
+                        OPERATORS_NOT_PORTED[:-1] + "; testTridiagonal (a ported case)\n")),
+        ("a not-ported case also on the // Partial: line", "not-ported-case",
+         "testConsistency, which is also on its // Partial: line",
+         lambda r: edit(r, OPERATORS_TESTS, OPERATORS_NOT_PORTED,
+                        "// Partial: testConsistency\n" + OPERATORS_NOT_PORTED)),
+        ("a not-ported case also on the // Replaced: line", "not-ported-case",
+         "testConsistency, which is also on its // Replaced: line",
+         lambda r: edit(r, OPERATORS_TESTS, OPERATORS_NOT_PORTED,
+                        "// Replaced: testConsistency (Divergences/NullDateTests.cs)\n" + OPERATORS_NOT_PORTED)),
+        ("a // Not ported: item that isn't '<case> (<reason>)'", "not-ported-case", "isn't '<case> (<reason>)'",
+         lambda r: edit(r, OPERATORS_TESTS, "// Not ported: testConsistency (", "// Not ported: testConsistency, (")),
         ("a // Moved: line naming a missing test file", "moved",
          "Moved names Divergences/NoSuchTests.cs, which doesn't exist under",
          lambda r: edit(r, OIS_COUPON_TESTS, "line 1936 (Divergences/TelescopicValueDatesTests.cs)",

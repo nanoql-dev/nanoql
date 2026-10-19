@@ -217,6 +217,32 @@ public class InterpolatorZeroValueTests
         }
     }
 
+    [Fact]
+    public void SabrZeroValueIsRefused()
+    {
+        // QuantLib's SABR factory has no default constructor.
+        double[] strikes = [0.03, 0.035, 0.04];
+        double[] vols = [0.21, 0.19, 0.2];
+        SABR[] zeros = [default, new SABR(), (new SABR[1])[0]];
+        foreach (SABR zero in zeros)
+        {
+            Assert.Throws<InvalidOperationException>(() => zero.Interpolate(strikes, vols));
+            Assert.Throws<InvalidOperationException>(() => zero.CheckPoints(3));
+        }
+
+        Assert.Throws<InvalidOperationException>(() => Consumer<SABR>(strikes, vols));
+
+        // A factory built with its parameters fits as the interpolation does, its vega weighting off by default.
+        var factory = new SABR(1.0, 0.035, null, 0.5, null, null, false, true, false, false);
+        var fit = (SABRInterpolation)Consumer(strikes, vols, factory);
+        var direct = new SABRInterpolation(strikes, vols, 1.0, 0.035, null, 0.5, null, null, false, true, false, false, false);
+        Assert.Equal((direct.Alpha, direct.Beta, direct.Nu, direct.Rho), (fit.Alpha, fit.Beta, fit.Nu, fit.Rho));
+        Assert.True(SABR.Global);
+        Assert.Equal(1, SABR.RequiredPoints);
+        factory.CheckPoints(1);
+        Assert.Throws<ArgumentException>(() => factory.CheckPoints(0));
+    }
+
     // A consumer generic over the 2-D factory, taking QuantLib's const Interpolator& i = {} as TInterpolator i = default.
     private static Interpolation2D Consumer2D<TInterpolator>(double[] x, double[] y, Matrix z, TInterpolator interpolator = default)
         where TInterpolator : struct, IInterpolator2D =>

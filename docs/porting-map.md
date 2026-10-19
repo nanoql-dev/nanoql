@@ -19,10 +19,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
-| not ported | 165 | 6 |
-| not started | 1,074 | 141 |
-| partial | 17 | 28 |
-| ported | 181 | 13 |
+| not ported | 175 | 6 |
+| not started | 1,057 | 140 |
+| partial | 17 | 27 |
+| ported | 188 | 15 |
 | replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
@@ -856,8 +856,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `loginterpolation` | ported | Numerics/Interpolations/LogInterpolation/FritschButlandLogCubic.cs, Numerics/Interpolations/LogInterpolation/HarmonicLogCubic.cs, Numerics/Interpolations/LogInterpolation/KrugerLog.cs, Numerics/Interpolations/LogInterpolation/KrugerLogCubic.cs, Numerics/Interpolations/LogInterpolation/KrugerLogMixedLinearCubic.cs, Numerics/Interpolations/LogInterpolation/LogCubic.cs, Numerics/Interpolations/LogInterpolation/LogCubicInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/LogInterpolationImpl.cs, Numerics/Interpolations/LogInterpolation/LogLinear.cs, Numerics/Interpolations/LogInterpolation/LogLinearInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogMixedLinearCubic.cs, Numerics/Interpolations/LogInterpolation/LogMixedLinearCubicInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogMixedLinearCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/LogParabolic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogCubic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogMixedLinearCubic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogParabolic.cs | no nanoql type: DefaultLogCubic, DefaultLogMixedLinearCubic |
 | `mixedinterpolation` | ported | Numerics/Interpolations/MixedInterpolation/MixedInterpolationBehavior.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearCubic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearCubicInterpolation.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearCubicNaturalSpline.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearFritschButlandCubic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearKrugerCubic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearMonotonicCubicNaturalSpline.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearMonotonicParabolic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearParabolic.cs |  |
 | `multicubicspline` | not started |  | no nanoql type: MultiCubicSpline |
-| `sabrinterpolation` | not started |  | no nanoql type: SABRInterpolation, SABR |
-| `xabrinterpolation` | not started |  |  |
+| `sabrinterpolation` | ported | Numerics/Interpolations/SabrInterpolation/SABR.cs, Numerics/Interpolations/SabrInterpolation/SABRInterpolation.cs, Numerics/Interpolations/SabrInterpolation/SABRSpecs.cs, Numerics/Interpolations/SabrInterpolation/SABRWrapper.cs |  |
+| `xabrinterpolation` | ported | Numerics/Interpolations/XabrInterpolation/IXabrInterpolation.cs, Numerics/Interpolations/XabrInterpolation/IXabrModelInstance.cs, Numerics/Interpolations/XabrInterpolation/IXabrSpecs.cs, Numerics/Interpolations/XabrInterpolation/XabrFit.cs |  |
 | `zabrinterpolation` | not started |  | no nanoql type: ZabrInterpolation, Zabr |
 
 ### `ql/math/matrixutilities/`
@@ -914,7 +914,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `method` | ported | Numerics/Optimization/OptimizationMethod.cs |  |
 | `problem` | ported | Numerics/Optimization/Problem/Problem.cs, Numerics/Optimization/Problem/ProblemResults.cs, Numerics/Optimization/Problem/ProblemState.cs |  |
 | `projectedconstraint` | ported | Numerics/Optimization/ProjectedConstraint.cs |  |
-| `projectedcostfunction` | not started |  | no nanoql type: ProjectedCostFunction |
+| `projectedcostfunction` | ported | Numerics/Optimization/ProjectedCostFunction.cs |  |
 | `projection` | ported | Numerics/Optimization/Projection.cs |  |
 | `simplex` | ported | Numerics/Optimization/Simplex.cs |  |
 | `simulatedannealing` | not started |  | no nanoql type: SimulatedAnnealing, SimulatedAnnealingScheme |
@@ -993,15 +993,15 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `boundarycondition` | not started |  | no nanoql type: BoundaryCondition, BoundaryConditionSide, NeumannBC, DirichletBC |
 | `bsmoperator` | not ported: deprecated |  |  |
-| `cranknicolson` | not started |  | no nanoql type: CrankNicolson |
-| `dminus` | not started |  | no nanoql type: DMinus |
-| `dplus` | not started |  | no nanoql type: DPlus |
-| `dplusdminus` | not started |  | no nanoql type: DPlusDMinus |
-| `dzero` | not started |  | no nanoql type: DZero |
-| `expliciteuler` | not started |  | no nanoql type: ExplicitEuler |
+| `cranknicolson` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
+| `dminus` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
+| `dplus` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
+| `dplusdminus` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
+| `dzero` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
+| `expliciteuler` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `finitedifferencemodel` | not started |  | no nanoql type: FiniteDifferenceModel |
-| `impliciteuler` | not started |  | no nanoql type: ImplicitEuler |
-| `mixedscheme` | not started |  | no nanoql type: MixedScheme |
+| `impliciteuler` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
+| `mixedscheme` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `operatortraits` | not started |  | no nanoql type: OperatorTraits |
 | `pde` | not ported: deprecated |  |  |
 | `pdebsm` | not ported: deprecated |  |  |
@@ -1762,7 +1762,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `bootstraperror` | not started |  | no nanoql type: BootstrapError |
+| `bootstraperror` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `bootstraphelper` | ported | TermStructures/BootstrapHelper/BootstrapHelperExtensions.cs, TermStructures/BootstrapHelper/BootstrapHelperFunctions.cs, TermStructures/BootstrapHelper/BootstrapHelper{TTermStructure}.cs, TermStructures/BootstrapHelper/IBootstrapHelper.cs, TermStructures/BootstrapHelper/PillarChoice.cs, TermStructures/BootstrapHelper/RelativeDateBootstrapHelper{TTermStructure}.cs |  |
 | `defaulttermstructure` | not started |  | no nanoql type: DefaultProbabilityTermStructure |
 | `globalbootstrap` | partial | TermStructures/GlobalBootstrap/GlobalBootstrap.cs, TermStructures/GlobalBootstrap/IMultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrapContributor.cs | partial: AdditionalBootstrapVariables, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for B6.2 with SimpleQuoteVariables and its user; no nanoql type: AdditionalBootstrapVariables |
@@ -1815,14 +1815,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `atmsmilesection` | not started |  | no nanoql type: AtmSmileSection |
 | `flatsmilesection` | ported | TermStructures/Volatility/FlatSmileSection.cs |  |
 | `gaussian1dsmilesection` | not started |  | no nanoql type: Gaussian1dSmileSection |
-| `interpolatedsmilesection` | not started |  | no nanoql type: InterpolatedSmileSection |
+| `interpolatedsmilesection` | ported | TermStructures/Volatility/InterpolatedSmileSection/CubicInterpolatedSmileSection.cs, TermStructures/Volatility/InterpolatedSmileSection/InterpolatedSmileSection{TInterpolator}.cs, TermStructures/Volatility/InterpolatedSmileSection/LinearInterpolatedSmileSection.cs, TermStructures/Volatility/InterpolatedSmileSection/MonotonicCubicInterpolatedSmileSection.cs, TermStructures/Volatility/InterpolatedSmileSection/SplineCubicInterpolatedSmileSection.cs |  |
 | `kahalesmilesection` | not started |  | no nanoql type: KahaleSmileSection, KahaleSmileSectionCFunction, KahaleSmileSectionAHelper, KahaleSmileSectionSHelper, KahaleSmileSectionSHelper1 |
-| `sabr` | not started |  |  |
+| `sabr` | ported | TermStructures/Volatility/SabrFunctions.cs |  |
 | `sabrinterpolatedsmilesection` | not started |  | no nanoql type: SabrInterpolatedSmileSection |
-| `sabrsmilesection` | not started |  | no nanoql type: SabrSmileSection |
+| `sabrsmilesection` | ported | TermStructures/Volatility/SabrSmileSection.cs |  |
 | `smilesection` | ported | TermStructures/Volatility/SmileSection.cs |  |
 | `smilesectionutils` | not started |  | no nanoql type: SmileSectionUtils |
-| `spreadedsmilesection` | not started |  | no nanoql type: SpreadedSmileSection |
+| `spreadedsmilesection` | ported | TermStructures/Volatility/SpreadedSmileSection.cs |  |
 | `volatilitytype` | ported | TermStructures/Volatility/VolatilityType.cs |  |
 | `zabr` | not started |  | no nanoql type: ZabrModel |
 | `zabrinterpolatedsmilesection` | not started |  | no nanoql type: ZabrInterpolatedSmileSection |
@@ -1920,7 +1920,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `flatforward` | ported | TermStructures/Yield/FlatForward.cs |  |
 | `forwardcurve` | ported | TermStructures/Yield/ForwardCurve/CubicForwardCurve.cs, TermStructures/Yield/ForwardCurve/ForwardCurve.cs, TermStructures/Yield/ForwardCurve/ForwardCurveFormula.cs, TermStructures/Yield/ForwardCurve/InterpolatedForwardCurve{TInterpolator}.cs, TermStructures/Yield/ForwardCurve/LinearForwardCurve.cs |  |
 | `forwardspreadedtermstructure` | not started |  | no nanoql type: ForwardSpreadedTermStructure |
-| `forwardstructure` | not started |  | no nanoql type: ForwardRateStructure |
+| `forwardstructure` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `impliedtermstructure` | not started |  | no nanoql type: ImpliedTermStructure |
 | `interpolatedsimplezerocurve` | ported | TermStructures/Yield/InterpolatedSimpleZeroCurve/InterpolatedSimpleZeroCurveFormula.cs, TermStructures/Yield/InterpolatedSimpleZeroCurve/InterpolatedSimpleZeroCurve{TInterpolator}.cs, TermStructures/Yield/InterpolatedSimpleZeroCurve/SimpleZeroCurve.cs |  |
 | `multipleresetsswaphelper` | not started |  | no nanoql type: MultipleResetsSwapRateHelper |
@@ -2159,8 +2159,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `instruments` | not started |  | 2 cases |
 | `integrals` | not started |  | 21 cases |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
-| `interpolatedsmilesection` | not started |  | 8 cases |
-| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 14 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testSplineErrorOnGaussianValues, testMultiSpline, testForwardFlat, testSabrInterpolation, testSabrGuess, testKernelInterpolation, testKernelInterpolation2D, testBicubicDerivatives, testBicubicUpdate, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testSabrSingleCases, testTransformations, testFlochKennedySabrIsSmoothAroundATM, testLeFlochKennedySabrExample, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testBSplines, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation, testFlatExtrapolation |
+| `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
+| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 19 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testSplineErrorOnGaussianValues, testMultiSpline, testForwardFlat, testKernelInterpolation, testKernelInterpolation2D, testBicubicDerivatives, testBicubicUpdate, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testBSplines, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation, testFlatExtrapolation |
 | `jumpdiffusion` | not started |  | 2 cases |
 | `lazyobject` | not ported: tests LazyObject, which is replaced |  |  |
 | `libormarketmodel` | not started |  | 4 cases |
@@ -2190,7 +2190,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `numericaldifferentiation` | not started |  | 7 cases |
 | `observable` | not ported: tests Observable, which is removed |  |  |
 | `ode` | not started |  | 3 cases |
-| `operators` | partial | TestSuite/OperatorsTests.cs | 1 of 2 cases; not yet: testConsistency |
+| `operators` | ported | TestSuite/OperatorsTests.cs | 1 of 2 cases; not ported: testConsistency (exercises only deprecated code: DZero and DPlusDMinus, D5) |
 | `optimizers` | partial | TestSuite/OptimizersTests.cs | 2 of 10 cases; not yet: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination, testLBFGSB, testLBFGSBActiveBounds, testLBFGSBCoverage, testDifferentialEvolution, testCMAES |
 | `optionletstripper` | not started |  | 19 cases |
 | `overnightindexedcoupon` | ported | TestSuite/OvernightIndexedCouponTests.cs | 45 of 45 cases; moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 to Divergences/TelescopicValueDatesTests.cs; testOvernightLegNPV line 1033 to Divergences/TelescopicValueDatesTests.cs |

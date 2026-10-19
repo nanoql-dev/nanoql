@@ -4,6 +4,7 @@
 #include "termstructures/volatility/smilesectionspec.hpp"
 
 #include <ql/termstructures/volatility/flatsmilesection.hpp>
+#include <ql/termstructures/volatility/sabrsmilesection.hpp>
 #include <ql/utilities/null.hpp>
 
 #include <initializer_list>
@@ -72,10 +73,12 @@ namespace harness::termstructures {
         s.type = std::string(type->get_string());
         s.form = std::string(form->get_string());
         const std::string what = s.type + " (" + s.form + ")";
-        std::vector<const char*> keys{"type", "form", "dayCounter", "atmLevel", "volatilityType", "shift"};
+        std::vector<const char*> keys{"type", "form", "dayCounter", "volatilityType", "shift"};
+        if (s.type != "SabrSmileSection")
+            keys.push_back("atmLevel");
         if (s.form == "date")
             keys.insert(keys.end(), {"exerciseDate", "referenceDate"});
-        else if (s.form == "floating" && s.type == "FlatSmileSection")
+        else if (s.form == "floating" && (s.type == "FlatSmileSection" || s.type == "SabrSmileSection"))
             keys.push_back("exerciseDate");
         else if (s.form == "time")
             keys.push_back("exerciseTime");
@@ -85,6 +88,8 @@ namespace harness::termstructures {
             keys.push_back("volatility");
         else if (s.type == "HarnessSmileSection")
             keys.insert(keys.end(), {"smile", "minStrike", "maxStrike", "overriddenType", "overriddenShift"});
+        else if (s.type == "SabrSmileSection")
+            keys.insert(keys.end(), {"forward", "sabrParameters"});
         else
             throw InvalidParams("unknown smile section " + s.type);
         onlyKeys(o, keys, what);
@@ -99,11 +104,18 @@ namespace harness::termstructures {
         s.hasDayCounter = !dc.is_null();
         if (s.hasDayCounter)
             s.dayCounter = dayCounter(dc);
-        s.atmLevel = real(key(o, "atmLevel", what));
+        if (s.type != "SabrSmileSection")
+            s.atmLevel = real(key(o, "atmLevel", what));
         s.volatilityType = enumeration<VolatilityType>(key(o, "volatilityType", what));
         s.shift = real(key(o, "shift", what));
         if (s.type == "FlatSmileSection") {
             s.volatility = real(key(o, "volatility", what));
+        } else if (s.type == "SabrSmileSection") {
+            s.forward = real(key(o, "forward", what));
+            s.sabrParameters = reals(key(o, "sabrParameters", what));
+            // QuantLib reads the first four unchecked.
+            if (s.sabrParameters.size() < 4)
+                throw InvalidParams(what + " needs at least 4 SABR parameters");
         } else {
             std::vector<Real> smile = reals(key(o, "smile", what));
             if (smile.size() != 3)
@@ -130,6 +142,15 @@ namespace harness::termstructures {
                 return ext::make_shared<HarnessSmileSection>(s.exerciseTime, dc, s.volatilityType, s.shift, s);
             return ext::make_shared<HarnessSmileSection>(makeDate(s.exerciseDate), dc, makeDate(s.referenceDate),
                                                          s.volatilityType, s.shift, s);
+        }
+        if (s.type == "SabrSmileSection") {
+            if (s.form == "time")
+                return ext::make_shared<SabrSmileSection>(s.exerciseTime, s.forward, s.sabrParameters, s.shift,
+                                                          s.volatilityType);
+            // The floating form passes Date(), QuantLib's default reference date.
+            Date referenceDate = s.form == "date" ? makeDate(s.referenceDate) : Date();
+            return ext::make_shared<SabrSmileSection>(makeDate(s.exerciseDate), s.forward, s.sabrParameters,
+                                                      referenceDate, dc, s.shift, s.volatilityType);
         }
         if (s.form == "time")
             return ext::make_shared<FlatSmileSection>(s.exerciseTime, s.volatility, dc, s.atmLevel, s.volatilityType,

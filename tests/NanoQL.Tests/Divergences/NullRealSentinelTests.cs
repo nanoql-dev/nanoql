@@ -178,6 +178,44 @@ public class NullRealSentinelTests
     }
 
     /// <summary>
+    /// An interpolated smile section's ATM level: QuantLib's value constructors wrap it in a <c>SimpleQuote</c>
+    /// (<c>interpolatedsmilesection.hpp:148, 202</c>), whose read refuses the sentinel, "invalid SimpleQuote"
+    /// (<c>simplequote.hpp:63-70</c>), so on the wheel a section built with <c>Null&lt;Real&gt;()</c>, as QuantLib's
+    /// stripped optionlet adapter builds them (<c>strippedoptionletadapter.cpp:60-63</c>), gives its volatilities, 0.18 at
+    /// 3%, while <c>atmLevel()</c>, <c>optionPrice</c>, <c>vega</c>, <c>density</c> and the converted volatility throw
+    /// "invalid SimpleQuote". nanoql's null is no level: <c>AtmLevel()</c> is null, and those members refuse with
+    /// <see cref="SmileSection"/>'s own texts, as for a section with no level. Its ATM level of the sentinel is a level.
+    /// </summary>
+    [Fact]
+    public void AnInterpolatedSmileSectionsAtmLevelOfQuantLibsNullIsALevel()
+    {
+        const double t = 0.25;
+        double[] strikes = [0.02, 0.03, 0.04];
+        double[] stdDevs = [0.2 * Math.Sqrt(t), 0.18 * Math.Sqrt(t), 0.19 * Math.Sqrt(t)];
+
+        var none = new LinearInterpolatedSmileSection(t, strikes, stdDevs, null);
+        Assert.Equal(0.18, none.Volatility(0.03));
+        Assert.Null(none.AtmLevel());
+        Assert.Equal(
+            "smile section must provide atm level to compute option price",
+            Assert.Throws<NanoQLException>(() => none.OptionPrice(0.03)).Message);
+        Assert.Equal(
+            "smile section must provide atm level to compute option vega",
+            Assert.Throws<NanoQLException>(() => none.Vega(0.03)).Message);
+        Assert.Equal(
+            "smile section must provide atm level to compute option price",
+            Assert.Throws<NanoQLException>(() => none.Density(0.03)).Message);
+        Assert.Equal(
+            "smile section must provide atm level to compute converted volatilties",
+            Assert.Throws<NanoQLException>(() => none.Volatility(0.03, VolatilityType.Normal, 0.0)).Message);
+
+        var sentinel = new LinearInterpolatedSmileSection(t, strikes, stdDevs, NullReal);
+        Assert.Equal(NullReal, sentinel.AtmLevel());
+        double price = sentinel.OptionPrice(0.03);
+        Assert.True(double.IsFinite(price) && price > 0.999 * NullReal, $"price {price}");
+    }
+
+    /// <summary>
     /// A swaption builder's strike: QuantLib's <c>MakeSwaption</c> takes <c>strike = Null&lt;Rate&gt;()</c> by default
     /// and reads a strike equal to the sentinel as none (<c>makeswaption.cpp:80</c>), striking the swaption at the money,
     /// 0.03047147232859789 for these inputs. nanoql's strike of the sentinel is a strike: the underlying's fixed rate.

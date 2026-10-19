@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/operators.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testConsistency, which waits for B6.2's DZero and DPlusDMinus
+// Not ported: testConsistency (exercises only deprecated code: DZero and DPlusDMinus, D5)
 
 using NanoQL.Methods;
 using NanoQL.Numerics;

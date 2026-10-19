@@ -387,6 +387,16 @@ Facts:
 - `AGuessShorterThanTheCurvesPillarsIsRefused`
 - `ALongerGuessUnderTheSimpleZeroTraitsIsRefused`
 
+## InterpolatedSmileSectionCountTests
+
+[`Divergences/InterpolatedSmileSectionCountTests.cs`](../tests/NanoQL.Tests/Divergences/InterpolatedSmileSectionCountTests.cs)
+
+An interpolated smile section given more strikes than standard deviations. QuantLib sizes its volatilities by the standard deviations and interpolates over the strikes' count of them (`interpolatedsmilesection.hpp:117, 124-125`), reading past the volatilities: over strikes 1%, 2%, 3% and 4% with standard deviations 0.4 and 0.3, the wheel's linear section gives 0.14999999999999994 at 2.5% and 0.0 at 3.5%, memory past the vector. nanoql refuses more strikes than standard deviations with `ArgumentException`, and keeps QuantLib's behaviour for fewer, ignoring the extra standard deviations.
+
+Facts:
+
+- `MoreStrikesThanStandardDeviationsAreRefused`
+
 ## Interpolation2DSizeTests
 
 [`Divergences/Interpolation2DSizeTests.cs`](../tests/NanoQL.Tests/Divergences/Interpolation2DSizeTests.cs)
@@ -470,6 +480,7 @@ Facts:
 - `AGlobalBootstrapsAccuracyOfQuantLibsNullIsAValue`
 - `AnImpliedStandardDeviationsGuessOfQuantLibsNullIsAGuess`
 - `ASmileSectionsAtmLevelOfQuantLibsNullIsALevel`
+- `AnInterpolatedSmileSectionsAtmLevelOfQuantLibsNullIsALevel`
 - `ASwaptionBuildersStrikeOfQuantLibsNullIsAStrike`
 - `ABondsAtmRatePriceOfQuantLibsNullIsAPrice`
 - `ALegsAtmRateTargetOfQuantLibsNullIsATarget`
@@ -604,6 +615,46 @@ Facts:
 
 - `APrecisionOutsideZeroToSixteenIsRefused`
 
+## SabrGuessNonFiniteTests
+
+[`Divergences/SabrGuessNonFiniteTests.cs`](../tests/NanoQL.Tests/Divergences/SabrGuessNonFiniteTests.cs)
+
+Le Floc'h and Kennedy's SABR guess on a non-finite argument. QuantLib computes on it (`sabr.cpp:289-385`): a NaN or infinite volatility makes the smile's moments NaN, ν NaN, and ρ the sign of a NaN through `boost::math::sign` (`sabr.cpp:332, 365`), which reads the NaN's sign bit, so it depends on which NaN an operation keeps, and the compiler's choice and .NET's differ on some inputs. On strikes 3%, 3% and 4% around a forward of 3.5%, with a NaN first volatility, the wheel gives α NaN, β 0.5, ν NaN and ρ 1; with an infinite third volatility, α NaN, β 0.5, ν NaN and ρ −1. None of them is a guess a caller can use, so nanoql refuses a non-finite argument with `ArgumentException` naming it.
+
+Facts:
+
+- `ANonFiniteArgumentIsRefused`
+
+## SabrSmileSectionParameterTests
+
+[`Divergences/SabrSmileSectionParameterTests.cs`](../tests/NanoQL.Tests/Divergences/SabrSmileSectionParameterTests.cs)
+
+A SABR smile section given fewer than four parameters. QuantLib reads α, β, ν and ρ from the vector unchecked (`sabrsmilesection.cpp:52-55`): with three, the wheel's ρ is −2.654651770048e-310, memory past the vector; with none, the process ends with an access violation. nanoql refuses fewer than four with `ArgumentException`, in the text of QuantLib's no-arbitrage SABR section's check (`noarbsabrsmilesection.cpp:46-48`).
+
+Facts:
+
+- `FewerThanFourParametersAreRefused`
+
+## SabrVolatilityTypeTests
+
+[`Divergences/SabrVolatilityTypeTests.cs`](../tests/NanoQL.Tests/Divergences/SabrVolatilityTypeTests.cs)
+
+A volatility type outside `VolatilityType`. QuantLib's SABR functions and the SABR fit take any value other than `Normal` as lognormal (`sabr.cpp:87, 142`), while `SmileSection::optionPrice` takes any value other than `ShiftedLognormal` as Bachelier's (`smilesection.cpp:84-88`): on the wheel, type 2 gives the SABR volatility 1.125831262004863 at a strike of 4% on a forward of 3.5%, the lognormal one, and a SABR section of type 2 prices a call there at 0.4466461204232711, Bachelier's price on that lognormal volatility, where the lognormal section's is 0.013594842378425748. nanoql refuses the value on entry with `ArgumentOutOfRangeException`, as its other members taking an enum do.
+
+Facts:
+
+- `AnUnknownVolatilityTypeIsRefused`
+
+## SabrZeroSmileTests
+
+[`Divergences/SabrZeroSmileTests.cs`](../tests/NanoQL.Tests/Divergences/SabrZeroSmileTests.cs)
+
+A smile of zero volatilities fitted with vega weights. Every strike's vega weight is 0, and QuantLib normalizes the weights by their zero sum (`xabrinterpolation.hpp:144-160`): the weights are NaN, every cost the optimizer sees is NaN, and the fit returns the round-tripped guess with a NaN root-mean-square error, a finite maximum error and no end criteria. On 31 strikes from 3% to 9% and a forward of 3.9%, the wheel's fit keeps α 0.4472135954999579, β 0.5000000000000001, ν 0.6324555320336759 and ρ 0, a volatility of 2.4439735411535746 at 4%. nanoql refuses the smile with `ArgumentException`, "vega weights are all zero".
+
+Facts:
+
+- `AZeroSmileWithVegaWeightsIsRefused`
+
 ## SeedZeroTests
 
 [`Divergences/SeedZeroTests.cs`](../tests/NanoQL.Tests/Divergences/SeedZeroTests.cs)
@@ -688,6 +739,16 @@ Facts:
 
 - `SkipToTheLastIndexIsRefusedWithTheGrayCode`
 - `TheDrawThatWouldReachTheLastCounterThrowsWithTheGrayCode`
+
+## SpreadedSmileSectionTypeTests
+
+[`Divergences/SpreadedSmileSectionTypeTests.cs`](../tests/NanoQL.Tests/Divergences/SpreadedSmileSectionTypeTests.cs)
+
+The converted volatility of a spreaded smile section. QuantLib's `SpreadedSmileSection` default-constructs its `SmileSection` base (`spreadedsmilesection.cpp:26-31`), so the base's `volatility(strike, type, shift)` compares the type asked for with an uninitialized member (`smilesection.cpp:131-136`), and the section returns its own volatility or one converted through option prices by chance, observed both ways. nanoql's spreaded section gives its base the underlying section's exercise time, day counter, volatility type and shift, so the comparison reads the underlying's type: asked for its own type and shift, it returns its own volatility.
+
+Facts:
+
+- `TheConvertedVolatilityComparesTheUnderlyingsType`
 
 ## StatePriceCacheTests
 
@@ -857,6 +918,16 @@ A weighted index with a null component. QuantLib's `StubIborCoupon::WeightedInde
 Facts:
 
 - `ANullComponentIsRefusedBeforeItIsRead`
+
+## XabrTransformEdgeTests
+
+[`Divergences/XabrTransformEdgeTests.cs`](../tests/NanoQL.Tests/Divergences/XabrTransformEdgeTests.cs)
+
+XABR's parameter transforms at their edges. QuantLib's SABR inverse transform doesn't clamp its arguments (`sabrinterpolation.hpp:103-114`): a ρ beyond 0.9999 takes `asin` of a value above 1, a NaN that the direct transform turns into −0.9999, so a fixed ρ of 0.99995 comes back as −0.9999, its sign flipped, and a free guess of 0.99995 fails the fit with "alpha must be positive: nan not allowed"; an α or ν below 1e-7, ν = 0 included, takes the square root of a negative number, a NaN the fit refuses ("alpha must be positive: nan not allowed", "nu must be non negative: nan not allowed"). nanoql's inverse clamps each argument to its direct transform's range, so such an input comes back as the nearest value the transform reaches, bit for bit: ρ = 0.9999, ν = 1e-7, and the fixed β of 0.6. The fits from those values are the wheel's fits from them. Two of them are well posed and agree within the vectors' tolerance; the three that pin a parameter at an edge can't reproduce the smile, so their optimum is flat: when the input volatilities move by one ulp, their free parameters move by up to 2.4e-3 in S7R6's measure, at the vectors' scale of 1, which is up to 24% of the small ones' own values. Those are asserted within 1e-2 in that measure.
+
+Facts:
+
+- `SabrsEdgesComeBackAsTheTransformsNearestValues`
 
 ## ZeroGearingWithoutDayCounterTests
 

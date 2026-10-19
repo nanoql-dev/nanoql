@@ -19,6 +19,8 @@ COPYRIGHT = re.compile(r"Copyright\s*\(\w\)")
 NANOQL = re.compile(r"\d{4} The nanoql Authors")
 # A "// Replaced:" item: a QuantLib test case and the nanoql test file, under tests/NanoQL.Tests/, replacing it.
 REPLACED = re.compile(r"(\w+)\s+\(([^()]+)\)")
+# A "// Not ported:" item: a QuantLib test case that can never port, and the reason.
+NOT_PORTED = re.compile(r"(\w+)\s+\(([^()]+)\)")
 # A "// Moved:" item: a QuantLib test case, the line of its check moved to a Divergences/ test, and that test's file,
 # under tests/NanoQL.Tests/.
 MOVED = re.compile(r"(\w+)\s+line\s+(\d+)\s+\(([^()]+)\)")
@@ -63,6 +65,7 @@ class Header:
         self.pin = None
         self.partial = self.own_tested = self.equality_tested = None
         self.replaced = []  # (case, test file), or (None, the item) for one that doesn't parse
+        self.not_ported = []  # (case, reason), or (None, the item) for one that doesn't parse
         self.moved = []  # (case, line, test file), or (None, None, the item) for one that doesn't parse
         for line in self.lines:
             if line.startswith("SPDX-FileCopyrightText:"):
@@ -82,6 +85,10 @@ class Header:
                 for item in line[len("Replaced:"):].split(";"):
                     m = REPLACED.fullmatch(item.strip())
                     self.replaced.append((m.group(1), m.group(2).strip()) if m else (None, item.strip()))
+            elif line.startswith("Not ported:"):
+                for item in line[len("Not ported:"):].split(";"):
+                    m = NOT_PORTED.fullmatch(item.strip())
+                    self.not_ported.append((m.group(1), m.group(2).strip()) if m else (None, item.strip()))
             elif line.startswith("Moved:"):
                 for item in line[len("Moved:"):].split(";"):
                     m = MOVED.fullmatch(item.strip())
