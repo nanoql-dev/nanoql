@@ -30,6 +30,17 @@ Facts:
 
 - `ANullBMAIndexIsRefusedWithQuantLibsText`
 
+## BlackCallableEngineTests
+
+[`Divergences/BlackCallableEngineTests.cs`](../tests/NanoQL.Tests/Divergences/BlackCallableEngineTests.cs)
+
+The Black engine on a bond whose one callability has occurred, and the option-adjusted spread through the Black engine. QuantLib's engine checks that the full schedule holds one callability, then reads the first of the live ones, those after the settlement date (`blackcallablebondengine.cpp:127-133`): when the one callability has occurred, that list is empty, and QuantLib reads past its end, which is undefined (the wheel read indeterminate memory, and happened to refuse "must have exercise Date >= settlement Date"). nanoql refuses with that text. The Black engine reads no spread (`blackcallablebondengine.cpp:125-175`), so the spread for a clean price can't be bracketed: a defined path, kept as QuantLib's, where the solver refuses "unable to bracket root".
+
+Facts:
+
+- `AnOccurredCallabilityIsRefusedWithQuantLibsText`
+- `TheOASThroughTheBlackEngineCantBeBracketed`
+
 ## BlackFormulaNullPayoffTests
 
 [`Divergences/BlackFormulaNullPayoffTests.cs`](../tests/NanoQL.Tests/Divergences/BlackFormulaNullPayoffTests.cs)
@@ -133,6 +144,27 @@ A null helper among a calibration's. QuantLib's `calibrate` and `value` take a v
 Facts:
 
 - `ANullHelperIsRefused`
+
+## CallabilityTypeAfterSettledCallabilityTests
+
+[`Divergences/CallabilityTypeAfterSettledCallabilityTests.cs`](../tests/NanoQL.Tests/Divergences/CallabilityTypeAfterSettledCallabilityTests.cs)
+
+A callable bond's live callabilities after one on or before the settlement date, of the other type. QuantLib 1.44 keeps the dates and prices of the live callabilities only (`callablebond.cpp:448-452`), but its tree applies the i-th of them by the type of the i-th entry of the whole schedule (`discretizedcallablefixedratebond.cpp:179`), so after a settled put a live call is applied as a put, and after a settled call a live put as a call. QuantLib fixed it after v1.44 (issue #2871, PR #2875, commit `20c2d3ac6`), keeping each live callability's type with its date and price, and nanoql fixes it as QuantLib does. This is upstream's `testCallabilityTypeAfterSettledCallability`: on testCached's bond, the price with the settled callability ahead equals the price without it, where QuantLib 1.44 prices the settled put ahead of the calls at 106.0716945553609 for 102.76445466543099, and the settled call ahead of the puts at 102.90405256617298 for 114.89193072303775. The class retires, and the case joins `CallableBondsTests`, when the pin moves to a release with the fix.
+
+Facts:
+
+- `ASettledCallabilityLeavesTheLiveOnesTypesAlone`
+
+## CallableBondScheduleTests
+
+[`Divergences/CallableBondScheduleTests.cs`](../tests/NanoQL.Tests/Divergences/CallableBondScheduleTests.cs)
+
+A callable bond on an empty coupon schedule, and a put/call schedule holding a null callability. QuantLib's `CallableFixedRateBond` passes its base the schedule's last date unchecked (`schedule.dates().back()`, `callablebond.cpp:499`), past the end of an empty vector, which is undefined: the wheel ends the process (0xC0000005), where `FixedRateBond`, which reads the schedule's `endDate()`, refuses "empty Schedule: no end date". nanoql reads `Schedule.EndDate` and refuses with that text. QuantLib's base constructor reads each callability's date to find the last one (`callablebond.cpp:43-50`), dereferencing a null one; nanoql refuses it with `ArgumentException`, naming the schedule.
+
+Facts:
+
+- `AnEmptyScheduleIsRefusedWithTheSchedulesOwnText`
+- `ANullCallabilityIsRefusedAtConstruction`
 
 ## CappedFlooredCouponNullUnderlyingTests
 
@@ -258,6 +290,16 @@ Facts:
 - `AnIndexOutOfRangeIsRefused`
 - `ASwaptionOnAnExerciseWithNoDatesIsRefusedWhereItsDateIsRead`
 
+## ExpiredCallableBondSpreadTests
+
+[`Divergences/ExpiredCallableBondSpreadTests.cs`](../tests/NanoQL.Tests/Divergences/ExpiredCallableBondSpreadTests.cs)
+
+The option-adjusted spread family on an expired callable bond. QuantLib's `NPVSpreadHelper` sets the bond's arguments up and calls its engine's `calculate()` directly (`callablebond.cpp:262-277`), which skips `Instrument::calculate`'s expiry check (`instrument.hpp:130-139`), so the family prices an expired bond's arguments. On a bond called at 100 in September 2019 and maturing on 9 June 2025, evaluated on 16 September 2030, with Hull-White on a flat 3% curve dated 2 January 2020 and 40 steps, the wheel gives an OAS of inf for a clean price of 100, a clean price of inf for a spread of 0.01, and an effective duration and convexity of NaN. nanoql's family takes the engine as its `Calculate`, whose first step is the expiry check: the expired bond gets its expired results, an NPV of 0, so the OAS is the solver's guess, 0 (the dirty target is 0, the notional being 0), the clean price is 0 over a notional of 0, NaN, and the duration and convexity are NaN.
+
+Facts:
+
+- `AnExpiredBondsSpreadFamilyReadsItsExpiredResults`
+
 ## ExtrapolatorCopyTests
 
 [`Divergences/ExtrapolatorCopyTests.cs`](../tests/NanoQL.Tests/Divergences/ExtrapolatorCopyTests.cs)
@@ -300,6 +342,16 @@ A custom futures helper built from dates with no end date keeps a null maturity,
 Facts:
 
 - `ACustomFuturesHelperWithNoEndDateRefusesItsImpliedQuote`
+
+## GridEngineSpreadTests
+
+[`Divergences/GridEngineSpreadTests.cs`](../tests/NanoQL.Tests/Divergences/GridEngineSpreadTests.cs)
+
+The tree engine's spread on a lattice reused across calls. QuantLib's time-grid engine builds its tree once and keeps it (`latticeshortratemodelengine.hpp:80-95`), and sets a spread on it only when the spread isn't 0 (`treecallablebondengine.cpp:69-74`), so the solver's last trial spread stays on the tree: on testCached's callable bond with an 80-step grid through its mandatory times, after a clean price at a spread, the wheel's OAS for a clean price of 104 is 0.0, where its time-steps engine gives 0.011561251367301573, and its NPV after the OAS is 11205.506593769049, against 11205.506591750021 before. nanoql's lattices are immutable and its engines hold nothing: the lattice overload, given one tree for every call, and the grid overload price at the spread each call is given, so the grid engine's OAS is the time-steps engine's, and the NPV after it is the NPV before.
+
+Facts:
+
+- `ASharedLatticeKeepsNoSpreadAcrossCalls`
 
 ## IborNegativeCountTests
 

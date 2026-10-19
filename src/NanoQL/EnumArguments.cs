@@ -332,4 +332,20 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, "unknown price type");
         }
     }
+
+    /// <summary>Refuses a callability type outside <see cref="CallabilityType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>
+    /// QuantLib stores any value and refuses it where the callable bond's tree applies it: its text is that refusal's
+    /// (<c>discretizedcallablefixedratebond.cpp:191</c>).
+    /// </remarks>
+    internal static void Check(CallabilityType value, string paramName)
+    {
+        if (value is not (CallabilityType.Call or CallabilityType.Put))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown callability type");
+        }
+    }
 }

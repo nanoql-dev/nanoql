@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,081 | 142 |
-| partial | 16 | 28 |
-| ported | 175 | 12 |
+| not started | 1,074 | 141 |
+| partial | 17 | 28 |
+| ported | 181 | 13 |
 | replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
@@ -185,12 +185,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `blackcallablebondengine` | not started |  | no nanoql type: BlackCallableFixedRateBondEngine, BlackCallableZeroCouponBondEngine |
-| `callablebond` | not started |  | no nanoql type: CallableBond, CallableBondResults, CallableFixedRateBond, CallableZeroCouponBond |
-| `callablebondconstantvol` | not started |  | no nanoql type: CallableBondConstantVolatility |
-| `callablebondvolstructure` | not started |  | no nanoql type: CallableBondVolatilityStructure |
-| `discretizedcallablefixedratebond` | not started |  | no nanoql type: DiscretizedCallableFixedRateBond |
-| `treecallablebondengine` | not started |  | no nanoql type: TreeCallableFixedRateBondEngine, TreeCallableZeroCouponBondEngine |
+| `blackcallablebondengine` | ported | Experimental/CallableBonds/BlackCallableFixedRateBondEngine.cs, Experimental/CallableBonds/BlackCallableZeroCouponBondEngine.cs |  |
+| `callablebond` | ported | Experimental/CallableBonds/CallableBond/CallableBond.cs, Experimental/CallableBonds/CallableBond/CallableBondArguments.cs, Experimental/CallableBonds/CallableBond/CallableBondResults.cs, Experimental/CallableBonds/CallableBond/CallableFixedRateBond.cs, Experimental/CallableBonds/CallableBond/CallableZeroCouponBond.cs |  |
+| `callablebondconstantvol` | ported | Experimental/CallableBonds/CallableBondConstantVolatility.cs |  |
+| `callablebondvolstructure` | partial | Experimental/CallableBonds/CallableBondVolatilityStructure.cs | partial: the constructor for a structure that manages its own reference date, (dc, bdc), which no QuantLib 1.44 class uses and which waits for its first user |
+| `discretizedcallablefixedratebond` | ported | Experimental/CallableBonds/DiscretizedCallableFixedRateBond.cs |  |
+| `treecallablebondengine` | ported | Experimental/CallableBonds/TreeCallableFixedRateBondEngine.cs, Experimental/CallableBonds/TreeCallableZeroCouponBondEngine.cs |  |
 
 ### `ql/experimental/catbonds/`
 
@@ -627,7 +627,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bmaswap` | ported | Instruments/BMASwap.cs, Instruments/BMASwapResults.cs |  |
 | `bond` | ported | Instruments/Bond/Bond.cs, Instruments/Bond/BondPrice.cs, Instruments/Bond/BondPriceType.cs, Instruments/Bond/BondResults.cs |  |
 | `bondforward` | not started |  | no nanoql type: BondForward |
-| `callabilityschedule` | not started |  | no nanoql type: Callability, CallabilityType, CallabilitySchedule |
+| `callabilityschedule` | ported | Instruments/CallabilitySchedule/Callability.cs, Instruments/CallabilitySchedule/CallabilityType.cs | no nanoql type: CallabilitySchedule |
 | `capfloor` | not started |  | no nanoql type: CapFloor, CapFloorType, Cap, Floor, Collar |
 | `claim` | not started |  | no nanoql type: Claim, FaceValueClaim, FaceValueAccrualClaim |
 | `cliquetoption` | not started |  | no nanoql type: CliquetOption |
@@ -2084,7 +2084,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
 | `businessdayconventions` | not started |  | 1 cases |
 | `calendars` | partial | TestSuite/CalendarsTests.cs | 16 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
-| `callablebonds` | not started |  | 14 cases |
+| `callablebonds` | ported | TestSuite/CallableBondsTests.cs | 14 of 14 cases; replaced: testObservability by Vectors/Experimental/CallableBonds/CallableBondVectorTests.cs |
 | `capfloor` | not started |  | 10 cases |
 | `capflooredcoupon` | partial | TestSuite/CapFlooredCouponTests.cs | 1 of 2 cases; not yet: testDecomposition |
 | `cashflows` | partial | TestSuite/CashFlowsTests.cs | 10 of 16 cases; not yet: testAccessViolation, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices |

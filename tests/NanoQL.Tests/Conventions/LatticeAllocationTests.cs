@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Models;
@@ -17,7 +19,8 @@ namespace NanoQL.Tests.Conventions;
 /// where QuantLib allocates an array per step. The grid is non-uniform, with two short mandatory steps, so the tree is
 /// wider at an earlier time than at the asset's initial one, and buffers sized at the initial step would grow. A
 /// Bermudan swaption's swap keeps one discount bond for its coupon events, where QuantLib's builds one per event, its
-/// buffers reserved at the widest step of the swap's own rollback.
+/// buffers reserved at the widest step of the swap's own rollback. The callable bond's rollback, its callabilities
+/// applied and its coupons added in place, allocates nothing either.
 /// </summary>
 public class LatticeAllocationTests
 {
@@ -101,6 +104,45 @@ public class LatticeAllocationTests
 
         // the tree engine's value on the same lattice
         Assert.Equal(TreeSwaptionEngine.Calculate(swaption, context, model, lattice).NPV, asset.PresentValue());
+    }
+
+    [Fact]
+    public void ACallableBondsRollbackAllocatesNothing()
+    {
+        var context = new EvaluationContext { EvaluationDate = new Date(15, Month.January, 2026) };
+        var calendar = new TARGET();
+        var issue = new Date(15, Month.January, 2026);
+        Schedule schedule = new MakeSchedule().From(issue).To(new Date(15, Month.January, 2031))
+            .WithCalendar(calendar).WithFrequency(Frequency.Semiannual).WithConvention(BusinessDayConvention.Following)
+            .WithRule(DateGenerationRule.Backward).ToSchedule();
+
+        // calls on coupon dates, and a put three days before one, which the asset moves to it
+        ImmutableArray<Callability> exercises =
+        [
+            .. Enumerable.Range(1, 4).Select(i => new Callability(
+                new BondPrice(101.0, BondPriceType.Clean), CallabilityType.Call, schedule.Date(2 * i))),
+            new Callability(new BondPrice(97.0, BondPriceType.Dirty), CallabilityType.Put, schedule.Date(5) - 3),
+        ];
+        var bond = new CallableFixedRateBond(
+            2, 100.0, schedule, [0.045], new Thirty360(Thirty360Convention.BondBasis), BusinessDayConvention.Following,
+            100.0, issue, exercises);
+
+        var model = new HullWhite(Curve, 0.1, 0.01);
+        var warm = new DiscretizedCallableFixedRateBond(bond, Curve, context);
+        Lattice lattice = model.Tree(new TimeGrid(warm.MandatoryTimes().AsSpan(), 40));
+        double redemptionTime = Curve.DayCounter.YearFraction(Curve.ReferenceDate, bond.Redemption().Date);
+        warm.Initialize(lattice, redemptionTime);
+        warm.Rollback(0.0);
+
+        var asset = new DiscretizedCallableFixedRateBond(bond, Curve, context);
+        asset.Initialize(lattice, redemptionTime);
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        asset.Rollback(0.0);
+        Assert.Equal(before, GC.GetAllocatedBytesForCurrentThread());
+
+        // the asset the engine rolls back on that lattice
+        Assert.Equal(
+            TreeCallableFixedRateBondEngine.Calculate(bond, context, model, lattice).NPV, asset.PresentValue());
     }
 
     private static OneFactorModelShortRateTree Tree()
