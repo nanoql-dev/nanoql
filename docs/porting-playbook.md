@@ -261,7 +261,7 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `RelativeDateBootstrapHelper<TTermStructure>`, `RateHelper`, `RelativeDateRateHelper` and `ZeroYieldStructure`
   (abstract); `Swap`,
   `SimpleCashFlow`, `InstrumentResults`, `SwapResults`, `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`,
-  `IborIndex`, `OvernightIndex`, `Euribor`, `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`,
+  `IborIndex`, `OvernightIndex`, `Euribor`, `SwapIndex`, `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`,
   `CappedFlooredCoupon`, `BlackIborCouponPricer`, `CompoundingOvernightIndexedCouponPricer`,
   `ArithmeticAveragedOvernightIndexedCouponPricer`, `TridiagonalOperator`, `CubicInterpolation`,
   `LogCubicInterpolation`, `MixedLinearCubicInterpolation`, `LogMixedLinearCubicInterpolation`,

@@ -10,8 +10,9 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// A rate helper given a null index is refused on entry, naming the parameter. QuantLib's helpers dereference their
 /// index before any check (<c>ratehelpers.cpp:198, 206</c> for the deposit helper, <c>:533</c> for the swap helper,
-/// <c>:148</c> for the futures helper, <c>:312, 332, 350</c> for the FRA helper, <c>oisratehelper.cpp:114</c> for the
-/// OIS helper), a result C++ leaves undefined; the wheel stops on Boost's assertion.
+/// <c>:148</c> for the futures helper, <c>:312, 332, 350</c> for the FRA helper, <c>:469</c> for the swap helper on a
+/// swap index, <c>:688, 694</c> for the BMA swap helper, <c>oisratehelper.cpp:114</c> for the OIS helper), a result
+/// C++ leaves undefined; the wheel stops on Boost's assertion.
 /// </summary>
 public class RateHelperNullIndexTests
 {
@@ -49,6 +50,35 @@ public class RateHelperNullIndexTests
                 Frequency.Annual,
                 BusinessDayConvention.Unadjusted,
                 thirty360,
+                null!,
+                context)).ParamName);
+        Assert.Equal(
+            "swapIndex",
+            Assert.Throws<ArgumentNullException>(() => new SwapRateHelper(0.03, (SwapIndex)null!, context)).ParamName);
+        Assert.Equal(
+            "bmaIndex",
+            Assert.Throws<ArgumentNullException>(() => new BMASwapRateHelper(
+                0.7,
+                new Period(2, TimeUnit.Years),
+                2,
+                new UnitedStates(UnitedStatesMarket.GovernmentBond),
+                new Period(1, TimeUnit.Weeks),
+                BusinessDayConvention.Following,
+                null,
+                null!,
+                new Euribor3M(),
+                context)).ParamName);
+        Assert.Equal(
+            "index",
+            Assert.Throws<ArgumentNullException>(() => new BMASwapRateHelper(
+                0.7,
+                new Period(2, TimeUnit.Years),
+                2,
+                new UnitedStates(UnitedStatesMarket.GovernmentBond),
+                new Period(1, TimeUnit.Weeks),
+                BusinessDayConvention.Following,
+                null,
+                new BMAIndex(),
                 null!,
                 context)).ParamName);
     }

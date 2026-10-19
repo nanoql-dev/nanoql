@@ -10,6 +10,16 @@ Every documented divergence from QuantLib v1.44, one entry per test class under
 `tools/divergences.py`: regenerate it with `.venv\Scripts\python -I tools/divergences.py` rather than
 editing it by hand.
 
+## BMANullIndexTests
+
+[`Divergences/BMANullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/BMANullIndexTests.cs)
+
+A null BMA index is refused on entry, with QuantLib's text for a missing index, "no index provided" (`floatingratecoupon.cpp:52`), naming the parameter. QuantLib's `AverageBMACoupon` reads its index's fixing days before its base checks the index (`averagebmacoupon.cpp:111-113`), `AverageBMALeg` never checks it (`:165-166`) and its coupons then read it, and `BMASwap` passes it to its BMA leg (`bmaswap.cpp:55-58`): results C++ leaves undefined, where the wheel stops on Boost's assertion.
+
+Facts:
+
+- `ANullBMAIndexIsRefusedWithQuantLibsText`
+
 ## BootstrapNullHelperTests
 
 [`Divergences/BootstrapNullHelperTests.cs`](../tests/NanoQL.Tests/Divergences/BootstrapNullHelperTests.cs)
@@ -131,11 +141,12 @@ Facts:
 
 [`Divergences/EmptyScheduleTests.cs`](../tests/NanoQL.Tests/Divergences/EmptyScheduleTests.cs)
 
-A leg builder given an empty schedule, or a swap building its legs on one. QuantLib's conversion to a leg counts `schedule_.size()-1` periods, a `Size` wrapping below zero, and reserves them or reads `schedule_.date(0)` past the end of the schedule's dates (`fixedratecoupon.cpp:182-185`, `cashflowvectors.hpp:82-102`, `overnightindexedcoupon.cpp:592-603`), which is undefined. nanoql refuses the schedule at that point of the conversion, with `NanoQLException`, "empty schedule", after the checks QuantLib makes before it, so that with several bad inputs QuantLib's first refusal is nanoql's; the pilot's `FixedRateLeg` threw `ArgumentOutOfRangeException` from the read.
+A leg builder given an empty schedule, or a swap building its legs on one. QuantLib's conversion to a leg counts `schedule_.size()-1` periods, a `Size` wrapping below zero, and reserves them or reads `schedule_.date(0)` past the end of the schedule's dates (`fixedratecoupon.cpp:182-185`, `cashflowvectors.hpp:82-102`, `overnightindexedcoupon.cpp:592-603`, `averagebmacoupon.cpp:225-228`), which is undefined. nanoql refuses the schedule at that point of the conversion, with `NanoQLException`, "empty schedule", after the checks QuantLib makes before it, so that with several bad inputs QuantLib's first refusal is nanoql's; the pilot's `FixedRateLeg` threw `ArgumentOutOfRangeException` from the read.
 
 Facts:
 
 - `ALegBuilderRefusesAnEmptyScheduleAfterQuantLibsEarlierChecks`
+- `TheAverageBMALegRefusesAnEmptyScheduleAfterItsNotionalCheck`
 
 ## EngineSequenceTests
 
@@ -356,7 +367,7 @@ Facts:
 
 [`Divergences/RateHelperNullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/RateHelperNullIndexTests.cs)
 
-A rate helper given a null index is refused on entry, naming the parameter. QuantLib's helpers dereference their index before any check (`ratehelpers.cpp:198, 206` for the deposit helper, `:533` for the swap helper, `:148` for the futures helper, `:312, 332, 350` for the FRA helper, `oisratehelper.cpp:114` for the OIS helper), a result C++ leaves undefined; the wheel stops on Boost's assertion.
+A rate helper given a null index is refused on entry, naming the parameter. QuantLib's helpers dereference their index before any check (`ratehelpers.cpp:198, 206` for the deposit helper, `:533` for the swap helper, `:148` for the futures helper, `:312, 332, 350` for the FRA helper, `:469` for the swap helper on a swap index, `:688, 694` for the BMA swap helper, `oisratehelper.cpp:114` for the OIS helper), a result C++ leaves undefined; the wheel stops on Boost's assertion.
 
 Facts:
 
@@ -449,6 +460,17 @@ Facts:
 
 - `SkipToTheLastIndexIsRefusedWithTheGrayCode`
 - `TheDrawThatWouldReachTheLastCounterThrowsWithTheGrayCode`
+
+## SwapIndexNullIndexTests
+
+[`Divergences/SwapIndexNullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/SwapIndexNullIndexTests.cs)
+
+A swap index given a null Ibor index, or an overnight-indexed swap index given a null overnight index, is refused on entry, naming the parameter. QuantLib's `SwapIndex` accepts a null Ibor index (`swapindex.cpp:38-43`) and dereferences it later, in `forwardingTermStructure()`, `underlyingSwap()` and the clones (`:65, 85, 95, 125, 136, 150`), and `OvernightIndexedSwapIndex` dereferences its overnight index in its base's initializer (`:193, 196`): results C++ leaves undefined, where the wheel stops on Boost's assertion.
+
+Facts:
+
+- `ASwapIndexGivenANullIborIndexIsRefused`
+- `AnOvernightIndexedSwapIndexGivenANullOvernightIndexIsRefused`
 
 ## SwapRefusalTests
 

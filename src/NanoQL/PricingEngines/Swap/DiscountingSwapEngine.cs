@@ -18,8 +18,8 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// A static class: <c>Calculate</c> takes the engine's inputs and returns the results, in place of QuantLib's engine
 /// object, whose <c>discountCurve()</c> accessor has no instance to belong to. Its overloads for
-/// <see cref="FixedVsFloatingSwap"/> and <see cref="OvernightIndexedSwap"/> run the same steps and body and return
-/// those swaps' results records, so a caller needs no cast.
+/// <see cref="FixedVsFloatingSwap"/>, <see cref="OvernightIndexedSwap"/> and <see cref="BMASwap"/> run the same steps
+/// and body and return those swaps' results records, so a caller needs no cast.
 /// </remarks>
 public static class DiscountingSwapEngine
 {
@@ -125,6 +125,40 @@ public static class DiscountingSwapEngine
         return swap.FetchResults(results);
     }
 
+    /// <summary>Prices a BMA swap, with the inspectors its results derive.</summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="includeSettlementDateFlows">
+    /// Whether cash flows on the settlement date count; the context's
+    /// <see cref="EvaluationContext.IncludeReferenceDateEvents"/> when <see langword="null"/>.
+    /// </param>
+    /// <param name="settlementDate">The settlement date; the curve's reference date when <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the NPV is given at; the curve's reference date when <see langword="null"/>.</param>
+    /// <returns>The swap's results: the expired results when the swap has expired.</returns>
+    /// <exception cref="ArgumentException">
+    /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
+    /// </exception>
+    /// <exception cref="NanoQLException">A leg fails to price; the message names the leg.</exception>
+    public static BMASwapResults Calculate(
+        BMASwap swap,
+        EvaluationContext context,
+        YieldTermStructure discountCurve,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        CheckArguments(swap, context, discountCurve, settlementDate, npvDate);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        SwapResults results = Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate);
+        return swap.FetchResults(results);
+    }
+
     /// <summary>
     /// Prices a swap as QuantLib's engine does on an empty discount-curve handle, the engine a builder's
     /// <c>WithDiscountingTermStructure(null)</c> sets: an expired swap's results, which QuantLib's instrument gives
@@ -137,6 +171,28 @@ public static class DiscountingSwapEngine
     /// <exception cref="NanoQLException">The swap has not expired.</exception>
     internal static FixedVsFloatingSwapResults CalculateWithoutCurve(
         FixedVsFloatingSwap swap, EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(swap);
+        ArgumentNullException.ThrowIfNull(context);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        throw new NanoQLException("discounting term structure handle is empty");
+    }
+
+    /// <summary>
+    /// Prices a BMA swap as QuantLib's engine does on an empty discount-curve handle, the engine the BMA swap rate
+    /// helper builds on an Ibor index with no forwarding curve: an expired swap's results, and otherwise QuantLib's
+    /// refusal, once the swap's arguments are validated.
+    /// </summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <returns>The expired swap's results.</returns>
+    /// <exception cref="NanoQLException">The swap has not expired.</exception>
+    internal static BMASwapResults CalculateWithoutCurve(BMASwap swap, EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(swap);
         ArgumentNullException.ThrowIfNull(context);

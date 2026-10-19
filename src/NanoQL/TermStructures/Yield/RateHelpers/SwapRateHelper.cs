@@ -9,7 +9,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/yield/ratehelpers.hpp ql/termstructures/yield/ratehelpers.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the constructor from a swap index, which waits for S5's fourth commit with SwapIndex
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -62,6 +61,73 @@ public sealed class SwapRateHelper : RelativeDateRateHelper
     // the helper is re-dated and its coupons copied on the bound curve.
     private IborIndex iborIndex;
     private VanillaSwap swap;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SwapRateHelper"/> class for the swap of a swap index: its tenor,
+    /// fixing calendar, fixed leg's frequency, convention and day counter, and Ibor index, starting at the Ibor index's
+    /// spot date from the evaluation date.
+    /// </summary>
+    /// <param name="rate">The swap rate.</param>
+    /// <param name="swapIndex">
+    /// The swap index. Its fixing days and its exogenous discounting curve are not used, as in QuantLib: the spot date
+    /// is the Ibor index's, and the swap is discounted on the curve or on <paramref name="discountingCurve"/>.
+    /// </param>
+    /// <param name="context">The evaluation context, read when the swap is built.</param>
+    /// <param name="spread">The spread over the floating leg.</param>
+    /// <param name="fwdStart">The forward start from the spot date.</param>
+    /// <param name="discountingCurve">An exogenous discounting curve, or <see langword="null"/> to discount on the curve.</param>
+    /// <param name="pillar">The pillar choice.</param>
+    /// <param name="customPillarDate">The pillar date for <see cref="PillarChoice.CustomDate"/>.</param>
+    /// <param name="endOfMonth">Whether the legs follow the end-of-month rule.</param>
+    /// <param name="useIndexedCoupons">
+    /// Whether the floating coupons are indexed, or <see langword="null"/> for the context's at-par switch.
+    /// </param>
+    /// <param name="couponPricer">A pricer for the floating coupons, or <see langword="null"/> for the default.</param>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="context"/> or <paramref name="swapIndex"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// An enum argument isn't a member of its type, or the swap index's fixed-leg tenor has no frequency
+    /// (<see cref="Frequency.OtherFrequency"/>).
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="customPillarDate"/> is <c>default(Date)</c>, or, for a custom pillar, outside the swap's earliest
+    /// and latest relevant dates.
+    /// </exception>
+    /// <exception cref="NanoQLException">The swap can't be built.</exception>
+    public SwapRateHelper(
+        double rate,
+        SwapIndex swapIndex,
+        EvaluationContext context,
+        double spread = 0.0,
+        Period fwdStart = default,
+        YieldTermStructure? discountingCurve = null,
+        PillarChoice pillar = PillarChoice.LastRelevantDate,
+        Date? customPillarDate = null,
+        bool endOfMonth = false,
+        bool? useIndexedCoupons = null,
+        FloatingRateCouponPricer? couponPricer = null)
+        : this(
+            rate,
+            Checked(swapIndex, context).Tenor,
+            swapIndex.FixingCalendar,
+            swapIndex.FixedLegTenor.Frequency(),
+            swapIndex.FixedLegConvention,
+            swapIndex.DayCounter,
+            swapIndex.IborIndex,
+            context,
+            spread,
+            fwdStart,
+            discountingCurve,
+            null,
+            pillar,
+            customPillarDate,
+            endOfMonth,
+            useIndexedCoupons,
+            null,
+            couponPricer)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SwapRateHelper"/> class for a swap of the given tenor, starting
@@ -308,6 +374,15 @@ public sealed class SwapRateHelper : RelativeDateRateHelper
         {
             EnumArguments.Check(convention, nameof(floatConvention));
         }
+    }
+
+    // The checks before the swap index is read: the context first, as every member taking it checks it, then the
+    // index, which QuantLib dereferences unchecked, which is undefined for a null index.
+    private static SwapIndex Checked(SwapIndex swapIndex, EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(swapIndex);
+        return swapIndex;
     }
 
     // A swap result QuantLib's inspectors refuse when it is null.

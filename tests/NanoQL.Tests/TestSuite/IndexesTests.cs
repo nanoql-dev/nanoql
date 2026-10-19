@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/indexes.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testFixingObservability (BMAIndex); testCustomIborIndex (CustomIborIndex, BespokeCalendar); testCdiIndex (Cdi, Brazil, Business252); testShirIndex (Shir, Israel, ILSCurrency)
+// Partial: testCustomIborIndex (CustomIborIndex, BespokeCalendar); testCdiIndex (Cdi, Brazil, Business252); testShirIndex (Shir, Israel, ILSCurrency)
+// Replaced: testFixingObservability (Vectors/Indexes/BMAIndexVectorTests.cs)
 
 using NanoQL.Indexes;
 using NanoQL.Time;

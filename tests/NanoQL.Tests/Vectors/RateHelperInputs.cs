@@ -24,12 +24,17 @@ namespace NanoQL.Tests.Vectors;
 /// "endOfMonth", "useIndexedCoupons", "floatConvention"}</c>, the same with <c>"form": "dates"</c>, <c>"startDate"</c>
 /// and <c>"endDate"</c> for <c>"tenor"</c> and without <c>"fwdStart"</c> and <c>"settlementDays"</c>; the C++
 /// harness's files may add a <c>"couponPricer"</c>, a pricer spec of <see cref="CouponInputs"/>. An FRA, futures, FX
-/// swap or OIS helper is <c>{"kind": "FraRateHelper", "form": "months" | "periodLength" | "monthsIndex" |
-/// "periodIndex" | "imm" | "dates", …}</c>, <c>{"kind": "FuturesRateHelper", "form": "length" | "dates" | "index",
-/// …}</c>, <c>{"kind": "FxSwapRateHelper", "form": "tenor" | "dates", …}</c> or <c>{"kind": "OISRateHelper", "form":
-/// "tenor" | "dates", …}</c>, with the inputs of the constructor its form names, under QuantLib's parameter names, the
-/// quote always <c>"rate"</c> (a futures price, an FX swap's forward points); the generator's docstring lists them. A
-/// futures spec's <c>"quotes"</c>, the harness's choice of QuantLib's quote or value forms, collapses here. A period is
+/// swap or OIS helper is <c>{"kind": "FraRateHelper", "form": "months" | "periodLength" | "monthsIndex" | "periodIndex"
+/// | "imm" | "dates", …}</c>, <c>{"kind": "FuturesRateHelper", "form": "length" | "dates" | "index", …}</c>,
+/// <c>{"kind": "FxSwapRateHelper", "form": "tenor" | "dates", …}</c> or <c>{"kind": "OISRateHelper", "form": "tenor" |
+/// "dates", …}</c>, with the inputs of the constructor its form names, under QuantLib's parameter names, the quote
+/// always <c>"rate"</c> (a futures price, an FX swap's forward points); the generator's docstring lists them. A futures
+/// spec's <c>"quotes"</c>, the harness's choice of QuantLib's quote or value forms, collapses here. A swap helper on a
+/// swap index is <c>{"kind": "SwapRateHelper", "form": "swapIndex", "rate", "swapIndex", "spread", "fwdStart",
+/// "discountingCurve", "pillar", "customPillarDate", "endOfMonth", "useIndexedCoupons"}</c>, its swap index a spec of
+/// <see cref="SwapIndexInputs"/>; a BMA swap helper is <c>{"kind": "BMASwapRateHelper", "form": "tenor", "rate",
+/// "tenor", "settlementDays", "calendar", "bmaPeriod", "bmaConvention", "bmaDayCount", "index"}</c>, on a
+/// <see cref="BMAIndex"/> with no curve. A period is
 /// <c>[length, units]</c>; a calendar and a day counter are specs of <see cref="CashFlowInputs"/>, <c>null</c> for
 /// QuantLib's empty one; an index is a spec of <see cref="SwapInputs"/>; the discounting curve is <c>null</c>, a flat
 /// forward spec, or <c>{"handle": name}</c>, a curve the caller names (a multicurve's member). A null settlement-day
@@ -115,6 +120,31 @@ internal static class RateHelperInputs
                 return FxSwapOf(spec, form, rate, context);
             case ("OISRateHelper", _):
                 return OisOf(spec, form, rate, context);
+            case ("SwapRateHelper", "swapIndex"):
+                return new SwapRateHelper(
+                    rate,
+                    SwapIndexInputs.SwapIndexOf(spec.GetProperty("swapIndex")),
+                    context,
+                    spec.GetProperty("spread").GetDouble(),
+                    SwapInputs.PeriodOf(spec.GetProperty("fwdStart")),
+                    IndexInputs.CurveOf(spec.GetProperty("discountingCurve")),
+                    (PillarChoice)spec.GetProperty("pillar").GetInt32(),
+                    CashFlowInputs.NullableDate(spec.GetProperty("customPillarDate")),
+                    spec.GetProperty("endOfMonth").GetBoolean(),
+                    CouponInputs.NullableBool(spec.GetProperty("useIndexedCoupons")),
+                    PricerOf(spec, context));
+            case ("BMASwapRateHelper", "tenor"):
+                return new BMASwapRateHelper(
+                    rate,
+                    SwapInputs.PeriodOf(spec.GetProperty("tenor")),
+                    spec.GetProperty("settlementDays").GetInt32(),
+                    CashFlowInputs.CalendarOf(spec.GetProperty("calendar")),
+                    SwapInputs.PeriodOf(spec.GetProperty("bmaPeriod")),
+                    (BusinessDayConvention)spec.GetProperty("bmaConvention").GetInt32(),
+                    CouponInputs.DayCounterOrNull(spec.GetProperty("bmaDayCount")),
+                    new BMAIndex(),
+                    SwapInputs.IndexOf(spec.GetProperty("index")),
+                    context);
             default:
                 throw new InvalidOperationException($"unknown helper {kind} ({form})");
         }

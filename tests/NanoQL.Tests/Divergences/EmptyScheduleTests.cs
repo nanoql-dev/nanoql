@@ -13,7 +13,8 @@ namespace NanoQL.Tests.Divergences;
 /// A leg builder given an empty schedule, or a swap building its legs on one. QuantLib's conversion to a leg counts
 /// <c>schedule_.size()-1</c> periods, a <c>Size</c> wrapping below zero, and reserves them or reads
 /// <c>schedule_.date(0)</c> past the end of the schedule's dates (<c>fixedratecoupon.cpp:182-185</c>,
-/// <c>cashflowvectors.hpp:82-102</c>, <c>overnightindexedcoupon.cpp:592-603</c>), which is undefined. nanoql refuses the
+/// <c>cashflowvectors.hpp:82-102</c>, <c>overnightindexedcoupon.cpp:592-603</c>, <c>averagebmacoupon.cpp:225-228</c>),
+/// which is undefined. nanoql refuses the
 /// schedule at that point of the conversion, with <see cref="NanoQLException"/>, "empty schedule", after the checks
 /// QuantLib makes before it, so that with several bad inputs QuantLib's first refusal is nanoql's; the pilot's
 /// <see cref="FixedRateLeg"/> threw <see cref="ArgumentOutOfRangeException"/> from the read.
@@ -65,6 +66,27 @@ public class EmptyScheduleTests
         AssertRefused(
             "empty schedule",
             () => new OvernightIndexedSwap(SwapType.Payer, [1e6], empty, 0.03, null, [1e6], schedule, estr));
+    }
+
+    [Fact]
+    public void TheAverageBMALegRefusesAnEmptyScheduleAfterItsNotionalCheck()
+    {
+        var empty = new Schedule([], new TARGET());
+        var context = new EvaluationContext { EvaluationDate = Today };
+        var bma = new BMAIndex(Curve);
+        var leg = new AverageBMALeg(empty, bma);
+
+        // QuantLib's conversion checks the notionals first (averagebmacoupon.cpp:215; harness: "no notional given"),
+        // then counts the wrapping periods.
+        AssertRefused("no notional given", () => leg.ToLeg());
+        AssertRefused("empty schedule", () => leg.WithNotionals(100.0).ToLeg());
+
+        // A BMA swap builds its Libor leg, then its BMA leg on the empty schedule (wheel: "invalid vector subscript").
+        Schedule libor = new MakeSchedule().From(new Date(17, Month.January, 2025)).To(new Date(17, Month.January, 2027))
+            .WithTenor(new Period(3, TimeUnit.Months)).WithCalendar(new TARGET()).ToSchedule();
+        AssertRefused(
+            "empty schedule",
+            () => new BMASwap(SwapType.Payer, 1e6, libor, 0.7, 0.0, new Euribor3M(Curve), null, empty, bma, null, context));
     }
 
     private static void AssertRefused(string message, Func<object> build)

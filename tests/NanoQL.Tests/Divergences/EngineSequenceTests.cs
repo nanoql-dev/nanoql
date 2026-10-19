@@ -91,7 +91,7 @@ public class EngineSequenceTests
         Assert.Equal("context", Assert.Throws<ArgumentNullException>(() =>
             DiscountingSwapEngine.Calculate(expired, null!, Curve)).ParamName);
         Assert.Equal("swap", Assert.Throws<ArgumentNullException>(() =>
-            DiscountingSwapEngine.Calculate(null!, Context, Curve)).ParamName);
+            DiscountingSwapEngine.Calculate((OvernightIndexedSwap)null!, Context, Curve)).ParamName);
         Assert.Empty(log);
 
         // A settlement date before the curve is checked in the body, as in QuantLib: an expired swap returns zeros.

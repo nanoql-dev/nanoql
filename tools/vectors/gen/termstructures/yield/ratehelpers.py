@@ -35,12 +35,28 @@ helpers on each date, appended after them.
   calendars, a trading calendar, conventions and end of month, either currency the collateral's, and no collateral
   curve, with which QuantLib builds the helper but can't bind it); and between dates (built with forDates).
 
+Then, after those cases, so that their bytes don't move, 40 helpers on the same three dates, 120 cases:
+
+- 20 BMA swap helpers: tenors from 1 to 10 years, 0 to 3 settlement days on the US government-bond, UK exchange,
+  TARGET and null calendars, weekly, monthly and quarterly BMA legs over three conventions and three day counters,
+  against a US dollar Libor-style index (3M and 1M, on the UK exchange calendar, on a flat curve), Euribor 3M, and an
+  index with no curve, whose swap can't be priced. Each case stores the Libor and BMA fixings its swap reads: every
+  valid fixing date from three weeks before the evaluation date to the day before it.
+- 20 swap helpers on swap indexes of indexes/swapindex.py (Euribor, US dollar, pound, null-calendar and overnight
+  swap indexes, an exogenous one, whose curve the helper doesn't use, and one whose fixed leg's tenor, 13 months, has
+  no frequency, which QuantLib refuses), with spreads, forward starts, a discounting curve, the three pillar choices,
+  end of month, and indexed and at-par coupons, by the helper's choice and by the context's switch.
+
 Each case's outputs are whether the helper builds, QuantLib's refusals recorded as its one throw, then its five dates
 (earliestDate, maturityDate, latestRelevantDate, pillarDate, latestDate); for a swap helper its swap's start and
 maturity dates and fixed rate, and its spread; for a futures helper its convexity adjustment; for an FX swap helper its
 spot, tenor ([length, units]), base-currency flag and the names of its calendar, trading calendar and adjustment
 calendar (null for QuantLib's empty calendar), and, built from a tenor, its fixing days, convention and end-of-month
-flag, which QuantLib leaves uninitialized for one built from dates.
+flag, which QuantLib leaves uninitialized for one built from dates; for a BMA swap helper its swap's start and
+maturity dates and Libor fraction, then a log-linear discount curve (PiecewiseLogLinearDiscount, Actual/365 (Fixed))
+bootstrapped on the helper alone from the evaluation date: the curve's discount at the helper's latest date, and the
+helper's implied quote and quote error, read from the helper QuantLib has bound to the curve; a curve QuantLib can't
+bootstrap gives its refusal as the discount's throw, and no quotes.
 
 The functions here build the helper specs and the wheel's helpers that the bootstrap generators share
 (termstructures/yield/piecewiseyieldcurve, termstructures/iterativebootstrap, termstructures/yield/oisratehelper and
@@ -51,7 +67,9 @@ the harness counterpart cxx/termstructures/yield/ratehelpers, which import this 
 - {"kind": "SwapRateHelper", "form": "tenor", "rate", "tenor", "calendar", "fixedFrequency", "fixedConvention",
   "fixedDayCount", "index", "spread", "fwdStart", "discountingCurve", "settlementDays", "pillar", "customPillarDate",
   "endOfMonth", "useIndexedCoupons", "floatConvention"}, or the same with "form": "dates", "startDate" and "endDate"
-  for "tenor", and without "fwdStart" and "settlementDays";
+  for "tenor", and without "fwdStart" and "settlementDays"; or {"kind": "SwapRateHelper", "form": "swapIndex", "rate",
+  "swapIndex", "spread", "fwdStart", "discountingCurve", "pillar", "customPillarDate", "endOfMonth",
+  "useIndexedCoupons"}, its swap index a spec of indexes/swapindex.py;
 - {"kind": "FraRateHelper", "form": "months", "rate", "monthsToStart", "monthsToEnd", "fixingDays", "calendar",
   "convention", "endOfMonth", "dayCounter", "pillar", "customPillarDate", "useIndexedCoupon"}; the same with "form":
   "periodLength", "periodToStart" and "lengthInMonths" for the months (the harness's only, which the wheel doesn't
@@ -74,6 +92,9 @@ the harness counterpart cxx/termstructures/yield/ratehelpers, which import this 
   and "tenor", and without "forwardStart"; the index an overnight preset or spec, the pricer null or a pricer spec of
   cashflows/overnightindexedcoupon.py, null calendars, day counter, lookback, end-of-month flag and fixed frequency
   QuantLib's empty values and nulls;
+- {"kind": "BMASwapRateHelper", "form": "tenor", "rate", "tenor", "settlementDays", "calendar", "bmaPeriod",
+  "bmaConvention", "bmaDayCount", "index"}, the rate being the Libor fraction, the BMA index QuantLib's BMAIndex with no
+  curve (the helper reads its calendar only), and a null day counter QuantLib's empty one;
 a period is [length, units]; a calendar and a day counter are specs of indexes/interestrateindex.py, null for
 QuantLib's empty one; an index is a spec of instruments/fixedvsfloatingswap.py; the discounting curve is null or a flat
 forward spec; null settlement days are Null<Natural>(), a null custom pillar date Date(), and null coupon and floating
@@ -108,6 +129,9 @@ fvf = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(fvf)
 irx = fvf.irx
 ocp = fvf._load("wheel_overnightindexedcoupon", "cashflows/overnightindexedcoupon.py")
+_spec = importlib.util.spec_from_file_location("wheel_swapindex", os.path.join(v.GEN_ROOT, "indexes", "swapindex.py"))
+swx = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(swx)
 
 D = fvf.d
 TARGET, NULL_CALENDAR, US_SOFR, UK_EXCHANGE = irx.TARGET, irx.NULL_CALENDAR, irx.US_SOFR, irx.UK_EXCHANGE
@@ -336,11 +360,15 @@ def make_helper(spec):
                                         fvf.make_index(spec["index"]))
     elif kind == "SwapRateHelper":
         spread = ql.QuoteHandle() if spec["spread"] == 0.0 else ql.QuoteHandle(ql.SimpleQuote(spec["spread"]))
+        discount = irx.handle(spec["discountingCurve"])
+        if form == "swapIndex":
+            return ql.SwapRateHelper(spec["rate"], swx.make_swap_index(spec["swapIndex"]), spread,
+                                     ql.Period(*spec["fwdStart"]), discount, spec["pillar"],
+                                     _date(spec["customPillarDate"]), spec["endOfMonth"], spec["useIndexedCoupons"])
         common = (_calendar(spec["calendar"]), spec["fixedFrequency"], spec["fixedConvention"],
                   _day_counter(spec["fixedDayCount"]), fvf.make_index(spec["index"]), spread)
         tail = (spec["pillar"], _date(spec["customPillarDate"]), spec["endOfMonth"], spec["useIndexedCoupons"],
                 spec["floatConvention"])
-        discount = irx.handle(spec["discountingCurve"])
         if form == "tenor":
             days = v.NULL_INTEGER if spec["settlementDays"] is None else spec["settlementDays"]
             return ql.SwapRateHelper(spec["rate"], ql.Period(*spec["tenor"]), *common,
@@ -409,6 +437,11 @@ def make_helper(spec):
         if form == "dates":
             return ql.OISRateHelper.forDates(ql.Date(spec["startDate"]), ql.Date(spec["endDate"]), spec["rate"],
                                              index, discount, *middle, *tail)
+    elif kind == "BMASwapRateHelper" and form == "tenor":
+        return ql.BMASwapRateHelper(ql.QuoteHandle(ql.SimpleQuote(spec["rate"])), ql.Period(*spec["tenor"]),
+                                    spec["settlementDays"], irx.calendar(spec["calendar"]),
+                                    ql.Period(*spec["bmaPeriod"]), spec["bmaConvention"],
+                                    _day_counter(spec["bmaDayCount"]), ql.BMAIndex(), fvf.make_index(spec["index"]))
     raise ValueError(f"unknown helper {kind} {form}")
 
 
@@ -726,6 +759,108 @@ def fx_swaps():
     return out
 
 
+US_GOVT = {"type": "UnitedStates", "market": int(ql.UnitedStates.GovernmentBond)}
+LIBOR_CURVE = fvf.curve(0.0342, A360, ql.Simple, reference=EVALUATION_DATES[0])
+LIBOR_3M = fvf.with_currency(irx.ibor_spec("UsdLibor", (3, ql.Months), 2, UK_EXCHANGE, ql.ModifiedFollowing, False,
+                                           A360, LIBOR_CURVE), "USD")
+LIBOR_1M = fvf.with_currency(irx.ibor_spec("UsdLibor", (1, ql.Months), 2, UK_EXCHANGE, ql.ModifiedFollowing, False,
+                                           A360, LIBOR_CURVE), "USD")
+
+
+def bma_helper(rate, tenor, days=2, cal=US_GOVT, bma_period=(1, ql.Weeks), convention=ql.Following, dc=None,
+               index=LIBOR_3M):
+    return {"kind": "BMASwapRateHelper", "form": "tenor", "rate": rate, "tenor": period(tenor), "settlementDays": days,
+            "calendar": cal, "bmaPeriod": period(bma_period), "bmaConvention": int(convention), "bmaDayCount": dc,
+            "index": index}
+
+
+def bma_helpers():
+    """(name, spec) for the 20 BMA swap helpers."""
+    Y, M, W = ql.Years, ql.Months, ql.Weeks
+    out = [
+        ("1Y weekly", bma_helper(0.700, (1, Y))),
+        ("2Y weekly", bma_helper(0.705, (2, Y))),
+        ("3Y weekly", bma_helper(0.710, (3, Y))),
+        ("5Y monthly", bma_helper(0.715, (5, Y), bma_period=(1, M))),
+        ("7Y quarterly", bma_helper(0.720, (7, Y), bma_period=(3, M))),
+        ("10Y quarterly", bma_helper(0.725, (10, Y), bma_period=(3, M))),
+        ("2Y, no settlement days", bma_helper(0.730, (2, Y), days=0)),
+        ("2Y, one settlement day", bma_helper(0.735, (2, Y), days=1)),
+        ("2Y, three settlement days", bma_helper(0.740, (2, Y), days=3)),
+        ("2Y on the UK exchange calendar", bma_helper(0.745, (2, Y), cal=UK_EXCHANGE)),
+        ("2Y on TARGET", bma_helper(0.750, (2, Y), cal=TARGET)),
+        ("2Y on the null calendar", bma_helper(0.755, (2, Y), cal=NULL_CALENDAR)),
+        ("3Y monthly, ModifiedFollowing", bma_helper(0.760, (3, Y), bma_period=(1, M),
+                                                     convention=ql.ModifiedFollowing)),
+        ("3Y weekly, Unadjusted", bma_helper(0.765, (3, Y), convention=ql.Unadjusted)),
+        ("2Y, Actual/360 BMA leg", bma_helper(0.770, (2, Y), dc=A360)),
+        ("2Y, Actual/Actual BMA leg", bma_helper(0.775, (2, Y), dc=ACT_ISDA)),
+        ("2Y on Libor 1M", bma_helper(0.780, (2, Y), index=LIBOR_1M)),
+        ("3Y on Euribor 3M", bma_helper(0.785, (3, Y), cal=TARGET,
+                                        index=fvf.preset("Euribor3M", fvf.curve(0.031, A360, ql.Simple,
+                                                                                  reference=EVALUATION_DATES[0])))),
+        ("2Y on an index with no curve", bma_helper(0.790, (2, Y), index=fvf.with_currency(
+            irx.ibor_spec("UsdLibor", (3, M), 2, UK_EXCHANGE, ql.ModifiedFollowing, False, A360, None), "USD"))),
+        ("18M weekly", bma_helper(0.795, (18, M))),
+    ]
+    assert len(out) == 20
+    return out
+
+
+def swap_index_helper(rate, swap_index, spread=0.0, fwd_start=(0, ql.Days), discount=None,
+                      pillar=ql.Pillar.LastRelevantDate, custom=None, eom=False, indexed=None):
+    return {"kind": "SwapRateHelper", "form": "swapIndex", "rate": rate, "swapIndex": swap_index, "spread": spread,
+            "fwdStart": period(fwd_start), "discountingCurve": discount, "pillar": int(pillar),
+            "customPillarDate": v.enc(custom), "endOfMonth": eom, "useIndexedCoupons": indexed}
+
+
+def swap_index_helpers():
+    """(name, spec, at-par switch or None) for the 20 swap helpers on swap indexes."""
+    Y, M, Dd = ql.Years, ql.Months, ql.Days
+    MF = ql.ModifiedFollowing
+    curve = fvf.curve(0.029, reference=EVALUATION_DATES[0])
+    e6m = fvf.preset("Euribor6M", curve)
+
+    def eur(tenor, fixed=(1, Y), exogenous=False):
+        return swx.swap_index("EurSwap", tenor, 2, "EUR", TARGET, fixed, MF, THIRTY360_BB, e6m, exogenous,
+                              FLAT_DISCOUNT if exogenous else None)
+
+    out = [
+        ("on a 5Y swap index", swap_index_helper(0.0301, eur((5, Y)))),
+        ("on a 2Y swap index", swap_index_helper(0.0302, eur((2, Y)))),
+        ("on a 10Y swap index", swap_index_helper(0.0303, eur((10, Y)))),
+        ("on a 30Y swap index", swap_index_helper(0.0304, eur((30, Y)))),
+        ("on an 18M swap index, semiannual", swap_index_helper(0.0305, eur((18, M), (6, M)))),
+        ("on an exogenous swap index", swap_index_helper(0.0306, eur((5, Y), exogenous=True))),
+        ("on a swap index, spread 10bp", swap_index_helper(0.0307, eur((5, Y)), spread=0.001)),
+        ("on a swap index, forward start 1M", swap_index_helper(0.0308, eur((5, Y)), fwd_start=(1, M))),
+        ("on a swap index, discounting curve", swap_index_helper(0.0309, eur((5, Y)), discount=FLAT_DISCOUNT)),
+        ("on a swap index, pillar at maturity", swap_index_helper(0.0310, eur((5, Y)),
+                                                                  pillar=ql.Pillar.MaturityDate)),
+        ("on a swap index, custom pillar", swap_index_helper(0.0311, eur((5, Y)), pillar=ql.Pillar.CustomDate,
+                                                             custom=D(3, 7, 2028))),
+        ("on a swap index, custom pillar not given", swap_index_helper(0.0312, eur((5, Y)),
+                                                                       pillar=ql.Pillar.CustomDate)),
+        ("on a swap index, end of month", swap_index_helper(0.0313, eur((3, Y)), eom=True)),
+        ("on a swap index, indexed coupons", swap_index_helper(0.0314, eur((5, Y)), indexed=True)),
+        ("on a swap index, the switch's indexed coupons", swap_index_helper(0.0315, eur((5, Y))), False),
+        ("on a US dollar swap index", swap_index_helper(0.0316, swx.swap_index(
+            "UsdSwap", (5, Y), 2, "USD", US_SOFR, (6, M), MF, A360, USD_INDEX))),
+        ("on a pound swap index", swap_index_helper(0.0317, swx.swap_index(
+            "GbpSwap", (5, Y), 0, "GBP", UK_EXCHANGE, (1, Y), MF, A365,
+            irx.ibor_spec("GbpIbor", (6, M), 0, UK_EXCHANGE, ql.Following, False, A365, curve)))),
+        ("on a null-calendar swap index", swap_index_helper(0.0318, swx.swap_index(
+            "NulSwap", (5, Y), 1, None, NULL_CALENDAR, (1, Y), ql.Unadjusted, THIRTY360_BB,
+            irx.ibor_spec("NulIbor", (6, M), 1, NULL_CALENDAR, MF, False, A360, curve)))),
+        ("on an overnight-indexed swap index", swap_index_helper(0.0319, swx.ois_index(
+            "EstrSwap", (1, Y), 2, "EUR", irx.overnight_spec("Estr", 0, TARGET, A360, curve)))),
+        ("on a swap index whose fixed leg's tenor has no frequency", swap_index_helper(0.0320, eur((5, Y), (13, M)))),
+    ]
+    out = [(x[0], x[1], x[2] if len(x) > 2 else None) for x in out]
+    assert len(out) == 20
+    return out
+
+
 def more_helpers():
     """(name, spec) for the 103 FRA, futures and FX swap helpers, appended after the deposit and swap helpers."""
     return ([(f"fra {n}", s) for n, s in fras()] + [(f"futures {n}", s) for n, s in futures()]
@@ -734,6 +869,16 @@ def more_helpers():
 
 def calendar_name(cal):
     return None if cal.empty() else cal.name()
+
+
+def bma_fixings(spec, today):
+    """The Libor and BMA fixings a BMA swap helper's swap reads: every valid fixing date from three weeks before the
+    evaluation date to the day before it."""
+    out = []
+    for k, index in enumerate((fvf.make_index(spec["index"]), ql.BMAIndex())):
+        dates = [today - n for n in range(21, 0, -1) if index.isValidFixingDate(today - n)]
+        out.append((index, [(d, round(0.034 - 0.008 * k + 0.0001 * (d - today), 6)) for d in dates]))
+    return out
 
 
 def outputs(h, spec):
@@ -755,6 +900,20 @@ def outputs(h, spec):
             # QuantLib leaves these uninitialized for a helper built from dates
             out.update({"fixingDays": h.fixingDays(), "businessDayConvention": h.businessDayConvention(),
                         "endOfMonth": h.endOfMonth()})
+    elif spec["kind"] == "BMASwapRateHelper":
+        sw = h.swap()
+        out.update({"swapStartDate": v.enc(sw.startDate()), "swapMaturityDate": v.enc(sw.maturityDate()),
+                    "swapLiborFraction": sw.liborFraction()})
+        # A curve bootstrapped on the helper alone; it is kept alive while the helper, which holds a raw pointer to
+        # it, is read.
+        curve = ql.PiecewiseLogLinearDiscount(ql.Settings.instance().evaluationDate, [h], ql.Actual365Fixed())
+        try:
+            discount = curve.discount(h.latestDate())
+        except RuntimeError:
+            out["bootstrapDiscount"] = dict(v.THROWS)
+        else:
+            out.update({"bootstrapDiscount": discount, "impliedQuote": h.impliedQuote(),
+                        "quoteError": h.quoteError()})
     return out
 
 
@@ -762,28 +921,29 @@ def cases():
     out = []
     for today in EVALUATION_DATES:
         for name, spec, at_par in all_helpers():
-            with v.case_settings(today, use_at_par_coupons=at_par) as st:
-                try:
-                    h = make_helper(spec)
-                except RuntimeError:
-                    expected = {"built": dict(v.THROWS)}
-                else:
-                    expected = outputs(h, spec)
-                out.append({"name": f"{today.ISO()} {name}", "inputs": {"settings": st, "helper": spec},
-                            "expected": expected})
+            out.append(case(today, name, spec, at_par, None))
     for today in EVALUATION_DATES:
         for name, spec in more_helpers():
-            with v.case_settings(today) as st:
-                try:
-                    h = make_helper(spec)
-                except RuntimeError:
-                    expected = {"built": dict(v.THROWS)}
-                else:
-                    expected = outputs(h, spec)
-                out.append({"name": f"{today.ISO()} {name}", "inputs": {"settings": st, "helper": spec},
-                            "expected": expected})
+            out.append(case(today, name, spec, None, None))
+    # The later helpers, after the first ones so that those cases' bytes don't move.
+    for today in EVALUATION_DATES:
+        for name, spec in bma_helpers():
+            out.append(case(today, f"BMA swap {name}", spec, None, bma_fixings(spec, today)))
+        for name, spec, at_par in swap_index_helpers():
+            out.append(case(today, f"swap {name}", spec, at_par, None))
     check_rows(out)
     return out
+
+
+def case(today, name, spec, at_par, fixings):
+    with v.case_settings(today, use_at_par_coupons=at_par, fixings=fixings) as st:
+        try:
+            h = make_helper(spec)
+        except RuntimeError:
+            expected = {"built": dict(v.THROWS)}
+        else:
+            expected = outputs(h, spec)
+        return {"name": f"{today.ISO()} {name}", "inputs": {"settings": st, "helper": spec}, "expected": expected}
 
 
 def check_rows(out):
@@ -815,6 +975,12 @@ def check_rows(out):
     assert reversed_imm["built"] is True and reversed_imm["maturityDate"] < reversed_imm["earliestDate"]
     # The FX swap helper with no collateral curve builds; it can't be bound.
     assert by_name[f"{first} fx 1M with no collateral curve"]["built"] is True
+    for refused in ("swap on a swap index, custom pillar not given",
+                    "swap on a swap index whose fixed leg's tenor has no frequency"):
+        assert by_name[f"{first} {refused}"] == {"built": v.THROWS}, refused
+    # The BMA swap helper bootstraps its curve, but on an index with no curve, which can't price its swap.
+    assert by_name[f"{first} BMA swap 2Y weekly"]["impliedQuote"] != v.THROWS
+    assert by_name[f"{first} BMA swap 2Y on an index with no curve"]["bootstrapDiscount"] == v.THROWS
 
 
 if __name__ == "__main__":

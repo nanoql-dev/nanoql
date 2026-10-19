@@ -3,7 +3,8 @@
 """Vectors for QuantLib's PiecewiseYieldCurve (ql/termstructures/yield/piecewiseyieldcurve.hpp) on its iterative
 bootstrap, with the four yield traits (ql/termstructures/yield/bootstraptraits.hpp) and the interpolated curves'
 formulas they carry: 209 curves in 43 cases, on deposit and swap helpers of termstructures/yield/ratehelpers.py;
-then, appended after them, 30 curves in 14 cases on its FRA, futures, FX swap and OIS helpers.
+then, appended after them, 30 curves in 14 cases on its FRA, futures, FX swap and OIS helpers; then 1 curve in 1
+case on its BMA swap helpers, re-dated.
 
 - 132 curves in 12 cases: 11 traits and interpolator pairs (discounts: log-linear, spline cubic, log-cubic with the
   spline and with Kruger's derivatives, monotonic log-cubic; zero rates: linear, cubic with Kruger's derivatives and
@@ -583,9 +584,24 @@ def more_cases():
     return out
 
 
+def bma_moved_cases():
+    """A log-linear discount curve on four of termstructures/yield/ratehelpers.py's BMA swap helpers, built 15 TARGET
+    days after the evaluation date they were built on, which re-dates them as moved_cases' curves re-date theirs; the
+    case stores the Libor and BMA fixings their swaps read before the curve's evaluation date."""
+    today = EVALUATION_DATES[0]
+    later = ql.TARGET().advance(today, 15, ql.Days)
+    helper_specs = [rh.bma_helper(rate, tenor, bma_period=period) for rate, tenor, period in (
+        (0.700, (1, ql.Years), (1, ql.Weeks)), (0.705, (2, ql.Years), (1, ql.Weeks)),
+        (0.710, (3, ql.Years), (1, ql.Weeks)), (0.715, (5, ql.Years), (1, ql.Months)))]
+    with v.case_settings(later, fixings=rh.bma_fixings(helper_specs[0], later)) as st:
+        specs = [ref_spec("Discount", LOG_LINEAR, A365, later)]
+        return [group_case(f"{later.ISO()} BMA swaps built on {today.ISO()}", st, "moved", specs, helper_specs,
+                           quote_errors=False, extra={"helpersEvaluationDate": today.serialNumber()})]
+
+
 def cases():
     out = grid_cases() + jump_cases() + fallback_cases() + bumped_cases() + moved_cases()
-    out += named_cases() + log_mixed_cases() + more_cases()
+    out += named_cases() + log_mixed_cases() + more_cases() + bma_moved_cases()
     check_rows(out)
     return out
 

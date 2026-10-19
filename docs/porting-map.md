@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,134 | 150 |
-| partial | 22 | 24 |
-| ported | 118 | 8 |
+| not started | 1,129 | 150 |
+| partial | 21 | 24 |
+| ported | 124 | 8 |
 | replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
@@ -83,7 +83,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `averagebmacoupon` | not started |  | no nanoql type: AverageBMACoupon, AverageBMALeg |
+| `averagebmacoupon` | ported | Coupons/AverageBMACoupon/AverageBMACoupon.cs, Coupons/AverageBMACoupon/AverageBMACouponPricer.cs, Coupons/AverageBMACoupon/AverageBMALeg.cs |  |
 | `blackovernightindexedcouponpricer` | ported | Coupons/BlackAveragingOvernightIndexedCouponPricer.cs, Coupons/BlackCompoundingOvernightIndexedCouponPricer.cs |  |
 | `capflooredcoupon` | partial | Coupons/CappedFlooredCoupon.cs, Coupons/CappedFlooredIborCoupon.cs | partial: CappedFlooredCmsCoupon, which waits for S-rx with CmsCoupon; no nanoql type: CappedFlooredCmsCoupon |
 | `capflooredinflationcoupon` | not started |  | no nanoql type: CappedFlooredYoYInflationCoupon |
@@ -529,14 +529,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `bmaindex` | not started |  | no nanoql type: BMAIndex |
+| `bmaindex` | ported | Indexes/BMAIndex.cs |  |
 | `equityindex` | not started |  | no nanoql type: EquityIndex |
 | `iborindex` | ported | Indexes/IborIndex.cs, Indexes/OvernightIndex.cs |  |
 | `indexmanager` | replaced: the evaluation context's fixings | Indexes/IndexFixings.cs |  |
 | `inflationindex` | not started |  | no nanoql type: CPI, CPIInterpolationType, InflationIndex, ZeroInflationIndex, YoYInflationIndex |
 | `interestrateindex` | ported | Indexes/InterestRateIndex.cs |  |
 | `region` | not started |  | no nanoql type: Region, RegionData, CustomRegion, AustraliaRegion, EURegion, FranceRegion, UKRegion, USRegion, ZARegion |
-| `swapindex` | not started |  | no nanoql type: SwapIndex, OvernightIndexedSwapIndex |
+| `swapindex` | ported | Indexes/OvernightIndexedSwapIndex.cs, Indexes/SwapIndex.cs |  |
 
 ### `ql/indexes/ibor/`
 
@@ -607,7 +607,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `chfliborswap` | not started |  | no nanoql type: ChfLiborSwapIsdaFix |
-| `euriborswap` | not started |  | no nanoql type: EuriborSwapIsdaFixA, EuriborSwapIsdaFixB, EuriborSwapIfrFix |
+| `euriborswap` | ported | Indexes/Swap/EuriborSwap/EuriborSwapIfrFix.cs, Indexes/Swap/EuriborSwap/EuriborSwapIsdaFixA.cs, Indexes/Swap/EuriborSwap/EuriborSwapIsdaFixB.cs |  |
 | `eurliborswap` | not started |  | no nanoql type: EurLiborSwapIsdaFixA, EurLiborSwapIsdaFixB, EurLiborSwapIfrFix |
 | `gbpliborswap` | not started |  | no nanoql type: GbpLiborSwapIsdaFix |
 | `jpyliborswap` | not started |  | no nanoql type: JpyLiborSwapIsdaFixAm, JpyLiborSwapIsdaFixPm |
@@ -624,7 +624,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `barrieroption` | not started |  | no nanoql type: BarrierOption |
 | `barriertype` | not started |  | no nanoql type: BarrierType |
 | `basketoption` | not started |  | no nanoql type: BasketPayoff, MinBasketPayoff, MaxBasketPayoff, AverageBasketPayoff, SpreadBasketPayoff, BasketOption |
-| `bmaswap` | not started |  | no nanoql type: BMASwap |
+| `bmaswap` | ported | Instruments/BMASwap.cs, Instruments/BMASwapResults.cs |  |
 | `bond` | not started |  | no nanoql type: Bond, BondPrice, BondPriceType, BondResults |
 | `bondforward` | not started |  | no nanoql type: BondForward |
 | `callabilityschedule` | not started |  | no nanoql type: Callability, CallabilityType, CallabilitySchedule |
@@ -1932,7 +1932,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `piecewiseyieldcurve` | ported | TermStructures/Yield/PiecewiseYieldCurve/GlobalLinearSimpleZeroCurve.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseSplineCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearSimpleZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseYieldCurve{TTraits,TInterpolator,TBootstrap}.cs |  |
 | `piecewisezerospreadedtermstructure` | not started |  | no nanoql type: InterpolatedPiecewiseZeroSpreadedTermStructure, PiecewiseZeroSpreadedTermStructure |
 | `quantotermstructure` | not started |  | no nanoql type: QuantoTermStructure |
-| `ratehelpers` | partial | TermStructures/Yield/RateHelpers/DepositRateHelper.cs, TermStructures/Yield/RateHelpers/FraRateHelper.cs, TermStructures/Yield/RateHelpers/FuturesRateHelper.cs, TermStructures/Yield/RateHelpers/FxSwapRateHelper.cs, TermStructures/Yield/RateHelpers/RateHelper.cs, TermStructures/Yield/RateHelpers/RelativeDateRateHelper.cs, TermStructures/Yield/RateHelpers/SwapRateHelper.cs | partial: the constructor from a swap index, which waits for S5's fourth commit with SwapIndex; no nanoql type: BMASwapRateHelper |
+| `ratehelpers` | ported | TermStructures/Yield/RateHelpers/BMASwapRateHelper.cs, TermStructures/Yield/RateHelpers/DepositRateHelper.cs, TermStructures/Yield/RateHelpers/FraRateHelper.cs, TermStructures/Yield/RateHelpers/FuturesRateHelper.cs, TermStructures/Yield/RateHelpers/FxSwapRateHelper.cs, TermStructures/Yield/RateHelpers/RateHelper.cs, TermStructures/Yield/RateHelpers/RelativeDateRateHelper.cs, TermStructures/Yield/RateHelpers/SwapRateHelper.cs |  |
 | `spreadbootstraptraits` | not started |  |  |
 | `spreaddiscountcurve` | not started |  | no nanoql type: InterpolatedSpreadDiscountCurve, SpreadDiscountCurve |
 | `ultimateforwardtermstructure` | not started |  | no nanoql type: UltimateForwardTermStructure |
@@ -2148,7 +2148,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `hestonslvmodel` | not started |  | 19 cases |
 | `himalayaoption` | not started |  | 1 cases |
 | `hybridhestonhullwhiteprocess` | not started |  | 13 cases |
-| `indexes` | partial | TestSuite/IndexesTests.cs | 2 of 6 cases; not yet: testFixingObservability, testCustomIborIndex, testCdiIndex, testShirIndex |
+| `indexes` | partial | TestSuite/IndexesTests.cs | 3 of 6 cases; replaced: testFixingObservability by Vectors/Indexes/BMAIndexVectorTests.cs; not yet: testCustomIborIndex, testCdiIndex, testShirIndex |
 | `inflation` | not started |  | 28 cases |
 | `inflationcapfloor` | not started |  | 4 cases |
 | `inflationcapflooredcoupon` | not started |  | 2 cases |
