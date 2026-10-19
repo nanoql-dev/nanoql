@@ -93,7 +93,6 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/InterestRate.cs`: the discount factor's two derivatives, which wait for the slot that ports the cash-flow duration and convexity.
 - `src/NanoQL/Numerics/ComparisonFunctions.cs`: `earlier_than`, which waits for the bond slot.
 - `src/NanoQL/OptionType.cs`: `Option`, its arguments, `Greeks` and `MoreGreeks`, which wait for S6 and S-eq.
-- `src/NanoQL/PricingEngines/BlackFormulaFunctions.cs`: every function but `checkParameters`, `blackFormula` and `bachelierBlackFormula` on an option type, which wait for S6.
 - `src/NanoQL/StochasticProcess/StochasticProcess.cs`: `StochasticProcess`'s defaults of `expectation`, `stdDeviation` and `covariance`, which call the discretization and wait for S-eq's `EulerDiscretization`.
 - `src/NanoQL/StochasticProcess/StochasticProcess1D.cs`: `StochasticProcess1D`'s defaults of `expectation`, `stdDeviation` and `variance`, which call the discretization and wait for S-eq's `EulerDiscretization`.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
@@ -105,7 +104,6 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
-- `tests/NanoQL.Tests/TestSuite/BlackFormulaTests.cs`: `testBachelierImpliedVol`, `testChambersImpliedVol`, `testRadoicicStefanicaImpliedVol`, `testRadoicicStefanicaLowerBound`, `testImpliedVolAdaptiveSuccessiveOverRelaxation`, `testBlackFormulaForwardDerivative`, `testBlackFormulaForwardDerivativeWithZeroStrike`, `testBlackFormulaForwardDerivativeWithZeroVolatility`, `testBachelierBlackFormulaForwardDerivative`, `testBachelierBlackFormulaForwardDerivativeWithZeroVolatility`, `testItmProbabilitiesWithZeroVolatility`, `testBachelierImpliedVolAtIntrinsic`, `testImpliedStdDevApproximationRSStaysFinite`, `testImpliedStdDevLiRSAtIntrinsic`, which need the Black formula's other functions and wait for S6.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for S-eq's Black-Scholes process.
 - `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
 - `tests/NanoQL.Tests/TestSuite/CapFlooredCouponTests.cs`: `testDecomposition`, which waits for S8's cap and floor instruments.

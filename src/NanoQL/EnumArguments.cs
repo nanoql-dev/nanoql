@@ -182,6 +182,19 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses an exercise type outside <see cref="ExerciseType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib has no text for it: <c>Exercise::Type</c> has no stream operator and no switch refuses it.</remarks>
+    internal static void Check(ExerciseType value, string paramName)
+    {
+        if (value is < ExerciseType.American or > ExerciseType.European)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown exercise type ({(int)value})");
+        }
+    }
+
     /// <summary>Refuses an averaging method outside <see cref="RateAveragingType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

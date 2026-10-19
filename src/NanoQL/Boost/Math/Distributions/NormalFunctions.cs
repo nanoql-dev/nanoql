@@ -12,9 +12,9 @@ namespace NanoQL.Numerics;
 
 /// <summary>
 /// Boost.Math's normal distribution (<c>normal.hpp</c>) for <c>double</c> under the default policy: the constructor's
-/// checks, <c>cdf</c> and <c>quantile</c>. Boost's <c>normal_distribution</c> holds only its mean and standard
-/// deviation, so the functions take them. <c>constants::root_two&lt;double&gt;()</c> is <c>Math.Sqrt(2.0)</c>
-/// exactly.
+/// checks, <c>pdf</c>, <c>cdf</c> and <c>quantile</c>. Boost's <c>normal_distribution</c> holds only its mean and
+/// standard deviation, so the functions take them. <c>constants::root_two&lt;double&gt;()</c> is <c>Math.Sqrt(2.0)</c>
+/// and <c>constants::pi&lt;double&gt;()</c> is <see cref="Math.PI"/>, exactly.
 /// </summary>
 internal static class NormalFunctions
 {
@@ -31,6 +31,36 @@ internal static class NormalFunctions
 
         CheckScale(function, sd);
         CheckLocation(function, lMean);
+    }
+
+    /// <summary><c>pdf(normal_distribution, x)</c>: the density at <paramref name="x"/>.</summary>
+    /// <param name="mean">The distribution's mean.</param>
+    /// <param name="sd">The distribution's standard deviation.</param>
+    /// <param name="x">The variate; ±∞ gives 0.</param>
+    /// <returns>The density.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="x"/> is NaN.</exception>
+    /// <exception cref="NanoQLException">The parameters are refused.</exception>
+    internal static double Pdf(double mean, double sd, double x)
+    {
+        const string function = "boost::math::pdf(const normal_distribution<double>&, double)";
+
+        CheckScale(function, sd);
+        CheckLocation(function, mean);
+        if (double.IsInfinity(x))
+        {
+            return 0; // pdf + and - infinity is zero.
+        }
+
+        CheckX(function, x, nameof(x));
+
+        double exponent = x - mean;
+        exponent *= -exponent;
+        exponent /= 2 * sd * sd;
+
+        double result = Math.Exp(exponent);
+        result /= sd * Math.Sqrt(2 * Math.PI);
+
+        return result;
     }
 
     /// <summary><c>cdf(normal_distribution, x)</c>: the probability of a variate below <paramref name="x"/>.</summary>

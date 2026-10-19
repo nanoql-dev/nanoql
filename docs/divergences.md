@@ -20,6 +20,16 @@ Facts:
 
 - `ANullBMAIndexIsRefusedWithQuantLibsText`
 
+## BlackFormulaNullPayoffTests
+
+[`Divergences/BlackFormulaNullPayoffTests.cs`](../tests/NanoQL.Tests/Divergences/BlackFormulaNullPayoffTests.cs)
+
+A null payoff in a Black formula's payoff overload. QuantLib's fifteen payoff overloads read the payoff's option type or strike through the pointer before anything else (`blackformula.cpp:105, 144, 195, 257, 330, 456, 564, 597, 628, 675, 709, 742, 767, 958, 981`), a null dereference, undefined under `std::shared_ptr` and a Boost assertion by default. nanoql refuses it first, with `ArgumentNullException` naming `payoff`.
+
+Facts:
+
+- `ANullPayoffIsRefusedBeforeItIsRead`
+
 ## BootstrapNullHelperTests
 
 [`Divergences/BootstrapNullHelperTests.cs`](../tests/NanoQL.Tests/Divergences/BootstrapNullHelperTests.cs)
@@ -163,6 +173,16 @@ Facts:
 - `TheArgumentChecksRunBeforeTheExpiryCheck`
 - `ALegFailureNamesTheLegAndKeepsTheCause`
 
+## ExerciseDatesTests
+
+[`Divergences/ExerciseDatesTests.cs`](../tests/NanoQL.Tests/Divergences/ExerciseDatesTests.cs)
+
+An exercise's dates read past their end. QuantLib's `Exercise::date(i)` is `dates_[i]` (`exercise.hpp:45`), which reads past the vector for an index out of range, undefined, where its twin `dateAt(i)` (`:46`) throws `std::out_of_range`. nanoql refuses the index in both, with `ArgumentOutOfRangeException` naming `index`, as `Schedule.Date(int)` does.
+
+Facts:
+
+- `AnIndexOutOfRangeIsRefused`
+
 ## ExtrapolatorCopyTests
 
 [`Divergences/ExtrapolatorCopyTests.cs`](../tests/NanoQL.Tests/Divergences/ExtrapolatorCopyTests.cs)
@@ -290,6 +310,7 @@ Facts:
 - `AnIterativeBootstrapsBoundOfQuantLibsNullIsAValue`
 - `AMixedInterpolationsLeftConditionValueOfQuantLibsNullIsAValue`
 - `AGlobalBootstrapsAccuracyOfQuantLibsNullIsAValue`
+- `AnImpliedStandardDeviationsGuessOfQuantLibsNullIsAGuess`
 
 ## OvernightIndexedCouponRefusalTests
 

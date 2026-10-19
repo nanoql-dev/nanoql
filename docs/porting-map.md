@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,129 | 150 |
-| partial | 21 | 24 |
-| ported | 124 | 8 |
+| not started | 1,125 | 150 |
+| partial | 20 | 23 |
+| ported | 129 | 9 |
 | replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
@@ -46,7 +46,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `errors` | replaced: ArgumentException and NanoQLException |  |  |
 | `event` | partial | Event.cs | partial: detail::simple_event, which only experimental code uses |
 | `exchangerate` | not started |  | no nanoql type: ExchangeRate, ExchangeRateType |
-| `exercise` | not started |  | no nanoql type: Exercise, ExerciseType, EarlyExercise, AmericanExercise, BermudanExercise, EuropeanExercise |
+| `exercise` | ported | Exercise/AmericanExercise.cs, Exercise/BermudanExercise.cs, Exercise/EarlyExercise.cs, Exercise/EuropeanExercise.cs, Exercise/Exercise.cs, Exercise/ExerciseType.cs |  |
 | `functional` | not ported: deprecated |  |  |
 | `grid` | not ported: deprecated |  |  |
 | `handle` | replaced: the object itself |  |  |
@@ -58,7 +58,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `numericalmethod` | not started |  | no nanoql type: Lattice |
 | `option` | partial | OptionType.cs | partial: Option, Option::arguments, Greeks and MoreGreeks, which wait for S6's Swaption and S-eq's engines; no nanoql type: Option, Greeks, MoreGreeks |
 | `optional` | not ported: C++ platform header |  |  |
-| `payoff` | not started |  | no nanoql type: Payoff |
+| `payoff` | ported | Payoff.cs |  |
 | `position` | ported | PositionType.cs |  |
 | `prices` | not started |  | no nanoql type: PriceType, IntervalPrice, IntervalPriceType |
 | `pricingengine` | replaced: static engines |  |  |
@@ -675,7 +675,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `overnightindexedswap` | ported | Instruments/OvernightIndexedSwap.cs, Instruments/OvernightIndexedSwapResults.cs |  |
 | `overnightindexfuture` | not started |  | no nanoql type: OvernightIndexFuture |
 | `partialtimebarrieroption` | not started |  | no nanoql type: PartialBarrierRange, PartialTimeBarrierOption |
-| `payoffs` | not started |  | no nanoql type: NullPayoff, TypePayoff, FloatingTypePayoff, StrikedTypePayoff, PlainVanillaPayoff, PercentageStrikePayoff, AssetOrNothingPayoff, CashOrNothingPayoff, GapPayoff, SuperFundPayoff, SuperSharePayoff |
+| `payoffs` | ported | Instruments/Payoffs/AssetOrNothingPayoff.cs, Instruments/Payoffs/CashOrNothingPayoff.cs, Instruments/Payoffs/FloatingTypePayoff.cs, Instruments/Payoffs/GapPayoff.cs, Instruments/Payoffs/NullPayoff.cs, Instruments/Payoffs/PercentageStrikePayoff.cs, Instruments/Payoffs/PlainVanillaPayoff.cs, Instruments/Payoffs/StrikedTypePayoff.cs, Instruments/Payoffs/SuperFundPayoff.cs, Instruments/Payoffs/SuperSharePayoff.cs, Instruments/Payoffs/TypePayoff.cs |  |
 | `perpetualfutures` | not started |  | no nanoql type: PerpetualFutures, PerpetualFuturesPayoffType, PerpetualFuturesFundingType |
 | `quantobarrieroption` | not started |  | no nanoql type: QuantoBarrierOption |
 | `quantoforwardvanillaoption` | not started |  | no nanoql type: QuantoForwardVanillaOption |
@@ -758,7 +758,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `expm1` | not started |  |  |
 | `factorial` | ported | Numerics/Factorial.cs |  |
 | `fastfouriertransform` | not started |  | no nanoql type: FastFourierTransform |
-| `functional` | not started |  |  |
+| `functional` | ported | Numerics/FunctionalFunctions.cs |  |
 | `generallinearleastsquares` | not started |  | no nanoql type: GeneralLinearLeastSquares |
 | `incompletegamma` | ported | Numerics/IncompleteGammaFunctions.cs |  |
 | `interpolation` | ported | Numerics/IInterpolator.cs, Numerics/Interpolation.cs | no nanoql type: InterpolationImpl, InterpolationTemplateImpl |
@@ -1464,7 +1464,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bacheliercalculator` | not started |  | no nanoql type: BachelierCalculator |
 | `blackcalculator` | not started |  | no nanoql type: BlackCalculator |
 | `blackdeltacalculator` | not started |  | no nanoql type: BlackDeltaCalculator, BlackDeltaPremiumAdjustedSolverClass, BlackDeltaPremiumAdjustedMaxStrikeClass |
-| `blackformula` | partial | PricingEngines/BlackFormulaFunctions.cs | partial: every function but checkParameters, blackFormula(Option::Type, ...) and bachelierBlackFormula(Option::Type, ...), which wait for S6 |
+| `blackformula` | ported | PricingEngines/BlackFormulaFunctions.cs |  |
 | `blackscholescalculator` | not started |  | no nanoql type: BlackScholesCalculator |
 | `genericmodelengine` | not started |  | no nanoql type: GenericModelEngine |
 | `greeks` | not started |  |  |
@@ -2077,7 +2077,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `binaryoption` | not started |  | 3 cases |
 | `blackcalculator` | not started |  | 6 cases |
 | `blackdeltacalculator` | not started |  | 4 cases |
-| `blackformula` | partial | TestSuite/BlackFormulaTests.cs | 1 of 15 cases; not yet: testBachelierImpliedVol, testChambersImpliedVol, testRadoicicStefanicaImpliedVol, testRadoicicStefanicaLowerBound, testImpliedVolAdaptiveSuccessiveOverRelaxation, testBlackFormulaForwardDerivative, testBlackFormulaForwardDerivativeWithZeroStrike, testBlackFormulaForwardDerivativeWithZeroVolatility, testBachelierBlackFormulaForwardDerivative, testBachelierBlackFormulaForwardDerivativeWithZeroVolatility, testItmProbabilitiesWithZeroVolatility, testBachelierImpliedVolAtIntrinsic, testImpliedStdDevApproximationRSStaysFinite, testImpliedStdDevLiRSAtIntrinsic |
+| `blackformula` | ported | TestSuite/BlackFormulaTests.cs | 15 of 15 cases |
 | `blackvolsurfacedelta` | not started |  | 5 cases |
 | `bondforward` | not started |  | 3 cases |
 | `bonds` | not started |  | 22 cases |

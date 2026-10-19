@@ -160,6 +160,7 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
 | `operator<<` on an enum | Not ported where the enum's `ToString()` already gives QuantLib's text: its stream strings equal the member names and no alias shares a value. Otherwise the text is a static `ToString(value)` on the header's `<Header>Functions` class, and a class whose `ToString()` embeds it calls it. Each port records this check per enum. |
 | Operators whose operands nanoql doesn't own (`Integer * TimeUnit`) | C# 14 extension operators, in a static class `<Type>Extensions` in the folder of the QuantLib file that declares them. |
 | `std::fma` (in Boost code) | `Math.FusedMultiplyAdd`. |
+| `std::log1p`, and a C runtime function .NET lacks | Written in the file of the port that calls it, from a published formulation, as the user ruled for `std::log1p` (2026-10-18): Goldberg's `Math.Log(u) * x / (u − 1)` with `u = 1 + x` (D. Goldberg 1991, Theorem 4), never `double.LogP1`, which computes `Math.Log(1 + x)` and loses `x`'s low digits. It is within a few ulp of the C runtime's, so an output that reaches it can differ from QuantLib's in its last places, within R7 (Choi's implied volatility: 4 of the wheel's 608 outputs, 1 ulp). |
 | The numeric macros of `qldefines.hpp` (`QL_EPSILON`, `QL_MIN_POSITIVE_REAL`, …) | `internal const` fields of `NumericLimits`, keeping the macro names. `QL_EPSILON` is machine epsilon, `2.220446049250313E-16`, and `QL_MIN_POSITIVE_REAL` the smallest normal double; neither is `double.Epsilon`. |
 | Deprecated members, `ql/legacy` | Not ported. |
 | `#ifdef QL_HIGH_RESOLUTION_DATE`, sessions, thread-safe observer options | The default build's branch only. The wheel's build flags are checked against this (§7). |
@@ -258,22 +259,22 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `StochasticProcess1D`, `StochasticProcessDiscretization`, `StochasticProcess1DDiscretization`, `FinancialIndex`,
   `InterestRateIndex`, `VolatilityTermStructure`, `OptionletVolatilityStructure`, `FloatingRateCouponPricer`,
   `IborCouponPricer`, `OvernightIndexedCouponPricer`, `FixedVsFloatingSwap`, `BootstrapHelper<TTermStructure>`,
-  `RelativeDateBootstrapHelper<TTermStructure>`, `RateHelper`, `RelativeDateRateHelper` and `ZeroYieldStructure`
-  (abstract); `Swap`,
-  `SimpleCashFlow`, `InstrumentResults`, `SwapResults`, `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`,
-  `IborIndex`, `OvernightIndex`, `Euribor`, `SwapIndex`, `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`,
-  `CappedFlooredCoupon`, `BlackIborCouponPricer`, `CompoundingOvernightIndexedCouponPricer`,
-  `ArithmeticAveragedOvernightIndexedCouponPricer`, `TridiagonalOperator`, `CubicInterpolation`,
-  `LogCubicInterpolation`, `MixedLinearCubicInterpolation`, `LogMixedLinearCubicInterpolation`,
-  `RandomSequenceGenerator<TRng>`, `InverseCumulativeRng<TRng, TIc>`,
-  `InverseCumulativeRsg<TUsg, TIc>`, `PathGenerator<TGsg>`, `PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap>`
-  and the interpolated curves `InterpolatedDiscountCurve<TInterpolator>`, `InterpolatedZeroCurve<TInterpolator>`,
-  `InterpolatedForwardCurve<TInterpolator>` and `InterpolatedSimpleZeroCurve<TInterpolator>` (unsealed);
-  `IInterpolator` (the interpolation traits: a factory of
-  one's own overrides its `CheckPoints` with its construction checks, whose default refuses nothing, so that a curve on
-  it takes a bootstrap's first-pass fallback where QuantLib's would), the bootstrap's concepts `IBootstrap`,
-  `IBootstrapState`, `IBootstrapHelper`, `IBootstrapTraits<TTermStructure>`, `IYieldTraits` and
-  `IInterpolatedCurve<TTraits, TInterpolator>`, `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers'
+  `RelativeDateBootstrapHelper<TTermStructure>`, `RateHelper`, `RelativeDateRateHelper`, `ZeroYieldStructure`, `Payoff`,
+  `TypePayoff` and `StrikedTypePayoff` (abstract); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
+  `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`, `IborIndex`, `OvernightIndex`, `Euribor`, `SwapIndex`,
+  `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`, `CappedFlooredCoupon`, `BlackIborCouponPricer`,
+  `CompoundingOvernightIndexedCouponPricer`, `ArithmeticAveragedOvernightIndexedCouponPricer`, `TridiagonalOperator`,
+  `CubicInterpolation`, `LogCubicInterpolation`, `MixedLinearCubicInterpolation`, `LogMixedLinearCubicInterpolation`,
+  `RandomSequenceGenerator<TRng>`, `InverseCumulativeRng<TRng, TIc>`, `InverseCumulativeRsg<TUsg, TIc>`,
+  `PathGenerator<TGsg>`, `Exercise`, `EarlyExercise`, `BermudanExercise`,
+  `PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap>` and the interpolated curves
+  `InterpolatedDiscountCurve<TInterpolator>`, `InterpolatedZeroCurve<TInterpolator>`,
+  `InterpolatedForwardCurve<TInterpolator>` and `InterpolatedSimpleZeroCurve<TInterpolator>` (unsealed); `IInterpolator`
+  (the interpolation traits: a factory of one's own overrides its `CheckPoints` with its construction checks, whose
+  default refuses nothing, so that a curve on it takes a bootstrap's first-pass fallback where QuantLib's would), the
+  bootstrap's concepts `IBootstrap`, `IBootstrapState`, `IBootstrapHelper`, `IBootstrapTraits<TTermStructure>`,
+  `IYieldTraits` and `IInterpolatedCurve<TTraits, TInterpolator>`, `ISolver1DFunction` and `IDerivativeSolver1DFunction`
+  (the solvers'
   function concepts), and the generator concepts `IRng`, `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`,
   `ISeedableRsg<TSelf>`, `IInverseCumulative` and `IRngTraits` (interfaces); and `Solver1DBracket`, `ProblemState` and
   `BootstrapState<TTermStructure>`, sealed, which a solver's `SolveCore`, a method's `MinimizeCore` and a bootstrap's

@@ -5,6 +5,7 @@ using NanoQL.Indexes;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
 using NanoQL.Time;
+using static NanoQL.PricingEngines.BlackFormulaFunctions;
 
 namespace NanoQL.Tests.Divergences;
 
@@ -127,5 +128,25 @@ public class NullRealSentinelTests
         // QuantLib's curve is the first for both; nanoql's sentinel curve is the traits' guess
         Assert.Equal(0.8822716504192525, byDefault.Discount(4.0));
         Assert.Equal(0.8187307530779818, sentinel.Discount(4.0));
+    }
+
+    /// <summary>
+    /// An implied standard deviation's guess: QuantLib's <c>blackFormulaImpliedStdDev</c> reads a guess of the sentinel
+    /// as no guess and starts from the approximation (<c>blackformula.cpp:430-432</c>), so its result is the no-guess
+    /// one, 0.1999993088780617 for these inputs. nanoql's guess of the sentinel is a guess, which the solver refuses,
+    /// being above its upper bound, 24.
+    /// </summary>
+    [Fact]
+    public void AnImpliedStandardDeviationsGuessOfQuantLibsNullIsAGuess()
+    {
+        double price = BlackFormula(OptionType.Call, 100.0, 110.0, 0.2);
+
+        ArgumentException e = Assert.Throws<ArgumentException>(() =>
+            BlackFormulaImpliedStdDev(OptionType.Call, 100.0, 110.0, price, 1.0, 0.0, NullReal));
+        Assert.Equal("guess", e.ParamName);
+        Assert.StartsWith("guess (3.4028234663852886E+38) > xMax_ (24)", e.Message, StringComparison.Ordinal);
+
+        // Only null is no guess: the result QuantLib gives for the sentinel.
+        Assert.Equal(0.1999993088780617, BlackFormulaImpliedStdDev(OptionType.Call, 100.0, 110.0, price, 1.0, 0.0, null));
     }
 }
