@@ -188,6 +188,27 @@ Facts:
 - `AnEmptyPricerListIsRefused`
 - `ANullCashFlowInTheLegIsRefused`
 
+## CubeAtmExtrapolationTests
+
+[`Divergences/CubeAtmExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/CubeAtmExtrapolationTests.cs)
+
+A cube's at-the-money structure's extrapolation. QuantLib's cube turns extrapolation on in the structure it is given (`swaptionvolcube.cpp:68`), for every holder of it: on the wheel, the at-the-money matrix refused a 40-year option before a cube was built on it ("date (June 16th, 2065) is past max curve date (June 16th, 2055)") and returned 0.09799630288922362 after, at a strike of 3%, while the cube's own flag stayed off. nanoql's cube holds a copy of the structure with extrapolation enabled, and leaves the caller's structure as it was.
+
+Facts:
+
+- `TheCallersStructureIsLeftUnchanged`
+
+## CubeIndexTests
+
+[`Divergences/CubeIndexTests.cs`](../tests/NanoQL.Tests/Divergences/CubeIndexTests.cs)
+
+A cube's per-strike inspectors given an index past the strike spreads. QuantLib checks neither index: the SABR cube's `marketVolCube(i)` (`sabrswaptionvolatilitycube.hpp:218-220`) and the interpolated cube's `volSpreads(i)` (`interpolatedswaptionvolatilitycube.hpp:67`) read past their vectors of matrices: the wheel's interpolated cube returned an 8237205143316950851 × 7008297511184330863 "matrix" for `volSpreads(5)` on QuantLib's five strike spreads. nanoql refuses the index with `ArgumentOutOfRangeException`.
+
+Facts:
+
+- `ASabrCubesMarketVolatilitiesRefuseAnIndexPastTheStrikes`
+- `AnInterpolatedCubesSpreadsRefuseAnIndexPastTheStrikes`
+
 ## CubicNotAKnotTwoPointsTests
 
 [`Divergences/CubicNotAKnotTwoPointsTests.cs`](../tests/NanoQL.Tests/Divergences/CubicNotAKnotTwoPointsTests.cs)
@@ -614,6 +635,46 @@ QuantLib documents a rounding's precision as lying in [0, 16] and doesn't check 
 Facts:
 
 - `APrecisionOutsideZeroToSixteenIsRefused`
+
+## SabrCubeDenseParametersTests
+
+[`Divergences/SabrCubeDenseParametersTests.cs`](../tests/NanoQL.Tests/Divergences/SabrCubeDenseParametersTests.cs)
+
+The dense parameters of a SABR cube that is neither at-the-money-calibrated nor calibrated in a single pass, which has none. QuantLib's `denseSabrParameters()` browses a default-constructed `Cube`, whose layer count is uninitialized (`sabrswaptionvolatilitycube.hpp:134, 416-424, 1045-1048, 1408`); the wheel returned a 0 × 2 matrix on QuantLib's 3 × 3 cube, a shape read from an uninitialized member. nanoql refuses it with `NanoQLException`.
+
+Facts:
+
+- `ACubeWithoutDenseParametersRefusesThem`
+
+## SabrCubeFixedFlagsTests
+
+[`Divergences/SabrCubeFixedFlagsTests.cs`](../tests/NanoQL.Tests/Divergences/SabrCubeFixedFlagsTests.cs)
+
+A SABR cube given fewer fixed flags than the model's four parameters. QuantLib's SABR traits read `paramIsFixed[0..3]` unchecked (`sabrswaptionvolatilitycube.hpp:98`): with three flags the wheel reads the fourth as free, fitting ρ to −0.9999; with none, the process ends with an access violation at the first query. nanoql refuses fewer flags with `System.ArgumentException`, in the form of QuantLib's ZABR traits' check ("ZABR model requires 5 fixed flags, but 4 provided", `zabrswaptionvolatilitycube.hpp:128`), and ignores flags past the fourth, as QuantLib does. The refusal is the model's, `CreateInterpolation`'s, naming its own `paramIsFixed`, and reaches the cube's caller as the model raised it.
+
+Facts:
+
+- `FewerFixedFlagsThanParametersAreRefused`
+
+## SabrCubeGuessGridTests
+
+[`Divergences/SabrCubeGuessGridTests.cs`](../tests/NanoQL.Tests/Divergences/SabrCubeGuessGridTests.cs)
+
+The grid a SABR cube's parameter guesses sit on. QuantLib's cube builds its guesses in its constructor (`sabrswaptionvolatilitycube.hpp:357-359, 370-385`) on the grid its base computed from the evaluation date adjusted on the at-the-money structure's calendar (`swaptionvolcube.cpp:37-42`); its first calculation recomputes the grid from the at-the-money structure's reference date (`swaptionvoldiscrete.cpp:180-190`) and never rebuilds the guesses, so where the two dates differ the fits start from guesses interpolated off their nodes. With β fixed at guesses of 0.3, 0.5 and 0.7 by option tenor, on an at-the-money matrix fixed on Wednesday 18 June 2025 and an evaluation date of Monday 16 June, the wheel's β at the 10-year option node is 0.4998783824870782. nanoql builds the guesses on the at-the-money structure's grid, the cube's only one, so the node's β is its guess, 0.5000000000000001 after the fit's transforms, as QuantLib's is when the structure is dated on the evaluation date.
+
+Facts:
+
+- `TheGuessesSitOnTheAtTheMoneyStructuresGrid`
+
+## SabrCubeGuessShapeTests
+
+[`Divergences/SabrCubeGuessShapeTests.cs`](../tests/NanoQL.Tests/Divergences/SabrCubeGuessShapeTests.cs)
+
+A SABR cube's parameter guesses with fewer rows than option and swap tenor pairs, or a row with fewer guesses than the model's parameters. QuantLib reads `parametersGuessQuotes_[j*nSwapTenors_+k][i]` unchecked (`sabrswaptionvolatilitycube.hpp:364-367, 377-382`): on QuantLib's 3 × 3 cube, 8 rows, a row of 3 guesses or no rows end the process with an access violation at construction. nanoql refuses them with `System.ArgumentException`, in the words of the volatility spreads' checks, and ignores rows and guesses past those it reads, as QuantLib does.
+
+Facts:
+
+- `FewerGuessesThanTheCubeReadsAreRefused`
 
 ## SabrGuessNonFiniteTests
 

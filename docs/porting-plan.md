@@ -94,6 +94,7 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/TermStructures/GlobalBootstrap/GlobalBootstrap.cs`: `AdditionalBootstrapVariables`, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for B6.2 with `SimpleQuoteVariables` and its user.
 - `src/NanoQL/TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs`: the constructor for a structure managing its own reference date, which waits for S7.
+- `src/NanoQL/TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/XabrSwaptionVolatilityCube{TModel}.cs`: the recalibration members (`recalibration`, `updateAfterRecalibration` and `sabrCalibrationSection`), which change a calibrated cube and wait for B3.3's `CmsMarketCalibration`, their only user.
 - `src/NanoQL/TermStructures/Volatility/Swaption/SwaptionVolatilityStructure.cs`: the constructor for a structure managing its own reference date, which waits for its first user (B3.3's `SpreadedSwaptionVolatility`).
 - `src/NanoQL/TermStructures/VolatilityTermStructure.cs`: the constructor for a structure managing its own reference date, which waits for its first user (S7 or S-eq).
 - `src/NanoQL/TermStructures/Yield/BondHelpers/BondHelper.cs`: `CPIBondHelper`, with the inflation bond and coupon it is built on, which waits for S-infl.
@@ -126,5 +127,6 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant, Newton, Ridder and Halley cases, whose solvers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/SwapTests.cs`: `testInArrears`, which waits for batch 2's `SimpleDayCounter`; `testFixedTenorInferenceWithTerminationDate`, which waits for batch 2's `GBPLibor` and `Bbsw`; and `testSpotDateUsesFixingCalendar`, which waits for batch 2's Taiwan calendar.
 - `tests/NanoQL.Tests/TestSuite/SwaptionTests.cs`: `testImpliedVolatilityOis` and `testCachedValue`'s overnight-indexed swaption (lines 449-466), which wait for batch 2's `Eonia`.
+- `tests/NanoQL.Tests/TestSuite/SwaptionVolatilityCubeTests.cs`: the ZABR cube's cases (`testZabrVols`, `testZabrSmileSection`, `testZabrParameters`, `testZabrWithNonUnitGamma`, `testZabrWithFreeGamma`, `testZabrShiftedVolThrows`, `testZabrAlternativeKernel`, `testZabrObservability`) and `testSpreadedCube`, which wait for `ZabrSwaptionVolatilityCube` and `SpreadedSwaptionVolatility`.
 - `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported.
 - `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, B4.2).
