@@ -45,6 +45,43 @@ plus 2, so the earlier cases' bytes are unchanged. Its inputs are the leg, "rate
 "compounding", "frequency"}) and "settlements", and its output "bpsInterestRate" holds the BPS per rate and settlement,
 [rate][settlement], compared at the leg's largest notional times 1e-4.
 
+After those, one case per leg gives the functions ported with the bonds, all drawn with a fourth generator,
+seeded with the seed plus 3, so the earlier cases' bytes are unchanged: under one of the 12 evaluation contexts
+before 2030, at 20 settlement dates (a null one, which means the evaluation date, and 19 of the leg's accrual dates, drawn as for the
+accrued functions, among them its last payment date and the day after it for a leg with flows after its coupons, so
+that some dates pay several flows), each with a drawn includeSettlementDateFlows, the previous and next cash-flow
+dates and amounts, the accrual period and the accrual days ("previousCashFlowDate", "nextCashFlowDate",
+"previousCashFlowAmount", "nextCashFlowAmount", "accrualPeriod", "accrualDays", one element per date); and, under one
+of the 6 settlement settings and at one of the interest rates above, the functions of a constant rate: the NPV, and
+the yield that reproduces it, or a price of 95% of the notional where the NPV throws (NewtonSafe, accuracy 1e-10, 100 iterations, guess 0.05, C++'s defaults, where the
+wheel's own default is 10000 iterations); the simple, modified and Macaulay durations (the wheel's form on an
+InterestRate takes no NPV date, so these use none); the convexity and the basis-point value; the NPV, BPS, modified
+duration, convexity and basis-point value again through the forms taking the rate's value, day counter, compounding
+and frequency; the NPV on the flat curve with a Z-spread added in one of 4 compoundings, and the Z-spread that
+reproduces it (Brent, accuracy 1e-10, 100 iterations, guess 0.0, C++'s defaults); and the at-the-money rate on the
+curve, without a target NPV and with one 1% above the leg's. Its inputs are the leg, "curve", "dates" and "includes"
+(the settlement dates and their flags), "settlement" (one {"includeSettlementDateFlows", "settlementDate",
+"npvDate"}), "rate" ({"rate", "dayCounter", "compounding", "frequency"}), "zSpread" ({"spread", "compounding",
+"frequency"}), and the targets "yieldNpv" of the yield, "zSpreadNpv" of the Z-spread and "atmNpv" of the
+at-the-money rate. NPVs, amounts and basis-point values are compared at the
+leg's largest notional, BPS at that notional times 1e-4.
+
+Then 5 cases, one per schedule, whose leg puts another flow before the first coupon on its payment date: the flat 3%
+coupons led by a Redemption or an AmortizingPayment of a tenth of the notional on the first coupon's payment date
+("leadingFlows" in the leg, listed before the coupons), under an evaluation date at the first coupon's accrual start,
+so that the accrual and accrued functions read the coupon after the flow on that date: the accrual period, accrual
+days, accrued period, accrued days and accrued amount (the outputs ending in "FirstCoupon", one element per
+setting) at 6 settlement
+settings ("accruals": a null date, the day after the accrual start, the accrual period's mid-point, the day before the
+payment date, and the payment date with includeSettlementDateFlows false and true).
+
+And 2 cases of the solvers' edges: on an empty leg, the Z-spread for a target NPV of 50 (which QuantLib can't
+bracket) and of 0 from guesses 0.01 and -0.02 (which QuantLib returns, the empty leg's NPV being 0 at every spread);
+and on the "6M MF EOM / flat 3% A360 + redemption" leg, the yield from a zero guess (whose first step, a tenth of the
+guess, is 0, so QuantLib can't bracket) and with one iteration, and the Z-spread with one iteration, which QuantLib
+refuses. Their inputs are the leg, the curve, the settlement setting, and each call's "target", "guess" and
+"maxIterations".
+
 The schedules are built with ql.Schedule, the wheel's proxy of C++ QuantLib::Schedule's rule-based constructor. The
 legs are built with ql.FixedRateLeg, which forwards to the wheel's C++ helper _FixedRateLeg (QuantLib-SWIG 1.44,
 SWIG/cashflows.i). It builds a C++ QuantLib::FixedRateLeg and calls withNotionals, withPaymentAdjustment,
@@ -181,8 +218,10 @@ EXTRA_FLOWS = {"Redemption": ql.Redemption, "AmortizingPayment": ql.AmortizingPa
 
 
 def leg(spec):
-    """The leg a "leg" spec describes: its fixed-rate coupons, then its extra flows in order."""
-    flows = list(fixed_rate_leg(spec["fixedRateLeg"])) if spec["fixedRateLeg"] is not None else []
+    """The leg a "leg" spec describes: its leading flows, if any, then its fixed-rate coupons, then its extra flows,
+    each in order."""
+    flows = [EXTRA_FLOWS[f["type"]](f["amount"], ql.Date(f["date"])) for f in spec.get("leadingFlows", [])]
+    flows += list(fixed_rate_leg(spec["fixedRateLeg"])) if spec["fixedRateLeg"] is not None else []
     flows += [EXTRA_FLOWS[f["type"]](f["amount"], ql.Date(f["date"])) for f in spec["extraFlows"]]
     return ql.Leg(flows)
 
@@ -287,6 +326,9 @@ def cases():
                              "npv": npv, "bps": bps, "npvbps": npvbps, "accruedPeriod": accrued_period,
                              "accruedDays": accrued_days, "accruedAmount": accrued_amount}})
     out += interest_rate_cases()
+    out += later_cases()
+    out += first_coupon_cases()
+    out += solver_edge_cases()
     return out
 
 
@@ -326,6 +368,196 @@ def interest_rate_cases():
         out.append({"name": f"{name} / bps on an interest rate / {ev.ISO()} {ref_events} {todays}",
                     "inputs": {"settings": st, "leg": spec, "rates": rates, "settlements": settlements},
                     "expected": {"bpsInterestRate": values}})
+    return out
+
+
+# The evaluation contexts before 2030, under which most legs still have flows to pay.
+LATER_CONTEXTS = [c for c in contexts() if c[0] < ql.Date(1, ql.January, 2030)]
+
+# (spread, compounding, frequency) for the Z-spread functions.
+Z_SPREADS = [(0.0125, ql.Continuous, ql.Annual), (-0.004, ql.Compounded, ql.Annual),
+             (0.02, ql.Compounded, ql.Semiannual), (0.008, ql.Simple, ql.Annual)]
+
+
+def settlement_dates(cfs, spec, rnd):
+    """19 of the leg's accrual dates, sorted, among them its last payment date and the day after it when flows follow
+    its coupons."""
+    candidates = accrual_dates(cfs)
+    n = 0
+    while len(candidates) < 21:
+        candidates = sorted(set(candidates) | {ql.Date(1, ql.January, 2026) + 91 * n})
+        n += 1
+    forced = []
+    if spec["extraFlows"] and len(cfs) > 0:
+        last = cfs[len(cfs) - 1].date()
+        forced = [last, last + 1]
+    rest = [d for d in candidates if d not in forced]
+    return sorted(forced + rnd.sample(rest, 19 - len(forced)))
+
+
+def scaled(value, scale):
+    """An amount with its scale, or QuantLib's throw as it is."""
+    return value if isinstance(value, dict) else v.amount(value, scale)
+
+
+def later_cases():
+    """One case per leg: the previous and next cash flows and the accrual period and days at 20 settlement dates, and
+    the functions of a constant rate, a Z-spread and the at-the-money rate at one settlement setting, all drawn with a
+    fourth generator."""
+    rnd = random.Random(v.SEED + 3)
+    out = []
+    for name, spec, scale in legs():
+        cfs = leg(spec)
+        ev, ref_events, todays = rnd.choice(LATER_CONTEXTS)
+        st = v.settings(ev, ref_events, todays)
+        crv = ql.FlatForward(ev, CURVE_RATE, day_counter(A365), ql.Continuous, ql.Annual)
+        curve = {"referenceDate": v.enc(ev), "forward": CURVE_RATE, "dayCounter": A365,
+                 "compounding": int(ql.Continuous), "frequency": int(ql.Annual)}
+        dates = [ql.Date()] + settlement_dates(cfs, spec, rnd)
+        includes = [rnd.random() < 0.5 for _ in dates]
+        expected = {key: [] for key in ("previousCashFlowDate", "nextCashFlowDate", "previousCashFlowAmount",
+                                        "nextCashFlowAmount", "accrualPeriod", "accrualDays")}
+        for d, include in zip(dates, includes):
+            expected["previousCashFlowDate"].append(
+                v.attempt(lambda: ql.CashFlows.previousCashFlowDate(cfs, include, d)))
+            expected["nextCashFlowDate"].append(v.attempt(lambda: ql.CashFlows.nextCashFlowDate(cfs, include, d)))
+            expected["previousCashFlowAmount"].append(
+                scaled(v.attempt(lambda: ql.CashFlows.previousCashFlowAmount(cfs, include, d)), scale))
+            expected["nextCashFlowAmount"].append(
+                scaled(v.attempt(lambda: ql.CashFlows.nextCashFlowAmount(cfs, include, d)), scale))
+            expected["accrualPeriod"].append(v.attempt(lambda: ql.CashFlows.accrualPeriod(cfs, include, d)))
+            expected["accrualDays"].append(v.attempt(lambda: ql.CashFlows.accrualDays(cfs, include, d)))
+
+        include, sd, nd = rnd.choice(SETTLEMENTS)
+        settlement = ev + sd if sd is not None else ql.Date()
+        npv_date = ev + nd if nd is not None else ql.Date()
+        r, rdc, comp, freq = rnd.choice(RATES)
+        dc = day_counter(rdc)
+        y = ql.InterestRate(r, dc, comp, freq)
+        z, zcomp, zfreq = rnd.choice(Z_SPREADS)
+        at = (include, settlement, npv_date)
+
+        npv = v.attempt(lambda: ql.CashFlows.npv(cfs, y, *at))
+        expected["npvYield"] = scaled(npv, scale)
+        # the yield that reproduces the NPV, or a price of 95% of the notional where the NPV throws
+        target = npv if isinstance(npv, float) else 0.95 * scale
+        expected["yield"] = v.attempt(
+            lambda: ql.CashFlows.yieldRate(cfs, target, dc, comp, freq, *at, 1.0e-10, 100, 0.05))
+        expected["durationSimple"] = v.attempt(
+            lambda: ql.CashFlows.duration(cfs, y, ql.Duration.Simple, include, settlement))
+        expected["durationModified"] = v.attempt(
+            lambda: ql.CashFlows.duration(cfs, y, ql.Duration.Modified, include, settlement))
+        expected["durationMacaulay"] = v.attempt(
+            lambda: ql.CashFlows.duration(cfs, y, ql.Duration.Macaulay, include, settlement))
+        expected["convexity"] = v.attempt(lambda: ql.CashFlows.convexity(cfs, y, *at))
+        expected["basisPointValue"] = scaled(v.attempt(lambda: ql.CashFlows.basisPointValue(cfs, y, *at)), scale)
+        expected["npvRate"] = scaled(v.attempt(lambda: ql.CashFlows.npv(cfs, r, dc, comp, freq, *at)), scale)
+        expected["bpsRate"] = scaled(v.attempt(lambda: ql.CashFlows.bps(cfs, r, dc, comp, freq, *at)),
+                                       scale * 1e-4)
+        expected["durationRate"] = v.attempt(
+            lambda: ql.CashFlows.duration(cfs, r, dc, comp, freq, ql.Duration.Modified, *at))
+        expected["convexityRate"] = v.attempt(lambda: ql.CashFlows.convexity(cfs, r, dc, comp, freq, *at))
+        expected["basisPointValueRate"] = scaled(
+            v.attempt(lambda: ql.CashFlows.basisPointValue(cfs, r, dc, comp, freq, *at)), scale)
+        z_npv = ql.CashFlows.npv(cfs, crv, z, zcomp, zfreq, *at)  # never throws on these legs and curves
+        expected["zSpreadNpv"] = scaled(z_npv, scale)
+        expected["zSpread"] = v.attempt(
+            lambda: ql.CashFlows.zSpread(cfs, z_npv, crv, zcomp, zfreq, *at, 1.0e-10, 100, 0.0))
+        expected["atmRate"] = v.attempt(lambda: ql.CashFlows.atmRate(cfs, crv, *at))
+        atm_npv = ql.CashFlows.npv(cfs, crv, *at) * 1.01
+        expected["atmRateNpv"] = v.attempt(lambda: ql.CashFlows.atmRate(cfs, crv, *at, atm_npv))
+        out.append({"name": f"{name} / later functions / {ev.ISO()} {ref_events} {todays}",
+                    "inputs": {"settings": st, "leg": spec, "curve": curve, "dates": v.enc(dates),
+                               "includes": includes,
+                               "settlement": {"includeSettlementDateFlows": include,
+                                              "settlementDate": v.enc(settlement), "npvDate": v.enc(npv_date)},
+                               "rate": {"rate": r, "dayCounter": rdc, "compounding": int(comp),
+                                        "frequency": int(freq)},
+                               "zSpread": {"spread": z, "compounding": int(zcomp), "frequency": int(zfreq)},
+                               "yieldNpv": target, "zSpreadNpv": z_npv, "atmNpv": atm_npv},
+                    "expected": expected})
+    return out
+
+
+def first_coupon_cases():
+    """One case per schedule: a leg whose first coupon's payment date pays another flow first, read by the accrual and
+    accrued functions at 6 settlement settings before and on that date."""
+    out = []
+    flat = dict(VARIANTS)[FLAT]
+    for (sname, sspec), kind in zip(SCHEDULES, ["Redemption", "AmortizingPayment", "Redemption", "AmortizingPayment",
+                                                "Redemption"]):
+        lspec = dict(flat, schedule=sspec)
+        coupons = fixed_rate_leg(lspec)
+        first = ql.as_coupon(coupons[0])
+        start, pay = first.accrualStartDate(), first.date()
+        spec = {"leadingFlows": [flow(kind, 1e5, pay)], "fixedRateLeg": lspec, "extraFlows": []}
+        cfs = leg(spec)
+        st = v.settings(start)
+        accruals = [(False, ql.Date()), (False, start + 1), (True, start + (first.accrualEndDate() - start) // 2),
+                    (False, pay - 1), (False, pay), (True, pay)]
+        expected = {key: [] for key in ("accrualPeriodFirstCoupon", "accrualDaysFirstCoupon",
+                                        "accruedPeriodFirstCoupon", "accruedDaysFirstCoupon",
+                                        "accruedAmountFirstCoupon")}
+        for include, d in accruals:
+            expected["accrualPeriodFirstCoupon"].append(v.attempt(lambda: ql.CashFlows.accrualPeriod(cfs, include, d)))
+            expected["accrualDaysFirstCoupon"].append(v.attempt(lambda: ql.CashFlows.accrualDays(cfs, include, d)))
+            expected["accruedPeriodFirstCoupon"].append(v.attempt(lambda: ql.CashFlows.accruedPeriod(cfs, include, d)))
+            expected["accruedDaysFirstCoupon"].append(v.attempt(lambda: ql.CashFlows.accruedDays(cfs, include, d)))
+            expected["accruedAmountFirstCoupon"].append(
+                scaled(v.attempt(lambda: ql.CashFlows.accruedAmount(cfs, include, d)), 1e6))
+        out.append({"name": f"{sname} / {FLAT} led by a {kind} / first coupon after another flow",
+                    "inputs": {"settings": st, "kind": "firstCoupon", "leg": spec,
+                               "accruals": [{"includeSettlementDateFlows": i, "settlementDate": v.enc(d)}
+                                            for i, d in accruals]},
+                    "expected": expected})
+    return out
+
+
+def solver_edge_cases():
+    """The Z-spread on an empty leg, and the yield and Z-spread from a zero guess or with one iteration."""
+    ev = ql.Date(15, ql.October, 2026)
+    crv = ql.FlatForward(ev, CURVE_RATE, day_counter(A365), ql.Continuous, ql.Annual)
+    curve = {"referenceDate": v.enc(ev), "forward": CURVE_RATE, "dayCounter": A365,
+             "compounding": int(ql.Continuous), "frequency": int(ql.Annual)}
+    settlement = {"includeSettlementDateFlows": False, "settlementDate": None, "npvDate": None}
+    out = []
+
+    st = v.settings(ev)
+    empty = {"fixedRateLeg": None, "extraFlows": []}
+    calls = [{"target": 50.0, "guess": 0.0, "maxIterations": 100}, {"target": 0.0, "guess": 0.01, "maxIterations": 100},
+             {"target": 0.0, "guess": -0.02, "maxIterations": 100}]
+    values = [v.attempt(lambda c=c: ql.CashFlows.zSpread(ql.Leg(), c["target"], crv, ql.Continuous, ql.Annual, False,
+                                                         ql.Date(), ql.Date(), 1.0e-10, c["maxIterations"],
+                                                         c["guess"]))
+              for c in calls]
+    out.append({"name": "no flows / solver edges",
+                "inputs": {"settings": st, "kind": "solverEdges", "leg": empty, "curve": curve,
+                           "settlement": settlement, "zSpreadCalls": calls, "yieldCalls": []},
+                "expected": {"zSpreadEdges": values, "yieldEdges": []}})
+
+    st = v.settings(ev)
+    name, spec, scale = [x for x in legs() if x[0] == f"6M MF EOM / {FLAT} + redemption"][0]
+    cfs = leg(spec)
+    y = ql.InterestRate(0.04, day_counter(A360), ql.Compounded, ql.Annual)
+    target = ql.CashFlows.npv(cfs, y, False)
+    yield_calls = [{"target": target, "guess": 0.0, "maxIterations": 100},
+                   {"target": target, "guess": 0.05, "maxIterations": 1}]
+    yields = [v.attempt(lambda c=c: ql.CashFlows.yieldRate(cfs, c["target"], day_counter(A360), ql.Compounded,
+                                                           ql.Annual, False, ql.Date(), ql.Date(), 1.0e-10,
+                                                           c["maxIterations"], c["guess"]))
+              for c in yield_calls]
+    z_target = ql.CashFlows.npv(cfs, crv, 0.01, ql.Continuous, ql.Annual, False)
+    z_calls = [{"target": z_target, "guess": 0.0, "maxIterations": 1}]
+    zs = [v.attempt(lambda c=c: ql.CashFlows.zSpread(cfs, c["target"], crv, ql.Continuous, ql.Annual, False,
+                                                     ql.Date(), ql.Date(), 1.0e-10, c["maxIterations"], c["guess"]))
+          for c in z_calls]
+    out.append({"name": f"{name} / solver edges",
+                "inputs": {"settings": st, "kind": "solverEdges", "leg": spec, "curve": curve,
+                           "settlement": settlement, "zSpreadCalls": z_calls,
+                           "yieldCalls": [dict(c, rate={"rate": 0.04, "dayCounter": A360,
+                                                        "compounding": int(ql.Compounded),
+                                                        "frequency": int(ql.Annual)}) for c in yield_calls]},
+                "expected": {"zSpreadEdges": zs, "yieldEdges": yields}})
     return out
 
 

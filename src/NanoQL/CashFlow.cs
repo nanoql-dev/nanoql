@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflow.hpp ql/cashflow.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: earlier_than<CashFlow>, which waits for the bond slot, whose code and tests sort by it
 
 using NanoQL.Time;
 

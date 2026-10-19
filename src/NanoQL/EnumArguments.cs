@@ -207,6 +207,31 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a duration type outside <see cref="DurationType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(DurationType value, string paramName)
+    {
+        if (value is < DurationType.Simple or > DurationType.Modified)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown duration type");
+        }
+    }
+
+    /// <summary>Refuses a replication strategy outside <see cref="ReplicationType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib stores any value and refuses it in its stream operator: its text is that refusal's.</remarks>
+    internal static void Check(ReplicationType value, string paramName)
+    {
+        if (value is < ReplicationType.Sub or > ReplicationType.Super)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown Replication Type ({(int)value})");
+        }
+    }
+
     /// <summary>Refuses a stub index convention outside <see cref="StubIndexSelectionConvention"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

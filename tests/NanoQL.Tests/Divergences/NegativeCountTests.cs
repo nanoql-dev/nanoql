@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Immutable;
+using NanoQL.Coupons;
 using NanoQL.Indexes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
@@ -11,7 +13,9 @@ namespace NanoQL.Tests.Divergences;
 /// QuantLib's fixing and settlement days are <c>Natural</c>, an unsigned type, which can't hold a negative value; nanoql
 /// takes an <see cref="int"/> and refuses a negative one on entry. From C++ a negative wraps to a large unsigned value,
 /// which QuantLib negates back where it advances by it (<c>interestrateindex.hpp:43, 106</c>, <c>termstructure.cpp:42</c>),
-/// and the wrap of 2^31 negates <c>INT_MIN</c>, which is undefined.
+/// and the wrap of 2^31 negates <c>INT_MIN</c>, which is undefined. The cash-flow solvers' maximum numbers of iterations
+/// are <c>Size</c>, unsigned too (<c>cashflows.hpp:273, 436</c>), where a negative wraps to a count no solve reaches;
+/// nanoql refuses it on entry likewise.
 /// </summary>
 public class NegativeCountTests
 {
@@ -53,6 +57,30 @@ public class NegativeCountTests
             0,
             ConstantOptionletVolatility.Create(0, calendar, BusinessDayConvention.Following, 0.2, dc, context).SettlementDays);
         Assert.Equal(0, new TestVolatility(0).SettlementDays);
+    }
+
+    [Fact]
+    public void NegativeMaximumIterationsOfTheCashFlowSolversAreRefused()
+    {
+        var today = new Date(15, Month.January, 2024);
+        var context = new EvaluationContext { EvaluationDate = today };
+        var dc = new Actual365Fixed();
+        ImmutableArray<CashFlow> leg = [new Redemption(100.0, today + 365)];
+        var curve = new FlatForward(today, 0.03, dc);
+
+        foreach (Func<object> solve in new Func<object>[]
+        {
+            () => CashFlows.Yield(leg, 97.0, dc, Compounding.Compounded, Frequency.Annual, context, maxIterations: -1),
+            () => CashFlows.Yield(leg, 97.0, dc, Compounding.Compounded, Frequency.Annual, context, maxIterations: int.MinValue),
+            () => CashFlows.ZSpread(leg, 97.0, curve, Compounding.Continuous, Frequency.Annual, context, maxIterations: -1),
+        })
+        {
+            Assert.Equal("maxIterations", Assert.Throws<ArgumentOutOfRangeException>(solve).ParamName);
+        }
+
+        // Zero stays QuantLib's: no evaluation is allowed, and the solver can't bracket.
+        Assert.Throws<NanoQLException>(
+            () => CashFlows.Yield(leg, 97.0, dc, Compounding.Compounded, Frequency.Annual, context, maxIterations: 0));
     }
 
     private static void AssertRefused(Func<object> create) =>

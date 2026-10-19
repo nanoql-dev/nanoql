@@ -13,11 +13,19 @@ namespace NanoQL.Numerics;
 /// </remarks>
 public abstract class Extrapolator
 {
-    // Written only on a fresh copy (WithExtrapolation).
+    // Written only at construction (the initializer) and on a fresh copy (WithExtrapolation).
     private bool extrapolate;
 
     /// <summary>Gets a value indicating whether extrapolation is enabled.</summary>
-    public bool AllowsExtrapolation => extrapolate;
+    /// <remarks>
+    /// A derived class of nanoql's own may set it in its constructor: a curve that follows another starts from the
+    /// other's flag, as QuantLib's derived curves copy it when they are built.
+    /// </remarks>
+    public bool AllowsExtrapolation
+    {
+        get => extrapolate;
+        private protected init => extrapolate = value;
+    }
 
     // A copy of the object with extrapolation enabled or disabled.
     internal Extrapolator WithExtrapolation(bool allow)

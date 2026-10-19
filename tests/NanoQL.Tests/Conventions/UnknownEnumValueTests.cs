@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Immutable;
 using NanoQL.Coupons;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
@@ -107,6 +108,20 @@ public class UnknownEnumValueTests
         AssertParam("convention", () => leg.WithExCouponPeriod(
             new Period(5, TimeUnit.Days), new TARGET(), (BusinessDayConvention)99));
         AssertParam("comp", () => leg.WithCouponRates(0.03, dc, (Compounding)99));
+
+        ImmutableArray<CashFlow> cashFlows = leg.WithNotionals(100.0).WithCouponRates(0.03, dc).ToLeg();
+        EvaluationContext context = Context();
+        AssertParam("compounding", () => CashFlows.Npv(cashFlows, 0.03, dc, (Compounding)99, Frequency.Annual, context));
+        AssertParam("frequency", () => CashFlows.Npv(cashFlows, 0.03, dc, Compounding.Compounded, (Frequency)99, context));
+        AssertParam("type", () => CashFlows.Duration(cashFlows, rate, (DurationType)99, context));
+        AssertParam("compounding", () => CashFlows.Yield(cashFlows, 0.0, dc, (Compounding)99, Frequency.Annual, context));
+        AssertParam("frequency", () => CashFlows.Yield(cashFlows, 0.0, dc, Compounding.Compounded, (Frequency)99, context));
+        AssertParam("compounding", () => CashFlows.ZSpread(cashFlows, 0.0, curve, (Compounding)99, Frequency.Annual, context));
+        AssertParam("frequency", () => CashFlows.Npv(cashFlows, curve, 0.01, Compounding.Continuous, (Frequency)99, context));
+        ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(
+            () => new DigitalReplication((ReplicationType)99));
+        Assert.Equal("t", e.ParamName);
+        Assert.StartsWith("unknown Replication Type (99)", e.Message, StringComparison.Ordinal);
     }
 
     [Fact]

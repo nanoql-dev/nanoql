@@ -3,11 +3,16 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/math/comparison.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: earlier_than, which waits for the bond slot, whose code and tests sort by it
 
 namespace NanoQL.Numerics;
 
 /// <summary>QuantLib's floating-point comparisons (<c>comparison.hpp</c>), after Knuth's advice.</summary>
+/// <remarks>
+/// <c>comparison.hpp</c> also declares <c>earlier_than</c>, the comparison of two objects by date, with no generic
+/// implementation: each dated type gives its own, as <see cref="CashFlowFunctions.EarlierThan"/> does for cash flows.
+/// Its form on shared pointers forwards to the pointees' comparison; a C# reference is the object, so the type's own
+/// comparison serves for it, and neither form has code here.
+/// </remarks>
 public static class ComparisonFunctions
 {
     /// <summary>

@@ -80,6 +80,20 @@ namespace harness {
                  Time t = real(a[1]);
                  return [=] { return json::value(make(s).discountFactor(t)); };
              }},
+            {"InterestRate::discountFactorFirstDerivative(Time)",
+             [](const Args& a) -> Call {
+                 arity(a, 2);
+                 InterestRateSpec s = interestRate(a[0]);
+                 Time t = real(a[1]);
+                 return [=] { return json::value(make(s).discountFactorFirstDerivative(t)); };
+             }},
+            {"InterestRate::discountFactorSecondDerivative(Time)",
+             [](const Args& a) -> Call {
+                 arity(a, 2);
+                 InterestRateSpec s = interestRate(a[0]);
+                 Time t = real(a[1]);
+                 return [=] { return json::value(make(s).discountFactorSecondDerivative(t)); };
+             }},
             {"InterestRate::compoundFactor(Date,Date)",
              [](const Args& a) -> Call {
                  arity(a, 3);

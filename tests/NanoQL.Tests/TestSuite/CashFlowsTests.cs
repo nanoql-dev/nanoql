@@ -9,7 +9,6 @@
 using System.Collections.Immutable;
 using NanoQL.Coupons;
 using NanoQL.Indexes;
-using NanoQL.TermStructures;
 using NanoQL.Time;
 using static NanoQL.Time.Month;
 
@@ -23,9 +22,7 @@ public class CashFlowsTests
 
     // Adapted: where QuantLib sets the global Settings before each block (lines 56, 75-76, 91-92, 108-109, 125-126,
     // 142-143, 172 and 177), each block builds its own evaluation context, with today as the evaluation date, and passes
-    // it to HasOccurred and CashFlows.Npv. The NPV checks (lines 157-180) discount on a zero-rate FlatForward from
-    // today, in place of the zero-rate InterestRate that CashFlows::npv's InterestRate overload takes, which isn't
-    // ported yet; both discount by 1, so QuantLib's expected values stand.
+    // it to HasOccurred and CashFlows.Npv.
     [Fact]
     public void TestSettings()
     {
@@ -153,7 +150,7 @@ public class CashFlowsTests
         CheckInclusion(settings, 2, 3, false);
 
         // no discount to make calculations easier
-        var noDiscount = new FlatForward(today, 0.0, new Actual365Fixed(), Compounding.Continuous, Frequency.Annual);
+        var noDiscount = new InterestRate(0.0, new Actual365Fixed(), Compounding.Continuous, Frequency.Annual);
         ImmutableArray<CashFlow> cashFlows = [.. leg];
 
         void CheckNpv(EvaluationContext context, bool includeRef, Real expected)

@@ -12,8 +12,9 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// A cycle's member (<see cref="MultiCurveMember"/>) is the one reference nanoql writes after it is built: a
 /// multicurve's <see cref="MultiCurve.Build"/> links it once, to a curve with its reference date and day counter (the
-/// playbook's handle row). Before that it refuses every query but its reference date; after it, it answers through its
-/// curve with its own range and extrapolation flag, and every copy of it shares the link. A <see cref="MultiCurve"/> is
+/// playbook's handle row). Before that it answers its reference date and day counter, both given when it is created,
+/// and the times they measure, and refuses every query that needs its curve; after it, it answers through its curve with
+/// its own range and extrapolation flag, and every copy of it shares the link. A <see cref="MultiCurve"/> is
 /// an immutable builder whose second <c>Build</c> refuses, and a <c>Build</c> that fails links no member. A guess
 /// function that prices a helper on a bootstrapped member added after its own curve, directly or through an
 /// extrapolating copy, is refused with nanoql's text, since that member's curve isn't set up yet; QuantLib's guess
@@ -31,7 +32,7 @@ public class MultiCurveMemberTests
     {
         var member = new MultiCurveMember(Spot, Act365);
 
-        // its reference date is the one thing it answers
+        // it answers its reference date (and its day counter, AMembersDayCounterIsTheOneItWasCreatedWith)
         Assert.Equal(Spot, member.ReferenceDate);
         Action[] queries =
         [
@@ -41,10 +42,8 @@ public class MultiCurveMemberTests
             () => _ = member.ForwardRate(1.0, 2.0, Compounding.Continuous),
             () => _ = member.MaxDate,
             () => _ = member.MaxTime,
-            () => _ = member.DayCounter,
             () => _ = member.Calendar,
             () => _ = member.SettlementDays,
-            () => _ = member.TimeFromReference(Spot + 30),
             () => _ = member.JumpDates(),
             () => _ = member.JumpTimes(),
         ];
@@ -76,6 +75,27 @@ public class MultiCurveMemberTests
                 () => new MultiCurve(1e-10).AddNonBootstrappedCurve(member, new FlatForward(Spot, 0.03, Act365)))
                 .ParamName);
         Assert.Equal(curve.Discount(3.0), member.Discount(3.0));
+    }
+
+    [Fact]
+    public void AMembersDayCounterIsTheOneItWasCreatedWith()
+    {
+        var member = new MultiCurveMember(Spot, Act365);
+
+        // before Build: the day counter it was created with, and the times it measures with it
+        Assert.Equal(Act365, member.DayCounter);
+        Assert.Equal(Act365.YearFraction(Spot, Spot + 30), member.TimeFromReference(Spot + 30));
+
+        // so a curve that follows it reads it now, as the spreaded curve does
+        var spreaded = new ZeroSpreadedTermStructure(member, 0.01);
+        Assert.Equal(Act365, spreaded.DayCounter);
+
+        // after Build: the same, which Build checked its curve has
+        YieldTermStructure curve = new MultiCurve(1e-10).AddBootstrappedCurve<Discount, LogLinear>(
+            member, Spot, Helpers(), Act365).Build(Context)[0];
+        Assert.Equal(Act365, member.DayCounter);
+        Assert.Equal(curve.DayCounter, member.DayCounter);
+        Assert.Equal(curve.TimeFromReference(Spot + 30), member.TimeFromReference(Spot + 30));
     }
 
     [Fact]

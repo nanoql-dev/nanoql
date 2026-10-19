@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/piecewiseyieldcurve.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the consistency cases' bond check, which waits for S-bond's FixedRateBond, their FRA and futures checks, which wait for S-rx's ForwardRateAgreement, and testBMACurveConsistency, which waits for batch 2's USDLibor; testDefaultInstantiation's ForwardFlat curve (S-cds) and ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testHelperDatesFromNonBusinessEvaluationDate's BMA helper check, which waits for batch 2's USDLibor; testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testParFraRegression, testMultiCurveTwoPiecewiseYieldCurves and testFraForDates (S-rx); testMultiCurvePiecewiseYieldCurveAndSpreadedCurve (S-bond); testPiecewiseSpreadYieldCurve (B3.5); testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate and testBmaHelperSwap (batch 2's Libor indexes); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
+// Partial: the consistency cases' bond check, which waits for S-bond's FixedRateBond, their FRA and futures checks, which wait for S-rx's ForwardRateAgreement, and testBMACurveConsistency, which waits for batch 2's USDLibor; testDefaultInstantiation's ForwardFlat curve (S-cds) and ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testHelperDatesFromNonBusinessEvaluationDate's BMA helper check, which waits for batch 2's USDLibor; testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testParFraRegression, testMultiCurveTwoPiecewiseYieldCurves and testFraForDates (S-rx); testPiecewiseSpreadYieldCurve (B3.5); testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate and testBmaHelperSwap (batch 2's Libor indexes); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
 // Replaced: testObservability (Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -621,6 +621,85 @@ public class PiecewiseYieldCurveTests
         }
 
         Assert.Equal(1, initialGuessCalls);
+    }
+
+    // Adapted: the empty internal handles (lines 1771-1772) are the cycle's members, each created with the reference
+    // date and day counter of the curve it is linked to; the bootstrapped curve, which QuantLib builds and then adds
+    // (lines 1791-1793), is added with its arguments, and Build builds it, links both members and returns the two
+    // curves QuantLib's adds return (lines 1793, 1797); the swaps' engine (line 1816) is a static call.
+    [Fact]
+    public void TestMultiCurvePiecewiseYieldCurveAndSpreadedCurve()
+    {
+        // Testing multicurve bootstrap with piecewise yield curve and spreaded curve...
+
+        var vars = new CommonVars(new Date(23, October, 2025));
+
+        const double accuracy = 1E-10;
+
+        var intcurveois = new MultiCurveMember(vars.Today, new Actual360());
+        var intcurve3m = new MultiCurveMember(vars.Today, new Actual360());
+
+        var euribor3m = new Euribor3M(intcurve3m);
+
+        var helpers3m = new List<RateHelper>();
+
+        Real q = 0.03;
+        Real b = -0.01;
+
+        for (int i = 1; i <= 10; ++i)
+        {
+            helpers3m.Add(new SwapRateHelper(
+                q,
+                new Period(i, TimeUnit.Years),
+                euribor3m.FixingCalendar,
+                Frequency.Annual,
+                BusinessDayConvention.Following,
+                new Thirty360(Thirty360Convention.BondBasis),
+                euribor3m,
+                vars.Context,
+                fwdStart: new Period(0, TimeUnit.Days),
+                discountingCurve: intcurveois));
+        }
+
+        // the spreaded curve reads its member's reference date and day counter now, before the cycle is built
+        YieldTermStructure ptrois = new ZeroSpreadedTermStructure(intcurve3m, b);
+
+        var curves = new MultiCurve(accuracy)
+            .AddBootstrappedCurve<Discount, LogLinear>(
+                intcurve3m,
+                vars.Today,
+                helpers3m,
+                new Actual360(),
+                i: default(LogLinear),
+                bootstrap: new GlobalBootstrap(accuracy))
+            .AddNonBootstrappedCurve(intcurveois, ptrois)
+            .Build(vars.Context);
+        YieldTermStructure curve3m = curves[0], curveois = curves[1];
+
+        // check spread ois 3m
+
+        const double tolerance = 1E-10;
+
+        CheckClose(
+            curveois.ZeroRate(1.0, Compounding.Continuous).Rate - curve3m.ZeroRate(1.0, Compounding.Continuous).Rate,
+            b,
+            tolerance);
+
+        // check instrument npvs
+
+        for (int i = 1; i <= 10; ++i)
+        {
+            VanillaSwap swap = new MakeVanillaSwap(new Period(i, TimeUnit.Years), euribor3m)
+                .WithFixedRate(q)
+                .WithSettlementDays(euribor3m.FixingDays)
+                .WithFixedLegDayCount(new Thirty360(Thirty360Convention.BondBasis))
+                .WithFixedLegTenor(new Period(1, TimeUnit.Years))
+                .WithFixedLegConvention(BusinessDayConvention.Following)
+                .WithFixedLegTerminationDateConvention(BusinessDayConvention.Following)
+                .ToVanillaSwap(vars.Context);
+            Real npv = DiscountingSwapEngine.Calculate(swap, vars.Context, curveois).NPV!.Value;
+            Assert.True(Math.Abs(npv) <= tolerance, $"swap {i}Y: NPV {npv:R} isn't within {tolerance:R} of 0");
+        }
     }
 
     // Adapted: the additional penalties read the helpers from the working state, whose additional helpers are the

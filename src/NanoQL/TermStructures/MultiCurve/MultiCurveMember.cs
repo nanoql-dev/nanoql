@@ -23,12 +23,14 @@ namespace NanoQL.TermStructures;
 /// on a copy taken before <c>Build</c> prices after it.
 /// </para>
 /// <para>
-/// Before <c>Build</c>, every query refuses, "multicurve member not built"; its reference date, given when it is
-/// created, is the one thing it answers. After <c>Build</c>, a query is checked against the member's own range and
+/// Before <c>Build</c>, a member answers its reference date and day counter, both given when it is created, and the
+/// times they measure (<see cref="TermStructure.TimeFromReference"/>), and refuses every query that needs its curve,
+/// "multicurve member not built". After <c>Build</c>, a query is checked against the member's own range and
 /// extrapolation flag, then forwarded to the curve it is linked to with extrapolation allowed, so the member's flag
-/// rules; its day counter, calendar, settlement days and jumps are that curve's. <c>Build</c> links it only to a curve
-/// with its reference date and day counter, since it measures a date's time from its own reference date with its own
-/// day counter and the curve reads that time against its own.
+/// rules; its calendar, settlement days and jumps are that curve's. <c>Build</c> links it only to a curve with its
+/// reference date and day counter, since it measures a date's time from its own reference date with its own day
+/// counter and the curve reads that time against its own; so its day counter is the one it was created with, before
+/// <c>Build</c> and after.
 /// </para>
 /// <para>
 /// <c>Build</c> writes the members' working state while their handles are linked, so no other thread may read a member
@@ -50,9 +52,11 @@ public sealed class MultiCurveMember : YieldTermStructure
     {
     }
 
-    /// <inheritdoc/>
-    /// <exception cref="NanoQLException">The member isn't built.</exception>
-    public override DayCounter DayCounter => Curve.DayCounter;
+    /// <summary>
+    /// Gets the day counter the member was created with, before <c>Build</c> and after: <c>Build</c> links the member
+    /// only to a curve with this day counter.
+    /// </summary>
+    public override DayCounter DayCounter => base.DayCounter;
 
     /// <inheritdoc/>
     /// <exception cref="NanoQLException">The member isn't built.</exception>

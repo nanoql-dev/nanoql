@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/interestrate.hpp ql/interestrate.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: discountFactorFirstDerivative and discountFactorSecondDerivative, which wait for the slot that ports the cash-flow duration and convexity, whose wheel functions check them
 
 using System.Globalization;
 using NanoQL.Time;
@@ -200,6 +199,64 @@ public sealed record InterestRate
         RequireDates(d1, d2, refStart, refEnd);
         double t = DayCounter.YearFraction(d1, d2, refStart, refEnd);
         return CompoundFactor(t);
+    }
+
+    /// <summary>The first derivative of the discount factor at a time with respect to the rate.</summary>
+    /// <param name="t">The time, measured by the rate's day counter.</param>
+    /// <returns>The derivative.</returns>
+    /// <exception cref="ArgumentException">The time is negative.</exception>
+    /// <exception cref="NanoQLException">The rule is simple then compounded or compounded then simple.</exception>
+    public double DiscountFactorFirstDerivative(double t)
+    {
+        double discount = DiscountFactor(t);
+        switch (Compounding)
+        {
+            case Compounding.Simple:
+                return -t * discount * discount;
+            case Compounding.Compounded:
+                {
+                    double freq = (double)Frequency;
+                    double compound = 1 + (Rate / freq);
+                    return -t * discount / compound;
+                }
+
+            case Compounding.Continuous:
+                return -t * discount;
+            case Compounding.SimpleThenCompounded:
+            case Compounding.CompoundedThenSimple:
+                throw new NanoQLException($"{Compounding} is not supported for direct calculations: use the CashFlow methods");
+            default:
+                throw new NanoQLException("unknown compounding convention");
+        }
+    }
+
+    /// <summary>The second derivative of the discount factor at a time with respect to the rate.</summary>
+    /// <param name="t">The time, measured by the rate's day counter.</param>
+    /// <returns>The derivative.</returns>
+    /// <exception cref="ArgumentException">The time is negative.</exception>
+    /// <exception cref="NanoQLException">The rule is simple then compounded or compounded then simple.</exception>
+    public double DiscountFactorSecondDerivative(double t)
+    {
+        double discount = DiscountFactor(t);
+        switch (Compounding)
+        {
+            case Compounding.Simple:
+                return 2.0 * t * t * discount * discount * discount;
+            case Compounding.Compounded:
+                {
+                    double freq = (double)Frequency;
+                    double compound = 1 + (Rate / freq);
+                    return discount * t * ((freq * t) + 1.0) / (freq * compound * compound);
+                }
+
+            case Compounding.Continuous:
+                return t * t * discount;
+            case Compounding.SimpleThenCompounded:
+            case Compounding.CompoundedThenSimple:
+                throw new NanoQLException($"{Compounding} is not supported for direct calculations: use the CashFlow methods");
+            default:
+                throw new NanoQLException("unknown compounding convention");
+        }
     }
 
     /// <summary>The equivalent rate for a compounding period of a time, with the rate's own day counter.</summary>
