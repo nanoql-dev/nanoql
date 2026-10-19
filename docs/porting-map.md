@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,089 | 143 |
-| partial | 17 | 27 |
-| ported | 166 | 12 |
+| not started | 1,081 | 142 |
+| partial | 16 | 28 |
+| ported | 175 | 12 |
 | replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
@@ -646,7 +646,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `doublebarriertype` | not started |  | no nanoql type: DoubleBarrierType |
 | `equitytotalreturnswap` | not started |  | no nanoql type: EquityTotalReturnSwap |
 | `europeanoption` | not started |  | no nanoql type: EuropeanOption |
-| `fixedvsfloatingswap` | ported | Instruments/FixedVsFloatingSwap.cs, Instruments/FixedVsFloatingSwapResults.cs |  |
+| `fixedvsfloatingswap` | ported | Instruments/FixedVsFloatingSwap.cs, Instruments/FixedVsFloatingSwapArguments.cs, Instruments/FixedVsFloatingSwapResults.cs |  |
 | `floatfloatswap` | not started |  | no nanoql type: FloatFloatSwap, FloatFloatSwapResults |
 | `floatfloatswaption` | not started |  | no nanoql type: FloatFloatSwaption |
 | `forward` | not started |  | no nanoql type: Forward, ForwardTypePayoff |
@@ -913,9 +913,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `lmdif` | ported | Numerics/Optimization/LmdifFunctions.cs |  |
 | `method` | ported | Numerics/Optimization/OptimizationMethod.cs |  |
 | `problem` | ported | Numerics/Optimization/Problem/Problem.cs, Numerics/Optimization/Problem/ProblemResults.cs, Numerics/Optimization/Problem/ProblemState.cs |  |
-| `projectedconstraint` | not started |  | no nanoql type: ProjectedConstraint |
+| `projectedconstraint` | ported | Numerics/Optimization/ProjectedConstraint.cs |  |
 | `projectedcostfunction` | not started |  | no nanoql type: ProjectedCostFunction |
-| `projection` | not started |  | no nanoql type: Projection |
+| `projection` | ported | Numerics/Optimization/Projection.cs |  |
 | `simplex` | ported | Numerics/Optimization/Simplex.cs |  |
 | `simulatedannealing` | not started |  | no nanoql type: SimulatedAnnealing, SimulatedAnnealingScheme |
 | `spherecylinder` | not started |  | no nanoql type: SphereCylinderOptimizer |
@@ -1183,8 +1183,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `calibrationhelper` | not started |  | no nanoql type: CalibrationHelper, BlackCalibrationHelper, BlackCalibrationHelperCalibrationErrorType |
-| `model` | partial | Models/Model/CalibratedModel.cs, Models/Model/CalibratedModelExtensions.cs, Models/Model/IAffineModel.cs, Models/Model/ICalibratedModel.cs, Models/Model/ITermStructureConsistentModel.cs, Models/Model/ShortRateModel.cs | partial: calibrate and value, with their cost function, which wait for the calibration helpers and the cases that calibrate; no nanoql type: AffineModel, TermStructureConsistentModel, CalibratedModelPrivateConstraint |
+| `calibrationhelper` | ported | Models/CalibrationHelper/BlackCalibrationHelper.cs, Models/CalibrationHelper/BlackCalibrationHelperCalibrationErrorType.cs, Models/CalibrationHelper/CalibrationHelper.cs |  |
+| `model` | ported | Models/Model/CalibratedModel.cs, Models/Model/CalibratedModelExtensions.cs, Models/Model/CalibrationFunction.cs, Models/Model/CalibrationResults{TModel}.cs, Models/Model/IAffineModel.cs, Models/Model/ICalibratedModel.cs, Models/Model/ITermStructureConsistentModel.cs, Models/Model/ShortRateModel.cs | no nanoql type: AffineModel, TermStructureConsistentModel, CalibratedModelPrivateConstraint |
 | `parameter` | ported | Models/Parameter/ConstantParameter.cs, Models/Parameter/NullParameter.cs, Models/Parameter/Parameter.cs, Models/Parameter/PiecewiseConstantParameter.cs, Models/Parameter/TermStructureFittingParameter.cs | no nanoql type: TermStructureFittingParameterNumericalImpl |
 
 ### `ql/models/equity/`
@@ -1410,7 +1410,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `caphelper` | not started |  | no nanoql type: CapHelper |
-| `swaptionhelper` | not started |  | no nanoql type: SwaptionHelper |
+| `swaptionhelper` | ported | Models/ShortRate/CalibrationHelpers/SwaptionHelper.cs |  |
 
 ### `ql/models/shortrate/onefactormodels/`
 
@@ -1643,7 +1643,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `cvaswapengine` | not started |  | no nanoql type: CounterpartyAdjSwapEngine |
 | `discountingconstnotionalcrosscurrencyswapengine` | not started |  | no nanoql type: DiscountingConstNotionalCrossCurrencySwapEngine |
 | `discountingswapengine` | ported | PricingEngines/Swap/DiscountingSwapEngine.cs |  |
-| `discretizedswap` | not started |  | no nanoql type: DiscretizedSwap |
+| `discretizedswap` | ported | PricingEngines/Swap/DiscretizedSwap.cs |  |
 | `treeswapengine` | not started |  | no nanoql type: TreeVanillaSwapEngine |
 
 ### `ql/pricingengines/swaption/`
@@ -1653,7 +1653,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `basketgeneratingengine` | not started |  | no nanoql type: BasketGeneratingEngine, BasketGeneratingEngineCalibrationBasketType |
 | `blackswaptionengine` | ported | PricingEngines/Swaption/BlackSwaptionEngine/BachelierSpec.cs, PricingEngines/Swaption/BlackSwaptionEngine/BachelierSwaptionEngine.cs, PricingEngines/Swaption/BlackSwaptionEngine/Black76Spec.cs, PricingEngines/Swaption/BlackSwaptionEngine/BlackStyleSwaptionEngine{TSpec}.cs, PricingEngines/Swaption/BlackSwaptionEngine/BlackSwaptionEngine.cs, PricingEngines/Swaption/BlackSwaptionEngine/CashAnnuityModel.cs, PricingEngines/Swaption/BlackSwaptionEngine/IBlackStyleSwaptionSpec.cs |  |
-| `discretizedswaption` | not started |  | no nanoql type: DiscretizedSwaption |
+| `discretizedswaption` | ported | PricingEngines/Swaption/DiscretizedSwaption.cs |  |
 | `fdg2swaptionengine` | not started |  | no nanoql type: FdG2SwaptionEngine |
 | `fdhullwhiteswaptionengine` | not started |  | no nanoql type: FdHullWhiteSwaptionEngine |
 | `g2swaptionengine` | not started |  | no nanoql type: G2SwaptionEngine |
@@ -1661,8 +1661,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `gaussian1djamshidianswaptionengine` | not started |  | no nanoql type: Gaussian1dJamshidianSwaptionEngine |
 | `gaussian1dnonstandardswaptionengine` | not started |  | no nanoql type: Gaussian1dNonstandardSwaptionEngine, Gaussian1dNonstandardSwaptionEngineProbabilities |
 | `gaussian1dswaptionengine` | not started |  | no nanoql type: Gaussian1dSwaptionEngine, Gaussian1dSwaptionEngineProbabilities |
-| `jamshidianswaptionengine` | not started |  | no nanoql type: JamshidianSwaptionEngine |
-| `treeswaptionengine` | not started |  | no nanoql type: TreeSwaptionEngine |
+| `jamshidianswaptionengine` | ported | PricingEngines/Swaption/JamshidianSwaptionEngine.cs |  |
+| `treeswaptionengine` | ported | PricingEngines/Swaption/TreeSwaptionEngine.cs |  |
 
 ### `ql/pricingengines/vanilla/`
 
@@ -2073,7 +2073,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `basisswapratehelpers` | not started |  | 24 cases |
 | `basketoption` | not started |  | 25 cases |
 | `batesmodel` | not started |  | 4 cases |
-| `bermudanswaption` | not started |  | 6 cases |
+| `bermudanswaption` | partial | TestSuite/BermudanSwaptionTests.cs | 1 of 6 cases; not yet: testCachedG2Values, testTreeEngineTimeSnapping, testBermudanOISSwaptionWithHW, testBermudanOISSwaptionWithG2, testBermudanOISSwaptionPreservesFeatures |
 | `binaryoption` | not started |  | 3 cases |
 | `blackcalculator` | not started |  | 6 cases |
 | `blackdeltacalculator` | not started |  | 4 cases |
@@ -2220,7 +2220,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rounding` | ported | TestSuite/RoundingTests.cs | 5 of 5 cases |
 | `schedule` | partial | TestSuite/ScheduleTests.cs | 20 of 28 cases; not yet: testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured |
 | `settings` | not ported: tests Settings, which EvaluationContext replaces |  |  |
-| `shortratemodels` | partial | TestSuite/ShortRateModelsTests.cs | 3 of 9 cases; replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks by Conventions/ModelRebuildTests.cs; not yet: testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks, testCachedHullWhite, testCachedHullWhiteFixedReversion, testCachedHullWhite2, testSwaps, testExtendedCoxIngersollRossDiscountFactor |
+| `shortratemodels` | partial | TestSuite/ShortRateModelsTests.cs | 6 of 9 cases; replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks by Conventions/ModelRebuildTests.cs; not yet: testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks, testSwaps, testExtendedCoxIngersollRossDiscountFactor |
 | `sofrfutures` | not started |  | 6 cases |
 | `softbarrieroption` | not started |  | 1 cases |
 | `solvers` | partial | TestSuite/SolversTests.cs | 3 of 9 cases; not yet: testBisection, testFalsePosition, testNewton, testRidder, testSecant, testHalley |

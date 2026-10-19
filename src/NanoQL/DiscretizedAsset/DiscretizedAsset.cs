@@ -236,7 +236,11 @@ public abstract class DiscretizedAsset
     }
 
     /// <summary>Indicates whether a coupon is adjusted in <see cref="PreAdjustValues"/> or <see cref="PostAdjustValues"/>.</summary>
-    protected enum CouponAdjustment
+    /// <remarks>
+    /// <c>protected internal</c>, where QuantLib's is protected: the discretized swaption passes its snapped coupons'
+    /// adjustments to the discretized swap's internal constructor, which C# refuses a protected type (CS0051).
+    /// </remarks>
+    protected internal enum CouponAdjustment
     {
         /// <summary>In the pre-adjustment.</summary>
         Pre = 0,

@@ -117,11 +117,22 @@ Facts:
 
 [`Divergences/CalibratedModelSideEffectTests.cs`](../tests/NanoQL.Tests/Divergences/CalibratedModelSideEffectTests.cs)
 
-What QuantLib's calibrated model changes in itself. Its `setParams` writes each parameter as it reaches it (`model.cpp:138-149`): an array too short sets the leading parameters before refusing "parameter array too small", one too long sets them all before refusing "parameter array too big!" (the wheel: `[0.2, 0.01]` and `[0.2, 0.02]` left on a Hull-White model from `[0.1, 0.01]`). nanoql's models are immutable: `SetParams` returns a new model, and refuses both with QuantLib's texts before anything is written, so the receiver keeps its parameters.
+What QuantLib's calibrated model changes in itself. Its `setParams` writes each parameter as it reaches it (`model.cpp:138-149`): an array too short sets the leading parameters before refusing "parameter array too small", one too long sets them all before refusing "parameter array too big!" (the wheel: `[0.2, 0.01]` and `[0.2, 0.02]` left on a Hull-White model from `[0.1, 0.01]`). Its `value` sets the parameters it is given into the model before it prices the helpers (`model.cpp:46-47, 117-124`), so the model is left at them, and the helpers whose engines hold it price at them afterwards. nanoql's models are immutable: `SetParams` returns a new model, and refuses both with QuantLib's texts before anything is written, so the receiver keeps its parameters; and `Value` prices against a new model with the parameters and changes nothing.
 
 Facts:
 
 - `ARefusedSetParamsLeavesTheModelUnchanged`
+- `ValueLeavesTheModelUnchanged`
+
+## CalibrationNullHelperTests
+
+[`Divergences/CalibrationNullHelperTests.cs`](../tests/NanoQL.Tests/Divergences/CalibrationNullHelperTests.cs)
+
+A null helper among a calibration's. QuantLib's `calibrate` and `value` take a vector of helper pointers, which may hold a null one, and the calibration function dereferences each at its first evaluation (`model.cpp:49-51, 59-61`), undefined for a null pointer (the wheel's binding refuses `None` before the call). nanoql's `Calibrate` and `Value` copy the helpers and refuse a null one first, with `ArgumentException`, "null calibration helper", naming `helpers`.
+
+Facts:
+
+- `ANullHelperIsRefused`
 
 ## CappedFlooredCouponNullUnderlyingTests
 
@@ -410,6 +421,7 @@ Facts:
 - `ASwaptionBuildersStrikeOfQuantLibsNullIsAStrike`
 - `ABondsAtmRatePriceOfQuantLibsNullIsAPrice`
 - `ALegsAtmRateTargetOfQuantLibsNullIsATarget`
+- `ASwaptionHelpersStrikeOfQuantLibsNullIsAStrike`
 
 ## OptionDateFromTimeTests
 
@@ -554,13 +566,14 @@ Facts:
 
 [`Divergences/SettlementDaysSentinelTests.cs`](../tests/NanoQL.Tests/Divergences/SettlementDaysSentinelTests.cs)
 
-Settlement days are an `int`, or an `int?` where QuantLib may leave them unset, so `int.MaxValue` is a value. QuantLib reads its null sentinel, `Null<Natural>()`, which equals `INT_MAX`, as "not given": a swap rate helper given it starts at the index's spot date (`ratehelpers.cpp:573-575`), and an OIS rate helper at its swap builder's default spot (`oisratehelper.cpp:167-169`), each 18 June 2025 from 16 June. nanoql counts that many days from the evaluation date, and the date leaves its range.
+Settlement days are an `int`, or an `int?` where QuantLib may leave them unset, so `int.MaxValue` is a value. QuantLib reads its null sentinel, `Null<Natural>()`, which equals `INT_MAX`, as "not given": a swap rate helper given it starts at the index's spot date (`ratehelpers.cpp:573-575`), and an OIS rate helper at its swap builder's default spot (`oisratehelper.cpp:167-169`), each 18 June 2025 from 16 June; and a swaption helper starts its swap at the index's value date (`swaptionhelper.cpp:161-167`), whose settlement days' value it never reads. nanoql counts that many days from the evaluation date, and the date leaves its range; its swaption helper takes the path of any settlement days given.
 
 Facts:
 
 - `SettlementDaysOfIntMaxValueAreAValue`
 - `OisSettlementDaysOfIntMaxValueAreAValue`
 - `AFloatingRateBondsFixingDaysOfIntMaxValueAreAValue`
+- `ASwaptionHelpersSettlementDaysOfIntMaxValueAreAValue`
 
 ## SharedPricerStateTests
 
@@ -657,6 +670,26 @@ Facts:
 - `MakeVanillaSwapRefusesANullIndex`
 - `NegativeCountsAreRefused`
 
+## SwaptionHelperArgumentTests
+
+[`Divergences/SwaptionHelperArgumentTests.cs`](../tests/NanoQL.Tests/Divergences/SwaptionHelperArgumentTests.cs)
+
+A swaption helper on a null index. QuantLib's constructors keep the index unchecked and its first calculation dereferences it (`swaptionhelper.cpp:153`), which the wheel's build refuses with "Boost assertion failed: px != 0" at the helper's first use, its construction succeeding. nanoql's helper computes at construction and refuses the null index there, with `ArgumentNullException` naming it, in each constructor.
+
+Facts:
+
+- `ANullIndexIsRefusedAtConstruction`
+
+## SwaptionHelperAtParTests
+
+[`Divergences/SwaptionHelperAtParTests.cs`](../tests/NanoQL.Tests/Divergences/SwaptionHelperAtParTests.cs)
+
+When a swaption helper reads the at-par switch. QuantLib's helper builds its swaps, whose Ibor legs read the global switch, at its first calculation and again at each recalculation after a notification (`swaptionhelper.cpp:152-199, 212-214`; `calibrationhelper.hpp:73`), so a helper built at par gives the indexed swap's values once the switch is flipped and its quote moves (the wheel: a 1Y x 5Y helper's market value 0.011261310927040481 at par, then 0.011261495561724687, the value of a helper built with indexed coupons). nanoql's helper builds its swaps under the context it is given at construction, and keeps them: its prices under a context with the other switch are its own swap's.
+
+Facts:
+
+- `TheAtParSwitchIsReadAtConstruction`
+
 ## SwaptionImpliedVolatilityTests
 
 [`Divergences/SwaptionImpliedVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/SwaptionImpliedVolatilityTests.cs)
@@ -719,6 +752,16 @@ QuantLib's `TimeSeries::find` inserts a date the series doesn't hold, with a `Nu
 Facts:
 
 - `LookingUpAMissingDateLeavesTheSeriesUnchanged`
+
+## TreeSwaptionEngineExerciseTimeTests
+
+[`Divergences/TreeSwaptionEngineExerciseTimeTests.cs`](../tests/NanoQL.Tests/Divergences/TreeSwaptionEngineExerciseTimeTests.cs)
+
+A swaption with no exercise time on or after the reference date, priced on a lattice that initializes an asset at a negative time. QuantLib's tree engine initializes the swaption at its last exercise time and rolls it back to the first time not before the reference date, read through `*std::find_if` (`treeswaptionengine.cpp:88-93`), which reads past the times when none is: undefined. Its own lattices refuse the negative time first, at the initialization ("using inadequate time grid"), but a lattice of one's own may not, as a short-rate model of one's own may build. nanoql refuses it there, with `NanoQLException`, "no exercise time on or after the reference date".
+
+Facts:
+
+- `NoExerciseTimeOnOrAfterTheReferenceDateIsRefused`
 
 ## TridiagonalOperatorSizeOneTests
 

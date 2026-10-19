@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Indexes;
+using NanoQL.Models;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 
@@ -12,8 +13,10 @@ namespace NanoQL.Tests.Divergences;
 /// <see cref="int.MaxValue"/> is a value. QuantLib reads its null sentinel, <c>Null&lt;Natural&gt;()</c>, which equals
 /// <c>INT_MAX</c>, as "not given": a swap rate helper given it starts at the index's spot date
 /// (<c>ratehelpers.cpp:573-575</c>), and an OIS rate helper at its swap builder's default spot
-/// (<c>oisratehelper.cpp:167-169</c>), each 18 June 2025 from 16 June. nanoql counts that many days from the evaluation
-/// date, and the date leaves its range.
+/// (<c>oisratehelper.cpp:167-169</c>), each 18 June 2025 from 16 June; and a swaption helper starts its swap at the
+/// index's value date (<c>swaptionhelper.cpp:161-167</c>), whose settlement days' value it never reads. nanoql counts
+/// that many days from the evaluation date, and the date leaves its range; its swaption helper takes the path of any
+/// settlement days given.
 /// </summary>
 public class SettlementDaysSentinelTests
 {
@@ -76,5 +79,35 @@ public class SettlementDaysSentinelTests
         Assert.Equal(new Date(16, Month.June, 2025), first.FixingDate());
         Assert.Equal(2, first.FixingDays);
         Assert.ThrowsAny<ArgumentException>(() => Bond(int.MaxValue));
+    }
+
+    /// <summary>
+    /// For an exercise on Saturday 18 January 2025, QuantLib's helper with settlement days of the sentinel starts its
+    /// swap at the index's value date, 22 January, as with none; with any value, 0, 2 or 5 alike, it starts the index's
+    /// fixing days after the exercise, 21 January.
+    /// </summary>
+    [Fact]
+    public void ASwaptionHelpersSettlementDaysOfIntMaxValueAreAValue()
+    {
+        var context = new EvaluationContext { EvaluationDate = new Date(15, Month.January, 2025) };
+        var curve = new FlatForward(context.EvaluationDate, 0.03, new Actual365Fixed());
+
+        Date Start(int? settlementDays) => new SwaptionHelper(
+                new Date(18, Month.January, 2025),
+                new Period(5, TimeUnit.Years),
+                0.2,
+                new Euribor6M(curve),
+                new Period(1, TimeUnit.Years),
+                new Thirty360(Thirty360Convention.BondBasis),
+                new Actual360(),
+                curve,
+                context,
+                settlementDays: settlementDays)
+            .Underlying.FixedSchedule.Dates[0];
+
+        // QuantLib's value for INT_MAX, which nanoql gives for no settlement days
+        Assert.Equal(new Date(22, Month.January, 2025), Start(null));
+        Assert.Equal(new Date(21, Month.January, 2025), Start(int.MaxValue));
+        Assert.Equal(new Date(21, Month.January, 2025), Start(2));
     }
 }

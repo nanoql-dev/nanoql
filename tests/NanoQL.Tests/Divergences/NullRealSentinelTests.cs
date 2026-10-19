@@ -3,6 +3,7 @@
 
 using NanoQL.Indexes;
 using NanoQL.Instruments;
+using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
@@ -248,5 +249,40 @@ public class NullRealSentinelTests
             2, 100.0, schedule, [0.05], new Thirty360(Thirty360Convention.BondBasis), BusinessDayConvention.Following,
             100.0, new Date(15, Month.March, 2022));
         return (bond, new FlatForward(today, 0.04, new Actual365Fixed()), context);
+    }
+
+    /// <summary>
+    /// A swaption helper's strike: QuantLib's helper reads a strike equal to the sentinel, its default, as none
+    /// (<c>swaptionhelper.cpp:189-194</c>) and strikes at the money, its zero-rate swap's fair rate: for
+    /// test-suite/shortratemodels.cpp's 1Y x 5Y helper, a receiver at 0.04999591410983986, worth 0.009485292983139233.
+    /// nanoql's strike of the sentinel is a strike, above the forward, so the swap is a payer at it.
+    /// </summary>
+    [Fact]
+    public void ASwaptionHelpersStrikeOfQuantLibsNullIsAStrike()
+    {
+        var context = new EvaluationContext { EvaluationDate = new Date(15, Month.February, 2002) };
+        var curve = new FlatForward(new Date(19, Month.February, 2002), 0.04875825, new Actual365Fixed());
+
+        SwaptionHelper Helper(double? strike) => new(
+            new Period(1, TimeUnit.Years),
+            new Period(5, TimeUnit.Years),
+            0.1148,
+            new Euribor6M(curve),
+            new Period(1, TimeUnit.Years),
+            new Thirty360(Thirty360Convention.BondBasis),
+            new Actual360(),
+            curve,
+            context,
+            strike: strike);
+
+        SwaptionHelper struck = Helper(NullReal);
+        Assert.Equal(NullReal, struck.Underlying.FixedRate);
+        Assert.Equal(SwapType.Payer, struck.Underlying.Type);
+
+        // Only null is the at-the-money strike: QuantLib's values for the sentinel.
+        SwaptionHelper atTheMoney = Helper(null);
+        Assert.Equal(0.04999591410983986, atTheMoney.Underlying.FixedRate);
+        Assert.Equal(SwapType.Receiver, atTheMoney.Underlying.Type);
+        Assert.Equal(0.009485292983139233, atTheMoney.MarketValue);
     }
 }
