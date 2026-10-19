@@ -50,4 +50,31 @@ public class SettlementDaysSentinelTests
         Assert.Equal(new Date(18, Month.June, 2025), Helper(2).EarliestDate);
         Assert.Throws<ArgumentOutOfRangeException>(() => Helper(int.MaxValue));
     }
+
+    /// <summary>
+    /// A floating-rate bond's fixing days: QuantLib reads <c>fixingDays = Null&lt;Natural&gt;()</c>, its default, as the
+    /// index's (<c>floatingratebond.hpp:50</c>, through the Ibor leg), so a bond given <c>INT_MAX</c> fixes its first
+    /// coupon two TARGET days before its start, on 16 June 2025; one day fewer leaves the dates' range. nanoql's fixing
+    /// days are an <c>int?</c>, whose <see langword="null"/> is the index's, so <see cref="int.MaxValue"/> is a value,
+    /// and the fixing date leaves the range.
+    /// </summary>
+    [Fact]
+    public void AFloatingRateBondsFixingDaysOfIntMaxValueAreAValue()
+    {
+        var today = new Date(16, Month.June, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+        var index = new Euribor6M(new FlatForward(today, 0.03, new Actual365Fixed()));
+        var schedule = new Schedule(
+            new Date(18, Month.June, 2025), new Date(18, Month.June, 2027), new Period(6, TimeUnit.Months), new TARGET(),
+            BusinessDayConvention.Following, BusinessDayConvention.Following, DateGenerationRule.Backward, false, context);
+
+        NanoQL.Instruments.FloatingRateBond Bond(int? fixingDays) =>
+            new(2, 100.0, schedule, index, new Actual360(), context, fixingDays: fixingDays);
+
+        // QuantLib's value for INT_MAX, which nanoql gives for no fixing days
+        var first = (NanoQL.Coupons.FloatingRateCoupon)Bond(null).Cashflows[0];
+        Assert.Equal(new Date(16, Month.June, 2025), first.FixingDate());
+        Assert.Equal(2, first.FixingDays);
+        Assert.ThrowsAny<ArgumentException>(() => Bond(int.MaxValue));
+    }
 }

@@ -316,4 +316,20 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, $"unknown futures type (Unknown({(int)value}))");
         }
     }
+
+    /// <summary>Refuses a bond price type outside <see cref="BondPriceType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>
+    /// QuantLib stores any value and refuses it only where a switch reads it: its text is the callable bond's
+    /// (<c>callablebond.cpp:130</c>).
+    /// </remarks>
+    internal static void Check(BondPriceType value, string paramName)
+    {
+        if (value is not (BondPriceType.Dirty or BondPriceType.Clean))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown price type");
+        }
+    }
 }

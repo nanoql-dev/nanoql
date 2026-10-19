@@ -4,6 +4,7 @@
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Numerics;
+using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 using static NanoQL.PricingEngines.BlackFormulaFunctions;
@@ -193,5 +194,59 @@ public class NullRealSentinelTests
         // Only null is the at-the-money strike: QuantLib's value for the sentinel.
         Swaption atTheMoney = new MakeSwaption(index, new Period(1, TimeUnit.Years)).ToSwaption(context);
         Assert.Equal(0.03047147232859789, atTheMoney.Underlying.FixedRate);
+    }
+
+    /// <summary>
+    /// A bond's at-the-money rate for a price: QuantLib's <c>BondFunctions::atmRate</c> takes <c>Bond::Price()</c> by
+    /// default, whose amount is the sentinel, and reads a price whose amount is the sentinel as none
+    /// (<c>bondfunctions.cpp:291-303</c>), giving the rate at the bond's own value on the curve, 0.04999999999999983 for
+    /// this 5% bond (the wheel). nanoql's <see langword="null"/> price is none; a price of the sentinel is a price,
+    /// whose rate is that large.
+    /// </summary>
+    [Fact]
+    public void ABondsAtmRatePriceOfQuantLibsNullIsAPrice()
+    {
+        (Bond bond, YieldTermStructure curve, EvaluationContext context) = AtmRateBond();
+
+        // QuantLib's value for the sentinel, which nanoql gives for no price
+        Assert.Equal(0.04999999999999983, BondFunctions.AtmRate(bond, curve, context));
+        double rate = BondFunctions.AtmRate(bond, curve, context, null, new BondPrice(NullReal, BondPriceType.Clean));
+        Assert.True(rate > 1e30, $"rate {rate}");
+    }
+
+    /// <summary>
+    /// A leg's at-the-money rate for a target NPV: QuantLib's <c>CashFlows::atmRate</c> takes <c>npv =
+    /// Null&lt;Real&gt;()</c> by default and reads a target equal to the sentinel as none (<c>cashflows.cpp:530-535</c>),
+    /// giving the rate at the leg's own value, 0.04999999999999983 for this 5% bond's leg (the wheel). nanoql's
+    /// <see langword="null"/> target is none; a target of the sentinel is a target, whose rate is that large.
+    /// </summary>
+    [Fact]
+    public void ALegsAtmRateTargetOfQuantLibsNullIsATarget()
+    {
+        (Bond bond, YieldTermStructure curve, EvaluationContext context) = AtmRateBond();
+        Date settlement = bond.SettlementDate(context);
+
+        // QuantLib's value for the sentinel, which nanoql gives for no target
+        Assert.Equal(
+            0.04999999999999983,
+            NanoQL.Coupons.CashFlows.AtmRate(bond.Cashflows, curve, context, false, settlement, settlement));
+        double rate = NanoQL.Coupons.CashFlows.AtmRate(
+            bond.Cashflows, curve, context, false, settlement, settlement, NullReal);
+        Assert.True(rate > 1e30, $"rate {rate}");
+    }
+
+    // A 5% semiannual bond on a flat 4% curve, settling 18 June 2025.
+    private static (Bond Bond, YieldTermStructure Curve, EvaluationContext Context) AtmRateBond()
+    {
+        var today = new Date(16, Month.June, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+        var schedule = new Schedule(
+            new Date(15, Month.March, 2022), new Date(15, Month.March, 2029), new Period(6, TimeUnit.Months),
+            new TARGET(), BusinessDayConvention.Unadjusted, BusinessDayConvention.Unadjusted,
+            DateGenerationRule.Backward, false, context);
+        var bond = new FixedRateBond(
+            2, 100.0, schedule, [0.05], new Thirty360(Thirty360Convention.BondBasis), BusinessDayConvention.Following,
+            100.0, new Date(15, Month.March, 2022));
+        return (bond, new FlatForward(today, 0.04, new Actual365Fixed()), context);
     }
 }

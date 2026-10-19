@@ -96,10 +96,13 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs`: the constructor for a structure managing its own reference date, which waits for S8.
 - `src/NanoQL/TermStructures/Volatility/Swaption/SwaptionVolatilityStructure.cs`: the constructor for a structure managing its own reference date, which waits for its first user (B3.3's `SpreadedSwaptionVolatility`).
 - `src/NanoQL/TermStructures/VolatilityTermStructure.cs`: the constructor for a structure managing its own reference date, which waits for its first user (S8 or S-eq).
+- `src/NanoQL/TermStructures/Yield/BondHelpers/BondHelper.cs`: `CPIBondHelper`, with the inflation bond and coupon it is built on, which waits for S-infl.
 - `src/NanoQL/TermStructures/Yield/ZeroYieldStructure.cs`: the constructor taking a day counter only.
 - `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
+- `tests/NanoQL.Tests/TestSuite/AmortizingBondTests.cs`: `testBrazilianAmortizingFixedRateBond`, which waits for batch 2's Brazil calendar and `Business252` day counter.
+- `tests/NanoQL.Tests/TestSuite/BondsTests.cs`: `testCachedFloating`, which waits for batch 2's `USDLibor`; `testBrazilianCached`, which waits for batch 2's Brazil calendar and `Business252` day counter; and `testRiskyBondWithGivenDates`, which waits for B3.5's `RiskyBondEngine` and S-infl's `FlatHazardRate`.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for S-eq's Black-Scholes process.
 - `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
 - `tests/NanoQL.Tests/TestSuite/CapFlooredCouponTests.cs`: `testDecomposition`, which waits for S8's cap and floor instruments.
@@ -116,7 +119,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing, L-BFGS-B, differential evolution and CMA-ES cases, whose optimizers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/OvernightIndexedSwapTests.cs`: `testBootstrapRegression`, which waits for batch 2's `FedFunds`; `testMakeOisEndOfMonthRegression2453`, which waits for batch 2's `Aonia`; `testNonstandardSwapConversionPreservesObservationConventions`, which waits for B3.2's `NonstandardSwap`; and `testMakeOISDefaultSettlementDays`' lines for the indexes of batch 2 (EONIA, FedFunds, AONIA, SARON, NZOCR, DESTR, SWESTR, KOFR).
 - `tests/NanoQL.Tests/TestSuite/PathGeneratorTests.cs`: `testMultiPathGenerator`, which waits for `MultiPathGenerator` (B3.2).
-- `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: the consistency cases' bond check (S-bond), their FRA and futures checks (S-rx) and `testBMACurveConsistency` (batch 2's USDLibor); `testDefaultInstantiation`'s ForwardFlat (S-cds) and ConvexMonotone (B6.2) curves; `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (B6.2); `testHelperDatesFromNonBusinessEvaluationDate`'s BMA helper check (batch 2's USDLibor); and the cases that need B6.2's, S-rx's, S-bond's, B3.5's and batch 2's units.
+- `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: the consistency cases' FRA and futures checks (S-rx) and `testBMACurveConsistency` (batch 2's USDLibor); `testDefaultInstantiation`'s ForwardFlat (S-cds) and ConvexMonotone (B6.2) curves; `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (B6.2); `testHelperDatesFromNonBusinessEvaluationDate`'s BMA helper check (batch 2's USDLibor); and the cases that need B6.2's, S-rx's, B3.5's and batch 2's units.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
 - `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases, which need `cdsMaturity`.
 - `tests/NanoQL.Tests/TestSuite/ShortRateModelsTests.cs`: `testCachedHullWhite`, `testCachedHullWhiteFixedReversion` and `testCachedHullWhite2`, which wait for S-bond's swaption helpers and calibration; `testSwaps`, which waits for B3.4's `TreeVanillaSwapEngine`; and the two extended Cox-Ingersoll-Ross cases, which wait for B3.1's `ExtendedCoxIngersollRoss`.

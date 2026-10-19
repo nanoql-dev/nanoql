@@ -3,7 +3,9 @@
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Instruments;
 using NanoQL.Numerics;
+using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 
@@ -122,6 +124,36 @@ public class UnknownEnumValueTests
             () => new DigitalReplication((ReplicationType)99));
         Assert.Equal("t", e.ParamName);
         Assert.StartsWith("unknown Replication Type (99)", e.Message, StringComparison.Ordinal);
+
+        // The bonds: a price type is stored or switched on, and the conventions passed to the leg builders and the
+        // calendar under other names are checked under the bonds' own.
+        ArgumentOutOfRangeException price = Assert.Throws<ArgumentOutOfRangeException>(
+            () => new BondPrice(98.0, (BondPriceType)7));
+        Assert.Equal("type", price.ParamName);
+        Assert.StartsWith("unknown price type", price.Message, StringComparison.Ordinal);
+        var bond = new FixedRateBond(2, 100.0, schedule, [0.03], dc);
+        AssertParam("priceType", () => new BondHelper(100.0, bond, context, (BondPriceType)7));
+        AssertParam("priceType", () => new FixedRateBondHelper(
+            100.0, 2, 100.0, schedule, [0.03], dc, context, priceType: (BondPriceType)7));
+        AssertParam("paymentConv", () => new FixedRateBondHelper(
+            100.0, 2, 100.0, schedule, [0.03], dc, context, (BusinessDayConvention)99));
+        AssertParam("priceType", () => bond.Yield(
+            DiscountingBondEngine.Calculate(bond, context, curve), dc, Compounding.Compounded, Frequency.Annual, context,
+            priceType: (BondPriceType)7));
+        AssertParam("paymentConvention", () => new FixedRateBond(2, 100.0, schedule, [0.03], dc, (BusinessDayConvention)99));
+        AssertParam("exCouponConvention", () => new FixedRateBond(
+            2, 100.0, schedule, [0.03], dc, exCouponConvention: (BusinessDayConvention)99));
+        AssertParam("paymentConvention", () => new ZeroCouponBond(
+            2, new TARGET(), 100.0, Today + 730, (BusinessDayConvention)99));
+        AssertParam("paymentConvention", () => new AmortizingFixedRateBond(
+            2, [100.0], schedule, [0.03], dc, (BusinessDayConvention)99));
+        AssertParam("type", () => BondFunctions.Duration(bond, rate, context, (DurationType)99));
+        AssertParam("frequency", () => AmortizingFixedRateBondFunctions.SinkingSchedule(
+            Today, new Period(5, TimeUnit.Years), (Frequency)99, new TARGET()));
+        AssertParam("frequency", () => AmortizingFixedRateBondFunctions.SinkingNotionals(
+            new Period(5, TimeUnit.Years), Frequency.OtherFrequency, 0.03, 100.0));
+        AssertParam("bondLength", () => AmortizingFixedRateBondFunctions.SinkingNotionals(
+            new Period(5, TimeUnit.Hours), Frequency.Annual, 0.03, 100.0));
     }
 
     [Fact]

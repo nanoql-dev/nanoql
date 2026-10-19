@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/piecewiseyieldcurve.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the consistency cases' bond check, which waits for S-bond's FixedRateBond, their FRA and futures checks, which wait for S-rx's ForwardRateAgreement, and testBMACurveConsistency, which waits for batch 2's USDLibor; testDefaultInstantiation's ForwardFlat curve (S-cds) and ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testHelperDatesFromNonBusinessEvaluationDate's BMA helper check, which waits for batch 2's USDLibor; testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testParFraRegression, testMultiCurveTwoPiecewiseYieldCurves and testFraForDates (S-rx); testPiecewiseSpreadYieldCurve (B3.5); testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate and testBmaHelperSwap (batch 2's Libor indexes); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
+// Partial: the consistency cases' FRA and futures checks, which wait for S-rx's ForwardRateAgreement, and testBMACurveConsistency, which waits for batch 2's USDLibor; testDefaultInstantiation's ForwardFlat curve (S-cds) and ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testHelperDatesFromNonBusinessEvaluationDate's BMA helper check, which waits for batch 2's USDLibor; testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testParFraRegression, testMultiCurveTwoPiecewiseYieldCurves and testFraForDates (S-rx); testPiecewiseSpreadYieldCurve (B3.5); testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate and testBmaHelperSwap (batch 2's Libor indexes); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
 // Replaced: testObservability (Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -58,6 +58,15 @@ public class PiecewiseYieldCurveTests
         new(20, TimeUnit.Years, 5.89),
         new(25, TimeUnit.Years, 5.95),
         new(30, TimeUnit.Years, 5.96),
+    ];
+
+    private static readonly BondDatum[] BondData =
+    [
+        new(6, TimeUnit.Months, 5, Frequency.Semiannual, 4.75, 101.320),
+        new(1, TimeUnit.Years, 3, Frequency.Semiannual, 2.75, 100.590),
+        new(2, TimeUnit.Years, 5, Frequency.Semiannual, 5.00, 105.650),
+        new(5, TimeUnit.Years, 11, Frequency.Semiannual, 5.50, 113.610),
+        new(10, TimeUnit.Years, 11, Frequency.Semiannual, 3.75, 104.070),
     ];
 
     [Fact]
@@ -1262,7 +1271,9 @@ public class PiecewiseYieldCurveTests
 
     // Adapted: the curve's handle linked after the curve is built (line 362), and the checking indexes built on it,
     // become indexes built on the curve; MakeVanillaSwap's default engine (makevanillaswap.cpp:178-189) prices the
-    // fair rate on the index's curve.
+    // fair rate on the index's curve. The handle relinked to the curve bootstrapped on the bonds (line 411) is that
+    // curve, which the bonds' engine (lines 427-428), DiscountingBondEngine.Calculate, discounts on; their clean prices
+    // (line 431) are read from its results.
     private static void TestCurveConsistency<TTraits, TInterpolator, TBootstrap>(
         CommonVars vars, TInterpolator interpolator = default, Real tolerance = 1.0e-9)
         where TTraits : struct, IYieldTraits
@@ -1304,6 +1315,30 @@ public class PiecewiseYieldCurveTests
                 error <= tolerance,
                 $"{SwapData[i].N} year(s) swap:\n\n estimated rate: {estimatedRate}\n expected rate:  {expectedRate}\n"
                 + $" error:          {error}\n tolerance:      {tolerance}");
+        }
+
+        // check bonds
+        termStructure = new PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap>(
+            vars.Settlement, vars.BondHelpers, new Actual360(), vars.Context, i: interpolator);
+
+        for (int i = 0; i < vars.Bonds; i++)
+        {
+            Date maturity = vars.Calendar.Advance(vars.Today, BondData[i].N, BondData[i].Units);
+            Date issue = vars.Calendar.Advance(maturity, -BondData[i].Length, TimeUnit.Years);
+            Rate[] coupons = [BondData[i].Coupon / 100.0];
+
+            var bond = new FixedRateBond(
+                vars.BondSettlementDays, 100.0, vars.Schedules[i], coupons, vars.BondDayCounter, vars.BondConvention,
+                vars.BondRedemption, issue);
+
+            BondResults results = DiscountingBondEngine.Calculate(bond, vars.Context, termStructure);
+
+            Real expectedPrice = BondData[i].Price, estimatedPrice = bond.CleanPrice(results, vars.Context);
+            Real error = Math.Abs(expectedPrice - estimatedPrice);
+            Assert.True(
+                error <= tolerance,
+                $"{NanoQL.Utilities.DataFormattersFunctions.Ordinal(i + 1)} bond failure:\n  estimated price: "
+                + $"{estimatedPrice}\n  expected price:  {expectedPrice}\n  error:           {error}");
         }
     }
 
@@ -1370,7 +1405,10 @@ public class PiecewiseYieldCurveTests
 
     private readonly record struct Datum(Integer N, TimeUnit Units, Rate Rate);
 
-    // The fixture without its bond, futures, FRA and BMA helpers, which no ported case reads; testCA365Futures reads
+    private readonly record struct BondDatum(
+        Integer N, TimeUnit Units, Integer Length, Frequency Frequency, Rate Coupon, Real Price);
+
+    // The fixture without its futures, FRA and BMA helpers, which no ported case reads; testCA365Futures reads
     // its futures prices and builds its own futures helpers.
     private sealed class CommonVars
     {
@@ -1385,10 +1423,15 @@ public class PiecewiseYieldCurveTests
             FixedLegConvention = BusinessDayConvention.Unadjusted;
             FixedLegFrequency = Frequency.Annual;
             FixedLegDayCounter = new Thirty360(Thirty360Convention.BondBasis);
+            BondSettlementDays = 3;
+            BondDayCounter = new ActualActual(ActualActualConvention.ISDA);
+            BondConvention = BusinessDayConvention.Following;
+            BondRedemption = 100.0;
 
             Deposits = DepositData.Length;
             ImmFuts = ImmFutData.Length;
             Swaps = SwapData.Length;
+            Bonds = BondData.Length;
 
             // market elements
             Rates = new Rate[Deposits + Swaps];
@@ -1430,6 +1473,36 @@ public class PiecewiseYieldCurveTests
                     euribor6m,
                     Context));
             }
+
+            Schedules = new Schedule[Bonds];
+            for (int i = 0; i < Bonds; i++)
+            {
+                Real p = BondData[i].Price;
+                Date maturity = Calendar.Advance(Today, BondData[i].N, BondData[i].Units);
+                Date issue = Calendar.Advance(maturity, -BondData[i].Length, TimeUnit.Years);
+                Rate[] coupons = [BondData[i].Coupon / 100.0];
+                Schedules[i] = new Schedule(
+                    issue,
+                    maturity,
+                    new Period(BondData[i].Frequency),
+                    Calendar,
+                    BondConvention,
+                    BondConvention,
+                    DateGenerationRule.Backward,
+                    false,
+                    Context);
+                BondHelpers.Add(new FixedRateBondHelper(
+                    p,
+                    BondSettlementDays,
+                    BondRedemption,
+                    Schedules[i],
+                    coupons,
+                    BondDayCounter,
+                    Context,
+                    BondConvention,
+                    BondRedemption,
+                    issue));
+            }
         }
 
         public Calendar Calendar { get; }
@@ -1459,5 +1532,19 @@ public class PiecewiseYieldCurveTests
         public Real[] ImmFutPrices { get; }
 
         public List<RateHelper> Instruments { get; } = [];
+
+        public Natural BondSettlementDays { get; }
+
+        public DayCounter BondDayCounter { get; }
+
+        public BusinessDayConvention BondConvention { get; }
+
+        public Real BondRedemption { get; }
+
+        public int Bonds { get; }
+
+        public Schedule[] Schedules { get; }
+
+        public List<RateHelper> BondHelpers { get; } = [];
     }
 }

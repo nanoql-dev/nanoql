@@ -73,6 +73,26 @@ public static class CouponPricerFunctions
     }
 
     /// <summary>
+    /// A copy of a built bond, of its own type, with the pricer set on its floating-rate coupons: QuantLib's
+    /// <c>setCouponPricer(bond.cashflows(), pricer)</c>, which changes the coupons the bond holds.
+    /// </summary>
+    /// <typeparam name="T">The bond's type.</typeparam>
+    /// <param name="bond">The bond.</param>
+    /// <param name="pricer">The pricer.</param>
+    /// <returns>
+    /// The copy, with the bond's terms, notional schedule and redemptions, which the re-priced leg keeps; the given bond
+    /// is unchanged.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">The bond is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">A coupon refuses the pricer.</exception>
+    public static T SetCouponPricer<T>(T bond, FloatingRateCouponPricer? pricer)
+        where T : Bond
+    {
+        ArgumentNullException.ThrowIfNull(bond);
+        return (T)bond.WithCashflows(SetCouponPricer(bond.Cashflows, pricer));
+    }
+
+    /// <summary>
     /// A copy of the leg with one pricer per cash flow, in order: the last pricer is set on the cash flows past the
     /// list's end.
     /// </summary>

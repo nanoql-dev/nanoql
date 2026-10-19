@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,097 | 145 |
-| partial | 16 | 25 |
-| ported | 159 | 12 |
+| not started | 1,089 | 143 |
+| partial | 17 | 27 |
+| ported | 166 | 12 |
 | replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
@@ -625,7 +625,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `barriertype` | not started |  | no nanoql type: BarrierType |
 | `basketoption` | not started |  | no nanoql type: BasketPayoff, MinBasketPayoff, MaxBasketPayoff, AverageBasketPayoff, SpreadBasketPayoff, BasketOption |
 | `bmaswap` | ported | Instruments/BMASwap.cs, Instruments/BMASwapResults.cs |  |
-| `bond` | not started |  | no nanoql type: Bond, BondPrice, BondPriceType, BondResults |
+| `bond` | ported | Instruments/Bond/Bond.cs, Instruments/Bond/BondPrice.cs, Instruments/Bond/BondPriceType.cs, Instruments/Bond/BondResults.cs |  |
 | `bondforward` | not started |  | no nanoql type: BondForward |
 | `callabilityschedule` | not started |  | no nanoql type: Callability, CallabilityType, CallabilitySchedule |
 | `capfloor` | not started |  | no nanoql type: CapFloor, CapFloorType, Cap, Floor, Collar |
@@ -705,15 +705,15 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `amortizingcmsratebond` | not started |  | no nanoql type: AmortizingCmsRateBond |
-| `amortizingfixedratebond` | not started |  | no nanoql type: AmortizingFixedRateBond |
+| `amortizingfixedratebond` | ported | Instruments/Bonds/AmortizingFixedRateBond.cs, Instruments/Bonds/AmortizingFixedRateBondFunctions.cs |  |
 | `amortizingfloatingratebond` | not started |  | no nanoql type: AmortizingFloatingRateBond |
 | `btp` | not started |  | no nanoql type: CCTEU, BTP, RendistatoBasket, RendistatoCalculator, RendistatoEquivalentSwapLengthQuote, RendistatoEquivalentSwapSpreadQuote |
 | `cmsratebond` | not started |  | no nanoql type: CmsRateBond |
 | `convertiblebonds` | not started |  | no nanoql type: SoftCallability, ConvertibleBond, ConvertibleZeroCouponBond, ConvertibleFixedCouponBond, ConvertibleFloatingRateBond |
 | `cpibond` | not started |  | no nanoql type: CPIBond |
-| `fixedratebond` | not started |  | no nanoql type: FixedRateBond |
-| `floatingratebond` | not started |  | no nanoql type: FloatingRateBond |
-| `zerocouponbond` | not started |  | no nanoql type: ZeroCouponBond |
+| `fixedratebond` | ported | Instruments/Bonds/FixedRateBond.cs |  |
+| `floatingratebond` | ported | Instruments/Bonds/FloatingRateBond.cs |  |
+| `zerocouponbond` | ported | Instruments/Bonds/ZeroCouponBond.cs |  |
 
 ### `ql/legacy/`
 
@@ -1539,8 +1539,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `binomialconvertibleengine` | not started |  | no nanoql type: BinomialConvertibleEngine |
-| `bondfunctions` | not started |  | no nanoql type: BondFunctions |
-| `discountingbondengine` | not started |  | no nanoql type: DiscountingBondEngine |
+| `bondfunctions` | ported | PricingEngines/Bond/BondFunctions.cs |  |
+| `discountingbondengine` | ported | PricingEngines/Bond/DiscountingBondEngine.cs |  |
 | `discretizedconvertible` | not started |  | no nanoql type: DiscretizedConvertible |
 | `riskybondengine` | not started |  | no nanoql type: RiskyBondEngine |
 
@@ -1911,7 +1911,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `bondhelpers` | not started |  | no nanoql type: BondHelper, FixedRateBondHelper, CPIBondHelper |
+| `bondhelpers` | partial | TermStructures/Yield/BondHelpers/BondHelper.cs, TermStructures/Yield/BondHelpers/FixedRateBondHelper.cs | partial: CPIBondHelper, with the inflation bond and coupon it is built on, which waits for S-infl; no nanoql type: CPIBondHelper |
 | `bootstraptraits` | ported | TermStructures/Yield/BootstrapTraits/BootstrapTraitsDetail.cs, TermStructures/Yield/BootstrapTraits/Discount.cs, TermStructures/Yield/BootstrapTraits/ForwardRate.cs, TermStructures/Yield/BootstrapTraits/IBootstrapTraits{TTermStructure}.cs, TermStructures/Yield/BootstrapTraits/IYieldTraits.cs, TermStructures/Yield/BootstrapTraits/SimpleZeroYield.cs, TermStructures/Yield/BootstrapTraits/ZeroYield.cs | no nanoql type: DiscountCurve, ZeroYieldCurve, ForwardRateCurve, SimpleZeroYieldCurve |
 | `compositezeroyieldstructure` | not started |  | no nanoql type: CompositeZeroYieldStructure |
 | `derivedtermstructure` | replaced: each derived curve implements its members: the original curve read when asked |  |  |
@@ -2061,7 +2061,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `americanoption` | not started |  | 32 cases |
-| `amortizingbond` | not started |  | 3 cases |
+| `amortizingbond` | partial | TestSuite/AmortizingBondTests.cs | 2 of 3 cases; not yet: testBrazilianAmortizingFixedRateBond |
 | `andreasenhugevolatilityinterpl` | not started |  | 14 cases |
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
 | `asianoptions` | not started |  | 23 cases |
@@ -2080,7 +2080,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackformula` | ported | TestSuite/BlackFormulaTests.cs | 15 of 15 cases |
 | `blackvolsurfacedelta` | not started |  | 5 cases |
 | `bondforward` | not started |  | 3 cases |
-| `bonds` | not started |  | 22 cases |
+| `bonds` | partial | TestSuite/BondsTests.cs | 19 of 22 cases; not yet: testCachedFloating, testBrazilianCached, testRiskyBondWithGivenDates |
 | `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
 | `businessdayconventions` | not started |  | 1 cases |
 | `calendars` | partial | TestSuite/CalendarsTests.cs | 16 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
