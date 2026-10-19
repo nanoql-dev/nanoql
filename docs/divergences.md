@@ -177,11 +177,12 @@ Facts:
 
 [`Divergences/ExerciseDatesTests.cs`](../tests/NanoQL.Tests/Divergences/ExerciseDatesTests.cs)
 
-An exercise's dates read past their end. QuantLib's `Exercise::date(i)` is `dates_[i]` (`exercise.hpp:45`), which reads past the vector for an index out of range, undefined, where its twin `dateAt(i)` (`:46`) throws `std::out_of_range`. nanoql refuses the index in both, with `ArgumentOutOfRangeException` naming `index`, as `Schedule.Date(int)` does.
+An exercise's dates read past their end. QuantLib's `Exercise::date(i)` is `dates_[i]` (`exercise.hpp:45`), which reads past the vector for an index out of range, undefined, where its twin `dateAt(i)` (`:46`) throws `std::out_of_range`. nanoql refuses the index in both, with `ArgumentOutOfRangeException` naming `index`, as `Schedule.Date(int)` does. And a swaption on an exercise with no dates, which QuantLib's public `Exercise(type)` builds (`exercise.hpp:41`): QuantLib's swaption reads its last date in `isExpired` (`dates().back()`, `swaption.cpp:159`), and its first in the engines and in `impliedVolatility` (`date(0)`, `blackswaptionengine.hpp:227`, `swaption.cpp:198`), undefined for an empty vector. nanoql's swaption builds on it and refuses where the date is read, with `NanoQLException` and QuantLib's text for the same input, `lastDate()`'s "no exercise date given" (`exercise.cpp:29`).
 
 Facts:
 
 - `AnIndexOutOfRangeIsRefused`
+- `ASwaptionOnAnExerciseWithNoDatesIsRefusedWhereItsDateIsRead`
 
 ## ExtrapolatorCopyTests
 
@@ -270,6 +271,16 @@ Facts:
 
 - `AMatrixSmallerThanTheGridIsRefused`
 
+## MakeSwaptionNullIndexTests
+
+[`Divergences/MakeSwaptionNullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/MakeSwaptionNullIndexTests.cs)
+
+A swaption builder given no swap index is refused at construction, with `ArgumentNullException` naming `swapIndex`, as nanoql's swap builders refuse theirs. QuantLib's `MakeSwaption` takes it unchecked and dereferences it at the conversion, for its fixing calendar, its forwarding curve and its conventions (`makeswaption.cpp:57-58, 82, 112`): results C++ leaves undefined, where the wheel stops on Boost's assertion.
+
+Facts:
+
+- `ABuilderWithoutASwapIndexIsRefused`
+
 ## MinimizeContinuationTests
 
 [`Divergences/MinimizeContinuationTests.cs`](../tests/NanoQL.Tests/Divergences/MinimizeContinuationTests.cs)
@@ -332,6 +343,17 @@ Facts:
 - `AGlobalBootstrapsAccuracyOfQuantLibsNullIsAValue`
 - `AnImpliedStandardDeviationsGuessOfQuantLibsNullIsAGuess`
 - `ASmileSectionsAtmLevelOfQuantLibsNullIsALevel`
+- `ASwaptionBuildersStrikeOfQuantLibsNullIsAStrike`
+
+## OptionDateFromTimeTests
+
+[`Divergences/OptionDateFromTimeTests.cs`](../tests/NanoQL.Tests/Divergences/OptionDateFromTimeTests.cs)
+
+The option date of a time whose interpolated serial number is NaN, infinite or outside the integers. QuantLib's `SwaptionVolatilityDiscrete::optionDateFromTime` truncates the serial with `static_cast<Date::serial_type>` (`swaptionvoldiscrete.hpp:121-123`), whose result C++ leaves undefined there; MSVC's conversion, the platform the vectors are generated on, gives the smallest integer, which `Date`'s range check refuses. .NET's conversion saturates instead (NaN to 0, a large value to `int.MaxValue`), so a literal port would refuse other serials, or none: nanoql takes MSVC's serial in those cases, and the refusal is QuantLib's, `Date`'s `ArgumentOutOfRangeException` and text.
+
+Facts:
+
+- `ATimeWhoseSerialLeavesTheIntegersIsRefusedAsMsvcsSmallestInteger`
 
 ## OvernightIndexedCouponRefusalTests
 
@@ -535,6 +557,37 @@ Facts:
 - `MakeOISRefusesANullIndex`
 - `MakeVanillaSwapRefusesANullIndex`
 - `NegativeCountsAreRefused`
+
+## SwaptionImpliedVolatilityTests
+
+[`Divergences/SwaptionImpliedVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/SwaptionImpliedVolatilityTests.cs)
+
+An implied volatility whose bracket starts at −1. QuantLib's helper starts its volatility quote at −1.0, "so that calculation is forced at first ... call", and runs the engine only when the volatility asked differs from the quote (`swaption.cpp:55-92`, lines 61-64 and 87-91); the solver's first call is at the bracket's lower end (`math/solver1d.hpp:187`), so a lower end of −1.0 skips the engine and reads its NPV result, which nothing has set (`instrument.hpp:121`, `pricingengine.hpp:63-73`): an indeterminate value, and a run-dependent result. nanoql's helper prices at every call: at −1.0 the price is the price at volatility 1, the variance being the volatility squared, so the result depends on the inputs alone.
+
+Facts:
+
+- `ABracketStartingAtMinusOnePricesAtVolatilityOne`
+
+## SwaptionNullArgumentTests
+
+[`Divergences/SwaptionNullArgumentTests.cs`](../tests/NanoQL.Tests/Divergences/SwaptionNullArgumentTests.cs)
+
+A swaption given no swap or no exercise is refused on entry, with `ArgumentNullException` naming the parameter. QuantLib's constructor takes both unchecked and dereferences them before its arguments' checks ("swap not set", "exercise not set", `swaption.cpp:177-178`) could refuse them: results C++ leaves undefined, where the wheel stops on Boost's assertion.
+
+Facts:
+
+- `ASwaptionWithoutASwapIsRefused`
+- `ASwaptionWithoutAnExerciseIsRefused`
+
+## SwaptionVolatilityEmptyGridTests
+
+[`Divergences/SwaptionVolatilityEmptyGridTests.cs`](../tests/NanoQL.Tests/Divergences/SwaptionVolatilityEmptyGridTests.cs)
+
+A discrete swaption volatility structure on no option tenors, no option dates or no swap tenors is refused with `ArgumentException` naming the parameter: "no option tenors given", "no option dates given", "no swap tenors given". QuantLib's `SwaptionVolatilityDiscrete` reads the first element of each in its checks (`optionTenors_[0]`, `optionDates_[0]`, `swapTenors_[0]`, `swaptionvoldiscrete.cpp:137, 125, 148`), before any check of its subclass could refuse the grid: a read past an empty vector's end, undefined, which crashes the wheel. nanoql refuses each where QuantLib reads it, in QuantLib's order.
+
+Facts:
+
+- `AnEmptyGridIsRefused`
 
 ## TelescopicValueDatesTests
 

@@ -168,6 +168,8 @@ public class NullDateTests
         ImmutableArray<CashFlow> leg = [cashFlow];
         AssertParam("settlementDate", () => CashFlows.Npv(leg, curve, context, null, d));
         AssertParam("npvDate", () => CashFlows.Bps(leg, curve, context, null, valid, d));
+        AssertParam("settlementDate", () => CashFlows.Bps(leg, rate, context, null, d));
+        AssertParam("npvDate", () => CashFlows.Bps(leg, rate, context, null, valid, d));
         AssertParam("settlementDate", () => CashFlows.NpvBps(leg, curve, context, null, d));
         var swap = new Swap(leg, leg);
         AssertParam("settlementDate", () => DiscountingSwapEngine.Calculate(swap, context, curve, null, d));

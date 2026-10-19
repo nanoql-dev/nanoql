@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Immutable;
+using System.Text.Json;
 using NanoQL.Coupons;
 using NanoQL.TermStructures;
 using NanoQL.Tests.Harness;
@@ -13,7 +14,7 @@ namespace NanoQL.Tests.Vectors;
 /// The cash-flow analysis vectors, <c>tests/vectors/cashflows/cashflows.json</c>: the start and maturity dates of
 /// fixed-rate legs, some followed by redemptions and amortizing payments, their NPV, BPS and the pair from
 /// <see cref="CashFlows.NpvBps"/> on a flat curve, and their accrued period, days and amount, under sampled evaluation
-/// contexts and settlement settings.
+/// contexts and settlement settings; and their BPS on an interest rate, at sampled rates and settlement settings.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class CashFlowsVectorTests
@@ -27,13 +28,31 @@ public class CashFlowsVectorTests
         {
             EvaluationContext context = c.Context();
             ImmutableArray<CashFlow> leg = CashFlowInputs.LegOf(c.Input("leg"), context);
-            FlatForward curve = CashFlowInputs.CurveOf(c.Input("curve"));
             Settlement[] settlements = c.Input("settlements").EnumerateArray()
                 .Select(s => new Settlement(
                     s.GetProperty("includeSettlementDateFlows").GetBoolean(),
                     CashFlowInputs.NullableDate(s.GetProperty("settlementDate")),
                     CashFlowInputs.NullableDate(s.GetProperty("npvDate"))))
                 .ToArray();
+            if (c.Inputs.TryGetProperty("rates", out JsonElement rates))
+            {
+                // bps on an interest rate, [rate][settlement]
+                InterestRate[] yields = rates.EnumerateArray()
+                    .Select(r => new InterestRate(
+                        IndexInputs.Real(r.GetProperty("rate")),
+                        CashFlowInputs.DayCounterOf(r.GetProperty("dayCounter")),
+                        (Compounding)r.GetProperty("compounding").GetInt32(),
+                        (Frequency)r.GetProperty("frequency").GetInt32()))
+                    .ToArray();
+                check.Output(
+                    c,
+                    "bpsInterestRate",
+                    yields.Select(y => Each(settlements, s =>
+                        CashFlows.Bps(leg, y, context, s.IncludeFlows, s.SettlementDate, s.NpvDate))));
+                continue;
+            }
+
+            FlatForward curve = CashFlowInputs.CurveOf(c.Input("curve"));
             Accrual[] accruals = c.Input("accruals").EnumerateArray()
                 .Select(s => new Accrual(
                     s.GetProperty("includeSettlementDateFlows").GetBoolean(),

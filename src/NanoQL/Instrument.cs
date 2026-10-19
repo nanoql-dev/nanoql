@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/instrument.hpp ql/instrument.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: result<T>(tag), which waits for the first engine that sets additional results
 
 namespace NanoQL;
 
@@ -13,7 +12,9 @@ namespace NanoQL;
 /// An engine prices an instrument through the four steps of QuantLib's <c>Instrument::calculate</c>, which the
 /// instrument owns: <see cref="IsExpired"/>, <see cref="SetupExpired"/>, <see cref="Validate"/> and
 /// <see cref="FetchResults"/>. QuantLib's <c>setPricingEngine</c>, <c>pricingEngine</c> and <c>NPV()</c> become the
-/// engine's static <c>Calculate</c>, which returns the results.
+/// engine's static <c>Calculate</c>, which returns the results; QuantLib's <c>result&lt;T&gt;(tag)</c> and
+/// <c>additionalResults()</c> are <see cref="InstrumentResults.Result{T}"/> and
+/// <see cref="InstrumentResults.AdditionalResults"/> on them.
 /// </remarks>
 public abstract class Instrument
 {

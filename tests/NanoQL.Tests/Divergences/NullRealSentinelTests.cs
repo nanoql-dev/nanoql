@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Indexes;
+using NanoQL.Instruments;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
 using NanoQL.Time;
@@ -172,5 +173,25 @@ public class NullRealSentinelTests
         Assert.Equal(
             "smile section must provide atm level to compute option price",
             Assert.Throws<NanoQLException>(() => none.OptionPrice(0.03)).Message);
+    }
+
+    /// <summary>
+    /// A swaption builder's strike: QuantLib's <c>MakeSwaption</c> takes <c>strike = Null&lt;Rate&gt;()</c> by default
+    /// and reads a strike equal to the sentinel as none (<c>makeswaption.cpp:80</c>), striking the swaption at the money,
+    /// 0.03047147232859789 for these inputs. nanoql's strike of the sentinel is a strike: the underlying's fixed rate.
+    /// </summary>
+    [Fact]
+    public void ASwaptionBuildersStrikeOfQuantLibsNullIsAStrike()
+    {
+        var today = new Date(15, Month.January, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+        var index = new EuriborSwapIsdaFixA(new Period(5, TimeUnit.Years), new FlatForward(today, 0.03, new Actual365Fixed()));
+
+        Swaption struck = new MakeSwaption(index, new Period(1, TimeUnit.Years), NullReal).ToSwaption(context);
+        Assert.Equal(NullReal, struck.Underlying.FixedRate);
+
+        // Only null is the at-the-money strike: QuantLib's value for the sentinel.
+        Swaption atTheMoney = new MakeSwaption(index, new Period(1, TimeUnit.Years)).ToSwaption(context);
+        Assert.Equal(0.03047147232859789, atTheMoney.Underlying.FixedRate);
     }
 }

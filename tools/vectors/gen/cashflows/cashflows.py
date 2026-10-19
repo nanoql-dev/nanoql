@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's CashFlows (ql/cashflows/cashflows.hpp): startDate, maturityDate, accruedPeriod,
-accruedDays, accruedAmount, and npv, bps and npvbps on a yield term structure, over 47 legs. 35 are fixed-rate legs
+accruedDays, accruedAmount, and npv, bps and npvbps on a yield term structure, over 47 legs; and bps on an interest
+rate over the same legs. 35 are fixed-rate legs
 (5 schedules x 7 variants, as in the fixed-rate coupon vectors); each schedule adds a bullet leg, its flat 3% coupons
 followed by a Redemption of the notional on the last payment date, and an amortizing leg, its amortizing coupons
 followed by an AmortizingPayment of each notional step on the date of the coupon before the step and a Redemption of
@@ -35,6 +36,14 @@ settings, in the order of the npv, bps and npvbps outputs; "accruals" holds the 
 outputs. Calendars are {"type": <class>}, with a "market" integer for UnitedStates and UnitedKingdom; day counters
 {"type": <class>}, with a "convention" integer for Thirty360 and ActualActual; enums and time units are QuantLib's
 integers.
+
+After those cases, one case per leg gives bps on an interest rate, the leg's coupons discounted period by period at a
+constant rate: under one of the 18 evaluation contexts, at 4 of 7 interest rates (each compounding rule, Simple,
+Compounded at three frequencies, Continuous, SimpleThenCompounded and CompoundedThenSimple, on four day counters, a
+negative rate among them) and 3 of the 6 settlement settings, all drawn with a third generator, seeded with the seed
+plus 2, so the earlier cases' bytes are unchanged. Its inputs are the leg, "rates" (each {"rate", "dayCounter",
+"compounding", "frequency"}) and "settlements", and its output "bpsInterestRate" holds the BPS per rate and settlement,
+[rate][settlement], compared at the leg's largest notional times 1e-4.
 
 The schedules are built with ql.Schedule, the wheel's proxy of C++ QuantLib::Schedule's rule-based constructor. The
 legs are built with ql.FixedRateLeg, which forwards to the wheel's C++ helper _FixedRateLeg (QuantLib-SWIG 1.44,
@@ -277,6 +286,46 @@ def cases():
                              "maturityDate": v.attempt(lambda: ql.CashFlows.maturityDate(cfs)),
                              "npv": npv, "bps": bps, "npvbps": npvbps, "accruedPeriod": accrued_period,
                              "accruedDays": accrued_days, "accruedAmount": accrued_amount}})
+    out += interest_rate_cases()
+    return out
+
+
+# (rate, day counter, compounding, frequency) for bps on an interest rate.
+RATES = [(0.03, A365, ql.Continuous, ql.Annual), (0.045, A360, ql.Compounded, ql.Semiannual),
+         (0.02, THIRTY360_BB, ql.Simple, ql.Annual), (0.05, ACT_ISDA, ql.SimpleThenCompounded, ql.Quarterly),
+         (0.035, A365, ql.CompoundedThenSimple, ql.Annual), (-0.002, A365, ql.Compounded, ql.Annual),
+         (0.04, A360, ql.Compounded, ql.Monthly)]
+
+
+def interest_rate_cases():
+    """One case per leg: bps on an interest rate at 4 rates and 3 settlement settings, under a context, all drawn
+    with a third generator."""
+    rnd = random.Random(v.SEED + 2)
+    out = []
+    for name, spec, scale in legs():
+        cfs = leg(spec)
+        ev, ref_events, todays = rnd.choice(contexts())
+        st = v.settings(ev, ref_events, todays)
+        rates = [{"rate": r, "dayCounter": dc, "compounding": int(comp), "frequency": int(freq)}
+                 for r, dc, comp, freq in rnd.sample(RATES, 4)]
+        settlements, values = [], []
+        chosen = rnd.sample(SETTLEMENTS, 3)
+        for include, sd, nd in chosen:
+            settlements.append({"includeSettlementDateFlows": include,
+                                "settlementDate": v.enc(ev + sd if sd is not None else ql.Date()),
+                                "npvDate": v.enc(ev + nd if nd is not None else ql.Date())})
+        for r in rates:
+            y = ql.InterestRate(r["rate"], day_counter(r["dayCounter"]), r["compounding"], r["frequency"])
+            row = []
+            for include, sd, nd in chosen:
+                settlement = ev + sd if sd is not None else ql.Date()
+                npv_date = ev + nd if nd is not None else ql.Date()
+                row.append(v.amount(v.attempt(lambda: ql.CashFlows.bps(cfs, y, include, settlement, npv_date)),
+                                    scale * 1e-4))
+            values.append(row)
+        out.append({"name": f"{name} / bps on an interest rate / {ev.ISO()} {ref_events} {todays}",
+                    "inputs": {"settings": st, "leg": spec, "rates": rates, "settlements": settlements},
+                    "expected": {"bpsInterestRate": values}})
     return out
 
 

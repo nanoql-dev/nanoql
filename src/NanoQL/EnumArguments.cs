@@ -243,6 +243,30 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a settlement type outside <see cref="SettlementType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(SettlementType value, string paramName)
+    {
+        if (value is not (SettlementType.Physical or SettlementType.Cash))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown Settlement::Type({(int)value})");
+        }
+    }
+
+    /// <summary>Refuses a settlement method outside <see cref="SettlementMethod"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(SettlementMethod value, string paramName)
+    {
+        if (value is < SettlementMethod.PhysicalOTC or > SettlementMethod.ParYieldCurve)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown Settlement::Method({(int)value})");
+        }
+    }
+
     /// <summary>Refuses a pillar choice outside <see cref="PillarChoice"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,118 | 150 |
-| partial | 20 | 23 |
-| ported | 136 | 9 |
+| not started | 1,113 | 147 |
+| partial | 18 | 24 |
+| ported | 143 | 11 |
 | replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
@@ -44,19 +44,19 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `default` | not started |  | no nanoql type: ProtectionSide |
 | `discretizedasset` | not started |  | no nanoql type: DiscretizedAsset, DiscretizedDiscountBond, DiscretizedOption |
 | `errors` | replaced: ArgumentException and NanoQLException |  |  |
-| `event` | partial | Event.cs | partial: detail::simple_event, which only experimental code uses |
+| `event` | ported | Event.cs, SimpleEvent.cs |  |
 | `exchangerate` | not started |  | no nanoql type: ExchangeRate, ExchangeRateType |
 | `exercise` | ported | Exercise/AmericanExercise.cs, Exercise/BermudanExercise.cs, Exercise/EarlyExercise.cs, Exercise/EuropeanExercise.cs, Exercise/Exercise.cs, Exercise/ExerciseType.cs |  |
 | `functional` | not ported: deprecated |  |  |
 | `grid` | not ported: deprecated |  |  |
 | `handle` | replaced: the object itself |  |  |
 | `index` | ported | FinancialIndex.cs |  |
-| `instrument` | partial | Instrument.cs, InstrumentResults.cs | partial: result<T>(tag), which waits for the first engine that sets additional results |
+| `instrument` | ported | Instrument.cs, InstrumentResults.cs |  |
 | `interestrate` | partial | InterestRate.cs | partial: discountFactorFirstDerivative and discountFactorSecondDerivative, which wait for the slot that ports the cash-flow duration and convexity, whose wheel functions check them |
 | `mathconstants` | not started |  |  |
 | `money` | not started |  | no nanoql type: Money, MoneyConversionType, MoneySettings |
 | `numericalmethod` | not started |  | no nanoql type: Lattice |
-| `option` | partial | OptionType.cs | partial: Option, Option::arguments, Greeks and MoreGreeks, which wait for S6's Swaption and S-eq's engines; no nanoql type: Option, Greeks, MoreGreeks |
+| `option` | partial | Option.cs, OptionType.cs | partial: Greeks and MoreGreeks, which wait for S-eq's engines; no nanoql type: Greeks, MoreGreeks |
 | `optional` | not ported: C++ platform header |  |  |
 | `payoff` | ported | Payoff.cs |  |
 | `position` | ported | PositionType.cs |  |
@@ -87,7 +87,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackovernightindexedcouponpricer` | ported | Coupons/BlackAveragingOvernightIndexedCouponPricer.cs, Coupons/BlackCompoundingOvernightIndexedCouponPricer.cs |  |
 | `capflooredcoupon` | partial | Coupons/CappedFlooredCoupon.cs, Coupons/CappedFlooredIborCoupon.cs | partial: CappedFlooredCmsCoupon, which waits for S-rx with CmsCoupon; no nanoql type: CappedFlooredCmsCoupon |
 | `capflooredinflationcoupon` | not started |  | no nanoql type: CappedFlooredYoYInflationCoupon |
-| `cashflows` | partial | Coupons/CashFlows.cs | partial: every function but startDate, maturityDate, accruedPeriod, accruedDays, accruedAmount, and npv, bps and npvbps on a yield term structure, which wait for the slots whose code and tests use them |
+| `cashflows` | partial | Coupons/CashFlows.cs | partial: every function but startDate, maturityDate, accruedPeriod, accruedDays, accruedAmount, npv, bps and npvbps on a yield term structure, and bps on an interest rate, which wait for the slots whose code and tests use them |
 | `cashflowvectors` | partial | Coupons/CashFlowVectorsFunctions.cs | partial: FloatingDigitalLeg, which waits for B3.4 with the digital coupons |
 | `cmscoupon` | not started |  | no nanoql type: CmsCoupon, CmsLeg |
 | `conundrumpricer` | not started |  | no nanoql type: VanillaOptionPricer, MarketQuotedOptionPricer, GFunction, GFunctionFactory, GFunctionFactoryYieldCurveModel, HaganPricer, NumericHaganPricer, NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand, AnalyticHaganPricer |
@@ -663,7 +663,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `makecms` | not started |  | no nanoql type: MakeCms |
 | `makemultipleresetsswap` | not started |  | no nanoql type: MakeMultipleResetsSwap |
 | `makeois` | ported | Instruments/MakeOIS.cs |  |
-| `makeswaption` | not started |  | no nanoql type: MakeSwaption |
+| `makeswaption` | ported | Instruments/MakeSwaption.cs |  |
 | `makevanillaswap` | ported | Instruments/MakeVanillaSwap.cs |  |
 | `makeyoyinflationcapfloor` | not started |  | no nanoql type: MakeYoYInflationCapFloor |
 | `margrabeoption` | not started |  | no nanoql type: MargrabeOption, MargrabeOptionResults |
@@ -686,7 +686,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `stickyratchet` | not started |  | no nanoql type: DoubleStickyRatchetPayoff, RatchetPayoff, StickyPayoff, RatchetMaxPayoff, RatchetMinPayoff, StickyMaxPayoff, StickyMinPayoff |
 | `stock` | not started |  | no nanoql type: Stock |
 | `swap` | ported | Instruments/Swap/Swap.cs, Instruments/Swap/SwapResults.cs, Instruments/Swap/SwapType.cs |  |
-| `swaption` | not started |  | no nanoql type: Settlement, SettlementType, SettlementMethod, Swaption, SwaptionPriceType |
+| `swaption` | ported | Instruments/Swaption/Settlement.cs, Instruments/Swaption/SettlementMethod.cs, Instruments/Swaption/SettlementType.cs, Instruments/Swaption/Swaption.cs, Instruments/Swaption/SwaptionFunctions.cs, Instruments/Swaption/SwaptionPriceType.cs |  |
 | `twoassetbarrieroption` | not started |  | no nanoql type: TwoAssetBarrierOption |
 | `twoassetcorrelationoption` | not started |  | no nanoql type: TwoAssetCorrelationOption |
 | `vanillaoption` | not started |  | no nanoql type: VanillaOption |
@@ -1652,7 +1652,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `basketgeneratingengine` | not started |  | no nanoql type: BasketGeneratingEngine, BasketGeneratingEngineCalibrationBasketType |
-| `blackswaptionengine` | not started |  | no nanoql type: BlackSwaptionEngine, BachelierSwaptionEngine |
+| `blackswaptionengine` | ported | PricingEngines/Swaption/BlackSwaptionEngine/BachelierSpec.cs, PricingEngines/Swaption/BlackSwaptionEngine/BachelierSwaptionEngine.cs, PricingEngines/Swaption/BlackSwaptionEngine/Black76Spec.cs, PricingEngines/Swaption/BlackSwaptionEngine/BlackStyleSwaptionEngine{TSpec}.cs, PricingEngines/Swaption/BlackSwaptionEngine/BlackSwaptionEngine.cs, PricingEngines/Swaption/BlackSwaptionEngine/CashAnnuityModel.cs, PricingEngines/Swaption/BlackSwaptionEngine/IBlackStyleSwaptionSpec.cs |  |
 | `discretizedswaption` | not started |  | no nanoql type: DiscretizedSwaption |
 | `fdg2swaptionengine` | not started |  | no nanoql type: FdG2SwaptionEngine |
 | `fdhullwhiteswaptionengine` | not started |  | no nanoql type: FdHullWhiteSwaptionEngine |
@@ -1901,8 +1901,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `spreadedswaptionvol` | not started |  | no nanoql type: SpreadedSwaptionVolatility |
 | `swaptionconstantvol` | ported | TermStructures/Volatility/Swaption/ConstantSwaptionVolatility.cs |  |
 | `swaptionvolcube` | not started |  | no nanoql type: SwaptionVolatilityCube |
-| `swaptionvoldiscrete` | not started |  | no nanoql type: SwaptionVolatilityDiscrete |
-| `swaptionvolmatrix` | not started |  | no nanoql type: SwaptionVolatilityMatrix |
+| `swaptionvoldiscrete` | ported | TermStructures/Volatility/Swaption/SwaptionVolatilityDiscrete.cs |  |
+| `swaptionvolmatrix` | ported | TermStructures/Volatility/Swaption/SwaptionVolatilityMatrix.cs |  |
 | `swaptionvolstructure` | partial | TermStructures/Volatility/Swaption/SwaptionVolatilityStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc), which waits for its first user (B3.3's SpreadedSwaptionVolatility) |
 | `zabrswaptionvolatilitycube` | not started |  | no nanoql type: SwaptionVolCubeZabrModel, ZabrSwaptionVolatilityCube |
 
@@ -2229,10 +2229,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `svivolatility` | not started |  | 1 cases |
 | `swap` | partial | TestSuite/SwapTests.cs | 12 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs; not yet: testInArrears, testFixedTenorInferenceWithTerminationDate, testSpotDateUsesFixingCalendar |
 | `swapforwardmappings` | not started |  | 3 cases |
-| `swaption` | not started |  | 13 cases |
+| `swaption` | partial | TestSuite/SwaptionTests.cs | 12 of 13 cases; replaced: testBlackEngineCaching by Vectors/Instruments/SwaptionVectorTests.cs; not yet: testImpliedVolatilityOis |
 | `swaptionvolatilitycube` | not started |  | 17 cases |
-| `swaptionvolatilitymatrix` | not started |  | 2 cases |
-| `swaptionvolstructuresutilities` | not started |  | 0 cases |
+| `swaptionvolatilitymatrix` | ported | TestSuite/SwaptionVolatilityMatrixTests.cs | 2 of 2 cases; replaced: testSwaptionVolMatrixObservability by Vectors/TermStructures/SwaptionVolMatrixVectorTests.cs |
+| `swaptionvolstructuresutilities` | ported | TestSuite/SwaptionVolStructuresUtilitiesTests.cs | 0 of 0 cases |
 | `swingoption` | not started |  | 6 cases |
 | `termstructures` | partial | TestSuite/TermStructuresTests.cs | 2 of 15 cases; replaced: testReferenceChange by Vectors/TermStructures/FlatForwardVectorTests.cs; not yet: testImplied, testImpliedObs, testFSpreaded, testFSpreadedObs, testZSpreaded, testZSpreadedObs, testCreateWithNullUnderlying, testLinearInterpolationSpreadedForwardRate, testForwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationSpreadedForwardRate, testBackwardFlatInterpolationZeroRate, testLinkToNullUnderlying, testCompositeZeroYieldStructures |
 | `timegrid` | ported | TestSuite/TimeGridTests.cs | 10 of 10 cases |

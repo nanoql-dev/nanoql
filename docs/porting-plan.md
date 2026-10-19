@@ -85,14 +85,12 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/CashFlow.cs`: `earlier_than<CashFlow>`, which waits for the bond slot.
 - `src/NanoQL/Coupons/CappedFlooredCoupon.cs`: `CappedFlooredCmsCoupon`, which waits for S-rx with `CmsCoupon`.
 - `src/NanoQL/Coupons/CashFlowVectorsFunctions.cs`: `FloatingDigitalLeg`, which waits for B3.4 with the digital coupons.
-- `src/NanoQL/Coupons/CashFlows.cs`: every function but `startDate`, `maturityDate`, `accruedPeriod`, `accruedDays`, `accruedAmount`, and `npv`, `bps` and `npvbps` on a yield term structure.
+- `src/NanoQL/Coupons/CashFlows.cs`: every function but `startDate`, `maturityDate`, `accruedPeriod`, `accruedDays`, `accruedAmount`, `npv`, `bps` and `npvbps` on a yield term structure, and `bps` on an interest rate.
 - `src/NanoQL/Coupons/CouponPricer/CouponPricerFunctions.cs`: the visitor's cases for the CMS, CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS and CMS-spread checks among them), which wait for S-rx and batch 3; the CMS pricer bases, which wait for B3.3.
 - `src/NanoQL/Coupons/FixedRateLeg.cs`: `withLastPeriodDayCounter`, which waits for the credit default swap slot.
-- `src/NanoQL/Event.cs`: `detail::simple_event`, which only experimental code uses.
-- `src/NanoQL/Instrument.cs`: `result<T>`, which waits for the first engine that sets additional results.
 - `src/NanoQL/InterestRate.cs`: the discount factor's two derivatives, which wait for the slot that ports the cash-flow duration and convexity.
 - `src/NanoQL/Numerics/ComparisonFunctions.cs`: `earlier_than`, which waits for the bond slot.
-- `src/NanoQL/OptionType.cs`: `Option`, its arguments, `Greeks` and `MoreGreeks`, which wait for S6 and S-eq.
+- `src/NanoQL/OptionType.cs`: `Greeks` and `MoreGreeks`, which wait for S-eq's engines.
 - `src/NanoQL/StochasticProcess/StochasticProcess.cs`: `StochasticProcess`'s defaults of `expectation`, `stdDeviation` and `covariance`, which call the discretization and wait for S-eq's `EulerDiscretization`.
 - `src/NanoQL/StochasticProcess/StochasticProcess1D.cs`: `StochasticProcess1D`'s defaults of `expectation`, `stdDeviation` and `variance`, which call the discretization and wait for S-eq's `EulerDiscretization`.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
@@ -125,5 +123,6 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases, which need `cdsMaturity`.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant, Newton, Ridder and Halley cases, whose solvers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/SwapTests.cs`: `testInArrears`, which waits for batch 2's `SimpleDayCounter`; `testFixedTenorInferenceWithTerminationDate`, which waits for batch 2's `GBPLibor` and `Bbsw`; and `testSpotDateUsesFixingCalendar`, which waits for batch 2's Taiwan calendar.
+- `tests/NanoQL.Tests/TestSuite/SwaptionTests.cs`: `testImpliedVolatilityOis` and `testCachedValue`'s overnight-indexed swaption (lines 449-466), which wait for batch 2's `Eonia` and S-bond's `ZeroSpreadedTermStructure`.
 - `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported.
 - `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, B4.2).

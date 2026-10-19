@@ -10,7 +10,9 @@ namespace NanoQL.Tests.Conventions;
 /// A constant swaption volatility structure answers the conventions it was built with: its calendar, business-day
 /// convention and day counter, in both forms; its settlement days are the days given to <c>Create</c>, and
 /// <see langword="null"/> for a fixed reference date, where QuantLib's <c>settlementDays()</c> refuses
-/// (<c>termstructure.hpp:127-129</c>), as the term structures' <see cref="TermStructure.SettlementDays"/> is.
+/// (<c>termstructure.hpp:127-129</c>), as the term structures' <see cref="TermStructure.SettlementDays"/> is. The
+/// discrete swaption base seals the conventions its constructor reads (C# runs a derived override from a base
+/// constructor, before the derived constructor has run).
 /// </summary>
 public class VolatilityStructureConventionsTests
 {
@@ -35,5 +37,16 @@ public class VolatilityStructureConventionsTests
         Assert.Equal(new TARGET(), moving.Calendar);
         Assert.Equal(BusinessDayConvention.Preceding, moving.BusinessDayConvention);
         Assert.Equal(new Thirty360(Thirty360Convention.BondBasis), moving.DayCounter);
+    }
+
+    [Fact]
+    public void TheDiscreteSwaptionBaseSealsTheConventionsItsConstructorReads()
+    {
+        foreach (string name in new[] { "DayCounter", "Calendar", "BusinessDayConvention" })
+        {
+            System.Reflection.MethodInfo getter = typeof(SwaptionVolatilityDiscrete).GetProperty(name)!.GetMethod!;
+            Assert.Equal(typeof(SwaptionVolatilityDiscrete), getter.DeclaringType);
+            Assert.True(getter.IsFinal, name);
+        }
     }
 }

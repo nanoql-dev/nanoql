@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/instrument.hpp ql/instrument.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Equality-tested: tests/NanoQL.Tests/Conventions/ResultsEqualityTests.cs
 
 using System.Collections;
 using System.Collections.Immutable;
@@ -41,6 +40,27 @@ public record InstrumentResults
     /// <summary>Gets any additional results the engine returns, by tag.</summary>
     public ImmutableSortedDictionary<string, object> AdditionalResults { get; init; } =
         ImmutableSortedDictionary<string, object>.Empty;
+
+    /// <summary>An additional result, by its tag: QuantLib's <c>Instrument::result&lt;T&gt;</c>.</summary>
+    /// <typeparam name="T">The result's type.</typeparam>
+    /// <param name="tag">The result's tag.</param>
+    /// <returns>The result.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="tag"/> is <see langword="null"/>.</exception>
+    /// <exception cref="NanoQLException">No additional result has the tag.</exception>
+    /// <exception cref="InvalidCastException">
+    /// The result isn't a <typeparamref name="T"/>, where QuantLib's <c>std::any_cast</c> throws
+    /// <c>std::bad_any_cast</c>: .NET's own type for a failed cast, since the failure is the type argument's.
+    /// </exception>
+    public T Result<T>(string tag)
+    {
+        ArgumentNullException.ThrowIfNull(tag);
+        if (!AdditionalResults.TryGetValue(tag, out object? value))
+        {
+            throw new NanoQLException($"{tag} not provided");
+        }
+
+        return (T)value;
+    }
 
     /// <inheritdoc/>
     public virtual bool Equals(InstrumentResults? other)

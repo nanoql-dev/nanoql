@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/cashflows.hpp ql/cashflows/cashflows.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: every function but startDate, maturityDate, accruedPeriod, accruedDays, accruedAmount, and npv, bps and npvbps on a yield term structure, which wait for the slots whose code and tests use them
+// Partial: every function but startDate, maturityDate, accruedPeriod, accruedDays, accruedAmount, npv, bps and npvbps on a yield term structure, and bps on an interest rate, which wait for the slots whose code and tests use them
 
 using System.Collections.Immutable;
 using NanoQL.TermStructures;
@@ -266,6 +266,76 @@ public static class CashFlows
         return BasisPoint * calc.Bps / discountCurve.Discount(npvAt);
     }
 
+    /// <summary>
+    /// The basis-point sensitivity of the cash flows: the change in NPV for a one-basis-point change in the coupon
+    /// rates, each coupon's change discounted at a constant interest rate, period by period from the NPV date.
+    /// </summary>
+    /// <param name="leg">The leg.</param>
+    /// <param name="yield">The interest rate the changes are discounted at; its compounding, frequency and day counter
+    /// set the discounting.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="includeSettlementDateFlows">Whether cash flows on the settlement date count.</param>
+    /// <param name="settlementDate">The settlement date; the evaluation date when <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the value is given at; the settlement date when <see langword="null"/>.</param>
+    /// <returns>The BPS.</returns>
+    /// <remarks>
+    /// Only the coupons count, and QuantLib checks no ex-coupon date here: a coupon traded ex-coupon still counts, as
+    /// in QuantLib. A rate compounded after a simple first period, or simple in its final one, discounts that period
+    /// simply.
+    /// </remarks>
+    public static double Bps(
+        ImmutableArray<CashFlow> leg,
+        InterestRate yield,
+        EvaluationContext context,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(yield);
+        Date.ThrowIfDefault(settlementDate, nameof(settlementDate));
+        Date.ThrowIfDefault(npvDate, nameof(npvDate));
+        if (leg.IsDefaultOrEmpty)
+        {
+            return 0.0;
+        }
+
+        Date settlement = settlementDate ?? context.EvaluationDate;
+        Date npvAt = npvDate ?? settlement;
+
+        double bps = 0.0;
+        double discount = 1.0;
+        Date lastDate = npvAt;
+        DayCounter dc = yield.DayCounter;
+        bool inFirstPeriod = true;
+
+        (InterestRate yMain, InterestRate yException) = CashFlowsHelpers.StepwiseYields(yield);
+
+        foreach (CashFlow cashFlow in leg)
+        {
+            if (cashFlow.HasOccurred(context, settlement, includeSettlementDateFlows))
+            {
+                continue;
+            }
+
+            if (cashFlow is not Coupon coupon)
+            {
+                continue;
+            }
+
+            InterestRate yI = CashFlowsHelpers.Choose(
+                yMain, yException, yield.Compounding, inFirstPeriod, cashFlow.Date, leg[^1].Date);
+
+            double dt = CashFlowsHelpers.GetStepwiseDiscountTime(cashFlow, dc, npvAt, lastDate);
+            discount *= yI.DiscountFactor(dt);
+            bps += coupon.Nominal(context) * coupon.AccrualPeriod() * discount;
+            lastDate = cashFlow.Date;
+            inFirstPeriod = false;
+        }
+
+        return BasisPoint * bps;
+    }
+
     /// <summary>The NPV and the BPS of the cash flows, computed together.</summary>
     /// <param name="leg">The leg.</param>
     /// <param name="discountCurve">The discount curve.</param>
@@ -337,6 +407,99 @@ public static class CashFlows
 
         return leg.Length;
     }
+}
+
+/// <summary>
+/// QuantLib's IRR utility functions that the functions on an interest rate share: the time each cash flow is discounted
+/// over, and the rate each period is discounted at.
+/// </summary>
+file static class CashFlowsHelpers
+{
+    /// <summary>
+    /// The time a cash flow is discounted over, from the previous one: QuantLib's <c>getStepwiseDiscountTime</c>, the
+    /// year fraction with the coupon's reference period, or, for another flow, a reference period ending on its date.
+    /// </summary>
+    public static double GetStepwiseDiscountTime(CashFlow cashFlow, DayCounter dc, Date npvDate, Date lastDate)
+    {
+        Date cashFlowDate = cashFlow.Date;
+        Date refStartDate, refEndDate;
+        Coupon? coupon = cashFlow as Coupon;
+        if (coupon is not null)
+        {
+            refStartDate = coupon.ReferencePeriodStart;
+            refEndDate = coupon.ReferencePeriodEnd;
+        }
+        else
+        {
+            if (lastDate == npvDate)
+            {
+                // we don't have a previous coupon date,
+                // so we fake it
+                refStartDate = cashFlowDate - new Period(1, TimeUnit.Years);
+            }
+            else
+            {
+                refStartDate = lastDate;
+            }
+
+            refEndDate = cashFlowDate;
+        }
+
+        if (coupon is not null && lastDate != coupon.AccrualStartDate)
+        {
+            double couponPeriod = dc.YearFraction(coupon.AccrualStartDate, cashFlowDate, refStartDate, refEndDate);
+            double accruedPeriod = dc.YearFraction(coupon.AccrualStartDate, lastDate, refStartDate, refEndDate);
+            return couponPeriod - accruedPeriod;
+        }
+
+        return dc.YearFraction(lastDate, cashFlowDate, refStartDate, refEndDate);
+    }
+
+    /// <summary>
+    /// The rate for the usual periods and, if any, the one for the exceptional period: QuantLib's
+    /// <c>stepwiseYields</c>, compounded and simple for the rules that mix them.
+    /// </summary>
+    public static (InterestRate Main, InterestRate Exception) StepwiseYields(InterestRate y)
+    {
+        // we return the yield to be used in the normal case and,
+        // if any, the one to be used in the exceptional case.
+        switch (y.Compounding)
+        {
+            case Compounding.SimpleThenCompounded:
+            case Compounding.CompoundedThenSimple:
+                return (Clone(y, Compounding.Compounded), Clone(y, Compounding.Simple));
+            default:
+                return (y, y);
+        }
+    }
+
+    /// <summary>
+    /// The rate a period is discounted at: QuantLib's <c>choose</c>, the exceptional rate for the first period of a
+    /// simple-then-compounded rule and for the final one of a compounded-then-simple rule.
+    /// </summary>
+    public static InterestRate Choose(
+        InterestRate main,
+        InterestRate exception,
+        Compounding compounding,
+        bool inFirstPeriod,
+        Date cashFlowDate,
+        Date finalCashFlowDate)
+    {
+        // The exceptions are positional: the first interval is
+        // simple for SimpleThenCompounded and the final interval is
+        // simple for CompoundedThenSimple.
+        switch (compounding)
+        {
+            case Compounding.SimpleThenCompounded:
+                return inFirstPeriod ? exception : main;
+            case Compounding.CompoundedThenSimple:
+                return cashFlowDate == finalCashFlowDate ? exception : main;
+            default:
+                return main;
+        }
+    }
+
+    private static InterestRate Clone(InterestRate y, Compounding c) => new(y.Rate, y.DayCounter, c, y.Frequency);
 }
 
 /// <summary>Sums the coupons' basis-point sensitivity, and the other cash flows' NPV apart.</summary>

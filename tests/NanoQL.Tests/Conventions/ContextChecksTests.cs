@@ -76,6 +76,8 @@ public class ContextChecksTests
         // An empty leg, which the functions value at 0 without reading the context, still needs one.
         AssertContext(() => CashFlows.Npv([], curve, null!));
         AssertContext(() => CashFlows.Bps([], curve, null!));
+        AssertContext(() => CashFlows.Bps(
+            [], new InterestRate(0.03, new Actual365Fixed(), Compounding.Simple, Frequency.Annual), null!));
         AssertContext(() => CashFlows.NpvBps([], curve, null!));
         AssertContext(() => swap.IsExpired(null!));
         AssertContext(() => DiscountingSwapEngine.Calculate(swap, null!, curve));
