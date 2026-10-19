@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
-"""Vectors for QuantLib's DepositRateHelper and SwapRateHelper (ql/termstructures/yield/ratehelpers.hpp), each output
-computed by the C++ harness: what the wheel can't reach, a helper's implied quote and quote error against a curve of
-one's choice, the helper bound to it by setTermStructure, which the wheel doesn't bind; the swap helper's
-forwardStart(); and its constructor taking a coupon pricer, which the wheel doesn't wrap.
+"""Vectors for QuantLib's rate helpers (ql/termstructures/yield/ratehelpers.hpp), each output computed by the C++
+harness: what the wheel can't reach, a helper's implied quote and quote error against a curve of one's choice, the
+helper bound to it by setTermStructure, which the wheel doesn't bind; the swap helper's forwardStart(); its
+constructor taking a coupon pricer, the FRA helper's constructor from a period and a length, and the futures helper's
+mixed quote and value forms, which the wheel doesn't wrap.
 
 - 103 cases, the helpers of termstructures/yield/ratehelpers.py on its first evaluation date, 15 January 2024, each
   with the at-par switch it sets there: whether it builds (its pillar date, which QuantLib computes at construction;
@@ -18,9 +19,15 @@ forwardStart(); and its constructor taking a coupon pricer, which the wheel does
   Black76's timing adjustment, on a tenor and a dated helper, and with the bivariate lognormal one at correlations 0.5
   and 0.8, its indexed-coupon choice from the switch, given, and given against the helper's own; with the same
   outputs.
+- Appended after them, 117 cases with the same outputs: the 103 FRA, futures and FX swap helpers of
+  termstructures/yield/ratehelpers.py on the same date (an FX swap helper bound to a curve discounts on its own
+  collateral curve too; one with no collateral curve can't be bound, QuantLib's refusal); 8 FRA helpers from a period
+  to start and a length in months (weeks added to months refused); and 6 futures helpers in QuantLib's mixed forms, the
+  price a quote and the convexity adjustment a value or the other way round.
 
 Each case's inputs hold its settings, "helper" (a helper spec of termstructures/yield/ratehelpers.py, with a
-"couponPricer" spec of cashflows/couponspec.hpp for the last six) and "curves" (the flat forward spec and {"type":
+"couponPricer" spec of cashflows/couponspec.hpp for the six pricer cases, and "quotes" for the mixed futures forms)
+and "curves" (the flat forward spec and {"type":
 "DiscountCurve", "dates", "discounts", "dayCounter"}). Read back by tests/NanoQL.Tests/Vectors/Cxx/TermStructures/Yield/
 RateHelpersCxxVectorTests.cs."""
 import importlib.util
@@ -91,6 +98,46 @@ def pricer_helpers():
     return [(name, dict(spec, couponPricer=pricer)) for name, spec, pricer in rows]
 
 
+def fra_period_lengths():
+    """(name, spec) for the 8 FRA helpers from a period to start and a length in months."""
+    M, W, Dd, Y = ql.Months, ql.Weeks, ql.Days, ql.Years
+    MF, F = ql.ModifiedFollowing, ql.Following
+    out = [
+        ("1M then 3 months", rh.fra_period_length(0.0381, (1, M), 3)),
+        ("3M then 6 months, Actual/365", rh.fra_period_length(0.0382, (3, M), 6, dc=rh.A365)),
+        ("1Y then 6 months, end of month", rh.fra_period_length(0.0383, (1, Y), 6, eom=True)),
+        ("0D then 3 months, Following, one fixing day", rh.fra_period_length(0.0384, (0, Dd), 3, 1, convention=F)),
+        ("6M then 3 months, not indexed", rh.fra_period_length(0.0385, (6, M), 3, indexed=False)),
+        ("3M then 3 months, pillar at maturity",
+         rh.fra_period_length(0.0386, (3, M), 3, pillar=ql.Pillar.MaturityDate)),
+        ("2W then 3 months, refused", rh.fra_period_length(0.0387, (2, W), 3)),
+        ("1M then 9 months on the US SOFR calendar", rh.fra_period_length(0.0388, (1, M), 9, 2, rh.US_SOFR, MF)),
+    ]
+    return out
+
+
+def mixed_futures():
+    """(name, spec) for the 6 futures helpers in QuantLib's mixed quote and value forms."""
+    out = [
+        ("IMM March 2024, 3 months, the price a quote",
+         rh.futures_length(96.21, ql.Date(20, 3, 2024), 3, convexity=0.0002)),
+        ("IMM June 2024, 3 months, the adjustment a quote",
+         rh.futures_length(96.31, ql.Date(19, 6, 2024), 3, convexity=0.0004)),
+        ("IMM March 2024 with no end date, the price a quote",
+         rh.futures_dates(96.21, ql.Date(20, 3, 2024), None, convexity=0.0001)),
+        ("custom from 20 February 2024 to 6 April, the adjustment a quote",
+         rh.futures_dates(96.5, ql.Date(20, 2, 2024), ql.Date(6, 4, 2024), convexity=0.0003,
+                          futures_type=ql.Futures.Custom)),
+        ("ASX March 2024 on Euribor 3M, the price a quote",
+         rh.futures_index(96.26, ql.Date(8, 3, 2024), rh.E3M, 0.0002, ql.Futures.ASX)),
+        ("IMM June 2024 on Euribor 3M, the adjustment a quote",
+         rh.futures_index(96.31, ql.Date(19, 6, 2024), rh.E3M, 0.0004)),
+    ]
+    for k, (_, spec) in enumerate(out):
+        spec["quotes"] = [k % 2 == 0, k % 2 == 1]
+    return out
+
+
 def outputs(H, spec):
     try:
         pillar = H.call("RateHelper::pillarDate", spec)
@@ -108,6 +155,9 @@ def outputs(H, spec):
 def cases():
     out = []
     rows = [(n, s, a) for n, s, a in rh.all_helpers()] + [(f"swap {n}", s, None) for n, s in pricer_helpers()]
+    rows += [(n, s, None) for n, s in rh.more_helpers()]
+    rows += [(f"fra {n}", s, None) for n, s in fra_period_lengths()]
+    rows += [(f"futures {n}", s, None) for n, s in mixed_futures()]
     with cxx.connect() as H:
         for name, spec, at_par in rows:
             with H.case_settings(v.enc(TODAY), use_at_par_coupons=at_par) as st:
@@ -131,6 +181,12 @@ def check_rows(out):
     assert by_name[f"{first} swap index fixing pricer, +5bp"] == {"built": v.THROWS}
     assert by_name[f"{first} swap Black pricer, bivariate lognormal 0.5"]["impliedQuoteFlat"] != base
     assert by_name[f"{first} swap forward start -1W"]["forwardStart"] == [-1, int(ql.Weeks)]
+    # an FX swap helper with no collateral curve can't be bound
+    assert by_name[f"{first} fx 1M with no collateral curve"]["impliedQuoteFlat"] == v.THROWS
+    assert by_name[f"{first} fra 2W then 3 months, refused"] == {"built": v.THROWS}
+    # the mixed forms give the plain forms' values
+    assert (by_name[f"{first} futures IMM June 2024 on Euribor 3M, the adjustment a quote"]["impliedQuoteFlat"]
+            == by_name[f"{first} futures IMM June 2024 on Euribor 3M, convexity"]["impliedQuoteFlat"])
 
 
 if __name__ == "__main__":

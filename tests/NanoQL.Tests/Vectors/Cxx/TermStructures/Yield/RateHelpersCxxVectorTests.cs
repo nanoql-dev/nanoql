@@ -10,11 +10,12 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Vectors;
 
 /// <summary>
-/// The C++ harness's rate-helper vectors, <c>tests/vectors/cxx/termstructures/yield/ratehelpers.json</c>: the deposit
-/// and swap helpers (<see cref="RateHelperInputs"/>) bound by
+/// The C++ harness's rate-helper vectors, <c>tests/vectors/cxx/termstructures/yield/ratehelpers.json</c>: the deposit,
+/// swap, FRA, futures and FX swap helpers (<see cref="RateHelperInputs"/>) bound by
 /// <see cref="BootstrapHelperExtensions.SetTermStructure{T}(T, YieldTermStructure)"/> to a flat forward curve and to an
-/// interpolated discount curve, with their implied quotes and quote errors; <see cref="SwapRateHelper.ForwardStart"/>;
-/// and the swap helper's coupon pricer.
+/// interpolated discount curve, with their implied quotes and quote errors, an FX swap helper with no collateral curve
+/// refusing to be bound; <see cref="SwapRateHelper.ForwardStart"/>; the swap helper's coupon pricer; the FRA helper's
+/// constructor from a period and a length; and the futures helper's mixed forms, which collapse here.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class RateHelpersCxxVectorTests
@@ -41,11 +42,12 @@ public class RateHelpersCxxVectorTests
 
             check.Output(c, "pillarDate", helper.PillarDate);
             YieldTermStructure[] curves = [.. c.Input("curves").EnumerateArray().Select(CurveOf)];
+            BootstrapHelper<YieldTermStructure> unbound = helper;
             foreach ((string name, YieldTermStructure curve) in new[] { "Flat", "Curve" }.Zip(curves))
             {
-                BootstrapHelper<YieldTermStructure> bound = helper.SetTermStructure(curve);
-                check.Output(c, "impliedQuote" + name, () => bound.ImpliedQuote(context));
-                check.Output(c, "quoteError" + name, () => bound.QuoteError(context));
+                // binding can refuse too: an FX swap helper with no collateral curve
+                check.Output(c, "impliedQuote" + name, () => unbound.SetTermStructure(curve).ImpliedQuote(context));
+                check.Output(c, "quoteError" + name, () => unbound.SetTermStructure(curve).QuoteError(context));
             }
 
             if (helper is SwapRateHelper swap)

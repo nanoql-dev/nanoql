@@ -107,6 +107,16 @@ Facts:
 
 - `AnOverflowingAdvanceIsRefusedByTheDateRange`
 
+## DatedFxSwapRateHelperTests
+
+[`Divergences/DatedFxSwapRateHelperTests.cs`](../tests/NanoQL.Tests/Divergences/DatedFxSwapRateHelperTests.cs)
+
+An FX swap helper built from dates has no fixing days, convention or end-of-month flag, and its `FxSwapRateHelper.FixingDays`, `FxSwapRateHelper.BusinessDayConvention` and `FxSwapRateHelper.EndOfMonth` refuse. QuantLib's dated constructor leaves the three members uninitialized (`ratehelpers.cpp:772-785`) and its inspectors return them (`ratehelpers.hpp:398-401`): reading an indeterminate value, a result C++ leaves undefined.
+
+Facts:
+
+- `ADatedFxSwapHelperRefusesItsFixingDaysConventionAndEndOfMonth`
+
 ## DefaultRoundingTests
 
 [`Divergences/DefaultRoundingTests.cs`](../tests/NanoQL.Tests/Divergences/DefaultRoundingTests.cs)
@@ -164,6 +174,16 @@ Facts:
 
 - `AnEmptyScheduleIsRefusedByBothBuilders`
 - `ANullIndexIsRefused`
+
+## FuturesNullMaturityTests
+
+[`Divergences/FuturesNullMaturityTests.cs`](../tests/NanoQL.Tests/Divergences/FuturesNullMaturityTests.cs)
+
+A custom futures helper built from dates with no end date keeps a null maturity, as QuantLib's does (`ratehelpers.cpp:126-128`), and the bootstraps drop it as expired; but its implied quote refuses the null maturity before it reads the curve, with the term structure's text for a date before its reference date. QuantLib computes a year fraction from the null date (`:133`), which a day counter reading the month or the day reads out of bounds, and its implied quote discounts to the null date (`:159-160`), which a curve whose day counter reads serial numbers alone refuses as a "negative time" and one reading the month or the day reads out of bounds: a result C++ leaves undefined, and a text nanoql can't form from a null date.
+
+Facts:
+
+- `ACustomFuturesHelperWithNoEndDateRefusesItsImpliedQuote`
 
 ## IborNegativeCountTests
 
@@ -336,11 +356,12 @@ Facts:
 
 [`Divergences/RateHelperNullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/RateHelperNullIndexTests.cs)
 
-A rate helper given a null index is refused on entry, naming the parameter. QuantLib's helpers dereference their index before any check (`ratehelpers.cpp:198, 206` for the deposit helper, `:533` for the swap helper), a result C++ leaves undefined; the wheel stops on Boost's assertion.
+A rate helper given a null index is refused on entry, naming the parameter. QuantLib's helpers dereference their index before any check (`ratehelpers.cpp:198, 206` for the deposit helper, `:533` for the swap helper, `:148` for the futures helper, `:312, 332, 350` for the FRA helper, `oisratehelper.cpp:114` for the OIS helper), a result C++ leaves undefined; the wheel stops on Boost's assertion.
 
 Facts:
 
 - `AHelperGivenANullIndexIsRefused`
+- `AFuturesFraOrOisHelperGivenANullIndexIsRefused`
 
 ## ResultsNullTests
 
@@ -381,11 +402,12 @@ Facts:
 
 [`Divergences/SettlementDaysSentinelTests.cs`](../tests/NanoQL.Tests/Divergences/SettlementDaysSentinelTests.cs)
 
-Settlement days that QuantLib may leave unset are an `int?`, so `int.MaxValue` is a value. QuantLib reads its null sentinel, `Null<Natural>()`, which equals `INT_MAX`, as "not given": a swap rate helper given it starts at the index's spot date (`ratehelpers.cpp:573-575`), 18 June 2025 from 16 June. nanoql counts that many days from the evaluation date, and the date leaves its range.
+Settlement days are an `int`, or an `int?` where QuantLib may leave them unset, so `int.MaxValue` is a value. QuantLib reads its null sentinel, `Null<Natural>()`, which equals `INT_MAX`, as "not given": a swap rate helper given it starts at the index's spot date (`ratehelpers.cpp:573-575`), and an OIS rate helper at its swap builder's default spot (`oisratehelper.cpp:167-169`), each 18 June 2025 from 16 June. nanoql counts that many days from the evaluation date, and the date leaves its range.
 
 Facts:
 
 - `SettlementDaysOfIntMaxValueAreAValue`
+- `OisSettlementDaysOfIntMaxValueAreAValue`
 
 ## SharedPricerStateTests
 

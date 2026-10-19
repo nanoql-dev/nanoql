@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,137 | 150 |
-| partial | 23 | 24 |
-| ported | 114 | 8 |
+| not started | 1,134 | 150 |
+| partial | 22 | 24 |
+| ported | 118 | 8 |
 | replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
@@ -652,7 +652,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `forward` | not started |  | no nanoql type: Forward, ForwardTypePayoff |
 | `forwardrateagreement` | not started |  | no nanoql type: ForwardRateAgreement |
 | `forwardvanillaoption` | not started |  | no nanoql type: ForwardOptionArguments, ForwardVanillaOption |
-| `futures` | not started |  | no nanoql type: FuturesType |
+| `futures` | ported | Instruments/FuturesType.cs |  |
 | `fxforward` | not started |  | no nanoql type: FxForward, FxForwardResults |
 | `holderextensibleoption` | not started |  | no nanoql type: HolderExtensibleOption |
 | `impliedvolatility` | not started |  |  |
@@ -1925,14 +1925,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `interpolatedsimplezerocurve` | ported | TermStructures/Yield/InterpolatedSimpleZeroCurve/InterpolatedSimpleZeroCurveFormula.cs, TermStructures/Yield/InterpolatedSimpleZeroCurve/InterpolatedSimpleZeroCurve{TInterpolator}.cs, TermStructures/Yield/InterpolatedSimpleZeroCurve/SimpleZeroCurve.cs |  |
 | `multipleresetsswaphelper` | not started |  | no nanoql type: MultipleResetsSwapRateHelper |
 | `nonlinearfittingmethods` | not started |  | no nanoql type: ExponentialSplinesFitting, NelsonSiegelFitting, SvenssonFitting, CubicBSplinesFitting, NaturalCubicFitting, SimplePolynomialFitting, SpreadFittingMethod |
-| `oisratehelper` | not started |  | no nanoql type: OISRateHelper |
+| `oisratehelper` | ported | TermStructures/Yield/OISRateHelper.cs |  |
 | `overnightindexfutureratehelper` | not started |  | no nanoql type: OvernightIndexFutureRateHelper, SofrFutureRateHelper |
 | `piecewiseforwardspreadedtermstructure` | not started |  | no nanoql type: InterpolatedPiecewiseForwardSpreadedTermStructure |
 | `piecewisespreadyieldcurve` | not started |  | no nanoql type: PiecewiseSpreadYieldCurve |
 | `piecewiseyieldcurve` | ported | TermStructures/Yield/PiecewiseYieldCurve/GlobalLinearSimpleZeroCurve.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseSplineCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearSimpleZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseYieldCurve{TTraits,TInterpolator,TBootstrap}.cs |  |
 | `piecewisezerospreadedtermstructure` | not started |  | no nanoql type: InterpolatedPiecewiseZeroSpreadedTermStructure, PiecewiseZeroSpreadedTermStructure |
 | `quantotermstructure` | not started |  | no nanoql type: QuantoTermStructure |
-| `ratehelpers` | partial | TermStructures/Yield/RateHelpers/DepositRateHelper.cs, TermStructures/Yield/RateHelpers/RateHelper.cs, TermStructures/Yield/RateHelpers/RelativeDateRateHelper.cs, TermStructures/Yield/RateHelpers/SwapRateHelper.cs | partial: the constructor from a swap index, which waits for S5's fourth commit with SwapIndex; no nanoql type: FuturesRateHelper, FraRateHelper, BMASwapRateHelper, FxSwapRateHelper |
+| `ratehelpers` | partial | TermStructures/Yield/RateHelpers/DepositRateHelper.cs, TermStructures/Yield/RateHelpers/FraRateHelper.cs, TermStructures/Yield/RateHelpers/FuturesRateHelper.cs, TermStructures/Yield/RateHelpers/FxSwapRateHelper.cs, TermStructures/Yield/RateHelpers/RateHelper.cs, TermStructures/Yield/RateHelpers/RelativeDateRateHelper.cs, TermStructures/Yield/RateHelpers/SwapRateHelper.cs | partial: the constructor from a swap index, which waits for S5's fourth commit with SwapIndex; no nanoql type: BMASwapRateHelper |
 | `spreadbootstraptraits` | not started |  |  |
 | `spreaddiscountcurve` | not started |  | no nanoql type: InterpolatedSpreadDiscountCurve, SpreadDiscountCurve |
 | `ultimateforwardtermstructure` | not started |  | no nanoql type: UltimateForwardTermStructure |
@@ -1945,7 +1945,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `asx` | not started |  | no nanoql type: ASX, ASXMonth |
+| `asx` | ported | Time/ASX.cs, Time/ASXMonth.cs |  |
 | `businessdayconvention` | ported | Time/BusinessDayConvention.cs, Time/BusinessDayConventionFunctions.cs |  |
 | `calendar` | ported | Time/Calendar.cs, Time/EmptyCalendar.cs |  |
 | `date` | partial | Time/Date/Date.cs, Time/Date/DateFunctions.cs, Time/Date/Month.cs | partial: io::formatted_date (not ported: a Date converts to DateOnly, whose ToString(format) does its job) |
@@ -1953,7 +1953,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `daycounter` | ported | Time/DayCounter.cs |  |
 | `ecb` | not started |  | no nanoql type: ECB |
 | `frequency` | ported | Time/Frequency.cs, Time/FrequencyFunctions.cs |  |
-| `imm` | partial | Time/IMM.cs, Time/IMMMonth.cs | partial: isIMMcode, code, date, nextDate and nextCode, which the wheel exposes and a later slot ports |
+| `imm` | ported | Time/IMM.cs, Time/IMMMonth.cs |  |
 | `period` | ported | Time/Period/Period.cs, Time/Period/PeriodFunctions.cs, Time/Period/TimeUnitExtensions.cs |  |
 | `schedule` | ported | Time/Schedule/MakeSchedule.cs, Time/Schedule/Schedule.cs, Time/Schedule/ScheduleFunctions.cs |  |
 | `timeunit` | ported | Time/TimeUnit.cs |  |
@@ -2109,7 +2109,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `crosscurrencyratehelpers` | not started |  | 30 cases |
 | `currency` | ported | TestSuite/CurrencyTests.cs | 1 of 1 cases |
 | `curvestates` | not started |  | 3 cases |
-| `dates` | partial | TestSuite/DatesTests.cs | 4 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; not yet: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, immDates, asxDates, asxDatesSpecific, isoDates, parseDates, intraday |
+| `dates` | partial | TestSuite/DatesTests.cs | 7 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; not yet: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, isoDates, parseDates, intraday |
 | `daycounters` | partial | TestSuite/DayCountersTests.cs | 11 of 22 cases; not yet: testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter |
 | `defaultprobabilitycurves` | not started |  | 10 cases |
 | `digitalcoupon` | not started |  | 8 cases |
@@ -2195,7 +2195,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `optionletstripper` | not started |  | 19 cases |
 | `overnightindexedcoupon` | ported | TestSuite/OvernightIndexedCouponTests.cs | 45 of 45 cases; moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 to Divergences/TelescopicValueDatesTests.cs; testOvernightLegNPV line 1033 to Divergences/TelescopicValueDatesTests.cs |
 | `overnightindexedfundingratehelper` | not started |  | 3 cases |
-| `overnightindexedswap` | partial | TestSuite/OvernightIndexedSwapTests.cs | 11 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs; not yet: testBaseBootstrap, testBootstrapWithArithmeticAverage, testBootstrapWithTelescopicDates, testBootstrapWithTelescopicDatesAndArithmeticAverage, testBootstrapWithCustomPricer, testBootstrapWithLookbackDays, testBootstrapWithLookbackDaysAndShift, testBootstrapWithLockoutDays, testBootstrapWithLockoutDaysAndShift, testBootstrapRegression, test131BootstrapRegression, testBootstrapWithDifferentCalendars, testMakeOisEndOfMonthRegression2453, testNonstandardSwapConversionPreservesObservationConventions |
+| `overnightindexedswap` | partial | TestSuite/OvernightIndexedSwapTests.cs | 22 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs; not yet: testBootstrapRegression, testMakeOisEndOfMonthRegression2453, testNonstandardSwapConversionPreservesObservationConventions |
 | `pagodaoption` | not started |  | 1 cases |
 | `paralleltestrunner` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `partialtimebarrieroption` | not started |  | 3 cases |
@@ -2203,7 +2203,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `period` | ported | TestSuite/PeriodTests.cs | 9 of 9 cases |
 | `perpetualfutures` | not started |  | 1 cases |
 | `piecewiseblackvariancesurface` | not started |  | 20 cases |
-| `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 17 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency, testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency, testParFraRegression, testJpyLibor, testCA365Futures, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate, testGlobalBootstrap, testGlobalBootstrapPenalty, testGlobalBootstrapVariables, testMultiCurveTwoPiecewiseYieldCurves, testMultiCurvePiecewiseYieldCurveAndSpreadedCurve, testPiecewiseSpreadYieldCurve, testIterativeBootstrapRetries, testCustomFuturesHelpers, testSwapHelpersWithOnceFrequency, testFraForDates, testHelperDatesFromNonBusinessEvaluationDate, testBmaHelperSwap |
+| `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 23 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency, testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency, testParFraRegression, testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate, testGlobalBootstrapVariables, testMultiCurveTwoPiecewiseYieldCurves, testMultiCurvePiecewiseYieldCurveAndSpreadedCurve, testPiecewiseSpreadYieldCurve, testSwapHelpersWithOnceFrequency, testFraForDates, testBmaHelperSwap |
 | `piecewisezerospreadedtermstructure` | not started |  | 10 cases |
 | `preconditions` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `prices` | not started |  | 6 cases |

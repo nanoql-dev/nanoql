@@ -13,6 +13,7 @@
 #include <ql/utilities/null.hpp>
 
 #include <initializer_list>
+#include <variant>
 
 using namespace QuantLib;
 
@@ -204,6 +205,120 @@ namespace harness::termstructures {
                 s.floatConvention = enumeration<BusinessDayConvention>(floatConvention);
             if (const json::value* pricer = o.if_contains("couponPricer"))
                 s.couponPricer = cashflows::pricer(*pricer);
+        } else if (s.kind == "FraRateHelper") {
+            const bool conventions = s.form == "months" || s.form == "periodLength";
+            if (s.form == "months") {
+                onlyKeys(o, {"kind", "form", "rate", "monthsToStart", "monthsToEnd", "fixingDays", "calendar",
+                             "convention", "endOfMonth", "dayCounter", "pillar", "customPillarDate",
+                             "useIndexedCoupon"},
+                         what);
+                s.monthsToStart = natural(key(o, "monthsToStart", what));
+                s.monthsToEnd = natural(key(o, "monthsToEnd", what));
+            } else if (s.form == "periodLength") {
+                onlyKeys(o, {"kind", "form", "rate", "periodToStart", "lengthInMonths", "fixingDays", "calendar",
+                             "convention", "endOfMonth", "dayCounter", "pillar", "customPillarDate",
+                             "useIndexedCoupon"},
+                         what);
+                s.periodToStart = period(key(o, "periodToStart", what));
+                s.lengthInMonths = natural(key(o, "lengthInMonths", what));
+            } else if (s.form == "monthsIndex") {
+                onlyKeys(o, {"kind", "form", "rate", "monthsToStart", "index", "pillar", "customPillarDate",
+                             "useIndexedCoupon"},
+                         what);
+                s.monthsToStart = natural(key(o, "monthsToStart", what));
+            } else if (s.form == "periodIndex") {
+                onlyKeys(o, {"kind", "form", "rate", "periodToStart", "index", "pillar", "customPillarDate",
+                             "useIndexedCoupon"},
+                         what);
+                s.periodToStart = period(key(o, "periodToStart", what));
+            } else if (s.form == "imm") {
+                onlyKeys(o, {"kind", "form", "rate", "immOffsetStart", "immOffsetEnd", "index", "pillar",
+                             "customPillarDate", "useIndexedCoupon"},
+                         what);
+                s.immOffsetStart = natural(key(o, "immOffsetStart", what));
+                s.immOffsetEnd = natural(key(o, "immOffsetEnd", what));
+            } else if (s.form == "dates") {
+                onlyKeys(o, {"kind", "form", "rate", "startDate", "endDate", "index", "pillar", "customPillarDate",
+                             "useIndexedCoupon"},
+                         what);
+                s.startDate = date(key(o, "startDate", what));
+                s.endDate = date(key(o, "endDate", what));
+            } else {
+                throw InvalidParams("unknown form " + what);
+            }
+            if (conventions) {
+                s.fixingDays = natural(key(o, "fixingDays", what));
+                s.calendar = indexes::calendar(key(o, "calendar", what));
+                s.convention = enumeration<BusinessDayConvention>(key(o, "convention", what));
+                s.endOfMonth = boolean(key(o, "endOfMonth", what));
+                s.dayCounter = dayCounter(key(o, "dayCounter", what));
+            } else {
+                s.index = helperIndex(key(o, "index", what));
+            }
+            s.pillar = enumeration<Pillar::Choice>(key(o, "pillar", what));
+            s.customPillarDate = date(key(o, "customPillarDate", what));
+            s.useIndexedCoupon = boolean(key(o, "useIndexedCoupon", what));
+        } else if (s.kind == "FuturesRateHelper") {
+            if (s.form == "length") {
+                onlyKeys(o, {"kind", "form", "rate", "iborStartDate", "lengthInMonths", "calendar", "convention",
+                             "endOfMonth", "dayCounter", "convexityAdjustment", "type", "quotes"},
+                         what);
+                s.lengthInMonths = natural(key(o, "lengthInMonths", what));
+                s.calendar = indexes::calendar(key(o, "calendar", what));
+                s.convention = enumeration<BusinessDayConvention>(key(o, "convention", what));
+                s.endOfMonth = boolean(key(o, "endOfMonth", what));
+                s.dayCounter = dayCounter(key(o, "dayCounter", what));
+            } else if (s.form == "dates") {
+                onlyKeys(o, {"kind", "form", "rate", "iborStartDate", "iborEndDate", "dayCounter",
+                             "convexityAdjustment", "type", "quotes"},
+                         what);
+                s.endDate = date(key(o, "iborEndDate", what));
+                s.dayCounter = dayCounter(key(o, "dayCounter", what));
+            } else if (s.form == "index") {
+                onlyKeys(o, {"kind", "form", "rate", "iborStartDate", "index", "convexityAdjustment", "type",
+                             "quotes"},
+                         what);
+                s.index = helperIndex(key(o, "index", what));
+            } else {
+                throw InvalidParams("unknown form " + what);
+            }
+            s.startDate = date(key(o, "iborStartDate", what));
+            s.convexityAdjustment = real(key(o, "convexityAdjustment", what));
+            s.futuresType = enumeration<Futures::Type>(key(o, "type", what));
+            if (const json::value* quotes = o.if_contains("quotes")) {
+                if (!quotes->is_array() || quotes->get_array().size() != 2)
+                    throw InvalidParams("expected quotes as [price, convexity adjustment], got " +
+                                        json::serialize(*quotes));
+                s.priceQuote = boolean(quotes->get_array()[0]);
+                s.convexityQuote = boolean(quotes->get_array()[1]);
+            }
+        } else if (s.kind == "FxSwapRateHelper") {
+            if (s.form == "tenor") {
+                onlyKeys(o, {"kind", "form", "rate", "spotFx", "tenor", "fixingDays", "calendar", "convention",
+                             "endOfMonth", "isFxBaseCurrencyCollateralCurrency", "collateralCurve",
+                             "tradingCalendar"},
+                         what);
+                s.tenor = period(key(o, "tenor", what));
+                s.fixingDays = natural(key(o, "fixingDays", what));
+                s.calendar = indexes::calendar(key(o, "calendar", what));
+                s.convention = enumeration<BusinessDayConvention>(key(o, "convention", what));
+                s.endOfMonth = boolean(key(o, "endOfMonth", what));
+                const json::value& trading = key(o, "tradingCalendar", what);
+                s.emptyTradingCalendar = trading.is_null();
+                if (!s.emptyTradingCalendar)
+                    s.tradingCalendar = indexes::calendar(trading);
+            } else if (s.form == "dates") {
+                onlyKeys(o, {"kind", "form", "rate", "spotFx", "startDate", "endDate",
+                             "isFxBaseCurrencyCollateralCurrency", "collateralCurve"},
+                         what);
+                s.startDate = date(key(o, "startDate", what));
+                s.endDate = date(key(o, "endDate", what));
+            } else {
+                throw InvalidParams("unknown form " + what);
+            }
+            s.spotFx = real(key(o, "spotFx", what));
+            s.isFxBaseCurrencyCollateralCurrency = boolean(key(o, "isFxBaseCurrencyCollateralCurrency", what));
+            s.collateralCurve = indexes::curve(key(o, "collateralCurve", what));
         } else {
             throw InvalidParams("unknown rate helper " + s.kind);
         }
@@ -211,7 +326,79 @@ namespace harness::termstructures {
         return s;
     }
 
+    namespace {
+
+        ext::shared_ptr<RateHelper> makeFraRateHelper(const RateHelperSpec& s) {
+            Date custom = makeDate(s.customPillarDate);
+            if (s.form == "months")
+                return ext::make_shared<FraRateHelper>(
+                    s.rate, s.monthsToStart, s.monthsToEnd, s.fixingDays, indexes::makeCalendar(s.calendar),
+                    s.convention, s.endOfMonth, makeDayCounter(s.dayCounter), s.pillar, custom, s.useIndexedCoupon);
+            if (s.form == "periodLength")
+                return ext::make_shared<FraRateHelper>(
+                    s.rate, Period(s.periodToStart.first, s.periodToStart.second), s.lengthInMonths, s.fixingDays,
+                    indexes::makeCalendar(s.calendar), s.convention, s.endOfMonth, makeDayCounter(s.dayCounter),
+                    s.pillar, custom, s.useIndexedCoupon);
+            ext::shared_ptr<IborIndex> index = makeHelperIndex(s.index);
+            if (s.form == "monthsIndex")
+                return ext::make_shared<FraRateHelper>(s.rate, s.monthsToStart, index, s.pillar, custom,
+                                                       s.useIndexedCoupon);
+            if (s.form == "periodIndex")
+                return ext::make_shared<FraRateHelper>(
+                    s.rate, Period(s.periodToStart.first, s.periodToStart.second), index, s.pillar, custom,
+                    s.useIndexedCoupon);
+            if (s.form == "imm")
+                return ext::make_shared<FraRateHelper>(s.rate, s.immOffsetStart, s.immOffsetEnd, index, s.pillar,
+                                                       custom, s.useIndexedCoupon);
+            return ext::make_shared<FraRateHelper>(s.rate, makeDate(s.startDate), makeDate(s.endDate), index,
+                                                   s.pillar, custom, s.useIndexedCoupon);
+        }
+
+        std::variant<Real, Handle<Quote>> quoteOrValue(Real value, bool quote) {
+            if (quote)
+                return Handle<Quote>(ext::make_shared<SimpleQuote>(value));
+            return value;
+        }
+
+        ext::shared_ptr<RateHelper> makeFuturesRateHelper(const RateHelperSpec& s) {
+            std::variant<Real, Handle<Quote>> price = quoteOrValue(s.rate, s.priceQuote);
+            std::variant<Real, Handle<Quote>> convexity = quoteOrValue(s.convexityAdjustment, s.convexityQuote);
+            Date start = makeDate(s.startDate);
+            if (s.form == "length")
+                return ext::make_shared<FuturesRateHelper>(price, start, s.lengthInMonths,
+                                                           indexes::makeCalendar(s.calendar), s.convention,
+                                                           s.endOfMonth, makeDayCounter(s.dayCounter), convexity,
+                                                           s.futuresType);
+            if (s.form == "dates")
+                return ext::make_shared<FuturesRateHelper>(price, start, makeDate(s.endDate),
+                                                           makeDayCounter(s.dayCounter), convexity, s.futuresType);
+            return ext::make_shared<FuturesRateHelper>(price, start, makeHelperIndex(s.index), convexity,
+                                                       s.futuresType);
+        }
+
+        ext::shared_ptr<RateHelper> makeFxSwapRateHelper(const RateHelperSpec& s) {
+            Handle<Quote> points(ext::make_shared<SimpleQuote>(s.rate));
+            Handle<Quote> spot(ext::make_shared<SimpleQuote>(s.spotFx));
+            Handle<YieldTermStructure> collateral = indexes::makeCurve(s.collateralCurve);
+            if (s.form == "tenor")
+                return ext::make_shared<FxSwapRateHelper>(
+                    points, spot, Period(s.tenor.first, s.tenor.second), s.fixingDays,
+                    indexes::makeCalendar(s.calendar), s.convention, s.endOfMonth,
+                    s.isFxBaseCurrencyCollateralCurrency, collateral,
+                    s.emptyTradingCalendar ? Calendar() : indexes::makeCalendar(s.tradingCalendar));
+            return ext::make_shared<FxSwapRateHelper>(points, spot, makeDate(s.startDate), makeDate(s.endDate),
+                                                      s.isFxBaseCurrencyCollateralCurrency, collateral);
+        }
+
+    }
+
     ext::shared_ptr<RateHelper> makeRateHelper(const RateHelperSpec& s) {
+        if (s.kind == "FraRateHelper")
+            return makeFraRateHelper(s);
+        if (s.kind == "FuturesRateHelper")
+            return makeFuturesRateHelper(s);
+        if (s.kind == "FxSwapRateHelper")
+            return makeFxSwapRateHelper(s);
         if (s.kind == "DepositRateHelper") {
             if (s.form == "tenor")
                 return ext::make_shared<DepositRateHelper>(

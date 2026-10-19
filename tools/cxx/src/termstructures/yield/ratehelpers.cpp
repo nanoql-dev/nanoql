@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
-// ql/termstructures/yield/ratehelpers.hpp: what the wheel can't reach of DepositRateHelper and SwapRateHelper, each
-// built inside the call from a spec of termstructures/yield/ratehelperspec.hpp under the settings already set. A
+// ql/termstructures/yield/ratehelpers.hpp: what the wheel can't reach of the deposit, swap, FRA, futures and FX swap
+// helpers, each built inside the call from a spec of termstructures/yield/ratehelperspec.hpp under the settings
+// already set; among them the FRA's constructor from a period and a length, the futures helper's mixed quote and value
+// forms, and the dated FX swap helper, which the wheel doesn't wrap or can't bind. A
 // helper's implied quote and quote error against a given curve, the helper bound to it by setTermStructure, which the
 // wheel doesn't bind (a flat forward curve, or an interpolated discount curve, built inside the call and alive while
 // the helper is read); the swap helper's forwardStart(), as [length, units]; and the pillar date of a helper as built,

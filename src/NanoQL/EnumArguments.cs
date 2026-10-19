@@ -241,4 +241,17 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, $"unknown Pillar::Choice({(int)value})");
         }
     }
+
+    /// <summary>Refuses a futures type outside <see cref="FuturesType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(FuturesType value, string paramName)
+    {
+        if (value is not (FuturesType.IMM or FuturesType.ASX or FuturesType.Custom))
+        {
+            // QuantLib's text embeds the type's stream text, "Unknown(n)" for a value outside the members
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown futures type (Unknown({(int)value}))");
+        }
+    }
 }

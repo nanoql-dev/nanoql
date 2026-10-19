@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's PiecewiseYieldCurve (ql/termstructures/yield/piecewiseyieldcurve.hpp) on its iterative
 bootstrap, with the four yield traits (ql/termstructures/yield/bootstraptraits.hpp) and the interpolated curves'
-formulas they carry: 209 curves in 43 cases, on deposit and swap helpers of termstructures/yield/ratehelpers.py.
+formulas they carry: 209 curves in 43 cases, on deposit and swap helpers of termstructures/yield/ratehelpers.py;
+then, appended after them, 30 curves in 14 cases on its FRA, futures, FX swap and OIS helpers.
 
 - 132 curves in 12 cases: 11 traits and interpolator pairs (discounts: log-linear, spline cubic, log-cubic with the
   spline and with Kruger's derivatives, monotonic log-cubic; zero rates: linear, cubic with Kruger's derivatives and
@@ -41,6 +42,20 @@ formulas they carry: 209 curves in 43 cases, on deposit and swap helpers of term
   never can, and the curve stays linear); and the derivatives matched at the switch point n = 2 (a first-derivative
   left end with no value), under SplitRanges, and under ShareRanges, whose construction refuses them on every prefix,
   so that the curve is linear.
+
+- The appended cases: 3 curves (log-linear discounts, linear zero rates, backward-flat forwards) on 2 deposits, 7
+  FRAs on Euribor 3M and 5 quarterly swaps on Euribor 3M, on each evaluation date; 2 curves (log-linear discounts,
+  backward-flat forwards) on 2 deposits, 4 IMM futures on Euribor 3M from the first whose fixing isn't before the
+  evaluation date, a custom futures helper with no end date, whose null pillar the bootstraps drop as expired (DS13),
+  and 4 swaps, on each evaluation date; 2 curves (Kruger cubic zero rates, monotonic log-cubic discounts) on a 1-day
+  deposit and 12 OIS helpers on ESTR with a payment lag, from the evaluation date, on each evaluation date; 2 curves (log-linear discounts,
+  linear zero rates) on 6 EUR/USD FX swap helpers with a flat collateral curve, on the first evaluation date; 2
+  log-linear discount curves on QuantLib's ARS/USD FX swap helpers with a flat USD collateral curve on 25 September
+  2019, which QuantLib's default bootstrap refuses and 5 attempts build; and the DS12 pair: 2 deposits and an IMM FRA
+  from the spot date to the first IMM date with its pillar at maturity, before its latest relevant date, under the
+  linear simple-zero curve, which QuantLib refuses, its maximum date its last pillar, and the log-linear discount
+  curve, which builds (DS12); and 3 curves built 15 TARGET days after the evaluation date their FRA and FX swap
+  helpers were built on, which re-date them.
 
 A curve's outputs are whether it builds, QuantLib's refusals recorded as its throw; its nodes' dates and data, its
 maximum date, its discounts at 40 dates (35 from its reference date to its maximum date, the earlier ones closer
@@ -230,7 +245,8 @@ def curve_outputs(curve, helpers, quote_errors=True):
            "maxDate": v.enc(curve.maxDate()),
            "discounts": [curve.discount(d, x) for d, x in zip(dates, flags)]}
     if quote_errors:
-        out["quoteErrors"] = [h.quoteError() for h in helpers]
+        # a helper the bootstraps drop as expired is never bound, and QuantLib refuses its quote error
+        out["quoteErrors"] = [v.attempt(h.quoteError) for h in helpers]
     return out, v.enc(dates), flags
 
 
@@ -242,7 +258,7 @@ def group_case(name, st, kind, specs, helper_specs, quote_errors=True, extra=Non
     expected = {k: [] for k in keys}
     discount_inputs, flag_inputs = [], []
     for spec in specs:
-        helpers = [rh.make_helper(h) for h in helper_specs]
+        helpers = [rh.make_value_helper(h) for h in helper_specs]
         try:
             curve = make_curve(spec, helpers)
             curve.nodes()
@@ -461,9 +477,115 @@ def log_mixed_cases():
     return out
 
 
+def ref_spec(traits, interpolator, dc, today, bootstrap=None):
+    return curve_spec(traits, interpolator, dc, today, bootstrap=bootstrap)
+
+
+def fra_set(today):
+    fras = [(0, 0.0393), (1, 0.0395), (2, 0.0397), (3, 0.0399), (6, 0.0402), (9, 0.0405), (12, 0.0409)]
+    swaps = [(2, 0.0417), (3, 0.0428), (5, 0.0446), (7, 0.0461), (10, 0.0475)]
+    return ([rh.deposit_index(0.0386, rh.E1W), rh.deposit_index(0.0389, rh.E1M)]
+            + [rh.fra_months_index(rate, n, rh.E3M) for n, rate in fras]
+            + [rh.swap_tenor(rate, (n, ql.Years), freq=ql.Quarterly, index=rh.E3M) for n, rate in swaps])
+
+
+def futures_set(today):
+    """2 deposits, 4 IMM futures on Euribor 3M, as QuantLib's test fixture picks them, a custom one with no end date
+    and 4 swaps."""
+    euribor3m = ql.Euribor3M()
+    out = [rh.deposit_index(0.0386, rh.E1W), rh.deposit_index(0.0389, rh.E1M)]
+    imm = today
+    for price in (96.07, 95.95, 95.82, 95.70):
+        imm = ql.IMM.nextDate(imm, False)
+        # if the fixing is before the evaluation date, we
+        # just jump forward by one future maturity
+        if euribor3m.fixingDate(imm) < today:
+            imm = ql.IMM.nextDate(imm, False)
+        out.append(rh.futures_index(price, imm, rh.E3M, 0.0001))
+    out.append(rh.futures_dates(96.5, ql.TARGET().advance(today, 10, ql.Days), None, A360, 0.0, ql.Futures.Custom))
+    swaps = [(2, 0.0417), (3, 0.0428), (5, 0.0446), (10, 0.0475)]
+    return out + [rh.swap_tenor(rate, (n, ql.Years)) for n, rate in swaps]
+
+
+def ois_set(today):
+    data = [((1, ql.Weeks), 0.0391), ((1, ql.Months), 0.0392), ((3, ql.Months), 0.0390), ((6, ql.Months), 0.0386),
+            ((1, ql.Years), 0.0371), ((2, ql.Years), 0.0342), ((3, ql.Years), 0.0328), ((5, ql.Years), 0.0317),
+            ((7, ql.Years), 0.0315), ((10, ql.Years), 0.0318), ((20, ql.Years), 0.0322), ((30, ql.Years), 0.0310)]
+    deposit = rh.deposit_tenor(0.0390, (1, ql.Days), 0, TARGET, ql.Following, False, A360)
+    return [deposit] + [rh.ois_tenor(rate, tenor, payment_lag=2) for tenor, rate in data]
+
+
+def fx_set(today):
+    data = [((1, ql.Weeks), 0.0006), ((1, ql.Months), 0.0026), ((3, ql.Months), 0.0079), ((6, ql.Months), 0.0157),
+            ((1, ql.Years), 0.0306), ((2, ql.Years), 0.0570)]
+    collateral = fvf.curve(0.052, A360, ql.Simple, reference=today)
+    return [rh.fx_tenor(points, 1.0950, tenor, collateral=collateral) for tenor, points in data]
+
+
+ARS_DATE = D(25, 9, 2019)
+
+
+def ars_set():
+    """QuantLib's testIterativeBootstrapRetries' FX swap helpers, on a flat USD collateral curve."""
+    data = [((1, ql.Months), 8.5157), ((2, ql.Months), 12.7180), ((3, ql.Months), 17.8310), ((6, ql.Months), 30.3680),
+            ((9, ql.Months), 45.5520), ((1, ql.Years), 60.7370)]
+    collateral = fvf.curve(0.0185, A365, reference=ARS_DATE)
+    calendar = {"type": "UnitedStates", "market": int(ql.UnitedStates.GovernmentBond)}
+    return [rh.fx_tenor(points, 56.881, tenor, 2, calendar, ql.Following, False, True, collateral)
+            for tenor, points in data]
+
+
+def ds12_set(today):
+    return [rh.deposit_index(0.0386, rh.E1W), rh.deposit_index(0.0389, rh.E1M),
+            rh.fra_imm(0.0391, 0, 1, rh.E3M, pillar=ql.Pillar.MaturityDate)]
+
+
+def more_cases():
+    """The curves on FRA, futures, FX swap and OIS helpers, and the DS12 pair."""
+    out = []
+    rows = [("FRAs", fra_set, [("Discount", LOG_LINEAR, A360), ("ZeroYield", LINEAR, A365),
+                               ("ForwardRate", BACKWARD_FLAT, A360)]),
+            ("futures", futures_set, [("Discount", LOG_LINEAR, A360), ("ForwardRate", BACKWARD_FLAT, A365)]),
+            ("OIS", ois_set, [("ZeroYield", KRUGER_CUBIC, A365), ("Discount", MONOTONIC_LOG_CUBIC, A365)])]
+    for today in EVALUATION_DATES:
+        for name, helpers_on, pairs in rows:
+            with v.case_settings(today) as st:
+                specs = [ref_spec(traits, interpolator, dc, today) for traits, interpolator, dc in pairs]
+                if name == "OIS":
+                    # the curve starts on the evaluation date, where the 1-day deposit does
+                    for spec in specs:
+                        spec["referenceDate"] = v.enc(today)
+                out.append(group_case(f"{today.ISO()} {name}", st, "curves", specs, helpers_on(today)))
+    today = EVALUATION_DATES[0]
+    with v.case_settings(today) as st:
+        specs = [ref_spec("Discount", LOG_LINEAR, A365, today), ref_spec("ZeroYield", LINEAR, A365, today)]
+        out.append(group_case(f"{today.ISO()} FX swaps", st, "curves", specs, fx_set(today)))
+    with v.case_settings(ARS_DATE) as st:
+        specs = [curve_spec("Discount", LOG_LINEAR, A365, ARS_DATE),
+                 curve_spec("Discount", LOG_LINEAR, A365, ARS_DATE, bootstrap=bootstrap_spec(max_attempts=5))]
+        for spec in specs:
+            spec["referenceDate"] = v.enc(ARS_DATE)
+        out.append(group_case(f"{ARS_DATE.ISO()} ARS FX swaps", st, "curves", specs, ars_set()))
+    with v.case_settings(today) as st:
+        specs = [ref_spec("SimpleZeroYield", LINEAR, A360, today), ref_spec("Discount", LOG_LINEAR, A360, today)]
+        out.append(group_case(f"{today.ISO()} IMM FRA with its pillar at maturity", st, "curves", specs,
+                              ds12_set(today)))
+    # curves built 15 TARGET days after the evaluation date their FRA and FX swap helpers were built on, which re-date
+    # them as moved_cases' curves re-date theirs
+    later = ql.TARGET().advance(today, 15, ql.Days)
+    for name, helper_specs, rows in (
+            ("FRAs", fra_set(today), [("Discount", LOG_LINEAR, A360), ("ForwardRate", BACKWARD_FLAT, A360)]),
+            ("FX swaps", fx_set(today), [("Discount", LOG_LINEAR, A365)])):
+        with v.case_settings(later) as st:
+            specs = [ref_spec(traits, interpolator, dc, later) for traits, interpolator, dc in rows]
+            out.append(group_case(f"{later.ISO()} {name} built on {today.ISO()}", st, "moved", specs, helper_specs,
+                                  quote_errors=False, extra={"helpersEvaluationDate": today.serialNumber()}))
+    return out
+
+
 def cases():
     out = grid_cases() + jump_cases() + fallback_cases() + bumped_cases() + moved_cases()
-    out += named_cases() + log_mixed_cases()
+    out += named_cases() + log_mixed_cases() + more_cases()
     check_rows(out)
     return out
 
@@ -477,6 +599,10 @@ def check_rows(out):
         cubics = f"{today.ISO()} cubic zero curves on fixture"
         refused += [(cubics, 2), (cubics, 3), (f"{today.ISO()} discounted swaps", 1),
                     (f"{today.ISO()} pillared swaps", 10)]
+    # QuantLib's default bootstrap refuses the ARS curve, which 5 attempts build; and DS12: the simple-zero curve, whose
+    # maximum date is its last pillar, refuses the IMM FRA whose latest relevant date is after it
+    refused += [(f"{ARS_DATE.ISO()} ARS FX swaps", 0),
+                (f"{EVALUATION_DATES[0].ISO()} IMM FRA with its pillar at maturity", 0)]
     got = []
     for c in out:
         built = c["expected"]["built"]

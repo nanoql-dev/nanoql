@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/overnightindexedswap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBaseBootstrap, testBootstrapWithArithmeticAverage, testBootstrapWithTelescopicDates, testBootstrapWithTelescopicDatesAndArithmeticAverage, testBootstrapWithCustomPricer, testBootstrapWithLookbackDays, testBootstrapWithLookbackDaysAndShift, testBootstrapWithLockoutDays, testBootstrapWithLockoutDaysAndShift, testBootstrapRegression, test131BootstrapRegression, testBootstrapWithDifferentCalendars, which wait for S5's bootstrap; testMakeOisEndOfMonthRegression2453, which waits for batch 2's Aonia; testNonstandardSwapConversionPreservesObservationConventions, which waits for B3.2's NonstandardSwap; and testMakeOISDefaultSettlementDays' lines for EONIA, FedFunds, AONIA, SARON, NZOCR, DESTR, SWESTR and KOFR, which wait for batch 2's indexes
+// Partial: testBootstrapRegression, which waits for batch 2's FedFunds; testMakeOisEndOfMonthRegression2453, which waits for batch 2's Aonia; testNonstandardSwapConversionPreservesObservationConventions, which waits for B3.2's NonstandardSwap; and testMakeOISDefaultSettlementDays' lines for EONIA, FedFunds, AONIA, SARON, NZOCR, DESTR, SWESTR and KOFR, which wait for batch 2's indexes
 // Replaced: testNotifications (Vectors/Instruments/OvernightIndexedSwapVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -138,6 +138,177 @@ public class OvernightIndexedSwapTests
             $"failed to reproduce cached swap value (telescopic value dates): calculated {npv2}, expected {cachedNPV}");
     }
 
+    [Fact]
+    public void TestBaseBootstrap()
+    {
+        // Testing Estr-swap curve building with daily compounded ON rates...
+        TestBootstrap(false, RateAveragingType.Compound);
+    }
+
+    [Fact]
+    public void TestBootstrapWithArithmeticAverage()
+    {
+        // Testing Estr-swap curve building with arithmetic average ON rates...
+        TestBootstrap(false, RateAveragingType.Simple);
+    }
+
+    [Fact]
+    public void TestBootstrapWithTelescopicDates()
+    {
+        // Testing Estr-swap curve building with telescopic value dates and DCON rates...
+        TestBootstrap(true, RateAveragingType.Compound);
+    }
+
+    [Fact]
+    public void TestBootstrapWithTelescopicDatesAndArithmeticAverage()
+    {
+        // Testing Estr-swap curve building with telescopic value dates and AAON rates...
+
+        // Given that we are using an approximation that omits
+        // the required convexity correction, a lower tolerance
+        // is needed.
+        TestBootstrap(true, RateAveragingType.Simple, 1.0e-5);
+    }
+
+    // Adapted: the ESTR term structure relinked to the bootstrapped curve (line 481) becomes a copy of the fixture on
+    // it; setCouponPricer on the swap's overnight leg (line 490) returns a copy of the swap.
+    [Fact]
+    public void TestBootstrapWithCustomPricer()
+    {
+        // Testing Estr-swap curve building with custom pricer...
+
+        var vars = new CommonVars();
+
+        Natural paymentLag = 2;
+        bool telescopicValueDates = false;
+        RateAveragingType averagingMethod = RateAveragingType.Simple;
+        var pricer = new ArithmeticAveragedOvernightIndexedCouponPricer(0.02, 0.15, true);
+
+        var estrHelpers = new List<RateHelper>();
+        Spread spread = 0.0;
+
+        var estr = new Estr();
+
+        foreach (Datum i in EstrSwapData)
+        {
+            Real rate = 0.01 * i.Rate;
+            var term = new Period(i.N, i.Unit);
+            var helper = new OISRateHelper(
+                i.SettlementDays,
+                term,
+                rate,
+                estr,
+                vars.Context,
+                null,
+                telescopicValueDates,
+                paymentLag,
+                BusinessDayConvention.Following,
+                Frequency.Annual,
+                null,
+                new Period(0, TimeUnit.Days),
+                spread,
+                PillarChoice.LastRelevantDate,
+                null,
+                averagingMethod,
+                null,
+                null,
+                null,
+                null,
+                0,
+                false,
+                pricer);
+            estrHelpers.Add(helper);
+        }
+
+        var estrTS = new PiecewiseYieldCurve<Discount, LogLinear, IterativeBootstrap>(
+            vars.Today, estrHelpers, new Actual365Fixed(), vars.Context);
+
+        vars = vars.Relinked(estrTS);
+
+        // test curve consistency
+        foreach (Datum i in EstrSwapData)
+        {
+            Rate expected = i.Rate / 100;
+            var term = new Period(i.N, i.Unit);
+
+            OvernightIndexedSwap swap = vars.MakeSwap(term, 0.0, 0.0, false, null, paymentLag, averagingMethod);
+            swap = CouponPricerFunctions.SetCouponPricer(swap, 1, pricer);
+
+            Rate calculated = vars.Price(swap).FairRate!.Value;
+            Rate error = Math.Abs(expected - calculated);
+            Real tolerance = 1.0e-8;
+
+            Assert.True(
+                error <= tolerance,
+                $"curve inconsistency:\n swap length:     {term}\n quoted rate:     {expected:R}\n calculated rate: "
+                + $"{calculated:R}\n error:           {error:R}\n tolerance:       {tolerance:R}");
+        }
+    }
+
+    [Fact]
+    public void TestBootstrapWithLookbackDays()
+    {
+        // Testing Estr-swap curve building with lookback days...
+
+        int lookbackDays = 2;
+        int lockoutDays = 0;
+        bool applyObservationShift = false;
+        int paymentLag = 2;
+
+        TestBootstrapWithLookback(lookbackDays, lockoutDays, applyObservationShift, false, paymentLag);
+
+        ArgumentException e = Assert.Throws<ArgumentException>(
+            () => TestBootstrapWithLookback(lookbackDays, lockoutDays, applyObservationShift, true, paymentLag));
+        Assert.Contains("Telescopic formula cannot be applied", e.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TestBootstrapWithLookbackDaysAndShift()
+    {
+        // Testing Estr-swap curve building with lookback days and observation shift...
+
+        int lookbackDays = 2;
+        int lockoutDays = 0;
+        bool applyObservationShift = true;
+        int paymentLag = 2;
+
+        TestBootstrapWithLookback(lookbackDays, lockoutDays, applyObservationShift, false, paymentLag);
+
+        TestBootstrapWithLookback(lookbackDays, lockoutDays, applyObservationShift, true, paymentLag);
+    }
+
+    [Fact]
+    public void TestBootstrapWithLockoutDays()
+    {
+        // Testing Estr-swap curve building with lookback and lockout days...
+
+        int lookbackDays = 2;
+        int lockoutDays = 2;
+        bool applyObservationShift = false;
+        int paymentLag = 0;
+
+        TestBootstrapWithLookback(lookbackDays, lockoutDays, applyObservationShift, false, paymentLag);
+
+        ArgumentException e = Assert.Throws<ArgumentException>(
+            () => TestBootstrapWithLookback(lookbackDays, lockoutDays, applyObservationShift, true, paymentLag));
+        Assert.Contains("Telescopic formula cannot be applied", e.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TestBootstrapWithLockoutDaysAndShift()
+    {
+        // Testing Estr-swap curve building with lookback and lockout days and observation shift...
+
+        int lookbackDays = 2;
+        int lockoutDays = 2;
+        bool applyObservationShift = true;
+        int paymentLag = 0;
+
+        TestBootstrapWithLookback(lookbackDays, lockoutDays, applyObservationShift, false, paymentLag);
+
+        TestBootstrapWithLookback(lookbackDays, lockoutDays, applyObservationShift, true, paymentLag);
+    }
+
     // Adapted: the fixings added to the index (lines 644-647) become the context's store.
     [Fact]
     public void TestSeasonedSwaps()
@@ -175,6 +346,90 @@ public class OvernightIndexedSwapTests
                     + $"value dates) {npv}, swap value (telescopic value dates) {npv2}");
             }
         }
+    }
+
+    // Adapted: the check that nodes() doesn't throw (line 744) becomes a check that construction, which bootstraps,
+    // doesn't throw; the moving curve (line 743) is built by Create in the case's context.
+    [Fact]
+    public void Test131BootstrapRegression()
+    {
+        // Testing 1.31 regression with OIS bootstrap...
+
+        var today = new Date(11, December, 2012);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        var estr = new Estr();
+
+        var helpers = new List<RateHelper>
+        {
+            new OISRateHelper(2, new Period(1, TimeUnit.Weeks), 0.070 / 100, estr, context),
+            new OISRateHelper(new Date(16, January, 2013), new Date(13, February, 2013), 0.046 / 100, estr, context),
+        };
+
+        var curve = PiecewiseYieldCurve<ForwardRate, BackwardFlat, IterativeBootstrap>.Create(
+            0, new TARGET(), helpers, new Actual365Fixed(), context);
+        _ = curve.Nodes();
+    }
+
+    // Adapted: the check that nodes() doesn't throw (line 787) becomes a check that construction, which bootstraps,
+    // doesn't throw.
+    [Fact]
+    public void TestBootstrapWithDifferentCalendars()
+    {
+        // Testing OIS bootstrap when the swap maturity is not a fixing day for the index...
+
+        var today = new Date(10, April, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Datum[] data =
+        [
+            new(2, 1, TimeUnit.Years, 0.037755),
+            new(2, 2, TimeUnit.Years, 0.034115),
+            new(2, 3, TimeUnit.Years, 0.033417),
+        ];
+
+        var helpers = new List<RateHelper>();
+        var index = new Sofr();
+
+        var calendar = new UnitedStates(UnitedStatesMarket.FederalReserve);
+
+        foreach (Datum i in data)
+        {
+            helpers.Add(new OISRateHelper(
+                i.SettlementDays,
+                new Period(i.N, i.Unit),
+                i.Rate,
+                index,
+                context,
+                null,
+                false,
+                0,
+                BusinessDayConvention.Following,
+                Frequency.Annual,
+                calendar,
+                new Period(0, TimeUnit.Days),
+                0.0,
+                PillarChoice.LastRelevantDate,
+                null,
+                RateAveragingType.Compound,
+                null,
+                null,
+                calendar,
+                null,
+                0,
+                false,
+                null,
+                DateGenerationRule.Backward,
+                calendar));
+        }
+
+        Assert.Equal(new Date(14, April, 2028), helpers[^1].MaturityDate); // Good Friday; holiday for SOFR
+                                                                             // but not for Federal Reserve
+        Assert.Equal(new Date(17, April, 2028), helpers[^1].LatestRelevantDate); // end of last fixing
+
+        var curve = new PiecewiseYieldCurve<ForwardRate, BackwardFlat, IterativeBootstrap>(
+            today, helpers, new Actual365Fixed(), context);
+        _ = curve.Nodes();
     }
 
     [Fact]
@@ -590,6 +845,210 @@ public class OvernightIndexedSwapTests
         Assert.True(expectedStart != index.FixingCalendar.Advance(today, 2, TimeUnit.Days));
     }
 
+    private static readonly Datum[] DepositData =
+    [
+        new(0, 1, TimeUnit.Days, 1.10),
+        new(1, 1, TimeUnit.Days, 1.10),
+        new(2, 1, TimeUnit.Weeks, 1.40),
+        new(2, 2, TimeUnit.Weeks, 1.50),
+        new(2, 1, TimeUnit.Months, 1.70),
+        new(2, 2, TimeUnit.Months, 1.90),
+        new(2, 3, TimeUnit.Months, 2.05),
+        new(2, 4, TimeUnit.Months, 2.08),
+        new(2, 5, TimeUnit.Months, 2.11),
+        new(2, 6, TimeUnit.Months, 2.13),
+    ];
+
+    private static readonly Datum[] EstrSwapData =
+    [
+        new(2, 1, TimeUnit.Weeks, 1.245),
+        new(2, 2, TimeUnit.Weeks, 1.269),
+        new(2, 3, TimeUnit.Weeks, 1.277),
+        new(2, 1, TimeUnit.Months, 1.281),
+        new(2, 2, TimeUnit.Months, 1.18),
+        new(2, 3, TimeUnit.Months, 1.143),
+        new(2, 4, TimeUnit.Months, 1.125),
+        new(2, 5, TimeUnit.Months, 1.116),
+        new(2, 6, TimeUnit.Months, 1.111),
+        new(2, 7, TimeUnit.Months, 1.109),
+        new(2, 8, TimeUnit.Months, 1.111),
+        new(2, 9, TimeUnit.Months, 1.117),
+        new(2, 10, TimeUnit.Months, 1.129),
+        new(2, 11, TimeUnit.Months, 1.141),
+        new(2, 12, TimeUnit.Months, 1.153),
+        new(2, 15, TimeUnit.Months, 1.218),
+        new(2, 18, TimeUnit.Months, 1.308),
+        new(2, 21, TimeUnit.Months, 1.407),
+        new(2, 2, TimeUnit.Years, 1.510),
+        new(2, 3, TimeUnit.Years, 1.916),
+        new(2, 4, TimeUnit.Years, 2.254),
+        new(2, 5, TimeUnit.Years, 2.523),
+        new(2, 6, TimeUnit.Years, 2.746),
+        new(2, 7, TimeUnit.Years, 2.934),
+        new(2, 8, TimeUnit.Years, 3.092),
+        new(2, 9, TimeUnit.Years, 3.231),
+        new(2, 10, TimeUnit.Years, 3.380),
+        new(2, 11, TimeUnit.Years, 3.457),
+        new(2, 12, TimeUnit.Years, 3.544),
+        new(2, 15, TimeUnit.Years, 3.702),
+        new(2, 20, TimeUnit.Years, 3.703),
+        new(2, 25, TimeUnit.Years, 3.541),
+        new(2, 30, TimeUnit.Years, 3.369),
+    ];
+
+    // Adapted: the ESTR term structure relinked to the bootstrapped curve (line 271) becomes a copy of the fixture on
+    // it.
+    private static void TestBootstrap(
+        bool telescopicValueDates, RateAveragingType averagingMethod, Real tolerance = 1.0e-8)
+    {
+        var vars = new CommonVars();
+
+        Natural paymentLag = 2;
+
+        var estrHelpers = new List<RateHelper>();
+        Spread spread = 0.0;
+
+        var euribor3m = new Euribor3M();
+        var estr = new Estr();
+
+        foreach (Datum i in DepositData)
+        {
+            Real rate = 0.01 * i.Rate;
+            var term = new Period(i.N, i.Unit);
+            var helper = new DepositRateHelper(
+                rate,
+                term,
+                i.SettlementDays,
+                euribor3m.FixingCalendar,
+                euribor3m.BusinessDayConvention,
+                euribor3m.EndOfMonth,
+                euribor3m.DayCounter,
+                vars.Context);
+
+            if (term <= new Period(2, TimeUnit.Days))
+            {
+                estrHelpers.Add(helper);
+            }
+        }
+
+        foreach (Datum i in EstrSwapData)
+        {
+            Real rate = 0.01 * i.Rate;
+            var term = new Period(i.N, i.Unit);
+            var helper = new OISRateHelper(
+                i.SettlementDays,
+                term,
+                rate,
+                estr,
+                vars.Context,
+                null,
+                telescopicValueDates,
+                paymentLag,
+                BusinessDayConvention.Following,
+                Frequency.Annual,
+                null,
+                new Period(0, TimeUnit.Days),
+                spread,
+                PillarChoice.LastRelevantDate,
+                null,
+                averagingMethod);
+            estrHelpers.Add(helper);
+        }
+
+        var estrTS = new PiecewiseYieldCurve<Discount, LogLinear, IterativeBootstrap>(
+            vars.Today, estrHelpers, new Actual365Fixed(), vars.Context);
+
+        vars = vars.Relinked(estrTS);
+
+        // test curve consistency
+        foreach (Datum i in EstrSwapData)
+        {
+            Rate expected = i.Rate / 100;
+            var term = new Period(i.N, i.Unit);
+
+            // test telescopic value dates (in bootstrap) against non telescopic value dates (swap here)
+            OvernightIndexedSwap swap = vars.MakeSwap(term, 0.0, 0.0, false, null, paymentLag, averagingMethod);
+            Rate calculated = vars.Price(swap).FairRate!.Value;
+            Rate error = Math.Abs(expected - calculated);
+
+            Assert.True(
+                error <= tolerance,
+                $"curve inconsistency:\n swap length:     {term}\n quoted rate:     {expected:R}\n calculated rate: "
+                + $"{calculated:R}\n error:           {error:R}\n tolerance:       {tolerance:R}");
+        }
+    }
+
+    // Adapted: the ESTR term structure relinked to the bootstrapped curve (line 551) becomes a copy of the fixture on
+    // it.
+    private static void TestBootstrapWithLookback(
+        Natural lookbackDays,
+        Natural lockoutDays,
+        bool applyObservationShift,
+        bool telescopicValueDates,
+        Natural paymentLag)
+    {
+        var vars = new CommonVars();
+
+        var estrHelpers = new List<RateHelper>();
+
+        var estr = new Estr();
+        Spread spread = 0.0;
+
+        foreach (Datum i in EstrSwapData)
+        {
+            Real rate = 0.01 * i.Rate;
+            var term = new Period(i.N, i.Unit);
+            var helper = new OISRateHelper(
+                i.SettlementDays,
+                term,
+                rate,
+                estr,
+                vars.Context,
+                null,
+                telescopicValueDates,
+                paymentLag,
+                BusinessDayConvention.Following,
+                Frequency.Annual,
+                null,
+                new Period(0, TimeUnit.Days),
+                spread,
+                PillarChoice.LastRelevantDate,
+                null,
+                RateAveragingType.Compound,
+                null,
+                null,
+                null,
+                lookbackDays,
+                lockoutDays,
+                applyObservationShift);
+            estrHelpers.Add(helper);
+        }
+
+        var estrTS = new PiecewiseYieldCurve<ForwardRate, BackwardFlat, IterativeBootstrap>(
+            vars.Today, estrHelpers, new Actual365Fixed(), vars.Context);
+
+        vars = vars.Relinked(estrTS);
+
+        // test curve consistency
+        foreach (Datum i in EstrSwapData)
+        {
+            Rate expected = i.Rate / 100;
+            var term = new Period(i.N, i.Unit);
+            OvernightIndexedSwap swap = vars.MakeSwapWithLookback(
+                term, 0.0, paymentLag, lookbackDays, lockoutDays, applyObservationShift, telescopicValueDates);
+            Rate calculated = vars.Price(swap).FairRate!.Value;
+            Rate error = Math.Abs(expected - calculated);
+            Real tolerance = 1e-8;
+
+            Assert.True(
+                error <= tolerance,
+                $"curve inconsistency:\n swap length:     {term}\n quoted rate:     {expected:R}\n calculated rate: "
+                + $"{calculated:R}\n error:           {error:R}\n tolerance:       {tolerance:R}");
+        }
+    }
+
+    private readonly record struct Datum(Integer SettlementDays, Integer N, TimeUnit Unit, Rate Rate);
+
     // Adapted: the evaluation date set by the fixture (lines 212-213) is its context; the ESTR term structure, a handle
     // linked after the index is built on it (lines 206 and 215), becomes the curve the index is built on, and a relink
     // becomes a copy of the fixture on the new curve; the engine each swap holds (line 171) becomes the pricing of each
@@ -676,6 +1135,26 @@ public class OvernightIndexedSwapTests
                 .WithTelescopicValueDates(telescopicValueDates)
                 .WithAveragingMethod(averagingMethod)
                 .WithRoundingPrecision(roundingPrecision)
+                .ToOvernightIndexedSwap(Context);
+
+        public OvernightIndexedSwap MakeSwapWithLookback(
+            Period length,
+            Rate fixedRate,
+            Integer paymentLag,
+            Natural lookbackDays,
+            Natural lockoutDays,
+            bool applyObservationShift,
+            bool telescopicValueDates) =>
+            new MakeOIS(length, EstrIndex)
+                .WithFixedRate(fixedRate)
+                .WithEffectiveDate(Settlement)
+                .WithNominal(Nominal)
+                .WithPaymentLag(paymentLag)
+                .WithDiscountingTermStructure(EstrTermStructure)
+                .WithLookbackDays(lookbackDays)
+                .WithLockoutDays(lockoutDays)
+                .WithObservationShift(applyObservationShift)
+                .WithTelescopicValueDates(telescopicValueDates)
                 .ToOvernightIndexedSwap(Context);
 
         public OvernightIndexedSwapResults Price(OvernightIndexedSwap swap) =>
