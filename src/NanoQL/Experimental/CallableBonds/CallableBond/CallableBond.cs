@@ -186,10 +186,7 @@ public abstract class CallableBond : Bond
         ArgumentNullException.ThrowIfNull(targetPrice);
         ArgumentNullException.ThrowIfNull(discountCurve);
         ArgumentOutOfRangeException.ThrowIfNegative(maxEvaluations);
-        if (IsExpired(context))
-        {
-            throw new NanoQLException("instrument expired");
-        }
+        ThrowIfExpired(context);
 
         double dirtyTargetPrice = targetPrice.Type switch
         {
@@ -236,11 +233,15 @@ public abstract class CallableBond : Bond
     /// <paramref name="maxIterations"/> is negative, or the compounding or the frequency isn't a member of its enum.
     /// </exception>
     /// <exception cref="ArgumentException"><paramref name="settlementDate"/> is <c>default(Date)</c>.</exception>
-    /// <exception cref="NanoQLException">The solver can't bracket the spread, or exceeds its evaluations.</exception>
+    /// <exception cref="NanoQLException">
+    /// The bond has expired; or the solver can't bracket the spread, or exceeds its evaluations.
+    /// </exception>
     /// <remarks>
     /// The clean price is made dirty with the accrued amount at the settlement date and turned into an amount on the
     /// notional there, which the engine's NPV, at its curve's reference date, must match: QuantLib's basis, so the
-    /// spread of the engine's own clean price, whose value is at the settlement date, isn't 0.
+    /// spread of the engine's own clean price, whose value is at the settlement date, isn't 0. An expired bond is
+    /// refused, as <see cref="ImpliedVolatility"/> refuses it, where QuantLib's solve prices the expired bond's
+    /// arguments.
     /// </remarks>
     public double OAS(
         double cleanPrice,
@@ -263,6 +264,7 @@ public abstract class CallableBond : Bond
         EnumArguments.Check(frequency, nameof(frequency));
         Date.ThrowIfDefault(settlementDate, nameof(settlementDate));
         ArgumentOutOfRangeException.ThrowIfNegative(maxIterations);
+        ThrowIfExpired(context);
 
         Date settlement = settlementDate ?? SettlementDate(context);
 
@@ -296,6 +298,7 @@ public abstract class CallableBond : Bond
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
     /// <exception cref="ArgumentException"><paramref name="settlementDate"/> is <c>default(Date)</c>.</exception>
+    /// <exception cref="NanoQLException">The bond has expired.</exception>
     public double CleanPriceOAS(
         double oas,
         YieldTermStructure engineTS,
@@ -313,6 +316,7 @@ public abstract class CallableBond : Bond
         EnumArguments.Check(compounding, nameof(compounding));
         EnumArguments.Check(frequency, nameof(frequency));
         Date.ThrowIfDefault(settlementDate, nameof(settlementDate));
+        ThrowIfExpired(context);
 
         Date settlement = settlementDate ?? SettlementDate(context);
 
@@ -340,6 +344,7 @@ public abstract class CallableBond : Bond
     /// <returns>The duration; 0 when the dirty price is 0.</returns>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
+    /// <exception cref="NanoQLException">The bond has expired.</exception>
     public double EffectiveDuration(
         double oas,
         YieldTermStructure engineTS,
@@ -383,6 +388,7 @@ public abstract class CallableBond : Bond
     /// <returns>The convexity; 0 when the dirty price is 0.</returns>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
+    /// <exception cref="NanoQLException">The bond has expired.</exception>
     public double EffectiveConvexity(
         double oas,
         YieldTermStructure engineTS,
@@ -521,6 +527,16 @@ public abstract class CallableBond : Bond
     /// <summary>Refuses a plain bond's engine, as QuantLib's <c>setupArguments</c> refuses a plain bond's arguments.</summary>
     /// <exception cref="NanoQLException">Always.</exception>
     internal override void CheckPlainBondArguments() => throw new NanoQLException("no arguments given");
+
+    // QuantLib's refusal in impliedVolatility, which the spread family shares here: an expired bond's engine returns
+    // its expired results, whose NPV of 0 would make a spread the solver's guess and a price 0 over a notional of 0.
+    private void ThrowIfExpired(EvaluationContext context)
+    {
+        if (IsExpired(context))
+        {
+            throw new NanoQLException("instrument expired");
+        }
+    }
 
     // QuantLib's NPVSpreadHelper: the engine's NPV at a spread.
     private Func<double, double> NPVSpreadHelper(

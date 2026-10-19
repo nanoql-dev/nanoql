@@ -40,7 +40,7 @@ The bonds, under these fixtures, most of them QuantLib's test-suite/callablebond
 - 16 September 2030: a bond called at 100 in September 2019 and maturing on 9 June 2025, expired, on the tree and the
   Black engines, priced on a flat 3% curve dated 2 January 2020: the expired results (an NPV and a settlement value of
   0), and the implied volatility's refusal ("instrument expired"). Its spread family isn't here: QuantLib's prices the
-  expired bond's arguments, nanoql's the expired results
+  expired bond's arguments, where nanoql refuses it as the implied volatility is refused
   (tests/NanoQL.Tests/Divergences/ExpiredCallableBondSpreadTests.cs).
 
 A case is one bond, one engine and one evaluation context. Its outputs: the put/call schedule (dates, types, price

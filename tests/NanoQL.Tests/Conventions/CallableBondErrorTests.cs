@@ -17,12 +17,12 @@ namespace NanoQL.Tests.Conventions;
 /// <see cref="ArgumentException"/>, as is a callability after the maturity date; a callability type outside its enum
 /// refused on entry with the tree's text; the tree engine's refusals of a missing term structure and of a spread on a
 /// lattice that takes none; an expired bond's implied volatility, refused by QuantLib's own check before the Black
-/// engine's would refuse it; and the plain bonds' engine's refusal of a callable bond, with QuantLib's "no arguments
-/// given", which names no experimental type. Then QuantLib's refusals the vectors record only as throws: the Black
-/// engine's single callability, the arguments' negative redemption, the Black engine's empty day counter, the
-/// volatility structure's range checks, on a structure of bounded bond tenors and strikes, and its smile section's
-/// negative tenor; and QuantLib's empty calendar, refused where an option date or a zero-coupon bond's redemption date
-/// is computed on it.
+/// engine's would refuse it, and its spread family, refused with the same text; and the plain bonds' engine's refusal
+/// of a callable bond, with QuantLib's "no arguments given", which names no experimental type. Then QuantLib's refusals
+/// the vectors record only as throws: the Black engine's single callability, the arguments' negative redemption, the
+/// Black engine's empty day counter, the volatility structure's range checks, on a structure of bounded bond tenors and
+/// strikes, and its smile section's negative tenor; and QuantLib's empty calendar, refused where an option date or a
+/// zero-coupon bond's redemption date is computed on it.
 /// </summary>
 public class CallableBondErrorTests
 {
@@ -92,6 +92,37 @@ public class CallableBondErrorTests
             new BondPrice(100.0, BondPriceType.Clean), Curve, expired, 1e-8, 200, 0.0, 1.0));
         Assert.Equal(typeof(NanoQLException), implied.GetType());
         Assert.Equal("instrument expired", implied.Message);
+
+        // and its spread family, with the same text, where QuantLib's prices the expired bond's arguments
+        CallableBondResults Tree(CallableBond b, EvaluationContext x, double s) =>
+            TreeCallableFixedRateBondEngine.Calculate(b, x, model, 40, null, s);
+        var dc = new Actual365Fixed();
+        Func<double>[] spreadFamily =
+        [
+            () => bond.OAS(100.0, Curve, dc, Compounding.Continuous, Frequency.NoFrequency, Tree, expired),
+            () => bond.CleanPriceOAS(0.01, Curve, dc, Compounding.Continuous, Frequency.NoFrequency, Tree, expired),
+            () => bond.EffectiveDuration(0.01, Curve, dc, Compounding.Continuous, Frequency.NoFrequency, Tree, expired),
+            () => bond.EffectiveConvexity(
+                0.01, Curve, dc, Compounding.Continuous, Frequency.NoFrequency, Tree, expired),
+        ];
+        foreach (Func<double> member in spreadFamily)
+        {
+            NanoQLException e = Assert.Throws<NanoQLException>(() => member());
+            Assert.Equal(typeof(NanoQLException), e.GetType());
+            Assert.Equal("instrument expired", e.Message);
+        }
+
+        // the arguments are checked first, as the engines check theirs before the expiry
+        ArgumentOutOfRangeException iterations = Assert.Throws<ArgumentOutOfRangeException>(() => bond.OAS(
+            100.0, Curve, dc, Compounding.Continuous, Frequency.NoFrequency, Tree, expired, maxIterations: -1));
+        Assert.Equal("maxIterations", iterations.ParamName);
+        ArgumentException settlementDate = Assert.Throws<ArgumentException>(() => bond.CleanPriceOAS(
+            0.01, Curve, dc, Compounding.Continuous, Frequency.NoFrequency, Tree, expired, default(Date)));
+        Assert.Equal(typeof(ArgumentException), settlementDate.GetType());
+        Assert.Equal("settlementDate", settlementDate.ParamName);
+        ArgumentOutOfRangeException evaluations = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            bond.ImpliedVolatility(new BondPrice(100.0, BondPriceType.Clean), Curve, expired, 1e-8, -1, 0.0, 1.0));
+        Assert.Equal("maxEvaluations", evaluations.ParamName);
     }
 
     [Fact]

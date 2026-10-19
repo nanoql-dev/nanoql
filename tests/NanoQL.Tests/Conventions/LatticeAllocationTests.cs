@@ -20,7 +20,8 @@ namespace NanoQL.Tests.Conventions;
 /// wider at an earlier time than at the asset's initial one, and buffers sized at the initial step would grow. A
 /// Bermudan swaption's swap keeps one discount bond for its coupon events, where QuantLib's builds one per event, its
 /// buffers reserved at the widest step of the swap's own rollback. The callable bond's rollback, its callabilities
-/// applied and its coupons added in place, allocates nothing either.
+/// applied and its coupons added in place, allocates nothing either. Each rollback is measured on a fresh asset, after
+/// a warm-up on another (<see cref="AllocationAssert"/>).
 /// </summary>
 public class LatticeAllocationTests
 {
@@ -33,11 +34,14 @@ public class LatticeAllocationTests
         OneFactorModelShortRateTree lattice = Tree();
 
         Roll(new DiscretizedDiscountBond(), lattice);
-        var bond = new DiscretizedDiscountBond();
-        bond.Initialize(lattice, 5.0);
-        long before = GC.GetAllocatedBytesForCurrentThread();
-        bond.Rollback(0.0);
-        Assert.Equal(before, GC.GetAllocatedBytesForCurrentThread());
+        DiscretizedDiscountBond bond = AllocationAssert.AllocatesNothing(
+            () =>
+            {
+                var fresh = new DiscretizedDiscountBond();
+                fresh.Initialize(lattice, 5.0);
+                return fresh;
+            },
+            fresh => fresh.Rollback(0.0));
 
         // the fitted tree reprices the curve's discount bond
         Assert.Equal(Curve.Discount(5.0), bond.PresentValue(), 1e-12);
@@ -50,13 +54,16 @@ public class LatticeAllocationTests
 
         var warmBond = new DiscretizedDiscountBond();
         Roll(new DiscretizedOption(warmBond, ExerciseType.Bermudan, [1.0, 3.0]), lattice, warmBond);
-        var bond = new DiscretizedDiscountBond();
-        var option = new DiscretizedOption(bond, ExerciseType.Bermudan, [1.0, 3.0]);
-        bond.Initialize(lattice, 5.0);
-        option.Initialize(lattice, 5.0);
-        long before = GC.GetAllocatedBytesForCurrentThread();
-        option.Rollback(0.0);
-        Assert.Equal(before, GC.GetAllocatedBytesForCurrentThread());
+        DiscretizedOption option = AllocationAssert.AllocatesNothing(
+            () =>
+            {
+                var bond = new DiscretizedDiscountBond();
+                var fresh = new DiscretizedOption(bond, ExerciseType.Bermudan, [1.0, 3.0]);
+                bond.Initialize(lattice, 5.0);
+                fresh.Initialize(lattice, 5.0);
+                return fresh;
+            },
+            fresh => fresh.Rollback(0.0));
 
         // exercised into the bond, the option is worth the bond
         Assert.Equal(Curve.Discount(5.0), option.PresentValue(), 1e-12);
@@ -96,11 +103,14 @@ public class LatticeAllocationTests
         DiscretizedSwaption warm = Asset();
         warm.Initialize(lattice, last);
         warm.Rollback(first);
-        DiscretizedSwaption asset = Asset();
-        asset.Initialize(lattice, last);
-        long before = GC.GetAllocatedBytesForCurrentThread();
-        asset.Rollback(first);
-        Assert.Equal(before, GC.GetAllocatedBytesForCurrentThread());
+        DiscretizedSwaption asset = AllocationAssert.AllocatesNothing(
+            () =>
+            {
+                DiscretizedSwaption fresh = Asset();
+                fresh.Initialize(lattice, last);
+                return fresh;
+            },
+            fresh => fresh.Rollback(first));
 
         // the tree engine's value on the same lattice
         Assert.Equal(TreeSwaptionEngine.Calculate(swaption, context, model, lattice).NPV, asset.PresentValue());
@@ -134,11 +144,14 @@ public class LatticeAllocationTests
         warm.Initialize(lattice, redemptionTime);
         warm.Rollback(0.0);
 
-        var asset = new DiscretizedCallableFixedRateBond(bond, Curve, context);
-        asset.Initialize(lattice, redemptionTime);
-        long before = GC.GetAllocatedBytesForCurrentThread();
-        asset.Rollback(0.0);
-        Assert.Equal(before, GC.GetAllocatedBytesForCurrentThread());
+        DiscretizedCallableFixedRateBond asset = AllocationAssert.AllocatesNothing(
+            () =>
+            {
+                var fresh = new DiscretizedCallableFixedRateBond(bond, Curve, context);
+                fresh.Initialize(lattice, redemptionTime);
+                return fresh;
+            },
+            fresh => fresh.Rollback(0.0));
 
         // the asset the engine rolls back on that lattice
         Assert.Equal(
