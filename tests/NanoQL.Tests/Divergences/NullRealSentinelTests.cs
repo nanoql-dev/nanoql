@@ -149,4 +149,28 @@ public class NullRealSentinelTests
         // Only null is no guess: the result QuantLib gives for the sentinel.
         Assert.Equal(0.1999993088780617, BlackFormulaImpliedStdDev(OptionType.Call, 100.0, 110.0, price, 1.0, 0.0, null));
     }
+
+    /// <summary>
+    /// A smile section's ATM level: QuantLib's <c>FlatSmileSection</c> stores <c>atmLevel = Null&lt;Rate&gt;()</c> by
+    /// default, and its <c>optionPrice</c>, <c>vega</c> and converted volatility read an ATM level equal to the sentinel
+    /// as none (<c>smilesection.cpp:78-80, 120-122, 135-137</c>), refusing "smile section must provide atm level to
+    /// compute option price" for it. nanoql's ATM level of the sentinel is a level: the call on a forward that large is
+    /// worth about the forward.
+    /// </summary>
+    [Fact]
+    public void ASmileSectionsAtmLevelOfQuantLibsNullIsALevel()
+    {
+        var section = new FlatSmileSection(1.0, 0.2, null, NullReal);
+
+        Assert.Equal(NullReal, section.AtmLevel());
+        double price = section.OptionPrice(0.03);
+        Assert.True(double.IsFinite(price) && price > 0.999 * NullReal, $"price {price}");
+
+        // Only null is no ATM level: the refusal QuantLib gives for the sentinel.
+        var none = new FlatSmileSection(1.0, 0.2, null);
+        Assert.Null(none.AtmLevel());
+        Assert.Equal(
+            "smile section must provide atm level to compute option price",
+            Assert.Throws<NanoQLException>(() => none.OptionPrice(0.03)).Message);
+    }
 }

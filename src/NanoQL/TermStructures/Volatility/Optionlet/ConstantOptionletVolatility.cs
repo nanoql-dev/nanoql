@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/volatility/optionlet/constantoptionletvol.hpp ql/termstructures/volatility/optionlet/constantoptionletvol.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: smileSectionImpl, which waits for S6's FlatSmileSection
 
 using NanoQL.Time;
 
@@ -110,6 +109,25 @@ public sealed class ConstantOptionletVolatility : OptionletVolatilityStructure
 
     /// <inheritdoc/>
     public override double MaxStrike() => NumericLimits.QL_MAX_REAL;
+
+    /// <summary>
+    /// A flat smile section on the option date, with the structure's day counter and reference date; as QuantLib's, it
+    /// takes the section's defaults for the rest: no at-the-money level, shifted lognormal and no shift, whatever the
+    /// structure's type and displacement.
+    /// </summary>
+    /// <param name="optionDate">The option date.</param>
+    /// <returns>The smile section.</returns>
+    protected override SmileSection SmileSectionImpl(Date optionDate) =>
+        new FlatSmileSection(optionDate, volatility, DayCounter, ReferenceDate);
+
+    /// <summary>
+    /// A flat smile section on the option time, with the structure's day counter; as QuantLib's, it takes the section's
+    /// defaults for the rest, whatever the structure's type and displacement.
+    /// </summary>
+    /// <param name="optionTime">The option time.</param>
+    /// <returns>The smile section.</returns>
+    protected override SmileSection SmileSectionImpl(double optionTime) =>
+        new FlatSmileSection(optionTime, volatility, DayCounter);
 
     /// <inheritdoc/>
     protected override double VolatilityImpl(double optionTime, double strike) => volatility;

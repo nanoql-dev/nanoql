@@ -7,8 +7,9 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// An interpolation is complete when it is built, and owns copies of its inputs (playbook §2.5). QuantLib's
-/// interpolations keep iterators into their caller's data and compute their coefficients in <c>update()</c>, which a
-/// caller runs again when the data change; nanoql ports no <c>update()</c>, so a change of data is a new interpolation.
+/// interpolations keep iterators into their caller's data, and its 2-D ones a reference to the caller's matrix, and
+/// compute their coefficients in <c>update()</c>, which a caller runs again when the data change; nanoql ports no
+/// <c>update()</c>, so a change of data is a new interpolation.
 /// </summary>
 public class InterpolationConstructionTests
 {
@@ -28,6 +29,7 @@ public class InterpolationConstructionTests
     {
         Assert.Null(typeof(Interpolation).GetMethod("Update"));
         Assert.Null(typeof(CubicInterpolation).GetMethod("Update"));
+        Assert.Null(typeof(Interpolation2D).GetMethod("Update"));
 
         AssertSame(new Linear().Interpolate(X, Y), new LinearInterpolation(X, Y));
         AssertSame(new BackwardFlat().Interpolate(X, Y), new BackwardFlatInterpolation(X, Y));
@@ -74,7 +76,28 @@ public class InterpolationConstructionTests
 
         Assert.Equal(Y, built[0].YValues());
         Assert.Equal(Y, built[5].YValues());
+
+        // A 2-D interpolation copies its grid and its matrix, and gives a copy of the matrix.
+        double[] gx = [0.0, 1.0, 3.0], gy = [10.0, 20.0];
+        var z = new Matrix(new[,] { { 1.0, 2.0, 4.0 }, { 3.0, 5.0, 9.0 } });
+        Interpolation2D[] grids = [new BilinearInterpolation(gx, gy, z), new Bilinear().Interpolate(gx, gy, z)];
+        grids = [.. grids, new FlatExtrapolator2D(grids[0])];
+        double[][] gridBefore = [.. grids.Select(Values2D)];
+        gx[1] = 2.5;
+        gy[0] = 0.0;
+        z[1, 1] = -100.0;
+        grids[0].ZData()[0, 0] = 50.0;
+        for (int i = 0; i < grids.Length; i++)
+        {
+            Assert.Equal(gridBefore[i], Values2D(grids[i]));
+            Assert.Equal([0.0, 1.0, 3.0], grids[i].XValues());
+            Assert.Equal([10.0, 20.0], grids[i].YValues());
+            Assert.Equal(new Matrix(new[,] { { 1.0, 2.0, 4.0 }, { 3.0, 5.0, 9.0 } }), grids[i].ZData());
+        }
     }
+
+    private static double[] Values2D(Interpolation2D f) =>
+        [.. Points.SelectMany(p => new[] { f.Evaluate(p, 12.5, true), f.Evaluate(p * 10.0, 17.0, true) })];
 
     private static double[] Values(Interpolation f) => [.. Points.Select(p => f.Evaluate(p, true))];
 

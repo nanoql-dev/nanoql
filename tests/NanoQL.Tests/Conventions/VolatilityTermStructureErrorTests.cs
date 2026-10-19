@@ -9,9 +9,11 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The exception types of the volatility bases' refusals, which the vectors record only as throws: the strike check
-/// (<c>voltermstructure.cpp:40-46</c>) and the range checks (<c>termstructure.cpp:54-72</c>) refuse a value against
-/// the structure's domain with <see cref="NanoQLException"/>, as the pilot's <c>CheckRange</c> does, with QuantLib's
-/// texts in C#'s number formatting; an unknown volatility type or convention throws
+/// (<c>voltermstructure.cpp:40-46</c>), the range checks (<c>termstructure.cpp:54-72</c>) and the swaption structure's
+/// swap-tenor checks (<c>swaptionvolstructure.cpp:70-88</c>) refuse a value against the structure's domain with
+/// <see cref="NanoQLException"/>, as the pilot's <c>CheckRange</c> does, and so does the shift of a normal swaption
+/// structure, with QuantLib's texts in C#'s number formatting; the swap length refuses its own arguments with
+/// <see cref="ArgumentException"/>; an unknown volatility type or convention throws
 /// <see cref="ArgumentOutOfRangeException"/> on its parameter, with the text of QuantLib's stream operator for the
 /// type; and a null argument <see cref="ArgumentNullException"/> on the caller's parameter.
 /// </summary>
@@ -74,6 +76,40 @@ public class VolatilityTermStructureErrorTests
         Assert.Equal("context", Assert.Throws<ArgumentNullException>(() => ConstantOptionletVolatility.Create(
             0, new TARGET(), BusinessDayConvention.Following, 0.2, new Actual365Fixed(), null!)).ParamName);
         Assert.Equal("optionDate", Assert.Throws<ArgumentException>(() => surface.Volatility(default(Date), 0.03)).ParamName);
+        Assert.Equal("optionDate", Assert.Throws<ArgumentException>(() => surface.SmileSection(default(Date))).ParamName);
+
+        // The swaption structure's swap tenor and length.
+        var swaption = new ConstantSwaptionVolatility(
+            Reference, new TARGET(), BusinessDayConvention.Following, 0.2, new Actual365Fixed(), VolatilityType.Normal);
+        var fiveYears = new Period(5, TimeUnit.Years);
+        AssertRefused("non-positive swap tenor (0Y) given", () => swaption.Volatility(Reference + 30, new Period(0, TimeUnit.Years), 0.03));
+        AssertRefused("swap tenor (101Y) is past max tenor (100Y)", () => swaption.Volatility(1.0, new Period(101, TimeUnit.Years), 0.03));
+        AssertRefused("non-positive swap length (-1) given", () => swaption.BlackVariance(1.0, -1.0, 0.03, true));
+        AssertRefused("swap tenor (150) is past max tenor (100)", () => swaption.SmileSection(1.0, 150.0));
+        AssertRefused("swap tenor (150) is past max tenor (100)", () => swaption.SmileSection(1.0, new Period(150, TimeUnit.Years), true));
+        AssertRefused("shift parameter only makes sense for lognormal volatilities", () => swaption.Shift(1.0, fiveYears));
+        ArgumentException swapLength = Assert.Throws<ArgumentException>(() => swaption.SwapLength(new Period(-1, TimeUnit.Years)));
+        Assert.Equal("swapTenor", swapLength.ParamName);
+        Assert.StartsWith("non-positive swap tenor (-1Y) given", swapLength.Message, StringComparison.Ordinal);
+        swapLength = Assert.Throws<ArgumentException>(() => swaption.SwapLength(new Period(2, TimeUnit.Weeks)));
+        Assert.Equal("swapTenor", swapLength.ParamName);
+        Assert.StartsWith("invalid Time Unit (Weeks) for swap length", swapLength.Message, StringComparison.Ordinal);
+        swapLength = Assert.Throws<ArgumentException>(() => swaption.SwapLength(Reference, Reference));
+        Assert.Equal("end", swapLength.ParamName);
+        Assert.StartsWith(
+            "swap end date (January 15th, 2025) must be greater than start (January 15th, 2025)", swapLength.Message, StringComparison.Ordinal);
+        Assert.Equal("optionDate", Assert.Throws<ArgumentException>(() => swaption.Shift(default(Date), fiveYears)).ParamName);
+        Assert.Equal("start", Assert.Throws<ArgumentException>(() => swaption.SwapLength(default, Reference)).ParamName);
+        e = Assert.Throws<ArgumentOutOfRangeException>(() => new ConstantSwaptionVolatility(
+            Reference, new TARGET(), BusinessDayConvention.Following, 0.2, new Actual365Fixed(), (VolatilityType)2));
+        Assert.Equal("type", e.ParamName);
+        Assert.StartsWith("Unknown volatility type (2)", e.Message, StringComparison.Ordinal);
+        Assert.Equal("context", Assert.Throws<ArgumentNullException>(() => ConstantSwaptionVolatility.Create(
+            0, new TARGET(), BusinessDayConvention.Following, 0.2, new Actual365Fixed(), null!)).ParamName);
+        Assert.Equal("cal", Assert.Throws<ArgumentNullException>(() => ConstantSwaptionVolatility.Create(
+            0, null!, BusinessDayConvention.Following, 0.2, new Actual365Fixed(), Context())).ParamName);
+        Assert.Equal("settlementDays", Assert.Throws<ArgumentOutOfRangeException>(() => ConstantSwaptionVolatility.Create(
+            -1, new TARGET(), BusinessDayConvention.Following, 0.2, new Actual365Fixed(), Context())).ParamName);
     }
 
     private static EvaluationContext Context() => new() { EvaluationDate = Reference };

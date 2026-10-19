@@ -260,9 +260,10 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `InterestRateIndex`, `VolatilityTermStructure`, `OptionletVolatilityStructure`, `FloatingRateCouponPricer`,
   `IborCouponPricer`, `OvernightIndexedCouponPricer`, `FixedVsFloatingSwap`, `BootstrapHelper<TTermStructure>`,
   `RelativeDateBootstrapHelper<TTermStructure>`, `RateHelper`, `RelativeDateRateHelper`, `ZeroYieldStructure`, `Payoff`,
-  `TypePayoff` and `StrikedTypePayoff` (abstract); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
-  `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`, `IborIndex`, `OvernightIndex`, `Euribor`, `SwapIndex`,
-  `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`, `CappedFlooredCoupon`, `BlackIborCouponPricer`,
+  `TypePayoff`, `StrikedTypePayoff`, `SmileSection`, `SwaptionVolatilityStructure` and `Interpolation2D` (abstract);
+  `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`, `FixedVsFloatingSwapResults`,
+  `OvernightIndexedSwapResults`, `IborIndex`, `OvernightIndex`, `Euribor`, `SwapIndex`, `Currency`, `Rounding`,
+  `FloatingRateCoupon`, `IborCoupon`, `CappedFlooredCoupon`, `BlackIborCouponPricer`,
   `CompoundingOvernightIndexedCouponPricer`, `ArithmeticAveragedOvernightIndexedCouponPricer`, `TridiagonalOperator`,
   `CubicInterpolation`, `LogCubicInterpolation`, `MixedLinearCubicInterpolation`, `LogMixedLinearCubicInterpolation`,
   `RandomSequenceGenerator<TRng>`, `InverseCumulativeRng<TRng, TIc>`, `InverseCumulativeRsg<TUsg, TIc>`,
@@ -271,10 +272,10 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `InterpolatedDiscountCurve<TInterpolator>`, `InterpolatedZeroCurve<TInterpolator>`,
   `InterpolatedForwardCurve<TInterpolator>` and `InterpolatedSimpleZeroCurve<TInterpolator>` (unsealed); `IInterpolator`
   (the interpolation traits: a factory of one's own overrides its `CheckPoints` with its construction checks, whose
-  default refuses nothing, so that a curve on it takes a bootstrap's first-pass fallback where QuantLib's would), the
-  bootstrap's concepts `IBootstrap`, `IBootstrapState`, `IBootstrapHelper`, `IBootstrapTraits<TTermStructure>`,
-  `IYieldTraits` and `IInterpolatedCurve<TTraits, TInterpolator>`, `ISolver1DFunction` and `IDerivativeSolver1DFunction`
-  (the solvers'
+  default refuses nothing, so that a curve on it takes a bootstrap's first-pass fallback where QuantLib's would),
+  `IInterpolator2D` (the 2-D factory concept), the bootstrap's concepts `IBootstrap`, `IBootstrapState`,
+  `IBootstrapHelper`, `IBootstrapTraits<TTermStructure>`, `IYieldTraits` and
+  `IInterpolatedCurve<TTraits, TInterpolator>`, `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers'
   function concepts), and the generator concepts `IRng`, `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`,
   `ISeedableRsg<TSelf>`, `IInverseCumulative` and `IRngTraits` (interfaces); and `Solver1DBracket`, `ProblemState` and
   `BootstrapState<TTermStructure>`, sealed, which a solver's `SolveCore`, a method's `MinimizeCore` and a bootstrap's

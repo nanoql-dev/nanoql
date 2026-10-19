@@ -190,6 +190,48 @@ internal static class InterpolationInputs
     public static object?[] Deferred<T>(IEnumerable<T> inputs, Func<T, object?> f) =>
         [.. inputs.Select(x => (object?)(Func<object?>)(() => f(x)))];
 
+    /// <summary>The matrix of a 2-D interpolation's function values, given as the list of its rows.</summary>
+    /// <param name="rows">The rows, each a list of numbers, all of one size.</param>
+    /// <returns>The matrix.</returns>
+    public static Matrix MatrixOf(JsonElement rows)
+    {
+        double[][] r = [.. rows.EnumerateArray().Select(Numbers)];
+        int columns = r.Length == 0 ? 0 : r[0].Length;
+        var m = new Matrix(r.Length, columns);
+        for (int i = 0; i < r.Length; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                m[i, j] = r[i][j];
+            }
+        }
+
+        return m;
+    }
+
+    /// <summary>
+    /// The 2-D interpolation a C++ harness spec describes: <c>{"type", "x", "y", "z", "enableExtrapolation"}</c>, a
+    /// <see cref="BilinearInterpolation"/>, built by the <see cref="Bilinear"/> factory as QuantLib's builds it, or a
+    /// <see cref="FlatExtrapolator2D"/> decorating one, which adds <c>"decoratedExtrapolation"</c>, whether
+    /// extrapolation is enabled on the decorated interpolation.
+    /// </summary>
+    /// <param name="spec">The spec.</param>
+    /// <returns>The interpolation.</returns>
+    public static Interpolation2D Build2D(JsonElement spec)
+    {
+        string type = spec.GetProperty("type").GetString()!;
+        Interpolation2D bilinear = new Bilinear().Interpolate(
+            Numbers(spec.GetProperty("x")), Numbers(spec.GetProperty("y")), MatrixOf(spec.GetProperty("z")));
+        Interpolation2D f = type switch
+        {
+            "BilinearInterpolation" => bilinear,
+            "FlatExtrapolator2D" => new FlatExtrapolator2D(
+                spec.GetProperty("decoratedExtrapolation").GetBoolean() ? bilinear.EnableExtrapolation() : bilinear),
+            _ => throw new InvalidOperationException($"unknown 2-D interpolation type '{type}'"),
+        };
+        return spec.GetProperty("enableExtrapolation").GetBoolean() ? f.EnableExtrapolation() : f;
+    }
+
     private static object? Members(
         Interpolation? f, Func<Interpolation> build, double[] points, bool[] allow, Func<Interpolation, double, bool, double> member)
     {

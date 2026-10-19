@@ -17,11 +17,20 @@ on QuantLib's ConstantOptionletVolatility, each output computed by the C++ harne
 - "defaults" cases, on two of the harness's own structures, which override only what OptionletVolatilityStructure
   leaves abstract: volatilityType and displacement, the base's defaults (ShiftedLognormal and 0), and volatility and
   blackVariance on the same tenors and 2 strikes, through the base's default volatilityImpl on a date.
+- "smileSections" cases, on a fixed normal and a moving shifted lognormal constant surface, both displaced, and on
+  the first of the harness's own structures, whose smile section by time is a FlatSmileSection of its volatility,
+  reached by date through the base's default: smileSection on 10 tenors, 10 dates and 10 times (before the reference
+  date, a NaN and a negative time, which QuantLib refuses, and past the maximum time, which it refuses unless
+  extrapolating), each with its extrapolate argument, as the summary of the section (its exercise date and time,
+  volatility type, shift, ATM level and volatility at the surface's second strike; termstructures/volatility/
+  smilesectionspec.hpp). A constant surface's sections are shifted lognormal with no shift and no ATM level whatever
+  the surface's type and displacement, as QuantLib builds them.
 
 A refused value is {"throws": true}. Each case's inputs hold the surface spec ("surface", as in that generator), and
 the tenors (each [length, units]) and strikes, or the dates, times, strikes, the in-range date, time and strike, and
-the extrapolate arguments. The reference date and the maximum time that place the refusals' inputs are read from the
-wheel's structure, built under the same evaluation date; every output is the harness's.
+the extrapolate arguments, or the tenors, dates and times with their extrapolate arguments and the strike. The reference
+date and the maximum time that place the refusals' inputs are read from the wheel's structure, built under the same
+evaluation date; every output is the harness's.
 tests/NanoQL.Tests/Vectors/Cxx/TermStructures/OptionletVolatilityStructureCxxVectorTests.cs reads it back."""
 import importlib.util
 import os
@@ -68,6 +77,9 @@ REFUSED_STRIKES = [NAN, INF, -INF, -MAX, MAX]
 
 VOLATILITY = "OptionletVolatilityStructure::volatility"
 BLACK_VARIANCE = "OptionletVolatilityStructure::blackVariance"
+SMILE_SECTION = "OptionletVolatilityStructure::smileSection"
+# The surfaces the smile sections use: a fixed normal one and a moving shifted lognormal one.
+SMILE_SURFACES = [3, 9]
 
 
 def period_case(H, k, evaluation_date, spec, strikes):
@@ -126,6 +138,40 @@ def defaults_case(H, k, evaluation_date, spec, strikes):
                 "expected": expected}
 
 
+def smile_case(H, k, evaluation_date, spec, strikes):
+    with v.case_settings(evaluation_date):
+        twin = cov.make_surface(cov.fixed_spec(ql.Date(spec["referenceDate"]), spec["calendar"], spec["convention"],
+                                               spec["volatility"], spec["dayCounter"], cov.SL, 0.0)
+                                if spec["type"] == "BaseOptionletVolatility" else spec)
+        ref, max_time = twin.referenceDate(), twin.maxTime()
+    with H.case_settings(v.enc(evaluation_date)) as st:
+        strike = strikes[1]
+        tenors = [(p, False) for p in TENORS]
+        dates = [(ref - 1, False), (ref - 1, True), (ref, False), (ref + 1, False), (ref + 45, False),
+                 (ref + 365, False), (ref + 3653, True), (ref + 10958, False), (ql.Date.maxDate(), False),
+                 (ql.Date.maxDate(), True)]
+        times = [(-0.25, True), (NAN, True), (0.0, False), (1e-8, False), (0.5, False), (1.0, True), (10.0, False),
+                 (max_time, False), (max_time + 1.0, False), (max_time + 1.0, True)]
+        expected = {
+            "atTenors": [v.attempt(lambda p=p, e=e: H.call(SMILE_SECTION + "(Period)", spec, p, e, strike))
+                         for p, e in tenors],
+            "atDates": [v.attempt(lambda d=d, e=e: H.call(SMILE_SECTION + "(Date)", spec, v.enc(d), e, strike))
+                        for d, e in dates],
+            "atTimes": [v.attempt(lambda t=t, e=e: H.call(SMILE_SECTION + "(Time)", spec, t, e, strike))
+                        for t, e in times]}
+        if spec["type"] == "BaseOptionletVolatility":
+            kind = "base"
+        else:
+            kind = "fixed" if "referenceDate" in spec else f"{spec['settlementDays']} days"
+        return {"name": f"smile sections {kind} {evaluation_date.ISO()} / {k}",
+                "inputs": {"settings": st, "kind": "smileSections", "surface": spec,
+                           "tenors": [p for p, _ in tenors], "tenorExtrapolate": [e for _, e in tenors],
+                           "dates": [v.enc(d) for d, _ in dates], "dateExtrapolate": [e for _, e in dates],
+                           "times": v.enc([t for t, _ in times]), "timeExtrapolate": [e for _, e in times],
+                           "strike": strike},
+                "expected": expected}
+
+
 def cases():
     with cxx.connect() as H:
         out = [period_case(H, k, ev, spec, strikes) for k, (ev, spec, strikes) in enumerate(cov.SURFACES)]
@@ -134,6 +180,9 @@ def cases():
             for enabled in (False, True):
                 out.append(refusal_case(H, k, ev, dict(spec, enableExtrapolation=enabled), strikes))
         out += [defaults_case(H, k, ev, spec, strikes) for k, (ev, spec, strikes) in enumerate(BASE_SURFACES)]
+        # Added after the cases above, which keep their bytes.
+        out += [smile_case(H, k, *cov.SURFACES[k]) for k in SMILE_SURFACES]
+        out.append(smile_case(H, 0, *BASE_SURFACES[0]))
         return out
 
 

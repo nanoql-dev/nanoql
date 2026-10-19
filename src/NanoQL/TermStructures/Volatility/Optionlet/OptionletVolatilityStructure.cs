@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/volatility/optionlet/optionletvolatilitystructure.hpp ql/termstructures/volatility/optionlet/optionletvolatilitystructure.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: smileSection and smileSectionImpl, which wait for S6's SmileSection; the constructor for a structure that manages its own reference date, which waits for its first user (S8)
+// Partial: the constructor for a structure that manages its own reference date, which waits for its first user (S8)
 
 using NanoQL.Time;
 
@@ -109,6 +109,50 @@ public abstract class OptionletVolatilityStructure : VolatilityTermStructure
         double v = Volatility(optionTime, strike, extrapolate);
         return v * v * optionTime;
     }
+
+    /// <summary>The smile section for an option tenor.</summary>
+    /// <param name="optionTenor">The option tenor, from the reference date.</param>
+    /// <param name="extrapolate">Whether to extrapolate outside the structure's range.</param>
+    /// <returns>The smile section.</returns>
+    public SmileSection SmileSection(Period optionTenor, bool extrapolate = false)
+    {
+        Date optionDate = OptionDateFromTenor(optionTenor);
+        return SmileSection(optionDate, extrapolate);
+    }
+
+    /// <summary>The smile section for an option date.</summary>
+    /// <param name="optionDate">The option date.</param>
+    /// <param name="extrapolate">Whether to extrapolate outside the structure's range.</param>
+    /// <returns>The smile section.</returns>
+    /// <exception cref="NanoQLException">The date is outside the structure's domain.</exception>
+    public SmileSection SmileSection(Date optionDate, bool extrapolate = false)
+    {
+        Date.ThrowIfDefault(optionDate, nameof(optionDate));
+        CheckRange(optionDate, extrapolate);
+        return SmileSectionImpl(optionDate);
+    }
+
+    /// <summary>The smile section for an option time.</summary>
+    /// <param name="optionTime">The option time, from the reference date.</param>
+    /// <param name="extrapolate">Whether to extrapolate outside the structure's range.</param>
+    /// <returns>The smile section.</returns>
+    /// <exception cref="NanoQLException">The time is outside the structure's domain.</exception>
+    public SmileSection SmileSection(double optionTime, bool extrapolate = false)
+    {
+        CheckRange(optionTime, extrapolate);
+        return SmileSectionImpl(optionTime);
+    }
+
+    /// <summary>The smile section for an option date, without range checks; by default the one for the date's time.</summary>
+    /// <param name="optionDate">The option date.</param>
+    /// <returns>The smile section.</returns>
+    protected virtual SmileSection SmileSectionImpl(Date optionDate) =>
+        SmileSectionImpl(TimeFromReference(optionDate));
+
+    /// <summary>The smile section for an option time, without range checks.</summary>
+    /// <param name="optionTime">The option time.</param>
+    /// <returns>The smile section.</returns>
+    protected abstract SmileSection SmileSectionImpl(double optionTime);
 
     /// <summary>The volatility for an option date, without range checks; by default through the date's time.</summary>
     /// <param name="optionDate">The option date.</param>

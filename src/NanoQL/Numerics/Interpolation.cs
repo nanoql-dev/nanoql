@@ -185,8 +185,8 @@ public abstract class Interpolation : Extrapolator
     protected abstract double SecondDerivativeCore(double x);
 
     // std::upper_bound over a sorted range, in its order of comparisons: the first position whose element is greater
-    // than x, or the range's length.
-    private static int UpperBound(ReadOnlySpan<double> range, double x)
+    // than x, or the range's length. Interpolation2D locates its x and y values with it too.
+    internal static int UpperBound(ReadOnlySpan<double> range, double x)
     {
         int first = 0, count = range.Length;
         while (count > 0)

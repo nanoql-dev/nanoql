@@ -9,7 +9,8 @@ namespace NanoQL.Tests.Conventions;
 /// The interpolation factories' zero values (playbook §2.6): <c>default(T)</c>, <c>new T()</c>, an array element and a
 /// consumer's <c>TInterpolator i = default</c> are QuantLib's default construction, or are refused where QuantLib has
 /// none; and QuantLib's presets convert to the <see cref="LogCubic"/> they derive from. The factories expose no
-/// parameters, as QuantLib's don't, so the interpolations they build show their settings.
+/// parameters, as QuantLib's don't, so the interpolations they build show their settings. The 2-D factory
+/// <see cref="Bilinear"/> is stateless, as QuantLib's is.
 /// </summary>
 public class InterpolatorZeroValueTests
 {
@@ -195,6 +196,31 @@ public class InterpolatorZeroValueTests
             new KrugerLogMixedLinearCubic(2, MixedInterpolationBehavior.ShareRanges).Interpolate(x, y),
             new KrugerLogMixedLinearCubic(2).Interpolate(x, y));
     }
+
+    [Fact]
+    public void BilinearZeroValueIsQuantLibsDefault()
+    {
+        // QuantLib's Bilinear(), stateless: every instance builds the BilinearInterpolation of the grid.
+        double[] x = [0.0, 0.7, 2.0], y = [-1.0, 1.0];
+        var z = new Matrix(new[,] { { 1.0, 0.2, 1.5 }, { 0.4, 3.0, -2.0 } });
+        var expected = new BilinearInterpolation(x, y, z);
+        Bilinear[] zeros = [default, new Bilinear(), (new Bilinear[1])[0]];
+        foreach (Interpolation2D actual in zeros.Select(b => b.Interpolate(x, y, z)).Append(Consumer2D<Bilinear>(x, y, z)))
+        {
+            Assert.IsType<BilinearInterpolation>(actual);
+            foreach (double p in Points)
+            {
+                Assert.Equal(
+                    BitConverter.DoubleToInt64Bits(expected.Evaluate(p, p / 2.0, true)),
+                    BitConverter.DoubleToInt64Bits(actual.Evaluate(p, p / 2.0, true)));
+            }
+        }
+    }
+
+    // A consumer generic over the 2-D factory, taking QuantLib's const Interpolator& i = {} as TInterpolator i = default.
+    private static Interpolation2D Consumer2D<TInterpolator>(double[] x, double[] y, Matrix z, TInterpolator interpolator = default)
+        where TInterpolator : struct, IInterpolator2D =>
+        interpolator.Interpolate(x, y, z);
 
     // A consumer generic over the factory, taking QuantLib's const Interpolator& i = {} as TInterpolator i = default.
     private static Interpolation Consumer<TInterpolator>(double[] x, double[] y, TInterpolator interpolator = default)

@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,125 | 150 |
+| not started | 1,118 | 150 |
 | partial | 20 | 23 |
-| ported | 129 | 9 |
+| ported | 136 | 9 |
 | replaced | 17 | 6 |
 | total | 1,456 | 194 |
 
@@ -840,15 +840,15 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `backwardflatinterpolation` | ported | Numerics/Interpolations/BackwardFlat.cs, Numerics/Interpolations/BackwardFlatInterpolation.cs |  |
 | `backwardflatlinearinterpolation` | not started |  | no nanoql type: BackwardflatLinearInterpolation, BackwardflatLinear |
 | `bicubicsplineinterpolation` | not started |  | no nanoql type: BicubicSpline, Bicubic |
-| `bilinearinterpolation` | not started |  | no nanoql type: BilinearInterpolation, Bilinear |
+| `bilinearinterpolation` | ported | Numerics/Interpolations/Bilinear.cs, Numerics/Interpolations/BilinearInterpolation.cs |  |
 | `chebyshevinterpolation` | not started |  | no nanoql type: ChebyshevInterpolation, ChebyshevInterpolationPointsType |
 | `convexmonotoneinterpolation` | not started |  | no nanoql type: ConvexMonotoneInterpolation, ConvexMonotone |
 | `cubicinterpolation` | ported | Numerics/Interpolations/CubicInterpolation/AkimaCubicInterpolation.cs, Numerics/Interpolations/CubicInterpolation/Cubic.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolation.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolationBoundaryCondition.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolationDerivativeApprox.cs, Numerics/Interpolations/CubicInterpolation/CubicNaturalSpline.cs, Numerics/Interpolations/CubicInterpolation/CubicSplineOvershootingMinimization1.cs, Numerics/Interpolations/CubicInterpolation/CubicSplineOvershootingMinimization2.cs, Numerics/Interpolations/CubicInterpolation/FritschButlandCubic.cs, Numerics/Interpolations/CubicInterpolation/HarmonicCubic.cs, Numerics/Interpolations/CubicInterpolation/KrugerCubic.cs, Numerics/Interpolations/CubicInterpolation/MonotonicCubicNaturalSpline.cs, Numerics/Interpolations/CubicInterpolation/MonotonicParabolic.cs, Numerics/Interpolations/CubicInterpolation/Parabolic.cs |  |
 | `extrapolation` | ported | Numerics/Interpolations/Extrapolator.cs, Numerics/Interpolations/ExtrapolatorExtensions.cs |  |
 | `flatextrapolation` | not started |  | no nanoql type: FlatExtrapolator |
-| `flatextrapolation2d` | not started |  | no nanoql type: FlatExtrapolator2D |
+| `flatextrapolation2d` | ported | Numerics/Interpolations/FlatExtrapolator2D.cs |  |
 | `forwardflatinterpolation` | not started |  | no nanoql type: ForwardFlatInterpolation, ForwardFlat |
-| `interpolation2d` | not started |  | no nanoql type: Interpolation2D, Interpolation2DTemplateImpl |
+| `interpolation2d` | ported | Numerics/Interpolations/IInterpolator2D.cs, Numerics/Interpolations/Interpolation2D.cs | no nanoql type: Interpolation2DTemplateImpl |
 | `kernelinterpolation` | not started |  | no nanoql type: KernelInterpolation |
 | `kernelinterpolation2d` | not started |  | no nanoql type: KernelInterpolation2D |
 | `lagrangeinterpolation` | not started |  | no nanoql type: LagrangeInterpolation |
@@ -1813,14 +1813,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `atmadjustedsmilesection` | not started |  | no nanoql type: AtmAdjustedSmileSection |
 | `atmsmilesection` | not started |  | no nanoql type: AtmSmileSection |
-| `flatsmilesection` | not started |  | no nanoql type: FlatSmileSection |
+| `flatsmilesection` | ported | TermStructures/Volatility/FlatSmileSection.cs |  |
 | `gaussian1dsmilesection` | not started |  | no nanoql type: Gaussian1dSmileSection |
 | `interpolatedsmilesection` | not started |  | no nanoql type: InterpolatedSmileSection |
 | `kahalesmilesection` | not started |  | no nanoql type: KahaleSmileSection, KahaleSmileSectionCFunction, KahaleSmileSectionAHelper, KahaleSmileSectionSHelper, KahaleSmileSectionSHelper1 |
 | `sabr` | not started |  |  |
 | `sabrinterpolatedsmilesection` | not started |  | no nanoql type: SabrInterpolatedSmileSection |
 | `sabrsmilesection` | not started |  | no nanoql type: SabrSmileSection |
-| `smilesection` | not started |  | no nanoql type: SmileSection |
+| `smilesection` | ported | TermStructures/Volatility/SmileSection.cs |  |
 | `smilesectionutils` | not started |  | no nanoql type: SmileSectionUtils |
 | `spreadedsmilesection` | not started |  | no nanoql type: SpreadedSmileSection |
 | `volatilitytype` | ported | TermStructures/Volatility/VolatilityType.cs |  |
@@ -1878,11 +1878,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `capletvariancecurve` | not started |  | no nanoql type: CapletVarianceCurve |
-| `constantoptionletvol` | partial | TermStructures/Volatility/Optionlet/ConstantOptionletVolatility.cs | partial: smileSectionImpl, which waits for S6's FlatSmileSection |
+| `constantoptionletvol` | ported | TermStructures/Volatility/Optionlet/ConstantOptionletVolatility.cs |  |
 | `optionletstripper` | not started |  | no nanoql type: OptionletStripper |
 | `optionletstripper1` | not started |  | no nanoql type: OptionletStripper1 |
 | `optionletstripper2` | not started |  | no nanoql type: OptionletStripper2 |
-| `optionletvolatilitystructure` | partial | TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs | partial: smileSection and smileSectionImpl, which wait for S6's SmileSection; the constructor for a structure that manages its own reference date, which waits for its first user (S8) |
+| `optionletvolatilitystructure` | partial | TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs | partial: the constructor for a structure that manages its own reference date, which waits for its first user (S8) |
 | `spreadedoptionletvol` | not started |  | no nanoql type: SpreadedOptionletVolatility |
 | `strippedoptionlet` | not started |  | no nanoql type: StrippedOptionlet |
 | `strippedoptionletadapter` | not started |  | no nanoql type: StrippedOptionletAdapter |
@@ -1899,11 +1899,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `interpolatedswaptionvolatilitycube` | not started |  | no nanoql type: InterpolatedSwaptionVolatilityCube |
 | `sabrswaptionvolatilitycube` | not started |  | no nanoql type: XabrModelTraits, XabrSwaptionVolatilityCube, SwaptionVolCubeSabrModel, SabrSwaptionVolatilityCube |
 | `spreadedswaptionvol` | not started |  | no nanoql type: SpreadedSwaptionVolatility |
-| `swaptionconstantvol` | not started |  | no nanoql type: ConstantSwaptionVolatility |
+| `swaptionconstantvol` | ported | TermStructures/Volatility/Swaption/ConstantSwaptionVolatility.cs |  |
 | `swaptionvolcube` | not started |  | no nanoql type: SwaptionVolatilityCube |
 | `swaptionvoldiscrete` | not started |  | no nanoql type: SwaptionVolatilityDiscrete |
 | `swaptionvolmatrix` | not started |  | no nanoql type: SwaptionVolatilityMatrix |
-| `swaptionvolstructure` | not started |  | no nanoql type: SwaptionVolatilityStructure |
+| `swaptionvolstructure` | partial | TermStructures/Volatility/Swaption/SwaptionVolatilityStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc), which waits for its first user (B3.3's SpreadedSwaptionVolatility) |
 | `zabrswaptionvolatilitycube` | not started |  | no nanoql type: SwaptionVolCubeZabrModel, ZabrSwaptionVolatilityCube |
 
 ### `ql/termstructures/yield/`

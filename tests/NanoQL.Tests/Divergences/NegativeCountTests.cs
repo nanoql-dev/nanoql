@@ -84,6 +84,8 @@ public class NegativeCountTests
 
         public override double MaxStrike() => double.MaxValue;
 
+        protected override SmileSection SmileSectionImpl(double optionTime) => new FlatSmileSection(optionTime, 0.2, DayCounter);
+
         protected override double VolatilityImpl(double optionTime, double strike) => 0.2;
     }
 }

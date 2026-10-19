@@ -14,9 +14,10 @@
 //
 // Or {"type": "BaseOptionletVolatility", "referenceDate", "calendar", "convention", "volatility", "dayCounter",
 // "enableExtrapolation"}: the harness's own structure with a fixed reference date, which overrides only what
-// OptionletVolatilityStructure leaves abstract (a constant volatility over every date and strike), so that
-// volatilityType() and displacement() are the base's defaults, as tests/NanoQL.Tests/Vectors/VolatilityInputs.cs
-// defines it.
+// OptionletVolatilityStructure leaves abstract (a constant volatility over every date and strike, and a smile section
+// by time, a FlatSmileSection of that volatility with the structure's day counter), so that volatilityType(),
+// displacement() and the smile section by date are the base's defaults, as tests/NanoQL.Tests/Vectors/
+// VolatilityInputs.cs defines it.
 
 #ifndef NANOQL_CXX_TERMSTRUCTURES_VOLATILITY_OPTIONLET_OPTIONLETVOLSPEC_HPP
 #define NANOQL_CXX_TERMSTRUCTURES_VOLATILITY_OPTIONLET_OPTIONLETVOLSPEC_HPP

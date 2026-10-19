@@ -195,6 +195,16 @@ Facts:
 - `TheCopyKeepsItsTypeAndItsValues`
 - `ANullReceiverThrows`
 
+## FlatExtrapolator2DNullTests
+
+[`Divergences/FlatExtrapolator2DNullTests.cs`](../tests/NanoQL.Tests/Divergences/FlatExtrapolator2DNullTests.cs)
+
+A flat extrapolator decorating no interpolation. QuantLib's constructor calls the decorated interpolation's `update()` through the pointer it is given (`flatextrapolation2d.hpp:39-48, 62-64`), a null dereference, undefined under `std::shared_ptr` and a Boost assertion by default. nanoql refuses it with `ArgumentNullException` naming `decoratedInterpolation`.
+
+Facts:
+
+- `ANullDecoratedInterpolationIsRefused`
+
 ## FloatingLegUndefinedInputsTests
 
 [`Divergences/FloatingLegUndefinedInputsTests.cs`](../tests/NanoQL.Tests/Divergences/FloatingLegUndefinedInputsTests.cs)
@@ -249,6 +259,16 @@ Facts:
 
 - `AGuessShorterThanTheCurvesPillarsIsRefused`
 - `ALongerGuessUnderTheSimpleZeroTraitsIsRefused`
+
+## Interpolation2DSizeTests
+
+[`Divergences/Interpolation2DSizeTests.cs`](../tests/NanoQL.Tests/Divergences/Interpolation2DSizeTests.cs)
+
+A bilinear interpolation over a matrix smaller than its grid. QuantLib checks no matrix against the grid (`interpolation2d.hpp:72-83`), and its bilinear value reads `zData_[j+1][i+1]` for the cell holding the point (`bilinearinterpolation.hpp:50-53`), past the matrix's end for a matrix with fewer rows than y values or fewer columns than x values, undefined. nanoql refuses such a matrix when the interpolation is built, with `ArgumentException` naming the matrix's parameter (`zData`, and the factory's `z`) and QuantLib's own texts for a mismatched matrix (`kernelinterpolation2d.hpp:70-73`). A larger matrix, which QuantLib reads in its first rows and columns, is kept.
+
+Facts:
+
+- `AMatrixSmallerThanTheGridIsRefused`
 
 ## MinimizeContinuationTests
 
@@ -311,6 +331,7 @@ Facts:
 - `AMixedInterpolationsLeftConditionValueOfQuantLibsNullIsAValue`
 - `AGlobalBootstrapsAccuracyOfQuantLibsNullIsAValue`
 - `AnImpliedStandardDeviationsGuessOfQuantLibsNullIsAGuess`
+- `ASmileSectionsAtmLevelOfQuantLibsNullIsALevel`
 
 ## OvernightIndexedCouponRefusalTests
 
@@ -470,6 +491,16 @@ Simplex on a problem with no variables: QuantLib sizes its function values at n 
 Facts:
 
 - `ASimplexWithNoVariablesIsRefused`
+
+## SmileSectionFieldsTests
+
+[`Divergences/SmileSectionFieldsTests.cs`](../tests/NanoQL.Tests/Divergences/SmileSectionFieldsTests.cs)
+
+A smile section built by the parameterless constructor. QuantLib's `SmileSection() = default` (`smilesection.hpp:50`) leaves the exercise time, the volatility type and the shift uninitialized (`smilesection.hpp:86-92`), and the base's inspectors, its variance and its converted volatility read them (`smilesection.hpp:60-67, 112-115`; `smilesection.cpp:133`), indeterminate unless the section overrides them all, as QuantLib's own users of the constructor do. nanoql's parameterless constructor defines them: an exercise time of 0, `VolatilityType.ShiftedLognormal` and a shift of 0, so a section that keeps the base's members reads those values.
+
+Facts:
+
+- `AParameterlessSectionReadsDefinedFields`
 
 ## SobolPeriodEndTests
 

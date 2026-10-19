@@ -13,9 +13,10 @@ namespace NanoQL.Tests.Vectors;
 /// <see cref="OptionletVolatilityStructure.Volatility(Period, double, bool)"/> and
 /// <see cref="OptionletVolatilityStructure.BlackVariance(Period, double, bool)"/>, which the wheel doesn't expose; and
 /// the date, time and strike refusals of the date and time overloads, with and without the extrapolate argument, on
-/// structures as built and with extrapolation enabled; and the base's default
+/// structures as built and with extrapolation enabled; the base's default
 /// <see cref="OptionletVolatilityStructure.VolatilityType"/> and <see cref="OptionletVolatilityStructure.Displacement"/>,
-/// on the harness's own structure, which keeps them.
+/// on the harness's own structure, which keeps them; and the smile sections by tenor, date and time, the constant
+/// structure's and, through the base's default by date, the harness structure's.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class OptionletVolatilityStructureCxxVectorTests
@@ -41,6 +42,9 @@ public class OptionletVolatilityStructureCxxVectorTests
                 case "refusals":
                     CheckRefusals(check, c, surface);
                     break;
+                case "smileSections":
+                    CheckSmileSections(check, c, surface);
+                    break;
                 default:
                     Assert.Fail($"unexpected case kind in '{c.Name}'");
                     break;
@@ -56,6 +60,36 @@ public class OptionletVolatilityStructureCxxVectorTests
         double[] strikes = c.Doubles("strikes");
         check.Output(c, "volatility", VolatilityInputs.Grid(tenors, strikes, (p, k) => surface.Volatility(p, k)));
         check.Output(c, "blackVariance", VolatilityInputs.Grid(tenors, strikes, (p, k) => surface.BlackVariance(p, k)));
+    }
+
+    private static void CheckSmileSections(VectorAssert check, VectorCase c, OptionletVolatilityStructure surface)
+    {
+        Period[] tenors = c.Input("tenors").EnumerateArray().Select(VolatilityInputs.TenorOf).ToArray();
+        Date[] dates = c.DateInputs("dates");
+        double[] times = VolatilityInputs.Reals(c.Input("times"));
+        bool[] tenorExtrapolate = InterpolationInputs.Bools(c.Input("tenorExtrapolate"));
+        bool[] dateExtrapolate = InterpolationInputs.Bools(c.Input("dateExtrapolate"));
+        bool[] timeExtrapolate = InterpolationInputs.Bools(c.Input("timeExtrapolate"));
+        double strike = c.Double("strike");
+
+        check.Output(
+            c,
+            "atTenors",
+            InterpolationInputs.Deferred(
+                Enumerable.Range(0, tenors.Length),
+                i => SmileSectionInputs.Summary(surface.SmileSection(tenors[i], tenorExtrapolate[i]), strike)));
+        check.Output(
+            c,
+            "atDates",
+            InterpolationInputs.Deferred(
+                Enumerable.Range(0, dates.Length),
+                i => SmileSectionInputs.Summary(surface.SmileSection(dates[i], dateExtrapolate[i]), strike)));
+        check.Output(
+            c,
+            "atTimes",
+            InterpolationInputs.Deferred(
+                Enumerable.Range(0, times.Length),
+                i => SmileSectionInputs.Summary(surface.SmileSection(times[i], timeExtrapolate[i]), strike)));
     }
 
     private static void CheckRefusals(VectorAssert check, VectorCase c, OptionletVolatilityStructure surface)

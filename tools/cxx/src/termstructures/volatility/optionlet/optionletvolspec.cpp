@@ -3,6 +3,7 @@
 
 #include "termstructures/volatility/optionlet/optionletvolspec.hpp"
 
+#include <ql/termstructures/volatility/flatsmilesection.hpp>
 #include <ql/termstructures/volatility/optionlet/constantoptionletvol.hpp>
 #include <ql/utilities/null.hpp>
 
@@ -16,7 +17,7 @@ namespace harness::termstructures {
     namespace {
 
         // The harness's own optionlet structure, which overrides only what OptionletVolatilityStructure leaves
-        // abstract, so that volatilityType() and displacement() are the base's defaults.
+        // abstract, so that volatilityType(), displacement() and the smile section by date are the base's defaults.
         class BaseOptionletVolatility : public OptionletVolatilityStructure {
           public:
             BaseOptionletVolatility(const Date& referenceDate, const Calendar& cal, BusinessDayConvention bdc,
@@ -27,8 +28,8 @@ namespace harness::termstructures {
             Rate maxStrike() const override { return QL_MAX_REAL; }
 
           protected:
-            ext::shared_ptr<SmileSection> smileSectionImpl(Time) const override {
-                QL_FAIL("the harness's base optionlet structure has no smile section");
+            ext::shared_ptr<SmileSection> smileSectionImpl(Time optionTime) const override {
+                return ext::make_shared<FlatSmileSection>(optionTime, volatility_, dayCounter());
             }
             Volatility volatilityImpl(Time, Rate) const override { return volatility_; }
 
