@@ -7,6 +7,7 @@
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
 using System.Collections.Immutable;
+using System.Globalization;
 using NanoQL.Indexes;
 using NanoQL.Numerics;
 using NanoQL.Time;
@@ -109,8 +110,8 @@ public abstract class SwaptionVolatilityCube : SwaptionVolatilityDiscrete
             {
                 throw new ArgumentException(
                     $"non increasing strike spreads: {DataFormattersFunctions.Ordinal(i)} is "
-                    + $"{DataFormattersFunctions.General(this.strikeSpreads[i - 1])}, {DataFormattersFunctions.Ordinal(i + 1)} is "
-                    + $"{DataFormattersFunctions.General(this.strikeSpreads[i])}",
+                    + $"{Show(this.strikeSpreads[i - 1])}, {DataFormattersFunctions.Ordinal(i + 1)} is "
+                    + $"{Show(this.strikeSpreads[i])}",
                     nameof(strikeSpreads));
             }
         }
@@ -267,4 +268,6 @@ public abstract class SwaptionVolatilityCube : SwaptionVolatilityDiscrete
 
     private static SwaptionVolatilityStructure Checked(SwaptionVolatilityStructure atmVolStructure) =>
         atmVolStructure ?? throw new ArgumentNullException(nameof(atmVolStructure));
+
+    private static string Show(double x) => x.ToString(CultureInfo.InvariantCulture);
 }

@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 1,053 | 139 |
-| partial | 18 | 28 |
-| ported | 191 | 15 |
+| not started | 1,037 | 137 |
+| partial | 20 | 27 |
+| ported | 205 | 18 |
 | replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
@@ -628,7 +628,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bond` | ported | Instruments/Bond/Bond.cs, Instruments/Bond/BondPrice.cs, Instruments/Bond/BondPriceType.cs, Instruments/Bond/BondResults.cs |  |
 | `bondforward` | not started |  | no nanoql type: BondForward |
 | `callabilityschedule` | ported | Instruments/CallabilitySchedule/Callability.cs, Instruments/CallabilitySchedule/CallabilityType.cs | no nanoql type: CallabilitySchedule |
-| `capfloor` | not started |  | no nanoql type: CapFloor, CapFloorType, Cap, Floor, Collar |
+| `capfloor` | ported | Instruments/CapFloor/Cap.cs, Instruments/CapFloor/CapFloor.cs, Instruments/CapFloor/CapFloorArguments.cs, Instruments/CapFloor/CapFloorType.cs, Instruments/CapFloor/Collar.cs, Instruments/CapFloor/Floor.cs |  |
 | `claim` | not started |  | no nanoql type: Claim, FaceValueClaim, FaceValueAccrualClaim |
 | `cliquetoption` | not started |  | no nanoql type: CliquetOption |
 | `complexchooseroption` | not started |  | no nanoql type: ComplexChooserOption |
@@ -658,7 +658,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `impliedvolatility` | not started |  |  |
 | `inflationcapfloor` | not started |  | no nanoql type: YoYInflationCapFloor, YoYInflationCapFloorType, YoYInflationCap, YoYInflationFloor, YoYInflationCollar |
 | `lookbackoption` | not started |  | no nanoql type: ContinuousFloatingLookbackOption, ContinuousFixedLookbackOption, ContinuousPartialFloatingLookbackOption, ContinuousPartialFixedLookbackOption |
-| `makecapfloor` | not started |  | no nanoql type: MakeCapFloor |
+| `makecapfloor` | ported | Instruments/MakeCapFloor.cs |  |
 | `makecds` | not started |  | no nanoql type: MakeCreditDefaultSwap |
 | `makecms` | not started |  | no nanoql type: MakeCms |
 | `makemultipleresetsswap` | not started |  | no nanoql type: MakeMultipleResetsSwap |
@@ -839,7 +839,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `backwardflatinterpolation` | ported | Numerics/Interpolations/BackwardFlat.cs, Numerics/Interpolations/BackwardFlatInterpolation.cs |  |
 | `backwardflatlinearinterpolation` | ported | Numerics/Interpolations/BackwardflatLinear.cs, Numerics/Interpolations/BackwardflatLinearInterpolation.cs |  |
-| `bicubicsplineinterpolation` | not started |  | no nanoql type: BicubicSpline, Bicubic |
+| `bicubicsplineinterpolation` | ported | Numerics/Interpolations/Bicubic.cs, Numerics/Interpolations/BicubicSpline.cs |  |
 | `bilinearinterpolation` | ported | Numerics/Interpolations/Bilinear.cs, Numerics/Interpolations/BilinearInterpolation.cs |  |
 | `chebyshevinterpolation` | not started |  | no nanoql type: ChebyshevInterpolation, ChebyshevInterpolationPointsType |
 | `convexmonotoneinterpolation` | not started |  | no nanoql type: ConvexMonotoneInterpolation, ConvexMonotone |
@@ -1550,8 +1550,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `analyticcapfloorengine` | not started |  | no nanoql type: AnalyticCapFloorEngine |
-| `bacheliercapfloorengine` | not started |  | no nanoql type: BachelierCapFloorEngine |
-| `blackcapfloorengine` | not started |  | no nanoql type: BlackCapFloorEngine |
+| `bacheliercapfloorengine` | ported | PricingEngines/CapFloor/BachelierCapFloorEngine.cs |  |
+| `blackcapfloorengine` | ported | PricingEngines/CapFloor/BlackCapFloorEngine.cs |  |
 | `discretizedcapfloor` | not started |  | no nanoql type: DiscretizedCapFloor |
 | `gaussian1dcapfloorengine` | not started |  | no nanoql type: Gaussian1dCapFloorEngine |
 | `mchullwhiteengine` | not started |  | no nanoql type: MCHullWhiteCapFloorEngine, MakeMCHullWhiteCapFloorEngine |
@@ -1833,10 +1833,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `capfloortermvolatilitystructure` | not started |  | no nanoql type: CapFloorTermVolatilityStructure |
-| `capfloortermvolcurve` | not started |  | no nanoql type: CapFloorTermVolCurve |
-| `capfloortermvolsurface` | not started |  | no nanoql type: CapFloorTermVolSurface |
-| `constantcapfloortermvol` | not started |  | no nanoql type: ConstantCapFloorTermVolatility |
+| `capfloortermvolatilitystructure` | partial | TermStructures/Volatility/CapFloor/CapFloorTermVolatilityStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: no QuantLib class calls it) |
+| `capfloortermvolcurve` | ported | TermStructures/Volatility/CapFloor/CapFloorTermVolCurve.cs |  |
+| `capfloortermvolsurface` | ported | TermStructures/Volatility/CapFloor/CapFloorTermVolSurface.cs |  |
+| `constantcapfloortermvol` | ported | TermStructures/Volatility/CapFloor/ConstantCapFloorTermVolatility.cs |  |
 
 ### `ql/termstructures/volatility/equityfx/`
 
@@ -1879,14 +1879,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `capletvariancecurve` | not started |  | no nanoql type: CapletVarianceCurve |
 | `constantoptionletvol` | ported | TermStructures/Volatility/Optionlet/ConstantOptionletVolatility.cs |  |
-| `optionletstripper` | not started |  | no nanoql type: OptionletStripper |
-| `optionletstripper1` | not started |  | no nanoql type: OptionletStripper1 |
-| `optionletstripper2` | not started |  | no nanoql type: OptionletStripper2 |
-| `optionletvolatilitystructure` | partial | TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs | partial: the constructor for a structure that manages its own reference date, which waits for its first user (S8) |
-| `spreadedoptionletvol` | not started |  | no nanoql type: SpreadedOptionletVolatility |
-| `strippedoptionlet` | not started |  | no nanoql type: StrippedOptionlet |
-| `strippedoptionletadapter` | not started |  | no nanoql type: StrippedOptionletAdapter |
-| `strippedoptionletbase` | not started |  | no nanoql type: StrippedOptionletBase |
+| `optionletstripper` | ported | TermStructures/Volatility/Optionlet/OptionletStripper.cs |  |
+| `optionletstripper1` | partial | TermStructures/Volatility/Optionlet/OptionletStripper1.cs | partial: capletVols(), a matrix QuantLib never writes, not ported |
+| `optionletstripper2` | ported | TermStructures/Volatility/Optionlet/OptionletStripper2.cs |  |
+| `optionletvolatilitystructure` | partial | TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: its only QuantLib user, the spreaded optionlet volatility, passes its base's reference date to the reference-date constructor) |
+| `spreadedoptionletvol` | ported | TermStructures/Volatility/Optionlet/SpreadedOptionletVolatility.cs |  |
+| `strippedoptionlet` | ported | TermStructures/Volatility/Optionlet/StrippedOptionlet.cs |  |
+| `strippedoptionletadapter` | ported | TermStructures/Volatility/Optionlet/StrippedOptionletAdapter.cs |  |
+| `strippedoptionletbase` | ported | TermStructures/Volatility/Optionlet/StrippedOptionletBase.cs |  |
 
 ### `ql/termstructures/volatility/swaption/`
 
@@ -2085,8 +2085,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `businessdayconventions` | not started |  | 1 cases |
 | `calendars` | partial | TestSuite/CalendarsTests.cs | 16 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
 | `callablebonds` | ported | TestSuite/CallableBondsTests.cs | 14 of 14 cases; replaced: testObservability by Vectors/Experimental/CallableBonds/CallableBondVectorTests.cs |
-| `capfloor` | not started |  | 10 cases |
-| `capflooredcoupon` | partial | TestSuite/CapFlooredCouponTests.cs | 1 of 2 cases; not yet: testDecomposition |
+| `capfloor` | ported | TestSuite/CapFloorTests.cs | 10 of 10 cases |
+| `capflooredcoupon` | ported | TestSuite/CapFlooredCouponTests.cs | 2 of 2 cases |
 | `cashflows` | partial | TestSuite/CashFlowsTests.cs | 10 of 16 cases; not yet: testAccessViolation, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices |
 | `catbonds` | not started |  | 9 cases |
 | `cdo` | not started |  | 0 cases |
@@ -2160,7 +2160,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `integrals` | not started |  | 21 cases |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
-| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 19 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testSplineErrorOnGaussianValues, testMultiSpline, testForwardFlat, testKernelInterpolation, testKernelInterpolation2D, testBicubicDerivatives, testBicubicUpdate, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testBSplines, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation, testFlatExtrapolation |
+| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 21 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testSplineErrorOnGaussianValues, testMultiSpline, testForwardFlat, testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testBSplines, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation, testFlatExtrapolation |
 | `jumpdiffusion` | not started |  | 2 cases |
 | `lazyobject` | not ported: tests LazyObject, which is replaced |  |  |
 | `libormarketmodel` | not started |  | 4 cases |
@@ -2192,7 +2192,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `ode` | not started |  | 3 cases |
 | `operators` | ported | TestSuite/OperatorsTests.cs | 1 of 2 cases; not ported: testConsistency (exercises only deprecated code: DZero and DPlusDMinus, D5) |
 | `optimizers` | partial | TestSuite/OptimizersTests.cs | 2 of 10 cases; not yet: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination, testLBFGSB, testLBFGSBActiveBounds, testLBFGSBCoverage, testDifferentialEvolution, testCMAES |
-| `optionletstripper` | not started |  | 19 cases |
+| `optionletstripper` | ported | TestSuite/OptionletStripperTests.cs | 19 of 19 cases |
 | `overnightindexedcoupon` | ported | TestSuite/OvernightIndexedCouponTests.cs | 45 of 45 cases; moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 to Divergences/TelescopicValueDatesTests.cs; testOvernightLegNPV line 1033 to Divergences/TelescopicValueDatesTests.cs |
 | `overnightindexedfundingratehelper` | not started |  | 3 cases |
 | `overnightindexedswap` | partial | TestSuite/OvernightIndexedSwapTests.cs | 22 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs; not yet: testBootstrapRegression, testMakeOisEndOfMonthRegression2453, testNonstandardSwapConversionPreservesObservationConventions |

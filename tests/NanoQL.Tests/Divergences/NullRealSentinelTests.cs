@@ -236,6 +236,29 @@ public class NullRealSentinelTests
     }
 
     /// <summary>
+    /// A cap builder's strike: QuantLib's <c>MakeCapFloor</c> takes <c>strike_ = Null&lt;Rate&gt;()</c> by default and
+    /// reads a strike equal to the sentinel as none (<c>makecapfloor.cpp:70-98</c>), striking the cap at the leg's ATM
+    /// rate on its Black engine's curve, 0.03984885611590906 for this 2Y cap on a flat 4% curve (the wheel). nanoql's
+    /// strike of the sentinel is a strike, which the cap takes as its cap rate.
+    /// </summary>
+    [Fact]
+    public void AMakeCapFloorsStrikeOfQuantLibsNullIsAStrike()
+    {
+        var today = new Date(16, Month.June, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+        var curve = new FlatForward(today, 0.04, new Actual365Fixed());
+        MakeCapFloor builder = new MakeCapFloor(CapFloorType.Cap, new Period(2, TimeUnit.Years), new Euribor6M(curve))
+            .WithDiscountingTermStructure(curve);
+
+        CapFloor struck = builder.WithStrike(NullReal).ToCapFloor(context);
+        Assert.Equal([NullReal, NullReal, NullReal], struck.CapRates);
+
+        // Only null is the at-the-money strike: QuantLib's value for the sentinel.
+        CapFloor atTheMoney = builder.WithStrike(null).ToCapFloor(context);
+        Assert.Equal([0.03984885611590906, 0.03984885611590906, 0.03984885611590906], atTheMoney.CapRates);
+    }
+
+    /// <summary>
     /// A bond's at-the-money rate for a price: QuantLib's <c>BondFunctions::atmRate</c> takes <c>Bond::Price()</c> by
     /// default, whose amount is the sentinel, and reads a price whose amount is the sentinel as none
     /// (<c>bondfunctions.cpp:291-303</c>), giving the rate at the bond's own value on the curve, 0.04999999999999983 for

@@ -96,6 +96,53 @@ public class InterpolationConstructionTests
         }
     }
 
+    // Replaces QuantLib's testBicubicUpdate, which changes the caller's matrix after building a bicubic spline on it and
+    // checks that update() moves the value at (x[2] + 0.1, y[4]) by at least 0.5 (interpolations.cpp:1858-1884). A
+    // nanoql spline copies its matrix: changing the caller's matrix changes nothing, and a spline built on the changed
+    // matrix, the rebuild that takes update()'s place, moves the value as QuantLib's update() does.
+    [Fact]
+    public void ABicubicSplineCopiesItsInputs()
+    {
+        const int n = 6;
+        var x = new double[n];
+        var y = new double[n];
+        for (int i = 0; i < n; ++i)
+        {
+            x[i] = y[i] = i * 0.2;
+        }
+
+        var f = new Matrix(n, n);
+        for (int i = 0; i < n; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                f[i, j] = x[j] * (x[j] + y[i]);
+            }
+        }
+
+        Interpolation2D[] built = [new BicubicSpline(x, y, f), new Bicubic().Interpolate(x, y, f)];
+        Matrix original = f.Clone();
+        double px = x[2] + 0.1, py = y[4];
+        double oldResult = built[0].Evaluate(px, py);
+        double[][] before = [.. built.Select(Values2D)];
+
+        // modify input matrix: the splines built on it don't change.
+        f[4, 3] += 1.0;
+        x[1] = 0.25;
+        built[0].ZData()[4, 3] = -1.0;
+        for (int i = 0; i < built.Length; i++)
+        {
+            Assert.Equal(before[i], Values2D(built[i]));
+            Assert.Equal(original, built[i].ZData());
+            Assert.Equal(oldResult, built[i].Evaluate(px, py));
+        }
+
+        // A spline built on the changed matrix moves, as QuantLib's update() does.
+        x[1] = 0.2;
+        double newResult = new BicubicSpline(x, y, f).Evaluate(px, py);
+        Assert.True(Math.Abs(oldResult - newResult) >= 0.5, $"{oldResult} -> {newResult}");
+    }
+
     private static double[] Values2D(Interpolation2D f) =>
         [.. Points.SelectMany(p => new[] { f.Evaluate(p, 12.5, true), f.Evaluate(p * 10.0, 17.0, true) })];
 

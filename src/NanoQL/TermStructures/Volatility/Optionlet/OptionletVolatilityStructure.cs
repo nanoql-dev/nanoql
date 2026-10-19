@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/volatility/optionlet/optionletvolatilitystructure.hpp ql/termstructures/volatility/optionlet/optionletvolatilitystructure.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the constructor for a structure that manages its own reference date, which waits for its first user (S8)
+// Partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: its only QuantLib user, the spreaded optionlet volatility, passes its base's reference date to the reference-date constructor)
 
 using NanoQL.Time;
 

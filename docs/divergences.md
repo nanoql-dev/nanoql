@@ -166,6 +166,66 @@ Facts:
 - `AnEmptyScheduleIsRefusedWithTheSchedulesOwnText`
 - `ANullCallabilityIsRefusedAtConstruction`
 
+## CapFloorEmptyLegTests
+
+[`Divergences/CapFloorEmptyLegTests.cs`](../tests/NanoQL.Tests/Divergences/CapFloorEmptyLegTests.cs)
+
+The last floating-rate coupon of a cap on an empty leg. QuantLib's `lastFloatingRateCoupon()` reads `floatingLeg_.back()` (`capfloor.cpp:187-193`), which is undefined for an empty leg; the wheel doesn't bind it. nanoql refuses with `NanoQLException` and the text QuantLib's `CashFlows` gives an empty leg, "empty leg", as the wheel's `startDate()` and `maturityDate()` on the same cap do. The rest of the cap is QuantLib's defined behaviour: it is expired, prices at 0 and has an ATM rate of 0.
+
+Facts:
+
+- `TheLastCouponOfAnEmptyLegIsRefused`
+
+## CapFloorNullCashFlowTests
+
+[`Divergences/CapFloorNullCashFlowTests.cs`](../tests/NanoQL.Tests/Divergences/CapFloorNullCashFlowTests.cs)
+
+A cap on a leg holding a null cash flow. QuantLib builds the instrument, registering with each cash flow, and its `isExpired()` dereferences each (`capfloor.cpp:142-146, 172-177`), which is undefined for a null one; the wheel refuses `None` in a `Leg` ("in method 'new_Leg', argument 1 of type 'std::vector< ext::shared_ptr< CashFlow > > const &'"). nanoql refuses it at construction with `ArgumentException`, "null cash flow in leg", as a swap does, from every constructor, naming the leg; a `default` array, which isn't a leg, is refused alike.
+
+Facts:
+
+- `ANullCashFlowIsRefusedAtConstruction`
+
+## CapFloorNullForwardTests
+
+[`Divergences/CapFloorNullForwardTests.cs`](../tests/NanoQL.Tests/Divergences/CapFloorNullForwardTests.cs)
+
+A caplet paid between the discount curve's reference date and the evaluation date. QuantLib's arguments store `Null<Rate>()` as the forward of a coupon paid before the evaluation date (`capfloor.cpp:245-249`), and the Black and Bachelier engines price every caplet paid after the curve's reference date (`blackcapfloorengine.cpp:93-100`, `bacheliercapfloorengine.cpp:78-86`), so on a curve dated before the evaluation date they price that caplet on the sentinel, 3.4028234663852886e+38: the wheel's NPV of this 1Y cap is 1.7146697606502935e+38, its first caplet's, on both engines. nanoql's forward is a `double?`, null there, and the engines refuse a priced caplet without one, with `NanoQLException`. On a curve dated on the evaluation date the caplet is skipped and both price it as QuantLib does: 0.010031644352251482, its ATM forward null where QuantLib's is the sentinel.
+
+Facts:
+
+- `APricedCapletWithoutAForwardIsRefused`
+
+## CapFloorTermVolCurveDateTests
+
+[`Divergences/CapFloorTermVolCurveDateTests.cs`](../tests/NanoQL.Tests/Divergences/CapFloorTermVolCurveDateTests.cs)
+
+A cap/floor term-volatility curve after the evaluation date moves. QuantLib's moving curve recomputes its option dates and times in `update()` before its base clears the cached reference date (`capfloortermvolcurve.cpp:155-167`, `termstructure.cpp:48-52`), so after a move its times are those of the reference date the previous evaluation date gave, and its spline is over them: built on 16 June 2025 with two settlement days, tenors 1Y, 2Y and 3Y at 0.20, 0.21 and 0.22, and moved to 20 June, the wheel's curve has the reference date 24 June 2025 and the maximum date 26 June 2028, and its volatility at 1.5 years is 0.20500509503283154, its value before the move. nanoql's curves have fixed reference dates (R1): the curve for 20 June is built under that date, and gives the value of a curve QuantLib builds on it, 0.20500761138338572.
+
+Facts:
+
+- `ACurveUnderALaterEvaluationDateIsANewCurve`
+
+## CapFloorTermVolSurfaceDateTests
+
+[`Divergences/CapFloorTermVolSurfaceDateTests.cs`](../tests/NanoQL.Tests/Divergences/CapFloorTermVolSurfaceDateTests.cs)
+
+A cap/floor term-volatility surface after the evaluation date moves. QuantLib's moving surface recomputes its option dates in `update()` before its base clears the cached reference date (`capfloortermvolsurface.cpp:195-207`, `termstructure.cpp:39-52`), so after a move its dates are those of the reference date the previous evaluation date gave: built on 16 June 2025 with two settlement days and moved through 20, 25 and 30 June, the wheel's surface has the reference date 2 July 2025 and the option dates of 27 June's (29 June 2026, 28 June 2027, 27 June 2028, 27 June 2030), and its volatility at 1.5 years and 3.5% is 0.22743898630625792, at 30 June 2027 0.22282736247815785. nanoql's surfaces have fixed reference dates (R1): the surface for 30 June is built under that date, and gives the values of a surface QuantLib builds on it: the option dates of 2 July (2 July 2026, 2 July 2027, 3 July 2028, 2 July 2030), 0.2273976824337007 and 0.22280134235888954.
+
+Facts:
+
+- `ASurfaceUnderALaterEvaluationDateIsANewSurface`
+
+## CapFloorTermVolSurfaceEmptyMatrixTests
+
+[`Divergences/CapFloorTermVolSurfaceEmptyMatrixTests.cs`](../tests/NanoQL.Tests/Divergences/CapFloorTermVolSurfaceEmptyMatrixTests.cs)
+
+A cap/floor term-volatility surface on an empty matrix. QuantLib's constructors on quotes size their matrix from the first row, `vols_(vols.size(), vols[0].size())`, before any check (`capfloortermvolsurface.cpp:45, 77`), which is undefined for no rows: the wheel ends the process (0xC0000005 in all 18 recorded runs, with or without tenors). Its constructors on a matrix check it first, in `checkInputs` (`capfloortermvolsurface.cpp:154-177`): "empty option tenor vector", or "mismatch between number of option tenors (2) and number of volatility rows (0)", the wheel's texts. nanoql's quote and matrix forms are one (R1's quote row), so an empty matrix reaches QuantLib's own checks, refused with `ArgumentException`.
+
+Facts:
+
+- `AnEmptyMatrixReachesQuantLibsChecks`
+
 ## CappedFlooredCouponNullUnderlyingTests
 
 [`Divergences/CappedFlooredCouponNullUnderlyingTests.cs`](../tests/NanoQL.Tests/Divergences/CappedFlooredCouponNullUnderlyingTests.cs)
@@ -422,7 +482,7 @@ Facts:
 
 [`Divergences/Interpolation2DSizeTests.cs`](../tests/NanoQL.Tests/Divergences/Interpolation2DSizeTests.cs)
 
-A bilinear interpolation over a matrix smaller than its grid. QuantLib checks no matrix against the grid (`interpolation2d.hpp:72-83`), and its bilinear value reads `zData_[j+1][i+1]` for the cell holding the point (`bilinearinterpolation.hpp:50-53`), past the matrix's end for a matrix with fewer rows than y values or fewer columns than x values, undefined. nanoql refuses such a matrix when the interpolation is built, with `ArgumentException` naming the matrix's parameter (`zData`, and the factory's `z`) and QuantLib's own texts for a mismatched matrix (`kernelinterpolation2d.hpp:70-73`). A larger matrix, which QuantLib reads in its first rows and columns, is kept.
+A bilinear or bicubic-spline interpolation over a matrix smaller than its grid. QuantLib checks no matrix against the grid (`interpolation2d.hpp:72-83`): its bilinear value reads `zData_[j+1][i+1]` for the cell holding the point (`bilinearinterpolation.hpp:50-53`), and its bicubic spline builds a row spline over each row's first x values and reads a row per y value (`bicubicsplineinterpolation.hpp:58-79`), past the matrix's end for a matrix with fewer rows than y values or fewer columns than x values, undefined: the wheel's bicubic spline over a 2 by 2 matrix on a 3 by 3 grid gives 3.337890625 at (0.25, 0.25). nanoql refuses such a matrix when the interpolation is built, with `ArgumentException` naming the matrix's parameter (`zData`, and the factories' `z`) and QuantLib's own texts for a mismatched matrix (`kernelinterpolation2d.hpp:70-73`). A larger matrix, which QuantLib reads in its first rows and columns, is kept; the bicubic spline's derivatives in x, which QuantLib computes at an x value per matrix column (`bicubicsplineinterpolation.hpp:81-108, 137-149`), reading the x values past their end for a wider matrix, read its first columns, an x value each.
 
 Facts:
 
@@ -503,6 +563,7 @@ Facts:
 - `ASmileSectionsAtmLevelOfQuantLibsNullIsALevel`
 - `AnInterpolatedSmileSectionsAtmLevelOfQuantLibsNullIsALevel`
 - `ASwaptionBuildersStrikeOfQuantLibsNullIsAStrike`
+- `AMakeCapFloorsStrikeOfQuantLibsNullIsAStrike`
 - `ABondsAtmRatePriceOfQuantLibsNullIsAPrice`
 - `ALegsAtmRateTargetOfQuantLibsNullIsATarget`
 - `ASwaptionHelpersStrikeOfQuantLibsNullIsAStrike`
@@ -516,6 +577,26 @@ The option date of a time whose interpolated serial number is NaN, infinite or o
 Facts:
 
 - `ATimeWhoseSerialLeavesTheIntegersIsRefusedAsMsvcsSmallestInteger`
+
+## OptionletStripperDontThrowTests
+
+[`Divergences/OptionletStripperDontThrowTests.cs`](../tests/NanoQL.Tests/Divergences/OptionletStripperDontThrowTests.cs)
+
+A stripper told not to throw, after a strip that failed. QuantLib's `OptionletStripper1` leaves 0 for an optionlet whose volatility it can't imply and keeps it as that optionlet's next guess (`optionletstripper1.cpp:150-171`); a guess of 0 is the solver's lower bound, which `blackFormulaImpliedStdDev` refuses ("guess (0) < xMin_ (0)"), so once its quotes are good again the re-strip leaves 0 there still: on the warm-start case's setup with the 1Y row at 60% and the others at 10%, the second optionlet's volatilities are 0, 0, 0.08686109830399297 and 0, and with the quotes back at the good surface the wheel's re-strip gives 0, 0, 0.21151008145592823 and 0, where a fresh stripper gives 0.28960633277893066, 0.24306750297546387, 0.2115100814559281 and 0.20306367926200938. nanoql strips once, from QuantLib's first guess: the failed strip gives QuantLib's zeros, and a stripper on the good quotes QuantLib's fresh values.
+
+Facts:
+
+- `AFailedOptionletLeavesNoGuessBehind`
+
+## OptionletStripperWarmStartTests
+
+[`Divergences/OptionletStripperWarmStartTests.cs`](../tests/NanoQL.Tests/Divergences/OptionletStripperWarmStartTests.cs)
+
+A stripper's implied volatilities on a second strip. QuantLib's `OptionletStripper1` keeps its standard deviations between calculations and passes them as the next calculation's guesses (`optionletstripper1.cpp:58-59, 150-153`), so a recalculated stripper warm-starts: on 16 June 2025, a 4 × 4 surface (1Y, 2Y, 3Y, 5Y by 2%, 3%, 4%, 5%) on a flat 4% curve and Euribor 6M, a quote moved and moved back, the wheel's re-strip differs from its first in 33 of 36 volatilities, by up to 6.8449e-7: the first optionlet at 2% is 0.30000093033375125 on the first strip and 0.3000002879738929 on the second. nanoql strips once, at construction, from QuantLib's first guess, 0.14 (S7R4): every stripper on those quotes gives QuantLib's first strip, which a fresh QuantLib stripper gives too.
+
+Facts:
+
+- `EveryStripGivesQuantLibsFirstStrip`
 
 ## OvernightIndexedCouponRefusalTests
 
@@ -820,6 +901,36 @@ A tree's state prices read past the rows its construction stored. QuantLib's `Tr
 Facts:
 
 - `ARowReadBeforeTheSpreadIsSetDoesntKeepItsUnspreadValues`
+
+## StrippedOptionletAdapterEmptyStrikesTests
+
+[`Divergences/StrippedOptionletAdapterEmptyStrikesTests.cs`](../tests/NanoQL.Tests/Divergences/StrippedOptionletAdapterEmptyStrikesTests.cs)
+
+An adapter on a stripped optionlet with no strikes. No check of QuantLib's refuses empty strikes (`strippedoptionlet.cpp:84-115`), and its adapter, which builds its strike interpolations at its first calculation, builds. That calculation refuses them: its linear interpolation over the first date's strikes (`strippedoptionletadapter.cpp:109`) throws "not enough points to interpolate: at least 2 required, 0 provided" (`interpolation.hpp:83-86`), the wheel's text at its first extrapolated volatility. But its `minStrike()` and `maxStrike()` read the front and back of the empty strikes before any calculation (`strippedoptionletadapter.cpp:128, 132`), which a volatility without extrapolation reaches through its strike check: the wheel's process ends with an access violation, 0xC0000005, in 3 of 3 runs. nanoql's adapter does QuantLib's first calculation when it is built (S7R4), so it refuses the empty strikes there, with QuantLib's text, as an `ArgumentException` naming `stripper`, before the reads; and a base with no fixing dates, which builds no interpolation, is refused by `MinStrike` and `MaxStrike` with `NanoQLException`, "no strikes given" (S7D16).
+
+Facts:
+
+- `EmptyStrikesAreRefused`
+
+## StrippedOptionletStrikesTextTests
+
+[`Divergences/StrippedOptionletStrikesTextTests.cs`](../tests/NanoQL.Tests/Divergences/StrippedOptionletStrikesTextTests.cs)
+
+The refusal of a stripped optionlet's non-increasing strikes at a fixing date after the first. QuantLib checks each date's strikes but prints the first date's (`strippedoptionlet.cpp:106-113`), and reads past them where the first date has fewer: strikes 2%, 3%, 4% at the first date and 2%, 3.5%, 3% at the second give QuantLib's "non increasing strikes at date 1: 2nd is 3.000000 %, 3rd is 4.000000 %", the first date's. nanoql prints the offending date's strikes (S7D16), "non increasing strikes at date 1: 2nd is 3.500000 %, 3rd is 3.000000 %", and a shorter first date reads nothing past its end.
+
+Facts:
+
+- `TheTextPrintsTheOffendingDatesStrikes`
+
+## StrippedOptionletTimesTests
+
+[`Divergences/StrippedOptionletTimesTests.cs`](../tests/NanoQL.Tests/Divergences/StrippedOptionletTimesTests.cs)
+
+A stripped optionlet's fixing times after the evaluation date moves. QuantLib's `StrippedOptionlet` computes its times from the evaluation date at construction and never again (`strippedoptionlet.cpp:77-81`), while its adapter's reference date moves with the evaluation date: on 16 June 2025, with two settlement days, fixing dates 16 December 2025, 16 June 2026 and 16 December 2026, volatilities 20%/19%, 22%/21% and 25%/24% at 2% and 3%, the wheel's times are 0.4958904109589041, 0.9945205479452055 and 1.4958904109589042 and its adapter gives 0.22 at the second date and 2%; with the evaluation date moved to 16 September the times stay, the adapter's reference date is 18 September, and it gives 0.2098901098901099 there; a stripped optionlet built on 16 September has the times 0.24383561643835616, 0.7424657534246575 and 1.2438356164383562 and gives 0.22. nanoql's objects have fixed dates (R1): an adapter is built under a context. The stripped optionlet's times are frozen as QuantLib's are, so its adapter under the later context gives QuantLib's moved value, and the optionlet and adapter built under that context QuantLib's fresh one.
+
+Facts:
+
+- `TheTimesAreTheConstructionsAndTheAdapterIsTheContexts`
 
 ## SwapIndexNullIndexTests
 

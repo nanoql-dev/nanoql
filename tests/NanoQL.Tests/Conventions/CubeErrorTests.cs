@@ -75,13 +75,14 @@ public class CubeErrorTests
             "isAtmCalibrated requires an ATM volatility structure derived from SwaptionVolatilityDiscrete",
             () => CubeFixture.Sabr(atm: constant));
 
-        // A calibration beyond the tolerance, QuantLib's text, at construction.
+        // A calibration beyond the tolerance, QuantLib's text, at construction, its streamed numbers in C#'s formatting
+        // (QuantLib's prints the tolerance 1e-12).
         NanoQLException failed = Assert.Throws<NanoQLException>(() => new SabrSwaptionVolatilityCube(
             atm, CubeFixture.Options, CubeFixture.Swaps, CubeFixture.StrikeSpreads, CubeFixture.VolSpreads,
             CubeFixture.Index(2), CubeFixture.Index(1), false, CubeFixture.Guesses(), [false, false, false, false],
             false, CubeFixture.Context, maxErrorTolerance: 1e-12));
         Assert.StartsWith(
-            "global swaptions calibration failed: error tolerance exceeded: \nusing rmsError tolerance 1e-12, \n",
+            "global swaptions calibration failed: error tolerance exceeded: \nusing rmsError tolerance 1E-12, \n",
             failed.Message,
             StringComparison.Ordinal);
     }

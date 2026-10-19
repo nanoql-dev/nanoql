@@ -10,8 +10,8 @@ namespace NanoQL.Tests.Conventions;
 /// (playbook §9.4): a refused argument throws <see cref="ArgumentException"/> naming it, QuantLib's "not enough x
 /// points" and "not enough y points" and nanoql's refusal of a matrix smaller than the grid; a null argument
 /// <see cref="ArgumentNullException"/>; and a point outside the range, which the flat extrapolator's decorated
-/// interpolation refuses for a NaN coordinate, <see cref="NanoQLException"/>, with QuantLib's text in C#'s number
-/// formatting.
+/// interpolation refuses for a NaN coordinate and the bicubic spline's derivatives refuse in the coordinate they
+/// differentiate along, <see cref="NanoQLException"/>, with QuantLib's text in C#'s number formatting.
 /// </summary>
 public class Interpolation2DErrorTests
 {
@@ -46,6 +46,23 @@ public class Interpolation2DErrorTests
             "interpolation range is [1, 3] x [10, 20]: extrapolation at (NaN, 15) not allowed",
             () => flat.EnableExtrapolation().Evaluate(double.NaN, 15.0));
         Assert.True(double.IsNaN(new FlatExtrapolator2D(f.EnableExtrapolation()).Evaluate(double.NaN, 15.0, true)));
+
+        // The bicubic spline refuses as the bilinear interpolation does, and its derivatives, which skip the 2-D range
+        // check, refuse a point outside the range of the spline each differentiates with that spline's text.
+        AssertArgument("x", "not enough x points to interpolate: at least 2 required, 1 provided", () => new BicubicSpline([1.0], Y, Z));
+        AssertArgument("y", "not enough y points to interpolate: at least 2 required, 0 provided", () => new Bicubic().Interpolate(X, [], Z));
+        AssertArgument("zData", "Z value matrix has wrong number of rows", () => new BicubicSpline(X, Y, new Matrix(1, 3)));
+        AssertArgument("z", "Z value matrix has wrong number of columns", () => new Bicubic().Interpolate(X, Y, new Matrix(2, 2)));
+        Assert.Equal("zData", Assert.Throws<ArgumentNullException>(() => new BicubicSpline(X, Y, null!)).ParamName);
+        Assert.Equal("z", Assert.Throws<ArgumentNullException>(() => new Bicubic().Interpolate(X, Y, null!)).ParamName);
+        var spline = new BicubicSpline(X, Y, Z);
+        AssertFailure("interpolation range is [1, 3] x [10, 20]: extrapolation at (4, 10) not allowed", () => spline.Evaluate(4.0, 10.0));
+        AssertFailure("interpolation range is [1, 3]: extrapolation at 4 not allowed", () => spline.DerivativeX(4.0, 15.0));
+        AssertFailure("interpolation range is [1, 3]: extrapolation at 0.5 not allowed", () => spline.SecondDerivativeX(0.5, 25.0));
+        AssertFailure("interpolation range is [10, 20]: extrapolation at 25 not allowed", () => spline.DerivativeY(2.0, 25.0));
+        AssertFailure("interpolation range is [10, 20]: extrapolation at 5 not allowed", () => spline.SecondDerivativeY(4.0, 5.0));
+        AssertFailure("interpolation range is [10, 20]: extrapolation at 25 not allowed", () => spline.DerivativeXY(2.0, 25.0));
+        AssertFailure("interpolation range is [1, 3]: extrapolation at 4 not allowed", () => spline.DerivativeXY(4.0, 15.0));
     }
 
     private static void AssertArgument(string paramName, string message, Action action)

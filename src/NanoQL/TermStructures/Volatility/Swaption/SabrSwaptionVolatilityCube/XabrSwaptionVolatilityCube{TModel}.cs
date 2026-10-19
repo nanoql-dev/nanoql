@@ -475,7 +475,7 @@ public class XabrSwaptionVolatilityCube<TModel> : SwaptionVolatilityCube
                     throw new NanoQLException(
                         "global swaptions calibration failed: error tolerance exceeded: \n"
                         + $"using {(useMaxError ? "maxError" : "rmsError")} tolerance "
-                        + $"{DataFormattersFunctions.General(maxErrorTolerance)}, \n"
+                        + $"{Show(maxErrorTolerance)}, \n"
                         + $"option maturity = {optionDates[j]}, \n"
                         + $"swap tenor = {swapTenors[k]}, \n"
                         + $"rms error = {DataFormattersFunctions.Rate(calibrationRmsError)}, \n"
@@ -512,10 +512,10 @@ public class XabrSwaptionVolatilityCube<TModel> : SwaptionVolatilityCube
     }
 
     private static string ParametersText(double alpha, double beta, double nu, double rho, string gammaInfo) =>
-        $"   alpha = {DataFormattersFunctions.General(alpha)}\n"
-        + $"   beta = {DataFormattersFunctions.General(beta)}\n"
-        + $"   nu = {DataFormattersFunctions.General(nu)}\n"
-        + $"   rho = {DataFormattersFunctions.General(rho)}{gammaInfo}\n";
+        $"   alpha = {Show(alpha)}\n"
+        + $"   beta = {Show(beta)}\n"
+        + $"   nu = {Show(nu)}\n"
+        + $"   rho = {Show(rho)}{gammaInfo}\n";
 
     // An insertion position, the first element not less than x: std::lower_bound.
     private static int LowerBound(IReadOnlyList<double> range, double x)
@@ -717,13 +717,13 @@ public class XabrSwaptionVolatilityCube<TModel> : SwaptionVolatilityCube
             if (!(optionTimesPreviousIndex + 1 < optionTimes.Count))
             {
                 throw new NanoQLException(
-                    $"cannot interpolate market spreads at option time {DataFormattersFunctions.General(atmOptionTime)}");
+                    $"cannot interpolate market spreads at option time {Show(atmOptionTime)}");
             }
 
             if (!(swapLengthsPreviousIndex + 1 < swapLengths.Count))
             {
                 throw new NanoQLException(
-                    $"cannot interpolate market spreads at swap length {DataFormattersFunctions.General(atmTimeLength)}");
+                    $"cannot interpolate market spreads at swap length {Show(atmTimeLength)}");
             }
         }
         else
@@ -1152,4 +1152,6 @@ public class XabrSwaptionVolatilityCube<TModel> : SwaptionVolatilityCube
         private static ReadOnlySpan<double> AsSpan(List<double> list) =>
             System.Runtime.InteropServices.CollectionsMarshal.AsSpan(list);
     }
+
+    private static string Show(double x) => x.ToString(CultureInfo.InvariantCulture);
 }

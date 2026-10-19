@@ -8,8 +8,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSplineErrorOnGaussianValues (SimpsonIntegral, B4.5); testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (B4.5); testMultiSpline (B4.7); testForwardFlat (S-infl); testBicubicDerivatives, testBicubicUpdate (S7); testFlatExtrapolation (B3.1); testBSplines (B3.5); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (B6.2); testLaplaceInterpolation (B7.3); testNoArbSabrInterpolation, testTransformations (B7.5)
-// Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs)
+// Partial: testSplineErrorOnGaussianValues (SimpsonIntegral, B4.5); testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (B4.5); testMultiSpline (B4.7); testForwardFlat (S-infl); testFlatExtrapolation (B3.1); testBSplines (B3.5); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (B6.2); testLaplaceInterpolation (B7.3); testNoArbSabrInterpolation, testTransformations (B7.5)
+// Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs); testBicubicUpdate (Conventions/InterpolationConstructionTests.cs)
 
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
@@ -883,6 +883,71 @@ public class InterpolationsTests
                 }
             }
         }
+    }
+
+    [Fact]
+    public void TestBicubicDerivatives()
+    {
+        // Testing bicubic spline derivatives...
+
+        var x = new Real[100];
+        var y = new Real[100];
+        for (Size i = 0; i < 100; ++i)
+        {
+            x[i] = y[i] = i / 20.0;
+        }
+
+        var f = new Matrix(100, 100);
+        for (Size i = 0; i < 100; ++i)
+        {
+            for (Size j = 0; j < 100; ++j)
+            {
+                f[i, j] = (y[i] / 10 * Math.Sin(x[j])) + Math.Cos(y[i]);
+            }
+        }
+
+        const Real tol = 0.005;
+        var spline = new BicubicSpline(x, y, f);
+
+        var failures = new List<string>();
+        for (Size i = 5; i < 95; i += 10)
+        {
+            for (Size j = 5; j < 95; j += 10)
+            {
+                Real f_x = spline.DerivativeX(x[j], y[i]);
+                Real f_xx = spline.SecondDerivativeX(x[j], y[i]);
+                Real f_y = spline.DerivativeY(x[j], y[i]);
+                Real f_yy = spline.SecondDerivativeY(x[j], y[i]);
+                Real f_xy = spline.DerivativeXY(x[j], y[i]);
+
+                if (Math.Abs(f_x - (y[i] / 10 * Math.Cos(x[j]))) > tol)
+                {
+                    failures.Add("Failed to reproduce f_x");
+                }
+
+                if (Math.Abs(f_xx + (y[i] / 10 * Math.Sin(x[j]))) > tol)
+                {
+                    failures.Add("Failed to reproduce f_xx");
+                }
+
+                if (Math.Abs(f_y - ((Math.Sin(x[j]) / 10) - Math.Sin(y[i]))) > tol)
+                {
+                    failures.Add("Failed to reproduce f_y");
+                }
+
+                if (Math.Abs(f_yy + Math.Cos(y[i])) > tol)
+                {
+                    failures.Add("Failed to reproduce f_yy");
+                }
+
+                if (Math.Abs(f_xy - (Math.Cos(x[j]) / 10)) > tol)
+                {
+                    failures.Add("Failed to reproduce f_xy");
+                }
+            }
+        }
+
+        Assert.True(failures.Count == 0, string.Join("\n", failures));
     }
 
     [Fact]

@@ -1,0 +1,93 @@
+// SPDX-FileCopyrightText: Copyright (C) 2008 Ferdinando Ametrano
+// SPDX-FileCopyrightText: 2026 The nanoql Authors
+// SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
+// Upstream: ql/termstructures/volatility/capfloor/constantcapfloortermvol.hpp ql/termstructures/volatility/capfloor/constantcapfloortermvol.cpp @ v1.44
+// Ported to C# from QuantLib and modified by the nanoql Authors.
+
+using NanoQL.Time;
+
+namespace NanoQL.TermStructures;
+
+/// <summary>A constant cap and floor term volatility, for every length and strike.</summary>
+/// <remarks>
+/// QuantLib's four constructors collapse into two: its quote overloads are the <see cref="double"/> ones, and the
+/// settlement-days form, whose reference date moves with the evaluation date, is <see cref="Create"/>.
+/// </remarks>
+public sealed class ConstantCapFloorTermVolatility : CapFloorTermVolatilityStructure
+{
+    private readonly double volatility;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConstantCapFloorTermVolatility"/> class with a fixed reference date.
+    /// </summary>
+    /// <param name="referenceDate">The reference date.</param>
+    /// <param name="cal">The calendar of the option dates, or <see langword="null"/>, QuantLib's empty calendar, with
+    /// which option dates can't be computed from lengths.</param>
+    /// <param name="bdc">The convention adjusting option dates computed from lengths.</param>
+    /// <param name="volatility">The volatility.</param>
+    /// <param name="dc">The day counter.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="dc"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="bdc"/> isn't a member of its type.</exception>
+    public ConstantCapFloorTermVolatility(
+        Date referenceDate,
+        Calendar? cal,
+        BusinessDayConvention bdc,
+        double volatility,
+        DayCounter dc)
+        : this(referenceDate, cal, bdc, volatility, dc, null)
+    {
+    }
+
+    private ConstantCapFloorTermVolatility(
+        Date referenceDate,
+        Calendar? cal,
+        BusinessDayConvention bdc,
+        double volatility,
+        DayCounter dc,
+        int? settlementDays)
+        : base(referenceDate, cal, bdc, dc, settlementDays)
+    {
+        this.volatility = volatility;
+    }
+
+    /// <inheritdoc/>
+    public override Date MaxDate => Date.MaxDate;
+
+    /// <summary>
+    /// A constant volatility whose reference date is the given number of business days after the evaluation date.
+    /// </summary>
+    /// <param name="settlementDays">The business days from the evaluation date to the reference date.</param>
+    /// <param name="cal">The calendar of the business days and of the option dates.</param>
+    /// <param name="bdc">The convention adjusting option dates computed from lengths.</param>
+    /// <param name="volatility">The volatility.</param>
+    /// <param name="dc">The day counter.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <returns>The structure, with a fixed reference date.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="cal"/>, <paramref name="dc"/> or
+    /// <paramref name="context"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="settlementDays"/> is negative, or
+    /// <paramref name="bdc"/> isn't a member of its type.</exception>
+    public static ConstantCapFloorTermVolatility Create(
+        int settlementDays,
+        Calendar cal,
+        BusinessDayConvention bdc,
+        double volatility,
+        DayCounter dc,
+        EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentOutOfRangeException.ThrowIfNegative(settlementDays);
+        ArgumentNullException.ThrowIfNull(cal);
+        Date referenceDate = cal.Advance(context.EvaluationDate, settlementDays, TimeUnit.Days);
+        return new ConstantCapFloorTermVolatility(referenceDate, cal, bdc, volatility, dc, settlementDays);
+    }
+
+    /// <inheritdoc/>
+    public override double MinStrike() => NumericLimits.QL_MIN_REAL;
+
+    /// <inheritdoc/>
+    public override double MaxStrike() => NumericLimits.QL_MAX_REAL;
+
+    /// <inheritdoc/>
+    protected override double VolatilityImpl(double length, double strike) => volatility;
+}
