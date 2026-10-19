@@ -20,10 +20,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 165 | 6 |
-| not started | 1,113 | 147 |
-| partial | 18 | 24 |
-| ported | 143 | 11 |
-| replaced | 17 | 6 |
+| not started | 1,099 | 145 |
+| partial | 20 | 25 |
+| ported | 153 | 12 |
+| replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
 ## Library
@@ -42,7 +42,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `config.sun` | not ported: C++ platform header |  |  |
 | `currency` | ported | Currency.cs | no nanoql type: CurrencyData |
 | `default` | not started |  | no nanoql type: ProtectionSide |
-| `discretizedasset` | not started |  | no nanoql type: DiscretizedAsset, DiscretizedDiscountBond, DiscretizedOption |
+| `discretizedasset` | ported | DiscretizedAsset/DiscretizedAsset.cs, DiscretizedAsset/DiscretizedDiscountBond.cs, DiscretizedAsset/DiscretizedOption.cs |  |
 | `errors` | replaced: ArgumentException and NanoQLException |  |  |
 | `event` | ported | Event.cs, SimpleEvent.cs |  |
 | `exchangerate` | not started |  | no nanoql type: ExchangeRate, ExchangeRateType |
@@ -55,7 +55,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `interestrate` | partial | InterestRate.cs | partial: discountFactorFirstDerivative and discountFactorSecondDerivative, which wait for the slot that ports the cash-flow duration and convexity, whose wheel functions check them |
 | `mathconstants` | not started |  |  |
 | `money` | not started |  | no nanoql type: Money, MoneyConversionType, MoneySettings |
-| `numericalmethod` | not started |  | no nanoql type: Lattice |
+| `numericalmethod` | ported | Lattice.cs |  |
 | `option` | partial | Option.cs, OptionType.cs | partial: Greeks and MoreGreeks, which wait for S-eq's engines; no nanoql type: Greeks, MoreGreeks |
 | `optional` | not ported: C++ platform header |  |  |
 | `payoff` | ported | Payoff.cs |  |
@@ -1149,12 +1149,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `binomialtree` | not started |  | no nanoql type: BinomialTree, BinomialTreeBranches, EqualProbabilitiesBinomialTree, EqualJumpsBinomialTree, JarrowRudd, CoxRossRubinstein, AdditiveEQPBinomialTree, Trigeorgis, Tian, LeisenReimer, Joshi4 |
 | `bsmlattice` | not started |  | no nanoql type: BlackScholesLattice |
-| `lattice` | not started |  | no nanoql type: TreeLattice |
-| `lattice1d` | not started |  | no nanoql type: TreeLattice1D |
+| `lattice` | ported | Methods/Lattices/TreeLattice.cs |  |
+| `lattice1d` | ported | Methods/Lattices/TreeLattice1D.cs |  |
 | `lattice2d` | not started |  | no nanoql type: TreeLattice2D |
 | `tflattice` | not started |  | no nanoql type: TsiveriotisFernandesLattice |
-| `tree` | not started |  | no nanoql type: Tree |
-| `trinomialtree` | not started |  | no nanoql type: TrinomialTree, TrinomialTreeBranches |
+| `tree` | ported | Methods/Lattices/Tree.cs |  |
+| `trinomialtree` | ported | Methods/Lattices/TrinomialTree.cs | no nanoql type: TrinomialTreeBranches |
 
 ### `ql/methods/montecarlo/`
 
@@ -1184,8 +1184,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `calibrationhelper` | not started |  | no nanoql type: CalibrationHelper, BlackCalibrationHelper, BlackCalibrationHelperCalibrationErrorType |
-| `model` | not started |  | no nanoql type: AffineModel, TermStructureConsistentModel, CalibratedModel, ShortRateModel, CalibratedModelPrivateConstraint |
-| `parameter` | not started |  | no nanoql type: Parameter, ConstantParameter, NullParameter, PiecewiseConstantParameter, TermStructureFittingParameter, TermStructureFittingParameterNumericalImpl |
+| `model` | partial | Models/Model/CalibratedModel.cs, Models/Model/CalibratedModelExtensions.cs, Models/Model/IAffineModel.cs, Models/Model/ICalibratedModel.cs, Models/Model/ITermStructureConsistentModel.cs, Models/Model/ShortRateModel.cs | partial: calibrate and value, with their cost function, which wait for the calibration helpers and the cases that calibrate; no nanoql type: AffineModel, TermStructureConsistentModel, CalibratedModelPrivateConstraint |
+| `parameter` | ported | Models/Parameter/ConstantParameter.cs, Models/Parameter/NullParameter.cs, Models/Parameter/Parameter.cs, Models/Parameter/PiecewiseConstantParameter.cs, Models/Parameter/TermStructureFittingParameter.cs | no nanoql type: TermStructureFittingParameterNumericalImpl |
 
 ### `ql/models/equity/`
 
@@ -1401,7 +1401,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `onefactormodel` | not started |  | no nanoql type: OneFactorModel, OneFactorModelShortRateDynamics, OneFactorModelShortRateTree, OneFactorAffineModel |
+| `onefactormodel` | partial | Models/ShortRate/OneFactorModel/OneFactorAffineModel.cs, Models/ShortRate/OneFactorModel/OneFactorModel.cs, Models/ShortRate/OneFactorModel/OneFactorModelShortRateDynamics.cs, Models/ShortRate/OneFactorModel/OneFactorModelShortRateTree.cs | partial: the constructor fitting the tree to a term structure numerically, with its solver helper, which waits for batch 3's extended Cox-Ingersoll-Ross model, its only user |
 | `twofactormodel` | not started |  | no nanoql type: TwoFactorModel, TwoFactorModelShortRateDynamics, TwoFactorModelShortRateTree |
 
 ### `ql/models/shortrate/calibrationhelpers/`
@@ -1422,9 +1422,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `extendedcoxingersollross` | not started |  | no nanoql type: ExtendedCoxIngersollRoss, ExtendedCoxIngersollRossDynamics, ExtendedCoxIngersollRossFittingParameter |
 | `gaussian1dmodel` | not started |  | no nanoql type: Gaussian1dModel |
 | `gsr` | not started |  | no nanoql type: Gsr |
-| `hullwhite` | not started |  | no nanoql type: HullWhite, HullWhiteDynamics, HullWhiteFittingParameter |
+| `hullwhite` | ported | Models/ShortRate/OneFactorModels/HullWhite.cs | no nanoql type: HullWhiteDynamics, HullWhiteFittingParameter |
 | `markovfunctional` | not started |  | no nanoql type: MarkovFunctional, MarkovFunctionalCustomSmileSection, MarkovFunctionalCustomSmileFactory, MarkovFunctionalModelSettings, MarkovFunctionalModelSettingsAdjustments, MarkovFunctionalCalibrationPoint, MarkovFunctionalModelOutputs |
-| `vasicek` | not started |  | no nanoql type: Vasicek, VasicekDynamics |
+| `vasicek` | ported | Models/ShortRate/OneFactorModels/Vasicek.cs | no nanoql type: VasicekDynamics |
 
 ### `ql/models/shortrate/twofactormodels/`
 
@@ -1466,9 +1466,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackdeltacalculator` | not started |  | no nanoql type: BlackDeltaCalculator, BlackDeltaPremiumAdjustedSolverClass, BlackDeltaPremiumAdjustedMaxStrikeClass |
 | `blackformula` | ported | PricingEngines/BlackFormulaFunctions.cs |  |
 | `blackscholescalculator` | not started |  | no nanoql type: BlackScholesCalculator |
-| `genericmodelengine` | not started |  | no nanoql type: GenericModelEngine |
+| `genericmodelengine` | replaced: static engines: the model is an engine argument |  |  |
 | `greeks` | not started |  |  |
-| `latticeshortratemodelengine` | not started |  | no nanoql type: LatticeShortRateModelEngine |
+| `latticeshortratemodelengine` | ported | PricingEngines/LatticeShortRateModelEngine.cs |  |
 | `mclongstaffschwartzengine` | not started |  | no nanoql type: MCLongstaffSchwartzEngine |
 | `mcsimulation` | not started |  | no nanoql type: McSimulation |
 
@@ -1914,7 +1914,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bondhelpers` | not started |  | no nanoql type: BondHelper, FixedRateBondHelper, CPIBondHelper |
 | `bootstraptraits` | ported | TermStructures/Yield/BootstrapTraits/BootstrapTraitsDetail.cs, TermStructures/Yield/BootstrapTraits/Discount.cs, TermStructures/Yield/BootstrapTraits/ForwardRate.cs, TermStructures/Yield/BootstrapTraits/IBootstrapTraits{TTermStructure}.cs, TermStructures/Yield/BootstrapTraits/IYieldTraits.cs, TermStructures/Yield/BootstrapTraits/SimpleZeroYield.cs, TermStructures/Yield/BootstrapTraits/ZeroYield.cs | no nanoql type: DiscountCurve, ZeroYieldCurve, ForwardRateCurve, SimpleZeroYieldCurve |
 | `compositezeroyieldstructure` | not started |  | no nanoql type: CompositeZeroYieldStructure |
-| `derivedtermstructure` | not started |  | no nanoql type: DerivedYieldTermStructure, RelativeDerivedYieldTermStructure |
+| `derivedtermstructure` | replaced: each derived curve implements its members: the original curve read when asked |  |  |
 | `discountcurve` | ported | TermStructures/Yield/DiscountCurve/DiscountCurve.cs, TermStructures/Yield/DiscountCurve/DiscountCurveFormula.cs, TermStructures/Yield/DiscountCurve/InterpolatedDiscountCurve{TInterpolator}.cs, TermStructures/Yield/DiscountCurve/KrugerLogDiscountCurve.cs, TermStructures/Yield/DiscountCurve/LogCubicDiscountCurve.cs, TermStructures/Yield/DiscountCurve/LogMixedLinearCubicDiscountCurve.cs |  |
 | `fittedbonddiscountcurve` | not started |  | no nanoql type: FittedBondDiscountCurve, FittedBondDiscountCurveFittingMethod |
 | `flatforward` | ported | TermStructures/Yield/FlatForward.cs |  |
@@ -2220,7 +2220,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rounding` | ported | TestSuite/RoundingTests.cs | 5 of 5 cases |
 | `schedule` | partial | TestSuite/ScheduleTests.cs | 20 of 28 cases; not yet: testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured |
 | `settings` | not ported: tests Settings, which EvaluationContext replaces |  |  |
-| `shortratemodels` | not started |  | 9 cases |
+| `shortratemodels` | partial | TestSuite/ShortRateModelsTests.cs | 3 of 9 cases; replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks by Conventions/ModelRebuildTests.cs; not yet: testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks, testCachedHullWhite, testCachedHullWhiteFixedReversion, testCachedHullWhite2, testSwaps, testExtendedCoxIngersollRossDiscountFactor |
 | `sofrfutures` | not started |  | 6 cases |
 | `softbarrieroption` | not started |  | 1 cases |
 | `solvers` | partial | TestSuite/SolversTests.cs | 3 of 9 cases; not yet: testBisection, testFalsePosition, testNewton, testRidder, testSecant, testHalley |
@@ -2240,7 +2240,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `toplevelfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `tqreigendecomposition` | not started |  | 3 cases |
 | `tracing` | not ported: tests the C++ platform |  |  |
-| `trinomialtree` | not started |  | 2 cases |
+| `trinomialtree` | ported | TestSuite/TrinomialTreeTests.cs | 2 of 2 cases |
 | `twoassetbarrieroption` | not started |  | 1 cases |
 | `twoassetcorrelationoption` | not started |  | 1 cases |
 | `ultimateforwardtermstructure` | not started |  | 8 cases |

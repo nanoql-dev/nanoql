@@ -132,7 +132,8 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
 | Random-number and path generators | Mutable working types with QuantLib's API (§2.7). |
 | `OptimizationMethod::minimize(Problem&, …)` | `Minimize(problem, endCriteria)` returns a `ProblemResults` record holding what QuantLib leaves in the `Problem` it changes: `CurrentValue`, `FunctionValue`, `GradientNormValue`, the two evaluation counts, and the `EndCriteriaType`. `Problem` is an immutable description (cost function, constraint, initial value), and a method holds only its configuration. The methods work on a `ProblemState`, a working type built from a `Problem` that carries QuantLib's mutable `Problem` API (`Reset`, `Value` and `Gradient`, which count, `CurrentValue`, whose setter copies, and `FunctionValue`). `Minimize(problemState, endCriteria)` continues from the state's current value, for line searches and hybrid methods; both call `protected abstract MinimizeCore(ProblemState, EndCriteria)`. A second `minimize` on one QuantLib `Problem` starts from the last optimum, where `Minimize(problem, …)` starts from the initial value each time: a documented divergence. |
 | `Solver1D<Impl>` (the curiously recurring base) | `Solver1D<TSelf, TFunction>`. `TSelf` types the setters that return a modified copy (`SetMaxEvaluations`, `SetLowerBound`, `SetUpperBound`), and `TFunction` is the function concept the solver needs (`ISolver1DFunction`; `IDerivativeSolver1DFunction` for `NewtonSafe`). The public non-virtual `Solve<TF>(f, accuracy, guess, step)` and `Solve<TF>(f, accuracy, guess, xMin, xMax)`, `where TF : struct, TFunction`, run QuantLib's bracketing and then call `protected abstract SolveCore<TF>(f, accuracy, bracket)`, whose `Solver1DBracket` record holds what QuantLib's base sets before `solveImpl`. Each solver adds overloads taking delegates. |
-| `CalibratedModel::calibrate` | A static `Calibrate` that returns an immutable parameter object. |
+| Lattices and discretized assets (`Lattice`, `TreeLattice`, `TrinomialTree`, `DiscretizedAsset`: `initialize`, `rollback`, `partialRollback`, `statePrices`, `setSpread`) | **The discretized asset is a working type** (§2.5): mutable, owned by one calculation, never held by an immutable object; an engine builds its assets inside `Calculate`. Its `Values` is a `Span<double>` of the current step's size over its own buffer, which the asset's code reads and writes as QuantLib's `values_`. A lattice steps into the asset's second buffer and swaps the two (`StepValues(size)`, `CommitStep(size, time)`), and `Initialize` reserves both (`ReserveCapacity(width)`) at the widest step the rollback passes through, which a non-uniform grid can make wider than its first step's; `Reset` sets the values through the protected `ResetValues(size, value)`, QuantLib's `values_ = Array(size, value)`. So a rollback allocates nothing, where QuantLib's allocates an array per step, and a zero-allocation test pins it. Where QuantLib's composite builds a sub-asset per event, the port keeps one, re-initialized per event, its buffers reserved at the widest step of the composite's own rollback. **Lattices are immutable once built:** a tree lattice stores the state-price rows its construction computes, through the protected `ComputeStatePrices(until)` (Hull-White's tree computes them as it fits its parameter, before the tree is returned), and computes a row beyond them per call without keeping it; `SetSpread` returns a copy sharing the tree and its stored rows. A class whose constructor calls `ComputeStatePrices` seals the members it reads. A built lattice is thread-safe, and is reused by passing it to an engine's lattice overload. QuantLib's curiously recurring members (`size`, `discount`, `descendant`, `probability`, `stepback`) are abstract and virtual members, and `Tree.Branches` is QuantLib's `enum { branches = N }`. |
+| `CalibratedModel::calibrate`, `setParams`, `CalibrationHelper` | A static `Calibrate` that returns an immutable parameter object. Models and their `Parameter`s are immutable: `Parameter.SetParam(i, x)` returns a copy, and QuantLib's `setParams` is `SetParams`, a generic extension method over `WithParams`, which copies the model, writes the copy's arguments and runs its `GenerateArguments` on the copy, refusing a parameter array of the wrong size before any write. The contract is the interface `ICalibratedModel` (`Arguments`, `Constraint`, `Params()`, `WithParams`), which QuantLib's abstract `CalibratedModel` implements with QuantLib's machinery, so a model with another base class implements it over its own. QuantLib's mixin bases `AffineModel` and `TermStructureConsistentModel` are the interfaces `IAffineModel` and `ITermStructureConsistentModel`, which an engine tests with `is` where QuantLib's uses `dynamic_cast`. |
 | `SeedGenerator` | An explicit input: a seed is a parameter, a `long` in [1, 4294967295] with no default, refused otherwise with `ArgumentOutOfRangeException`. QuantLib's seed 0, which draws a seed from the clock, is refused: a documented divergence. No library code reads the clock. |
 | `QL_REQUIRE` on a public method's parameter | `ArgumentException`, with `ParamName` set. A null argument a member doesn't accept throws `ArgumentNullException`. |
 | An enum argument a member always refuses: a value outside the type's members (C# lets any integer be cast to an enum), or a member it never handles (`Period(OtherFrequency)`) | `ArgumentOutOfRangeException`, naming the parameter, with QuantLib's message. A public member that switches on the value, stores it or computes with it checks it on entry, before any work that reads it; one that passes it on under the same parameter name to such a member relies on that member's check; one that only compares it with named members needs no check. This replaces QuantLib's `QL_FAIL`, in a switch's default or on a `case` label, wherever the value is an argument the member always refuses. A value refused only together with other arguments keeps the other rows' mapping: a mixed compounding in `ImpliedRate`, refused unless the compound factor is 1, and an intraday unit in `Calendar.Advance`, refused unless the count is 0, throw `NanoQLException`. |
@@ -261,7 +262,9 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `IborCouponPricer`, `OvernightIndexedCouponPricer`, `FixedVsFloatingSwap`, `BootstrapHelper<TTermStructure>`,
   `RelativeDateBootstrapHelper<TTermStructure>`, `RateHelper`, `RelativeDateRateHelper`, `ZeroYieldStructure`, `Payoff`,
   `TypePayoff`, `StrikedTypePayoff`, `SmileSection`, `SwaptionVolatilityStructure`, `SwaptionVolatilityDiscrete`,
-  `Interpolation2D` and `Option` (abstract); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
+  `Interpolation2D`, `Option`, `Lattice`, `TreeLattice`, `TreeLattice1D`, `Tree`, `DiscretizedAsset`,
+  `CalibratedModel`, `ShortRateModel`, `OneFactorModel`, `OneFactorAffineModel`, `OneFactorModelShortRateDynamics` and
+  `Parameter` (abstract); `DiscretizedOption`, `Vasicek` and `TermStructureFittingParameter` (unsealed); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
   `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`, `IborIndex`, `OvernightIndex`, `Euribor`, `SwapIndex`,
   `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`, `CappedFlooredCoupon`, `BlackIborCouponPricer`,
   `CompoundingOvernightIndexedCouponPricer`, `ArithmeticAveragedOvernightIndexedCouponPricer`, `TridiagonalOperator`,
@@ -276,8 +279,9 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `IInterpolator2D` (the 2-D factory concept), the bootstrap's concepts `IBootstrap`, `IBootstrapState`,
   `IBootstrapHelper`, `IBootstrapTraits<TTermStructure>`, `IYieldTraits` and
   `IInterpolatedCurve<TTraits, TInterpolator>`, `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers'
-  function concepts), and the generator concepts `IRng`, `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`,
-  `ISeedableRsg<TSelf>`, `IInverseCumulative` and `IRngTraits` (interfaces); and `Solver1DBracket`, `ProblemState` and
+  function concepts), the generator concepts `IRng`, `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`,
+  `ISeedableRsg<TSelf>`, `IInverseCumulative` and `IRngTraits`, and the model contracts `ICalibratedModel`,
+  `IAffineModel` and `ITermStructureConsistentModel` (interfaces); and `Solver1DBracket`, `ProblemState` and
   `BootstrapState<TTermStructure>`, sealed, which a solver's `SolveCore`, a method's `MinimizeCore` and a bootstrap's
   `Calculate` receive.
 - **Leg:** QuantLib's `Leg` is the global alias
@@ -289,8 +293,9 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
 - **Working types** are mutable, owned by one computation and not thread-safe, as an array is: `Vector`, `Matrix` and
   `TridiagonalOperator` (an indexer that sets, compound assignment, `Resize`, the in-place operations QuantLib's
   algorithms use, `TridiagonalOperator`'s row setters), `ProblemState`, and the random-number and path generators
-  (§2.7). Later ports add lattice assets, finite-difference operators and schemes, and market-model evolvers and
-  accumulators, and each names the working types it adds. Every other public type is immutable.
+  (§2.7), and the lattices' discretized assets (`DiscretizedAsset` and its subclasses, §2's lattice row). Later ports
+  add finite-difference operators and schemes, and market-model evolvers and accumulators, and each names the working
+  types it adds. Every other public type is immutable.
 - **A copy where C++ copies:** a C# class is a reference, so a port copies explicitly (`Clone()`) wherever C++ copies
   an `Array` or `Matrix` by value (an assignment, a copy construction, a by-value parameter) and then changes either
   copy. The review checks each such site.
@@ -385,7 +390,10 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
     that also import `System.Numerics`; and `Path` → `MonteCarloPath`, after its folder, `montecarlo`, since `Path`
     would clash with `System.IO.Path`. QuantLib's other names around it stay (`PathGenerator`, `MultiPath`). And
     `Index` → `FinancialIndex`, in namespace `NanoQL`, since `Index` clashes with `System.Index`, which every C# file
-    sees; QuantLib's derived names stay (`InterestRateIndex`, `IborIndex`).
+    sees; QuantLib's derived names stay (`InterestRateIndex`, `IborIndex`). And QuantLib's mixin bases, which are
+    interfaces here and take .NET's `I` prefix: `AffineModel` → `IAffineModel`, `TermStructureConsistentModel` →
+    `ITermStructureConsistentModel`; `ICalibratedModel` is the contract beside QuantLib's `CalibratedModel`, which
+    keeps its name.
 - **Members:** the first letter is capitalised and the rest kept (`yearFraction` → `YearFraction`; `NPV` stays).
   - **Property or method:** a member is a property when it takes no arguments, has no side effect, is cheap, has no
     precondition that throws, doesn't return a copy or a new array, and is an attribute of the object, stored or

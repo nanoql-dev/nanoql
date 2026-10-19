@@ -10,6 +10,16 @@ Every documented divergence from QuantLib v1.44, one entry per test class under
 `tools/divergences.py`: regenerate it with `.venv\Scripts\python -I tools/divergences.py` rather than
 editing it by hand.
 
+## AffineDiscountBondFactorsTests
+
+[`Divergences/AffineDiscountBondFactorsTests.cs`](../tests/NanoQL.Tests/Divergences/AffineDiscountBondFactorsTests.cs)
+
+An affine model's discount bond given an empty vector of factors. QuantLib's `OneFactorAffineModel::discountBond(now, maturity, Array factors)` reads `factors[0]` (`onefactormodel.hpp:132-134`), past the end of an empty array, which crashes the wheel with an access violation. nanoql refuses it with `ArgumentException`, "no factors given", naming `factors`; given a factor, it prices as QuantLib's, on the vector's first element.
+
+Facts:
+
+- `AnEmptyFactorVectorIsRefused`
+
 ## BMANullIndexTests
 
 [`Divergences/BMANullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/BMANullIndexTests.cs)
@@ -70,6 +80,16 @@ Facts:
 - `JointCalendarsWhoseComponentsDifferByAnAddedHolidayAreUnequal`
 - `JointCalendarsBuiltFromEqualComponentsAreEqualWithEqualHashes`
 - `CalendarsOfDifferentKindsAreUnequalFromEitherSide`
+
+## CalibratedModelSideEffectTests
+
+[`Divergences/CalibratedModelSideEffectTests.cs`](../tests/NanoQL.Tests/Divergences/CalibratedModelSideEffectTests.cs)
+
+What QuantLib's calibrated model changes in itself. Its `setParams` writes each parameter as it reaches it (`model.cpp:138-149`): an array too short sets the leading parameters before refusing "parameter array too small", one too long sets them all before refusing "parameter array too big!" (the wheel: `[0.2, 0.01]` and `[0.2, 0.02]` left on a Hull-White model from `[0.1, 0.01]`). nanoql's models are immutable: `SetParams` returns a new model, and refuses both with QuantLib's texts before anything is written, so the receiver keeps its parameters.
+
+Facts:
+
+- `ARefusedSetParamsLeavesTheModelUnchanged`
 
 ## CappedFlooredCouponNullUnderlyingTests
 
@@ -146,6 +166,17 @@ QuantLib's default `Rounding()` initializes only its type, to `None`: `precision
 Facts:
 
 - `ADefaultRoundingHasNoPrecisionOrDigit`
+
+## DiscretizedAssetStateTests
+
+[`Divergences/DiscretizedAssetStateTests.cs`](../tests/NanoQL.Tests/Divergences/DiscretizedAssetStateTests.cs)
+
+A discretized asset used before it is initialized, and an American option with fewer than two exercise times. QuantLib's `DiscretizedAsset` leaves its lattice null until `initialize` and dereferences it in `rollback`, `partialRollback` and `presentValue` (`discretizedasset.hpp:38-40, 182-199`), and its `DiscretizedOption` reads `exerciseTimes_[0]` and `[1]` for an American exercise (`discretizedasset.cpp:35-37`), past the end of a shorter vector. nanoql refuses the first with `NanoQLException`, "asset not initialized", and the second, where QuantLib's read would go past the times, with `NanoQLException`, "American exercise needs two exercise times".
+
+Facts:
+
+- `AnUninitializedAssetIsRefused`
+- `AnAmericanOptionReadPastItsExerciseTimesIsRefused`
 
 ## EmptyScheduleTests
 
@@ -370,6 +401,17 @@ Facts:
 - `NegativeLookbackAndLockoutDaysAreRefused`
 - `ALookbackOfIntMaxValueIsAValue`
 
+## ParameterIndexTests
+
+[`Divergences/ParameterIndexTests.cs`](../tests/NanoQL.Tests/Divergences/ParameterIndexTests.cs)
+
+A parameter's index out of range, and its parameters before they are set. QuantLib's `Parameter::setParam(i, x)` writes `params_[i]` unchecked (`parameter.hpp:51`): a silent heap write past a constant parameter's one value, an access violation on a null parameter's empty array. nanoql refuses the index with `ArgumentOutOfRangeException` naming `i`, before the copy it returns. QuantLib's `ConstantParameter(constraint)` and `PiecewiseConstantParameter(times)` leave their parameters uninitialized (`parameter.hpp:64-65, 78-83, 134-141`), so a read before they are set is indeterminate; nanoql's are 0.
+
+Facts:
+
+- `AnIndexOutOfRangeIsRefused`
+- `ParametersBeforeTheyAreSetAreZero`
+
 ## PathGeneratorProcessTests
 
 [`Divergences/PathGeneratorProcessTests.cs`](../tests/NanoQL.Tests/Divergences/PathGeneratorProcessTests.cs)
@@ -535,6 +577,16 @@ Facts:
 - `SkipToTheLastIndexIsRefusedWithTheGrayCode`
 - `TheDrawThatWouldReachTheLastCounterThrowsWithTheGrayCode`
 
+## StatePriceCacheTests
+
+[`Divergences/StatePriceCacheTests.cs`](../tests/NanoQL.Tests/Divergences/StatePriceCacheTests.cs)
+
+A tree's state prices read past the rows its construction stored. QuantLib's `TreeLattice::statePrices` keeps every row it computes in a `mutable` cache (`lattice.hpp:87, 112-117`), and `setSpread` changes only the tree's spread (`onefactormodel.hpp:105-108`), so a row read before the spread is set keeps its unspread values afterwards, and a row first read after it carries the spread. nanoql's lattices keep no row beyond those their construction stored (PR6.9), and `SetSpread` returns a copy: the copy's later rows carry the spread whatever was read before, so reading a row changes nothing.
+
+Facts:
+
+- `ARowReadBeforeTheSpreadIsSetDoesntKeepItsUnspreadValues`
+
 ## SwapIndexNullIndexTests
 
 [`Divergences/SwapIndexNullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/SwapIndexNullIndexTests.cs)
@@ -630,6 +682,29 @@ A tridiagonal operator of size 1 can be built (QuantLib's `identity(1)`, or thre
 Facts:
 
 - `ApplyingOrSolvingASizeOneOperatorIsRefused`
+
+## TrinomialTreeConversionTests
+
+[`Divergences/TrinomialTreeConversionTests.cs`](../tests/NanoQL.Tests/Divergences/TrinomialTreeConversionTests.cs)
+
+The trinomial tree's node offset when it is NaN or outside the integers, and an empty grid. QuantLib converts `std::floor((m - x0_)/dx_[i+1] + 0.5)` to an `Integer` (`trinomialtree.cpp:99`), which C++ leaves undefined there; MSVC, the platform the vectors are generated on, gives the smallest integer, and the classical regime's probability check then refuses, as the wheel does for a NaN reversion ("negative probability in trinomial tree (unfloored regime) at step 0, node 0: p1=-nan(ind), p2=-nan(ind), p3=-nan(ind) (v=nan, dx=nan, e=-nan(ind))"). .NET's conversion saturates instead (NaN to 0, a large value to `int.MaxValue`), so nanoql converts as MSVC does and refuses where QuantLib does, with its text, its NaNs spelled as .NET spells them. For a NaN the offset never reaches the text, since the probabilities are NaN whatever it is; an offset beyond the integers does. QuantLib's step count is unsigned, so an empty grid wraps it and fails allocating ("vector too long"); nanoql's reaches QuantLib's own check, "null time steps for trinomial tree", which QuantLib gives a one-point grid.
+
+Facts:
+
+- `ANaNReversionIsRefusedByTheProbabilityCheck`
+- `AnOffsetBeyondTheIntegersConvertsToTheSmallestInteger`
+- `AnEmptyGridIsRefusedWithQuantLibsOwnText`
+
+## TrinomialTreeIndexTests
+
+[`Divergences/TrinomialTreeIndexTests.cs`](../tests/NanoQL.Tests/Divergences/TrinomialTreeIndexTests.cs)
+
+The trees' and lattices' indices out of range. QuantLib's `TrinomialTree` reads `branchings_[i-1]`, `k_[index]`, `probs_[branch][index]` and `dx_[i]` unchecked (`trinomialtree.hpp:84-103`), and `TreeLattice::statePrices(i)` extends its cache to any `i` through `size(i+1)` (`lattice.hpp:97-118`), reading past the trees beyond the grid's last time. nanoql refuses each index that reads past an array with `ArgumentOutOfRangeException` naming it, and a negative one as an unsigned count; a node's underlying and descendant, which QuantLib computes from the column's offsets for any node and branch without reading at them, it computes as QuantLib does.
+
+Facts:
+
+- `ATreesIndicesOutOfRangeAreRefused`
+- `StatePricesBeyondTheGridAreRefused`
 
 ## WeightedIndexNullComponentTests
 
