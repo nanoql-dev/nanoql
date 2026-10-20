@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/volatility/swaption/swaptionvolstructure.hpp ql/termstructures/volatility/swaption/swaptionvolstructure.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the constructor for a structure that manages its own reference date, (bdc, dc), which waits for its first user (B3.3's SpreadedSwaptionVolatility)
+// Partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: its only QuantLib user, the spreaded swaption volatility, passes its base's reference date to the reference-date constructor)
 
 using NanoQL.Numerics;
 using NanoQL.Time;

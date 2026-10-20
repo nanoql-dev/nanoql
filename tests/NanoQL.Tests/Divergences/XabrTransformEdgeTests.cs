@@ -20,6 +20,21 @@ namespace NanoQL.Tests.Divergences;
 /// when the input volatilities move by one ulp, their free parameters move by up to 2.4e-3 in S7R6's measure, at the
 /// vectors' scale of 1, which is up to 24% of the small ones' own values. Those are asserted within 1e-2 in that
 /// measure.
+/// <para>
+/// ZABR's inverse (<c>zabrinterpolation.hpp:78-88</c>) doesn't clamp either: α, β and ρ invert as SABR's do, so a ρ
+/// above 0.9999 takes <c>asin</c> of a value beyond 1, a NaN its direct transform turns into −0.9999, and an α below
+/// 1e-7 the square root of a negative number, a NaN the model then refuses ("alpha must be positive: nan not allowed");
+/// ν and γ invert through <c>tan(π(y/5 − 0.5))</c> and <c>tan(π(y/1.9 − 0.5))</c>, whose period is π, so a ν above 5
+/// or a γ above 1.9 comes back as another value inside the range the direct transform's comments name ("limit nu to
+/// 5.00", "limit gamma to 1.9", <c>zabrinterpolation.hpp:97-103</c>). On the wheel's ZABR cube a fixed ρ of 0.99995
+/// came back as −0.9999, ν 6.0 as 0.9999999999999998 and γ 2.0 as 0.09999999999999978. nanoql's inverse clamps its
+/// arguments to the direct transform's range, so each comes back as the nearest value the transform reaches, bit for
+/// bit: ρ 0.9999, ν 5, γ 1.9, α 1e-7; and the fit from it is the fit from that value, bit for bit, whose parameters the
+/// wheel gives. Under S7R6's one-ulp moves of the volatilities, together and each alone, the γ fit's free parameters
+/// and the ν fit's α move by at most 5.4e-11, asserted within the vectors' tolerance; the others move by up to 7.7e-6,
+/// asserted within 1e-2, but for the α fit's ρ, which moves by 9.1e-2 and so isn't asserted (the wheel's is
+/// −0.026977128413889717).
+/// </para>
 /// </summary>
 public class XabrTransformEdgeTests
 {
@@ -34,6 +49,10 @@ public class XabrTransformEdgeTests
 
     private static readonly double[] Vols =
         [.. Strikes.Select(k => SabrFunctions.SabrVolatility(k, F, T, 0.3, 0.6, 0.02, 0.01))];
+
+    private static readonly double[] ZabrStrikes = [0.02, 0.025, 0.03, 0.035, 0.04];
+
+    private static readonly double[] ZabrVolatilities = [0.25, 0.22, 0.2, 0.19, 0.195];
 
     [Fact]
     public void SabrsEdgesComeBackAsTheTransformsNearestValues()
@@ -74,9 +93,70 @@ public class XabrTransformEdgeTests
         AssertFlat(0.00032870084917787534, s.Nu);
     }
 
+    [Fact]
+    public void ZabrsTransformKeepsEachEdgeInItsRange()
+    {
+        // ρ fixed above 0.9999: QuantLib's sign flips (the wheel's cube: −0.9999); nanoql's ρ is 0.9999, and the fit is
+        // the fit from 0.9999, the wheel's (its ZABR interpolated section): α 0.03554185152378224, ν 2.1642491440654332e-05.
+        ZabrInterpolation<ZabrShortMaturityLognormal> rho = ZabrFit(0.2, 0.5, 0.4, 0.99995, 1.0, false, false, true, true);
+        Assert.Equal(0.9999, rho.Rho);
+        AssertSameFit(ZabrFit(0.2, 0.5, 0.4, 0.9999, 1.0, false, false, true, true), rho);
+        AssertFlat(0.03554185152378224, rho.Alpha);
+        AssertFlat(2.1642491440654332e-05, rho.Nu);
+
+        // ρ fixed below −0.9999: −0.9999 in both.
+        ZabrInterpolation<ZabrShortMaturityLognormal> rhoBelow = ZabrFit(0.2, 0.5, 0.4, -0.99995, 1.0, false, false, true, true);
+        Assert.Equal(-0.9999, rhoBelow.Rho);
+        AssertSameFit(ZabrFit(0.2, 0.5, 0.4, -0.9999, 1.0, false, false, true, true), rhoBelow);
+
+        // ν fixed at 6: QuantLib's tan wraps it (the wheel's cube and section: 0.9999999999999998); nanoql's is 5, and the
+        // fit is the fit from 5, the wheel's: α 0.003760513723405991, ρ 0.09305589423006091.
+        ZabrInterpolation<ZabrShortMaturityLognormal> nu = ZabrFit(0.2, 0.5, 6.0, 0.0, 1.0, false, true, false, true);
+        Assert.Equal(5.0, nu.Nu);
+        AssertSameFit(ZabrFit(0.2, 0.5, 5.0, 0.0, 1.0, false, true, false, true), nu);
+        AssertNear(0.003760513723405991, nu.Alpha);
+        AssertFlat(0.09305589423006091, nu.Rho);
+
+        // ν fixed inside the range: its round trip, QuantLib's (the wheel's cube: 0.4000000000000001).
+        Assert.Equal(0.4000000000000001, ZabrFit(0.2, 0.5, 0.4, 0.0, 1.0, false, true, false, true).Nu);
+
+        // γ fixed at 2: QuantLib's tan wraps it (the wheel's cube: 0.09999999999999978); nanoql's is 1.9, and the fit is
+        // the fit from 1.9, the wheel's: α 0.03462247561965941, ν 0.41817772079967036.
+        ZabrInterpolation<ZabrShortMaturityLognormal> gamma = ZabrFit(0.2, 0.5, 0.4, 0.0, 2.0, false, false, false, true);
+        Assert.Equal(1.9, gamma.Gamma);
+        AssertSameFit(ZabrFit(0.2, 0.5, 0.4, 0.0, 1.9, false, false, false, true), gamma);
+        AssertNear(0.03462247561965941, gamma.Alpha);
+        AssertNear(0.41817772079967036, gamma.Nu);
+
+        // α fixed below 1e-7: QuantLib's fit fails on the NaN (the wheel: "alpha must be positive: nan not allowed");
+        // nanoql's α is 1e-7, and the fit is the fit from 1e-7, the wheel's: ν 4.998428958137255 (its ρ is flat, the
+        // wheel's −0.026977128413889717).
+        ZabrInterpolation<ZabrShortMaturityLognormal> alpha = ZabrFit(1e-8, 0.5, 0.4, 0.0, 1.0, true, false, false, true);
+        Assert.Equal(1e-7, alpha.Alpha);
+        AssertSameFit(ZabrFit(1e-7, 0.5, 0.4, 0.0, 1.0, true, false, false, true), alpha);
+        AssertFlat(4.998428958137255, alpha.Nu);
+    }
+
     private static SABRInterpolation Fit(
         double a, double b, double n, double r, bool fa, bool fb, bool fn, bool fr) =>
         new(Strikes, Vols, T, F, a, b, n, r, fa, fb, fn, fr, false);
+
+    // A ZABR fit of the smile with β fixed, the given parameter fixed with it.
+    private static ZabrInterpolation<ZabrShortMaturityLognormal> ZabrFit(
+        double alpha, double beta, double nu, double rho, double gamma, bool alphaIsFixed, bool nuIsFixed, bool rhoIsFixed, bool gammaIsFixed) =>
+        new(ZabrStrikes, ZabrVolatilities, 1.0, 0.03, alpha, beta, nu, rho, gamma, alphaIsFixed, true, nuIsFixed, rhoIsFixed, gammaIsFixed);
+
+    // Two fits of the same inputs give the same computation: bit for bit.
+    private static void AssertSameFit(ZabrInterpolation<ZabrShortMaturityLognormal> expected, ZabrInterpolation<ZabrShortMaturityLognormal> actual)
+    {
+        Assert.Equal(expected.Alpha, actual.Alpha);
+        Assert.Equal(expected.Beta, actual.Beta);
+        Assert.Equal(expected.Nu, actual.Nu);
+        Assert.Equal(expected.Rho, actual.Rho);
+        Assert.Equal(expected.Gamma, actual.Gamma);
+        Assert.Equal(expected.RmsError, actual.RmsError);
+        Assert.Equal(expected.MaxError, actual.MaxError);
+    }
 
     // Within the vectors' tolerance, at the vectors' scale of 1.
     private static void AssertNear(double expected, double actual) =>

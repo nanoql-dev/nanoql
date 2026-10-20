@@ -6,8 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/swaptionvolatilitycube.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSpreadedCube, which waits for S7's SpreadedSwaptionVolatility; testZabrVols, testZabrSmileSection, testZabrParameters, testZabrWithNonUnitGamma, testZabrWithFreeGamma, testZabrShiftedVolThrows, testZabrAlternativeKernel, testZabrObservability, which wait for S7's ZabrSwaptionVolatilityCube
-// Replaced: testObservability (Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs)
+// Replaced: testObservability (Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs); testZabrObservability (Vectors/TermStructures/ZabrSwaptionVolatilityCubeVectorTests.cs)
 
 using NanoQL.Indexes;
 using NanoQL.Numerics;
@@ -525,6 +524,67 @@ public class SwaptionVolatilityCubeTests
         vars.MakeVolSpreadsTest(volCube, tolerance);
     }
 
+    // Adapted: the cube calibrates when it is built, under the context; the spread is a value, so the observability
+    // checks (lines 657-668), a notification from the cube and from a changed spread, have nothing to observe: a new
+    // spread is a new structure.
+    [Fact]
+    public void TestSpreadedCube()
+    {
+        // Testing spreaded swaption volatility cube...
+
+        var vars = new CommonVars();
+
+        double[][] parametersGuess = Guesses(vars, 0.2, 0.5, 0.4, 0.0);
+        bool[] isParameterFixed = [false, false, false, false];
+
+        SwaptionVolatilityStructure volCube = new SabrSwaptionVolatilityCube(
+            vars.AtmVolMatrix,
+            vars.Cube.Tenors.Options,
+            vars.Cube.Tenors.Swaps,
+            vars.Cube.StrikeSpreads,
+            vars.VolSpreads,
+            vars.SwapIndexBase,
+            vars.ShortSwapIndexBase,
+            vars.VegaWeighedSmileFit,
+            parametersGuess,
+            isParameterFixed,
+            true,
+            vars.Context);
+
+        double spread = 0.0001;
+        SwaptionVolatilityStructure spreadedVolCube = new SpreadedSwaptionVolatility(volCube, spread);
+        var strikes = new List<double>();
+        for (int k = 1; k < 100; k++)
+        {
+            strikes.Add(k * .01);
+        }
+
+        for (int i = 0; i < vars.Cube.Tenors.Options.Count; i++)
+        {
+            for (int j = 0; j < vars.Cube.Tenors.Swaps.Count; j++)
+            {
+                SmileSection smileSectionByCube = volCube.SmileSection(vars.Cube.Tenors.Options[i], vars.Cube.Tenors.Swaps[j]);
+                SmileSection smileSectionBySpreadedCube =
+                    spreadedVolCube.SmileSection(vars.Cube.Tenors.Options[i], vars.Cube.Tenors.Swaps[j]);
+                foreach (double strike in strikes)
+                {
+                    double diff = spreadedVolCube.Volatility(vars.Cube.Tenors.Options[i], vars.Cube.Tenors.Swaps[j], strike)
+                        - volCube.Volatility(vars.Cube.Tenors.Options[i], vars.Cube.Tenors.Swaps[j], strike);
+                    Assert.True(
+                        !(Math.Abs(diff - spread) > 1e-16),
+                        $"diff!=spread in volatility method: expiry time = {vars.Cube.Tenors.Options[i]}, swap length = "
+                        + $"{vars.Cube.Tenors.Swaps[j]}, atm strike = {strike}, diff = {diff}, spread = {spread}");
+
+                    diff = smileSectionBySpreadedCube.Volatility(strike) - smileSectionByCube.Volatility(strike);
+                    Assert.True(
+                        !(Math.Abs(diff - spread) > 1e-16),
+                        $"diff!=spread in smile section method: expiry time = {vars.Cube.Tenors.Options[i]}, swap length = "
+                        + $"{vars.Cube.Tenors.Swaps[j]}, atm strike = {strike}, diff = {diff}, spread = {spread}");
+                }
+            }
+        }
+    }
+
     // Adapted: the cube calibrates when it is built, under the context; a section's SabrSmileSection cast is a type
     // check.
     [Fact]
@@ -615,6 +675,403 @@ public class SwaptionVolatilityCubeTests
             $"Checking interpolation of forward parameters: expected = {forward12}, observed = {forward3}");
     }
 
+    // Adapted: the cube calibrates when it is built, under the context, which its at-the-money strikes take;
+    // BOOST_REQUIRE on a section is its non-null type.
+    [Fact]
+    public void TestZabrVols()
+    {
+        // Testing swaption volatility cube (ZABR interpolation)...
+
+        var vars = new CommonVars();
+
+        // ZABR requires 5 parameters: alpha, beta, nu, rho, gamma
+        // gamma=1.0 gives SABR-like behaviour
+        double[][] parametersGuess = vars.MakeZabrParametersGuess(0.2, 0.5, 0.4, 0.0, 1.0);
+        bool[] isParameterFixed = new bool[5];
+        isParameterFixed[1] = true;  // Fix beta (standard practice, as in SABR)
+        isParameterFixed[4] = true;  // Fix gamma for stability
+
+        var volCube = new ZabrSwaptionVolatilityCube(
+            vars.AtmVolMatrix,
+            vars.Cube.Tenors.Options,
+            vars.Cube.Tenors.Swaps,
+            vars.Cube.StrikeSpreads,
+            vars.VolSpreads,
+            vars.SwapIndexBase,
+            vars.ShortSwapIndexBase,
+            vars.VegaWeighedSmileFit,
+            parametersGuess,
+            isParameterFixed,
+            true,
+            vars.Context);
+
+        // ZABR should recover ATM vols with reasonable tolerance
+        double tolerance = 5.0e-4;
+        vars.MakeAtmVolTest(volCube, tolerance);
+
+        // ZABR should also recover vol spreads with reasonable tolerance
+        tolerance = 15.0e-4;
+        vars.MakeVolSpreadsTest(volCube, tolerance);
+
+        // Access via base class interface for smileSection
+        SwaptionVolatilityStructure volStructure = volCube;
+
+        // Test smile section retrieval
+        SmileSection smileSection = volStructure.SmileSection(new Period(10, TimeUnit.Years), new Period(2, TimeUnit.Years));
+        Assert.NotNull(smileSection);
+
+        // Test volatility at ATM
+        double atmStrike = volCube.AtmStrike(new Period(10, TimeUnit.Years), new Period(2, TimeUnit.Years), vars.Context);
+        double vol = volCube.Volatility(new Period(10, TimeUnit.Years), new Period(2, TimeUnit.Years), atmStrike, true);
+        Assert.True(vol > 0.0);
+    }
+
+    // Adapted: the cube calibrates when it is built, under the context.
+    [Fact]
+    public void TestZabrSmileSection()
+    {
+        // Testing ZABR swaption volatility cube smile sections...
+
+        var vars = new CommonVars();
+
+        double[][] parametersGuess = vars.MakeZabrParametersGuess(0.2, 0.5, 0.4, 0.0, 1.0);
+        bool[] isParameterFixed = new bool[5];
+        isParameterFixed[1] = true;  // Fix beta (standard practice)
+        isParameterFixed[4] = true;
+
+        var volCube = new ZabrSwaptionVolatilityCube(
+            vars.AtmVolMatrix,
+            vars.Cube.Tenors.Options,
+            vars.Cube.Tenors.Swaps,
+            vars.Cube.StrikeSpreads,
+            vars.VolSpreads,
+            vars.SwapIndexBase,
+            vars.ShortSwapIndexBase,
+            vars.VegaWeighedSmileFit,
+            parametersGuess,
+            isParameterFixed,
+            true,
+            vars.Context);
+
+        // Access via base class interface
+        SwaptionVolatilityStructure volStructure = volCube;
+
+        // Get smile section and test its properties
+        SmileSection smileSection = volStructure.SmileSection(new Period(5, TimeUnit.Years), new Period(5, TimeUnit.Years));
+
+        Assert.NotNull(smileSection);
+        Assert.True(smileSection.AtmLevel() > 0.0);
+
+        // Test volatility at different strikes
+        double atmStrike = smileSection.AtmLevel()!.Value;
+        double[] strikes = [atmStrike * 0.8, atmStrike, atmStrike * 1.2];
+
+        foreach (double strike in strikes)
+        {
+            double vol = smileSection.Volatility(strike);
+            Assert.True(vol > 0.0, $"ZABR smile section volatility at strike {strike} should be positive");
+        }
+    }
+
+    // Adapted: the cube calibrates when it is built, under the context; a section's ZabrSmileSection cast is a type
+    // check.
+    [Fact]
+    public void TestZabrParameters()
+    {
+        // Testing interpolation of ZABR smile section parameters...
+
+        var vars = new CommonVars();
+
+        double[][] parametersGuess = vars.MakeZabrParametersGuess(0.2, 0.5, 0.4, 0.0, 1.0);
+        bool[] isParameterFixed = new bool[5];
+        isParameterFixed[1] = true;  // Fix beta (standard practice)
+        isParameterFixed[4] = true;
+
+        var volCube = new ZabrSwaptionVolatilityCube(
+            vars.AtmVolMatrix,
+            vars.Cube.Tenors.Options,
+            vars.Cube.Tenors.Swaps,
+            vars.Cube.StrikeSpreads,
+            vars.VolSpreads,
+            vars.SwapIndexBase,
+            vars.ShortSwapIndexBase,
+            vars.VegaWeighedSmileFit,
+            parametersGuess,
+            isParameterFixed,
+            true,
+            vars.Context);
+
+        SwaptionVolatilityStructure volStructure = volCube;
+
+        // Test parameter interpolation by comparing volatilities at intermediate points
+        // If parameters interpolate correctly, volatilities at intermediate tenors should
+        // be smooth interpolations of neighboring volatilities
+
+        // Section 1: maturity = 10Y, tenor = 2Y
+        SmileSection smileSection1 = volStructure.SmileSection(new Period(10, TimeUnit.Years), new Period(2, TimeUnit.Years));
+
+        // Section 2: maturity = 10Y, tenor = 4Y
+        SmileSection smileSection2 = volStructure.SmileSection(new Period(10, TimeUnit.Years), new Period(4, TimeUnit.Years));
+
+        // Section 3: maturity = 10Y, tenor = 3Y (intermediate)
+        SmileSection smileSection3 = volStructure.SmileSection(new Period(10, TimeUnit.Years), new Period(3, TimeUnit.Years));
+
+        // Test forward rate interpolation (which depends on parameter interpolation)
+        double forward1 = smileSection1.AtmLevel()!.Value;
+        double forward2 = smileSection2.AtmLevel()!.Value;
+        double forward3 = smileSection3.AtmLevel()!.Value;
+        double forward12 = 0.5 * (forward1 + forward2);
+
+        double tolerance = 1.0e-4;
+        Assert.True(
+            !(Math.Abs(forward3 - forward12) > tolerance),
+            $"Checking interpolation of ZABR forward parameters: forward at 2Y = {forward1}, forward at 4Y = {forward2}, "
+            + $"expected at 3Y = {forward12}, observed at 3Y = {forward3}");
+
+        // Test ATM volatility smoothness (indirect parameter interpolation test)
+        double vol1 = smileSection1.Volatility(forward1);
+        double vol2 = smileSection2.Volatility(forward2);
+        double vol3 = smileSection3.Volatility(forward3);
+
+        // Verify that interpolated section produces reasonable volatility
+        // (between the two boundary sections or close to their average)
+        double vol12 = 0.5 * (vol1 + vol2);
+        double volTolerance = 5.0e-3;  // 50 bps tolerance for vol interpolation
+
+        Assert.True(
+            !(Math.Abs(vol3 - vol12) > volTolerance),
+            $"Checking interpolation of ZABR ATM volatility: vol at 2Y = {vol1}, vol at 4Y = {vol2}, expected at 3Y = "
+            + $"{vol12}, observed at 3Y = {vol3}");
+
+        // Downcast to access individual calibrated ZABR parameters,
+        // mirroring testSabrParameters which checks alpha/beta/rho/nu directly.
+        // This catches bugs such as parameters stored in wrong order in params vector.
+        var zs1 = Assert.IsType<ZabrSmileSection<ZabrShortMaturityLognormal>>(smileSection1);
+        var zs2 = Assert.IsType<ZabrSmileSection<ZabrShortMaturityLognormal>>(smileSection2);
+        var zs3 = Assert.IsType<ZabrSmileSection<ZabrShortMaturityLognormal>>(smileSection3);
+
+        // alpha interpolation
+        double alpha1 = zs1.Model.Alpha, alpha2 = zs2.Model.Alpha;
+        double alpha3 = zs3.Model.Alpha;
+        Assert.True(
+            !(Math.Abs(alpha3 - (0.5 * (alpha1 + alpha2))) > tolerance),
+            $"Checking interpolation of ZABR alpha: alpha at 2Y = {alpha1}, alpha at 4Y = {alpha2}, expected at 3Y = "
+            + $"{0.5 * (alpha1 + alpha2)}, observed at 3Y = {alpha3}");
+
+        // nu interpolation
+        double nu1 = zs1.Model.Nu, nu2 = zs2.Model.Nu;
+        double nu3 = zs3.Model.Nu;
+        Assert.True(
+            !(Math.Abs(nu3 - (0.5 * (nu1 + nu2))) > tolerance),
+            $"Checking interpolation of ZABR nu: nu at 2Y = {nu1}, nu at 4Y = {nu2}, expected at 3Y = "
+            + $"{0.5 * (nu1 + nu2)}, observed at 3Y = {nu3}");
+
+        // rho interpolation
+        double rho1 = zs1.Model.Rho, rho2 = zs2.Model.Rho;
+        double rho3 = zs3.Model.Rho;
+        Assert.True(
+            !(Math.Abs(rho3 - (0.5 * (rho1 + rho2))) > tolerance),
+            $"Checking interpolation of ZABR rho: rho at 2Y = {rho1}, rho at 4Y = {rho2}, expected at 3Y = "
+            + $"{0.5 * (rho1 + rho2)}, observed at 3Y = {rho3}");
+
+        // Note: beta and gamma interpolation are not tested here because both
+        // parameters are fixed (isParameterFixed[1]=true, isParameterFixed[4]=true),
+        // so their layer values do not change between sections.
+    }
+
+    // Adapted: the cube calibrates when it is built, under the context.
+    [Fact]
+    public void TestZabrWithNonUnitGamma()
+    {
+        // Testing ZABR swaption volatility cube with gamma != 1.0...
+
+        var vars = new CommonVars();
+
+        // ZABR with gamma = 0.75 (different from SABR-like gamma=1.0)
+        double[][] parametersGuess = vars.MakeZabrParametersGuess(0.2, 0.5, 0.4, 0.0, 0.75);
+        bool[] isParameterFixed = new bool[5];
+        isParameterFixed[1] = true;  // Fix beta (standard practice)
+        isParameterFixed[4] = true;  // Fix gamma to test non-unit value behavior
+
+        var volCube = new ZabrSwaptionVolatilityCube(
+            vars.AtmVolMatrix,
+            vars.Cube.Tenors.Options,
+            vars.Cube.Tenors.Swaps,
+            vars.Cube.StrikeSpreads,
+            vars.VolSpreads,
+            vars.SwapIndexBase,
+            vars.ShortSwapIndexBase,
+            vars.VegaWeighedSmileFit,
+            parametersGuess,
+            isParameterFixed,
+            true,
+            vars.Context);
+
+        // With gamma != 1.0, ZABR should still produce valid volatilities
+        // Tolerance may be slightly higher due to different smile shape
+        double tolerance = 8.0e-4;
+        vars.MakeAtmVolTest(volCube, tolerance);
+
+        // Verify smile section works with non-unit gamma
+        SwaptionVolatilityStructure volStructure = volCube;
+        SmileSection smileSection = volStructure.SmileSection(new Period(5, TimeUnit.Years), new Period(5, TimeUnit.Years));
+
+        Assert.NotNull(smileSection);
+
+        // Test volatility smile shape - with gamma < 1, expect different curvature
+        double atmStrike = smileSection.AtmLevel()!.Value;
+        double atmVol = smileSection.Volatility(atmStrike);
+        double otmVol = smileSection.Volatility(atmStrike * 1.2);
+        double itmVol = smileSection.Volatility(atmStrike * 0.8);
+
+        Assert.True(atmVol > 0.0);
+        Assert.True(otmVol > 0.0);
+        Assert.True(itmVol > 0.0);
+    }
+
+    // Adapted: the cube calibrates when it is built, under the context; a section's ZabrSmileSection cast is a type
+    // check.
+    [Fact]
+    public void TestZabrWithFreeGamma()
+    {
+        // Testing ZABR cube with free gamma calibration...
+
+        var vars = new CommonVars();
+
+        // gamma=1.0 is only the initial guess; optimizer will calibrate it freely
+        double[][] parametersGuess = vars.MakeZabrParametersGuess(0.2, 0.5, 0.4, 0.0, 1.0);
+        bool[] isParameterFixed = new bool[5];
+        isParameterFixed[1] = true;   // fix beta
+
+        var cube = new ZabrSwaptionVolatilityCube(
+            vars.AtmVolMatrix,
+            vars.Cube.Tenors.Options,
+            vars.Cube.Tenors.Swaps,
+            vars.Cube.StrikeSpreads,
+            vars.VolSpreads,
+            vars.SwapIndexBase,
+            vars.ShortSwapIndexBase,
+            vars.VegaWeighedSmileFit,
+            parametersGuess,
+            isParameterFixed,
+            true,
+            vars.Context);
+
+        // Get a smile section and verify gamma was actually calibrated
+        Period optionTenor = vars.Cube.Tenors.Options[0];
+        Period swapTenor = vars.Cube.Tenors.Swaps[0];
+        SmileSection section = cube.SmileSection(optionTenor, swapTenor);
+        Assert.NotNull(section);
+
+        // Downcast to ZabrSmileSection to access calibrated gamma
+        var zabrSection = Assert.IsType<ZabrSmileSection<ZabrShortMaturityLognormal>>(section);
+
+        double calibratedGamma = zabrSection.Model.Gamma;
+
+        // Gamma should be within valid bounds: ZabrSpecs::direct() caps gamma at 1.9
+        Assert.True(calibratedGamma > 0.1);
+        Assert.True(calibratedGamma < 1.9);
+
+        // Verify gamma actually moved from the initial guess of 1.0
+        Assert.True(Math.Abs(calibratedGamma - 1.0) > 1e-6);
+
+        // Verify ATM vol is positive
+        double atmStrike = section.AtmLevel()!.Value;
+        double atmVol = section.Volatility(atmStrike);
+        Assert.True(atmVol > 0.0);
+    }
+
+    // Adapted: QuantLib's cube calibrates at its first query, so its refusal of the shifted structure comes there
+    // (line 1258); nanoql's at-the-money-calibrated cube calibrates when it is built, so the refusal comes at
+    // construction, under the context. The matrix with shifts floats, built by Create from the context.
+    [Fact]
+    public void TestZabrShiftedVolThrows()
+    {
+        // Testing that ZABR cube throws for non-zero ATM vol shift...
+
+        var vars = new CommonVars();
+
+        // Build an ATM vol matrix with a uniform 2% shift.
+        // ZABR does not support shifted lognormal vols (QL_REQUIRE in createSmileSection).
+        int nOpts = vars.Atm.Tenors.Options.Count;
+        int nSwps = vars.Atm.Tenors.Swaps.Count;
+        var shifts = new Matrix(nOpts, nSwps, 0.02);
+
+        SwaptionVolatilityStructure shiftedAtmVol = SwaptionVolatilityMatrix.Create(
+            vars.Conventions.Calendar,
+            vars.Conventions.OptionBdc,
+            vars.Atm.Tenors.Options,
+            vars.Atm.Tenors.Swaps,
+            vars.Atm.Vols,
+            vars.Conventions.DayCounter,
+            vars.Context,
+            false,
+            VolatilityType.ShiftedLognormal,
+            shifts);
+
+        double[][] parametersGuess = vars.MakeZabrParametersGuess(0.2, 0.5, 0.4, 0.0, 1.0);
+        bool[] isParameterFixed = new bool[5];
+        isParameterFixed[1] = true;
+        isParameterFixed[4] = true;
+
+        // Building the cube calibrates it and must throw
+        // because the ATM vol structure has non-zero shift
+        Assert.Throws<ArgumentException>(() => new ZabrSwaptionVolatilityCube(
+            shiftedAtmVol,
+            vars.Cube.Tenors.Options,
+            vars.Cube.Tenors.Swaps,
+            vars.Cube.StrikeSpreads,
+            vars.VolSpreads,
+            vars.SwapIndexBase,
+            vars.ShortSwapIndexBase,
+            vars.VegaWeighedSmileFit,
+            parametersGuess,
+            isParameterFixed,
+            true,
+            vars.Context));
+    }
+
+    // Adapted: the cube calibrates when it is built, under the context; QuantLib's typedef is the generic cube on the
+    // normal kernel's model.
+    [Fact]
+    public void TestZabrAlternativeKernel()
+    {
+        // Testing ZABR cube with ZabrShortMaturityNormal kernel...
+
+        var vars = new CommonVars();
+
+        double[][] parametersGuess = vars.MakeZabrParametersGuess(0.2, 0.5, 0.4, 0.0, 1.0);
+        bool[] isParameterFixed = new bool[5];
+        isParameterFixed[1] = true;
+        isParameterFixed[4] = true;
+
+        // Instantiate with a non-default kernel — this exercises the kernel
+        // template parameter added in zabrswaptionvolatilitycube.hpp.
+        // Note: ZabrLocalVolatility and ZabrFullFd kernels are not covered here
+        // due to the high cost of finite-difference evaluation.
+        var volCube = new XabrSwaptionVolatilityCube<SwaptionVolCubeZabrModel<ZabrShortMaturityNormal>>(
+            vars.AtmVolMatrix,
+            vars.Cube.Tenors.Options,
+            vars.Cube.Tenors.Swaps,
+            vars.Cube.StrikeSpreads,
+            vars.VolSpreads,
+            vars.SwapIndexBase,
+            vars.ShortSwapIndexBase,
+            vars.VegaWeighedSmileFit,
+            parametersGuess,
+            isParameterFixed,
+            true,
+            vars.Context);
+
+        // Smoke test: cube constructs and returns positive vol at ATM
+        SmileSection section = volCube.SmileSection(new Period(5, TimeUnit.Years), new Period(5, TimeUnit.Years));
+        Assert.NotNull(section);
+
+        double atmStrike = section.AtmLevel()!.Value;
+        Assert.True(atmStrike > 0.0);
+        Assert.True(section.Volatility(atmStrike) > 0.0);
+    }
+
     private static double[][] Guesses(CommonVars vars, double alpha, double beta, double nu, double rho)
     {
         int n = vars.Cube.Tenors.Options.Count * vars.Cube.Tenors.Swaps.Count;
@@ -631,8 +1088,8 @@ public class SwaptionVolatilityCubeTests
     private static void CheckSmall(double x, double tolerance) =>
         Assert.True(Math.Abs(x) <= tolerance, $"|{x}| exceeds {tolerance}");
 
-    // The fixture, without makeZabrParametersGuess, which waits with the ZABR cases. The at-the-money matrices float
-    // with the evaluation date, so they are built by Create from the context: the date QuantLib's test runner sets.
+    // The fixture. The at-the-money matrices float with the evaluation date, so they are built by Create from the
+    // context: the date QuantLib's test runner sets.
     private sealed class CommonVars
     {
         public CommonVars()
@@ -701,6 +1158,18 @@ public class SwaptionVolatilityCubeTests
         public bool VegaWeighedSmileFit { get; }
 
         // utilities
+        public double[][] MakeZabrParametersGuess(double alpha, double beta, double nu, double rho, double gamma)
+        {
+            int n = Cube.Tenors.Options.Count * Cube.Tenors.Swaps.Count;
+            var guess = new double[n][];
+            for (int i = 0; i < n; ++i)
+            {
+                guess[i] = [alpha, beta, nu, rho, gamma];
+            }
+
+            return guess;
+        }
+
         public void MakeAtmVolTest(SwaptionVolatilityCube volCube, double tolerance)
         {
             foreach (Period option in Atm.Tenors.Options)

@@ -11,7 +11,8 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// QuantLib-Python's <c>%template</c> names are sealed subclasses of the closed generic class they name (playbook §2.6):
 /// the nine generators and the two path generators, each with a <c>Clone()</c> that returns its own type; and the
-/// named curves, iterative and global, each piecewise one with a <c>Create</c> that returns its own type.
+/// named curves, iterative and global, each piecewise one with a <c>Create</c> that returns its own type; and the ZABR
+/// sections, each with a <c>Create</c> that returns its own type, and the Runge-Kutta integrator.
 /// </summary>
 public class NamedClassesTests
 {
@@ -112,6 +113,28 @@ public class NamedClassesTests
         {
             Assert.True(named.IsSealed, named.Name);
             Assert.Equal(generic, named.BaseType);
+            MethodInfo create = named.GetMethod("Create", BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!;
+            Assert.Equal(named, create.ReturnType);
+        }
+    }
+
+    [Fact]
+    public void EachNamedZabrClassIsASubclassOfItsClosedGeneric()
+    {
+        // the ZABR sections, each with a Create that returns its own type, and the Runge-Kutta integrator
+        (Type Named, Type Generic)[] sections =
+        [
+            (typeof(ZabrShortMaturityLognormalSmileSection), typeof(ZabrSmileSection<ZabrShortMaturityLognormal>)),
+            (typeof(ZabrShortMaturityNormalSmileSection), typeof(ZabrSmileSection<ZabrShortMaturityNormal>)),
+        ];
+        foreach ((Type named, Type generic) in sections.Append((typeof(RungeKutta), typeof(AdaptiveRungeKutta<double>))))
+        {
+            Assert.True(named.IsSealed, named.Name);
+            Assert.Equal(generic, named.BaseType);
+        }
+
+        foreach ((Type named, _) in sections)
+        {
             MethodInfo create = named.GetMethod("Create", BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!;
             Assert.Equal(named, create.ReturnType);
         }

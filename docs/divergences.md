@@ -10,6 +10,16 @@ Every documented divergence from QuantLib v1.44, one entry per test class under
 `tools/divergences.py`: regenerate it with `.venv\Scripts\python -I tools/divergences.py` rather than
 editing it by hand.
 
+## AdaptiveRungeKuttaSizeTests
+
+[`Divergences/AdaptiveRungeKuttaSizeTests.cs`](../tests/NanoQL.Tests/Divergences/AdaptiveRungeKuttaSizeTests.cs)
+
+An ordinary differential equation whose function returns a vector of another length than its argument's. QuantLib's `AdaptiveRungeKutta` reads the function's value at every index of the solution vector (`adaptiverungekutta.hpp:111-113, 219-247`), past the end of a shorter one, and ignores the extra values of a longer one; the wheel's `RungeKutta` refuses both with its own wrapper's check, "Python function did not return a list of correct size" (`ode.i:79-81`), which QuantLib doesn't make. nanoql refuses both with `NanoQLException`, "the ODE function returned n values for m".
+
+Facts:
+
+- `AFunctionOfAnotherLengthIsRefused`
+
 ## AffineDiscountBondFactorsTests
 
 [`Divergences/AffineDiscountBondFactorsTests.cs`](../tests/NanoQL.Tests/Divergences/AffineDiscountBondFactorsTests.cs)
@@ -1095,11 +1105,44 @@ Facts:
 
 [`Divergences/XabrTransformEdgeTests.cs`](../tests/NanoQL.Tests/Divergences/XabrTransformEdgeTests.cs)
 
-XABR's parameter transforms at their edges. QuantLib's SABR inverse transform doesn't clamp its arguments (`sabrinterpolation.hpp:103-114`): a ρ beyond 0.9999 takes `asin` of a value above 1, a NaN that the direct transform turns into −0.9999, so a fixed ρ of 0.99995 comes back as −0.9999, its sign flipped, and a free guess of 0.99995 fails the fit with "alpha must be positive: nan not allowed"; an α or ν below 1e-7, ν = 0 included, takes the square root of a negative number, a NaN the fit refuses ("alpha must be positive: nan not allowed", "nu must be non negative: nan not allowed"). nanoql's inverse clamps each argument to its direct transform's range, so such an input comes back as the nearest value the transform reaches, bit for bit: ρ = 0.9999, ν = 1e-7, and the fixed β of 0.6. The fits from those values are the wheel's fits from them. Two of them are well posed and agree within the vectors' tolerance; the three that pin a parameter at an edge can't reproduce the smile, so their optimum is flat: when the input volatilities move by one ulp, their free parameters move by up to 2.4e-3 in S7R6's measure, at the vectors' scale of 1, which is up to 24% of the small ones' own values. Those are asserted within 1e-2 in that measure.
+XABR's parameter transforms at their edges. QuantLib's SABR inverse transform doesn't clamp its arguments (`sabrinterpolation.hpp:103-114`): a ρ beyond 0.9999 takes `asin` of a value above 1, a NaN that the direct transform turns into −0.9999, so a fixed ρ of 0.99995 comes back as −0.9999, its sign flipped, and a free guess of 0.99995 fails the fit with "alpha must be positive: nan not allowed"; an α or ν below 1e-7, ν = 0 included, takes the square root of a negative number, a NaN the fit refuses ("alpha must be positive: nan not allowed", "nu must be non negative: nan not allowed"). nanoql's inverse clamps each argument to its direct transform's range, so such an input comes back as the nearest value the transform reaches, bit for bit: ρ = 0.9999, ν = 1e-7, and the fixed β of 0.6. The fits from those values are the wheel's fits from them. Two of them are well posed and agree within the vectors' tolerance; the three that pin a parameter at an edge can't reproduce the smile, so their optimum is flat: when the input volatilities move by one ulp, their free parameters move by up to 2.4e-3 in S7R6's measure, at the vectors' scale of 1, which is up to 24% of the small ones' own values. Those are asserted within 1e-2 in that measure. ZABR's inverse (`zabrinterpolation.hpp:78-88`) doesn't clamp either: α, β and ρ invert as SABR's do, so a ρ above 0.9999 takes `asin` of a value beyond 1, a NaN its direct transform turns into −0.9999, and an α below 1e-7 the square root of a negative number, a NaN the model then refuses ("alpha must be positive: nan not allowed"); ν and γ invert through `tan(π(y/5 − 0.5))` and `tan(π(y/1.9 − 0.5))`, whose period is π, so a ν above 5 or a γ above 1.9 comes back as another value inside the range the direct transform's comments name ("limit nu to 5.00", "limit gamma to 1.9", `zabrinterpolation.hpp:97-103`). On the wheel's ZABR cube a fixed ρ of 0.99995 came back as −0.9999, ν 6.0 as 0.9999999999999998 and γ 2.0 as 0.09999999999999978. nanoql's inverse clamps its arguments to the direct transform's range, so each comes back as the nearest value the transform reaches, bit for bit: ρ 0.9999, ν 5, γ 1.9, α 1e-7; and the fit from it is the fit from that value, bit for bit, whose parameters the wheel gives. Under S7R6's one-ulp moves of the volatilities, together and each alone, the γ fit's free parameters and the ν fit's α move by at most 5.4e-11, asserted within the vectors' tolerance; the others move by up to 7.7e-6, asserted within 1e-2, but for the α fit's ρ, which moves by 9.1e-2 and so isn't asserted (the wheel's is −0.026977128413889717).
 
 Facts:
 
 - `SabrsEdgesComeBackAsTheTransformsNearestValues`
+- `ZabrsTransformKeepsEachEdgeInItsRange`
+
+## ZabrModelEmptyStrikesTests
+
+[`Divergences/ZabrModelEmptyStrikesTests.cs`](../tests/NanoQL.Tests/Divergences/ZabrModelEmptyStrikesTests.cs)
+
+The ZABR model's vector members given no strikes. QuantLib's `ZabrModel::x`, which `lognormalVolatility`, `normalVolatility` and `localVolatility` call on their vector, reads `strikes[0]` and starts its ascending check at `strikes.begin() + 1` (`zabr.cpp:321-327`), past the end of an empty vector; the wheel doesn't bind the model. nanoql refuses an empty vector with `ArgumentException`, "no strikes given", naming the member's parameter; given strikes, each member returns QuantLib's values, its scalar form's among them.
+
+Facts:
+
+- `AnEmptyStrikeVectorIsRefused`
+
+## ZabrRestartInstanceTests
+
+[`Divergences/ZabrRestartInstanceTests.cs`](../tests/NanoQL.Tests/Divergences/ZabrRestartInstanceTests.cs)
+
+The model a ZABR interpolation prices with after its restarts. QuantLib's model is a smile section built from a copy of the parameters (`zabrinterpolation.hpp:110-115`), rebuilt at each evaluation of the cost function (`xabrinterpolation.hpp:292-307`); after the restarts the fit writes the best restart's parameters back and doesn't rebuild it (`:230-234`). So where the restarts run out without an accepted fit, or Simplex's last trial isn't the vertex it returns, the interpolation's values and its `rmsError()` and `maxError()` are its last trial's, while `alpha()`… are the best restart's: the C++ harness's fits below. nanoql rebuilds the section from the best parameters, so its values and errors are those of QuantLib's section built at the parameters it reports. A cube whose fits' restarts run out records its last trial's errors beside its best parameters, and refuses them against its tolerance where nanoql's cube records its best parameters' errors and builds. Each fit's claim is asserted in the same run, bit for bit: its values and errors are its own section's at the parameters it reports. QuantLib's numbers are asserted within bounds above what S7R6's one-ulp moves of the five volatilities, together and each alone, change: the maximum-error fit's by up to 1.5e-11, within the vectors' tolerance; the Simplex fit's parameters by up to 1.6e-9 and its values by 2.9e-10, within 1e-8, both in S7R6's measure at scale 1.
+
+Facts:
+
+- `AFitWhoseRestartsRunOutPricesWithItsBestParameters`
+- `ASimplexFitPricesWithTheVertexItReturns`
+- `ACubeWhoseRestartsRunOutRecordsItsBestParametersErrors`
+
+## ZabrSmileSectionParameterTests
+
+[`Divergences/ZabrSmileSectionParameterTests.cs`](../tests/NanoQL.Tests/Divergences/ZabrSmileSectionParameterTests.cs)
+
+A short-maturity ZABR smile section given fewer than five parameters. QuantLib's short-maturity `init` builds its model from `params_[0]` to `params_[4]` unchecked (`zabrsmilesection.hpp:139-152`), past the end of a shorter vector: the wheel's sections with α, β, ν and ρ alone gave the lognormal volatility 0.21300493901013692 at 4% in some runs and NaN in others, where γ = 1 given gives 0.21305710815847104. Only its local-volatility kernel checks the count, "zabr expects 5 parameters (alpha,beta,nu,rho,gamma) but (4) given" (`:158-160`). nanoql refuses fewer than five for every kernel, with that text, naming `zabrParameters`.
+
+Facts:
+
+- `FewerThanFiveParametersAreRefused`
 
 ## ZeroGearingWithoutDayCounterTests
 

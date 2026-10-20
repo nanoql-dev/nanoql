@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 1,037 | 137 |
-| partial | 20 | 27 |
-| ported | 205 | 18 |
+| not started | 1,031 | 135 |
+| partial | 22 | 27 |
+| ported | 209 | 20 |
 | replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
@@ -858,7 +858,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `multicubicspline` | not started |  | no nanoql type: MultiCubicSpline |
 | `sabrinterpolation` | ported | Numerics/Interpolations/SabrInterpolation/SABR.cs, Numerics/Interpolations/SabrInterpolation/SABRInterpolation.cs, Numerics/Interpolations/SabrInterpolation/SABRSpecs.cs, Numerics/Interpolations/SabrInterpolation/SABRWrapper.cs |  |
 | `xabrinterpolation` | ported | Numerics/Interpolations/XabrInterpolation/IXabrInterpolation.cs, Numerics/Interpolations/XabrInterpolation/IXabrModelInstance.cs, Numerics/Interpolations/XabrInterpolation/IXabrSpecs.cs, Numerics/Interpolations/XabrInterpolation/XabrFit.cs |  |
-| `zabrinterpolation` | not started |  | no nanoql type: ZabrInterpolation, Zabr |
+| `zabrinterpolation` | ported | Numerics/Interpolations/ZabrInterpolation/ZabrInterpolation{TEvaluation}.cs, Numerics/Interpolations/ZabrInterpolation/ZabrSpecs{TEvaluation}.cs, Numerics/Interpolations/ZabrInterpolation/Zabr{TEvaluation}.cs |  |
 
 ### `ql/math/matrixutilities/`
 
@@ -886,7 +886,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `adaptiverungekutta` | not started |  | no nanoql type: AdaptiveRungeKutta |
+| `adaptiverungekutta` | ported | Numerics/Ode/AdaptiveRungeKutta{T}.cs, Numerics/Ode/RungeKutta.cs |  |
 | `all` | not ported: include-only header |  |  |
 | `fractionaladams` | not started |  | no nanoql type: FractionalAdams, RiemannLiouvilleWeights |
 | `fractionalkernelapproximation` | not started |  | no nanoql type: FractionalKernelApproximation |
@@ -1772,7 +1772,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `iterativebootstrap` | ported | TermStructures/IterativeBootstrap/BootstrapState{TTermStructure}.cs, TermStructures/IterativeBootstrap/IBootstrap.cs, TermStructures/IterativeBootstrap/IBootstrapState.cs, TermStructures/IterativeBootstrap/IterativeBootstrap.cs |  |
 | `localbootstrap` | not started |  | no nanoql type: PenaltyFunction, LocalBootstrap |
 | `multicurve` | ported | TermStructures/MultiCurve/MultiCurve.cs, TermStructures/MultiCurve/MultiCurveMember.cs | no nanoql type: MultiCurveBootstrapProvider |
-| `voltermstructure` | partial | TermStructures/VolatilityTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc), which waits for its first user (S8's StrippedOptionletAdapter or S-eq's Black volatility structures) |
+| `voltermstructure` | partial | TermStructures/VolatilityTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc), which waits for its remaining users (S-eq's Black volatility structures) |
 | `yieldtermstructure` | partial | TermStructures/YieldTermStructure.cs | partial: the constructors taking a day counter only, for structures that manage their own reference date, which no curve ported so far uses |
 
 ### `ql/termstructures/credit/`
@@ -1824,9 +1824,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `smilesectionutils` | not started |  | no nanoql type: SmileSectionUtils |
 | `spreadedsmilesection` | ported | TermStructures/Volatility/SpreadedSmileSection.cs |  |
 | `volatilitytype` | ported | TermStructures/Volatility/VolatilityType.cs |  |
-| `zabr` | not started |  | no nanoql type: ZabrModel |
+| `zabr` | partial | TermStructures/Volatility/ZabrModel.cs | partial: fdPrice (both forms) and fullFdPrice, the local-volatility and full finite-difference prices, which wait for B3.3 with the finite-difference units they price on (S-eq's meshers, layout and backward solver, S-rx's Dirichlet boundary, B3.3's glued mesher and its Dupire and ZABR operators) |
 | `zabrinterpolatedsmilesection` | not started |  | no nanoql type: ZabrInterpolatedSmileSection |
-| `zabrsmilesection` | not started |  | no nanoql type: ZabrShortMaturityLognormal, ZabrShortMaturityNormal, ZabrLocalVolatility, ZabrFullFd, ZabrSmileSection |
+| `zabrsmilesection` | partial | TermStructures/Volatility/ZabrSmileSection/IZabrEvaluation.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityLognormal.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityLognormalSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityNormal.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityNormalSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrSmileSection{TEvaluation}.cs | partial: the local-volatility and full finite-difference kernels (the ZabrLocalVolatility and ZabrFullFd tags, with their strike grid, call prices and price spline, the members strikes_, callPrices_, callPriceFct_, a_ and b_ that only they use), which wait for B3.3 with ZabrModel's fdPrice and fullFdPrice; no nanoql type: ZabrLocalVolatility, ZabrFullFd |
 
 ### `ql/termstructures/volatility/capfloor/`
 
@@ -1898,13 +1898,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `gaussian1dswaptionvolatility` | not started |  | no nanoql type: Gaussian1dSwaptionVolatility |
 | `interpolatedswaptionvolatilitycube` | ported | TermStructures/Volatility/Swaption/InterpolatedSwaptionVolatilityCube.cs |  |
 | `sabrswaptionvolatilitycube` | partial | TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/IXabrCubeModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SabrSwaptionVolatilityCube.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SwaptionVolCubeSabrModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/XabrSwaptionVolatilityCube{TModel}.cs | partial: recalibration (three overloads), updateAfterRecalibration and sabrCalibrationSection, which change a calibrated cube and wait for B3.3's CmsMarketCalibration, their only user; no nanoql type: XabrModelTraits |
-| `spreadedswaptionvol` | not started |  | no nanoql type: SpreadedSwaptionVolatility |
+| `spreadedswaptionvol` | ported | TermStructures/Volatility/Swaption/SpreadedSwaptionVolatility.cs |  |
 | `swaptionconstantvol` | ported | TermStructures/Volatility/Swaption/ConstantSwaptionVolatility.cs |  |
 | `swaptionvolcube` | ported | TermStructures/Volatility/Swaption/SwaptionVolatilityCube.cs |  |
 | `swaptionvoldiscrete` | ported | TermStructures/Volatility/Swaption/SwaptionVolatilityDiscrete.cs |  |
 | `swaptionvolmatrix` | ported | TermStructures/Volatility/Swaption/SwaptionVolatilityMatrix.cs |  |
-| `swaptionvolstructure` | partial | TermStructures/Volatility/Swaption/SwaptionVolatilityStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc), which waits for its first user (B3.3's SpreadedSwaptionVolatility) |
-| `zabrswaptionvolatilitycube` | not started |  | no nanoql type: SwaptionVolCubeZabrModel, ZabrSwaptionVolatilityCube |
+| `swaptionvolstructure` | partial | TermStructures/Volatility/Swaption/SwaptionVolatilityStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: its only QuantLib user, the spreaded swaption volatility, passes its base's reference date to the reference-date constructor) |
+| `zabrswaptionvolatilitycube` | ported | TermStructures/Volatility/Swaption/ZabrSwaptionVolatilityCube/SwaptionVolCubeZabrModel{TEvaluation}.cs, TermStructures/Volatility/Swaption/ZabrSwaptionVolatilityCube/ZabrSwaptionVolatilityCube.cs |  |
 
 ### `ql/termstructures/yield/`
 
@@ -2189,7 +2189,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `nthtodefault` | not started |  | 2 cases |
 | `numericaldifferentiation` | not started |  | 7 cases |
 | `observable` | not ported: tests Observable, which is removed |  |  |
-| `ode` | not started |  | 3 cases |
+| `ode` | partial | TestSuite/OdeTests.cs | 1 of 3 cases; not yet: testMatrixExponential, testMatrixExponentialOfZero |
 | `operators` | ported | TestSuite/OperatorsTests.cs | 1 of 2 cases; not ported: testConsistency (exercises only deprecated code: DZero and DPlusDMinus, D5) |
 | `optimizers` | partial | TestSuite/OptimizersTests.cs | 2 of 10 cases; not yet: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination, testLBFGSB, testLBFGSBActiveBounds, testLBFGSBCoverage, testDifferentialEvolution, testCMAES |
 | `optionletstripper` | ported | TestSuite/OptionletStripperTests.cs | 19 of 19 cases |
@@ -2230,7 +2230,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `swap` | partial | TestSuite/SwapTests.cs | 12 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs; not yet: testInArrears, testFixedTenorInferenceWithTerminationDate, testSpotDateUsesFixingCalendar |
 | `swapforwardmappings` | not started |  | 3 cases |
 | `swaption` | partial | TestSuite/SwaptionTests.cs | 12 of 13 cases; replaced: testBlackEngineCaching by Vectors/Instruments/SwaptionVectorTests.cs; not yet: testImpliedVolatilityOis |
-| `swaptionvolatilitycube` | partial | TestSuite/SwaptionVolatilityCubeTests.cs | 8 of 17 cases; replaced: testObservability by Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs; not yet: testSpreadedCube, testZabrVols, testZabrSmileSection, testZabrParameters, testZabrWithNonUnitGamma, testZabrWithFreeGamma, testZabrShiftedVolThrows, testZabrAlternativeKernel, testZabrObservability |
+| `swaptionvolatilitycube` | ported | TestSuite/SwaptionVolatilityCubeTests.cs | 17 of 17 cases; replaced: testObservability by Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs; testZabrObservability by Vectors/TermStructures/ZabrSwaptionVolatilityCubeVectorTests.cs |
 | `swaptionvolatilitymatrix` | ported | TestSuite/SwaptionVolatilityMatrixTests.cs | 2 of 2 cases; replaced: testSwaptionVolMatrixObservability by Vectors/TermStructures/SwaptionVolMatrixVectorTests.cs |
 | `swaptionvolstructuresutilities` | ported | TestSuite/SwaptionVolStructuresUtilitiesTests.cs | 0 of 0 cases |
 | `swingoption` | not started |  | 6 cases |
@@ -2251,6 +2251,6 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `volatilitymodels` | not started |  | 1 cases |
 | `vpp` | not started |  | 6 cases |
 | `xoshiro256starstar` | not started |  | 3 cases |
-| `zabr` | not started |  | 1 cases |
+| `zabr` | ported | TestSuite/ZabrTests.cs | 1 of 1 cases |
 | `zerocouponswap` | not started |  | 6 cases |
 | `zigguratgaussian` | not started |  | 2 cases |

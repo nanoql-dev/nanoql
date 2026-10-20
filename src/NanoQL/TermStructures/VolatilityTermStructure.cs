@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/voltermstructure.hpp ql/termstructures/voltermstructure.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the constructor for a structure that manages its own reference date, (bdc, dc), which waits for its first user (S8's StrippedOptionletAdapter or S-eq's Black volatility structures)
+// Partial: the constructor for a structure that manages its own reference date, (bdc, dc), which waits for its remaining users (S-eq's Black volatility structures)
 
 using NanoQL.Time;
 

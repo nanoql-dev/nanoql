@@ -74,6 +74,14 @@ internal static class CubeFixture
     public static SwaptionVolatilityMatrix AtmMatrix(Date referenceDate) => new(
         referenceDate, new TARGET(), BusinessDayConvention.ModifiedFollowing, AtmOptions, AtmSwaps, AtmVols, new Actual365Fixed());
 
+    /// <summary>The at-the-money matrix floating on the fixture's evaluation date, shifted lognormal with a uniform
+    /// shift.</summary>
+    /// <param name="shift">The shift.</param>
+    /// <returns>The matrix.</returns>
+    public static SwaptionVolatilityMatrix ShiftedAtmMatrix(double shift) => SwaptionVolatilityMatrix.Create(
+        new TARGET(), BusinessDayConvention.ModifiedFollowing, AtmOptions, AtmSwaps, AtmVols, new Actual365Fixed(), Context,
+        false, VolatilityType.ShiftedLognormal, new Matrix(AtmVols.Rows, AtmVols.Columns, shift));
+
     /// <summary>The swap index of a tenor on the flat 5% curve of the context's evaluation date.</summary>
     /// <param name="years">The tenor, in years.</param>
     /// <param name="context">The context, by default the fixture's.</param>
