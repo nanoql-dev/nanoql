@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 1,018 | 134 |
+| not started | 1,001 | 131 |
 | partial | 22 | 28 |
-| ported | 222 | 20 |
+| ported | 239 | 23 |
 | replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
@@ -93,8 +93,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `conundrumpricer` | not started |  | no nanoql type: VanillaOptionPricer, MarketQuotedOptionPricer, GFunction, GFunctionFactory, GFunctionFactoryYieldCurveModel, HaganPricer, NumericHaganPricer, NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand, AnalyticHaganPricer |
 | `coupon` | ported | Coupons/Coupon.cs |  |
 | `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the CMS, CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS and CMS-spread checks among them), which wait for S-rx and batch 3; the CMS pricer bases CmsCouponPricer and MeanRevertingPricer, which wait for B3.3; no nanoql type: CmsCouponPricer, MeanRevertingPricer |
-| `cpicoupon` | not started |  | no nanoql type: CPICoupon, CPICashFlow, CPILeg |
-| `cpicouponpricer` | not started |  | no nanoql type: CPICouponPricer |
+| `cpicoupon` | ported | Coupons/CPICoupon/CPICashFlow.cs, Coupons/CPICoupon/CPICoupon.cs, Coupons/CPICoupon/CPILeg.cs |  |
+| `cpicouponpricer` | ported | Coupons/CPICouponPricer.cs |  |
 | `digitalcmscoupon` | not started |  | no nanoql type: DigitalCmsCoupon, DigitalCmsLeg |
 | `digitalcoupon` | not started |  | no nanoql type: DigitalCoupon |
 | `digitaliborcoupon` | not started |  | no nanoql type: DigitalIborCoupon, DigitalIborLeg |
@@ -104,9 +104,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fixedratecoupon` | partial | Coupons/FixedRateCoupon.cs, Coupons/FixedRateLeg.cs | partial: withLastPeriodDayCounter, which waits for the credit-default-swap slot, whose tests use it |
 | `floatingratecoupon` | ported | Coupons/FloatingRateCoupon.cs, Coupons/FloatingRateCouponExtensions.cs |  |
 | `iborcoupon` | ported | Coupons/IborCoupon.cs, Coupons/IborLeg.cs | no nanoql type: IborCouponSettings |
-| `indexedcashflow` | not started |  | no nanoql type: IndexedCashFlow |
-| `inflationcoupon` | not started |  | no nanoql type: InflationCoupon |
-| `inflationcouponpricer` | not started |  | no nanoql type: InflationCouponPricer, YoYInflationCouponPricer, BlackYoYInflationCouponPricer, UnitDisplacedBlackYoYInflationCouponPricer, BachelierYoYInflationCouponPricer |
+| `indexedcashflow` | ported | Coupons/IndexedCashFlow.cs |  |
+| `inflationcoupon` | ported | Coupons/InflationCoupon.cs, Coupons/InflationCouponExtensions.cs |  |
+| `inflationcouponpricer` | ported | Coupons/InflationCouponPricer/BachelierYoYInflationCouponPricer.cs, Coupons/InflationCouponPricer/BlackYoYInflationCouponPricer.cs, Coupons/InflationCouponPricer/InflationCouponPricer.cs, Coupons/InflationCouponPricer/InflationCouponPricerFunctions.cs, Coupons/InflationCouponPricer/UnitDisplacedBlackYoYInflationCouponPricer.cs, Coupons/InflationCouponPricer/YoYInflationCouponPricer.cs |  |
 | `lineartsrpricer` | not started |  | no nanoql type: LinearTsrPricer, LinearTsrPricerSettings, LinearTsrPricerSettingsStrategy |
 | `multipleresetscoupon` | not started |  | no nanoql type: MultipleResetsCoupon, MultipleResetsPricer, AveragingMultipleResetsPricer, CompoundingMultipleResetsPricer, MultipleResetsLeg |
 | `overnightindexedcoupon` | ported | Coupons/OvernightIndexedCoupon/CappedFlooredOvernightIndexedCoupon.cs, Coupons/OvernightIndexedCoupon/OvernightIndexedCoupon.cs, Coupons/OvernightIndexedCoupon/OvernightLeg.cs |  |
@@ -117,8 +117,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `simplecashflow` | ported | Coupons/SimpleCashFlow/AmortizingPayment.cs, Coupons/SimpleCashFlow/Redemption.cs, Coupons/SimpleCashFlow/SimpleCashFlow.cs |  |
 | `stubiborcoupon` | ported | Coupons/StubIborCoupon/StubIborCoupon.cs, Coupons/StubIborCoupon/StubIborCouponWeightedIndex.cs, Coupons/StubIborCoupon/StubIndexSelection.cs, Coupons/StubIborCoupon/StubIndexSelectionConvention.cs |  |
 | `timebasket` | not started |  | no nanoql type: TimeBasket |
-| `yoyinflationcoupon` | not started |  | no nanoql type: YoYInflationCoupon, YoyInflationLeg |
-| `zeroinflationcashflow` | not started |  | no nanoql type: ZeroInflationCashFlow |
+| `yoyinflationcoupon` | partial | Coupons/YoYInflationCoupon.cs, Coupons/YoYInflationLeg.cs | partial: withCaps and withFloors, which build capped and floored coupons and wait for B3.4's CappedFlooredYoYInflationCoupon |
+| `zeroinflationcashflow` | ported | Coupons/ZeroInflationCashFlow.cs |  |
 
 ### `ql/currencies/`
 
@@ -638,7 +638,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `constnotionalcrosscurrencyfixedvsfloatingswap` | not started |  | no nanoql type: ConstNotionalCrossCurrencyFixedVsFloatingSwap, ConstNotionalCrossCurrencyFixedVsFloatingSwapResults |
 | `constnotionalcrosscurrencyswap` | not started |  | no nanoql type: ConstNotionalCrossCurrencySwap, ConstNotionalCrossCurrencySwapResults |
 | `cpicapfloor` | not started |  | no nanoql type: CPICapFloor |
-| `cpiswap` | not started |  | no nanoql type: CPISwap, CPISwapResults |
+| `cpiswap` | ported | Instruments/CPISwap.cs, Instruments/CPISwapResults.cs |  |
 | `creditdefaultswap` | not started |  | no nanoql type: CreditDefaultSwap, CreditDefaultSwapPricingModel, CreditDefaultSwapResults |
 | `crosscurrencyswap` | not started |  | no nanoql type: CrossCurrencySwap, CrossCurrencySwapResults |
 | `dividendschedule` | not started |  | no nanoql type: DividendSchedule |
@@ -656,7 +656,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fxforward` | not started |  | no nanoql type: FxForward, FxForwardResults |
 | `holderextensibleoption` | not started |  | no nanoql type: HolderExtensibleOption |
 | `impliedvolatility` | not started |  |  |
-| `inflationcapfloor` | not started |  | no nanoql type: YoYInflationCapFloor, YoYInflationCapFloorType, YoYInflationCap, YoYInflationFloor, YoYInflationCollar |
+| `inflationcapfloor` | ported | Instruments/InflationCapFloor/InflationCapFloorFunctions.cs, Instruments/InflationCapFloor/YoYInflationCap.cs, Instruments/InflationCapFloor/YoYInflationCapFloor.cs, Instruments/InflationCapFloor/YoYInflationCapFloorArguments.cs, Instruments/InflationCapFloor/YoYInflationCapFloorType.cs, Instruments/InflationCapFloor/YoYInflationCollar.cs, Instruments/InflationCapFloor/YoYInflationFloor.cs |  |
 | `lookbackoption` | not started |  | no nanoql type: ContinuousFloatingLookbackOption, ContinuousFixedLookbackOption, ContinuousPartialFloatingLookbackOption, ContinuousPartialFixedLookbackOption |
 | `makecapfloor` | ported | Instruments/MakeCapFloor.cs |  |
 | `makecds` | not started |  | no nanoql type: MakeCreditDefaultSwap |
@@ -665,7 +665,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `makeois` | ported | Instruments/MakeOIS.cs |  |
 | `makeswaption` | ported | Instruments/MakeSwaption.cs |  |
 | `makevanillaswap` | ported | Instruments/MakeVanillaSwap.cs |  |
-| `makeyoyinflationcapfloor` | not started |  | no nanoql type: MakeYoYInflationCapFloor |
+| `makeyoyinflationcapfloor` | ported | Instruments/MakeYoYInflationCapFloor.cs |  |
 | `margrabeoption` | not started |  | no nanoql type: MargrabeOption, MargrabeOptionResults |
 | `multiassetoption` | not started |  | no nanoql type: MultiAssetOption, MultiAssetOptionResults |
 | `multipleresetsswap` | not started |  | no nanoql type: MultipleResetsSwap |
@@ -695,8 +695,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `vanillaswingoption` | not started |  | no nanoql type: SwingExercise, VanillaForwardPayoff, VanillaSwingOption |
 | `varianceswap` | not started |  | no nanoql type: VarianceSwap, VarianceSwapResults |
 | `writerextensibleoption` | not started |  | no nanoql type: WriterExtensibleOption |
-| `yearonyearinflationswap` | not started |  | no nanoql type: YearOnYearInflationSwap, YearOnYearInflationSwapResults |
-| `zerocouponinflationswap` | not started |  | no nanoql type: ZeroCouponInflationSwap |
+| `yearonyearinflationswap` | ported | Instruments/YearOnYearInflationSwap.cs, Instruments/YearOnYearInflationSwapResults.cs |  |
+| `zerocouponinflationswap` | ported | Instruments/ZeroCouponInflationSwap.cs |  |
 | `zerocouponswap` | not started |  | no nanoql type: ZeroCouponSwap |
 
 ### `ql/instruments/bonds/`
@@ -710,7 +710,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `btp` | not started |  | no nanoql type: CCTEU, BTP, RendistatoBasket, RendistatoCalculator, RendistatoEquivalentSwapLengthQuote, RendistatoEquivalentSwapSpreadQuote |
 | `cmsratebond` | not started |  | no nanoql type: CmsRateBond |
 | `convertiblebonds` | not started |  | no nanoql type: SoftCallability, ConvertibleBond, ConvertibleZeroCouponBond, ConvertibleFixedCouponBond, ConvertibleFloatingRateBond |
-| `cpibond` | not started |  | no nanoql type: CPIBond |
+| `cpibond` | ported | Instruments/Bonds/CPIBond.cs |  |
 | `fixedratebond` | ported | Instruments/Bonds/FixedRateBond.cs |  |
 | `floatingratebond` | ported | Instruments/Bonds/FloatingRateBond.cs |  |
 | `zerocouponbond` | ported | Instruments/Bonds/ZeroCouponBond.cs |  |
@@ -1615,7 +1615,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `inflationcapfloorengines` | not started |  | no nanoql type: YoYInflationCapFloorEngine, YoYInflationBlackCapFloorEngine, YoYInflationUnitDisplacedBlackCapFloorEngine, YoYInflationBachelierCapFloorEngine |
+| `inflationcapfloorengines` | ported | PricingEngines/Inflation/InflationCapFloorEngines/IYoYInflationOptionletFormula.cs, PricingEngines/Inflation/InflationCapFloorEngines/YoYInflationBachelierCapFloorEngine.cs, PricingEngines/Inflation/InflationCapFloorEngines/YoYInflationBachelierFormula.cs, PricingEngines/Inflation/InflationCapFloorEngines/YoYInflationBlackCapFloorEngine.cs, PricingEngines/Inflation/InflationCapFloorEngines/YoYInflationBlackFormula.cs, PricingEngines/Inflation/InflationCapFloorEngines/YoYInflationCapFloorEngine{TFormula}.cs, PricingEngines/Inflation/InflationCapFloorEngines/YoYInflationUnitDisplacedBlackCapFloorEngine.cs, PricingEngines/Inflation/InflationCapFloorEngines/YoYInflationUnitDisplacedBlackFormula.cs |  |
 
 ### `ql/pricingengines/lookback/`
 
@@ -1796,12 +1796,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `inflationhelpers` | not started |  | no nanoql type: ZeroCouponInflationSwapHelper, YearOnYearInflationSwapHelper |
+| `inflationhelpers` | ported | TermStructures/Inflation/InflationHelpers/YearOnYearInflationSwapHelper.cs, TermStructures/Inflation/InflationHelpers/YoYInflationHelperExtensions.cs, TermStructures/Inflation/InflationHelpers/ZeroCouponInflationSwapHelper.cs, TermStructures/Inflation/InflationHelpers/ZeroInflationHelperExtensions.cs |  |
 | `inflationtraits` | ported | TermStructures/Inflation/InflationTraits/IYoYInflationTraits.cs, TermStructures/Inflation/InflationTraits/IZeroInflationTraits.cs, TermStructures/Inflation/InflationTraits/InflationTraitsDetail.cs, TermStructures/Inflation/InflationTraits/YoYInflationTraits.cs, TermStructures/Inflation/InflationTraits/ZeroInflationTraits.cs |  |
 | `interpolatedyoyinflationcurve` | ported | TermStructures/Inflation/InterpolatedYoYInflationCurve/InterpolatedYoYInflationCurve{TInterpolator}.cs, TermStructures/Inflation/InterpolatedYoYInflationCurve/YoYInflationCurve.cs |  |
 | `interpolatedzeroinflationcurve` | ported | TermStructures/Inflation/InterpolatedZeroInflationCurve/InterpolatedZeroInflationCurve{TInterpolator}.cs, TermStructures/Inflation/InterpolatedZeroInflationCurve/ZeroInflationCurve.cs |  |
-| `piecewiseyoyinflationcurve` | not started |  | no nanoql type: PiecewiseYoYInflationCurve |
-| `piecewisezeroinflationcurve` | not started |  | no nanoql type: PiecewiseZeroInflationCurve |
+| `piecewiseyoyinflationcurve` | ported | TermStructures/Inflation/PiecewiseYoYInflationCurve/PiecewiseYoYInflation.cs, TermStructures/Inflation/PiecewiseYoYInflationCurve/PiecewiseYoYInflationCurve{TInterpolator,TBootstrap,TTraits}.cs |  |
+| `piecewisezeroinflationcurve` | ported | TermStructures/Inflation/PiecewiseZeroInflationCurve/PiecewiseZeroInflation.cs, TermStructures/Inflation/PiecewiseZeroInflationCurve/PiecewiseZeroInflationCurve{TInterpolator,TBootstrap,TTraits}.cs |  |
 | `seasonality` | ported | TermStructures/Inflation/Seasonality/KerkhofSeasonality.cs, TermStructures/Inflation/Seasonality/MultiplicativePriceSeasonality.cs, TermStructures/Inflation/Seasonality/Seasonality.cs |  |
 
 ### `ql/termstructures/volatility/`
@@ -1911,7 +1911,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `bondhelpers` | partial | TermStructures/Yield/BondHelpers/BondHelper.cs, TermStructures/Yield/BondHelpers/FixedRateBondHelper.cs | partial: CPIBondHelper, with the inflation bond and coupon it is built on, which waits for S-infl; no nanoql type: CPIBondHelper |
+| `bondhelpers` | ported | TermStructures/Yield/BondHelpers/BondHelper.cs, TermStructures/Yield/BondHelpers/CPIBondHelper.cs, TermStructures/Yield/BondHelpers/FixedRateBondHelper.cs |  |
 | `bootstraptraits` | ported | TermStructures/Yield/BootstrapTraits/BootstrapTraitsDetail.cs, TermStructures/Yield/BootstrapTraits/Discount.cs, TermStructures/Yield/BootstrapTraits/ForwardRate.cs, TermStructures/Yield/BootstrapTraits/IBootstrapTraits{TTermStructure}.cs, TermStructures/Yield/BootstrapTraits/IYieldTraits.cs, TermStructures/Yield/BootstrapTraits/SimpleZeroYield.cs, TermStructures/Yield/BootstrapTraits/ZeroYield.cs | no nanoql type: DiscountCurve, ZeroYieldCurve, ForwardRateCurve, SimpleZeroYieldCurve |
 | `compositezeroyieldstructure` | not started |  | no nanoql type: CompositeZeroYieldStructure |
 | `derivedtermstructure` | replaced: each derived curve implements its members: the original curve read when asked |  |  |
@@ -2149,12 +2149,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `himalayaoption` | not started |  | 1 cases |
 | `hybridhestonhullwhiteprocess` | not started |  | 13 cases |
 | `indexes` | partial | TestSuite/IndexesTests.cs | 3 of 6 cases; replaced: testFixingObservability by Vectors/Indexes/BMAIndexVectorTests.cs; not yet: testCustomIborIndex, testCdiIndex, testShirIndex |
-| `inflation` | partial | TestSuite/InflationTests.cs | 15 of 28 cases; not ported: testCpiAsIndexInterpolation (CPI::AsIndex, deprecated in QuantLib 1.43, D5); not yet: testZeroTermStructure, testZeroTermStructureLazyBaseDate, testYYTermStructure, testZeroBpsYoYInflationSwapFairRateAndSpread, testExpiredYoYInflationSwapFairRateAndSpread, testNotifications, testExtrapolationRegression, testUsCpiLinearBootstrapAtMonthStart, testEuHicpFlatBootstrapAtMonthStart, testUkRpiFlatBootstrapAtMonthStart, testUsCpiLinearGlobalBootstrapAtMonthStart, testPillarCollisionWithDifferentMonthLengths |
-| `inflationcapfloor` | not started |  | 4 cases |
+| `inflation` | ported | TestSuite/InflationTests.cs | 27 of 28 cases; replaced: testNotifications by Vectors/Coupons/IndexedCashFlowVectorTests.cs; not ported: testCpiAsIndexInterpolation (CPI::AsIndex, deprecated in QuantLib 1.43, D5) |
+| `inflationcapfloor` | ported | TestSuite/InflationCapFloorTests.cs | 4 of 4 cases; replaced: testVolatilityQuoteObservability by Conventions/YoYInflationCapFloorQuoteTests.cs |
 | `inflationcapflooredcoupon` | not started |  | 2 cases |
-| `inflationcpibond` | not started |  | 2 cases |
+| `inflationcpibond` | ported | TestSuite/InflationCPIBondTests.cs | 2 of 2 cases |
 | `inflationcpicapfloor` | not started |  | 2 cases |
-| `inflationcpiswap` | not started |  | 5 cases |
+| `inflationcpiswap` | partial | TestSuite/CPISwapTests.cs | 3 of 5 cases; not yet: consistency, cpibondconsistency |
 | `inflationvolatility` | not started |  | 3 cases |
 | `instruments` | not started |  | 2 cases |
 | `integrals` | not started |  | 21 cases |

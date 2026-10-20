@@ -278,17 +278,21 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `OneFactorModelShortRateDynamics`, `Parameter`, `CalibrationHelper`, `BlackCalibrationHelper`, `CallableBond`,
   `CallableBondVolatilityStructure`, `CapFloorTermVolatilityStructure`, `StrippedOptionletBase`, `OptionletStripper`,
   `InflationIndex`, `Region`, `InflationTermStructure`, `ZeroInflationTermStructure`, `YoYInflationTermStructure`,
-  `Seasonality`, `CPIVolatilitySurface` and `YoYOptionletVolatilitySurface` (abstract); `DiscretizedOption`, `Vasicek`, `TermStructureFittingParameter`, `Projection`, `ZeroInflationIndex`,
-  `YoYInflationIndex` and `MultiplicativePriceSeasonality` (unsealed); `Swap`,
-  `SimpleCashFlow`, `InstrumentResults`, `SwapResults`, `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`,
-  `Bond`, `BondResults`, `FixedRateBond`, `FloatingRateBond`, `CapFloor`, `BondHelper`, `Callability`, `IborIndex`,
+  `Seasonality`, `CPIVolatilitySurface`, `YoYOptionletVolatilitySurface`, `InflationCoupon` and `InflationCouponPricer`
+  (abstract); `DiscretizedOption`, `Vasicek`, `TermStructureFittingParameter`, `Projection`, `ZeroInflationIndex`,
+  `YoYInflationIndex`, `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`,
+  `YoYInflationCouponPricer`, `CPICouponPricer` and `YoYInflationCapFloor` (unsealed); `Swap`, `SimpleCashFlow`,
+  `InstrumentResults`, `SwapResults`, `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`, `Bond`,
+  `BondResults`, `FixedRateBond`, `FloatingRateBond`, `CapFloor`, `BondHelper`, `Callability`, `IborIndex`,
   `OvernightIndex`, `Euribor`, `SwapIndex`, `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`,
   `CappedFlooredCoupon`, `BlackIborCouponPricer`, `CompoundingOvernightIndexedCouponPricer`,
   `ArithmeticAveragedOvernightIndexedCouponPricer`, `TridiagonalOperator`, `CubicInterpolation`,
   `LogCubicInterpolation`, `MixedLinearCubicInterpolation`, `LogMixedLinearCubicInterpolation`,
   `RandomSequenceGenerator<TRng>`, `InverseCumulativeRng<TRng, TIc>`, `InverseCumulativeRsg<TUsg, TIc>`,
   `PathGenerator<TGsg>`, `Exercise`, `EarlyExercise`, `BermudanExercise`,
-  `PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap>` and the interpolated curves
+  `PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap>`,
+  `PiecewiseZeroInflationCurve<TInterpolator, TBootstrap, TTraits>` and
+  `PiecewiseYoYInflationCurve<TInterpolator, TBootstrap, TTraits>`, and the interpolated curves
   `InterpolatedDiscountCurve<TInterpolator>`, `InterpolatedZeroCurve<TInterpolator>`,
   `InterpolatedForwardCurve<TInterpolator>`, `InterpolatedSimpleZeroCurve<TInterpolator>`,
   `InterpolatedZeroInflationCurve<TInterpolator>` and `InterpolatedYoYInflationCurve<TInterpolator>`,
@@ -297,13 +301,14 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   of one's own overrides its `CheckPoints` with its construction checks, whose default refuses nothing, so that a curve
   on it takes a bootstrap's first-pass fallback where QuantLib's would), `IInterpolator2D` (the 2-D factory concept),
   the bootstrap's concepts `IBootstrap`, `IBootstrapState`, `IBootstrapHelper`, `IBootstrapTraits<TTermStructure>`,
-  `IYieldTraits`, `IZeroInflationTraits`, `IYoYInflationTraits` and `IInterpolatedCurve<TTraits, TInterpolator>`, `ISolver1DFunction` and `IDerivativeSolver1DFunction`
-  (the solvers' function concepts), the generator concepts `IRng`, `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`,
-  `ISeedableRsg<TSelf>`, `IInverseCumulative` and `IRngTraits`, and the model contracts `ICalibratedModel`,
-  `IAffineModel` and `ITermStructureConsistentModel`, `IXabrInterpolation`, a fit's results, `IXabrCubeModel`, a cube's
-  smile model, and the ZABR kernel tag `IZabrEvaluation`, whose members are internal, so that its tags are QuantLib's
-  (interfaces); and `Solver1DBracket`, `ProblemState` and `BootstrapState<TTermStructure>`, sealed, which a solver's
-  `SolveCore`, a method's `MinimizeCore` and a bootstrap's `Calculate` receive.
+  `IYieldTraits`, `IZeroInflationTraits`, `IYoYInflationTraits` and `IInterpolatedCurve<TTraits, TInterpolator>`,
+  `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers' function concepts), the generator concepts `IRng`,
+  `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`, `ISeedableRsg<TSelf>`, `IInverseCumulative` and `IRngTraits`, and the
+  model contracts `ICalibratedModel`, `IAffineModel` and `ITermStructureConsistentModel`, `IXabrInterpolation`, a fit's
+  results, `IXabrCubeModel`, a cube's smile model, and the ZABR kernel tag `IZabrEvaluation`, whose members are
+  internal, so that its tags are QuantLib's (interfaces); and `Solver1DBracket`, `ProblemState` and
+  `BootstrapState<TTermStructure>`, sealed, which a solver's `SolveCore`, a method's `MinimizeCore` and a bootstrap's
+  `Calculate` receive.
 - **A bond's construction contract:** `Bond`'s derived constructors follow QuantLib's protected interface. They call
   the protected `Bond(settlementDays, calendar, issueDate)`, which builds no leg, then write the protected state
   (`cashflows`, `maturityDate`, and `redemptions` for a bond with its own) and call QuantLib's protected helpers,

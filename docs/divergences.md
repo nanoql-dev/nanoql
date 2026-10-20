@@ -119,6 +119,16 @@ Facts:
 - `ToLegThrowsWhereQuantLibsConversionThrows`
 - `ADatesScheduleOnQuantLibsEmptyCalendarHasNoSpelling`
 
+## CPISwapFairRateTests
+
+[`Divergences/CPISwapFairRateTests.cs`](../tests/NanoQL.Tests/Divergences/CPISwapFairRateTests.cs)
+
+`CPISwap`'s fair rate. QuantLib derives it as `fixedRate - NPV / (legBPS[0] / 1bp)` (`cpiswap.cpp:195-199`), but a CPI coupon's sensitivity to its rate carries its index ratio, which the BPS leaves out, so the swap repriced at QuantLib's fair rate isn't worth zero (QuantLib's defect, R8). nanoql's `DiscountingSwapEngine` gives the rate that zeroes the swap, `fixedRate - NPV / (payer[0] S)`, S the NPV of the swap's CPI coupons rebuilt at a unit rate. On `InflationFixture`'s market, for a five-year payer swap of 1,000,000 against a 6-month Ibor leg on a curve flat at 4.5% plus 0.1%, at 2% on a base CPI of 306.1, QuantLib's fair rate is 0.011610586633227834 and the swap rebuilt at it is worth -4,112.158481168008; the root of QuantLib's own NPV, found by QuantLib's `Brent` through the wheel, is 0.012444035321727333, where the swap is worth 0.0, and it is nanoql's fair rate.
+
+Facts:
+
+- `TheFairRateZeroesTheSwap`
+
 ## CalendarEqualityTests
 
 [`Divergences/CalendarEqualityTests.cs`](../tests/NanoQL.Tests/Divergences/CalendarEqualityTests.cs)
@@ -257,6 +267,38 @@ Facts:
 - `ACouponRefusingThePricerLeavesNoNewLeg`
 - `AnEmptyPricerListIsRefused`
 - `ANullCashFlowInTheLegIsRefused`
+
+## CpiLegBaseFixingTests
+
+[`Divergences/CpiLegBaseFixingTests.cs`](../tests/NanoQL.Tests/Divergences/CpiLegBaseFixingTests.cs)
+
+A CPI leg's base. QuantLib's `CPILeg` gives each coupon `laggedFixing(baseDate + lag, lag)` and the notional flow `laggedFixing(baseDate, 0M)` (`cpicoupon.cpp:112-121, 168-172`), so under a linear observation the notional flow misses the coupons' base unless the base date starts its month. With neither a base CPI nor a base date it gives every flow the base date start - lag (`:286-288`), so from a month-end start the coupons miss `laggedFixing(start, lag)` too, since (start - lag) + lag loses the start's day (QuantLib's defect, R8). nanoql's leg gives every flow one base: with neither, `laggedFixing(start, lag, interpolation)`, QuantLib's own answer for the same leg built with that value as its explicit base CPI, which the wheel gives; with a base date, the coupons' `laggedFixing(baseDate + lag, lag, interpolation)`, the notional flow included, which QuantLib's `CPICashFlow` given that base fixing pays. On `InflationFixture`'s market, for a two-year annual leg of 1,000,000 at 2%, linear, lagged three months: from 15 May 2024 with neither base, the base is 310.30694493402456 and the notional flow pays 63,562.49459146323, where QuantLib's reads 310.34168149586054 and pays 63,443.44998172313; from 31 May, the base is 310.882579387307 and the coupons pay 20,637.587250557182 and 21,256.7148680739 and the notional flow 62,835.74340369502, where QuantLib's pay 20,642.36496136218, 21,261.63591020305 and 62,844.226063026195 on the base date 29 February 2024; from 15 May with the base date 15 March 2024, off the start less the lag, the base is 311.54246644409534 and the notional flow pays 59,344.59661315317, where QuantLib's reads 311.5223403181773 and pays 59,413.036336353194.
+
+Facts:
+
+- `TheNotionalFlowSharesTheCouponsBase`
+- `AMonthEndStartKeepsItsDay`
+- `ABaseDateGivesTheNotionalFlowTheCouponsBase`
+
+## CpiPricerCouponTypeTests
+
+[`Divergences/CpiPricerCouponTypeTests.cs`](../tests/NanoQL.Tests/Divergences/CpiPricerCouponTypeTests.cs)
+
+`CPICouponPricer` given a coupon that isn't a CPI coupon. QuantLib's `initialize` casts the coupon without a check and then reads its fixed rate through the null pointer (`cpicouponpricer.cpp:111-112`), which is undefined; the wheel can't reach it. nanoql refuses with "CPI coupon needed", after the year-on-year pricer's "year-on-year inflation coupon needed" (`inflationcouponpricer.cpp:138`).
+
+Facts:
+
+- `AYearOnYearCouponIsRefused`
+
+## CpiPricerFixedOptionletTests
+
+[`Divergences/CpiPricerFixedOptionletTests.cs`](../tests/NanoQL.Tests/Divergences/CpiPricerFixedOptionletTests.cs)
+
+`CPICouponPricer`'s optionlet once its fixing date is past. QuantLib then pays `max(indexFixing - strike, 0)`, a CPI level against a strike on the index ratio (`cpicouponpricer.cpp:84-94`), while before it the forward is `indexRatio(accrualEnd)` (`:104`; QuantLib's defect, R8). nanoql's fixed branch reads the ratio, as the live one does. QuantLib's check is its `blackFormula` at zero deviation, the live branch's own formula at zero variance, on the coupon's `indexRatio`, which the wheel binds. On `InflationFixture`'s market, for a coupon of 1,000,000 at 3% on a base CPI of 301 from 1 October 2023 to 1 April 2024, lagged two months and fixed at 309.80326478740244, its ratio 1.0292467268684466: the caplet rate struck at 1.01 is 9.263797943622073 from QuantLib's pricer (the C++ harness) and 0.0005774018060533992 from `blackFormula` and nanoql; the floorlet rate struck at 1.05 is 0.0 from QuantLib's pricer and 0.0006225981939466019 from `blackFormula` and nanoql.
+
+Facts:
+
+- `AFixedOptionletPaysOnTheIndexRatio`
 
 ## CubeAtmExtrapolationTests
 
@@ -466,6 +508,37 @@ Facts:
 - `ReadingNeverWrites`
 - `QuantLibsNullSentinelIsAValue`
 - `FewerValuesThanDatesAreRefused`
+
+## IndexedCashFlowNoBaseDateTests
+
+[`Divergences/IndexedCashFlowNoBaseDateTests.cs`](../tests/NanoQL.Tests/Divergences/IndexedCashFlowNoBaseDateTests.cs)
+
+An indexed cash flow with no base date. QuantLib's `baseFixing()` is `index_->fixing(baseDate())` (`indexedcashflow.hpp:62`), so on `Date()` a zero-inflation index first takes the date's inflation period (`inflationindex.cpp:205`), reading `Date()`'s month before the date tables, which is undefined. nanoql refuses the base fixing, and so the amount, with `NanoQLException` and the text QuantLib's `CPICashFlow` gives a missing base, "no base date specified" (`cpicoupon.cpp:164`).
+
+Facts:
+
+- `TheBaseFixingIsRefused`
+
+## InflationCouponPricerSettingTests
+
+[`Divergences/InflationCouponPricerSettingTests.cs`](../tests/NanoQL.Tests/Divergences/InflationCouponPricerSettingTests.cs)
+
+Setting an inflation pricer on a leg. QuantLib's `setCouponPricer` for inflation pricers casts each cash flow to an inflation coupon and sets the pricer on the coupons in place, one after another (`inflationcouponpricer.cpp:27-34`): a null cash flow casts to null and is skipped, and a coupon refusing the pricer, "pricer given is wrong type", leaves the earlier ones holding it. Both answers are defined. The wheel shows the in-place change: given a Black year-on-year pricer and a leg of a year-on-year coupon then a CPI coupon, it refuses "pricer given is wrong type", and the year-on-year coupon, which refused "pricer not set" before, then prices at 0.03 on `InflationFixture`'s flat curve. The null skip alone is off the wheel, which refuses `None` in a `Leg`. nanoql returns a new leg, all or nothing, as its floating-rate setter does, and refuses a null cash flow, as every nanoql leg does, with `ArgumentException`, "null cash flow in leg", naming the leg.
+
+Facts:
+
+- `ANullCashFlowIsRefused`
+- `ACouponRefusingThePricerLeavesNoNewLeg`
+
+## InflationCurveBaseDateTests
+
+[`Divergences/InflationCurveBaseDateTests.cs`](../tests/NanoQL.Tests/Divergences/InflationCurveBaseDateTests.cs)
+
+A piecewise zero-inflation curve whose base date is a function, given a seasonality of more than one cycle. QuantLib's lazy constructor gives its base `Date()` (`piecewisezeroinflationcurve.hpp:84`), and a seasonality of more than one cycle checks itself against that date (`seasonality.cpp:70-76`), whose month reads before the date tables, which is undefined. nanoql's curve passes the base date its function computes, so the check reads the real one. QuantLib's check is its curve with that base date given: on `InflationFixture`'s fixings and five UK RPI zero-coupon swaps from 2.9% to 3.15%, with two equal twelve-month cycles, the wheel's curve based on 1 April 2024 has the nodes 0.027822937658004258 (twice), 0.028915718188625192, 0.029630103472299253, 0.030288922160623725 and 0.03140364761530262; with a second cycle 0.1% higher, it refuses "seasonality is inconsistent with inflation term structure, factors 1.00049 and later factor 1.00149, 1 years later from inflation curve with base date at April 30th, 2024".
+
+Facts:
+
+- `TheSeasonalityChecksTheComputedBaseDate`
 
 ## InflationCurveFirstDateTests
 
@@ -849,6 +922,16 @@ Facts:
 
 - `EveryGeneratorRefusesSeedZero`
 
+## SetSeasonalityColdStartTests
+
+[`Divergences/SetSeasonalityColdStartTests.cs`](../tests/NanoQL.Tests/Divergences/SetSeasonalityColdStartTests.cs)
+
+`InflationTermStructureExtensions.SetSeasonality` on a piecewise zero-inflation curve. QuantLib's `setSeasonality` marks the curve for recalculation, and its bootstrap restarts from the nodes it last found, so the curve it gives differs from one built with the seasonality from the start: on the wheel, a curve on nine UK RPI zero-coupon swaps from 2.9% to 3.25%, bootstrapped to 1e-14, differs from the fresh one by up to 7.9e-15 at its nodes, and its five-year zero rate is 0.030262300008121912 against the fresh curve's 0.0302623000081228 (the planner's `seasonality_rebuild.py`). nanoql's copy is bootstrapped from a cold start, as S5R1's curves are, so it is the curve built with the seasonality, bit for bit.
+
+Facts:
+
+- `TheCopyIsTheCurveBuiltWithTheSeasonality`
+
 ## SetSeasonalityReceiverTests
 
 [`Divergences/SetSeasonalityReceiverTests.cs`](../tests/NanoQL.Tests/Divergences/SetSeasonalityReceiverTests.cs)
@@ -1154,6 +1237,49 @@ Facts:
 - `SabrsEdgesComeBackAsTheTransformsNearestValues`
 - `ZabrsTransformKeepsEachEdgeInItsRange`
 
+## YoYCapFloorEngineFixingTests
+
+[`Divergences/YoYCapFloorEngineFixingTests.cs`](../tests/NanoQL.Tests/Divergences/YoYCapFloorEngineFixingTests.cs)
+
+The year-on-year cap and floor engines' forward. QuantLib's engines take every optionlet's forward from the index's curve at the coupon's fixing date, `yoyTS->yoyRate(fixingDate)` (`inflationcapfloorengines.cpp:81`), and read no fixing, while QuantLib's own year-on-year pricer prices the same optionlet on the coupon's fixing (`inflationcouponpricer.cpp:99-109`; QuantLib's defect, R8). nanoql's engines read each optionlet's forward as its coupon's own fixing, `CPI.LaggedYoYRate` at its accrual end with its lag and interpolation, and keep QuantLib's zero deviation for a fixing at or before the volatility's base date. QuantLib's check is the wheel's capped year-on-year coupon priced by its `BlackYoYInflationCouponPricer`, the caplet's rate times its accrual, nominal and discount. On `InflationFixture`'s market, a ratio of UK RPI and a Black volatility of 15% lagged two months, each case a one-coupon cap of 1,000,000, Actual/365 (Fixed): a coupon from 1 July 2023 to 1 July 2024, lagged three months, struck at 3.2%, fixed at 0.033084673723716485 on 1 April 2024 where the curve reads 3%: QuantLib's engine prices it at 0.0, its pricer and nanoql at 1,085.739999233565; the same coupon on a curve based in May 2024: QuantLib's engine refuses "date (April 1st, 2024) is before base date (May 1st, 2024)", its pricer and nanoql price it at 1,085.739999233565; a coupon from 15 July 2024 to 15 July 2025, linear, struck at 2.5%, on a curve falling from 3% in April 2024 to 2% in April 2028: the engine's forward is the curve's rate at May 2025's start, 0.02729637234770705, the coupon's 0.027200547570157427; QuantLib's engine prices it at 2,896.7205361166657, its pricer and nanoql at 2,829.215810328031; a coupon from 3 July 2025 to 3 July 2026 with five fixing days, struck at 2.5%, fixing on 28 April 2026, on the same curve: the engine's forward is April's, 0.025003422313483917, the coupon's May's, 0.02479808350444901; QuantLib's engine prices it at 1,947.2600270718465, its pricer and nanoql at 1,846.091044619172.
+
+Facts:
+
+- `AFixedCapletPricesOnItsFixing`
+- `AFixingBeforeTheCurvesBaseDateIsPriced`
+- `ALinearObservationInterpolatesTheForward`
+- `FixingDaysMoveTheFixingDateAlone`
+
+## YoYInflationCapFloorEmptyLegTests
+
+[`Divergences/YoYInflationCapFloorEmptyLegTests.cs`](../tests/NanoQL.Tests/Divergences/YoYInflationCapFloorEmptyLegTests.cs)
+
+The last year-on-year coupon of a cap on an empty leg. QuantLib's `lastYoYInflationCoupon()` reads `yoyLeg_.back()` (`inflationcapfloor.cpp:109-115`), which is undefined for an empty leg; the wheel doesn't bind it. nanoql refuses with `NanoQLException` and the text QuantLib's `CashFlows` gives an empty leg, "empty leg", as S7's `CapFloor.LastFloatingRateCoupon` does. The rest of the cap is QuantLib's defined behaviour, as the wheel gives it: it is expired and prices at 0.
+
+Facts:
+
+- `TheLastCouponOfAnEmptyLegIsRefused`
+
+## YoYInflationCapFloorNullCashFlowTests
+
+[`Divergences/YoYInflationCapFloorNullCashFlowTests.cs`](../tests/NanoQL.Tests/Divergences/YoYInflationCapFloorNullCashFlowTests.cs)
+
+A year-on-year cap on a leg holding a null cash flow. QuantLib builds the instrument, and its `isExpired()` dereferences each cash flow (`inflationcapfloor.cpp:94-99`), which is undefined for a null one; the wheel refuses `None` in a `Leg`. nanoql refuses it at construction with `ArgumentException`, "null cash flow in leg", from every constructor, naming the leg, as S7's `CapFloor` does.
+
+Facts:
+
+- `ANullCashFlowIsRefusedAtConstruction`
+
+## YoYPricerMissingVolatilityTests
+
+[`Divergences/YoYPricerMissingVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/YoYPricerMissingVolatilityTests.cs)
+
+A year-on-year pricer with no volatility. QuantLib's `optionletRate` reads `capletVolatility()->baseDate()` before anything else (`inflationcouponpricer.cpp:99`), so its "missing optionlet volatility" check (`:112`) is unreachable and an empty handle throws "empty Handle cannot be dereferenced" on the wheel, for a fixed optionlet too (QuantLib's defect, R8). nanoql checks the volatility first, refusing every optionlet with QuantLib's own "missing optionlet volatility".
+
+Facts:
+
+- `TheMissingVolatilityIsNamed`
+
 ## ZabrModelEmptyStrikesTests
 
 [`Divergences/ZabrModelEmptyStrikesTests.cs`](../tests/NanoQL.Tests/Divergences/ZabrModelEmptyStrikesTests.cs)
@@ -1185,6 +1311,26 @@ A short-maturity ZABR smile section given fewer than five parameters. QuantLib's
 Facts:
 
 - `FewerThanFiveParametersAreRefused`
+
+## ZeroCouponInflationSwapConventionTests
+
+[`Divergences/ZeroCouponInflationSwapConventionTests.cs`](../tests/NanoQL.Tests/Divergences/ZeroCouponInflationSwapConventionTests.cs)
+
+`ZeroCouponInflationSwap`'s inflation-leg convention given as Following. QuantLib's default for it is `BusinessDayConvention()`, which is Following (0), and the constructor replaces that value by the fixed leg's convention (`zerocouponinflationswap.cpp:73-74`), so an explicit Following is silently replaced (QuantLib's defect, R8). nanoql's parameter is a nullable convention, null for the fixed leg's, so a given Following is kept. For a swap from 15 June 2024 to Saturday 31 May 2025 on the UK calendar, its fixed leg ModifiedFollowing, the wheel's inflation leg asked for Following pays on 30 May 2025, as the fixed leg does; nanoql's pays on 2 June.
+
+Facts:
+
+- `AGivenFollowingIsKept`
+
+## ZeroCouponInflationSwapFairRateTests
+
+[`Divergences/ZeroCouponInflationSwapFairRateTests.cs`](../tests/NanoQL.Tests/Divergences/ZeroCouponInflationSwapFairRateTests.cs)
+
+`ZeroCouponInflationSwap.FairRate` where the legs pay on different days. QuantLib's fair rate is the inflation growth's rate, `growth^(1/T) - 1` (`zerocouponinflationswap.cpp:118-138`), whose comment reads "Always means that NPV is zero for _this_ instrument", which fails once the legs' conventions part their payment days (QuantLib's defect, R8). nanoql scales the growth's excess by the ratio of the legs' end discounts, read from the engine's results. On `InflationFixture`'s market, for a payer swap of 1,000,000 from 15 June 2024 to Saturday 31 May 2025, its fixed leg Following (paying 2 June) and its inflation leg Preceding (paying 30 May), QuantLib's fair rate is 0.03078176611785821 and the swap rebuilt at it is worth -9.332619118980801; the root of QuantLib's own NPV, found by QuantLib's `Brent` through the wheel, is 0.030791894092525723, and it is nanoql's fair rate.
+
+Facts:
+
+- `TheFairRateZeroesTheSwap`
 
 ## ZeroGearingWithoutDayCounterTests
 

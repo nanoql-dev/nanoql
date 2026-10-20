@@ -7,7 +7,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/yield/bondhelpers.hpp ql/termstructures/yield/bondhelpers.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: CPIBondHelper, with the inflation bond and coupon it is built on, which waits for S-infl
 
 using NanoQL.Instruments;
 using NanoQL.PricingEngines;

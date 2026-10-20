@@ -21,7 +21,8 @@ namespace NanoQL.Coupons;
 /// QuantLib's visitor is a <c>switch</c> over the coupon types, most derived first, as <c>accept</c> dispatches; each
 /// later coupon type adds its case in its own port. A leg is set all or nothing: a pricer one coupon refuses leaves no
 /// new leg, where QuantLib has already changed the earlier coupons (a documented divergence). Cash flows that aren't
-/// floating-rate coupons are kept as they are.
+/// floating-rate coupons are kept as they are. QuantLib's overload for inflation-coupon pricers is
+/// <see cref="InflationCouponPricerFunctions"/>, with its swap and bond forms.
 /// </remarks>
 public static class CouponPricerFunctions
 {

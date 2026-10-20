@@ -18,8 +18,10 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// A static class: <c>Calculate</c> takes the engine's inputs and returns the results, in place of QuantLib's engine
 /// object, whose <c>discountCurve()</c> accessor has no instance to belong to. Its overloads for
-/// <see cref="FixedVsFloatingSwap"/>, <see cref="OvernightIndexedSwap"/> and <see cref="BMASwap"/> run the same steps
-/// and body and return those swaps' results records, so a caller needs no cast.
+/// <see cref="FixedVsFloatingSwap"/>, <see cref="OvernightIndexedSwap"/>, <see cref="BMASwap"/>,
+/// <see cref="YearOnYearInflationSwap"/> and <see cref="CPISwap"/> run the same steps and body and return those swaps'
+/// results records, so a caller needs no cast; the <see cref="CPISwap"/> overload also gives the fair rate, which
+/// QuantLib's swap derives from the CPI leg's BPS (see <see cref="CPISwapResults"/>).
 /// </remarks>
 public static class DiscountingSwapEngine
 {
@@ -157,6 +159,108 @@ public static class DiscountingSwapEngine
         swap.Validate();
         SwapResults results = Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate);
         return swap.FetchResults(results);
+    }
+
+    /// <summary>Prices a year-on-year inflation swap, with the fair rate and spread its results derive.</summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="includeSettlementDateFlows">
+    /// Whether cash flows on the settlement date count; the context's
+    /// <see cref="EvaluationContext.IncludeReferenceDateEvents"/> when <see langword="null"/>.
+    /// </param>
+    /// <param name="settlementDate">The settlement date; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the NPV is given at; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <returns>The swap's results: the expired results when the swap has expired.</returns>
+    /// <exception cref="ArgumentException">
+    /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
+    /// </exception>
+    /// <exception cref="NanoQLException">A leg fails to price; the message names the leg.</exception>
+    public static YearOnYearInflationSwapResults Calculate(
+        YearOnYearInflationSwap swap,
+        EvaluationContext context,
+        YieldTermStructure discountCurve,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        CheckArguments(swap, context, discountCurve, settlementDate, npvDate);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        SwapResults results = Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate);
+        return swap.FetchResults(results);
+    }
+
+    /// <summary>
+    /// Prices a CPI swap, with the fair rate that zeroes it and the fair spread its results derive.
+    /// </summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="includeSettlementDateFlows">
+    /// Whether cash flows on the settlement date count; the context's
+    /// <see cref="EvaluationContext.IncludeReferenceDateEvents"/> when <see langword="null"/>.
+    /// </param>
+    /// <param name="settlementDate">The settlement date; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the NPV is given at; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <returns>The swap's results: the expired results when the swap has expired.</returns>
+    /// <remarks>
+    /// The fair rate is <c>fixedRate - NPV / (p S)</c>, where <c>p</c> is the CPI leg's sign and <c>S</c> its
+    /// sensitivity to its rate: the NPV, on this curve and under these dates, of the swap's CPI coupons rebuilt at a
+    /// unit rate, so the swap rebuilt at the fair rate is worth zero. It is <see langword="null"/> when <c>S</c> is
+    /// zero, the CPI leg having no live coupon. QuantLib's <c>fixedRate - NPV / (legBPS[0] / 1bp)</c> leaves out the
+    /// index ratio a CPI coupon's sensitivity carries, a documented divergence.
+    /// </remarks>
+    /// <exception cref="ArgumentException">
+    /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
+    /// </exception>
+    /// <exception cref="NanoQLException">A leg fails to price; the message names the leg.</exception>
+    public static CPISwapResults Calculate(
+        CPISwap swap,
+        EvaluationContext context,
+        YieldTermStructure discountCurve,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        CheckArguments(swap, context, discountCurve, settlementDate, npvDate);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        SwapResults results = Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate);
+
+        // the CPI leg's sensitivity to its rate, under the body's dates
+        double sensitivity;
+        try
+        {
+            sensitivity = CashFlows.Npv(
+                swap.UnitRateCpiCoupons(),
+                discountCurve,
+                context,
+                includeSettlementDateFlows ?? context.IncludeReferenceDateEvents,
+                settlementDate ?? discountCurve.ReferenceDate,
+                results.ValuationDate);
+        }
+        catch (Exception e)
+        {
+            throw new NanoQLException($"{DataFormattersFunctions.Ordinal(1)} leg: {QuantLibText(e)}", e);
+        }
+
+        double? fairRate = sensitivity != 0.0 && results.NPV is double npv
+            ? swap.FixedRate - (npv / (swap.PayerMultipliers[0] * sensitivity))
+            : null;
+        return swap.FetchResults(new CPISwapResults(results) { FairRate = fairRate });
     }
 
     /// <summary>

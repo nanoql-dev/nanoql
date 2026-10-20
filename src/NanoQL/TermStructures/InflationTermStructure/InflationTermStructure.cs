@@ -31,7 +31,7 @@ public abstract class InflationTermStructure : TermStructure
 {
     private readonly double? baseRate;
 
-    // Written at construction and on a fresh copy (WithSeasonality), never after.
+    // Written at construction and on a fresh copy (WithSeasonality, ResetBase), never after.
     private Seasonality? seasonality;
 
     /// <summary>
@@ -123,7 +123,7 @@ public abstract class InflationTermStructure : TermStructure
     public Frequency Frequency { get; }
 
     /// <summary>Gets the base date: the last date for which there is information, the structure's minimum date.</summary>
-    public Date BaseDate { get; }
+    public Date BaseDate { get; private set; }
 
     /// <summary>Gets the seasonality, or <see langword="null"/> for none.</summary>
     public Seasonality? Seasonality => seasonality;
@@ -152,6 +152,20 @@ public abstract class InflationTermStructure : TermStructure
         copy.seasonality = seasonality;
         copy.CheckSeasonality();
         return copy;
+    }
+
+    /// <summary>
+    /// Sets a fresh copy's base date and seasonality, and checks the seasonality against the copy: the step of a
+    /// bootstrapped curve's <see cref="WithSeasonality"/>, before it bootstraps the copy again.
+    /// </summary>
+    /// <param name="baseDate">The base date.</param>
+    /// <param name="seasonality">The seasonality, or <see langword="null"/> for none.</param>
+    /// <exception cref="NanoQLException">The seasonality is inconsistent with the structure.</exception>
+    private protected void ResetBase(Date baseDate, Seasonality? seasonality)
+    {
+        BaseDate = baseDate;
+        this.seasonality = seasonality;
+        CheckSeasonality();
     }
 
     /// <summary>Checks that a date is within the structure's range, or that extrapolation is allowed.</summary>

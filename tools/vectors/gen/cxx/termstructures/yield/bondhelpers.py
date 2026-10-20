@@ -8,7 +8,7 @@ the wheel generator's helpers and on helpers of bonds the wheel can't build.
 - 22 cases, the helpers of tools/vectors/gen/termstructures/yield/bondhelpers.py's five sets (the test fixture's
   bonds on clean and on dirty prices, BondHelpers on bond.py's bonds, fixed-rate helpers with a payment calendar, an
   ex-coupon period and redemptions other than par, and a BondHelper on a floating-rate bond beside fixed-rate
-  helpers), each under its set's evaluation date with the flags drawn with the seed.
+  helpers), each built and priced under its set's evaluation date, with the flags drawn with the seed.
 - 5 cases on bonds the wheel can't build (cxx/instruments/bond.py's specs, under its first evaluation date): BondHelpers
   on a fixed-rate bond with a first-period day counter, on a floating-rate bond with no accrual day counter, and on a
   bond on QuantLib's empty calendar, whose construction QuantLib refuses (the helper reads the bond's next cash-flow
@@ -103,8 +103,13 @@ def outputs(H, spec, bound):
 
 def cases():
     rnd = random.Random(v.SEED)
-    rows = [(f"{name} / {k}", spec, today) for name, set_on, today in wh.SETS
-            for k, spec in enumerate(set_on(today))]
+    rows = []
+    for name, set_on, today in wh.SETS:
+        # a set reads the wheel's evaluation date (a dirty price adds the accrued amount at the helper's settlement
+        # date), so it is built on its own date, as the wheel's generator builds it
+        with v.case_settings(today):
+            specs = set_on(today)
+        rows += [(f"{name} / {k}", spec, today) for k, spec in enumerate(specs)]
     rows += [(name, spec, bd.EVALUATION_DATES[0]) for name, spec in harness_helpers()]
     out = []
     with cxx.connect() as H:
