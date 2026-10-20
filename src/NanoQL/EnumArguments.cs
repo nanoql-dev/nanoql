@@ -364,4 +364,37 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, $"unknown CPI interpolation type: {(int)value}");
         }
     }
+
+    /// <summary>Refuses a time extrapolation outside <see cref="BlackVolTimeExtrapolationType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>
+    /// QuantLib stores any value and refuses it where the structure extrapolates: its text is that refusal's
+    /// (<c>blackvoltimeextrapolation.cpp:75</c>).
+    /// </remarks>
+    internal static void Check(BlackVolTimeExtrapolationType value, string paramName)
+    {
+        if (value is < BlackVolTimeExtrapolationType.FlatVolatility or > BlackVolTimeExtrapolationType.LinearVariance)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown extrapolation type");
+        }
+    }
+
+    /// <summary>Refuses a strike extrapolation outside <see cref="BlackVarianceSurfaceExtrapolation"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>
+    /// QuantLib stores any value and compares it with <c>ConstantExtrapolation</c> alone, so any other value
+    /// extrapolates as the interpolator does; nanoql refuses a value outside the type, as for every stored enum.
+    /// </remarks>
+    internal static void Check(BlackVarianceSurfaceExtrapolation value, string paramName)
+    {
+        if (value is not (BlackVarianceSurfaceExtrapolation.ConstantExtrapolation
+            or BlackVarianceSurfaceExtrapolation.InterpolatorDefaultExtrapolation))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown extrapolation type");
+        }
+    }
 }

@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/option.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: Greeks and MoreGreeks, which wait for S-eq's engines
 
 namespace NanoQL;
 

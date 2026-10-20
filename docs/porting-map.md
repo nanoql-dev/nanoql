@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 982 | 129 |
-| partial | 24 | 27 |
-| ported | 256 | 26 |
+| not started | 960 | 125 |
+| partial | 25 | 30 |
+| ported | 277 | 27 |
 | replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
@@ -56,7 +56,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `mathconstants` | not started |  |  |
 | `money` | not started |  | no nanoql type: Money, MoneyConversionType, MoneySettings |
 | `numericalmethod` | ported | Lattice.cs |  |
-| `option` | partial | Option.cs, OptionType.cs | partial: Greeks and MoreGreeks, which wait for S-eq's engines; no nanoql type: Greeks, MoreGreeks |
+| `option` | ported | Option.cs, OptionType.cs | replaced: Greeks by OneAssetOptionResults; MoreGreeks by OneAssetOptionResults |
 | `optional` | not ported: C++ platform header |  |  |
 | `payoff` | ported | Payoff.cs |  |
 | `position` | ported | PositionType.cs |  |
@@ -68,7 +68,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rebatedexercise` | not started |  | no nanoql type: RebatedExercise |
 | `settings` | replaced: EvaluationContext | EvaluationContext.cs |  |
 | `shared_ptr` | not ported: C++ platform header |  |  |
-| `stochasticprocess` | partial | StochasticProcess/StochasticProcess.cs, StochasticProcess/StochasticProcess1D.cs, StochasticProcess/StochasticProcess1DDiscretization.cs, StochasticProcess/StochasticProcessDiscretization.cs | partial: StochasticProcess's defaults of expectation, stdDeviation and covariance, which call the discretization, wait for S-eq's EulerDiscretization; StochasticProcess1D's defaults of expectation, stdDeviation and variance, which call the discretization, wait for S-eq's EulerDiscretization |
+| `stochasticprocess` | ported | StochasticProcess/StochasticProcess.cs, StochasticProcess/StochasticProcess1D.cs, StochasticProcess/StochasticProcess1DDiscretization.cs, StochasticProcess/StochasticProcessDiscretization.cs |  |
 | `termstructure` | partial | TermStructure.cs | partial: the constructors taking a day counter only, for structures that manage their own reference date, which no pilot curve uses |
 | `timegrid` | ported | TimeGrid.cs |  |
 | `timeseries` | ported | TimeSeries{T}.cs | no nanoql type: TimeSeriesReverse |
@@ -98,7 +98,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `digitalcmscoupon` | not started |  | no nanoql type: DigitalCmsCoupon, DigitalCmsLeg |
 | `digitalcoupon` | not started |  | no nanoql type: DigitalCoupon |
 | `digitaliborcoupon` | not started |  | no nanoql type: DigitalIborCoupon, DigitalIborLeg |
-| `dividend` | not started |  | no nanoql type: Dividend, FixedDividend, FractionalDividend |
+| `dividend` | ported | Coupons/Dividend/Dividend.cs, Coupons/Dividend/DividendFunctions.cs, Coupons/Dividend/FixedDividend.cs, Coupons/Dividend/FractionalDividend.cs |  |
 | `duration` | ported | Coupons/DurationType.cs |  |
 | `equitycashflow` | not started |  | no nanoql type: EquityCashFlow, EquityCashFlowPricer, EquityQuantoCashFlowPricer |
 | `fixedratecoupon` | ported | Coupons/FixedRateCoupon.cs, Coupons/FixedRateLeg.cs |  |
@@ -641,11 +641,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `cpiswap` | ported | Instruments/CPISwap.cs, Instruments/CPISwapResults.cs |  |
 | `creditdefaultswap` | ported | Instruments/CreditDefaultSwap/CreditDefaultSwap.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapFunctions.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapPricingModel.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapResults.cs |  |
 | `crosscurrencyswap` | not started |  | no nanoql type: CrossCurrencySwap, CrossCurrencySwapResults |
-| `dividendschedule` | not started |  | no nanoql type: DividendSchedule |
+| `dividendschedule` | ported | Instruments/DividendSchedule.cs |  |
 | `doublebarrieroption` | not started |  | no nanoql type: DoubleBarrierOption |
 | `doublebarriertype` | not started |  | no nanoql type: DoubleBarrierType |
 | `equitytotalreturnswap` | not started |  | no nanoql type: EquityTotalReturnSwap |
-| `europeanoption` | not started |  | no nanoql type: EuropeanOption |
+| `europeanoption` | ported | Instruments/EuropeanOption.cs |  |
 | `fixedvsfloatingswap` | ported | Instruments/FixedVsFloatingSwap.cs, Instruments/FixedVsFloatingSwapArguments.cs, Instruments/FixedVsFloatingSwapResults.cs |  |
 | `floatfloatswap` | not started |  | no nanoql type: FloatFloatSwap, FloatFloatSwapResults |
 | `floatfloatswaption` | not started |  | no nanoql type: FloatFloatSwaption |
@@ -655,7 +655,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `futures` | ported | Instruments/FuturesType.cs |  |
 | `fxforward` | not started |  | no nanoql type: FxForward, FxForwardResults |
 | `holderextensibleoption` | not started |  | no nanoql type: HolderExtensibleOption |
-| `impliedvolatility` | not started |  |  |
+| `impliedvolatility` | ported | Instruments/ImpliedVolatilityHelper.cs |  |
 | `inflationcapfloor` | ported | Instruments/InflationCapFloor/InflationCapFloorFunctions.cs, Instruments/InflationCapFloor/YoYInflationCap.cs, Instruments/InflationCapFloor/YoYInflationCapFloor.cs, Instruments/InflationCapFloor/YoYInflationCapFloorArguments.cs, Instruments/InflationCapFloor/YoYInflationCapFloorType.cs, Instruments/InflationCapFloor/YoYInflationCollar.cs, Instruments/InflationCapFloor/YoYInflationFloor.cs |  |
 | `lookbackoption` | not started |  | no nanoql type: ContinuousFloatingLookbackOption, ContinuousFixedLookbackOption, ContinuousPartialFloatingLookbackOption, ContinuousPartialFixedLookbackOption |
 | `makecapfloor` | ported | Instruments/MakeCapFloor.cs |  |
@@ -671,7 +671,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `multipleresetsswap` | not started |  | no nanoql type: MultipleResetsSwap |
 | `nonstandardswap` | not started |  | no nanoql type: NonstandardSwap, NonstandardSwapResults |
 | `nonstandardswaption` | not started |  | no nanoql type: NonstandardSwaption |
-| `oneassetoption` | not started |  | no nanoql type: OneAssetOption, OneAssetOptionResults |
+| `oneassetoption` | ported | Instruments/OneAssetOption.cs, Instruments/OneAssetOptionResults.cs |  |
 | `overnightindexedswap` | ported | Instruments/OvernightIndexedSwap.cs, Instruments/OvernightIndexedSwapResults.cs |  |
 | `overnightindexfuture` | not started |  | no nanoql type: OvernightIndexFuture |
 | `partialtimebarrieroption` | not started |  | no nanoql type: PartialBarrierRange, PartialTimeBarrierOption |
@@ -689,7 +689,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `swaption` | ported | Instruments/Swaption/Settlement.cs, Instruments/Swaption/SettlementMethod.cs, Instruments/Swaption/SettlementType.cs, Instruments/Swaption/Swaption.cs, Instruments/Swaption/SwaptionFunctions.cs, Instruments/Swaption/SwaptionPriceType.cs |  |
 | `twoassetbarrieroption` | not started |  | no nanoql type: TwoAssetBarrierOption |
 | `twoassetcorrelationoption` | not started |  | no nanoql type: TwoAssetCorrelationOption |
-| `vanillaoption` | not started |  | no nanoql type: VanillaOption |
+| `vanillaoption` | partial | Instruments/VanillaOption.cs | partial: ImpliedVolatility's American and Bermudan branch, which builds the finite-difference engine and waits for this slot's third commit |
 | `vanillastorageoption` | not started |  | no nanoql type: VanillaStorageOption |
 | `vanillaswap` | ported | Instruments/VanillaSwap.cs |  |
 | `vanillaswingoption` | not started |  | no nanoql type: SwingExercise, VanillaForwardPayoff, VanillaSwingOption |
@@ -1462,12 +1462,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `americanpayoffatexpiry` | not started |  | no nanoql type: AmericanPayoffAtExpiry |
 | `americanpayoffathit` | not started |  | no nanoql type: AmericanPayoffAtHit |
 | `bacheliercalculator` | not started |  | no nanoql type: BachelierCalculator |
-| `blackcalculator` | not started |  | no nanoql type: BlackCalculator |
+| `blackcalculator` | ported | PricingEngines/BlackCalculator.cs |  |
 | `blackdeltacalculator` | not started |  | no nanoql type: BlackDeltaCalculator, BlackDeltaPremiumAdjustedSolverClass, BlackDeltaPremiumAdjustedMaxStrikeClass |
 | `blackformula` | ported | PricingEngines/BlackFormulaFunctions.cs |  |
 | `blackscholescalculator` | not started |  | no nanoql type: BlackScholesCalculator |
 | `genericmodelengine` | replaced: static engines: the model is an engine argument |  |  |
-| `greeks` | not started |  |  |
+| `greeks` | ported | PricingEngines/GreeksFunctions.cs |  |
 | `latticeshortratemodelengine` | ported | PricingEngines/LatticeShortRateModelEngine.cs |  |
 | `mclongstaffschwartzengine` | not started |  | no nanoql type: MCLongstaffSchwartzEngine |
 | `mcsimulation` | not started |  | no nanoql type: McSimulation |
@@ -1672,8 +1672,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `analyticbsmhullwhiteengine` | not started |  | no nanoql type: AnalyticBSMHullWhiteEngine |
 | `analyticcevengine` | not started |  | no nanoql type: CEVCalculator, AnalyticCEVEngine |
 | `analyticdigitalamericanengine` | not started |  | no nanoql type: AnalyticDigitalAmericanEngine, AnalyticDigitalAmericanKOEngine |
-| `analyticdividendeuropeanengine` | not started |  | no nanoql type: AnalyticDividendEuropeanEngine |
-| `analyticeuropeanengine` | not started |  | no nanoql type: AnalyticEuropeanEngine |
+| `analyticdividendeuropeanengine` | ported | PricingEngines/Vanilla/AnalyticDividendEuropeanEngine.cs |  |
+| `analyticeuropeanengine` | ported | PricingEngines/Vanilla/AnalyticEuropeanEngine.cs |  |
 | `analyticeuropeanvasicekengine` | not started |  | no nanoql type: AnalyticBlackVasicekEngine |
 | `analyticgjrgarchengine` | not started |  | no nanoql type: AnalyticGJRGARCHEngine |
 | `analytich1hwengine` | not started |  | no nanoql type: AnalyticH1HWEngine |
@@ -1719,10 +1719,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `batesprocess` | not started |  | no nanoql type: BatesProcess |
-| `blackscholesprocess` | not started |  | no nanoql type: GeneralizedBlackScholesProcess, BlackScholesProcess, BlackScholesMertonProcess, BlackProcess, GarmanKohlagenProcess |
+| `blackscholesprocess` | ported | Processes/BlackScholesProcess/BlackProcess.cs, Processes/BlackScholesProcess/BlackScholesMertonProcess.cs, Processes/BlackScholesProcess/BlackScholesProcess.cs, Processes/BlackScholesProcess/GarmanKohlagenProcess.cs, Processes/BlackScholesProcess/GeneralizedBlackScholesProcess.cs |  |
 | `coxingersollrossprocess` | not started |  | no nanoql type: CoxIngersollRossProcess |
 | `endeulerdiscretization` | not started |  | no nanoql type: EndEulerDiscretization |
-| `eulerdiscretization` | not started |  | no nanoql type: EulerDiscretization |
+| `eulerdiscretization` | ported | Processes/EulerDiscretization.cs |  |
 | `forwardmeasureprocess` | not started |  | no nanoql type: ForwardMeasureProcess, ForwardMeasureProcess1D |
 | `g2process` | not started |  | no nanoql type: G2Process, G2ForwardProcess |
 | `geometricbrownianprocess` | not started |  | no nanoql type: GeometricBrownianMotionProcess |
@@ -1772,7 +1772,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `iterativebootstrap` | ported | TermStructures/IterativeBootstrap/BootstrapState{TTermStructure}.cs, TermStructures/IterativeBootstrap/IBootstrap.cs, TermStructures/IterativeBootstrap/IBootstrapState.cs, TermStructures/IterativeBootstrap/IterativeBootstrap.cs |  |
 | `localbootstrap` | not started |  | no nanoql type: PenaltyFunction, LocalBootstrap |
 | `multicurve` | ported | TermStructures/MultiCurve/MultiCurve.cs, TermStructures/MultiCurve/MultiCurveMember.cs | no nanoql type: MultiCurveBootstrapProvider |
-| `voltermstructure` | partial | TermStructures/VolatilityTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc), which waits for its remaining users (S-eq's Black volatility structures) |
+| `voltermstructure` | partial | TermStructures/VolatilityTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead, as the local volatility structures do) |
 | `yieldtermstructure` | partial | TermStructures/YieldTermStructure.cs | partial: the constructors taking a day counter only, for structures that manage their own reference date, which no curve ported so far uses |
 
 ### `ql/termstructures/credit/`
@@ -1846,20 +1846,20 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `andreasenhugelocalvoladapter` | not started |  | no nanoql type: AndreasenHugeLocalVolAdapter |
 | `andreasenhugevolatilityadapter` | not started |  | no nanoql type: AndreasenHugeVolatilityAdapter |
 | `andreasenhugevolatilityinterpl` | not started |  | no nanoql type: AndreasenHugeVolatilityInterpl, AndreasenHugeVolatilityInterplInterpolationType, AndreasenHugeVolatilityInterplCalibrationType |
-| `blackconstantvol` | not started |  | no nanoql type: BlackConstantVol |
-| `blackvariancecurve` | not started |  | no nanoql type: BlackVarianceCurve |
-| `blackvariancesurface` | not started |  | no nanoql type: BlackVarianceSurface, BlackVarianceSurfaceExtrapolation |
+| `blackconstantvol` | ported | TermStructures/Volatility/EquityFX/BlackConstantVol.cs |  |
+| `blackvariancecurve` | ported | TermStructures/Volatility/EquityFX/BlackVarianceCurve.cs |  |
+| `blackvariancesurface` | ported | TermStructures/Volatility/EquityFX/BlackVarianceSurface.cs, TermStructures/Volatility/EquityFX/BlackVarianceSurfaceExtrapolation.cs |  |
 | `blackvolsurfacedelta` | not started |  | no nanoql type: BlackVolatilitySurfaceDelta, BlackVolatilitySurfaceDeltaSmileInterpolationMethod |
-| `blackvoltermstructure` | not started |  | no nanoql type: BlackVolTermStructure, BlackVolatilityTermStructure, BlackVarianceTermStructure |
-| `blackvoltimeextrapolation` | not started |  | no nanoql type: BlackVolTimeExtrapolation, BlackVolTimeExtrapolationType |
+| `blackvoltermstructure` | partial | TermStructures/Volatility/EquityFX/BlackVolTermStructure/BlackVarianceTermStructure.cs, TermStructures/Volatility/EquityFX/BlackVolTermStructure/BlackVolTermStructure.cs, TermStructures/Volatility/EquityFX/BlackVolTermStructure/BlackVolatilityTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead) |
+| `blackvoltimeextrapolation` | ported | TermStructures/Volatility/EquityFX/BlackVolTimeExtrapolation.cs, TermStructures/Volatility/EquityFX/BlackVolTimeExtrapolationType.cs |  |
 | `fixedlocalvolsurface` | not started |  | no nanoql type: FixedLocalVolSurface, FixedLocalVolSurfaceExtrapolation |
 | `gridmodellocalvolsurface` | not started |  | no nanoql type: GridModelLocalVolSurface |
 | `hestonblackvolsurface` | not started |  | no nanoql type: HestonBlackVolSurface |
 | `impliedvoltermstructure` | not started |  | no nanoql type: ImpliedVolTermStructure |
-| `localconstantvol` | not started |  | no nanoql type: LocalConstantVol |
-| `localvolcurve` | not started |  | no nanoql type: LocalVolCurve |
-| `localvolsurface` | not started |  | no nanoql type: LocalVolSurface |
-| `localvoltermstructure` | not started |  | no nanoql type: LocalVolTermStructure |
+| `localconstantvol` | ported | TermStructures/Volatility/EquityFX/LocalConstantVol.cs |  |
+| `localvolcurve` | ported | TermStructures/Volatility/EquityFX/LocalVolCurve.cs |  |
+| `localvolsurface` | ported | TermStructures/Volatility/EquityFX/LocalVolSurface.cs |  |
+| `localvoltermstructure` | partial | TermStructures/Volatility/EquityFX/LocalVolTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead, as LocalVolCurve and LocalVolSurface do) |
 | `noexceptlocalvolsurface` | not started |  | no nanoql type: NoExceptLocalVolSurface |
 | `piecewiseblackvariancesurface` | not started |  | no nanoql type: PiecewiseBlackVarianceSurface |
 
@@ -1931,7 +1931,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `piecewisespreadyieldcurve` | not started |  | no nanoql type: PiecewiseSpreadYieldCurve |
 | `piecewiseyieldcurve` | ported | TermStructures/Yield/PiecewiseYieldCurve/GlobalLinearSimpleZeroCurve.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseSplineCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearSimpleZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseYieldCurve{TTraits,TInterpolator,TBootstrap}.cs |  |
 | `piecewisezerospreadedtermstructure` | not started |  | no nanoql type: InterpolatedPiecewiseZeroSpreadedTermStructure, PiecewiseZeroSpreadedTermStructure |
-| `quantotermstructure` | not started |  | no nanoql type: QuantoTermStructure |
+| `quantotermstructure` | ported | TermStructures/Yield/QuantoTermStructure.cs |  |
 | `ratehelpers` | ported | TermStructures/Yield/RateHelpers/BMASwapRateHelper.cs, TermStructures/Yield/RateHelpers/DepositRateHelper.cs, TermStructures/Yield/RateHelpers/FraRateHelper.cs, TermStructures/Yield/RateHelpers/FuturesRateHelper.cs, TermStructures/Yield/RateHelpers/FxSwapRateHelper.cs, TermStructures/Yield/RateHelpers/RateHelper.cs, TermStructures/Yield/RateHelpers/RelativeDateRateHelper.cs, TermStructures/Yield/RateHelpers/SwapRateHelper.cs |  |
 | `spreadbootstraptraits` | not started |  |  |
 | `spreaddiscountcurve` | not started |  | no nanoql type: InterpolatedSpreadDiscountCurve, SpreadDiscountCurve |
@@ -2075,7 +2075,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `batesmodel` | not started |  | 4 cases |
 | `bermudanswaption` | partial | TestSuite/BermudanSwaptionTests.cs | 1 of 6 cases; not yet: testCachedG2Values, testTreeEngineTimeSnapping, testBermudanOISSwaptionWithHW, testBermudanOISSwaptionWithG2, testBermudanOISSwaptionPreservesFeatures |
 | `binaryoption` | not started |  | 3 cases |
-| `blackcalculator` | not started |  | 6 cases |
+| `blackcalculator` | ported | TestSuite/BlackCalculatorTests.cs | 6 of 6 cases |
 | `blackdeltacalculator` | not started |  | 4 cases |
 | `blackformula` | ported | TestSuite/BlackFormulaTests.cs | 15 of 15 cases |
 | `blackvolsurfacedelta` | not started |  | 5 cases |
@@ -2113,15 +2113,15 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `daycounters` | partial | TestSuite/DayCountersTests.cs | 11 of 22 cases; not yet: testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter |
 | `defaultprobabilitycurves` | ported | TestSuite/DefaultProbabilityCurvesTests.cs | 10 of 10 cases |
 | `digitalcoupon` | not started |  | 8 cases |
-| `digitaloption` | not started |  | 10 cases |
+| `digitaloption` | partial | TestSuite/DigitalOptionTests.cs | 3 of 10 cases; not yet: testCashAtHitOrNothingAmericanValues, testAssetAtHitOrNothingAmericanValues, testCashAtExpiryOrNothingAmericanValues, testAssetAtExpiryOrNothingAmericanValues, testCashAtHitOrNothingAmericanGreeks, testCashAtHitOrNothingAmericanLowVolatility, testMCCashAtHit |
 | `distributions` | partial | TestSuite/DistributionsTests.cs | 10 of 21 cases; not yet: testBivariate, testBinomialDistribution, testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation, testSankaranApproximation, testCumulativeChiSquareDistribution |
-| `dividendoption` | not started |  | 18 cases |
+| `dividendoption` | partial | TestSuite/DividendOptionTests.cs | 4 of 18 cases; not yet: testEuropeanEndLimit, testFdEuropeanValues, testFdEuropeanGreeks, testFdAmericanGreeks, testFdEuropeanDegenerate, testFdAmericanDegenerate, testFdEuropeanWithDividendToday, testFdAmericanWithDividendToday, testEscrowedDividendModel, testCashDividendEuropeanEngine, testCashDividendEuropeanEngineWithManyDividends, testCashDividendEuropeanEngineWithSingleDividends, testZeroStrikeCallWithCashDividends, testAmericanOptionsWithEscrowedDividends |
 | `doublebarrieroption` | not started |  | 3 cases |
 | `doublebinaryoption` | not started |  | 2 cases |
 | `equitycashflow` | not started |  | 8 cases |
 | `equityindex` | not started |  | 12 cases |
 | `equitytotalreturnswap` | not started |  | 5 cases |
-| `europeanoption` | not started |  | 27 cases |
+| `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 6 of 27 cases; not yet: testValues, testJRBinomialEngines, testCRRBinomialEngines, testEQPBinomialEngines, testTGEOBinomialEngines, testTIANBinomialEngines, testLRBinomialEngines, testJOSHIBinomialEngines, testFarOutOfTheMoneyBinomialEngines, testLargeDriftBinomialEngines, testFdEngines, testIntegralEngines, testMcEngines, testQmcEngines, testLocalVolatility, testPDESchemes, testFdEngineWithNonConstantParameters, testDouglasVsCrankNicolson, testFFTEngines, testBinomialGreeksWithCoincidentNodes, testFdEnginesWithNonStrikedPayoff |
 | `everestoption` | not started |  | 1 cases |
 | `exchangerate` | not started |  | 5 cases |
 | `extendedblackvariancesurface` | not started |  | 1 cases |

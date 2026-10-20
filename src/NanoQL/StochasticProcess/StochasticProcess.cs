@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/stochasticprocess.hpp ql/stochasticprocess.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: StochasticProcess's defaults of expectation, stdDeviation and covariance, which call the discretization, wait for S-eq's EulerDiscretization
 
 using NanoQL.Numerics;
 using NanoQL.Time;
@@ -21,8 +20,8 @@ namespace NanoQL;
 /// and return new vectors and matrices, and never keep one they are given. QuantLib's observer interface is removed.
 /// </para>
 /// <para>
-/// QuantLib's <see cref="Expectation"/>, <see cref="StdDeviation"/> and <see cref="Covariance"/> default to the
-/// process's discretization; those defaults aren't ported yet, so a derived process overrides the three.
+/// <see cref="Expectation"/>, <see cref="StdDeviation"/> and <see cref="Covariance"/> default to the process's
+/// discretization, as QuantLib's do; a process built without one overrides the three, or they refuse.
 /// </para>
 /// </remarks>
 public abstract class StochasticProcess
@@ -66,34 +65,40 @@ public abstract class StochasticProcess
     public abstract Matrix Diffusion(double t, Vector x);
 
     /// <summary>
-    /// The expectation E(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt, by the process's
-    /// discretization in QuantLib, whose default waits for its port.
+    /// The expectation E(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt; by default, the
+    /// discretization's drift applied to x0 by <see cref="Apply"/>.
     /// </summary>
     /// <param name="t0">The start of the interval.</param>
     /// <param name="x0">The state at its start.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>A new vector.</returns>
-    public abstract Vector Expectation(double t0, Vector x0, double dt);
+    /// <exception cref="NanoQLException">The process has no discretization.</exception>
+    public virtual Vector Expectation(double t0, Vector x0, double dt) =>
+        Apply(x0, Discretization().Drift(this, t0, x0, dt));
 
     /// <summary>
-    /// The standard deviation S(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt, by the process's
-    /// discretization in QuantLib, whose default waits for its port.
+    /// The standard deviation S(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt; by default, the
+    /// discretization's diffusion.
     /// </summary>
     /// <param name="t0">The start of the interval.</param>
     /// <param name="x0">The state at its start.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>A new matrix.</returns>
-    public abstract Matrix StdDeviation(double t0, Vector x0, double dt);
+    /// <exception cref="NanoQLException">The process has no discretization.</exception>
+    public virtual Matrix StdDeviation(double t0, Vector x0, double dt) =>
+        Discretization().Diffusion(this, t0, x0, dt);
 
     /// <summary>
-    /// The covariance V(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt, by the process's
-    /// discretization in QuantLib, whose default waits for its port.
+    /// The covariance V(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt; by default, the
+    /// discretization's covariance.
     /// </summary>
     /// <param name="t0">The start of the interval.</param>
     /// <param name="x0">The state at its start.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>A new matrix.</returns>
-    public abstract Matrix Covariance(double t0, Vector x0, double dt);
+    /// <exception cref="NanoQLException">The process has no discretization.</exception>
+    public virtual Matrix Covariance(double t0, Vector x0, double dt) =>
+        Discretization().Covariance(this, t0, x0, dt);
 
     /// <summary>
     /// The state after a time interval Δt; by default E(x0, t0, Δt) + S(x0, t0, Δt) · Δw, where E is the expectation
@@ -137,4 +142,8 @@ public abstract class StochasticProcess
         Date.ThrowIfDefault(date, nameof(date));
         throw new NanoQLException("date/time conversion not supported");
     }
+
+    // QuantLib dereferences its discretization pointer, which is undefined when the process was built without one.
+    private StochasticProcessDiscretization Discretization() =>
+        discretization ?? throw new NanoQLException("no discretization given");
 }

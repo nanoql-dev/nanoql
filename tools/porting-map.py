@@ -13,8 +13,9 @@ any has a "// Partial:" line, otherwise ported), and otherwise "not started". A 
 has a test method or is named on its class's "// Replaced:" line, which the map lists as "replaced: <case> by <test
 file>", or on its "// Not ported:" line, a case that can never port, which the map lists as "not ported: <case>
 (<reason>)" and leaves out of the cases ported. A "// Moved:" line, a check moved out of a ported case to a
-Divergences/ test, is listed on the row whatever its status, as "moved: <case> line <n> to <test file>". With --check,
-it writes nothing and exits 1 if the committed map differs from a fresh one.
+Divergences/ test, is listed on the row whatever its status, as "moved: <case> line <n> to <test file>". A type the
+name table renames into a type another unit ports (Greeks to OneAssetOptionResults) is listed as "replaced: <type> by
+<nanoql type>". With --check, it writes nothing and exits 1 if the committed map differs from a fresh one.
 """
 import os
 import re
@@ -265,11 +266,14 @@ def build(root, ql_root):
     files = sources.git_files(root)
     naming = {}  # unit -> [(nanoql path, header)]
     aliases = set()
+    everywhere = set()  # every ported file's top-level types, for a type renamed into another unit's file
     for path in files:
         if not path.endswith(".cs"):
             continue
         header = sources.Header(os.path.join(root, path))
         aliases |= set(GLOBAL_ALIAS.findall(header.text))
+        if header.upstream:
+            everywhere |= {name for _, _, name in sources.top_level_types(header.text)}
         for up in header.upstream:
             naming.setdefault(sources.unit_of(up), []).append((path, header))
     replaced, not_ported = table["replaced"], table["notPorted"]
@@ -320,9 +324,14 @@ def build(root, ql_root):
             status = "not started" if not mine else ("partial" if partial else "ported")
             # A renamed type (the name table's renames: Array is Vector) counts under its nanoql name.
             left = [n for n in declared if table["renames"].get(n, n) not in ported]
+            # A type replaced by one another unit ports (Greeks by OneAssetOptionResults) is listed as replaced.
+            elsewhere = [n for n in left if n in table["renames"] and table["renames"][n] in everywhere]
+            left = [n for n in left if n not in elsewhere]
             if partial:
                 # Files split from one unit may carry the same text; it is printed once.
                 notes.append("partial: " + "; ".join(dict.fromkeys(partial)))
+            if elsewhere:
+                notes.append("replaced: " + "; ".join(f"{n} by {table['renames'][n]}" for n in elsewhere))
             if left:
                 notes.append("no nanoql type: " + cell(left))
         # A check moved out of a ported case to a Divergences/ test is noted whatever the row's status.

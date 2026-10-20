@@ -281,15 +281,17 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `InflationIndex`, `Region`, `InflationTermStructure`, `ZeroInflationTermStructure`, `YoYInflationTermStructure`,
   `Seasonality`, `CPIVolatilitySurface`, `YoYOptionletVolatilitySurface`, `InflationCoupon`, `InflationCouponPricer`,
   `DefaultProbabilityTermStructure`, `HazardRateStructure`, `DefaultDensityStructure`, `SurvivalProbabilityStructure`,
-  `Claim` and `CdsHelper` (abstract); `DiscretizedOption`, `Vasicek`, `TermStructureFittingParameter`, `Projection`,
-  `ZeroInflationIndex`, `YoYInflationIndex`, `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`,
-  `YoYInflationCouponPricer`, `CPICouponPricer` and `YoYInflationCapFloor` (unsealed); `Swap`, `SimpleCashFlow`,
-  `InstrumentResults`, `SwapResults`, `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`, `Bond`,
-  `BondResults`, `FixedRateBond`, `FloatingRateBond`, `CapFloor`, `BondHelper`, `Callability`, `IborIndex`,
-  `OvernightIndex`, `Euribor`, `SwapIndex`, `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`,
-  `CappedFlooredCoupon`, `BlackIborCouponPricer`, `CompoundingOvernightIndexedCouponPricer`,
-  `ArithmeticAveragedOvernightIndexedCouponPricer`, `TridiagonalOperator`, `CubicInterpolation`,
-  `LogCubicInterpolation`, `MixedLinearCubicInterpolation`, `LogMixedLinearCubicInterpolation`,
+  `Claim`, `CdsHelper`, `BlackVolTermStructure`, `BlackVolatilityTermStructure`, `BlackVarianceTermStructure`,
+  `LocalVolTermStructure`, `OneAssetOption` and `Dividend` (abstract); `DiscretizedOption`, `Vasicek`,
+  `TermStructureFittingParameter`, `Projection`, `ZeroInflationIndex`, `YoYInflationIndex`,
+  `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`, `YoYInflationCouponPricer`,
+  `CPICouponPricer`, `YoYInflationCapFloor`, `GeneralizedBlackScholesProcess`, `LocalVolSurface`, `VanillaOption`,
+  `OneAssetOptionResults` and `BlackCalculator` (unsealed); `Swap`, `SimpleCashFlow`, `InstrumentResults`,
+  `SwapResults`, `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`, `Bond`, `BondResults`, `FixedRateBond`,
+  `FloatingRateBond`, `CapFloor`, `BondHelper`, `Callability`, `IborIndex`, `OvernightIndex`, `Euribor`, `SwapIndex`,
+  `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`, `CappedFlooredCoupon`, `BlackIborCouponPricer`,
+  `CompoundingOvernightIndexedCouponPricer`, `ArithmeticAveragedOvernightIndexedCouponPricer`, `TridiagonalOperator`,
+  `CubicInterpolation`, `LogCubicInterpolation`, `MixedLinearCubicInterpolation`, `LogMixedLinearCubicInterpolation`,
   `RandomSequenceGenerator<TRng>`, `InverseCumulativeRng<TRng, TIc>`, `InverseCumulativeRsg<TUsg, TIc>`,
   `PathGenerator<TGsg>`, `Exercise`, `EarlyExercise`, `BermudanExercise`,
   `PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap>`,
@@ -426,14 +428,15 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
     (`using Calendar = NanoQL.Time.Calendar;`).
   - **Public nested types** move to the top level as `<Outer><Inner>`: `Option::Type` → `OptionType`,
     `Swap::Type` → `SwapType`, `DateGeneration::Rule` (a struct holding an enum) → `DateGenerationRule`.
-  - **Renames** are recorded here. So far: `Array` → `Vector`, which clashes with `System.Numerics.Vector` in files
-    that also import `System.Numerics`; and `Path` → `MonteCarloPath`, after its folder, `montecarlo`, since `Path`
-    would clash with `System.IO.Path`. QuantLib's other names around it stay (`PathGenerator`, `MultiPath`). And
-    `Index` → `FinancialIndex`, in namespace `NanoQL`, since `Index` clashes with `System.Index`, which every C# file
-    sees; QuantLib's derived names stay (`InterestRateIndex`, `IborIndex`). And QuantLib's mixin bases, which are
-    interfaces here and take .NET's `I` prefix: `AffineModel` → `IAffineModel`, `TermStructureConsistentModel` →
-    `ITermStructureConsistentModel`; `ICalibratedModel` is the contract beside QuantLib's `CalibratedModel`, which
-    keeps its name.
+  - **Renames** are recorded here. So far: `Array` → `Vector`, which clashes with `System.Numerics.Vector` in files that
+    also import `System.Numerics`; and `Path` → `MonteCarloPath`, after its folder, `montecarlo`, since `Path` would
+    clash with `System.IO.Path`. QuantLib's other names around it stay (`PathGenerator`, `MultiPath`). And `Index` →
+    `FinancialIndex`, in namespace `NanoQL`, since `Index` clashes with `System.Index`, which every C# file sees;
+    QuantLib's derived names stay (`InterestRateIndex`, `IborIndex`). And QuantLib's mixin bases, which are interfaces
+    here and take .NET's `I` prefix: `AffineModel` → `IAffineModel`, `TermStructureConsistentModel` →
+    `ITermStructureConsistentModel`; `ICalibratedModel` is the contract beside QuantLib's `CalibratedModel`, which keeps
+    its name. And QuantLib's `Greeks` and `MoreGreeks`, the results a one-asset option's engine fills, are replaced by
+    `OneAssetOptionResults`, which carries them; the porting map lists them as replaced.
 - **Members:** the first letter is capitalised and the rest kept (`yearFraction` → `YearFraction`; `NPV` stays).
   - **Property or method:** a member is a property when it takes no arguments, has no side effect, is cheap, has no
     precondition that throws, doesn't return a copy or a new array, and is an attribute of the object, stored or

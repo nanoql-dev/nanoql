@@ -30,6 +30,16 @@ Facts:
 
 - `AnEmptyFactorVectorIsRefused`
 
+## AnalyticEuropeanVolatilityResultTests
+
+[`Divergences/AnalyticEuropeanVolatilityResultTests.cs`](../tests/NanoQL.Tests/Divergences/AnalyticEuropeanVolatilityResultTests.cs)
+
+`AnalyticEuropeanEngine`'s "volatility" additional result for an option expiring on the evaluation date, priced when the reference date's events are included. QuantLib reports √(variance / time to expiry) (`analyticeuropeanengine.cpp:113`), 0/0 there, NaN. nanoql reports the Black volatility at the exercise date and strike, QuantLib's own value for that date; every other result is QuantLib's.
+
+Facts:
+
+- `TheVolatilityAtExpiryIsTheStructures`
+
 ## BMANullIndexTests
 
 [`Divergences/BMANullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/BMANullIndexTests.cs)
@@ -39,6 +49,38 @@ A null BMA index is refused on entry, with QuantLib's text for a missing index, 
 Facts:
 
 - `ANullBMAIndexIsRefusedWithQuantLibsText`
+
+## BlackCalculatorItmProbabilityTests
+
+[`Divergences/BlackCalculatorItmProbabilityTests.cs`](../tests/NanoQL.Tests/Divergences/BlackCalculatorItmProbabilityTests.cs)
+
+`BlackCalculator`'s in-the-money probabilities for a put. QuantLib's `itmCashProbability()` and `itmAssetProbability()` return N(d2) and N(d1) for every payoff (`blackcalculator.hpp:129-135`), a call's, and the analytic engine reports the first for puts (`analyticeuropeanengine.cpp:105`): a put struck at 90 on a forward of 100 at 20% reads 0.665238, where QuantLib's own cash-or-nothing put values 0.334762. nanoql's put reads 1 − N(d2) and 1 − N(d1), the expressions QuantLib's cash-or-nothing and asset-or-nothing puts value, which check it.
+
+Facts:
+
+- `APutsProbabilitiesAreItsDigitalsValues`
+
+## BlackCalculatorVannaVolgaTests
+
+[`Divergences/BlackCalculatorVannaVolgaTests.cs`](../tests/NanoQL.Tests/Divergences/BlackCalculatorVannaVolgaTests.cs)
+
+`BlackCalculator`'s vanna and volga. QuantLib's volga, vega × d1 × d2 / (σ√T), divides by the standard deviation where the derivative in σ divides by σ (`blackcalculator.cpp:511-523`), so it is the volga over √T: against the difference of QuantLib's own vega in σ, a call struck at 100 on a forward of 104 at 25% reads half of it at T = 0.25 and twice it at T = 4. And QuantLib's vanna and volga use the plain vanilla's closed form, through d1 and d2, for every payoff (`:494-523`): a cash-or-nothing call reads a vanna of 0.0054 where its vega's difference in the spot is −0.60, and a volga of −0.15 where it is 18.9. nanoql multiplies the volga by √T, and for payoffs other than the plain vanilla differentiates QuantLib's vega through the payoff's alpha and beta; the plain vanilla's are QuantLib's formulas, and QuantLib's own check is its vega's differences.
+
+Facts:
+
+- `TheVolgaIsTheVegasDerivativeInTheVolatility`
+- `ADigitalsVannaAndVolgaAreItsVegasDerivatives`
+
+## BlackCalculatorZeroVolatilityTests
+
+[`Divergences/BlackCalculatorZeroVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/BlackCalculatorZeroVolatilityTests.cs)
+
+`BlackCalculator`'s Greeks at zero volatility. QuantLib's zero-volatility branches of `delta`, `deltaForward` and `strikeSensitivity` tell a call from a put by `alpha_ >= 0` (`blackcalculator.cpp:214-228`, `:256-270`, `:438-452`), but alpha is 0 for an out-of-the-money put and for every cash-or-nothing payoff, which then get a call's Greeks: a put struck at 90 on a forward of 100 reads a forward delta of 1 and a delta of 1.0204 at a spot of 98, though its value is 0 at every nearby spot; a cash-or-nothing call struck at 100 on a forward of 110 reads 0.95, though its value doesn't move. The theta, theta per day, elasticity and forward elasticity read the deltas, and the rho and dividend rho the forward delta (`:287-310`, `:360-369`, `:395-418`), so QuantLib's put reads an elasticity of 1.8e308, a rho of 100 and a dividend rho of −100. nanoql computes the three from alpha and beta as the nonzero branch does, its derivative terms zero, so each of the nine reads its limit: the delta is QuantLib's own value's difference in the spot, and every result of a plain vanilla call is QuantLib's, but at a standard deviation of exactly ε, where QuantLib's constructor computes d2 (`:76`) and its Greeks take the zero-volatility branch: there an at-the-money call's strike sensitivity reads N(−ε/2) where QuantLib's reads ½, 1 ulp apart.
+
+Facts:
+
+- `AnOutOfTheMoneyPutsGreeksAreItsValuesLimits`
+- `ACashOrNothingCallsGreeksAreItsValuesLimits`
 
 ## BlackCallableEngineTests
 
@@ -60,6 +102,38 @@ A null payoff in a Black formula's payoff overload. QuantLib's fifteen payoff ov
 Facts:
 
 - `ANullPayoffIsRefusedBeforeItIsRead`
+
+## BlackVarianceEmptyRefusalTests
+
+[`Divergences/BlackVarianceEmptyRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/BlackVarianceEmptyRefusalTests.cs)
+
+`BlackVarianceCurve` and `BlackVarianceSurface` with no dates. QuantLib's constructors read `dates.back()` of the empty list in their initializers, before any check (`blackvariancecurve.cpp:35`, `blackvariancesurface.cpp:36`), a result C++ leaves undefined; on the wheel each crashes the process. nanoql refuses with `ArgumentException`, "no dates given", naming `dates`.
+
+Facts:
+
+- `ACurveWithNoDatesIsRefused`
+- `ASurfaceWithNoDatesIsRefused`
+
+## BlackVarianceSurfaceFloorTests
+
+[`Divergences/BlackVarianceSurfaceFloorTests.cs`](../tests/NanoQL.Tests/Divergences/BlackVarianceSurfaceFloorTests.cs)
+
+`BlackVarianceSurface`'s variance past its strikes. QuantLib extrapolates the bilinear variance linearly in strike with no floor under its default extrapolation (`blackvariancesurface.cpp:67-84`), where its variance curve and its time extrapolation floor theirs at zero (`blackvariancecurve.cpp:68`, `blackvoltimeextrapolation.cpp:44`): volatilities of 30% at 90 and 20% at 110 read a variance of −0.010 and a NaN volatility at 130. nanoql floors the variance at zero, QuantLib's convention for a Black variance; inside the grid the variances are QuantLib's.
+
+Facts:
+
+- `TheExtrapolatedVarianceIsFlooredAtZero`
+
+## BlackVolTimeExtrapolationRefusalTests
+
+[`Divergences/BlackVolTimeExtrapolationRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/BlackVolTimeExtrapolationRefusalTests.cs)
+
+`BlackVolTimeExtrapolation` on too few times. QuantLib's surface overload reads `times[N-2]` unchecked under the linear strategy (`blackvoltimeextrapolation.cpp:49-50`), past the list's start with one time, where its curve overload refuses "at least two times required for volatility extrapolation" (`:86-88`); and both overloads' flat strategy read `times.back()` of an empty list (`:39`, `:44`). Both are results C++ leaves undefined. nanoql refuses them with `ArgumentException` naming `times`: the first with the curve overload's text, the second with "at least one time required for volatility extrapolation".
+
+Facts:
+
+- `TheSurfaceOverloadRefusesOneTimeUnderTheLinearStrategy`
+- `TheFlatStrategyRefusesNoTimes`
 
 ## BondEmptyLegTests
 
@@ -663,6 +737,16 @@ Facts:
 - `AFixingTheRatioBranchDoesntReadChangesNothing`
 - `ALagShorterThanThePeriodForecastsThroughTheYoYCurve`
 
+## LocalVolCurveRefusalTests
+
+[`Divergences/LocalVolCurveRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/LocalVolCurveRefusalTests.cs)
+
+`LocalVolCurve` on a Black variance that falls in time. QuantLib returns the square root of the negative derivative, NaN (`localvolcurve.hpp:88-95`): a curve of 30% at six months and 10% at a year, built without the forced monotone variance, gives a process diffusion of NaN at t = 0.8. nanoql refuses with `NanoQLException`, "negative local vol^2 at time …; the black variance curve is not smooth enough", as QuantLib's `LocalVolSurface` refuses the same condition (`localvolsurface.cpp:148-151`).
+
+Facts:
+
+- `AFallingVarianceIsRefused`
+
 ## MakeSwaptionNullIndexTests
 
 [`Divergences/MakeSwaptionNullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/MakeSwaptionNullIndexTests.cs)
@@ -845,6 +929,16 @@ Facts:
 
 - `ToStringNeverThrows`
 - `ShortPeriodThrowsAsQuantLibDoes`
+
+## QuantoTermStructureDayCounterTests
+
+[`Divergences/QuantoTermStructureDayCounterTests.cs`](../tests/NanoQL.Tests/Divergences/QuantoTermStructureDayCounterTests.cs)
+
+`QuantoTermStructure` on structures with different day counters. QuantLib reads every structure at the time the dividend curve's day counter measures, with its own comment that this assumes one day count and "It should be QL_REQUIREd" (`quantotermstructure.hpp:124-131`): two risk-free curves equal at every date, one on Actual/365 (Fixed) and one on Actual/360, give quanto zero rates of 5.0000% and 4.9589%. nanoql makes the check QuantLib names and refuses with `ArgumentException`, "all term structures must share one day counter", naming the first structure that differs; QuantLib's case (`testFDMQuantoHelper`, Actual/360 throughout) is unchanged.
+
+Facts:
+
+- `StructuresOnDifferentDayCountersAreRefused`
 
 ## QuoteSentinelTests
 
@@ -1096,6 +1190,16 @@ A tree's state prices read past the rows its construction stored. QuantLib's `Tr
 Facts:
 
 - `ARowReadBeforeTheSpreadIsSetDoesntKeepItsUnspreadValues`
+
+## StochasticProcessDiscretizationRefusalTests
+
+[`Divergences/StochasticProcessDiscretizationRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/StochasticProcessDiscretizationRefusalTests.cs)
+
+`StochasticProcess`'s and `StochasticProcess1D`'s defaults on a process built without a discretization. QuantLib's expectation, standard deviation, covariance and variance call the discretization through a pointer (`stochasticprocess.cpp:36-52`, `:78-88`), which is null when the process was built without one, a result C++ leaves undefined. nanoql refuses with `NanoQLException`, "no discretization given".
+
+Facts:
+
+- `TheDefaultsRefuseWithoutADiscretization`
 
 ## StrippedOptionletAdapterEmptyStrikesTests
 

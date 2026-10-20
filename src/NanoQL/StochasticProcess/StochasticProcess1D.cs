@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/stochasticprocess.hpp ql/stochasticprocess.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: StochasticProcess1D's defaults of expectation, stdDeviation and variance, which call the discretization, wait for S-eq's EulerDiscretization
 
 using NanoQL.Numerics;
 
@@ -19,9 +18,9 @@ namespace NanoQL;
 /// QuantLib keeps private and nanoql exposes as the base's overrides.
 /// </para>
 /// <para>
-/// QuantLib's <see cref="Expectation(double, double, double)"/>, <see cref="StdDeviation(double, double, double)"/>
-/// and <see cref="Variance"/> default to the process's discretization; those defaults aren't ported yet, so a derived
-/// process overrides the three.
+/// <see cref="Expectation(double, double, double)"/>, <see cref="StdDeviation(double, double, double)"/> and
+/// <see cref="Variance"/> default to the process's discretization, as QuantLib's do; a process built without one
+/// overrides the three, or they refuse.
 /// </para>
 /// </remarks>
 public abstract class StochasticProcess1D : StochasticProcess
@@ -61,34 +60,40 @@ public abstract class StochasticProcess1D : StochasticProcess
     public abstract double Diffusion(double t, double x);
 
     /// <summary>
-    /// The expectation E(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt, by the process's
-    /// discretization in QuantLib, whose default waits for its port.
+    /// The expectation E(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt; by default, the
+    /// discretization's drift applied to x0 by <see cref="Apply(double, double)"/>.
     /// </summary>
     /// <param name="t0">The start of the interval.</param>
     /// <param name="x0">The state at its start.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>The expectation.</returns>
-    public abstract double Expectation(double t0, double x0, double dt);
+    /// <exception cref="NanoQLException">The process has no discretization.</exception>
+    public virtual double Expectation(double t0, double x0, double dt) =>
+        Apply(x0, Discretization1D().Drift(this, t0, x0, dt));
 
     /// <summary>
-    /// The standard deviation S(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt, by the process's
-    /// discretization in QuantLib, whose default waits for its port.
+    /// The standard deviation S(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt; by default, the
+    /// discretization's diffusion.
     /// </summary>
     /// <param name="t0">The start of the interval.</param>
     /// <param name="x0">The state at its start.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>The standard deviation.</returns>
-    public abstract double StdDeviation(double t0, double x0, double dt);
+    /// <exception cref="NanoQLException">The process has no discretization.</exception>
+    public virtual double StdDeviation(double t0, double x0, double dt) =>
+        Discretization1D().Diffusion(this, t0, x0, dt);
 
     /// <summary>
-    /// The variance V(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt, by the process's
-    /// discretization in QuantLib, whose default waits for its port.
+    /// The variance V(x_{t0 + Δt} | x_{t0} = x0) of the process after a time interval Δt; by default, the
+    /// discretization's variance.
     /// </summary>
     /// <param name="t0">The start of the interval.</param>
     /// <param name="x0">The state at its start.</param>
     /// <param name="dt">The interval's length.</param>
     /// <returns>The variance.</returns>
-    public abstract double Variance(double t0, double x0, double dt);
+    /// <exception cref="NanoQLException">The process has no discretization.</exception>
+    public virtual double Variance(double t0, double x0, double dt) =>
+        Discretization1D().Variance(this, t0, x0, dt);
 
     /// <summary>
     /// The state after a time interval Δt; by default E(x0, t0, Δt) + S(x0, t0, Δt) · Δw, where E is the expectation
@@ -188,4 +193,8 @@ public abstract class StochasticProcess1D : StochasticProcess
         ArgumentNullException.ThrowIfNull(dx);
         return new Vector(1, Apply(x0[0], dx[0]));
     }
+
+    // QuantLib dereferences its discretization pointer, which is undefined when the process was built without one.
+    private protected StochasticProcess1DDiscretization Discretization1D() =>
+        discretization ?? throw new NanoQLException("no discretization given");
 }
