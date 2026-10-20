@@ -219,7 +219,8 @@ public sealed record FixedRateLeg
         Schedule schedule = Schedule;
         if (schedule.Empty)
         {
-            // QuantLib reserves schedule_.size()-1 coupons, a Size that wraps below zero, which is undefined.
+            // QuantLib reserves schedule_.size()-1 coupons, a Size that wraps to its largest value, and reserve throws
+            // std::length_error.
             throw new NanoQLException("empty schedule");
         }
 

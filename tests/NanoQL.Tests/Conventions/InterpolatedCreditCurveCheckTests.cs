@@ -12,9 +12,11 @@ namespace NanoQL.Tests.Conventions;
 /// The interpolated credit curves' checks of their data, with QuantLib's texts, each an <see cref="ArgumentException"/>
 /// naming the data: a count other than the dates', "dates/data count mismatch"; a negative hazard rate or default
 /// density; and for the survival-probability curve a first probability other than 1, a probability not above 0, and a
-/// probability above the one before it, "negative hazard rate implied by the survival probability 0.98 at … (t=…)
-/// after the survival probability 0.97 at … (t=…)". Each curve's nodes pair its dates with its data, as QuantLib's
-/// <c>nodes()</c> do.
+/// probability above the one before it, "negative hazard rate implied by the survival probability 0.98 at … (t=…) after
+/// the survival probability 0.97 at … (t=…)". An empty list of dates, whose first QuantLib reads with <c>at()</c>,
+/// which throws <c>std::out_of_range</c>, is refused at that point with QuantLib's own "not enough input dates given",
+/// naming <c>dates</c> (the playbook's convention for such an exception). Each curve's nodes pair its dates with its
+/// data, as QuantLib's <c>nodes()</c> do.
 /// </summary>
 public class InterpolatedCreditCurveCheckTests
 {
@@ -50,6 +52,26 @@ public class InterpolatedCreditCurveCheckTests
             $"negative hazard rate implied by the survival probability 0.98 at {Dates[2]} (t=2) after the survival "
             + $"probability 0.97 at {Dates[1]} (t=1)",
             () => new InterpolatedSurvivalProbabilityCurve<LogLinear>(Dates, [1.0, 0.97, 0.98], dc));
+    }
+
+    [Fact]
+    public void NoDatesAreRefusedBeforeTheFirstIsRead()
+    {
+        // QuantLib's constructors pass dates.at(0) to their base first (interpolatedhazardratecurve.hpp:213,
+        // 227, 240, and the density and survival curves alike): std::out_of_range, the wheel's "invalid vector
+        // subscript".
+        Action[] builds =
+        [
+            () => _ = new InterpolatedHazardRateCurve<BackwardFlat>([], [], new Actual365Fixed()),
+            () => _ = new InterpolatedDefaultDensityCurve<Linear>([], [], new Actual365Fixed()),
+            () => _ = new InterpolatedSurvivalProbabilityCurve<LogLinear>([], [], new Actual365Fixed()),
+        ];
+        foreach (Action build in builds)
+        {
+            ArgumentException e = Assert.Throws<ArgumentException>(build);
+            Assert.Equal("dates", e.ParamName);
+            Assert.StartsWith("not enough input dates given", e.Message, StringComparison.Ordinal);
+        }
     }
 
     [Fact]

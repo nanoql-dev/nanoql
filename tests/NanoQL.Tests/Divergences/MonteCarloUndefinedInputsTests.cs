@@ -19,8 +19,8 @@ public class MonteCarloUndefinedInputsTests
     public void ABrownianBridgeOfNoStepOrAShortOutputIsRefused()
     {
         // brownianbridge.cpp:34-57 build size_ steps, 0 for BrownianBridge(0), an empty vector or a grid of one time,
-        // and initialize() then reads sqrtdt_[0] and t_[size_-1] (lines 62, 73, 77); for the empty grid,
-        // size_(timeGrid.size()-1) (line 51) wraps.
+        // and initialize() then reads sqrtdt_[0] and t_[size_-1] (lines 62, 73, 77). The empty grid, which QuantLib
+        // refuses with std::length_error, is a convention (Conventions/MonteCarloErrorTests).
         ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(() => new BrownianBridge(0));
         Assert.Equal("steps", e.ParamName);
         e = Assert.Throws<ArgumentOutOfRangeException>(() => new BrownianBridge(-3));
@@ -28,8 +28,6 @@ public class MonteCarloUndefinedInputsTests
         e = Assert.Throws<ArgumentOutOfRangeException>(() => new BrownianBridge(ReadOnlySpan<double>.Empty));
         Assert.Equal("times", e.ParamName);
         e = Assert.Throws<ArgumentOutOfRangeException>(() => new BrownianBridge(new TimeGrid([0.0])));
-        Assert.Equal("timeGrid", e.ParamName);
-        e = Assert.Throws<ArgumentOutOfRangeException>(() => new BrownianBridge(new TimeGrid()));
         Assert.Equal("timeGrid", e.ParamName);
 
         // brownianbridge.hpp:114-136 write output[0] to output[size_-1] unchecked.

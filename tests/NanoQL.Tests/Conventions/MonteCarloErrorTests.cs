@@ -89,6 +89,16 @@ public class MonteCarloErrorTests
     }
 
     [Fact]
+    public void BrownianBridgeEmptyGridRefusal()
+    {
+        // QuantLib's size_(timeGrid.size()-1) wraps to the largest Size for the empty grid, and allocating the members
+        // throws std::length_error (brownianbridge.cpp:51-52; the wheel's "vector too long").
+        ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(() => new BrownianBridge(new TimeGrid()));
+        Assert.Equal("timeGrid", e.ParamName);
+        Assert.StartsWith("a Brownian bridge needs a time grid of at least two times, not 0", e.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void BrownianBridgeTransformRefusal()
     {
         var bridge = new BrownianBridge(4);

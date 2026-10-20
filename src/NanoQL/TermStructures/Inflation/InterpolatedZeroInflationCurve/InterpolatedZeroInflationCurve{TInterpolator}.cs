@@ -26,8 +26,8 @@ namespace NanoQL.TermStructures;
 /// </para>
 /// <para>
 /// QuantLib reads the first date before it checks how many there are, so with no date it throws
-/// <c>std::out_of_range</c>; here an empty list is refused first with QuantLib's own "too few dates", a documented
-/// divergence.
+/// <c>std::out_of_range</c>; here an empty list is refused at that point with QuantLib's own "too few dates", the
+/// playbook's convention for such an exception.
 /// </para>
 /// </remarks>
 public class InterpolatedZeroInflationCurve<TInterpolator>

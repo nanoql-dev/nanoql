@@ -128,7 +128,8 @@ public sealed record AverageBMALeg
 
         if (Schedule.Empty)
         {
-            // QuantLib's period count, schedule_.size()-1, is a Size that wraps below zero, which is undefined.
+            // QuantLib's period count, schedule_.size()-1, is a Size that wraps to its largest value, and its first
+            // read, schedule_.date(0), throws std::out_of_range.
             throw new NanoQLException("empty schedule");
         }
 

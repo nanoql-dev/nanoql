@@ -7,30 +7,15 @@ using NanoQL.Time;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The interpolated inflation curves given no dates or no rates. QuantLib's constructors pass <c>dates.at(0)</c> to
-/// their base before checking the count (<c>interpolatedzeroinflationcurve.hpp:98-102</c>,
-/// <c>interpolatedyoyinflationcurve.hpp:103-108</c>), so with no date they throw <c>std::out_of_range</c> (the wheel's
-/// <c>IndexError: invalid vector subscript</c>); the year-on-year curve also passes <c>rates[0]</c>, which reads past an
-/// empty vector, undefined. nanoql refuses both first, with QuantLib's own texts: "too few dates: 0" naming
-/// <c>dates</c>, and for empty rates QuantLib's checks of the count in its order, "too few dates" or the count mismatch
-/// naming <c>rates</c>.
+/// The year-on-year inflation curve given no rates. QuantLib's constructor passes <c>rates[0]</c> to its base before
+/// checking the count (<c>interpolatedyoyinflationcurve.hpp:103-108</c>), which reads past an empty vector, undefined.
+/// nanoql refuses first, with QuantLib's checks of the count in its order: "too few dates" naming <c>dates</c>, or the
+/// count mismatch naming <c>rates</c>. Given no dates, QuantLib's <c>dates.at(0)</c> throws <c>std::out_of_range</c>
+/// first, a convention (<c>Conventions/InterpolatedInflationCurveCheckTests</c>).
 /// </summary>
 public class InflationCurveFirstDateTests
 {
     private static readonly Date Reference = new(15, Month.June, 2024);
-
-    [Fact]
-    public void NoDatesAreRefusedBeforeTheFirstIsRead()
-    {
-        ArgumentException e = Assert.Throws<ArgumentException>(
-            () => new ZeroInflationCurve(Reference, [], [], Frequency.Monthly, new Actual365Fixed()));
-        Assert.Equal("dates", e.ParamName);
-        Assert.StartsWith("too few dates: 0", e.Message, StringComparison.Ordinal);
-        e = Assert.Throws<ArgumentException>(
-            () => new YoYInflationCurve(Reference, [], [0.03, 0.03], Frequency.Monthly, new Actual365Fixed()));
-        Assert.Equal("dates", e.ParamName);
-        Assert.StartsWith("too few dates: 0", e.Message, StringComparison.Ordinal);
-    }
 
     [Fact]
     public void NoRatesAreRefusedBeforeTheFirstIsRead()

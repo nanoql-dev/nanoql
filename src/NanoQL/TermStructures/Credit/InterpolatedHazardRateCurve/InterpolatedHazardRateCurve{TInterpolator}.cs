@@ -24,8 +24,9 @@ namespace NanoQL.TermStructures;
 /// <para>
 /// QuantLib's protected constructors without nodes, through which its piecewise curve derives, aren't ported: the
 /// piecewise curve implements the interface itself. QuantLib reads the first date before it checks how many there are,
-/// so with no date it throws <c>std::out_of_range</c>; here an empty list is refused first with QuantLib's own "not
-/// enough input dates given", a documented divergence. An extension point, for its named class.
+/// so with no date it throws <c>std::out_of_range</c>; here an empty list is refused at that point with QuantLib's own
+/// "not enough input dates given", the playbook's convention for such an exception. An extension point, for its named
+/// class.
 /// </para>
 /// </remarks>
 public class InterpolatedHazardRateCurve<TInterpolator>

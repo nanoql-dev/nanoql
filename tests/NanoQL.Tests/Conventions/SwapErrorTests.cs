@@ -52,7 +52,7 @@ public class SwapErrorTests
         Assert.StartsWith("rounding precision (17) must be between 0 and 16", r.Message, StringComparison.Ordinal);
 
         // An empty schedule, refused by the conversion of the leg built on it, as QuantLib's legs reach it: the
-        // undefined-path refusal of a value the leg builder stores (EmptyScheduleTests).
+        // refusal of a value the leg builder stores, where QuantLib's reserve or at() throws (EmptyScheduleTests).
         var empty = new Schedule(Array.Empty<Date>(), new TARGET());
         var euribor = new Euribor6M(Curve);
         Func<object>[] emptySchedules =

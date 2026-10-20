@@ -12,14 +12,14 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// An exercise's dates read past their end. QuantLib's <c>Exercise::date(i)</c> is <c>dates_[i]</c>
 /// (<c>exercise.hpp:45</c>), which reads past the vector for an index out of range, undefined, where its twin
-/// <c>dateAt(i)</c> (<c>:46</c>) throws <c>std::out_of_range</c>. nanoql refuses the index in both, with
-/// <see cref="ArgumentOutOfRangeException"/> naming <c>index</c>, as <see cref="Schedule.Date(int)"/> does. And a
-/// swaption on an exercise with no dates, which QuantLib's public <c>Exercise(type)</c> builds (<c>exercise.hpp:41</c>):
-/// QuantLib's swaption reads its last date in <c>isExpired</c> (<c>dates().back()</c>, <c>swaption.cpp:159</c>), and
-/// its first in the engines and in <c>impliedVolatility</c> (<c>date(0)</c>, <c>blackswaptionengine.hpp:227</c>,
-/// <c>swaption.cpp:198</c>), undefined for an empty vector. nanoql's swaption builds on it and refuses where the date is
-/// read, with <see cref="NanoQLException"/> and QuantLib's text for the same input, <c>lastDate()</c>'s "no exercise
-/// date given" (<c>exercise.cpp:29</c>).
+/// <c>dateAt(i)</c> (<c>:46</c>) throws <c>std::out_of_range</c>, a convention (<c>Conventions/ExerciseErrorTests</c>).
+/// nanoql refuses the index, with <see cref="ArgumentOutOfRangeException"/> naming <c>index</c>, as
+/// <see cref="Schedule.Date(int)"/> does. And a swaption on an exercise with no dates, which QuantLib's public
+/// <c>Exercise(type)</c> builds (<c>exercise.hpp:41</c>): QuantLib's swaption reads its last date in <c>isExpired</c>
+/// (<c>dates().back()</c>, <c>swaption.cpp:159</c>), and its first in the engines and in <c>impliedVolatility</c>
+/// (<c>date(0)</c>, <c>blackswaptionengine.hpp:227</c>, <c>swaption.cpp:198</c>), undefined for an empty vector.
+/// nanoql's swaption builds on it and refuses where the date is read, with <see cref="NanoQLException"/> and QuantLib's
+/// text for the same input, <c>lastDate()</c>'s "no exercise date given" (<c>exercise.cpp:29</c>).
 /// </summary>
 public class ExerciseDatesTests
 {
@@ -40,7 +40,6 @@ public class ExerciseDatesTests
             foreach (int index in new[] { -1, e.Dates.Length, e.Dates.Length + 6, int.MaxValue })
             {
                 Assert.Equal("index", Assert.Throws<ArgumentOutOfRangeException>(() => e.Date(index)).ParamName);
-                Assert.Equal("index", Assert.Throws<ArgumentOutOfRangeException>(() => e.DateAt(index)).ParamName);
             }
 
             // In range, both read the date.

@@ -342,16 +342,6 @@ Facts:
 
 - `AFixedOptionletPaysOnTheIndexRatio`
 
-## CreditCurveFirstDateTests
-
-[`Divergences/CreditCurveFirstDateTests.cs`](../tests/NanoQL.Tests/Divergences/CreditCurveFirstDateTests.cs)
-
-The interpolated credit curves given no dates. QuantLib's constructors pass `dates.at(0)` to their base before checking the count (`interpolatedhazardratecurve.hpp`, `interpolateddefaultdensitycurve.hpp`, `interpolatedsurvivalprobabilitycurve.hpp`), so with no date they throw `std::out_of_range`: the wheel's `HazardRateCurve`, `DefaultDensityCurve` and `SurvivalProbabilityCurve` each raise `IndexError: invalid vector subscript`. nanoql refuses first, with QuantLib's own "not enough input dates given", an `ArgumentException` naming `dates`.
-
-Facts:
-
-- `NoDatesAreRefusedBeforeTheFirstIsRead`
-
 ## CubeAtmExtrapolationTests
 
 [`Divergences/CubeAtmExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/CubeAtmExtrapolationTests.cs)
@@ -438,17 +428,6 @@ Facts:
 - `AnUninitializedAssetIsRefused`
 - `AnAmericanOptionReadPastItsExerciseTimesIsRefused`
 
-## EmptyScheduleTests
-
-[`Divergences/EmptyScheduleTests.cs`](../tests/NanoQL.Tests/Divergences/EmptyScheduleTests.cs)
-
-A leg builder given an empty schedule, or a swap building its legs on one. QuantLib's conversion to a leg counts `schedule_.size()-1` periods, a `Size` wrapping below zero, and reserves them or reads `schedule_.date(0)` past the end of the schedule's dates (`fixedratecoupon.cpp:182-185`, `cashflowvectors.hpp:82-102`, `overnightindexedcoupon.cpp:592-603`, `averagebmacoupon.cpp:225-228`), which is undefined. nanoql refuses the schedule at that point of the conversion, with `NanoQLException`, "empty schedule", after the checks QuantLib makes before it, so that with several bad inputs QuantLib's first refusal is nanoql's; the pilot's `FixedRateLeg` threw `ArgumentOutOfRangeException` from the read.
-
-Facts:
-
-- `ALegBuilderRefusesAnEmptyScheduleAfterQuantLibsEarlierChecks`
-- `TheAverageBMALegRefusesAnEmptyScheduleAfterItsNotionalCheck`
-
 ## EngineSequenceTests
 
 [`Divergences/EngineSequenceTests.cs`](../tests/NanoQL.Tests/Divergences/EngineSequenceTests.cs)
@@ -468,7 +447,7 @@ Facts:
 
 [`Divergences/ExerciseDatesTests.cs`](../tests/NanoQL.Tests/Divergences/ExerciseDatesTests.cs)
 
-An exercise's dates read past their end. QuantLib's `Exercise::date(i)` is `dates_[i]` (`exercise.hpp:45`), which reads past the vector for an index out of range, undefined, where its twin `dateAt(i)` (`:46`) throws `std::out_of_range`. nanoql refuses the index in both, with `ArgumentOutOfRangeException` naming `index`, as `Schedule.Date(int)` does. And a swaption on an exercise with no dates, which QuantLib's public `Exercise(type)` builds (`exercise.hpp:41`): QuantLib's swaption reads its last date in `isExpired` (`dates().back()`, `swaption.cpp:159`), and its first in the engines and in `impliedVolatility` (`date(0)`, `blackswaptionengine.hpp:227`, `swaption.cpp:198`), undefined for an empty vector. nanoql's swaption builds on it and refuses where the date is read, with `NanoQLException` and QuantLib's text for the same input, `lastDate()`'s "no exercise date given" (`exercise.cpp:29`).
+An exercise's dates read past their end. QuantLib's `Exercise::date(i)` is `dates_[i]` (`exercise.hpp:45`), which reads past the vector for an index out of range, undefined, where its twin `dateAt(i)` (`:46`) throws `std::out_of_range`, a convention (`Conventions/ExerciseErrorTests`). nanoql refuses the index, with `ArgumentOutOfRangeException` naming `index`, as `Schedule.Date(int)` does. And a swaption on an exercise with no dates, which QuantLib's public `Exercise(type)` builds (`exercise.hpp:41`): QuantLib's swaption reads its last date in `isExpired` (`dates().back()`, `swaption.cpp:159`), and its first in the engines and in `impliedVolatility` (`date(0)`, `blackswaptionengine.hpp:227`, `swaption.cpp:198`), undefined for an empty vector. nanoql's swaption builds on it and refuses where the date is read, with `NanoQLException` and QuantLib's text for the same input, `lastDate()`'s "no exercise date given" (`exercise.cpp:29`).
 
 Facts:
 
@@ -511,11 +490,10 @@ Facts:
 
 [`Divergences/FloatingLegUndefinedInputsTests.cs`](../tests/NanoQL.Tests/Divergences/FloatingLegUndefinedInputsTests.cs)
 
-The floating leg builders' undefined inputs. An empty schedule: QuantLib's `FloatingLeg` takes `schedule.size()-1` periods, a `Size` wrapping below zero, so its size checks all pass and `leg.reserve(n)` fails (`cashflowvectors.hpp:82-102`; `IborLeg` reaches it at `iborcoupon.cpp:286`). A null index: `FloatingLeg` reads `index->fixingDays()` as a default argument (`cashflowvectors.hpp:156, 169, 188, 204`). nanoql refuses the empty schedule where QuantLib reserves the leg, after its notional and in-arrears checks, with "empty schedule": `NanoQLException` from `IborLeg`'s conversion, and `ArgumentException` from `CashFlowVectorsFunctions.FloatingLeg`, whose schedule is an argument; and the null index with `ArgumentNullException`.
+The floating leg builder given a null index: QuantLib's `FloatingLeg` reads `index->fixingDays()` as a default argument (`cashflowvectors.hpp:156, 169, 188, 204`), a null pointer's dereference, which is undefined. nanoql refuses it with `ArgumentNullException` naming `index`. The empty schedule, which QuantLib refuses with `std::length_error`, is a convention (`Conventions/EmptyScheduleTests`).
 
 Facts:
 
-- `AnEmptyScheduleIsRefusedByBothBuilders`
 - `ANullIndexIsRefused`
 
 ## ForwardFlatPrimitiveTests
@@ -606,11 +584,10 @@ Facts:
 
 [`Divergences/InflationCurveFirstDateTests.cs`](../tests/NanoQL.Tests/Divergences/InflationCurveFirstDateTests.cs)
 
-The interpolated inflation curves given no dates or no rates. QuantLib's constructors pass `dates.at(0)` to their base before checking the count (`interpolatedzeroinflationcurve.hpp:98-102`, `interpolatedyoyinflationcurve.hpp:103-108`), so with no date they throw `std::out_of_range` (the wheel's `IndexError: invalid vector subscript`); the year-on-year curve also passes `rates[0]`, which reads past an empty vector, undefined. nanoql refuses both first, with QuantLib's own texts: "too few dates: 0" naming `dates`, and for empty rates QuantLib's checks of the count in its order, "too few dates" or the count mismatch naming `rates`.
+The year-on-year inflation curve given no rates. QuantLib's constructor passes `rates[0]` to its base before checking the count (`interpolatedyoyinflationcurve.hpp:103-108`), which reads past an empty vector, undefined. nanoql refuses first, with QuantLib's checks of the count in its order: "too few dates" naming `dates`, or the count mismatch naming `rates`. Given no dates, QuantLib's `dates.at(0)` throws `std::out_of_range` first, a convention (`Conventions/InterpolatedInflationCurveCheckTests`).
 
 Facts:
 
-- `NoDatesAreRefusedBeforeTheFirstIsRead`
 - `NoRatesAreRefusedBeforeTheFirstIsRead`
 
 ## InflationLastFixingDateTests
@@ -800,7 +777,7 @@ Facts:
 
 [`Divergences/OvernightIndexedCouponRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/OvernightIndexedCouponRefusalTests.cs)
 
-The overnight coupons' undefined paths, each refused before the undefined step (the playbook's undefined-path rule), and the lookback of `int.MaxValue` days, which `int`? treats as a value where QuantLib's `Null<Natural>()` means none.
+The overnight coupons' undefined paths, each refused before the undefined step (the playbook's undefined-path rule); the empty schedule with payment dates, where nanoql's text replaces QuantLib's; and the lookback of `int.MaxValue` days, which `int`? treats as a value where QuantLib's `Null<Natural>()` means none.
 
 Facts:
 

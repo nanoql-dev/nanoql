@@ -10,8 +10,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// The overnight coupons' undefined paths, each refused before the undefined step (the playbook's undefined-path rule),
-/// and the lookback of <see cref="int.MaxValue"/> days, which <see cref="int"/>? treats as a value where QuantLib's
+/// The overnight coupons' undefined paths, each refused before the undefined step (the playbook's undefined-path rule);
+/// the empty schedule with payment dates, where nanoql's text replaces QuantLib's; and the lookback of
+/// <see cref="int.MaxValue"/> days, which <see cref="int"/>? treats as a value where QuantLib's
 /// <c>Null&lt;Natural&gt;()</c> means none.
 /// </summary>
 public class OvernightIndexedCouponRefusalTests
@@ -53,10 +54,13 @@ public class OvernightIndexedCouponRefusalTests
         Assert.Equal("underlying", e.ParamName);
     }
 
-    // O3: QuantLib's conversion counts schedule_.size()-1 periods, a Size that wraps below zero
-    // (overnightindexedcoupon.cpp:593), and reads schedule_.date(0) past the end, or prints the wrapped count in its
-    // payment-date check (:596-601). nanoql's conversion refuses the schedule where the count wraps, after the
-    // notional and pricer checks QuantLib makes before it.
+    // O3: QuantLib's conversion counts schedule_.size()-1 periods, a Size that wraps to its largest value
+    // (overnightindexedcoupon.cpp:593). Given payment dates, its own check refuses first, its text printing the
+    // wrapped count: "Expected the number of explicit payment dates (1) to equal the number of calculation periods
+    // (18446744073709551615)" (:596-601); nanoql keeps no text with a count C++'s wrap made. Without them,
+    // schedule_.date(0)'s at() throws std::out_of_range, a convention (Conventions/EmptyScheduleTests). nanoql's
+    // conversion refuses the schedule where the count wraps, after the notional and pricer checks QuantLib makes
+    // before it.
     [Fact]
     public void AnOvernightLegRefusesAnEmptySchedule()
     {

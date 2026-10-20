@@ -26,8 +26,9 @@ namespace NanoQL.TermStructures;
 /// </para>
 /// <para>
 /// QuantLib reads the first date and the first rate before it checks how many there are, so with no date it throws
-/// <c>std::out_of_range</c>, and with no rate it reads past the end of the rates, which is undefined; here an empty list
-/// is refused first, with QuantLib's own "too few dates" or count mismatch, a documented divergence.
+/// <c>std::out_of_range</c>, and with no rate it reads past the end of the rates, which is undefined; here an empty
+/// list is refused first, with QuantLib's own "too few dates" or count mismatch: for no date the playbook's convention
+/// for such an exception, for no rate a documented divergence.
 /// </para>
 /// </remarks>
 public class InterpolatedYoYInflationCurve<TInterpolator>

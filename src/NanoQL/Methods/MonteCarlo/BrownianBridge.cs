@@ -100,8 +100,8 @@ public sealed class BrownianBridge
     {
         ArgumentNullException.ThrowIfNull(timeGrid);
 
-        // QuantLib's size_(timeGrid.size()-1) is 0 for a grid of one time, whose initialize() is undefined, and wraps
-        // for the empty grid.
+        // QuantLib's size_(timeGrid.size()-1) is 0 for a grid of one time, whose initialize() is undefined, and for
+        // the empty grid wraps to the largest Size, so allocating the members throws std::length_error.
         if (!(timeGrid.Size >= 2))
         {
             throw new ArgumentOutOfRangeException(

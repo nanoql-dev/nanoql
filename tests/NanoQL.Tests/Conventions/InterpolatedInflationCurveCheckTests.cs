@@ -9,9 +9,12 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// The exception types of the interpolated inflation curves' construction checks, which the vectors record only as
 /// throws: each is an <see cref="ArgumentException"/> with QuantLib's text, naming <c>dates</c> for the count of dates
-/// and their order and <c>rates</c> for the rates; an empty list, which QuantLib reads past, is refused first with
-/// QuantLib's own "too few dates: 0", and the year-on-year curve's empty rates with QuantLib's checks of the count, in
-/// QuantLib's order.
+/// and their order and <c>rates</c> for the rates; an empty list of dates, whose first QuantLib reads with <c>at()</c>,
+/// which throws <c>std::out_of_range</c>, is refused at that point with QuantLib's own "too few dates: 0" (the
+/// playbook's convention for such an exception; <c>interpolatedzeroinflationcurve.hpp:98</c>,
+/// <c>interpolatedyoyinflationcurve.hpp:103</c>); and the year-on-year curve's empty rates, which QuantLib reads past
+/// (a documented divergence, <c>InflationCurveFirstDateTests</c>), with QuantLib's checks of the count, in QuantLib's
+/// order.
 /// </summary>
 public class InterpolatedInflationCurveCheckTests
 {

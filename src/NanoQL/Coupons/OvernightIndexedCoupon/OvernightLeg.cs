@@ -370,7 +370,9 @@ public sealed record OvernightLeg
 
         if (Schedule.Empty)
         {
-            // QuantLib counts schedule_.size()-1 periods, a Size that wraps below zero, which is undefined.
+            // QuantLib counts schedule_.size()-1 periods, a Size that wraps to its largest value, and its first read,
+            // schedule_.date(0), throws std::out_of_range; given payment dates, its own count check refuses first,
+            // printing the wrapped count (overnightindexedcoupon.cpp:596-601), which this text replaces.
             throw new NanoQLException("empty schedule");
         }
 

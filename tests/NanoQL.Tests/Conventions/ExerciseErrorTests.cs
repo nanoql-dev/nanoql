@@ -35,7 +35,9 @@ public class ExerciseErrorTests
             Assert.Equal("no exercise date given", Assert.Throws<NanoQLException>(() => bare.LastDate()).Message);
         }
 
-        // EX1: an index out of range, read or checked alike; .NET's text.
+        // EX1: an index out of range, read or checked alike; .NET's text. QuantLib's dateAt(i) is dates_.at(i)
+        // (exercise.hpp:46), which throws std::out_of_range; its date(i) reads dates_[i] unchecked, undefined
+        // (Divergences/ExerciseDatesTests).
         var european = new EuropeanExercise(today);
         foreach (Func<int, Date> read in new Func<int, Date>[] { european.Date, european.DateAt })
         {

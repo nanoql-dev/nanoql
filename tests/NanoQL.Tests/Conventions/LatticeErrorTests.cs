@@ -18,6 +18,8 @@ public class LatticeErrorTests
     {
         StochasticProcess1D process = new Vasicek().Dynamics().Process;
 
+        // QuantLib's step count wraps to the largest Size for an empty grid, passing its own check, and allocating
+        // the step caches throws std::length_error (trinomialtree.cpp:42-43, 58; the wheel's "vector too long").
         ArgumentException empty = Assert.Throws<ArgumentException>(() => new TrinomialTree(process, new TimeGrid()));
         Assert.Equal(typeof(ArgumentException), empty.GetType());
         Assert.Equal("timeGrid", empty.ParamName);
