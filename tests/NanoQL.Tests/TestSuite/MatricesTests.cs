@@ -6,7 +6,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/matrices.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testEigenvectors, testCholeskyDecomposition, testCholeskySolverFor, testCholeskySolverForIncomplete, testHouseholderTransformation, testHouseholderReflection (B4.7's matrix utilities); testSqrt, testHighamSqrt, testSVD, testPrincipalMatrixSqrt (B4.1); testIterativeSolvers, testSparseMatrixMemory (S-eq); testOrthogonalProjection (B5.2); testQRDecomposition, testQRSolve (B6.2); testMoorePenroseInverse (B7.3)
+// Partial: testEigenvectors, testCholeskyDecomposition, testCholeskySolverFor, testCholeskySolverForIncomplete, testHouseholderTransformation, testHouseholderReflection (B4.7's matrix utilities); testSqrt, testHighamSqrt, testSVD, testPrincipalMatrixSqrt (B4.1); testOrthogonalProjection (B5.2); testQRDecomposition, testQRSolve (B6.2); testMoorePenroseInverse (B7.3)
+// Moved: testSparseMatrixMemory line 755 (Divergences/SparseMatrixProductTests.cs)
 
 using NanoQL.Numerics;
 using static NanoQL.Numerics.MatrixFunctions;
@@ -149,6 +150,73 @@ public class MatricesTests
     }
 
     [Fact]
+    public void TestIterativeSolvers()
+    {
+        // Testing iterative solvers...
+
+        var b = new Vector(3);
+        b[0] = 1.0;
+        b[1] = 0.5;
+        b[2] = 3.0;
+
+        const double relTol = 1e4 * QL_EPSILON;
+
+        Vector x = new BiCGstab(MatrixMult(M1), 3, relTol).Solve(b).X;
+        if (ArrayFunctions.Norm2((M1 * x) - b) / ArrayFunctions.Norm2(b) > relTol)
+        {
+            Assert.Fail(
+                "Failed to calculate inverse using BiCGstab"
+                + $"\n  rel error     : {ArrayFunctions.Norm2((M1 * x) - b) / ArrayFunctions.Norm2(b)}"
+                + $"\n  rel tolerance : {relTol}");
+        }
+
+        GMRESResult u = new GMRES(MatrixMult(M1), 3, relTol).Solve(b, b);
+        if (ArrayFunctions.Norm2((M1 * u.X) - b) / ArrayFunctions.Norm2(b) > relTol)
+        {
+            Assert.Fail(
+                "Failed to calculate inverse using gmres"
+                + $"\n  rel error     : {ArrayFunctions.Norm2((M1 * u.X) - b) / ArrayFunctions.Norm2(b)}"
+                + $"\n  rel tolerance : {relTol}");
+        }
+
+        var errors = new Vector(u.Errors.AsSpan());
+        foreach (Real error in errors)
+        {
+            Vector x10 = new GMRES(MatrixMult(M1), 10, 1.01 * error).Solve(b, b).X;
+
+            Real calculated = ArrayFunctions.Norm2((M1 * x10) - b) / ArrayFunctions.Norm2(b);
+            Real expected = error;
+
+            if (Math.Abs(calculated - expected) > relTol)
+            {
+                Assert.Fail(
+                    "Failed to calculate solution error"
+                    + $"\n  calculated error: {calculated}"
+                    + $"\n  expected error  : {expected}");
+            }
+        }
+
+        Vector v = new GMRES(MatrixMult(M1), 1, relTol, MatrixMult(Inverse(M1))).Solve(b, b).X;
+
+        if (ArrayFunctions.Norm2((M1 * v) - b) / ArrayFunctions.Norm2(b) > relTol)
+        {
+            Assert.Fail(
+                "Failed to calculate inverse using gmres with exact preconditioning"
+                + $"\n  rel error     : {ArrayFunctions.Norm2((M1 * v) - b) / ArrayFunctions.Norm2(b)}"
+                + $"\n  rel tolerance : {relTol}");
+        }
+
+        Vector w = new GMRES(MatrixMult(M1), 3, relTol, MatrixMult(M1)).Solve(b, b).X;
+        if (ArrayFunctions.Norm2((M1 * w) - b) / ArrayFunctions.Norm2(b) > relTol)
+        {
+            Assert.Fail(
+                "Failed to calculate inverse using gmres with nonsense preconditioning"
+                + $"\n  rel error     : {ArrayFunctions.Norm2((M1 * w) - b) / ArrayFunctions.Norm2(b)}"
+                + $"\n  rel tolerance : {relTol}");
+        }
+    }
+
+    [Fact]
     public void TestInitializers()
     {
         // Testing matrix initializers...
@@ -170,6 +238,65 @@ public class MatricesTests
         CheckEqual(m2[1, 0], 4.0);
         CheckEqual(m2[1, 1], 5.0);
         CheckEqual(m2[1, 2], 6.0);
+
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public void TestSparseMatrixMemory()
+    {
+        // Testing sparse matrix memory layout...
+
+        var m = new SparseMatrix(8, 4);
+        CheckEqual(m.Filled1, 1);
+        CheckEqual(m.Size1, 8);
+        CheckEqual(m.Size2, 4);
+        CheckEqual(Rows(m).Count(), m.Size1);
+
+        CoordinateTuple coords = SparseMatrixToCoordinateTuple(m);
+        CheckEqual(coords.RowIndices.Count, 0);
+
+        m[3, 1] = 42;
+        coords = SparseMatrixToCoordinateTuple(m);
+        CheckEqual(Rows(m).Count(), m.Size1);
+        CheckEqual(coords.RowIndices.Count, 1);
+        CheckEqual(coords.RowIndices[0], 3);
+        CheckEqual(coords.ColumnIndices[0], 1);
+        CheckEqual(coords.Data[0], 42);
+
+        m[1, 2] = 6;
+        coords = SparseMatrixToCoordinateTuple(m);
+        CheckEqual(coords.RowIndices.Count, 2);
+        CheckEqual(coords.RowIndices[0], 1);
+        CheckEqual(coords.ColumnIndices[0], 2);
+        CheckEqual(coords.Data[0], 6);
+
+        // QuantLib checks prod(m, x) == Array({0, 18, 0, 84}), a result sized by the columns of a matrix of 8 rows;
+        // Divergences/SparseMatrixProductTests asserts it, sized by the rows.
+        Vector x = [1, 2, 3, 4];
+        _ = SparseMatrixFunctions.Prod(m, x);
+
+        m[3, 2] = 43;
+        coords = SparseMatrixToCoordinateTuple(m);
+        CheckEqual(coords.RowIndices.Count, 3);
+        CheckEqual(coords.RowIndices[2], 3);
+        CheckEqual(coords.ColumnIndices[2], 2);
+        CheckEqual(coords.Data[2], 43);
+
+        m[7, 3] = 44;
+        coords = SparseMatrixToCoordinateTuple(m);
+        CheckEqual(coords.RowIndices.Count, 4);
+        CheckEqual(coords.RowIndices[3], 7);
+        CheckEqual(coords.ColumnIndices[3], 3);
+        CheckEqual(coords.Data[3], 44);
+
+        Size entries = 0;
+        foreach ((int Begin, int End) row in Rows(m))
+        {
+            entries += row.End - row.Begin;
+        }
+
+        CheckEqual(entries, 4);
 
         Assert.Empty(errors);
     }
@@ -232,6 +359,46 @@ public class MatricesTests
 
         Assert.Empty(errors);
     }
+
+    // QuantLib's MatrixMult: the product of a copy of the matrix with a vector.
+    private static Func<Vector, Vector> MatrixMult(Matrix m)
+    {
+        Matrix m_ = m.Clone();
+        return x => m_ * x;
+    }
+
+    // The sparse matrix's row iterator: every row, each the range of its stored elements in the data arrays (none
+    // beyond the last row written to), as uBLAS's begin1() to end1() visits them.
+    private static IEnumerable<(int Begin, int End)> Rows(SparseMatrix m)
+    {
+        for (int i = 0; i < m.Size1; ++i)
+        {
+            yield return i + 1 < m.Filled1 ? (m.Index1Data[i], m.Index1Data[i + 1]) : (0, 0);
+        }
+    }
+
+    // QuantLib's sparseMatrixToCoordinateTuple: the stored elements' rows, columns and values, row by row.
+    private static CoordinateTuple SparseMatrixToCoordinateTuple(SparseMatrix m)
+    {
+        List<Size> row_idx = [], col_idx = [];
+        List<Real> data = [];
+        int i = 0;
+        foreach ((int Begin, int End) row in Rows(m))
+        {
+            for (int k = row.Begin; k < row.End; ++k)
+            {
+                row_idx.Add(i);
+                col_idx.Add(m.Index2Data[k]);
+                data.Add(m.ValueData[k]);
+            }
+
+            ++i;
+        }
+
+        return new CoordinateTuple(row_idx, col_idx, data);
+    }
+
+    private sealed record CoordinateTuple(List<Size> RowIndices, List<Size> ColumnIndices, List<Real> Data);
 
     // QuantLib's norm(const Matrix&): the Frobenius norm.
     private static Real Norm(Matrix m)

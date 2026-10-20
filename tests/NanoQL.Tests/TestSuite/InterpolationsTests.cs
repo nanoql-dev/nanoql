@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSplineErrorOnGaussianValues (SimpsonIntegral, B4.5); testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (B4.5); testMultiSpline (B4.7); testFlatExtrapolation (B3.1); testBSplines (B3.5); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (B6.2); testLaplaceInterpolation (B7.3); testNoArbSabrInterpolation, testTransformations (B7.5)
+// Partial: testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (B4.5); testMultiSpline (B4.7); testFlatExtrapolation (B3.1); testBSplines (B3.5); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (B6.2); testLaplaceInterpolation (B7.3); testNoArbSabrInterpolation, testTransformations (B7.5)
 // Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs); testBicubicUpdate (Conventions/InterpolationConstructionTests.cs)
 
 using NanoQL.Numerics;
@@ -24,6 +24,64 @@ public class InterpolationsTests
 {
     // QuantLib's Null<Real>(), the largest float, which the tests pass as the ignored value of a not-a-knot condition.
     private const Real NullReal = 3.4028234663852886e38;
+
+    [Fact]
+    public void TestSplineErrorOnGaussianValues()
+    {
+        // Testing spline approximation on Gaussian data sets...
+
+        Size[] points = [5, 9, 17, 33];
+
+        // complete spline data from the original 1983 Hyman paper
+        Real[] tabulatedErrors = [3.5e-2, 2.0e-3, 4.0e-5, 1.8e-6];
+        Real[] toleranceOnTabErr = [0.1e-2, 0.1e-3, 0.1e-5, 0.1e-6];
+
+        // (complete) MC spline data from the original 1983 Hyman paper
+        // NB: with the improved Hyman filter from the Dougherty, Edelman, and
+        //     Hyman 1989 paper the n=17 nonmonotonicity is not filtered anymore
+        //     so the error agrees with the non MC method.
+        Real[] tabulatedMCErrors = [1.7e-2, 2.0e-3, 4.0e-5, 1.8e-6];
+        Real[] toleranceOnTabMCErr = [0.1e-2, 0.1e-3, 0.1e-5, 0.1e-6];
+
+        var integral = new SimpsonIntegral(1e-12, 10000);
+
+        // still unexplained scale factor needed to obtain the numerical
+        // results from the paper
+        Real scaleFactor = 1.9;
+
+        for (Size i = 0; i < points.Length; i++)
+        {
+            Size n = points[i];
+            Real[] x = XRange(-1.7, 1.9, n);
+            Real[] y = Gaussian(x);
+
+            // Not-a-knot
+            var f = new CubicInterpolation(x, y, Spline, false, NotAKnot, NullReal, NotAKnot, NullReal);
+            Real result = Math.Sqrt(integral.Integrate(MakeErrorFunction(f), -1.7, 1.9));
+            result /= scaleFactor;
+            if (Math.Abs(result - tabulatedErrors[i]) > toleranceOnTabErr[i])
+            {
+                Assert.Fail(
+                    "Not-a-knot spline interpolation "
+                    + $"\n    sample points:      {n}"
+                    + $"\n    norm of difference: {result}"
+                    + $"\n    it should be:       {tabulatedErrors[i]}");
+            }
+
+            // MC not-a-knot
+            f = new CubicInterpolation(x, y, Spline, true, NotAKnot, NullReal, NotAKnot, NullReal);
+            result = Math.Sqrt(integral.Integrate(MakeErrorFunction(f), -1.7, 1.9));
+            result /= scaleFactor;
+            if (Math.Abs(result - tabulatedMCErrors[i]) > toleranceOnTabMCErr[i])
+            {
+                Assert.Fail(
+                    "MC Not-a-knot spline interpolation "
+                    + $"\n    sample points:      {n}"
+                    + $"\n    norm of difference: {result}"
+                    + $"\n    it should be:       {tabulatedMCErrors[i]}");
+            }
+        }
+    }
 
     [Fact]
     public void TestSplineOnGaussianValues()
@@ -1195,6 +1253,14 @@ public class InterpolationsTests
             }
         }
     }
+
+    // QuantLib's errorFunction: the squared difference between the interpolation and exp(-x^2).
+    private static Func<Real, Real> MakeErrorFunction(CubicInterpolation f) =>
+        x =>
+        {
+            Real temp = f.Evaluate(x) - Math.Exp(-x * x);
+            return temp * temp;
+        };
 
     private static Real[] XRange(Real start, Real finish, Size points)
     {

@@ -59,6 +59,50 @@ public class UnsignedArgumentTests
     }
 
     [Fact]
+    public void ABinomialCountIsInTheUnsigned32BitRange()
+    {
+        foreach (long k in new[] { -1L, 4294967296L, long.MinValue })
+        {
+            Assert.Equal("n", Assert.Throws<ArgumentOutOfRangeException>(() => new BinomialDistribution(0.5, k)).ParamName);
+            Assert.Equal("n", Assert.Throws<ArgumentOutOfRangeException>(() => new CumulativeBinomialDistribution(0.5, k)).ParamName);
+            Assert.Equal("k", Assert.Throws<ArgumentOutOfRangeException>(() => new BinomialDistribution(0.5, 10).Evaluate(k)).ParamName);
+            Assert.Equal("k", Assert.Throws<ArgumentOutOfRangeException>(() => new CumulativeBinomialDistribution(0.5, 10).Evaluate(k)).ParamName);
+            Assert.Equal("n", Assert.Throws<ArgumentOutOfRangeException>(() => BinomialDistributionFunctions.BinomialCoefficientLn(k, 0)).ParamName);
+            Assert.Equal("k", Assert.Throws<ArgumentOutOfRangeException>(() => BinomialDistributionFunctions.BinomialCoefficient(5, k)).ParamName);
+            Assert.Equal("n", Assert.Throws<ArgumentOutOfRangeException>(() => BinomialDistributionFunctions.PeizerPrattMethod2Inversion(0.1, k)).ParamName);
+        }
+
+        // the range's top is a BigNatural's largest value
+        Assert.Equal(1.0, new CumulativeBinomialDistribution(0.5, 4294967295L).Evaluate(4294967295L));
+    }
+
+    [Fact]
+    public void AnIntegratorsOrSolversCountIsNotNegative()
+    {
+        Func<Vector, Vector> identity = x => x;
+
+        Assert.Equal("maxEvaluations", Assert.Throws<ArgumentOutOfRangeException>(() => new SimpsonIntegral(1e-6, -1)).ParamName);
+        Assert.Equal("maxEvaluations", Assert.Throws<ArgumentOutOfRangeException>(() => new GaussLobattoIntegral(-1, 1e-6)).ParamName);
+        Assert.Equal("maxEvaluations", Assert.Throws<ArgumentOutOfRangeException>(() => new SimpsonIntegral(1e-6, 10).SetMaxEvaluations(-1)).ParamName);
+        Assert.Equal("n", Assert.Throws<ArgumentOutOfRangeException>(() => new GaussLegendreIntegrator(-1)).ParamName);
+        Assert.Equal("n", Assert.Throws<ArgumentOutOfRangeException>(() => new GaussLegendreIntegration(-1)).ParamName);
+        Assert.Equal("n", Assert.Throws<ArgumentOutOfRangeException>(() => new GaussLegendrePolynomial().Value(-1, 0.5)).ParamName);
+        Assert.Equal("i", Assert.Throws<ArgumentOutOfRangeException>(() => new GaussLaguerrePolynomial().Alpha(-1)).ParamName);
+        Assert.Equal("i", Assert.Throws<ArgumentOutOfRangeException>(() => new GaussJacobiPolynomial(0.5, 0.5).Beta(-1)).ParamName);
+        Assert.Equal("ns", Assert.Throws<ArgumentOutOfRangeException>(
+            () => new MultiDimGaussianIntegration([2, -1], n => new GaussLegendreIntegration(n))).ParamName);
+        Assert.Equal("maxIter", Assert.Throws<ArgumentOutOfRangeException>(() => new BiCGstab(identity, -1, 1e-8)).ParamName);
+        Assert.Equal("maxIter", Assert.Throws<ArgumentOutOfRangeException>(() => new GMRES(identity, -1, 1e-8)).ParamName);
+        Assert.Equal("restart", Assert.Throws<ArgumentOutOfRangeException>(
+            () => new GMRES(identity, 2, 1e-8).SolveWithRestart(-1, new Vector([1.0, 1.0]))).ParamName);
+        Assert.Equal("size1", Assert.Throws<ArgumentOutOfRangeException>(() => new SparseMatrix(-1, 2)).ParamName);
+        Assert.Equal("size2", Assert.Throws<ArgumentOutOfRangeException>(() => new SparseMatrix(2, -1)).ParamName);
+        Assert.Equal("nonZeros", Assert.Throws<ArgumentOutOfRangeException>(() => new SparseMatrix(2, 2, -1)).ParamName);
+        Assert.Equal("maxEvaluations", Assert.Throws<ArgumentOutOfRangeException>(
+            () => new InverseNonCentralCumulativeChiSquareDistribution(3.0, 1.0, -1)).ParamName);
+    }
+
+    [Fact]
     public void FixingAndSettlementDaysAreNotNegative()
     {
         var calendar = new TARGET();

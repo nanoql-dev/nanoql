@@ -192,6 +192,18 @@ public class UnknownEnumValueTests
         AssertParam("rightCondition", () => new LogCubic(spline, true, second, 0.0, unknownCondition));
     }
 
+    [Fact]
+    public void TheTqrDecompositionRefusesAnUnknownCalculationOrStrategy()
+    {
+        // QuantLib reads an unknown calculation as OnlyFirstRowEigenVector and an unknown strategy as a shift
+        var diag = new Vector([1.0, 2.0]);
+        var sub = new Vector([0.5]);
+        AssertParam("calc", () => new TqrEigenDecomposition(
+            diag, sub, (TqrEigenDecompositionEigenVectorCalculation)3, TqrEigenDecompositionShiftStrategy.NoShift));
+        AssertParam("strategy", () => new TqrEigenDecomposition(
+            diag, sub, TqrEigenDecompositionEigenVectorCalculation.WithEigenVector, (TqrEigenDecompositionShiftStrategy)(-1)));
+    }
+
     private static EvaluationContext Context() => new() { EvaluationDate = Today };
 
     private static void AssertParam(string paramName, Action action) =>

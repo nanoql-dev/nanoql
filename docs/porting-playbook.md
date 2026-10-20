@@ -170,8 +170,8 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
 | `operator<<` on an enum | Not ported where the enum's `ToString()` already gives QuantLib's text: its stream strings equal the member names and no alias shares a value. Otherwise the text is a static `ToString(value)` on the header's `<Header>Functions` class, and a class whose `ToString()` embeds it calls it. Each port records this check per enum. |
 | Operators whose operands nanoql doesn't own (`Integer * TimeUnit`) | C# 14 extension operators, in a static class `<Type>Extensions` in the folder of the QuantLib file that declares them. |
 | `std::fma` (in Boost code) | `Math.FusedMultiplyAdd`. |
-| `std::log1p`, and a C runtime function .NET lacks | Written in the file of the port that calls it, from a published formulation, never one that loses precision: `double.LogP1` computes `Math.Log(1 + x)` and loses `x`'s low digits. `std::log1p` (in `Log1pFunctions`, Boost's `log1p` port) is Goldberg's (D. Goldberg 1991, Theorem 4), with `u = 1 + x`: `x` where `u` rounds to 1, and `Math.Log(u) * x / (u − 1)` otherwise; the code's own guard returns `Math.Log(u)` where `u` is +∞, which the ratio would turn into NaN. It is within a few ulp of the C runtime's, so an output that reaches it can differ from QuantLib's in its last places, within the tolerance (§7.3) (Choi's implied volatility: 4 of the wheel's 608 outputs, 1 ulp). |
-| The numeric macros of `qldefines.hpp` (`QL_EPSILON`, `QL_MIN_POSITIVE_REAL`, …) | `internal const` fields of `NumericLimits`, keeping the macro names. `QL_EPSILON` is machine epsilon, `2.220446049250313E-16`, and `QL_MIN_POSITIVE_REAL` the smallest normal double; neither is `double.Epsilon`. |
+| `std::log1p`, and a C runtime function .NET lacks | Written in the file of the port that calls it, from a published formulation, never one that loses precision: `double.LogP1` computes `Math.Log(1 + x)` and loses `x`'s low digits. `std::log1p` (in `Log1pFunctions`, Boost's `log1p` port) is Goldberg's (D. Goldberg 1991, Theorem 4), with `u = 1 + x`: `x` where `u` rounds to 1, and `Math.Log(u) * x / (u − 1)` otherwise; the code's own guard returns `Math.Log(u)` where `u` is +∞, which the ratio would turn into NaN. It is within a few ulp of the C runtime's, so an output that reaches it can differ from QuantLib's in its last places, within the tolerance (§7.3) (Choi's implied volatility: 4 of the wheel's 608 outputs, 1 ulp). `std::expm1` (in `Expm1Functions`) is Kahan's, as CPython's `_Py_expm1` computes it, with `u = exp(x)`: `x` where `u` is 1, −1 where `u − 1` is −1, and `(u − 1)·x / Math.Log(u)` otherwise; its guard returns `u` where `u` is +∞, where QuantLib's runtime returns +∞. It agrees with MSVC's on about three arguments in four, where `double.ExpM1` agrees on one in two, so an output that reaches it can differ from QuantLib's in its last places, within the tolerance. |
+| The numeric macros of `qldefines.hpp` (`QL_EPSILON`, `QL_MIN_POSITIVE_REAL`, …) and `mathconstants.hpp` (`M_PI`, `M_SQRT2`, …) | `internal const` fields of `NumericLimits` and `MathConstants`, keeping the macro names. `QL_EPSILON` is machine epsilon, `2.220446049250313E-16`, and `QL_MIN_POSITIVE_REAL` the smallest normal double; neither is `double.Epsilon`. |
 | Deprecated members, `ql/legacy` | Not ported, whether QuantLib deprecates them by its note or by its `[[deprecated]]` attribute alone. |
 | `#ifdef QL_HIGH_RESOLUTION_DATE`, sessions, thread-safe observer options | The default build's branch only. The wheel's build flags are checked against this (§7). |
 | Enums | C# enums with QuantLib's numeric values, so vectors carry them as integers. |
@@ -282,12 +282,13 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `Seasonality`, `CPIVolatilitySurface`, `YoYOptionletVolatilitySurface`, `InflationCoupon`, `InflationCouponPricer`,
   `DefaultProbabilityTermStructure`, `HazardRateStructure`, `DefaultDensityStructure`, `SurvivalProbabilityStructure`,
   `Claim`, `CdsHelper`, `BlackVolTermStructure`, `BlackVolatilityTermStructure`, `BlackVarianceTermStructure`,
-  `LocalVolTermStructure`, `OneAssetOption` and `Dividend` (abstract); `DiscretizedOption`, `Vasicek`,
-  `TermStructureFittingParameter`, `Projection`, `ZeroInflationIndex`, `YoYInflationIndex`,
-  `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`, `YoYInflationCouponPricer`,
-  `CPICouponPricer`, `YoYInflationCapFloor`, `GeneralizedBlackScholesProcess`, `LocalVolSurface`, `VanillaOption`,
-  `OneAssetOptionResults` and `BlackCalculator` (unsealed); `Swap`, `SimpleCashFlow`, `InstrumentResults`,
-  `SwapResults`, `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`, `Bond`, `BondResults`, `FixedRateBond`,
+  `LocalVolTermStructure`, `OneAssetOption`, `Dividend`, `Integrator` and `GaussianOrthogonalPolynomial` (abstract);
+  `DiscretizedOption`, `Vasicek`, `TermStructureFittingParameter`, `Projection`, `ZeroInflationIndex`,
+  `YoYInflationIndex`, `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`,
+  `YoYInflationCouponPricer`, `CPICouponPricer`, `YoYInflationCapFloor`, `GeneralizedBlackScholesProcess`,
+  `LocalVolSurface`, `VanillaOption`, `OneAssetOptionResults`, `BlackCalculator`, `GaussianQuadrature` and
+  `GaussJacobiPolynomial` (unsealed); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
+  `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`, `Bond`, `BondResults`, `FixedRateBond`,
   `FloatingRateBond`, `CapFloor`, `BondHelper`, `Callability`, `IborIndex`, `OvernightIndex`, `Euribor`, `SwapIndex`,
   `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`, `CappedFlooredCoupon`, `BlackIborCouponPricer`,
   `CompoundingOvernightIndexedCouponPricer`, `ArithmeticAveragedOvernightIndexedCouponPricer`, `TridiagonalOperator`,
@@ -303,19 +304,20 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `InterpolatedZeroInflationCurve<TInterpolator>`, `InterpolatedYoYInflationCurve<TInterpolator>`,
   `InterpolatedHazardRateCurve<TInterpolator>`, `InterpolatedDefaultDensityCurve<TInterpolator>` and
   `InterpolatedSurvivalProbabilityCurve<TInterpolator>`, `InterpolatedSmileSection<TInterpolator>`,
-  `XabrSwaptionVolatilityCube<TModel>`, and `ZabrSmileSection<TEvaluation>` and `AdaptiveRungeKutta<T>`, for their named
-  classes (unsealed); `IInterpolator` (the interpolation traits: a factory of one's own overrides its `CheckPoints` with
-  its construction checks, whose default refuses nothing, so that a curve on it takes a bootstrap's first-pass fallback
-  where QuantLib's would), `IInterpolator2D` (the 2-D factory concept), the bootstrap's concepts `IBootstrap`,
-  `IBootstrapState`, `IBootstrapHelper`, `IBootstrapTraits<TTermStructure>`, `IYieldTraits`, `IZeroInflationTraits`,
-  `IYoYInflationTraits`, `IDefaultProbabilityTraits` and `IInterpolatedCurve<TTraits, TInterpolator>`,
-  `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers' function concepts), the generator concepts `IRng`,
-  `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`, `ISeedableRsg<TSelf>`, `IInverseCumulative` and `IRngTraits`, and the
-  model contracts `ICalibratedModel`, `IAffineModel` and `ITermStructureConsistentModel`, `IXabrInterpolation`, a fit's
-  results, `IXabrCubeModel`, a cube's smile model, and the ZABR kernel tag `IZabrEvaluation`, whose members are
-  internal, so that its tags are QuantLib's (interfaces); and `Solver1DBracket`, `ProblemState` and
-  `BootstrapState<TTermStructure>`, sealed, which a solver's `SolveCore`, a method's `MinimizeCore` and a bootstrap's
-  `Calculate` receive.
+  `XabrSwaptionVolatilityCube<TModel>`, `ZabrSmileSection<TEvaluation>`, `AdaptiveRungeKutta<T>` and
+  `TrapezoidIntegral<TIntegrationPolicy>`, for their named classes (unsealed); `IInterpolator` (the interpolation
+  traits: a factory of one's own overrides its `CheckPoints` with its construction checks, whose default refuses
+  nothing, so that a curve on it takes a bootstrap's first-pass fallback where QuantLib's would), `IInterpolator2D` (the
+  2-D factory concept), the bootstrap's concepts `IBootstrap`, `IBootstrapState`, `IBootstrapHelper`,
+  `IBootstrapTraits<TTermStructure>`, `IYieldTraits`, `IZeroInflationTraits`, `IYoYInflationTraits`,
+  `IDefaultProbabilityTraits` and `IInterpolatedCurve<TTraits, TInterpolator>`, `ISolver1DFunction` and
+  `IDerivativeSolver1DFunction` (the solvers' function concepts), `ITrapezoidIntegrationPolicy` (the trapezoid rules'
+  concept), the generator concepts `IRng`, `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`, `ISeedableRsg<TSelf>`,
+  `IInverseCumulative` and `IRngTraits`, and the model contracts `ICalibratedModel`, `IAffineModel` and
+  `ITermStructureConsistentModel`, `IXabrInterpolation`, a fit's results, `IXabrCubeModel`, a cube's smile model, and
+  the ZABR kernel tag `IZabrEvaluation`, whose members are internal, so that its tags are QuantLib's (interfaces); and
+  `Solver1DBracket`, `ProblemState` and `BootstrapState<TTermStructure>`, sealed, which a solver's `SolveCore`, a
+  method's `MinimizeCore` and a bootstrap's `Calculate` receive.
 - **A bond's construction contract:** `Bond`'s derived constructors follow QuantLib's protected interface. They call
   the protected `Bond(settlementDays, calendar, issueDate)`, which builds no leg, then write the protected state
   (`cashflows`, `maturityDate`, and `redemptions` for a bond with its own) and call QuantLib's protected helpers,

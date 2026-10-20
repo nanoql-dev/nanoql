@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/distributions.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBivariate, testBinomialDistribution, testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation, testSankaranApproximation, testCumulativeChiSquareDistribution
+// Partial: testBivariate, testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation
 
 using NanoQL.Numerics;
 using static NanoQL.Numerics.ComparisonFunctions;
@@ -316,6 +316,48 @@ public class DistributionsTests
     }
 
     [Fact]
+    public void TestBinomialDistribution()
+    {
+        // Testing binomial distributions...
+
+        CheckClose(BinomialDistributionFunctions.BinomialCoefficientLn(5, 2), Math.Log(10.0), 1.0e-12);
+        CheckEqual(BinomialDistributionFunctions.BinomialCoefficient(5, 2), 10.0);
+        CheckEqual(BinomialDistributionFunctions.BinomialCoefficient(5, 0), 1.0);
+        CheckExpectedErrorMessage(() => BinomialDistributionFunctions.BinomialCoefficientLn(2, 3), "n<k not allowed");
+
+        var pmf = new BinomialDistribution(0.25, 4);
+        CheckClose(pmf.Evaluate(0), Math.Pow(0.75, 4), 1.0e-12);
+        CheckClose(pmf.Evaluate(2), 6.0 * Math.Pow(0.25, 2) * Math.Pow(0.75, 2), 1.0e-12);
+        CheckEqual(pmf.Evaluate(5), 0.0);
+
+        var zeroP = new BinomialDistribution(0.0, 4);
+        CheckEqual(zeroP.Evaluate(0), 1.0);
+        CheckEqual(zeroP.Evaluate(1), 0.0);
+        var oneP = new BinomialDistribution(1.0, 4);
+        CheckEqual(oneP.Evaluate(3), 0.0);
+        CheckEqual(oneP.Evaluate(4), 1.0);
+        CheckExpectedErrorMessage(() => _ = new BinomialDistribution(-0.1, 4), "negative p not allowed");
+        CheckExpectedErrorMessage(() => _ = new BinomialDistribution(1.1, 4), "p>1.0 not allowed");
+
+        var cdf = new CumulativeBinomialDistribution(0.25, 4);
+        CheckClose(cdf.Evaluate(2), pmf.Evaluate(0) + pmf.Evaluate(1) + pmf.Evaluate(2), 1.0e-12);
+        CheckEqual(cdf.Evaluate(4), 1.0);
+        var zeroPCdf = new CumulativeBinomialDistribution(0.0, 4);
+        CheckEqual(zeroPCdf.Evaluate(0), 1.0);
+        var onePCdf = new CumulativeBinomialDistribution(1.0, 4);
+        CheckEqual(onePCdf.Evaluate(3), 0.0);
+        CheckExpectedErrorMessage(() => _ = new CumulativeBinomialDistribution(-0.1, 4), "negative p not allowed");
+        CheckExpectedErrorMessage(() => _ = new CumulativeBinomialDistribution(1.1, 4), "p>1.0 not allowed");
+
+        Real upper = BinomialDistributionFunctions.PeizerPrattMethod2Inversion(1.0, 5);
+        Real lower = BinomialDistributionFunctions.PeizerPrattMethod2Inversion(-1.0, 5);
+        CheckClose(upper + lower, 1.0, 1.0e-12);
+        CheckEqual(BinomialDistributionFunctions.PeizerPrattMethod2Inversion(0.0, 5), 0.5);
+        CheckExpectedErrorMessage(
+            () => BinomialDistributionFunctions.PeizerPrattMethod2Inversion(0.0, 4), "n must be an odd number");
+    }
+
+    [Fact]
     public void TestPoisson()
     {
         // Testing Poisson distribution...
@@ -473,6 +515,45 @@ public class DistributionsTests
     }
 
     [Fact]
+    public void TestSankaranApproximation()
+    {
+        // Testing Sankaran approximation for the non-central cumulative chi-square distribution...
+
+        Real[] dfs = [2, 2, 2, 4, 4];
+        Real[] ncps = [1, 2, 3, 1, 2, 3];
+
+        const double tol = 0.01;
+        foreach (Real df in dfs)
+        {
+            foreach (Real ncp in ncps)
+            {
+                var d = new NonCentralCumulativeChiSquareDistribution(df, ncp);
+                var sankaran = new NonCentralCumulativeChiSquareSankaranApprox(df, ncp);
+
+                for (Real x = 0.25; x < 10; x += 0.1)
+                {
+                    Real expected = d.Evaluate(x);
+                    Real calculated = sankaran.Evaluate(x);
+                    Real diff = Math.Abs(expected - calculated);
+
+                    if (diff > tol)
+                    {
+                        Assert.Fail(
+                            "Failed to match accuracy of Sankaran approximation"
+                            + $"\n    df        : {df}"
+                            + $"\n    ncp       : {ncp}"
+                            + $"\n    x         : {x}"
+                            + $"\n    expected  : {expected}"
+                            + $"\n    calculated: {calculated}"
+                            + $"\n    diff      : {diff}"
+                            + $"\n    tol       : {tol}");
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
     public void TestCumulativeNormalTail()
     {
         // Testing error function and cumulative normal in the upper tail...
@@ -534,6 +615,19 @@ public class DistributionsTests
 
             previous = p;
         }
+    }
+
+    [Fact]
+    public void TestCumulativeChiSquareDistribution()
+    {
+        var chiSquare = new CumulativeChiSquareDistribution(2.0);
+        CheckEqual(chiSquare.Evaluate(-1.0), 0.0);
+        CheckEqual(chiSquare.Evaluate(0.0), 0.0);
+        CheckClose(chiSquare.Evaluate(2.0), 1.0 - Math.Exp(-1.0), 1.0e-5);
+
+        var nonCentral = new NonCentralCumulativeChiSquareDistribution(4.0, 1.0);
+        CheckEqual(nonCentral.Evaluate(0.0), 0.0);
+        CheckEqual(nonCentral.Evaluate(-1.0), 0.0);
     }
 
     private static Real Gaussian(Real x)

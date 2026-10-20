@@ -50,6 +50,17 @@ Facts:
 
 - `ANullBMAIndexIsRefusedWithQuantLibsText`
 
+## BiCGstabLastIterationTests
+
+[`Divergences/BiCGstabLastIterationTests.cs`](../tests/NanoQL.Tests/Divergences/BiCGstabLastIterationTests.cs)
+
+`BiCGstab` converging in its last allowed iteration. QuantLib's final checks test the iteration count before the error (`bicgstab.cpp:87-88`): a full step that meets the tolerance at the bottom of the last iteration still increments the count to the maximum, so the solve is refused, "max number of iterations exceeded" (a half step that meets it breaks out before the increment, and passes). nanoql tests the error first, QuantLib's own criterion; the count's refusal keeps its text, and a breakdown short of the tolerance keeps QuantLib's "could not converge".
+
+Facts:
+
+- `ASystemSolvedInTheLastIterationIsSolved`
+- `ABreakdownShortOfTheToleranceIsRefused`
+
 ## BlackCalculatorItmProbabilityTests
 
 [`Divergences/BlackCalculatorItmProbabilityTests.cs`](../tests/NanoQL.Tests/Divergences/BlackCalculatorItmProbabilityTests.cs)
@@ -372,6 +383,20 @@ Facts:
 - `AZeroTargetIsRefused`
 - `ANonZeroTargetIsRefused`
 
+## ChiSquaredSeriesRefusalTests
+
+[`Divergences/ChiSquaredSeriesRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/ChiSquaredSeriesRefusalTests.cs)
+
+`NonCentralCumulativeChiSquareDistribution` past its series' range. When QuantLib's loop ends at `itrmax` with its bound still negative, the bound passes as converged (`chisquaredistribution.cpp:79-88`), so above df + 20,000 a partial sum returns; when the first term falls below the normal range (`:54-55`), the series runs on subnormal numbers, then zeros; and when the Poisson weight's start, exp(−ncp/2) (`:39-41`), falls below it, from ncp 1,416.8, every term carries fewer bits, and from ncp 1,490.3 every term is 0, which the stop (`:82`) passes as converged. nanoql refuses each: QuantLib's own "didn't converge" for the first, and a text naming the term for the other two. The subnormal first term and the subnormal weight below pass a check against zero alone, so the refusals test "outside the range of doubles" as below the normal range; at ncp 1,500 the weight is exactly zero.
+
+Facts:
+
+- `ASubnormalFirstTermIsRefused`
+- `ASeriesStoppedUnconvergedAboveDfIsRefused`
+- `ASeriesStoppedUnconvergedInTheLargeDfWindowIsRefused`
+- `ASubnormalPoissonWeightIsRefused`
+- `AZeroPoissonWeightIsRefused`
+
 ## CouponPricerSettingTests
 
 [`Divergences/CouponPricerSettingTests.cs`](../tests/NanoQL.Tests/Divergences/CouponPricerSettingTests.cs)
@@ -589,6 +614,28 @@ A custom futures helper built from dates with no end date keeps a null maturity,
 Facts:
 
 - `ACustomFuturesHelperWithNoEndDateRefusesItsImpliedQuote`
+
+## GaussianQuadratureRefusalTests
+
+[`Divergences/GaussianQuadratureRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/GaussianQuadratureRefusalTests.cs)
+
+`MultiDimGaussianIntegration` with no dimension. QuantLib writes `spacing[0] = 1` on an empty vector (`gaussianquadratures.cpp:101-102`), an undefined write; nanoql refuses on entry, after QuantLib's own allocations.
+
+Facts:
+
+- `NoDimensionIsRefused`
+
+## GmresBreakdownTests
+
+[`Divergences/GmresBreakdownTests.cs`](../tests/NanoQL.Tests/Divergences/GmresBreakdownTests.cs)
+
+`GMRES` on a lucky breakdown, and a zero restart count. QuantLib's loop stops when h(j+1, j) falls below ε² (`gmres.cpp:101-102`) without rotating the column that found it, and solves with the columns before it (`:128-131`). At the first step there are none: k is 0, `y[k-1]` writes before its array, and QuantLib's process crashes on diag(2, 3) with b = (1, 0), an eigenvector. At a later step the dropped column turns a solved system into a refusal: on diag(1, 1, 3, 3) with b = (1, 1, 1, 1), the second step's vector is exactly zero, and QuantLib's `solve` throws "could not converge" where its `solveWithRestart(5)` returns the exact solution. nanoql takes the breakdown as the method defines it, the Krylov space holding the exact solution: it rotates the column and solves with it. `solveWithRestart`'s count bounds the restarts, `restart − 1` after the first cycle (`:54`), and at 0 the bound wraps to none, so QuantLib can run forever where every positive count ends; nanoql refuses 0 on entry, as QuantLib refuses a zero `maxIter`.
+
+Facts:
+
+- `ABreakdownAtTheFirstStepSolvesTheSystem`
+- `ABreakdownAtALaterStepSolvesWhatQuantLibsRestartedSolveSolves`
+- `AZeroRestartCountIsRefused`
 
 ## GridEngineSpreadTests
 
@@ -1171,6 +1218,16 @@ Facts:
 - `SkipToTheLastIndexIsRefusedWithTheGrayCode`
 - `TheDrawThatWouldReachTheLastCounterThrowsWithTheGrayCode`
 
+## SparseMatrixProductTests
+
+[`Divergences/SparseMatrixProductTests.cs`](../tests/NanoQL.Tests/Divergences/SparseMatrixProductTests.cs)
+
+`SparseMatrixFunctions.Prod` on a matrix with more rows than columns. QuantLib's `prod` sizes its result by the columns and writes it by the rows (`sparsematrix.hpp:51-69`), so such a matrix writes past the result, and one with fewer rows pads it. nanoql sizes the result by the rows. QuantLib's `testSparseMatrixMemory` asserts the column-sized result, `Array({0, 18, 0, 84})` for an 8×4 matrix (`matrices.cpp:753-755`); the check moved here from `MatricesTests.cs`.
+
+Facts:
+
+- `TheProductHasARowsLength`
+
 ## SpreadedSmileSectionTypeTests
 
 [`Divergences/SpreadedSmileSectionTypeTests.cs`](../tests/NanoQL.Tests/Divergences/SpreadedSmileSectionTypeTests.cs)
@@ -1336,6 +1393,28 @@ QuantLib's `TimeSeries::find` inserts a date the series doesn't hold, with a `Nu
 Facts:
 
 - `LookingUpAMissingDateLeavesTheSeriesUnchanged`
+
+## TqrEigenDecompositionCycleTests
+
+[`Divergences/TqrEigenDecompositionCycleTests.cs`](../tests/NanoQL.Tests/Divergences/TqrEigenDecompositionCycleTests.cs)
+
+`TqrEigenDecomposition` where QuantLib's iteration never returns. QuantLib loops while an off-diagonal element is above its test (`tqreigendecomposition.cpp:47`), with no bound on the iterations: under `NoShift` it never returns on eigenvalues in pairs of opposite sign, and under any strategy on a NaN, an infinite off-diagonal element or entries whose squares overflow, which QuantLib's Gauss-Jacobi quadrature reaches with parameters of 1e200 (its recurrence's alpha is ∞ − ∞, `gaussianorthogonalpolynomial.cpp:119`). While one eigenvalue converges, the next step is a function of the diagonal and off-diagonal alone, so a state repeated bit for bit proves the iteration endless: nanoql's cycle test refuses there, and every input QuantLib answers keeps QuantLib's result. Each input below never returns in QuantLib (killed at 5 s in the C++ harness, 10 s on the wheel). The test catches the inputs whose state repeats, as a zero diagonal's does, but not every pair: under `NoShift` a pair whose magnitudes differ slightly converges at their ratio without repeating a state, and one equal only to rounding may never repeat one either. Such an input runs as long as QuantLib's, without end once the ratio rounds to 1: a QuantLib defect kept, since no bound on the iterations would separate it from slow inputs QuantLib answers.
+
+Facts:
+
+- `PairedEigenvaluesUnderNoShiftAreRefused`
+- `ANaNOffDiagonalIsRefused`
+- `AGaussJacobiQuadratureWithOverflowingParametersIsRefused`
+
+## TrapezoidMidPointTests
+
+[`Divergences/TrapezoidMidPointTests.cs`](../tests/NanoQL.Tests/Divergences/TrapezoidMidPointTests.cs)
+
+`TrapezoidIntegral{TIntegrationPolicy}` with `MidPoint`. QuantLib starts the recursion from the trapezoid's estimate, (f(a) + f(b))·(b − a)/2, for either rule (`trapezoidintegral.hpp:58-82`), while the midpoint rule's refinement, (I + dx·Σ(f(x + dx/6) + f(x + 5dx/6)))/3 (`:101-117`), triples a midpoint sum only from a midpoint estimate: the start's error then falls by a third a tripling, first order, and `exp` on [0, 1] at 1e-6 takes QuantLib 531,442 evaluations and reads 1.7182822244001084, 3.9e-7 from e − 1. nanoql starts from the one-interval midpoint estimate, (b − a)·f((a + b)/2).
+
+Facts:
+
+- `TheMidPointRuleStartsFromTheMidPoint`
 
 ## TreeSwaptionEngineExerciseTimeTests
 

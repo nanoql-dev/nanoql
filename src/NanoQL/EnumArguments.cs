@@ -397,4 +397,32 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, "unknown extrapolation type");
         }
     }
+
+    /// <summary>Refuses an eigenvector calculation outside
+    /// <see cref="TqrEigenDecompositionEigenVectorCalculation"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib computes the first row's eigenvectors for any value but the other two members.</remarks>
+    internal static void Check(TqrEigenDecompositionEigenVectorCalculation value, string paramName)
+    {
+        if (value is < TqrEigenDecompositionEigenVectorCalculation.WithEigenVector
+            or > TqrEigenDecompositionEigenVectorCalculation.OnlyFirstRowEigenVector)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown eigenvector calculation");
+        }
+    }
+
+    /// <summary>Refuses a shift strategy outside <see cref="TqrEigenDecompositionShiftStrategy"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib overrelaxes for any value but the other two members.</remarks>
+    internal static void Check(TqrEigenDecompositionShiftStrategy value, string paramName)
+    {
+        if (value is < TqrEigenDecompositionShiftStrategy.NoShift or > TqrEigenDecompositionShiftStrategy.CloseEigenValue)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown shift strategy");
+        }
+    }
 }
