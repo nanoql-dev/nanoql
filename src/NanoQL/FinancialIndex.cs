@@ -95,4 +95,17 @@ public abstract class FinancialIndex
         ArgumentNullException.ThrowIfNull(context);
         return context.Fixings.GetHistory(Name);
     }
+
+    /// <summary>
+    /// The dates one fixing is stored on: QuantLib's virtual <c>Index::addFixing</c>, which stores a fixing on the date
+    /// it is given. <see cref="Indexes.IndexFixings.AddFixing"/> writes the fixing on every date this returns.
+    /// </summary>
+    /// <param name="fixingDate">The fixing date given to the store.</param>
+    /// <returns>The date alone; an index whose fixing covers a period overrides this to return every date of the
+    /// period, as QuantLib's inflation indexes override <c>addFixing</c>.</returns>
+    /// <remarks>
+    /// An extension point. QuantLib's <c>addFixings</c> isn't virtual, so the store's bulk writers store the dates they
+    /// are given and don't call it.
+    /// </remarks>
+    protected internal virtual IEnumerable<Date> FixingDates(Date fixingDate) => [fixingDate];
 }

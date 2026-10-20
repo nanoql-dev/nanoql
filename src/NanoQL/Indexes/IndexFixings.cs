@@ -66,13 +66,19 @@ public sealed class IndexFixings : IEquatable<IndexFixings>
     /// <returns>The names.</returns>
     public ImmutableArray<string> Histories() => [.. data.Values.Select(e => e.Name)];
 
-    /// <summary>A store with one more fixing.</summary>
+    /// <summary>A store with one more fixing, written on every date the index gives for it.</summary>
     /// <param name="index">The index the fixing is for.</param>
     /// <param name="fixingDate">The actual calendar date of the fixing, with no settlement days applied.</param>
     /// <param name="fixing">The fixing.</param>
-    /// <param name="forceOverwrite">Whether a fixing already stored on that date is replaced.</param>
+    /// <param name="forceOverwrite">Whether a fixing already stored on those dates is replaced.</param>
     /// <returns>The new store; this one is unchanged.</returns>
-    /// <exception cref="ArgumentException">The date isn't a valid fixing date, or a different fixing is stored on it
+    /// <remarks>
+    /// The fixing is written on each date of the index's <see cref="FinancialIndex.FixingDates"/>: the date alone, or
+    /// for an inflation index every day of the date's inflation period, as QuantLib's <c>InflationIndex::addFixing</c>
+    /// writes it. The dates are written together, through the same checks as <see cref="AddFixings(FinancialIndex,
+    /// IEnumerable{Date}, IEnumerable{double}, bool)"/>, all or nothing.
+    /// </remarks>
+    /// <exception cref="ArgumentException">A date isn't a valid fixing date, or a different fixing is stored on one
     /// and <paramref name="forceOverwrite"/> is <see langword="false"/>.</exception>
     /// <exception cref="NanoQLException">The index allows no native fixings.</exception>
     public IndexFixings AddFixing(FinancialIndex index, Date fixingDate, double fixing, bool forceOverwrite = false)
@@ -80,7 +86,10 @@ public sealed class IndexFixings : IEquatable<IndexFixings>
         ArgumentNullException.ThrowIfNull(index);
         Date.ThrowIfDefault(fixingDate, nameof(fixingDate));
         CheckNativeFixingsAllowed(index);
-        return Add(index, [fixingDate], [fixing], forceOverwrite, nameof(fixingDate));
+        Date[] dates = [.. index.FixingDates(fixingDate)];
+        var values = new double[dates.Length];
+        Array.Fill(values, fixing);
+        return Add(index, dates, values, forceOverwrite, nameof(fixingDate));
     }
 
     /// <summary>A store with more fixings, taken in pairs from two sequences.</summary>

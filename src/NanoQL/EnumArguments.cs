@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Coupons;
+using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
@@ -346,6 +347,21 @@ internal static class EnumArguments
         if (value is not (CallabilityType.Call or CallabilityType.Put))
         {
             throw new ArgumentOutOfRangeException(paramName, value, "unknown callability type");
+        }
+    }
+
+    /// <summary>
+    /// Refuses a CPI interpolation type outside <see cref="CPIInterpolationType"/>, QuantLib's deprecated
+    /// <c>AsIndex</c> (0) among them, which isn't ported.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(CPIInterpolationType value, string paramName)
+    {
+        if (value is not (CPIInterpolationType.Flat or CPIInterpolationType.Linear))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown CPI interpolation type: {(int)value}");
         }
     }
 }

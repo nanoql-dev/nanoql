@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 1,031 | 135 |
-| partial | 22 | 27 |
-| ported | 209 | 20 |
+| not started | 1,018 | 134 |
+| partial | 22 | 28 |
+| ported | 222 | 20 |
 | replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
@@ -533,9 +533,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `equityindex` | not started |  | no nanoql type: EquityIndex |
 | `iborindex` | ported | Indexes/IborIndex.cs, Indexes/OvernightIndex.cs |  |
 | `indexmanager` | replaced: the evaluation context's fixings | Indexes/IndexFixings.cs |  |
-| `inflationindex` | not started |  | no nanoql type: CPI, CPIInterpolationType, InflationIndex, ZeroInflationIndex, YoYInflationIndex |
+| `inflationindex` | ported | Indexes/InflationIndex/CPI.cs, Indexes/InflationIndex/CPIInterpolationType.cs, Indexes/InflationIndex/InflationIndex.cs, Indexes/InflationIndex/YoYInflationIndex.cs, Indexes/InflationIndex/ZeroInflationIndex.cs |  |
 | `interestrateindex` | ported | Indexes/InterestRateIndex.cs |  |
-| `region` | not started |  | no nanoql type: Region, RegionData, CustomRegion, AustraliaRegion, EURegion, FranceRegion, UKRegion, USRegion, ZARegion |
+| `region` | ported | Indexes/Region/AustraliaRegion.cs, Indexes/Region/CustomRegion.cs, Indexes/Region/EURegion.cs, Indexes/Region/FranceRegion.cs, Indexes/Region/Region.cs, Indexes/Region/UKRegion.cs, Indexes/Region/USRegion.cs, Indexes/Region/ZARegion.cs | no nanoql type: RegionData |
 | `swapindex` | ported | Indexes/OvernightIndexedSwapIndex.cs, Indexes/SwapIndex.cs |  |
 
 ### `ql/indexes/ibor/`
@@ -594,11 +594,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `aucpi` | not started |  | no nanoql type: AUCPI, YYAUCPI |
-| `euhicp` | not started |  | no nanoql type: EUHICP, EUHICPXT, YYEUHICP, YYEUHICPXT |
+| `euhicp` | ported | Indexes/Inflation/EUHICP/EUHICP.cs, Indexes/Inflation/EUHICP/EUHICPXT.cs, Indexes/Inflation/EUHICP/YYEUHICP.cs, Indexes/Inflation/EUHICP/YYEUHICPXT.cs |  |
 | `frhicp` | not started |  | no nanoql type: FRHICP, YYFRHICP |
 | `ukhicp` | not started |  | no nanoql type: UKHICP |
-| `ukrpi` | not started |  | no nanoql type: UKRPI, YYUKRPI |
-| `uscpi` | not started |  | no nanoql type: USCPI, YYUSCPI |
+| `ukrpi` | ported | Indexes/Inflation/UKRPI/UKRPI.cs, Indexes/Inflation/UKRPI/YYUKRPI.cs |  |
+| `uscpi` | ported | Indexes/Inflation/USCPI/USCPI.cs, Indexes/Inflation/USCPI/YYUSCPI.cs |  |
 | `zacpi` | not started |  | no nanoql type: ZACPI, YYZACPI |
 
 ### `ql/indexes/swap/`
@@ -1767,7 +1767,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `defaulttermstructure` | not started |  | no nanoql type: DefaultProbabilityTermStructure |
 | `globalbootstrap` | partial | TermStructures/GlobalBootstrap/GlobalBootstrap.cs, TermStructures/GlobalBootstrap/IMultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrapContributor.cs | partial: AdditionalBootstrapVariables, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for B6.2 with SimpleQuoteVariables and its user; no nanoql type: AdditionalBootstrapVariables |
 | `globalbootstrapvars` | not started |  | no nanoql type: SimpleQuoteVariables |
-| `inflationtermstructure` | not started |  | no nanoql type: InflationTermStructure, ZeroInflationTermStructure, YoYInflationTermStructure |
+| `inflationtermstructure` | ported | TermStructures/InflationTermStructure/InflationTermStructure.cs, TermStructures/InflationTermStructure/InflationTermStructureExtensions.cs, TermStructures/InflationTermStructure/InflationTermStructureFunctions.cs, TermStructures/InflationTermStructure/YoYInflationTermStructure.cs, TermStructures/InflationTermStructure/ZeroInflationTermStructure.cs |  |
 | `interpolatedcurve` | ported | TermStructures/IInterpolatedCurve{TTraits,TInterpolator}.cs, TermStructures/InterpolatedCurve{TInterpolator}.cs |  |
 | `iterativebootstrap` | ported | TermStructures/IterativeBootstrap/BootstrapState{TTermStructure}.cs, TermStructures/IterativeBootstrap/IBootstrap.cs, TermStructures/IterativeBootstrap/IBootstrapState.cs, TermStructures/IterativeBootstrap/IterativeBootstrap.cs |  |
 | `localbootstrap` | not started |  | no nanoql type: PenaltyFunction, LocalBootstrap |
@@ -1797,12 +1797,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `inflationhelpers` | not started |  | no nanoql type: ZeroCouponInflationSwapHelper, YearOnYearInflationSwapHelper |
-| `inflationtraits` | not started |  | no nanoql type: ZeroInflationTraits, YoYInflationTraits |
-| `interpolatedyoyinflationcurve` | not started |  | no nanoql type: InterpolatedYoYInflationCurve, YoYInflationCurve |
-| `interpolatedzeroinflationcurve` | not started |  | no nanoql type: InterpolatedZeroInflationCurve, ZeroInflationCurve |
+| `inflationtraits` | ported | TermStructures/Inflation/InflationTraits/IYoYInflationTraits.cs, TermStructures/Inflation/InflationTraits/IZeroInflationTraits.cs, TermStructures/Inflation/InflationTraits/InflationTraitsDetail.cs, TermStructures/Inflation/InflationTraits/YoYInflationTraits.cs, TermStructures/Inflation/InflationTraits/ZeroInflationTraits.cs |  |
+| `interpolatedyoyinflationcurve` | ported | TermStructures/Inflation/InterpolatedYoYInflationCurve/InterpolatedYoYInflationCurve{TInterpolator}.cs, TermStructures/Inflation/InterpolatedYoYInflationCurve/YoYInflationCurve.cs |  |
+| `interpolatedzeroinflationcurve` | ported | TermStructures/Inflation/InterpolatedZeroInflationCurve/InterpolatedZeroInflationCurve{TInterpolator}.cs, TermStructures/Inflation/InterpolatedZeroInflationCurve/ZeroInflationCurve.cs |  |
 | `piecewiseyoyinflationcurve` | not started |  | no nanoql type: PiecewiseYoYInflationCurve |
 | `piecewisezeroinflationcurve` | not started |  | no nanoql type: PiecewiseZeroInflationCurve |
-| `seasonality` | not started |  | no nanoql type: Seasonality, MultiplicativePriceSeasonality, KerkhofSeasonality |
+| `seasonality` | ported | TermStructures/Inflation/Seasonality/KerkhofSeasonality.cs, TermStructures/Inflation/Seasonality/MultiplicativePriceSeasonality.cs, TermStructures/Inflation/Seasonality/Seasonality.cs |  |
 
 ### `ql/termstructures/volatility/`
 
@@ -1868,9 +1868,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `constantcpivolatility` | not started |  | no nanoql type: ConstantCPIVolatility |
-| `cpivolatilitystructure` | not started |  | no nanoql type: CPIVolatilitySurface |
-| `yoyinflationoptionletvolatilitystructure` | not started |  | no nanoql type: YoYOptionletVolatilitySurface, ConstantYoYOptionletVolatility |
+| `constantcpivolatility` | ported | TermStructures/Volatility/Inflation/ConstantCPIVolatility.cs |  |
+| `cpivolatilitystructure` | ported | TermStructures/Volatility/Inflation/CPIVolatilitySurface.cs |  |
+| `yoyinflationoptionletvolatilitystructure` | ported | TermStructures/Volatility/Inflation/YoYInflationOptionletVolatilityStructure/ConstantYoYOptionletVolatility.cs, TermStructures/Volatility/Inflation/YoYInflationOptionletVolatilityStructure/YoYOptionletVolatilitySurface.cs |  |
 
 ### `ql/termstructures/volatility/optionlet/`
 
@@ -2149,7 +2149,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `himalayaoption` | not started |  | 1 cases |
 | `hybridhestonhullwhiteprocess` | not started |  | 13 cases |
 | `indexes` | partial | TestSuite/IndexesTests.cs | 3 of 6 cases; replaced: testFixingObservability by Vectors/Indexes/BMAIndexVectorTests.cs; not yet: testCustomIborIndex, testCdiIndex, testShirIndex |
-| `inflation` | not started |  | 28 cases |
+| `inflation` | partial | TestSuite/InflationTests.cs | 15 of 28 cases; not ported: testCpiAsIndexInterpolation (CPI::AsIndex, deprecated in QuantLib 1.43, D5); not yet: testZeroTermStructure, testZeroTermStructureLazyBaseDate, testYYTermStructure, testZeroBpsYoYInflationSwapFairRateAndSpread, testExpiredYoYInflationSwapFairRateAndSpread, testNotifications, testExtrapolationRegression, testUsCpiLinearBootstrapAtMonthStart, testEuHicpFlatBootstrapAtMonthStart, testUkRpiFlatBootstrapAtMonthStart, testUsCpiLinearGlobalBootstrapAtMonthStart, testPillarCollisionWithDifferentMonthLengths |
 | `inflationcapfloor` | not started |  | 4 cases |
 | `inflationcapflooredcoupon` | not started |  | 2 cases |
 | `inflationcpibond` | not started |  | 2 cases |

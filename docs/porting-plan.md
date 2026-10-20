@@ -117,6 +117,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, binomial, Student t, chi-square, stochastic-collocation and Sankaran cases, whose distributions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/FunctionsTests.cs`: the modified Bessel, expm1 and log1p cases, whose functions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/IndexesTests.cs`: the custom-index, CDI and SHIR cases, which wait for batch 2's indexes and calendars.
+- `tests/NanoQL.Tests/TestSuite/InflationTests.cs`: `testZeroIndex`'s UK HICP and quarterly AU CPI checks, which wait for batch 2's `UKHICP` and `AUCPI`; and the coupon, swap and bootstrap cases, which wait for S-infl's second commit.
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations, integrals or extrapolators not yet ported (Simpson, Lagrange, Chebyshev, multi-dimensional splines, forward-flat, no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace, B-splines, flat extrapolation).
 - `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice, Faure and Burley 2020 cases and the discrepancy cases, whose generators and statistics aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the cases needing matrix utilities not yet ported (decompositions, square roots, iterative solvers, sparse matrices, projections, Moore-Penrose).

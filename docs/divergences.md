@@ -467,6 +467,27 @@ Facts:
 - `QuantLibsNullSentinelIsAValue`
 - `FewerValuesThanDatesAreRefused`
 
+## InflationCurveFirstDateTests
+
+[`Divergences/InflationCurveFirstDateTests.cs`](../tests/NanoQL.Tests/Divergences/InflationCurveFirstDateTests.cs)
+
+The interpolated inflation curves given no dates or no rates. QuantLib's constructors pass `dates.at(0)` to their base before checking the count (`interpolatedzeroinflationcurve.hpp:98-102`, `interpolatedyoyinflationcurve.hpp:103-108`), so with no date they throw `std::out_of_range` (the wheel's `IndexError: invalid vector subscript`); the year-on-year curve also passes `rates[0]`, which reads past an empty vector, undefined. nanoql refuses both first, with QuantLib's own texts: "too few dates: 0" naming `dates`, and for empty rates QuantLib's checks of the count in its order, "too few dates" or the count mismatch naming `rates`.
+
+Facts:
+
+- `NoDatesAreRefusedBeforeTheFirstIsRead`
+- `NoRatesAreRefusedBeforeTheFirstIsRead`
+
+## InflationLastFixingDateTests
+
+[`Divergences/InflationLastFixingDateTests.cs`](../tests/NanoQL.Tests/Divergences/InflationLastFixingDateTests.cs)
+
+An inflation index's last fixing date after a read of a date the store lacks. QuantLib's `hasHistoricalFixing` reads the history through the index manager's non-const accessor, which inserts a null entry at the date, and `ZeroInflationIndex::lastFixingDate` (`inflationindex.cpp:190-195`) then attributes the last fixing to that entry's period: after probing 1 May 2024, UK RPI's last fixing date moves from 1 April to 1 May 2024, a month with no fixing, measured on the wheel (853 entries for 851 stored). nanoql's reads never write (the fixing store's divergence), so the last fixing date stays 1 April 2024, QuantLib's answer before the read.
+
+Facts:
+
+- `AReadOfAMissingDateDoesntMoveTheLastFixingDate`
+
 ## InitialGuessSizeTests
 
 [`Divergences/InitialGuessSizeTests.cs`](../tests/NanoQL.Tests/Divergences/InitialGuessSizeTests.cs)
@@ -497,6 +518,17 @@ A bilinear or bicubic-spline interpolation over a matrix smaller than its grid. 
 Facts:
 
 - `AMatrixSmallerThanTheGridIsRefused`
+
+## LaggedYoYRateBranchTests
+
+[`Divergences/LaggedYoYRateBranchTests.cs`](../tests/NanoQL.Tests/Divergences/LaggedYoYRateBranchTests.cs)
+
+`CPI.LaggedYoYRate` on a ratio index under linear interpolation. QuantLib interpolates the underlying's fixings and takes their ratio only when `!index->needsForecast(date)`, tested on the unlagged date (`inflationindex.cpp:83`), though the fixings that branch reads are those of the lagged date's period and the next; otherwise it interpolates the ratios. So a fixing it never reads changes the rate it returns: with UK RPI fixings to June 2025 and the evaluation date 20 August 2025, the rate for 15 July 2025 with a three-month lag is 0.035461466318187446 on the wheel, and 0.03545866305332557 once July's fixing is stored, a change of -2.8032648618780964e-06 (QuantLib's defect, R8). nanoql asks whether the latest fixing the ratio branch reads needs a forecast (the next period's first day, or the lagged period's own when the date starts its period), so the rate is 0.03545866305332557 with or without July's fixing: QuantLib's own answer with that fixing added, and its interpolate-then-divide value from the same April and May fixings. The other face: where the lag is shorter than the index's period, the unlagged date's fixing can be published while the next period's, which the ratio branch reads, isn't. QuantLib then takes the ratio branch and forecasts the underlying index, refusing without its zero curve, against its own comment that "forecasts need to be done through the YoY forecast curve, and not the underlying index" (`:84-90`): with UK RPI fixings to April 2024, the evaluation date 15 June 2024 and a YoY curve flat at 2%, the rate for 26 April 2024 with no lag throws "empty Handle cannot be dereferenced" on the wheel. nanoql interpolates the ratios through the YoY curve, 0.02218077895395275; on 1 April, which starts its period, both give 0.033084673723716485.
+
+Facts:
+
+- `AFixingTheRatioBranchDoesntReadChangesNothing`
+- `ALagShorterThanThePeriodForecastsThroughTheYoYCurve`
 
 ## MakeSwaptionNullIndexTests
 
@@ -816,6 +848,16 @@ QuantLib reads a seed of 0 as "no seed" and draws one from its `SeedGenerator` s
 Facts:
 
 - `EveryGeneratorRefusesSeedZero`
+
+## SetSeasonalityReceiverTests
+
+[`Divergences/SetSeasonalityReceiverTests.cs`](../tests/NanoQL.Tests/Divergences/SetSeasonalityReceiverTests.cs)
+
+`InflationTermStructureExtensions.SetSeasonality` returns a copy and leaves its receiver unchanged, whether it accepts the seasonality or refuses it. QuantLib's `setSeasonality` changes its curve, and assigns before it checks (`inflationtermstructure.cpp:78-82`), while `MultiplicativePriceSeasonality::isConsistent` throws rather than returning false (`seasonality.cpp:82-84`), so a refused seasonality stays on QuantLib's curve: a zero curve flat at 3%, refused a 24-factor seasonality inconsistent with it, then has a seasonality, and its zero rate on 1 May 2026 is 0.030493063761148242 on the wheel, not 0.03.
+
+Facts:
+
+- `TheReceiverIsUnchangedWhetherTheSeasonalityIsAcceptedOrRefused`
 
 ## SettlementDaysSentinelTests
 
