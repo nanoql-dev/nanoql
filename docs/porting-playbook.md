@@ -278,9 +278,10 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `OneFactorModelShortRateDynamics`, `Parameter`, `CalibrationHelper`, `BlackCalibrationHelper`, `CallableBond`,
   `CallableBondVolatilityStructure`, `CapFloorTermVolatilityStructure`, `StrippedOptionletBase`, `OptionletStripper`,
   `InflationIndex`, `Region`, `InflationTermStructure`, `ZeroInflationTermStructure`, `YoYInflationTermStructure`,
-  `Seasonality`, `CPIVolatilitySurface`, `YoYOptionletVolatilitySurface`, `InflationCoupon` and `InflationCouponPricer`
-  (abstract); `DiscretizedOption`, `Vasicek`, `TermStructureFittingParameter`, `Projection`, `ZeroInflationIndex`,
-  `YoYInflationIndex`, `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`,
+  `Seasonality`, `CPIVolatilitySurface`, `YoYOptionletVolatilitySurface`, `InflationCoupon`, `InflationCouponPricer`,
+  `DefaultProbabilityTermStructure`, `HazardRateStructure`, `DefaultDensityStructure`, `SurvivalProbabilityStructure`,
+  `Claim` and `CdsHelper` (abstract); `DiscretizedOption`, `Vasicek`, `TermStructureFittingParameter`, `Projection`,
+  `ZeroInflationIndex`, `YoYInflationIndex`, `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`,
   `YoYInflationCouponPricer`, `CPICouponPricer` and `YoYInflationCapFloor` (unsealed); `Swap`, `SimpleCashFlow`,
   `InstrumentResults`, `SwapResults`, `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`, `Bond`,
   `BondResults`, `FixedRateBond`, `FloatingRateBond`, `CapFloor`, `BondHelper`, `Callability`, `IborIndex`,
@@ -291,17 +292,20 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `RandomSequenceGenerator<TRng>`, `InverseCumulativeRng<TRng, TIc>`, `InverseCumulativeRsg<TUsg, TIc>`,
   `PathGenerator<TGsg>`, `Exercise`, `EarlyExercise`, `BermudanExercise`,
   `PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap>`,
-  `PiecewiseZeroInflationCurve<TInterpolator, TBootstrap, TTraits>` and
-  `PiecewiseYoYInflationCurve<TInterpolator, TBootstrap, TTraits>`, and the interpolated curves
+  `PiecewiseZeroInflationCurve<TInterpolator, TBootstrap, TTraits>`,
+  `PiecewiseYoYInflationCurve<TInterpolator, TBootstrap, TTraits>` and
+  `PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>`, and the interpolated curves
   `InterpolatedDiscountCurve<TInterpolator>`, `InterpolatedZeroCurve<TInterpolator>`,
   `InterpolatedForwardCurve<TInterpolator>`, `InterpolatedSimpleZeroCurve<TInterpolator>`,
-  `InterpolatedZeroInflationCurve<TInterpolator>` and `InterpolatedYoYInflationCurve<TInterpolator>`,
-  `InterpolatedSmileSection<TInterpolator>`, `XabrSwaptionVolatilityCube<TModel>`, and `ZabrSmileSection<TEvaluation>`
-  and `AdaptiveRungeKutta<T>`, for their named classes (unsealed); `IInterpolator` (the interpolation traits: a factory
-  of one's own overrides its `CheckPoints` with its construction checks, whose default refuses nothing, so that a curve
-  on it takes a bootstrap's first-pass fallback where QuantLib's would), `IInterpolator2D` (the 2-D factory concept),
-  the bootstrap's concepts `IBootstrap`, `IBootstrapState`, `IBootstrapHelper`, `IBootstrapTraits<TTermStructure>`,
-  `IYieldTraits`, `IZeroInflationTraits`, `IYoYInflationTraits` and `IInterpolatedCurve<TTraits, TInterpolator>`,
+  `InterpolatedZeroInflationCurve<TInterpolator>`, `InterpolatedYoYInflationCurve<TInterpolator>`,
+  `InterpolatedHazardRateCurve<TInterpolator>`, `InterpolatedDefaultDensityCurve<TInterpolator>` and
+  `InterpolatedSurvivalProbabilityCurve<TInterpolator>`, `InterpolatedSmileSection<TInterpolator>`,
+  `XabrSwaptionVolatilityCube<TModel>`, and `ZabrSmileSection<TEvaluation>` and `AdaptiveRungeKutta<T>`, for their named
+  classes (unsealed); `IInterpolator` (the interpolation traits: a factory of one's own overrides its `CheckPoints` with
+  its construction checks, whose default refuses nothing, so that a curve on it takes a bootstrap's first-pass fallback
+  where QuantLib's would), `IInterpolator2D` (the 2-D factory concept), the bootstrap's concepts `IBootstrap`,
+  `IBootstrapState`, `IBootstrapHelper`, `IBootstrapTraits<TTermStructure>`, `IYieldTraits`, `IZeroInflationTraits`,
+  `IYoYInflationTraits`, `IDefaultProbabilityTraits` and `IInterpolatedCurve<TTraits, TInterpolator>`,
   `ISolver1DFunction` and `IDerivativeSolver1DFunction` (the solvers' function concepts), the generator concepts `IRng`,
   `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`, `ISeedableRsg<TSelf>`, `IInverseCumulative` and `IRngTraits`, and the
   model contracts `ICalibratedModel`, `IAffineModel` and `ITermStructureConsistentModel`, `IXabrInterpolation`, a fit's

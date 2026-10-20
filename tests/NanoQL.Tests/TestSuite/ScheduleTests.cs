@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/schedule.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured (cdsMaturity)
 
+using NanoQL.Instruments;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.TestSuite;
@@ -359,6 +359,531 @@ public class ScheduleTests
             new(16, Month.March, 2023),
         ];
         CheckDates(s, expected);
+    }
+
+    [Fact]
+    public void TestCDS2015Convention()
+    {
+        // Testing CDS2015 semi-annual rolling convention...
+
+        DateGenerationRule rule = DateGenerationRule.CDS2015;
+        var tenor = new Period(5, TimeUnit.Years);
+
+        // From September 20th 2016 to March 19th 2017 of the next year, end date is December 20th 2021 for a 5 year
+        // CDS. To get the correct schedule, you can first use the cdsMaturity function to get the maturity from the
+        // tenor.
+        var tradeDate = new Date(12, Month.December, 2016);
+        Date? maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule);
+        var expStart = new Date(20, Month.September, 2016);
+        var expMaturity = new Date(20, Month.December, 2021);
+        Assert.Equal(expMaturity, maturity);
+        Schedule s = MakeCdsSchedule(tradeDate, maturity!.Value, rule);
+        Assert.Equal(expStart, s.StartDate());
+        Assert.Equal(expMaturity, s.EndDate());
+
+        // If we just use 12 Dec 2016 + 5Y = 12 Dec 2021 as termination date in the schedule, the schedule constructor
+        // can use any of the allowable CDS dates i.e. 20 Mar, Jun, Sep and Dec. In the constructor, we just use the
+        // next one here i.e. 20 Dec 2021. We get the same results as above.
+        maturity = tradeDate + tenor;
+        s = MakeCdsSchedule(tradeDate, maturity.Value, rule);
+        Assert.Equal(expStart, s.StartDate());
+        Assert.Equal(expMaturity, s.EndDate());
+
+        // We do the same tests but with a trade date of 1 Mar 2017. Using cdsMaturity to get maturity date from 5Y
+        // tenor, we get the same maturity as above.
+        tradeDate = new Date(1, Month.March, 2017);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule);
+        Assert.Equal(expMaturity, maturity);
+        s = MakeCdsSchedule(tradeDate, maturity!.Value, rule);
+        expStart = new Date(20, Month.December, 2016);
+        Assert.Equal(expStart, s.StartDate());
+        Assert.Equal(expMaturity, s.EndDate());
+
+        // Using 1 Mar 2017 + 5Y = 1 Mar 2022 as termination date in the schedule, the constructor just uses the next
+        // allowable CDS date i.e. 20 Mar 2022. We must update the expected maturity.
+        maturity = tradeDate + tenor;
+        s = MakeCdsSchedule(tradeDate, maturity.Value, rule);
+        Assert.Equal(expStart, s.StartDate());
+        expMaturity = new Date(20, Month.March, 2022);
+        Assert.Equal(expMaturity, s.EndDate());
+
+        // From March 20th 2017 to September 19th 2017, end date is June 20th 2022 for a 5 year CDS.
+        tradeDate = new Date(20, Month.March, 2017);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule);
+        expStart = new Date(20, Month.March, 2017);
+        expMaturity = new Date(20, Month.June, 2022);
+        Assert.Equal(expMaturity, maturity);
+        s = MakeCdsSchedule(tradeDate, maturity!.Value, rule);
+        Assert.Equal(expStart, s.StartDate());
+        Assert.Equal(expMaturity, s.EndDate());
+    }
+
+    [Fact]
+    public void TestCDS2015ConventionGrid()
+    {
+        // Testing against section 11 of ISDA doc FAQs Amending when Single Name CDS roll to new on-the-run contracts
+        // December 20, 2015 Go-Live
+        // Testing CDS2015 convention against ISDA doc...
+
+        // Test inputs and expected outputs
+        // Each row is the trade date and the CDS tenor, then the expected start and end date.
+        // The trade dates are from the transition dates in the doc i.e. 20th Mar, Jun, Sep and Dec in 2016 and a day
+        // either side. The tenors are selected tenors from the doc i.e. short quarterly tenors less than 1Y, 1Y and 5Y.
+        (Date From, Period Tenor, Date ExpStart, Date ExpEnd)[] inputs =
+        [
+                (new Date(19, Month.March, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.March, 2016)),
+                (new Date(20, Month.March, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.September, 2016)),
+                (new Date(21, Month.March, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.September, 2016)),
+                (new Date(19, Month.June, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.September, 2016)),
+                (new Date(20, Month.June, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.September, 2016)),
+                (new Date(21, Month.June, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.September, 2016)),
+                (new Date(19, Month.September, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.September, 2016)),
+                (new Date(20, Month.September, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.September, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.March, 2017)),
+                (new Date(19, Month.December, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.December, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.December, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.March, 2017)),
+                (new Date(19, Month.March, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.June, 2016)),
+                (new Date(20, Month.March, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.December, 2016)),
+                (new Date(21, Month.March, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.December, 2016)),
+                (new Date(19, Month.June, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.December, 2016)),
+                (new Date(20, Month.June, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.December, 2016)),
+                (new Date(21, Month.June, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.December, 2016)),
+                (new Date(19, Month.September, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.December, 2016)),
+                (new Date(20, Month.September, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.September, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.December, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.June, 2017)),
+                (new Date(20, Month.December, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.December, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.March, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.September, 2016)),
+                (new Date(20, Month.March, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.March, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.March, 2017)),
+                (new Date(19, Month.June, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.June, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.June, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.March, 2017)),
+                (new Date(19, Month.September, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.September, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.September, 2017)),
+                (new Date(21, Month.September, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.September, 2017)),
+                (new Date(19, Month.December, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.September, 2017)),
+                (new Date(20, Month.December, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.September, 2017)),
+                (new Date(21, Month.December, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.September, 2017)),
+                (new Date(19, Month.March, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.December, 2015), new Date(20, Month.December, 2016)),
+                (new Date(20, Month.March, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.December, 2015), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.March, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.March, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.June, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.March, 2016), new Date(20, Month.June, 2017)),
+                (new Date(20, Month.June, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.June, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.September, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.June, 2017)),
+                (new Date(20, Month.September, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2017)),
+                (new Date(21, Month.September, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2017)),
+                (new Date(19, Month.December, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2017)),
+                (new Date(20, Month.December, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.December, 2016), new Date(20, Month.December, 2017)),
+                (new Date(21, Month.December, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.December, 2016), new Date(20, Month.December, 2017)),
+                (new Date(19, Month.March, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.December, 2015), new Date(20, Month.December, 2020)),
+                (new Date(20, Month.March, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.December, 2015), new Date(20, Month.June, 2021)),
+                (new Date(21, Month.March, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.March, 2016), new Date(20, Month.June, 2021)),
+                (new Date(19, Month.June, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.March, 2016), new Date(20, Month.June, 2021)),
+                (new Date(20, Month.June, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.June, 2021)),
+                (new Date(21, Month.June, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.June, 2021)),
+                (new Date(19, Month.September, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.June, 2021)),
+                (new Date(20, Month.September, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2021)),
+                (new Date(21, Month.September, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2021)),
+                (new Date(19, Month.December, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2021)),
+                (new Date(20, Month.December, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.December, 2016), new Date(20, Month.December, 2021)),
+                (new Date(21, Month.December, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.December, 2016), new Date(20, Month.December, 2021)),
+                (new Date(20, Month.March, 2016), new Period(0, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.June, 2016)),
+                (new Date(21, Month.March, 2016), new Period(0, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.June, 2016)),
+                (new Date(19, Month.June, 2016), new Period(0, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.June, 2016)),
+                (new Date(20, Month.September, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.December, 2016)),
+                (new Date(21, Month.September, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.December, 2016)),
+                (new Date(19, Month.December, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.December, 2016)),
+        ];
+
+        TestCdsConventions(inputs, DateGenerationRule.CDS2015);
+    }
+
+    [Fact]
+    public void TestCDSConventionGrid()
+    {
+        // Testing against section 11 of ISDA doc FAQs Amending when Single Name CDS roll to new on-the-run contracts
+        // December 20, 2015 Go-Live. Amended the dates in the doc to the pre-2015 expected maturity dates.
+        // Testing CDS convention against ISDA doc...
+
+        // Test inputs and expected outputs
+        // Each row is the trade date and the CDS tenor, then the expected start and end date.
+        // The trade dates are from the transition dates in the doc i.e. 20th Mar, Jun, Sep and Dec in 2016 and a day
+        // either side. The tenors are selected tenors from the doc i.e. short quarterly tenors less than 1Y, 1Y and 5Y.
+        (Date From, Period Tenor, Date ExpStart, Date ExpEnd)[] inputs =
+        [
+                (new Date(19, Month.March, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.June, 2016)),
+                (new Date(20, Month.March, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.September, 2016)),
+                (new Date(21, Month.March, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.September, 2016)),
+                (new Date(19, Month.June, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.September, 2016)),
+                (new Date(20, Month.June, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.December, 2016)),
+                (new Date(21, Month.June, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.December, 2016)),
+                (new Date(19, Month.September, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.December, 2016)),
+                (new Date(20, Month.September, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.September, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.March, 2017)),
+                (new Date(19, Month.December, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.December, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.December, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.March, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.September, 2016)),
+                (new Date(20, Month.March, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.December, 2016)),
+                (new Date(21, Month.March, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.December, 2016)),
+                (new Date(19, Month.June, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.December, 2016)),
+                (new Date(20, Month.June, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.June, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.March, 2017)),
+                (new Date(19, Month.September, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.September, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.September, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.December, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.June, 2017)),
+                (new Date(20, Month.December, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.September, 2017)),
+                (new Date(21, Month.December, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.September, 2017)),
+                (new Date(19, Month.March, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.December, 2016)),
+                (new Date(20, Month.March, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.March, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.March, 2017)),
+                (new Date(19, Month.June, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.June, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.June, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.September, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.June, 2017)),
+                (new Date(20, Month.September, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.September, 2017)),
+                (new Date(21, Month.September, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.September, 2017)),
+                (new Date(19, Month.December, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.September, 2017)),
+                (new Date(20, Month.December, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.December, 2017)),
+                (new Date(21, Month.December, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.December, 2017)),
+                (new Date(19, Month.March, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.December, 2015), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.March, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.December, 2015), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.March, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.March, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.June, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.March, 2016), new Date(20, Month.June, 2017)),
+                (new Date(20, Month.June, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.September, 2017)),
+                (new Date(21, Month.June, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.September, 2017)),
+                (new Date(19, Month.September, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.September, 2017)),
+                (new Date(20, Month.September, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2017)),
+                (new Date(21, Month.September, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2017)),
+                (new Date(19, Month.December, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2017)),
+                (new Date(20, Month.December, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.December, 2016), new Date(20, Month.March, 2018)),
+                (new Date(21, Month.December, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.December, 2016), new Date(20, Month.March, 2018)),
+                (new Date(19, Month.March, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.December, 2015), new Date(20, Month.March, 2021)),
+                (new Date(20, Month.March, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.December, 2015), new Date(20, Month.June, 2021)),
+                (new Date(21, Month.March, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.March, 2016), new Date(20, Month.June, 2021)),
+                (new Date(19, Month.June, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.March, 2016), new Date(20, Month.June, 2021)),
+                (new Date(20, Month.June, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.September, 2021)),
+                (new Date(21, Month.June, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.September, 2021)),
+                (new Date(19, Month.September, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.September, 2021)),
+                (new Date(20, Month.September, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2021)),
+                (new Date(21, Month.September, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2021)),
+                (new Date(19, Month.December, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2021)),
+                (new Date(20, Month.December, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.December, 2016), new Date(20, Month.March, 2022)),
+                (new Date(21, Month.December, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.December, 2016), new Date(20, Month.March, 2022)),
+                (new Date(19, Month.March, 2016), new Period(0, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.March, 2016)),
+                (new Date(20, Month.March, 2016), new Period(0, TimeUnit.Months), new Date(21, Month.December, 2015), new Date(20, Month.June, 2016)),
+                (new Date(21, Month.March, 2016), new Period(0, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.June, 2016)),
+                (new Date(19, Month.June, 2016), new Period(0, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.June, 2016)),
+                (new Date(20, Month.June, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.September, 2016)),
+                (new Date(21, Month.June, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.September, 2016)),
+                (new Date(19, Month.September, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.September, 2016)),
+                (new Date(20, Month.September, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.December, 2016)),
+                (new Date(21, Month.September, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.December, 2016)),
+                (new Date(19, Month.December, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.December, 2016)),
+                (new Date(20, Month.December, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.December, 2016), new Period(0, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.March, 2017)),
+        ];
+
+        TestCdsConventions(inputs, DateGenerationRule.CDS);
+    }
+
+    [Fact]
+    public void TestOldCDSConventionGrid()
+    {
+        // Testing against section 11 of ISDA doc FAQs Amending when Single Name CDS roll to new on-the-run contracts
+        // December 20, 2015 Go-Live. Amended the dates in the doc to the pre-2009 expected start and maturity dates.
+        // Testing old CDS convention...
+
+        // Test inputs and expected outputs
+        // Each row is the trade date and the CDS tenor, then the expected start and end date.
+        // The trade dates are from the transition dates in the doc i.e. 20th Mar, Jun, Sep and Dec in 2016 and a day
+        // either side. The tenors are selected tenors from the doc i.e. short quarterly tenors less than 1Y, 1Y and 5Y.
+        (Date From, Period Tenor, Date ExpStart, Date ExpEnd)[] inputs =
+        [
+                (new Date(19, Month.March, 2016), new Period(3, TimeUnit.Months), new Date(19, Month.March, 2016), new Date(20, Month.June, 2016)),
+                (new Date(20, Month.March, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.March, 2016), new Date(20, Month.September, 2016)),
+                (new Date(21, Month.March, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.September, 2016)),
+                (new Date(19, Month.June, 2016), new Period(3, TimeUnit.Months), new Date(19, Month.June, 2016), new Date(20, Month.September, 2016)),
+                (new Date(20, Month.June, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.December, 2016)),
+                (new Date(21, Month.June, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.June, 2016), new Date(20, Month.December, 2016)),
+                (new Date(19, Month.September, 2016), new Period(3, TimeUnit.Months), new Date(19, Month.September, 2016), new Date(20, Month.December, 2016)),
+                (new Date(20, Month.September, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.September, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.September, 2016), new Date(20, Month.March, 2017)),
+                (new Date(19, Month.December, 2016), new Period(3, TimeUnit.Months), new Date(19, Month.December, 2016), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.December, 2016), new Period(3, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.December, 2016), new Period(3, TimeUnit.Months), new Date(21, Month.December, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.March, 2016), new Period(6, TimeUnit.Months), new Date(19, Month.March, 2016), new Date(20, Month.September, 2016)),
+                (new Date(20, Month.March, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.March, 2016), new Date(20, Month.December, 2016)),
+                (new Date(21, Month.March, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.December, 2016)),
+                (new Date(19, Month.June, 2016), new Period(6, TimeUnit.Months), new Date(19, Month.June, 2016), new Date(20, Month.December, 2016)),
+                (new Date(20, Month.June, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.June, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.June, 2016), new Date(20, Month.March, 2017)),
+                (new Date(19, Month.September, 2016), new Period(6, TimeUnit.Months), new Date(19, Month.September, 2016), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.September, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.September, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.September, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.December, 2016), new Period(6, TimeUnit.Months), new Date(19, Month.December, 2016), new Date(20, Month.June, 2017)),
+                (new Date(20, Month.December, 2016), new Period(6, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.September, 2017)),
+                (new Date(21, Month.December, 2016), new Period(6, TimeUnit.Months), new Date(21, Month.December, 2016), new Date(20, Month.September, 2017)),
+                (new Date(19, Month.March, 2016), new Period(9, TimeUnit.Months), new Date(19, Month.March, 2016), new Date(20, Month.December, 2016)),
+                (new Date(20, Month.March, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.March, 2016), new Date(20, Month.March, 2017)),
+                (new Date(21, Month.March, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.March, 2016), new Date(20, Month.March, 2017)),
+                (new Date(19, Month.June, 2016), new Period(9, TimeUnit.Months), new Date(19, Month.June, 2016), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.June, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.June, 2016), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.June, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.June, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.September, 2016), new Period(9, TimeUnit.Months), new Date(19, Month.September, 2016), new Date(20, Month.June, 2017)),
+                (new Date(20, Month.September, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.September, 2016), new Date(20, Month.September, 2017)),
+                (new Date(21, Month.September, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.September, 2016), new Date(20, Month.September, 2017)),
+                (new Date(19, Month.December, 2016), new Period(9, TimeUnit.Months), new Date(19, Month.December, 2016), new Date(20, Month.September, 2017)),
+                (new Date(20, Month.December, 2016), new Period(9, TimeUnit.Months), new Date(20, Month.December, 2016), new Date(20, Month.December, 2017)),
+                (new Date(21, Month.December, 2016), new Period(9, TimeUnit.Months), new Date(21, Month.December, 2016), new Date(20, Month.December, 2017)),
+                (new Date(19, Month.March, 2016), new Period(1, TimeUnit.Years), new Date(19, Month.March, 2016), new Date(20, Month.March, 2017)),
+                (new Date(20, Month.March, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.March, 2016), new Date(20, Month.June, 2017)),
+                (new Date(21, Month.March, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.March, 2016), new Date(20, Month.June, 2017)),
+                (new Date(19, Month.June, 2016), new Period(1, TimeUnit.Years), new Date(19, Month.June, 2016), new Date(20, Month.June, 2017)),
+                (new Date(20, Month.June, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.September, 2017)),
+                (new Date(21, Month.June, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.June, 2016), new Date(20, Month.September, 2017)),
+                (new Date(19, Month.September, 2016), new Period(1, TimeUnit.Years), new Date(19, Month.September, 2016), new Date(20, Month.September, 2017)),
+                (new Date(20, Month.September, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2017)),
+                (new Date(21, Month.September, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.September, 2016), new Date(20, Month.December, 2017)),
+                (new Date(19, Month.December, 2016), new Period(1, TimeUnit.Years), new Date(19, Month.December, 2016), new Date(20, Month.December, 2017)),
+                (new Date(20, Month.December, 2016), new Period(1, TimeUnit.Years), new Date(20, Month.December, 2016), new Date(20, Month.March, 2018)),
+                (new Date(21, Month.December, 2016), new Period(1, TimeUnit.Years), new Date(21, Month.December, 2016), new Date(20, Month.March, 2018)),
+                (new Date(19, Month.March, 2016), new Period(5, TimeUnit.Years), new Date(19, Month.March, 2016), new Date(20, Month.March, 2021)),
+                (new Date(20, Month.March, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.March, 2016), new Date(20, Month.June, 2021)),
+                (new Date(21, Month.March, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.March, 2016), new Date(20, Month.June, 2021)),
+                (new Date(19, Month.June, 2016), new Period(5, TimeUnit.Years), new Date(19, Month.June, 2016), new Date(20, Month.June, 2021)),
+                (new Date(20, Month.June, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.June, 2016), new Date(20, Month.September, 2021)),
+                (new Date(21, Month.June, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.June, 2016), new Date(20, Month.September, 2021)),
+                (new Date(19, Month.September, 2016), new Period(5, TimeUnit.Years), new Date(19, Month.September, 2016), new Date(20, Month.September, 2021)),
+                (new Date(20, Month.September, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.September, 2016), new Date(20, Month.December, 2021)),
+                (new Date(21, Month.September, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.September, 2016), new Date(20, Month.December, 2021)),
+                (new Date(19, Month.December, 2016), new Period(5, TimeUnit.Years), new Date(19, Month.December, 2016), new Date(20, Month.December, 2021)),
+                (new Date(20, Month.December, 2016), new Period(5, TimeUnit.Years), new Date(20, Month.December, 2016), new Date(20, Month.March, 2022)),
+                (new Date(21, Month.December, 2016), new Period(5, TimeUnit.Years), new Date(21, Month.December, 2016), new Date(20, Month.March, 2022)),
+        ];
+
+        TestCdsConventions(inputs, DateGenerationRule.OldCDS);
+    }
+
+    [Fact]
+    public void TestCDS2015ConventionSampleDates()
+    {
+        // Testing all dates in sample CDS schedule(s) for rule CDS2015...
+
+        DateGenerationRule rule = DateGenerationRule.CDS2015;
+        var tenor = new Period(1, TimeUnit.Years);
+
+        // trade date = Fri 18 Sep 2015.
+        var tradeDate = new Date(18, Month.September, 2015);
+        Date maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule)!.Value;
+        Schedule s = MakeCdsSchedule(tradeDate, maturity, rule);
+        List<Date> expDates =
+        [
+            new(22, Month.June, 2015), new(21, Month.September, 2015), new(21, Month.December, 2015),
+            new(21, Month.March, 2016), new(20, Month.June, 2016),
+        ];
+        CheckDates(s, [.. expDates]);
+
+        // trade date = Sat 19 Sep 2015, no change.
+        tradeDate = new Date(19, Month.September, 2015);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule)!.Value;
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        CheckDates(s, [.. expDates]);
+
+        // trade date = Sun 20 Sep 2015. Roll to new maturity. Trade date still before next coupon payment
+        // date of Mon 21 Sep 2015, so keep the first period from 22 Jun 2015 to 21 Sep 2015 in schedule.
+        tradeDate = new Date(20, Month.September, 2015);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule)!.Value;
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        expDates.Add(new Date(20, Month.September, 2016));
+        expDates.Add(new Date(20, Month.December, 2016));
+        CheckDates(s, [.. expDates]);
+
+        // trade date = Mon 21 Sep 2015, first period drops out of schedule.
+        tradeDate = new Date(21, Month.September, 2015);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule)!.Value;
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        expDates.RemoveAt(0);
+        CheckDates(s, [.. expDates]);
+
+        // Another sample trade date, Sat 20 Jun 2009.
+        tradeDate = new Date(20, Month.June, 2009);
+        maturity = new Date(20, Month.December, 2009);
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        expDates =
+        [
+            new(20, Month.March, 2009), new(22, Month.June, 2009), new(21, Month.September, 2009),
+            new(20, Month.December, 2009),
+        ];
+        CheckDates(s, [.. expDates]);
+
+        // Move forward to Sun 21 Jun 2009
+        tradeDate = new Date(21, Month.June, 2009);
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        CheckDates(s, [.. expDates]);
+
+        // Move forward to Mon 22 Jun 2009
+        tradeDate = new Date(22, Month.June, 2009);
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        expDates.RemoveAt(0);
+        CheckDates(s, [.. expDates]);
+    }
+
+    [Fact]
+    public void TestCDSConventionSampleDates()
+    {
+        // Testing all dates in sample CDS schedule(s) for rule CDS...
+
+        DateGenerationRule rule = DateGenerationRule.CDS;
+        var tenor = new Period(1, TimeUnit.Years);
+
+        // trade date = Fri 18 Sep 2015.
+        var tradeDate = new Date(18, Month.September, 2015);
+        Date maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule)!.Value;
+        Schedule s = MakeCdsSchedule(tradeDate, maturity, rule);
+        List<Date> expDates =
+        [
+            new(22, Month.June, 2015), new(21, Month.September, 2015), new(21, Month.December, 2015),
+            new(21, Month.March, 2016), new(20, Month.June, 2016), new(20, Month.September, 2016),
+        ];
+        CheckDates(s, [.. expDates]);
+
+        // trade date = Sat 19 Sep 2015, no change.
+        tradeDate = new Date(19, Month.September, 2015);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule)!.Value;
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        CheckDates(s, [.. expDates]);
+
+        // trade date = Sun 20 Sep 2015. Roll to new maturity. Trade date still before next coupon payment
+        // date of Mon 21 Sep 2015, so keep the first period from 22 Jun 2015 to 21 Sep 2015 in schedule.
+        tradeDate = new Date(20, Month.September, 2015);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule)!.Value;
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        expDates.Add(new Date(20, Month.December, 2016));
+        CheckDates(s, [.. expDates]);
+
+        // trade date = Mon 21 Sep 2015, first period drops out of schedule.
+        tradeDate = new Date(21, Month.September, 2015);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule)!.Value;
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        expDates.RemoveAt(0);
+        CheckDates(s, [.. expDates]);
+
+        // Another sample trade date, Sat 20 Jun 2009.
+        tradeDate = new Date(20, Month.June, 2009);
+        maturity = new Date(20, Month.December, 2009);
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        expDates =
+        [
+            new(20, Month.March, 2009), new(22, Month.June, 2009), new(21, Month.September, 2009),
+            new(20, Month.December, 2009),
+        ];
+        CheckDates(s, [.. expDates]);
+
+        // Move forward to Sun 21 Jun 2009
+        tradeDate = new Date(21, Month.June, 2009);
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        CheckDates(s, [.. expDates]);
+
+        // Move forward to Mon 22 Jun 2009
+        tradeDate = new Date(22, Month.June, 2009);
+        s = MakeCdsSchedule(tradeDate, maturity, rule);
+        expDates.RemoveAt(0);
+        CheckDates(s, [.. expDates]);
+    }
+
+    [Fact]
+    public void TestOldCDSConventionSampleDates()
+    {
+        // Testing all dates in sample CDS schedule(s) for rule OldCDS...
+
+        DateGenerationRule rule = DateGenerationRule.OldCDS;
+        var tenor = new Period(1, TimeUnit.Years);
+
+        // trade date plus 1D = Fri 18 Sep 2015.
+        var tradeDatePlusOne = new Date(18, Month.September, 2015);
+        Date maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDatePlusOne, tenor, rule)!.Value;
+        Schedule s = MakeCdsSchedule(tradeDatePlusOne, maturity, rule);
+        List<Date> expDates =
+        [
+            new(18, Month.September, 2015), new(21, Month.December, 2015),
+            new(21, Month.March, 2016), new(20, Month.June, 2016), new(20, Month.September, 2016),
+        ];
+        CheckDates(s, [.. expDates]);
+
+        // trade date plus 1D = Sat 19 Sep 2015, no change.
+        // OldCDS, schedule start date is not adjusted (kept this).
+        expDates[0] = tradeDatePlusOne = new Date(19, Month.September, 2015);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDatePlusOne, tenor, rule)!.Value;
+        s = MakeCdsSchedule(tradeDatePlusOne, maturity, rule);
+        CheckDates(s, [.. expDates]);
+
+        // trade date plus 1D = Sun 20 Sep 2015, roll.
+        expDates[0] = tradeDatePlusOne = new Date(20, Month.September, 2015);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDatePlusOne, tenor, rule)!.Value;
+        s = MakeCdsSchedule(tradeDatePlusOne, maturity, rule);
+        expDates.Add(new Date(20, Month.December, 2016));
+        CheckDates(s, [.. expDates]);
+
+        // trade date plus 1D = Mon 21 Sep 2015, no change.
+        expDates[0] = tradeDatePlusOne = new Date(21, Month.September, 2015);
+        maturity = CreditDefaultSwapFunctions.CdsMaturity(tradeDatePlusOne, tenor, rule)!.Value;
+        s = MakeCdsSchedule(tradeDatePlusOne, maturity, rule);
+        CheckDates(s, [.. expDates]);
+
+        // Check the 30 day stub rule by moving closer to the first coupon payment date of Mon 21 Dec 2015.
+        // The test here requires long first stub when trade date plus 1D = 21 Nov 2015. The condition in the schedule
+        // generation code is if: effective date + 30D > next 20th _unadjusted_. Not sure if we should refer to the
+        // actual coupon payment date here i.e. the next 20th _adjusted_ when making the decision.
+
+        // 19 Nov 2015 + 30D = 19 Dec 2015 <= 20 Dec 2015 => short front stub.
+        expDates[0] = tradeDatePlusOne = new Date(19, Month.November, 2015);
+        s = MakeCdsSchedule(tradeDatePlusOne, maturity, rule);
+        CheckDates(s, [.. expDates]);
+
+        // 20 Nov 2015 + 30D = 20 Dec 2015 <= 20 Dec 2015 => short front stub.
+        expDates[0] = tradeDatePlusOne = new Date(20, Month.November, 2015);
+        s = MakeCdsSchedule(tradeDatePlusOne, maturity, rule);
+        CheckDates(s, [.. expDates]);
+
+        // 21 Nov 2015 + 30D = 21 Dec 2015 > 20 Dec 2015 => long front stub.
+        // Note that if we reffered to the next coupon payment date of 21 Dec 2015, it would still be short front.
+        expDates[0] = tradeDatePlusOne = new Date(21, Month.November, 2015);
+        s = MakeCdsSchedule(tradeDatePlusOne, maturity, rule);
+        expDates.RemoveAt(1);
+        CheckDates(s, [.. expDates]);
+    }
+
+    // Adapted: QuantLib's Date() is null here.
+    [Fact]
+    public void TestCDS2015ZeroMonthsMatured()
+    {
+        // Testing 0M tenor for CDS2015 where matured...
+
+        DateGenerationRule rule = DateGenerationRule.CDS2015;
+        var tenor = new Period(0, TimeUnit.Months);
+
+        // Move through selected trade dates from 20 Dec 2015 to 20 Dec 2016 checking that the 0M CDS is matured.
+        Date[] inputs =
+        [
+            new(20, Month.December, 2015),
+            new(15, Month.February, 2016),
+            new(19, Month.March, 2016),
+            new(20, Month.June, 2016),
+            new(15, Month.August, 2016),
+            new(19, Month.September, 2016),
+            new(20, Month.December, 2016),
+        ];
+
+        foreach (Date input in inputs)
+        {
+            Assert.Null(CreditDefaultSwapFunctions.CdsMaturity(input, tenor, rule));
+        }
     }
 
     [Fact]
@@ -720,6 +1245,36 @@ public class ScheduleTests
             new Date(15, Month.March, 2024)); // off-grid, not one tenor from neighbors
         Size n = forwardNTLIrreg.Size;
         Assert.False(forwardNTLIrreg.IsRegular(n - 2), "Period ending at off-grid nextToLastDate should be irregular");
+    }
+
+    // QuantLib's CdsTests::makeCdsSchedule.
+    private static Schedule MakeCdsSchedule(Date from, Date to, DateGenerationRule rule) =>
+        new MakeSchedule()
+            .From(from)
+            .To(to)
+            .WithCalendar(new WeekendsOnly())
+            .WithTenor(new Period(3, TimeUnit.Months))
+            .WithConvention(BusinessDayConvention.Following)
+            .WithTerminationDateConvention(BusinessDayConvention.Unadjusted)
+            .WithRule(rule)
+            .ToSchedule();
+
+    // QuantLib's CdsTests::testCDSConventions: the generated start and end date against the expected start and end
+    // date.
+    private static void TestCdsConventions((Date From, Period Tenor, Date ExpStart, Date ExpEnd)[] inputs, DateGenerationRule rule)
+    {
+        foreach ((Date from, Period tenor, Date expStart, Date expEnd) in inputs)
+        {
+            Date? maturity = CreditDefaultSwapFunctions.CdsMaturity(from, tenor, rule);
+            Assert.Equal(expEnd, maturity);
+
+            Schedule s = MakeCdsSchedule(from, maturity!.Value, rule);
+
+            Date start = s.StartDate();
+            Date end = s.EndDate();
+            Assert.Equal(expStart, start);
+            Assert.Equal(expEnd, end);
+        }
     }
 
     private static void CheckDates(Schedule s, Date[] expected)

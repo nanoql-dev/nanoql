@@ -34,6 +34,7 @@ public class InterpolationConstructionTests
         AssertSame(new Linear().Interpolate(X, Y), new LinearInterpolation(X, Y));
         AssertSame(new BackwardFlat().Interpolate(X, Y), new BackwardFlatInterpolation(X, Y));
         AssertSame(new LogLinear().Interpolate(X, LogY), new LogLinearInterpolation(X, LogY));
+        AssertSame(new ForwardFlat().Interpolate(X, Y), new ForwardFlatInterpolation(X, Y));
         AssertSame(new Cubic().Interpolate(X, Y), new KrugerCubic(X, Y));
         AssertSame(
             new Cubic(CubicInterpolationDerivativeApprox.Spline, true, CubicInterpolationBoundaryCondition.NotAKnot, 0.0, CubicInterpolationBoundaryCondition.FirstDerivative, 1.5)

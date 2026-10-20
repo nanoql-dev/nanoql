@@ -256,6 +256,48 @@ Facts:
 
 - `ANullUnderlyingIsRefused`
 
+## CdsConventionalSpreadNullTests
+
+[`Divergences/CdsConventionalSpreadNullTests.cs`](../tests/NanoQL.Tests/Divergences/CdsConventionalSpreadNullTests.cs)
+
+The conventional spread where the engine leaves the fair spread null. QuantLib's `conventionalSpread` returns the results' fair spread unchecked (`creditdefaultswap.cpp:422`), so it returns `Null<Real>()`, 3.4028234663852886e+38, as a spread under either model: for `CreditFixture`'s expired swap, and for its live swap at a zero running spread, whose root is a zero hazard rate and no coupon leg. nanoql's results are `double?`, so QuantLib's sentinel has no form here (the forced-departure rule): nanoql refuses with `NanoQLException`, "instrument expired" for the expired swap and QuantLib's own "fair spread not available" for the live one.
+
+Facts:
+
+- `AnExpiredSwapIsRefused`
+- `AZeroRunningSpreadIsRefused`
+
+## CdsEmptyScheduleTests
+
+[`Divergences/CdsEmptyScheduleTests.cs`](../tests/NanoQL.Tests/Divergences/CdsEmptyScheduleTests.cs)
+
+A credit default swap on an empty schedule with no protection start. QuantLib's constructors initialize the protection start to `schedule[0]` before `init` checks the schedule (`creditdefaultswap.cpp:56, 81`), and `Schedule::operator[]` reads `dates_[i]` unchecked unless `QL_EXTRA_SAFETY_CHECKS` is defined (`schedule.hpp:169-173`): an empty vector's first element, which is undefined. On the wheel, both constructors end the process with an access violation (exit code 0xC0000005); given a protection start, both refuse with `init`'s "CreditDefaultSwap needs a non-empty schedule.". nanoql checks the schedule first, and refuses with that text, an `ArgumentException` naming `schedule`, whether or not a protection start is given.
+
+Facts:
+
+- `AnEmptyScheduleIsRefusedBeforeItsFirstDateIsRead`
+
+## CdsExpiredAccrualRebateTests
+
+[`Divergences/CdsExpiredAccrualRebateTests.cs`](../tests/NanoQL.Tests/Divergences/CdsExpiredAccrualRebateTests.cs)
+
+An expired credit default swap's accrual-rebate NPV. QuantLib's `setupExpired` zeroes seven results and leaves the accrual rebate's NPV unset (`creditdefaultswap.cpp:215-220`), so it reads an uninitialized member: on the wheel, for `CreditFixture`'s expired swap priced by the mid-point engine, 7.565977700541159e-307 in one fresh process and 1.9925540477164e-311 in another (QuantLib's defect, R8). nanoql's expired results are all 0, the accrual rebate's NPV included.
+
+Facts:
+
+- `TheAccrualRebateNpvOfAnExpiredSwapIsZero`
+
+## CdsImpliedHazardRateExpiredTests
+
+[`Divergences/CdsImpliedHazardRateExpiredTests.cs`](../tests/NanoQL.Tests/Divergences/CdsImpliedHazardRateExpiredTests.cs)
+
+The implied hazard rate of an expired credit default swap. QuantLib's `impliedHazardRate` calls the engine directly, without the expiry check (`creditdefaultswap.cpp:317-336`), and the engine finds every coupon occurred, so the objective is the target less a constant: for `CreditFixture`'s expired swap, under either model, a zero target returns the solver's guess, 0.016898148148148148, and a target of 1 fails to bracket ("unable to bracket root in 100 function evaluations …") (QuantLib's defect, R8). nanoql refuses an expired swap with a `NanoQLException`, "instrument expired", QuantLib's text in `Swaption::impliedVolatility`.
+
+Facts:
+
+- `AZeroTargetIsRefused`
+- `ANonZeroTargetIsRefused`
+
 ## CouponPricerSettingTests
 
 [`Divergences/CouponPricerSettingTests.cs`](../tests/NanoQL.Tests/Divergences/CouponPricerSettingTests.cs)
@@ -299,6 +341,16 @@ Facts:
 Facts:
 
 - `AFixedOptionletPaysOnTheIndexRatio`
+
+## CreditCurveFirstDateTests
+
+[`Divergences/CreditCurveFirstDateTests.cs`](../tests/NanoQL.Tests/Divergences/CreditCurveFirstDateTests.cs)
+
+The interpolated credit curves given no dates. QuantLib's constructors pass `dates.at(0)` to their base before checking the count (`interpolatedhazardratecurve.hpp`, `interpolateddefaultdensitycurve.hpp`, `interpolatedsurvivalprobabilitycurve.hpp`), so with no date they throw `std::out_of_range`: the wheel's `HazardRateCurve`, `DefaultDensityCurve` and `SurvivalProbabilityCurve` each raise `IndexError: invalid vector subscript`. nanoql refuses first, with QuantLib's own "not enough input dates given", an `ArgumentException` naming `dates`.
+
+Facts:
+
+- `NoDatesAreRefusedBeforeTheFirstIsRead`
 
 ## CubeAtmExtrapolationTests
 
@@ -466,6 +518,16 @@ Facts:
 - `AnEmptyScheduleIsRefusedByBothBuilders`
 - `ANullIndexIsRefused`
 
+## ForwardFlatPrimitiveTests
+
+[`Divergences/ForwardFlatPrimitiveTests.cs`](../tests/NanoQL.Tests/Divergences/ForwardFlatPrimitiveTests.cs)
+
+The forward-flat interpolation's primitive past its last node. QuantLib's `primitive` beyond `x[n-1]` adds `(x - x[n-2])·y[n-2]` (`forwardflatinterpolation.hpp:93-97`), while its value there is `y[n-1]` (`:87-88`), so the primitive's slope isn't the value (QuantLib's defect, R8). nanoql's primitive beyond `x[n-1]` is `primitive[n-1] + (x - x[n-1])·y[n-1]`, and QuantLib's expression at and before it. On x = [0, 1, 2, 3] and y = [0.01, 0.02, 0.03, 0.05], at 4 and 5 it is 0.11 and 0.16, where QuantLib's is 0.09 and 0.12: QuantLib's own forward-flat forward curve integrates there as nanoql does, its `-ln D(t)` on the wheel 0.11000000000000003 and 0.16 (`forwardcurve.hpp:155-168`). At 2.5 and 3 both give 0.045 and 0.06.
+
+Facts:
+
+- `ThePrimitivePastTheLastNodeGrowsAtTheValueThere`
+
 ## FuturesNullMaturityTests
 
 [`Divergences/FuturesNullMaturityTests.cs`](../tests/NanoQL.Tests/Divergences/FuturesNullMaturityTests.cs)
@@ -591,6 +653,27 @@ A bilinear or bicubic-spline interpolation over a matrix smaller than its grid. 
 Facts:
 
 - `AMatrixSmallerThanTheGridIsRefused`
+
+## IsdaImpliedWeekendTests
+
+[`Divergences/IsdaImpliedWeekendTests.cs`](../tests/NanoQL.Tests/Divergences/IsdaImpliedWeekendTests.cs)
+
+The ISDA model's implied hazard rate and conventional spread on a weekend. QuantLib's flat curve is `FlatHazardRate(0, WeekendsOnly(), …)` (`creditdefaultswap.cpp:352, 393`), which rolls a weekend to Monday, and its own ISDA engine then refuses it: on Saturday 15 March 2025, for `MakeCreditDefaultSwap(5Y, 1%)` on a discount curve flat at 3%, Actual/365 (Fixed), at a recovery of 40%, both throw "probability term structure reference date (March 17th, 2025 should be evaluation date (March 15th, 2025)" (QuantLib's defect, R8). nanoql's ISDA model dates its curve on the evaluation date. QuantLib's ISDA engine on QuantLib's `FlatHazardRate` dated there, solved by QuantLib's `Brent` on the wheel, gives the hazard rate 0.016833960395149727 for a zero target, and the fair spread at the conventional root, 0.009999999999972463; on the Friday before, the same oracle gives QuantLib's own 0.01683399613622196 and 0.009999999999972453. The mid-point model keeps QuantLib's curve and its weekend answers, 0.016853086104458855 and 0.009999999999985819.
+
+Facts:
+
+- `TheImpliedHazardRateIsSolvedOnTheEvaluationDate`
+- `TheConventionalSpreadIsTheFairSpreadAtTheRoot`
+
+## IsdaProtectionLegMaturityTests
+
+[`Divergences/IsdaProtectionLegMaturityTests.cs`](../tests/NanoQL.Tests/Divergences/IsdaProtectionLegMaturityTests.cs)
+
+The ISDA engine's protection leg on curves that end before the maturity. QuantLib integrates over the union of the two curves' nodes, adds the maturity only when the union is empty (`isdacdsengine.cpp:150-156`), and stops at the maturity only on meeting a node past it (`:167-172`), so it drops the protection from the curves' last node to the maturity (QuantLib's defect, R8). nanoql adds the maturity to the nodes when their last one is before it. On 15 March 2024, a 10-year CDS buying protection on 10,000,000 at 1% from the next day (quarterly on WeekendsOnly under the CDS rule, Actual/360 with the last period inclusive) on a hazard rate flat at 2% and a discount curve continuously flat at 3%, Actual/365 (Fixed): on a log-linear discount curve with yearly nodes to 5 years, nanoql's default leg is 945,721.5990409853, QuantLib's own on the flat curve and on nodes to 15 years, where QuantLib's on nodes to 5 years is 531,134.1471852273; the coupon leg is -820,172.4119002547 on every curve.
+
+Facts:
+
+- `TheProtectionRunsToTheMaturity`
 
 ## LaggedYoYRateBranchTests
 

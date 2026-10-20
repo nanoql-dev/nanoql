@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/piecewiseyieldcurve.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the consistency cases' FRA and futures checks, which wait for S-rx's ForwardRateAgreement, and testBMACurveConsistency, which waits for batch 2's USDLibor; testDefaultInstantiation's ForwardFlat curve (S-infl) and ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testHelperDatesFromNonBusinessEvaluationDate's BMA helper check, which waits for batch 2's USDLibor; testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testParFraRegression, testMultiCurveTwoPiecewiseYieldCurves and testFraForDates (S-rx); testPiecewiseSpreadYieldCurve (B3.5); testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate and testBmaHelperSwap (batch 2's Libor indexes); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
+// Partial: the consistency cases' FRA and futures checks, which wait for S-rx's ForwardRateAgreement, and testBMACurveConsistency, which waits for batch 2's USDLibor; testDefaultInstantiation's ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testHelperDatesFromNonBusinessEvaluationDate's BMA helper check, which waits for batch 2's USDLibor; testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testParFraRegression, testMultiCurveTwoPiecewiseYieldCurves and testFraForDates (S-rx); testPiecewiseSpreadYieldCurve (B3.5); testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate and testBmaHelperSwap (batch 2's Libor indexes); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
 // Replaced: testObservability (Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -209,8 +209,9 @@ public class PiecewiseYieldCurveTests
 
     // Adapted: QuantLib never bootstraps these curves (line 1087: the case tests that they compile); nanoql's
     // constructors bootstrap them. SplineLogCubic, a test-local subclass of LogCubic with a default constructor, is the
-    // LogCubic it constructs, passed to the curve. The ForwardFlat and ConvexMonotone curves (lines 1093-1094) are on
-    // the partial line.
+    // LogCubic it constructs, passed to the curve. The ForwardFlat curve (line 1093) is compiled and not invoked, as in
+    // QuantLib: no iterative bootstrap can build it, since a forward-flat curve's discount at a node never reads that
+    // node's forward. The ConvexMonotone curve (line 1094) is on the partial line.
     [Fact]
     public void TestDefaultInstantiation()
     {
@@ -235,6 +236,9 @@ public class PiecewiseYieldCurveTests
             vars.Settlement, vars.Instruments, new Actual360(), vars.Context);
         _ = new PiecewiseYieldCurve<ForwardRate, BackwardFlat, IterativeBootstrap>(
             vars.Settlement, vars.Instruments, new Actual360(), vars.Context);
+        Func<PiecewiseYieldCurve<ForwardRate, ForwardFlat, IterativeBootstrap>> forwardFlat =
+            () => new(vars.Settlement, vars.Instruments, new Actual360(), vars.Context);
+        Assert.NotNull(forwardFlat);
     }
 
     // Adapted: the helpers built under the test runner's evaluation date, the curve's first bootstrap under

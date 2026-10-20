@@ -85,7 +85,7 @@ public sealed class FixedRateCoupon : Coupon
     public override double Amount(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
-        return Nominal(context) * (rate.CompoundFactor(AccrualStartDate, AccrualEndDate, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
+        return Amount();
     }
 
     /// <inheritdoc/>
@@ -99,6 +99,17 @@ public sealed class FixedRateCoupon : Coupon
     public override double AccruedAmount(Date d, EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+        return AccruedAmount(d);
+    }
+
+    // The amount, which reads no context: the coupon's nominal is its contract nominal (SID10). The credit default
+    // swap's constructor, which takes no context, reads its accrual rebate through it.
+    internal double Amount() =>
+        ContractNominal * (rate.CompoundFactor(AccrualStartDate, AccrualEndDate, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
+
+    // The accrued amount at a date, which reads no context (SID10).
+    internal double AccruedAmount(Date d)
+    {
         NanoQL.Time.Date.ThrowIfDefault(d, nameof(d));
         if (d <= AccrualStartDate || d > Date)
         {
@@ -108,13 +119,13 @@ public sealed class FixedRateCoupon : Coupon
         else if (TradingExCouponOn(d))
         {
             Date end = d > AccrualEndDate ? d : AccrualEndDate;
-            return -Nominal(context) * (rate.CompoundFactor(d, end, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
+            return -ContractNominal * (rate.CompoundFactor(d, end, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
         }
         else
         {
             // usual case
             Date end = d < AccrualEndDate ? d : AccrualEndDate;
-            return Nominal(context) * (rate.CompoundFactor(AccrualStartDate, end, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
+            return ContractNominal * (rate.CompoundFactor(AccrualStartDate, end, ReferencePeriodStart, ReferencePeriodEnd) - 1.0);
         }
     }
 }

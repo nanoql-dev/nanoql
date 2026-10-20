@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSplineErrorOnGaussianValues (SimpsonIntegral, B4.5); testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (B4.5); testMultiSpline (B4.7); testForwardFlat (S-infl); testFlatExtrapolation (B3.1); testBSplines (B3.5); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (B6.2); testLaplaceInterpolation (B7.3); testNoArbSabrInterpolation, testTransformations (B7.5)
+// Partial: testSplineErrorOnGaussianValues (SimpsonIntegral, B4.5); testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (B4.5); testMultiSpline (B4.7); testFlatExtrapolation (B3.1); testBSplines (B3.5); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (B6.2); testLaplaceInterpolation (B7.3); testNoArbSabrInterpolation, testTransformations (B7.5)
 // Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs); testBicubicUpdate (Conventions/InterpolationConstructionTests.cs)
 
 using NanoQL.Numerics;
@@ -599,6 +599,117 @@ public class InterpolationsTests
             {
                 Assert.Fail(
                     $"failed to calculate primitive at {x[i]}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+    }
+
+    // Adapted: enableExtrapolation (line 1241), which changes QuantLib's interpolation, returns a modified copy here
+    // (playbook §2), which f is rebound to.
+    [Fact]
+    public void TestForwardFlat()
+    {
+        // Testing forward-flat interpolation...
+
+        Real[] x = [0.0, 1.0, 2.0, 3.0, 4.0];
+        Real[] y = [5.0, 4.0, 3.0, 2.0, 1.0];
+
+        Interpolation f = new ForwardFlatInterpolation(x, y);
+
+        Size N = x.Length;
+        Size i;
+        Real tolerance = 1.0e-12;
+
+        // at original points
+        for (i = 0; i < N; i++)
+        {
+            Real p = x[i];
+            Real calculated = f.Evaluate(p);
+            Real expected = y[i];
+            if (Math.Abs(expected - calculated) > tolerance)
+            {
+                Assert.Fail(
+                    $"failed to reproduce {DataFormattersFunctions.Ordinal(i + 1)} datum"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // at middle points
+        for (i = 0; i < N - 1; i++)
+        {
+            Real p = (x[i] + x[i + 1]) / 2;
+            Real calculated = f.Evaluate(p);
+            Real expected = y[i];
+            if (Math.Abs(expected - calculated) > tolerance)
+            {
+                Assert.Fail(
+                    $"failed to interpolate correctly at {p}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // outside the original range
+        f = f.EnableExtrapolation();
+
+        {
+            Real p = x[0] - 0.5;
+            Real calculated = f.Evaluate(p);
+            Real expected = y[0];
+            if (Math.Abs(expected - calculated) > tolerance)
+            {
+                Assert.Fail(
+                    $"failed to extrapolate correctly at {p}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+
+            p = x[N - 1] + 0.5;
+            calculated = f.Evaluate(p);
+            expected = y[N - 1];
+            if (Math.Abs(expected - calculated) > tolerance)
+            {
+                Assert.Fail(
+                    $"failed to extrapolate correctly at {p}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+
+            // primitive at original points
+            calculated = f.Primitive(x[0]);
+            expected = 0.0;
+            if (Math.Abs(expected - calculated) > tolerance)
+            {
+                Assert.Fail(
+                    $"failed to calculate primitive at {x[0]}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        Real sum = 0.0;
+        for (i = 1; i < N; i++)
+        {
+            sum += (x[i] - x[i - 1]) * y[i - 1];
+            Real calculated = f.Primitive(x[i]);
+            Real expected = sum;
+            if (Math.Abs(expected - calculated) > tolerance)
+            {
+                Assert.Fail(
+                    $"failed to calculate primitive at {x[i]}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // primitive at middle points
+        sum = 0.0;
+        for (i = 0; i < N - 1; i++)
+        {
+            Real p = (x[i] + x[i + 1]) / 2;
+            sum += (x[i + 1] - x[i]) * y[i] / 2;
+            Real calculated = f.Primitive(p);
+            Real expected = sum;
+            sum += (x[i + 1] - x[i]) * y[i] / 2;
+            if (Math.Abs(expected - calculated) > tolerance)
+            {
+                Assert.Fail(
+                    $"failed to calculate primitive at {p}"
                     + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}\n    error:      {Math.Abs(calculated - expected):E}");
             }
         }

@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/fixedratecoupon.hpp ql/cashflows/fixedratecoupon.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: withLastPeriodDayCounter, which waits for the credit-default-swap slot, whose tests use it
 
 using System.Collections.Immutable;
 using NanoQL.Time;
@@ -39,6 +38,8 @@ public sealed record FixedRateLeg
     private ImmutableArray<InterestRate> CouponRates { get; init; } = [];
 
     private DayCounter? FirstPeriodDC { get; init; }
+
+    private DayCounter? LastPeriodDC { get; init; }
 
     private Calendar? PaymentCalendar { get; init; }
 
@@ -147,6 +148,14 @@ public sealed record FixedRateLeg
     /// <returns>The modified builder.</returns>
     public FixedRateLeg WithFirstPeriodDayCounter(DayCounter? dayCounter) => this with { FirstPeriodDC = dayCounter };
 
+    /// <summary>Sets the day counter of the last period, in place of the rate's, when the schedule has more than one
+    /// period.</summary>
+    /// <param name="dayCounter">
+    /// The day counter, or <see langword="null"/>, QuantLib's empty day counter, for the rate's.
+    /// </param>
+    /// <returns>The modified builder.</returns>
+    public FixedRateLeg WithLastPeriodDayCounter(DayCounter? dayCounter) => this with { LastPeriodDC = dayCounter };
+
     /// <summary>Sets the calendar of the payment dates; the schedule's calendar by default.</summary>
     /// <param name="cal">
     /// The calendar, or <see langword="null"/> for QuantLib's empty calendar, which gives a payment date only with no
@@ -254,15 +263,16 @@ public sealed record FixedRateLeg
             exCouponDate = ExCouponDateFor(paymentDate);
             rate = (n - 2) < CouponRates.Length ? CouponRates[n - 2] : CouponRates[^1];
             nominal = (n - 2) < Notionals.Length ? Notionals[n - 2] : Notionals[^1];
+            var lastRate = new InterestRate(rate.Rate, LastPeriodDC ?? rate.DayCounter, rate.Compounding, rate.Frequency);
             if ((schedule.HasIsRegular && schedule.IsRegular(n - 1)) || !schedule.HasTenor)
             {
-                leg.Add(new FixedRateCoupon(paymentDate, nominal, rate, start, end, start, end, exCouponDate));
+                leg.Add(new FixedRateCoupon(paymentDate, nominal, lastRate, start, end, start, end, exCouponDate));
             }
             else
             {
                 Date referenceEnd = scheduleCalendar.Advance(
                     start, schedule.Tenor(), schedule.BusinessDayConvention, schedule.EndOfMonth());
-                leg.Add(new FixedRateCoupon(paymentDate, nominal, rate, start, end, start, referenceEnd, exCouponDate));
+                leg.Add(new FixedRateCoupon(paymentDate, nominal, lastRate, start, end, start, referenceEnd, exCouponDate));
             }
         }
 

@@ -85,7 +85,6 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Coupons/CappedFlooredCoupon.cs`: `CappedFlooredCmsCoupon`, which waits for S-rx with `CmsCoupon`.
 - `src/NanoQL/Coupons/CashFlowVectorsFunctions.cs`: `FloatingDigitalLeg`, which waits for B3.4 with the digital coupons.
 - `src/NanoQL/Coupons/CouponPricer/CouponPricerFunctions.cs`: the visitor's cases for the CMS, CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS and CMS-spread checks among them), which wait for S-rx and batch 3; the CMS pricer bases, which wait for B3.3.
-- `src/NanoQL/Coupons/FixedRateLeg.cs`: `withLastPeriodDayCounter`, which waits for the credit default swap slot.
 - `src/NanoQL/Coupons/YoYInflationLeg.cs`: `withCaps` and `withFloors`, which build capped and floored coupons and wait for B3.4's `CappedFlooredYoYInflationCoupon`.
 - `src/NanoQL/Experimental/CallableBonds/CallableBondVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(dc, bdc)`, which no QuantLib 1.44 class uses and which waits for its first user.
 - `src/NanoQL/Models/ShortRate/OneFactorModel/OneFactorModelShortRateTree.cs`: the constructor fitting the tree to a term structure numerically, with its solver helper, which waits for B3.1's `ExtendedCoxIngersollRoss`, its only user.
@@ -93,6 +92,9 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/StochasticProcess/StochasticProcess.cs`: `StochasticProcess`'s defaults of `expectation`, `stdDeviation` and `covariance`, which call the discretization and wait for S-eq's `EulerDiscretization`.
 - `src/NanoQL/StochasticProcess/StochasticProcess1D.cs`: `StochasticProcess1D`'s defaults of `expectation`, `stdDeviation` and `variance`, which call the discretization and wait for S-eq's `EulerDiscretization`.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
+- `src/NanoQL/TermStructures/Credit/DefaultDensityStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the default density, which waits for S-eq's `GaussChebyshevIntegration` and B7.2, its only users.
+- `src/NanoQL/TermStructures/Credit/HazardRateStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-eq's `GaussChebyshevIntegration` and B7.2, its only users.
+- `src/NanoQL/TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseDefaultCurve{TTraits,TInterpolator,TBootstrap}.cs`: the constructor on a one-factor affine model, which waits for B7.2's `AffineHazardRate` traits, the only traits whose curve takes a model.
 - `src/NanoQL/TermStructures/GlobalBootstrap/GlobalBootstrap.cs`: `AdditionalBootstrapVariables`, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for B6.2 with `SimpleQuoteVariables` and its user.
 - `src/NanoQL/TermStructures/Volatility/CapFloor/CapFloorTermVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: no QuantLib class calls it.
 - `src/NanoQL/TermStructures/Volatility/Optionlet/OptionletStripper1.cs`: `capletVols()`, a matrix QuantLib allocates and never writes, not ported.
@@ -108,27 +110,27 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `tests/NanoQL.Tests/TestSuite/AmortizingBondTests.cs`: `testBrazilianAmortizingFixedRateBond`, which waits for batch 2's Brazil calendar and `Business252` day counter.
 - `tests/NanoQL.Tests/TestSuite/BermudanSwaptionTests.cs`: `testCachedValues`' finite-difference checks, which wait for B3.2's `FdHullWhiteSwaptionEngine`; `testCachedG2Values`, which waits for B3.1's `G2` and B3.2's `FdG2SwaptionEngine`; `testTreeEngineTimeSnapping`, which waits for B3.2's `FdHullWhiteSwaptionEngine`; `testBermudanOISSwaptionWithHW` and `testBermudanOISSwaptionPreservesFeatures`, which wait for batch 2's `Eonia` and B3.2's `FdHullWhiteSwaptionEngine`; and `testBermudanOISSwaptionWithG2`, which waits for batch 2's `Eonia`, B3.1's `G2` and B3.2's `FdG2SwaptionEngine`.
-- `tests/NanoQL.Tests/TestSuite/BondsTests.cs`: `testCachedFloating`, which waits for batch 2's `USDLibor`; `testBrazilianCached`, which waits for batch 2's Brazil calendar and `Business252` day counter; and `testRiskyBondWithGivenDates`, which waits for B3.5's `RiskyBondEngine` and S-infl's `FlatHazardRate`.
+- `tests/NanoQL.Tests/TestSuite/BondsTests.cs`: `testCachedFloating`, which waits for batch 2's `USDLibor`; and `testBrazilianCached`, which waits for batch 2's Brazil calendar and `Business252` day counter.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for S-eq's Black-Scholes process.
 - `tests/NanoQL.Tests/TestSuite/CPISwapTests.cs`: `consistency` and `cpibondconsistency`, which wait for batch 2's `GBPLibor`.
 - `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
 - `tests/NanoQL.Tests/TestSuite/CashFlowsTests.cs`: the cases needing batch 2's USDLibor, NewZealand calendar and Bkbm indexes.
+- `tests/NanoQL.Tests/TestSuite/CreditDefaultSwapTests.cs`: `testCachedValue`'s integral-engine checks, which wait for B6.2's `IntegralCdsEngine`.
 - `tests/NanoQL.Tests/TestSuite/DatesTests.cs`: the ECB, parsing and intraday cases.
 - `tests/NanoQL.Tests/TestSuite/DayCountersTests.cs`: the cases for day counters not yet ported.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, binomial, Student t, chi-square, stochastic-collocation and Sankaran cases, whose distributions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/FunctionsTests.cs`: the modified Bessel, expm1 and log1p cases, whose functions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/IndexesTests.cs`: the custom-index, CDI and SHIR cases, which wait for batch 2's indexes and calendars.
 - `tests/NanoQL.Tests/TestSuite/InflationTests.cs`: `testZeroIndex`'s UK HICP and quarterly AU CPI checks, which wait for batch 2's `UKHICP` and `AUCPI`.
-- `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations, integrals or extrapolators not yet ported (Simpson, Lagrange, Chebyshev, multi-dimensional splines, forward-flat, no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace, B-splines, flat extrapolation).
+- `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations, integrals or extrapolators not yet ported (Simpson, Lagrange, Chebyshev, multi-dimensional splines, no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace, B-splines, flat extrapolation).
 - `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice, Faure and Burley 2020 cases and the discrepancy cases, whose generators and statistics aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the cases needing matrix utilities not yet ported (decompositions, square roots, iterative solvers, sparse matrices, projections, Moore-Penrose).
 - `tests/NanoQL.Tests/TestSuite/OdeTests.cs`: `testMatrixExponential` and `testMatrixExponentialOfZero`, which wait for B6.2's `Expm`.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing, L-BFGS-B, differential evolution and CMA-ES cases, whose optimizers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/OvernightIndexedSwapTests.cs`: `testBootstrapRegression`, which waits for batch 2's `FedFunds`; `testMakeOisEndOfMonthRegression2453`, which waits for batch 2's `Aonia`; `testNonstandardSwapConversionPreservesObservationConventions`, which waits for B3.2's `NonstandardSwap`; and `testMakeOISDefaultSettlementDays`' lines for the indexes of batch 2 (EONIA, FedFunds, AONIA, SARON, NZOCR, DESTR, SWESTR, KOFR).
 - `tests/NanoQL.Tests/TestSuite/PathGeneratorTests.cs`: `testMultiPathGenerator`, which waits for `MultiPathGenerator` (B3.2).
-- `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: the consistency cases' FRA and futures checks (S-rx) and `testBMACurveConsistency` (batch 2's USDLibor); `testDefaultInstantiation`'s ForwardFlat (S-infl) and ConvexMonotone (B6.2) curves; `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (B6.2); `testHelperDatesFromNonBusinessEvaluationDate`'s BMA helper check (batch 2's USDLibor); and the cases that need B6.2's, S-rx's, B3.5's and batch 2's units.
+- `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: the consistency cases' FRA and futures checks (S-rx) and `testBMACurveConsistency` (batch 2's USDLibor); `testDefaultInstantiation`'s ConvexMonotone curve (B6.2); `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (B6.2); `testHelperDatesFromNonBusinessEvaluationDate`'s BMA helper check (batch 2's USDLibor); and the cases that need B6.2's, S-rx's, B3.5's and batch 2's units.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
-- `tests/NanoQL.Tests/TestSuite/ScheduleTests.cs`: the CDS cases, which need `cdsMaturity`.
 - `tests/NanoQL.Tests/TestSuite/ShortRateModelsTests.cs`: `testSwaps`, which waits for B3.4's `TreeVanillaSwapEngine`; and the two extended Cox-Ingersoll-Ross cases, which wait for B3.1's `ExtendedCoxIngersollRoss`.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant, Newton, Ridder and Halley cases, whose solvers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/SwapTests.cs`: `testInArrears`, which waits for batch 2's `SimpleDayCounter`; `testFixedTenorInferenceWithTerminationDate`, which waits for batch 2's `GBPLibor` and `Bbsw`; and `testSpotDateUsesFixingCalendar`, which waits for batch 2's Taiwan calendar.

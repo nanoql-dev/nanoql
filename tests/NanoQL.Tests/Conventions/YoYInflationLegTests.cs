@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Conventions;
 /// more notionals, gearings or spreads than periods ("too many gearings (3), only 2 required"); an empty schedule is
 /// one too, "empty schedule", where QuantLib's <c>leg.reserve(n)</c> throws <c>std::length_error</c>. Each coupon is
 /// priced by QuantLib's default <see cref="YoYInflationCouponPricer"/>, which QuantLib attaches to a leg with no cap or
-/// floor.
+/// floor. One gearing applies to every coupon, as QuantLib's <c>withGearings(Real)</c> gives it.
 /// </summary>
 public class YoYInflationLegTests
 {
@@ -67,6 +67,18 @@ public class YoYInflationLegTests
 
         Assert.Equal(2, leg.Length);
         Assert.All(leg, f => Assert.IsType<YoYInflationCouponPricer>(Assert.IsType<YoYInflationCoupon>(f).Pricer));
+    }
+
+    [Fact]
+    public void OneGearingAppliesToEveryCoupon()
+    {
+        YoYInflationLeg leg = Leg().WithNotionals(1e6).WithPaymentDayCounter(new Actual365Fixed());
+
+        ImmutableArray<CashFlow> geared = leg.WithGearings(2.0).ToLeg();
+
+        Assert.Equal(2, geared.Length);
+        Assert.All(geared, f => Assert.Equal(2.0, Assert.IsType<YoYInflationCoupon>(f).Gearing));
+        Assert.All(leg.ToLeg(), f => Assert.Equal(1.0, Assert.IsType<YoYInflationCoupon>(f).Gearing));
     }
 
     private static YoYInflationLeg Leg() =>

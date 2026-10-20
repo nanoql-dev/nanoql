@@ -13,7 +13,8 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// The swap builders take QuantLib's pricing engine as a delegate of the swap and the context, which computes what
 /// QuantLib's builder computes at build time, the par rate when no fixed rate is given, and is never stored: the swap
-/// returned holds no engine, where QuantLib's builder attaches one.
+/// returned holds no engine, where QuantLib's builder attaches one. The credit default swap's builder computes nothing
+/// at build time, so its engine changes nothing (SID14).
 /// </summary>
 public class BuilderPricingEngineTests
 {
@@ -82,6 +83,21 @@ public class BuilderPricingEngineTests
             new MakeOIS(new Period(2, TimeUnit.Years), estr).ToOvernightIndexedSwap(Context);
         Assert.Equal(0.0, DiscountingSwapEngine.Calculate(onOwnCurve, Context, Forecast, false).NPV!.Value, 1e-14);
         Assert.NotEqual(ois.FixedRate, onOwnCurve.FixedRate);
+    }
+
+    [Fact]
+    public void TheCreditDefaultSwapBuildersEngineChangesNothing()
+    {
+        // QuantLib's builder only attaches the engine to the swap it builds (makecds.cpp:90)
+        static InstrumentResults Engine(CreditDefaultSwap s, EvaluationContext c) =>
+            throw new InvalidOperationException("the engine was called");
+
+        var builder = new MakeCreditDefaultSwap(new Period(5, TimeUnit.Years), 0.01);
+        Assert.Same(builder, builder.WithPricingEngine(Engine));
+        Assert.Same(builder, builder.WithPricingEngine(null));
+        Assert.Equal(
+            builder.ToCreditDefaultSwap(Context).ProtectionEndDate,
+            builder.WithPricingEngine(Engine).ToCreditDefaultSwap(Context).ProtectionEndDate);
     }
 
     [Fact]

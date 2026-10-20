@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 1,001 | 131 |
-| partial | 22 | 28 |
-| ported | 239 | 23 |
+| not started | 982 | 129 |
+| partial | 24 | 27 |
+| ported | 256 | 26 |
 | replaced | 19 | 6 |
 | total | 1,456 | 194 |
 
@@ -41,7 +41,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `config.msvc` | not ported: C++ platform header |  |  |
 | `config.sun` | not ported: C++ platform header |  |  |
 | `currency` | ported | Currency.cs | no nanoql type: CurrencyData |
-| `default` | not started |  | no nanoql type: ProtectionSide |
+| `default` | ported | ProtectionSide.cs |  |
 | `discretizedasset` | ported | DiscretizedAsset/DiscretizedAsset.cs, DiscretizedAsset/DiscretizedDiscountBond.cs, DiscretizedAsset/DiscretizedOption.cs |  |
 | `errors` | replaced: ArgumentException and NanoQLException |  |  |
 | `event` | ported | Event.cs, SimpleEvent.cs |  |
@@ -101,7 +101,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `dividend` | not started |  | no nanoql type: Dividend, FixedDividend, FractionalDividend |
 | `duration` | ported | Coupons/DurationType.cs |  |
 | `equitycashflow` | not started |  | no nanoql type: EquityCashFlow, EquityCashFlowPricer, EquityQuantoCashFlowPricer |
-| `fixedratecoupon` | partial | Coupons/FixedRateCoupon.cs, Coupons/FixedRateLeg.cs | partial: withLastPeriodDayCounter, which waits for the credit-default-swap slot, whose tests use it |
+| `fixedratecoupon` | ported | Coupons/FixedRateCoupon.cs, Coupons/FixedRateLeg.cs |  |
 | `floatingratecoupon` | ported | Coupons/FloatingRateCoupon.cs, Coupons/FloatingRateCouponExtensions.cs |  |
 | `iborcoupon` | ported | Coupons/IborCoupon.cs, Coupons/IborLeg.cs | no nanoql type: IborCouponSettings |
 | `indexedcashflow` | ported | Coupons/IndexedCashFlow.cs |  |
@@ -629,7 +629,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bondforward` | not started |  | no nanoql type: BondForward |
 | `callabilityschedule` | ported | Instruments/CallabilitySchedule/Callability.cs, Instruments/CallabilitySchedule/CallabilityType.cs | no nanoql type: CallabilitySchedule |
 | `capfloor` | ported | Instruments/CapFloor/Cap.cs, Instruments/CapFloor/CapFloor.cs, Instruments/CapFloor/CapFloorArguments.cs, Instruments/CapFloor/CapFloorType.cs, Instruments/CapFloor/Collar.cs, Instruments/CapFloor/Floor.cs |  |
-| `claim` | not started |  | no nanoql type: Claim, FaceValueClaim, FaceValueAccrualClaim |
+| `claim` | ported | Instruments/Claim/Claim.cs, Instruments/Claim/FaceValueAccrualClaim.cs, Instruments/Claim/FaceValueClaim.cs |  |
 | `cliquetoption` | not started |  | no nanoql type: CliquetOption |
 | `complexchooseroption` | not started |  | no nanoql type: ComplexChooserOption |
 | `compositeinstrument` | not started |  | no nanoql type: CompositeInstrument |
@@ -639,7 +639,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `constnotionalcrosscurrencyswap` | not started |  | no nanoql type: ConstNotionalCrossCurrencySwap, ConstNotionalCrossCurrencySwapResults |
 | `cpicapfloor` | not started |  | no nanoql type: CPICapFloor |
 | `cpiswap` | ported | Instruments/CPISwap.cs, Instruments/CPISwapResults.cs |  |
-| `creditdefaultswap` | not started |  | no nanoql type: CreditDefaultSwap, CreditDefaultSwapPricingModel, CreditDefaultSwapResults |
+| `creditdefaultswap` | ported | Instruments/CreditDefaultSwap/CreditDefaultSwap.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapFunctions.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapPricingModel.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapResults.cs |  |
 | `crosscurrencyswap` | not started |  | no nanoql type: CrossCurrencySwap, CrossCurrencySwapResults |
 | `dividendschedule` | not started |  | no nanoql type: DividendSchedule |
 | `doublebarrieroption` | not started |  | no nanoql type: DoubleBarrierOption |
@@ -659,7 +659,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcapfloor` | ported | Instruments/InflationCapFloor/InflationCapFloorFunctions.cs, Instruments/InflationCapFloor/YoYInflationCap.cs, Instruments/InflationCapFloor/YoYInflationCapFloor.cs, Instruments/InflationCapFloor/YoYInflationCapFloorArguments.cs, Instruments/InflationCapFloor/YoYInflationCapFloorType.cs, Instruments/InflationCapFloor/YoYInflationCollar.cs, Instruments/InflationCapFloor/YoYInflationFloor.cs |  |
 | `lookbackoption` | not started |  | no nanoql type: ContinuousFloatingLookbackOption, ContinuousFixedLookbackOption, ContinuousPartialFloatingLookbackOption, ContinuousPartialFixedLookbackOption |
 | `makecapfloor` | ported | Instruments/MakeCapFloor.cs |  |
-| `makecds` | not started |  | no nanoql type: MakeCreditDefaultSwap |
+| `makecds` | ported | Instruments/MakeCreditDefaultSwap.cs |  |
 | `makecms` | not started |  | no nanoql type: MakeCms |
 | `makemultipleresetsswap` | not started |  | no nanoql type: MakeMultipleResetsSwap |
 | `makeois` | ported | Instruments/MakeOIS.cs |  |
@@ -847,7 +847,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `extrapolation` | ported | Numerics/Interpolations/Extrapolator.cs, Numerics/Interpolations/ExtrapolatorExtensions.cs |  |
 | `flatextrapolation` | not started |  | no nanoql type: FlatExtrapolator |
 | `flatextrapolation2d` | ported | Numerics/Interpolations/FlatExtrapolator2D.cs |  |
-| `forwardflatinterpolation` | not started |  | no nanoql type: ForwardFlatInterpolation, ForwardFlat |
+| `forwardflatinterpolation` | ported | Numerics/Interpolations/ForwardFlat.cs, Numerics/Interpolations/ForwardFlatInterpolation.cs |  |
 | `interpolation2d` | ported | Numerics/Interpolations/IInterpolator2D.cs, Numerics/Interpolations/Interpolation2D.cs | no nanoql type: Interpolation2DTemplateImpl |
 | `kernelinterpolation` | not started |  | no nanoql type: KernelInterpolation |
 | `kernelinterpolation2d` | not started |  | no nanoql type: KernelInterpolation2D |
@@ -1542,7 +1542,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bondfunctions` | ported | PricingEngines/Bond/BondFunctions.cs |  |
 | `discountingbondengine` | ported | PricingEngines/Bond/DiscountingBondEngine.cs |  |
 | `discretizedconvertible` | not started |  | no nanoql type: DiscretizedConvertible |
-| `riskybondengine` | not started |  | no nanoql type: RiskyBondEngine |
+| `riskybondengine` | ported | PricingEngines/Bond/RiskyBondEngine.cs |  |
 
 ### `ql/pricingengines/capfloor/`
 
@@ -1572,8 +1572,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `integralcdsengine` | not started |  | no nanoql type: IntegralCdsEngine |
-| `isdacdsengine` | not started |  | no nanoql type: IsdaCdsEngine, IsdaCdsEngineNumericalFix, IsdaCdsEngineAccrualBias, IsdaCdsEngineForwardsInCouponPeriod |
-| `midpointcdsengine` | not started |  | no nanoql type: MidPointCdsEngine |
+| `isdacdsengine` | ported | PricingEngines/Credit/IsdaCdsEngine/IsdaCdsEngine.cs, PricingEngines/Credit/IsdaCdsEngine/IsdaCdsEngineAccrualBias.cs, PricingEngines/Credit/IsdaCdsEngine/IsdaCdsEngineForwardsInCouponPeriod.cs, PricingEngines/Credit/IsdaCdsEngine/IsdaCdsEngineNumericalFix.cs |  |
+| `midpointcdsengine` | ported | PricingEngines/Credit/MidPointCdsEngine.cs |  |
 
 ### `ql/pricingengines/exotic/`
 
@@ -1764,7 +1764,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `bootstraperror` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `bootstraphelper` | ported | TermStructures/BootstrapHelper/BootstrapHelperExtensions.cs, TermStructures/BootstrapHelper/BootstrapHelperFunctions.cs, TermStructures/BootstrapHelper/BootstrapHelper{TTermStructure}.cs, TermStructures/BootstrapHelper/IBootstrapHelper.cs, TermStructures/BootstrapHelper/PillarChoice.cs, TermStructures/BootstrapHelper/RelativeDateBootstrapHelper{TTermStructure}.cs |  |
-| `defaulttermstructure` | not started |  | no nanoql type: DefaultProbabilityTermStructure |
+| `defaulttermstructure` | ported | TermStructures/DefaultProbabilityTermStructure.cs |  |
 | `globalbootstrap` | partial | TermStructures/GlobalBootstrap/GlobalBootstrap.cs, TermStructures/GlobalBootstrap/IMultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrapContributor.cs | partial: AdditionalBootstrapVariables, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for B6.2 with SimpleQuoteVariables and its user; no nanoql type: AdditionalBootstrapVariables |
 | `globalbootstrapvars` | not started |  | no nanoql type: SimpleQuoteVariables |
 | `inflationtermstructure` | ported | TermStructures/InflationTermStructure/InflationTermStructure.cs, TermStructures/InflationTermStructure/InflationTermStructureExtensions.cs, TermStructures/InflationTermStructure/InflationTermStructureFunctions.cs, TermStructures/InflationTermStructure/YoYInflationTermStructure.cs, TermStructures/InflationTermStructure/ZeroInflationTermStructure.cs |  |
@@ -1780,16 +1780,16 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `defaultdensitystructure` | not started |  | no nanoql type: DefaultDensityStructure |
-| `defaultprobabilityhelpers` | not started |  | no nanoql type: DefaultProbabilityHelper, RelativeDateDefaultProbabilityHelper, CdsHelper, SpreadCdsHelper, UpfrontCdsHelper |
-| `flathazardrate` | not started |  | no nanoql type: FlatHazardRate |
-| `hazardratestructure` | not started |  | no nanoql type: HazardRateStructure |
-| `interpolateddefaultdensitycurve` | not started |  | no nanoql type: InterpolatedDefaultDensityCurve |
-| `interpolatedhazardratecurve` | not started |  | no nanoql type: InterpolatedHazardRateCurve |
-| `interpolatedsurvivalprobabilitycurve` | not started |  | no nanoql type: InterpolatedSurvivalProbabilityCurve |
-| `piecewisedefaultcurve` | not started |  | no nanoql type: PiecewiseDefaultCurve |
-| `probabilitytraits` | not started |  | no nanoql type: SurvivalProbability, SurvivalProbabilityCurve, HazardRate, HazardRateCurve, DefaultDensity, DefaultDensityCurve |
-| `survivalprobabilitystructure` | not started |  | no nanoql type: SurvivalProbabilityStructure |
+| `defaultdensitystructure` | partial | TermStructures/Credit/DefaultDensityStructure.cs | partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the default density, which waits for S-eq's GaussChebyshevIntegration and B7.2, its only users |
+| `defaultprobabilityhelpers` | ported | TermStructures/Credit/DefaultProbabilityHelpers/CdsHelper.cs, TermStructures/Credit/DefaultProbabilityHelpers/DefaultProbabilityHelperExtensions.cs, TermStructures/Credit/DefaultProbabilityHelpers/SpreadCdsHelper.cs, TermStructures/Credit/DefaultProbabilityHelpers/UpfrontCdsHelper.cs | no nanoql type: DefaultProbabilityHelper, RelativeDateDefaultProbabilityHelper |
+| `flathazardrate` | ported | TermStructures/Credit/FlatHazardRate.cs |  |
+| `hazardratestructure` | partial | TermStructures/Credit/HazardRateStructure.cs | partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-eq's GaussChebyshevIntegration and B7.2, its only users |
+| `interpolateddefaultdensitycurve` | ported | TermStructures/Credit/InterpolatedDefaultDensityCurve/DefaultDensityCurve.cs, TermStructures/Credit/InterpolatedDefaultDensityCurve/InterpolatedDefaultDensityCurve{TInterpolator}.cs |  |
+| `interpolatedhazardratecurve` | ported | TermStructures/Credit/InterpolatedHazardRateCurve/HazardRateCurve.cs, TermStructures/Credit/InterpolatedHazardRateCurve/InterpolatedHazardRateCurve{TInterpolator}.cs |  |
+| `interpolatedsurvivalprobabilitycurve` | ported | TermStructures/Credit/InterpolatedSurvivalProbabilityCurve/InterpolatedSurvivalProbabilityCurve{TInterpolator}.cs, TermStructures/Credit/InterpolatedSurvivalProbabilityCurve/SurvivalProbabilityCurve.cs |  |
+| `piecewisedefaultcurve` | partial | TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseDefaultCurve{TTraits,TInterpolator,TBootstrap}.cs, TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseFlatHazardRate.cs | partial: the constructor on a one-factor affine model, which waits for B7.2's AffineHazardRate traits, the only traits whose curve takes a model |
+| `probabilitytraits` | ported | TermStructures/Credit/ProbabilityTraits/DefaultDensity.cs, TermStructures/Credit/ProbabilityTraits/HazardRate.cs, TermStructures/Credit/ProbabilityTraits/IDefaultProbabilityTraits.cs, TermStructures/Credit/ProbabilityTraits/ProbabilityTraitsDetail.cs, TermStructures/Credit/ProbabilityTraits/SurvivalProbability.cs | no nanoql type: SurvivalProbabilityCurve, HazardRateCurve, DefaultDensityCurve |
+| `survivalprobabilitystructure` | ported | TermStructures/Credit/SurvivalProbabilityStructure.cs |  |
 
 ### `ql/termstructures/inflation/`
 
@@ -2080,7 +2080,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackformula` | ported | TestSuite/BlackFormulaTests.cs | 15 of 15 cases |
 | `blackvolsurfacedelta` | not started |  | 5 cases |
 | `bondforward` | not started |  | 3 cases |
-| `bonds` | partial | TestSuite/BondsTests.cs | 19 of 22 cases; not yet: testCachedFloating, testBrazilianCached, testRiskyBondWithGivenDates |
+| `bonds` | partial | TestSuite/BondsTests.cs | 20 of 22 cases; not yet: testCachedFloating, testBrazilianCached |
 | `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
 | `businessdayconventions` | not started |  | 1 cases |
 | `calendars` | partial | TestSuite/CalendarsTests.cs | 16 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
@@ -2105,13 +2105,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `convertiblebonds` | not started |  | 4 cases |
 | `copulas` | not started |  | 3 cases |
 | `covariance` | not started |  | 3 cases |
-| `creditdefaultswap` | not started |  | 10 cases |
+| `creditdefaultswap` | ported | TestSuite/CreditDefaultSwapTests.cs | 10 of 10 cases |
 | `crosscurrencyratehelpers` | not started |  | 30 cases |
 | `currency` | ported | TestSuite/CurrencyTests.cs | 1 of 1 cases |
 | `curvestates` | not started |  | 3 cases |
 | `dates` | partial | TestSuite/DatesTests.cs | 7 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; not yet: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, isoDates, parseDates, intraday |
 | `daycounters` | partial | TestSuite/DayCountersTests.cs | 11 of 22 cases; not yet: testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter |
-| `defaultprobabilitycurves` | not started |  | 10 cases |
+| `defaultprobabilitycurves` | ported | TestSuite/DefaultProbabilityCurvesTests.cs | 10 of 10 cases |
 | `digitalcoupon` | not started |  | 8 cases |
 | `digitaloption` | not started |  | 10 cases |
 | `distributions` | partial | TestSuite/DistributionsTests.cs | 10 of 21 cases; not yet: testBivariate, testBinomialDistribution, testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation, testSankaranApproximation, testCumulativeChiSquareDistribution |
@@ -2160,7 +2160,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `integrals` | not started |  | 21 cases |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
-| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 21 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testSplineErrorOnGaussianValues, testMultiSpline, testForwardFlat, testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testBSplines, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation, testFlatExtrapolation |
+| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 22 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testSplineErrorOnGaussianValues, testMultiSpline, testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testBSplines, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation, testFlatExtrapolation |
 | `jumpdiffusion` | not started |  | 2 cases |
 | `lazyobject` | not ported: tests LazyObject, which is replaced |  |  |
 | `libormarketmodel` | not started |  | 4 cases |
@@ -2218,7 +2218,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rngtraits` | partial | TestSuite/RngTraitsTests.cs | 3 of 4 cases; not yet: testRanLux |
 | `roughhestonmodel` | not started |  | 24 cases |
 | `rounding` | ported | TestSuite/RoundingTests.cs | 5 of 5 cases |
-| `schedule` | partial | TestSuite/ScheduleTests.cs | 20 of 28 cases; not yet: testCDS2015Convention, testCDS2015ConventionGrid, testCDSConventionGrid, testOldCDSConventionGrid, testCDS2015ConventionSampleDates, testCDSConventionSampleDates, testOldCDSConventionSampleDates, testCDS2015ZeroMonthsMatured |
+| `schedule` | ported | TestSuite/ScheduleTests.cs | 28 of 28 cases |
 | `settings` | not ported: tests Settings, which EvaluationContext replaces |  |  |
 | `shortratemodels` | partial | TestSuite/ShortRateModelsTests.cs | 6 of 9 cases; replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks by Conventions/ModelRebuildTests.cs; not yet: testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks, testSwaps, testExtendedCoxIngersollRossDiscountFactor |
 | `sofrfutures` | not started |  | 6 cases |

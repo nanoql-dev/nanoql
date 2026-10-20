@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/bonds.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCachedFloating, which waits for batch 2's USDLibor; testBrazilianCached, which waits for batch 2's Brazil calendar and Business252 day counter; testRiskyBondWithGivenDates, which waits for B3.5's RiskyBondEngine and S-infl's FlatHazardRate
+// Partial: testCachedFloating, which waits for batch 2's USDLibor; testBrazilianCached, which waits for batch 2's Brazil calendar and Business252 day counter
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -1080,6 +1080,59 @@ public class BondsTests
         Assert.False(
             Math.Abs(expected - calculated) > tolerance,
             $"failed to reproduce cached price: calculated {calculated}, expected {expected}, error {expected - calculated}");
+    }
+
+    // Adapted: the evaluation date the case sets (line 1620) is the context; the bond's engine (lines 1651-1652) is
+    // RiskyBondEngine.Calculate, and its NPV and clean price are read from its results. QuantLib's notionals (line
+    // 1637) are never used, and are left out.
+    [Fact]
+    public void TestRiskyBondWithGivenDates()
+    {
+        // Testing risky bond engine...
+
+        var vars = new CommonVars();
+
+        var today = new Date(22, November, 2005);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        // Probability Structure
+        FlatHazardRate defaultProbability = FlatHazardRate.Create(0, new TARGET(), 0.1, new Actual360(), context);
+
+        // Yield term structure
+        var riskFree = new FlatForward(today, 0.02, new Actual360());
+        var sch1 = new Schedule(
+            new Date(30, November, 2004), new Date(30, November, 2008), new Period(Frequency.Semiannual),
+            new UnitedStates(UnitedStatesMarket.GovernmentBond), BusinessDayConvention.Unadjusted,
+            BusinessDayConvention.Unadjusted, DateGenerationRule.Backward, false, context);
+
+        // Create Bond
+        Natural settlementDays = 1;
+
+        Rate[] couponRates = [0.02875, 0.03, 0.03125, 0.0325];
+        Real recoveryRate = 0.4;
+
+        var bond = new FixedRateBond(
+            settlementDays, vars.FaceAmount, sch1, couponRates, new ActualActual(ActualActualConvention.ISMA),
+            BusinessDayConvention.ModifiedFollowing, 100.0, new Date(20, November, 2004));
+
+        // Create Engine
+        BondResults results = RiskyBondEngine.Calculate(bond, context, defaultProbability, recoveryRate, riskFree);
+
+        // Calculate and validate NPV and price
+        Real expected = 888458.819055;
+        Real calculated = results.NPV!.Value;
+        Real tolerance = 1.0e-6;
+        Assert.False(
+            Math.Abs(expected - calculated) > tolerance,
+            "Failed to reproduce risky bond NPV:\n"
+            + $"    calculated: {calculated:F6}\n    expected:   {expected:F6}\n    error:      {expected - calculated:F6}");
+
+        expected = 87.407883;
+        calculated = bond.CleanPrice(results, context);
+        Assert.False(
+            Math.Abs(expected - calculated) > tolerance,
+            "Failed to reproduce risky bond price:\n"
+            + $"    calculated: {calculated:F6}\n    expected:   {expected:F6}\n    error:      {expected - calculated:F6}");
     }
 
     // Adapted: the bond's engine (lines 1709-1710) is DiscountingBondEngine.Calculate under the case's evaluation date
