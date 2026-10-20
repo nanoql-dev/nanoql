@@ -19,12 +19,12 @@ namespace NanoQL.Tests.Conventions;
 /// fixed-rate and Ibor legs and the overnight-indexed swap's fixed leg), or reads <c>schedule_.date(0)</c>, whose
 /// <c>at()</c> throws <c>std::out_of_range</c> (<c>overnightindexedcoupon.cpp:592-603</c>,
 /// <c>averagebmacoupon.cpp:225-228</c>; on the wheel, "invalid vector subscript" from the overnight leg and the BMA
-/// swap). nanoql refuses the schedule at that point of the conversion, after the checks QuantLib makes before it, so
-/// that with several bad inputs QuantLib's first refusal is nanoql's, but for the overnight leg given payment dates,
-/// where QuantLib's own check refuses first with the wrapped count in its text, which nanoql's replaces
-/// (<c>Divergences/OvernightIndexedCouponRefusalTests</c>, O3): <see cref="NanoQLException"/>, "empty schedule", from a
-/// builder's conversion, and <see cref="ArgumentException"/> naming <c>schedule</c> from
-/// <see cref="CashFlowVectorsFunctions.FloatingLeg"/>, whose schedule is an argument. A one-date schedule stays
+/// swap). nanoql refuses the schedule at that point of the conversion: <see cref="NanoQLException"/>, "empty schedule",
+/// from a builder's conversion, and <see cref="ArgumentException"/> naming <c>schedule</c> from
+/// <see cref="CashFlowVectorsFunctions.FloatingLeg"/>, whose schedule is an argument. It refuses after the checks
+/// QuantLib makes before it, so that with several bad inputs QuantLib's first refusal is nanoql's, but for the
+/// overnight leg given payment dates, where QuantLib's own check refuses first with the wrapped count in its text,
+/// which nanoql's replaces (<c>Divergences/OvernightIndexedCouponRefusalTests</c>, O3). A one-date schedule stays
 /// QuantLib's.
 /// </summary>
 public class EmptyScheduleTests
