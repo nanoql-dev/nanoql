@@ -4,11 +4,12 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/cashflows.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testAccessViolation, which waits for batch 2's USDLibor; testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking and testIborStubCouponHasFixedUsesSelectedIndices, which wait for batch 2's NewZealand calendar and Bkbm indexes
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Currencies;
 using NanoQL.Indexes;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 using static NanoQL.Time.Month;
 
@@ -175,6 +176,45 @@ public class CashFlowsTests
         CheckNpv(settings, true, 2.0);
     }
 
+    // Adapted: QuantLib catches its Error, a proper exception; here a refusal is a NanoQLException or an
+    // ArgumentException. The volatility and the coupon's pricer take the context.
+    [Fact]
+    public void TestAccessViolation()
+    {
+        // Testing dynamic cast of coupon in Black pricer...
+
+        var todaysDate = new Date(7, April, 2010);
+        var settlementDate = new Date(9, April, 2010);
+        var context = new EvaluationContext { EvaluationDate = todaysDate };
+        Calendar calendar = new TARGET();
+
+        YieldTermStructure rhTermStructure = new FlatForward(settlementDate, 0.04875825, new Actual365Fixed());
+
+        Volatility volatility = 0.10;
+        OptionletVolatilityStructure vol = ConstantOptionletVolatility.Create(
+            2, calendar, BusinessDayConvention.ModifiedFollowing, volatility, new Actual365Fixed(), context);
+
+        IborIndex index3m = new USDLibor(3 * TimeUnit.Months, rhTermStructure);
+
+        var payDate = new Date(20, December, 2013);
+        var startDate = new Date(20, September, 2013);
+        var endDate = new Date(20, December, 2013);
+        Rate spread = 0.0115;
+        IborCouponPricer pricer = new BlackIborCouponPricer(context, vol);
+        FloatingRateCoupon coupon = new FloatingRateCoupon(
+            payDate, 100, startDate, endDate, 2, index3m, 1.0, spread / 100).SetPricer(pricer);
+
+        try
+        {
+            // this caused an access violation in version 1.0
+            _ = coupon.Amount(context);
+        }
+        catch (Exception e) when (e is NanoQLException or ArgumentException)
+        {
+            // ok; proper exception thrown
+        }
+    }
+
     [Fact]
     public void TestDefaultSettlementDate()
     {
@@ -215,9 +255,8 @@ public class CashFlowsTests
         }
     }
 
-    // Adapted: Euribor 6M in place of USDLibor 6M (line 268), which waits for batch 2; the case's index is incidental.
-    // QuantLib's precondition, at-par coupons, is the context's default; the conversion to a leg (lines 269-273) takes
-    // the context.
+    // Adapted: QuantLib's precondition, at-par coupons, is the context's default; the conversion to a leg (lines
+    // 269-273) takes the context.
     [Fact]
     public void TestNullFixingDays()
     {
@@ -232,7 +271,7 @@ public class CashFlowsTests
             .Backwards()
             .ToSchedule();
 
-        IborIndex index = new Euribor6M();
+        IborIndex index = new USDLibor(6 * TimeUnit.Months);
         Leg leg = new IborLeg(schedule, index)
             .WithNotionals(100.0)
             // this can happen with default values, and caused an
@@ -435,8 +474,7 @@ public class CashFlowsTests
         }
     }
 
-    // Adapted: the fixed-rate legs only. Dropped: the floating legs and their checks, lines 492-536, since USDLibor
-    // waits for batch 2.
+    // Adapted: the floating legs' conversions take the context.
     [Fact]
     public void TestPartialScheduleLegConstruction()
     {
@@ -496,11 +534,52 @@ public class CashFlowsTests
         Assert.Equal(new Date(25, Sep, 2017), firstCpn3.ReferencePeriodEnd);
         Assert.Equal(new Date(25, Sep, 2020), lastCpn3.ReferencePeriodStart);
         Assert.Equal(new Date(30, Sep, 2020), lastCpn3.ReferencePeriodEnd);
+
+        // same check as above for a floating leg
+        IborIndex iborIndex = new USDLibor(3 * TimeUnit.Months);
+        Leg legf = new IborLeg(schedule, iborIndex)
+                       .WithNotionals(100.0)
+                       .WithPaymentDayCounter(new ActualActual(ActualActualConvention.ISMA))
+                       .ToLeg(Context);
+        Leg legf2 = new IborLeg(schedule2, iborIndex)
+                        .WithNotionals(100.0)
+                        .WithPaymentDayCounter(new ActualActual(ActualActualConvention.ISMA))
+                        .ToLeg(Context);
+        Leg legf3 = new IborLeg(schedule3, iborIndex)
+                        .WithNotionals(100.0)
+                        .WithPaymentDayCounter(new ActualActual(ActualActualConvention.ISMA))
+                        .ToLeg(Context);
+
+        var firstCpnF = legf[0] as FloatingRateCoupon;
+        var lastCpnF = legf[^1] as FloatingRateCoupon;
+        Assert.NotNull(firstCpnF);
+        Assert.NotNull(lastCpnF);
+        Assert.Equal(new Date(25, Mar, 2017), firstCpnF.ReferencePeriodStart);
+        Assert.Equal(new Date(25, Sep, 2017), firstCpnF.ReferencePeriodEnd);
+        Assert.Equal(new Date(25, Sep, 2020), lastCpnF.ReferencePeriodStart);
+        Assert.Equal(new Date(25, Mar, 2021), lastCpnF.ReferencePeriodEnd);
+
+        var firstCpnF2 = legf2[0] as FloatingRateCoupon;
+        var lastCpnF2 = legf2[^1] as FloatingRateCoupon;
+        Assert.NotNull(firstCpnF2);
+        Assert.NotNull(lastCpnF2);
+        Assert.Equal(new Date(25, Mar, 2017), firstCpnF2.ReferencePeriodStart);
+        Assert.Equal(new Date(25, Sep, 2017), firstCpnF2.ReferencePeriodEnd);
+        Assert.Equal(new Date(25, Sep, 2020), lastCpnF2.ReferencePeriodStart);
+        Assert.Equal(new Date(25, Mar, 2021), lastCpnF2.ReferencePeriodEnd);
+
+        var firstCpnF3 = legf3[0] as FloatingRateCoupon;
+        var lastCpnF3 = legf3[^1] as FloatingRateCoupon;
+        Assert.NotNull(firstCpnF3);
+        Assert.NotNull(lastCpnF3);
+        Assert.Equal(new Date(15, Sep, 2017), firstCpnF3.ReferencePeriodStart);
+        Assert.Equal(new Date(25, Sep, 2017), firstCpnF3.ReferencePeriodEnd);
+        Assert.Equal(new Date(25, Sep, 2020), lastCpnF3.ReferencePeriodStart);
+        Assert.Equal(new Date(30, Sep, 2020), lastCpnF3.ReferencePeriodEnd);
     }
 
-    // Adapted: Euribor 6M in place of USDLibor 6M (line 544), which waits for batch 2; the case's index is incidental.
-    // The fixing added to the index (line 549) is stored in the context, and the coupon's pricer (line 555), built
-    // with QuantLib's defaults, reads the context's at-par switch.
+    // Adapted: the fixing added to the index (line 549) is stored in the context, and the coupon's pricer (line 555),
+    // built with QuantLib's defaults, reads the context's at-par switch.
     [Fact]
     public void TestFixedIborCouponWithoutForecastCurve()
     {
@@ -508,7 +587,7 @@ public class CashFlowsTests
 
         Date today = Context.EvaluationDate;
 
-        var index = new Euribor6M();
+        var index = new USDLibor(6 * TimeUnit.Months);
         Calendar calendar = index.FixingCalendar;
 
         Date fixingDate = calendar.Advance(today, -2, TimeUnit.Months);
@@ -595,6 +674,309 @@ public class CashFlowsTests
             EvaluationContext context = Context with { EnforcesTodaysHistoricFixings = true };
             Assert.False(coupon.HasFixed(context));
         }
+    }
+
+    // Adapted: the conversions to legs take a context with today as the evaluation date.
+    [Fact]
+    public void TestInterpolatedIborStubCoupon()
+    {
+        // Testing interpolation of an irregular Ibor coupon...
+
+        var today = new Date(27, May, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        YieldTermStructure twoMonthCurve = new FlatForward(today, 0.02, new Actual365Fixed());
+        YieldTermStructure threeMonthCurve = new FlatForward(today, 0.04, new Actual365Fixed());
+
+        Calendar calendar = new NewZealand();
+        var bkbm2m = new IborIndex(
+            "Bkbm", 2 * TimeUnit.Months, 0, new NZDCurrency(), calendar, BusinessDayConvention.ModifiedFollowing, false,
+            new Actual365Fixed(), twoMonthCurve);
+        var bkbm3m = new IborIndex(
+            "Bkbm", 3 * TimeUnit.Months, 0, new NZDCurrency(), calendar, BusinessDayConvention.ModifiedFollowing, false,
+            new Actual365Fixed(), threeMonthCurve);
+        var start = new Date(29, May, 2026);
+        var maturity = new Date(28, February, 2027);
+
+        Schedule schedule = new MakeSchedule()
+                                .From(start)
+                                .To(maturity)
+                                .WithTenor(3 * TimeUnit.Months)
+                                .WithCalendar(calendar)
+                                .WithConvention(BusinessDayConvention.ModifiedFollowing)
+                                .Backwards()
+                                .ToSchedule();
+        Assert.False(schedule.IsRegular(1));
+        Assert.Equal(new Date(28, August, 2026), schedule.Date(1));
+
+        var convention = new StubIndexSelection(StubIndexSelectionConvention.Interpolated, [bkbm2m, bkbm3m]);
+        Leg leg = new IborLeg(schedule, bkbm3m)
+                      .WithNotionals(1.0)
+                      .WithIndexedCoupons(true)
+                      .WithStubIndexSelection(convention)
+                      .ToLeg(context);
+
+        var coupon = Assert.IsType<StubIborCoupon>(leg[0]);
+        Assert.IsNotType<StubIborCoupon>(leg[1]);
+
+        Date fixingDate = coupon.FixingDate();
+        Date shortMaturity = bkbm2m.MaturityDate(start);
+        Date longMaturity = bkbm3m.MaturityDate(start);
+        Assert.Equal(new Date(29, July, 2026), shortMaturity);
+        Assert.Equal(new Date(31, August, 2026), longMaturity);
+
+        Rate shortRate = bkbm2m.Fixing(fixingDate, context);
+        Rate longRate = bkbm3m.Fixing(fixingDate, context);
+        Real weight = (double)(coupon.AccrualEndDate - shortMaturity) / (longMaturity - shortMaturity);
+        Rate expected = shortRate + ((longRate - shortRate) * weight);
+        Assert.True(Math.Abs(coupon.IndexFixing(context) - expected) <= 1.0e-14);
+
+        var closest = new StubIndexSelection(StubIndexSelectionConvention.ClosestIndex, [bkbm2m, bkbm3m]);
+        Leg closestLeg = new IborLeg(schedule, bkbm3m)
+                             .WithNotionals(1.0)
+                             .WithIndexedCoupons(true)
+                             .WithStubIndexSelection(closest)
+                             .ToLeg(context);
+        var closestCoupon = Assert.IsType<StubIborCoupon>(closestLeg[0]);
+        Assert.True(Math.Abs(closestCoupon.IndexFixing(context) - longRate) <= 1.0e-14);
+
+        // stub index conventions require indexed coupons...
+        Assert.Throws<NanoQLException>(() => new IborLeg(schedule, bkbm3m)
+                                                 .WithNotionals(1.0)
+                                                 .WithIndexedCoupons(false)
+                                                 .WithStubIndexSelection(convention)
+                                                 .ToLeg(context));
+
+        // ...and candidates with distinct maturities
+        var duplicate = new StubIndexSelection(StubIndexSelectionConvention.Interpolated, [bkbm2m, bkbm3m, bkbm3m]);
+        Assert.Throws<ArgumentException>(() => new IborLeg(schedule, bkbm3m)
+                                                   .WithNotionals(1.0)
+                                                   .WithIndexedCoupons(true)
+                                                   .WithStubIndexSelection(duplicate)
+                                                   .ToLeg(context));
+
+        // a default-constructed configuration is empty and leaves the leg alone
+        Assert.True(new StubIndexSelection().Empty);
+        Leg defaultLeg = new IborLeg(schedule, bkbm3m)
+                             .WithNotionals(1.0)
+                             .WithIndexedCoupons(true)
+                             .WithStubIndexSelection(new StubIndexSelection())
+                             .ToLeg(context);
+        Assert.IsNotType<StubIborCoupon>(defaultLeg[0]);
+
+        // configurations without usable candidates are rejected on construction
+        Assert.Throws<ArgumentException>(() => new StubIndexSelection(StubIndexSelectionConvention.Interpolated, []));
+        Assert.Throws<ArgumentException>(
+            () => new StubIndexSelection(StubIndexSelectionConvention.Interpolated, [bkbm2m, null!]));
+    }
+
+    // Adapted: as TestInterpolatedIborStubCoupon.
+    [Fact]
+    public void TestIborStubInterpolationEndpointsAndRegularSchedule()
+    {
+        // Testing Ibor stub endpoints and unchanged regular coupons...
+
+        var today = new Date(27, May, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        YieldTermStructure twoMonthCurve = new FlatForward(today, 0.02, new Actual365Fixed());
+        YieldTermStructure threeMonthCurve = new FlatForward(today, 0.04, new Actual365Fixed());
+        var bkbm2m = new Bkbm2M(twoMonthCurve);
+        var bkbm3m = new Bkbm3M(threeMonthCurve);
+        var start = new Date(29, May, 2026);
+        var convention = new StubIndexSelection(StubIndexSelectionConvention.Interpolated, [bkbm2m, bkbm3m]);
+
+        foreach (IborIndex endpoint in new IborIndex[] { bkbm2m, bkbm3m })
+        {
+            Date end = endpoint.MaturityDate(start);
+            var endpointSchedule = new Schedule(
+                [start, end], endpoint.FixingCalendar, BusinessDayConvention.ModifiedFollowing, null,
+                3 * TimeUnit.Months, DateGenerationRule.Backward, true, [false]);
+            Leg leg = new IborLeg(endpointSchedule, bkbm3m)
+                          .WithNotionals(1.0)
+                          .WithIndexedCoupons(true)
+                          .WithStubIndexSelection(convention)
+                          .ToLeg(context);
+            var coupon = Assert.IsType<StubIborCoupon>(leg[0]);
+            Assert.True(
+                Math.Abs(coupon.IndexFixing(context) - endpoint.Fixing(coupon.FixingDate(), context)) <= 1.0e-14);
+        }
+
+        Date regularEnd = bkbm3m.MaturityDate(start);
+        var regularSchedule = new Schedule(
+            [start, regularEnd], bkbm3m.FixingCalendar, BusinessDayConvention.ModifiedFollowing, null,
+            3 * TimeUnit.Months, DateGenerationRule.Backward, true, [true]);
+        Leg defaultLeg = new IborLeg(regularSchedule, bkbm3m)
+                             .WithNotionals(1.0)
+                             .WithIndexedCoupons(true)
+                             .ToLeg(context);
+        Leg configuredLeg = new IborLeg(regularSchedule, bkbm3m)
+                                .WithNotionals(1.0)
+                                .WithIndexedCoupons(true)
+                                .WithStubIndexSelection(convention)
+                                .ToLeg(context);
+        Assert.IsNotType<StubIborCoupon>(configuredLeg[0]);
+        var defaultCoupon = Assert.IsAssignableFrom<IborCoupon>(defaultLeg[0]);
+        var configuredCoupon = Assert.IsAssignableFrom<IborCoupon>(configuredLeg[0]);
+        Assert.True(Math.Abs(defaultCoupon.Rate(context) - configuredCoupon.Rate(context)) <= 1.0e-14);
+    }
+
+    // Adapted: as TestInterpolatedIborStubCoupon.
+    [Fact]
+    public void TestFinalAndLongIborStubCoupons()
+    {
+        // Testing final and long Ibor stub coupons...
+
+        var today = new Date(27, May, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        Calendar calendar = new NewZealand();
+
+        YieldTermStructure oneMonthCurve = new FlatForward(today, 0.01, new Actual365Fixed());
+        YieldTermStructure threeMonthCurve = new FlatForward(today, 0.03, new Actual365Fixed());
+        YieldTermStructure sixMonthCurve = new FlatForward(today, 0.06, new Actual365Fixed());
+        var bkbm1m = new Bkbm1M(oneMonthCurve);
+        var bkbm3m = new Bkbm3M(threeMonthCurve);
+        var bkbm6m = new Bkbm6M(sixMonthCurve);
+
+        var finalStubSchedule = new Schedule(
+            [new Date(29, May, 2026), new Date(31, August, 2026), new Date(30, October, 2026)],
+            calendar, BusinessDayConvention.ModifiedFollowing, null, 3 * TimeUnit.Months, DateGenerationRule.Forward,
+            true, [true, false]);
+        var finalConvention = new StubIndexSelection(StubIndexSelectionConvention.Interpolated, [bkbm1m, bkbm3m]);
+        Leg finalStubLeg = new IborLeg(finalStubSchedule, bkbm3m)
+                               .WithNotionals(1.0)
+                               .WithIndexedCoupons(true)
+                               .WithStubIndexSelection(finalConvention)
+                               .ToLeg(context);
+        Assert.IsNotType<StubIborCoupon>(finalStubLeg[0]);
+        var finalCoupon = Assert.IsType<StubIborCoupon>(finalStubLeg[^1]);
+
+        Date finalStart = finalCoupon.AccrualStartDate;
+        Date oneMonthMaturity = bkbm1m.MaturityDate(finalStart);
+        Date threeMonthMaturity = bkbm3m.MaturityDate(finalStart);
+        Real finalWeight = (double)(finalCoupon.AccrualEndDate - oneMonthMaturity)
+            / (threeMonthMaturity - oneMonthMaturity);
+        Rate expectedFinal =
+            bkbm1m.Fixing(finalCoupon.FixingDate(), context)
+            + ((bkbm3m.Fixing(finalCoupon.FixingDate(), context) - bkbm1m.Fixing(finalCoupon.FixingDate(), context))
+                * finalWeight);
+        Assert.True(Math.Abs(finalCoupon.IndexFixing(context) - expectedFinal) <= 1.0e-14);
+
+        var longStart = new Date(29, May, 2026);
+        var longEnd = new Date(30, October, 2026);
+        var longStubSchedule = new Schedule(
+            [longStart, longEnd], calendar, BusinessDayConvention.ModifiedFollowing, null, 3 * TimeUnit.Months,
+            DateGenerationRule.Backward, true, [false]);
+        var longConvention = new StubIndexSelection(StubIndexSelectionConvention.Interpolated, [bkbm3m, bkbm6m]);
+        Leg longStubLeg = new IborLeg(longStubSchedule, bkbm3m)
+                              .WithNotionals(1.0)
+                              .WithIndexedCoupons(true)
+                              .WithStubIndexSelection(longConvention)
+                              .ToLeg(context);
+        var longCoupon = Assert.IsType<StubIborCoupon>(longStubLeg[0]);
+        Date threeMonthLongMaturity = bkbm3m.MaturityDate(longStart);
+        Date sixMonthMaturity = bkbm6m.MaturityDate(longStart);
+        Real longWeight = (double)(longEnd - threeMonthLongMaturity) / (sixMonthMaturity - threeMonthLongMaturity);
+        Rate expectedLong =
+            bkbm3m.Fixing(longCoupon.FixingDate(), context)
+            + ((bkbm6m.Fixing(longCoupon.FixingDate(), context) - bkbm3m.Fixing(longCoupon.FixingDate(), context))
+                * longWeight);
+        Assert.True(Math.Abs(longCoupon.IndexFixing(context) - expectedLong) <= 1.0e-14);
+    }
+
+    // Adapted: QuantLib relinks the two-month curve and checks that the coupon notifies its observers and reprices;
+    // here no object observes another, so a coupon built on a two-month index on the relinked curve prices differently.
+    // The fixings added to the indexes (lines 862-863) are stored in the context of 1 June, and cleared with it.
+    [Fact]
+    public void TestIborStubCouponHistoricalFixingsAndRelinking()
+    {
+        // Testing Ibor stub historical fixings and forwarding-curve relinking...
+
+        var fixingDate = new Date(29, May, 2026);
+        Date start = fixingDate;
+        var end = new Date(28, August, 2026);
+
+        var bkbm2m = new Bkbm2M(new FlatForward(fixingDate, 0.02, new Actual365Fixed()));
+        var bkbm3m = new Bkbm3M(new FlatForward(fixingDate, 0.04, new Actual365Fixed()));
+        var convention = new StubIndexSelection(StubIndexSelectionConvention.Interpolated, [bkbm2m, bkbm3m]);
+        var schedule = new Schedule(
+            [start, end], bkbm3m.FixingCalendar, BusinessDayConvention.ModifiedFollowing, null, 3 * TimeUnit.Months,
+            DateGenerationRule.Backward, true, [false]);
+
+        var context = new EvaluationContext { EvaluationDate = new Date(27, May, 2026) };
+        StubIborCoupon CouponOn(StubIndexSelection selection) =>
+            Assert.IsType<StubIborCoupon>(new IborLeg(schedule, bkbm3m)
+                                              .WithNotionals(1.0)
+                                              .WithIndexedCoupons(true)
+                                              .WithStubIndexSelection(selection)
+                                              .ToLeg(context)[0]);
+        StubIborCoupon coupon = CouponOn(convention);
+
+        Rate initialRate = coupon.Rate(context);
+        var relinked = new Bkbm2M(new FlatForward(fixingDate, 0.03, new Actual365Fixed()));
+        StubIborCoupon repriced = CouponOn(
+            new StubIndexSelection(StubIndexSelectionConvention.Interpolated, [relinked, bkbm3m]));
+        Assert.True(Math.Abs(repriced.Rate(context) - initialRate) > 1.0e-6);
+
+        var afterFixing = new EvaluationContext
+        {
+            EvaluationDate = new Date(1, June, 2026),
+            Fixings = IndexFixings.Empty.AddFixing(bkbm2m, fixingDate, 0.05).AddFixing(bkbm3m, fixingDate, 0.08),
+        };
+        Date shortMaturity = bkbm2m.MaturityDate(start);
+        Date longMaturity = bkbm3m.MaturityDate(start);
+        Real weight = (double)(end - shortMaturity) / (longMaturity - shortMaturity);
+        Rate expected = 0.05 + ((0.08 - 0.05) * weight);
+        Assert.True(Math.Abs(coupon.IndexFixing(afterFixing) - expected) <= 1.0e-14);
+    }
+
+    // Adapted: the fixings added to the indexes (lines 904 and 908) build each check's own context.
+    [Fact]
+    public void TestIborStubCouponHasFixedUsesSelectedIndices()
+    {
+        // Testing that a stub coupon has fixed only once its selected indices have...
+
+        var fixingDate = new Date(29, May, 2026);
+        Date start = fixingDate;
+        var end = new Date(28, August, 2026);
+        var context = new EvaluationContext { EvaluationDate = fixingDate };
+
+        var bkbm2m = new Bkbm2M(new FlatForward(fixingDate, 0.02, new Actual365Fixed()));
+        var bkbm3m = new Bkbm3M(new FlatForward(fixingDate, 0.04, new Actual365Fixed()));
+        var convention = new StubIndexSelection(StubIndexSelectionConvention.Interpolated, [bkbm2m, bkbm3m]);
+        var schedule = new Schedule(
+            [start, end], bkbm3m.FixingCalendar, BusinessDayConvention.ModifiedFollowing, null, 3 * TimeUnit.Months,
+            DateGenerationRule.Backward, true, [false]);
+        Leg leg = new IborLeg(schedule, bkbm3m)
+                      .WithNotionals(1.0)
+                      .WithIndexedCoupons(true)
+                      .WithStubIndexSelection(convention)
+                      .ToLeg(context);
+        var coupon = Assert.IsType<StubIborCoupon>(leg[0]);
+        Assert.Equal(fixingDate, coupon.FixingDate());
+
+        Assert.False(coupon.HasFixed(context));
+
+        // The leg index's own print must not flip the stub to fixed: the coupon
+        // reads the bracketing candidates, and the 2M print is still missing.
+        // Checked through a base-class pointer so the virtual dispatch is covered.
+        EvaluationContext threeMonthPrint = context with
+        {
+            Fixings = context.Fixings.AddFixing(bkbm3m, fixingDate, 0.08),
+        };
+        IborCoupon asIborCoupon = coupon;
+        Assert.False(asIborCoupon.HasFixed(threeMonthPrint));
+
+        EvaluationContext bothPrints = threeMonthPrint with
+        {
+            Fixings = threeMonthPrint.Fixings.AddFixing(bkbm2m, fixingDate, 0.05),
+        };
+        Assert.True(asIborCoupon.HasFixed(bothPrints));
+
+        Date shortMaturity = bkbm2m.MaturityDate(start);
+        Date longMaturity = bkbm3m.MaturityDate(start);
+        Real weight = (double)(end - shortMaturity) / (longMaturity - shortMaturity);
+        Assert.True(Math.Abs(coupon.IndexFixing(bothPrints) - (0.05 + ((0.08 - 0.05) * weight))) <= 1.0e-14);
     }
 
     private static IborCoupon IborCouponForFixingDate(IborIndex index, Date fixingDate)

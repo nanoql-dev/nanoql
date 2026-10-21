@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/couponpricer.hpp ql/cashflows/couponpricer.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the visitor's cases for the CMS, CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS and CMS-spread checks among them), which wait for S-rx and batch 3; the CMS pricer bases CmsCouponPricer and MeanRevertingPricer, which wait for B3.3
+// Partial: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for batch 3; the CMS pricer bases CmsCouponPricer and MeanRevertingPricer, and the CMS cases' test for a CmsCouponPricer, which wait for B3.3
 
 using System.Collections.Immutable;
 using NanoQL.Instruments;
@@ -194,11 +194,16 @@ public static class CouponPricerFunctions
         CappedFlooredIborCoupon c => pricer is IborCouponPricer
             ? c.SetPricer(pricer)
             : throw new ArgumentException("pricer not compatible with Ibor coupon", nameof(pricer)),
+
+        // The CMS coupons (couponpricer.cpp:376-382, :392-398) take only a CmsCouponPricer, whose family waits for
+        // B3.3: every pricer that exists before it is refused, and B3.3 adds the type test.
+        CappedFlooredCmsCoupon => throw new ArgumentException("pricer not compatible with CMS coupon", nameof(pricer)),
+        CmsCoupon => throw new ArgumentException("pricer not compatible with CMS coupon", nameof(pricer)),
+
         CappedFlooredCoupon c => VisitCappedFlooredCoupon(c, pricer),
         IborCoupon c => pricer is IborCouponPricer
             ? c.SetPricer(pricer)
             : throw new ArgumentException("pricer not compatible with Ibor coupon", nameof(pricer)),
-
 
         // The overnight-indexed coupons (couponpricer.cpp:340-375). A capped or floored coupon takes the pricer and
         // then its underlying is visited with it, as QuantLib's visitor does; the copy carries both, its cap and floor
@@ -238,6 +243,12 @@ public static class CouponPricerFunctions
         if (c.Underlying is IborCoupon && pricer is not IborCouponPricer)
         {
             throw new ArgumentException("pricer not compatible with Ibor Coupon", nameof(pricer));
+        }
+
+        // a CmsCouponPricer, which waits for B3.3: every pricer that exists before it is refused
+        if (c.Underlying is CmsCoupon)
+        {
+            throw new ArgumentException("pricer not compatible with CMS Coupon", nameof(pricer));
         }
 
         return c.SetPricer(pricer);

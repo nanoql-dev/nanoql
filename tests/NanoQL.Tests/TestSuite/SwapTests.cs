@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/swap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testInArrears, which waits for batch 2's SimpleDayCounter; testFixedTenorInferenceWithTerminationDate, which waits for batch 2's GBPLibor and Bbsw; testSpotDateUsesFixingCalendar, which waits for batch 2's Taiwan calendar
+// Partial: testInArrears, which waits for batch 2's SimpleDayCounter; testFixedTenorInferenceWithTerminationDate, which waits for batch 2's Bbsw; testSpotDateUsesFixingCalendar, which waits for batch 2's Taiwan calendar
 // Replaced: testNotifications (Vectors/Instruments/VanillaSwapVectorTests.cs)
 
 using NanoQL.Indexes;

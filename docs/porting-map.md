@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 884 | 113 |
-| partial | 29 | 37 |
-| ported | 348 | 32 |
+| not started | 870 | 110 |
+| partial | 29 | 34 |
+| ported | 362 | 38 |
 | replaced | 20 | 6 |
 | total | 1,456 | 194 |
 
@@ -85,14 +85,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `averagebmacoupon` | ported | Coupons/AverageBMACoupon/AverageBMACoupon.cs, Coupons/AverageBMACoupon/AverageBMACouponPricer.cs, Coupons/AverageBMACoupon/AverageBMALeg.cs |  |
 | `blackovernightindexedcouponpricer` | ported | Coupons/BlackAveragingOvernightIndexedCouponPricer.cs, Coupons/BlackCompoundingOvernightIndexedCouponPricer.cs |  |
-| `capflooredcoupon` | partial | Coupons/CappedFlooredCoupon.cs, Coupons/CappedFlooredIborCoupon.cs | partial: CappedFlooredCmsCoupon, which waits for S-rx with CmsCoupon; no nanoql type: CappedFlooredCmsCoupon |
+| `capflooredcoupon` | ported | Coupons/CapFlooredCoupon/CappedFlooredCmsCoupon.cs, Coupons/CapFlooredCoupon/CappedFlooredCoupon.cs, Coupons/CapFlooredCoupon/CappedFlooredIborCoupon.cs |  |
 | `capflooredinflationcoupon` | not started |  | no nanoql type: CappedFlooredYoYInflationCoupon |
 | `cashflows` | ported | Coupons/CashFlows.cs |  |
 | `cashflowvectors` | partial | Coupons/CashFlowVectorsFunctions.cs | partial: FloatingDigitalLeg, which waits for B3.4 with the digital coupons |
-| `cmscoupon` | not started |  | no nanoql type: CmsCoupon, CmsLeg |
+| `cmscoupon` | ported | Coupons/CmsCoupon.cs, Coupons/CmsLeg.cs |  |
 | `conundrumpricer` | not started |  | no nanoql type: VanillaOptionPricer, MarketQuotedOptionPricer, GFunction, GFunctionFactory, GFunctionFactoryYieldCurveModel, HaganPricer, NumericHaganPricer, NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand, AnalyticHaganPricer |
 | `coupon` | ported | Coupons/Coupon.cs |  |
-| `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the CMS, CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS and CMS-spread checks among them), which wait for S-rx and batch 3; the CMS pricer bases CmsCouponPricer and MeanRevertingPricer, which wait for B3.3; no nanoql type: CmsCouponPricer, MeanRevertingPricer |
+| `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for batch 3; the CMS pricer bases CmsCouponPricer and MeanRevertingPricer, and the CMS cases' test for a CmsCouponPricer, which wait for B3.3; no nanoql type: CmsCouponPricer, MeanRevertingPricer |
 | `cpicoupon` | ported | Coupons/CPICoupon/CPICashFlow.cs, Coupons/CPICoupon/CPICoupon.cs, Coupons/CPICoupon/CPILeg.cs |  |
 | `cpicouponpricer` | ported | Coupons/CPICouponPricer.cs |  |
 | `digitalcmscoupon` | not started |  | no nanoql type: DigitalCmsCoupon, DigitalCmsLeg |
@@ -471,7 +471,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `basisswapratehelpers` | not started |  | no nanoql type: IborIborBasisSwapRateHelper, OvernightIborBasisSwapRateHelper, OvernightOvernightBasisSwapRateHelper |
+| `basisswapratehelpers` | ported | Experimental/TermStructures/BasisSwapRateHelpers/IborIborBasisSwapRateHelper.cs, Experimental/TermStructures/BasisSwapRateHelpers/OvernightIborBasisSwapRateHelper.cs, Experimental/TermStructures/BasisSwapRateHelpers/OvernightOvernightBasisSwapRateHelper.cs |  |
 | `crosscurrencyratehelpers` | not started |  | no nanoql type: CrossCurrencySwapRateHelperBase, CrossCurrencyBasisSwapRateHelperBase, ConstNotionalCrossCurrencyBasisSwapRateHelper, MtMCrossCurrencyBasisSwapRateHelper, ConstNotionalCrossCurrencySwapRateHelper |
 | `overnightindexedfundingratehelper` | not started |  | no nanoql type: OvernightIndexedFundingRateHelper |
 
@@ -547,7 +547,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `audlibor` | not started |  | no nanoql type: AUDLibor |
 | `bbsw` | not started |  | no nanoql type: Bbsw, Bbsw1M, Bbsw2M, Bbsw3M, Bbsw4M, Bbsw5M, Bbsw6M |
 | `bibor` | not started |  | no nanoql type: Bibor, BiborSW, Bibor1M, Bibor2M, Bibor3M, Bibor6M, Bibor1Y |
-| `bkbm` | not started |  | no nanoql type: Bkbm, Bkbm1M, Bkbm2M, Bkbm3M, Bkbm4M, Bkbm5M, Bkbm6M |
+| `bkbm` | ported | Indexes/Ibor/Bkbm/Bkbm.cs, Indexes/Ibor/Bkbm/Bkbm1M.cs, Indexes/Ibor/Bkbm/Bkbm2M.cs, Indexes/Ibor/Bkbm/Bkbm3M.cs, Indexes/Ibor/Bkbm/Bkbm4M.cs, Indexes/Ibor/Bkbm/Bkbm5M.cs, Indexes/Ibor/Bkbm/Bkbm6M.cs |  |
 | `cadlibor` | not started |  | no nanoql type: CADLibor, CADLiborON |
 | `cdi` | not started |  | no nanoql type: Cdi |
 | `cdor` | not started |  | no nanoql type: Cdor |
@@ -556,16 +556,16 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `custom` | not started |  | no nanoql type: CustomIborIndex |
 | `destr` | not started |  | no nanoql type: Destr |
 | `dkklibor` | not started |  | no nanoql type: DKKLibor |
-| `eonia` | not started |  | no nanoql type: Eonia |
+| `eonia` | ported | Indexes/Ibor/Eonia.cs |  |
 | `estr` | ported | Indexes/Ibor/Estr.cs |  |
 | `euribor` | ported | Indexes/Ibor/Euribor/Euribor.cs, Indexes/Ibor/Euribor/Euribor1M.cs, Indexes/Ibor/Euribor/Euribor1W.cs, Indexes/Ibor/Euribor/Euribor1Y.cs, Indexes/Ibor/Euribor/Euribor365.cs, Indexes/Ibor/Euribor/Euribor3M.cs, Indexes/Ibor/Euribor/Euribor6M.cs, Indexes/Ibor/Euribor/EuriborConventions.cs |  |
 | `eurlibor` | not started |  | no nanoql type: EURLibor, DailyTenorEURLibor, EURLiborON, EURLibor1M, EURLibor3M, EURLibor6M, EURLibor1Y |
-| `fedfunds` | not started |  | no nanoql type: FedFunds |
-| `gbplibor` | not started |  | no nanoql type: GBPLibor, DailyTenorGBPLibor, GBPLiborON |
+| `fedfunds` | ported | Indexes/Ibor/FedFunds.cs |  |
+| `gbplibor` | ported | Indexes/Ibor/GBPLibor/DailyTenorGBPLibor.cs, Indexes/Ibor/GBPLibor/GBPLibor.cs, Indexes/Ibor/GBPLibor/GBPLiborON.cs |  |
 | `jibar` | not started |  | no nanoql type: Jibar |
-| `jpylibor` | not started |  | no nanoql type: JPYLibor, DailyTenorJPYLibor |
+| `jpylibor` | ported | Indexes/Ibor/DailyTenorJPYLibor.cs, Indexes/Ibor/JPYLibor.cs |  |
 | `kofr` | not started |  | no nanoql type: Kofr |
-| `libor` | not started |  | no nanoql type: Libor, DailyTenorLibor |
+| `libor` | ported | Indexes/Ibor/Libor/DailyTenorLibor.cs, Indexes/Ibor/Libor/Libor.cs, Indexes/Ibor/Libor/LiborConventions.cs |  |
 | `mosprime` | not started |  | no nanoql type: Mosprime |
 | `nibor` | not started |  | no nanoql type: Nibor |
 | `nzdlibor` | not started |  | no nanoql type: NZDLibor |
@@ -583,7 +583,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `tibor` | ported | Indexes/Ibor/Tibor.cs |  |
 | `tonar` | ported | Indexes/Ibor/Tonar.cs |  |
 | `trlibor` | not started |  | no nanoql type: TRLibor |
-| `usdlibor` | not started |  | no nanoql type: USDLibor, DailyTenorUSDLibor, USDLiborON |
+| `usdlibor` | ported | Indexes/Ibor/USDLibor/DailyTenorUSDLibor.cs, Indexes/Ibor/USDLibor/USDLibor.cs, Indexes/Ibor/USDLibor/USDLiborON.cs |  |
 | `wibor` | not started |  | no nanoql type: Wibor |
 | `zaronia` | not started |  | no nanoql type: Zaronia |
 | `zibor` | not started |  | no nanoql type: Zibor |
@@ -647,10 +647,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `equitytotalreturnswap` | not started |  | no nanoql type: EquityTotalReturnSwap |
 | `europeanoption` | ported | Instruments/EuropeanOption.cs |  |
 | `fixedvsfloatingswap` | ported | Instruments/FixedVsFloatingSwap.cs, Instruments/FixedVsFloatingSwapArguments.cs, Instruments/FixedVsFloatingSwapResults.cs |  |
-| `floatfloatswap` | not started |  | no nanoql type: FloatFloatSwap, FloatFloatSwapResults |
+| `floatfloatswap` | partial | Instruments/FloatFloatSwap.cs, Instruments/FloatFloatSwapResults.cs | partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for batch 3's CMS spread coupons (B3.4) |
 | `floatfloatswaption` | not started |  | no nanoql type: FloatFloatSwaption |
 | `forward` | not started |  | no nanoql type: Forward, ForwardTypePayoff |
-| `forwardrateagreement` | not started |  | no nanoql type: ForwardRateAgreement |
+| `forwardrateagreement` | ported | Instruments/ForwardRateAgreement.cs, Instruments/ForwardRateAgreementResults.cs |  |
 | `forwardvanillaoption` | not started |  | no nanoql type: ForwardOptionArguments, ForwardVanillaOption |
 | `futures` | ported | Instruments/FuturesType.cs |  |
 | `fxforward` | ported | Instruments/FxForward.cs, Instruments/FxForwardResults.cs |  |
@@ -1993,7 +1993,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `malta` | not started |  | no nanoql type: Malta, MaltaMarket |
 | `mexico` | not started |  | no nanoql type: Mexico, MexicoMarket |
 | `montenegro` | not started |  | no nanoql type: Montenegro, MontenegroMarket |
-| `newzealand` | not started |  | no nanoql type: NewZealand, NewZealandMarket |
+| `newzealand` | ported | Time/Calendars/NewZealand.cs, Time/Calendars/NewZealandMarket.cs |  |
 | `northmacedonia` | not started |  | no nanoql type: NorthMacedonia, NorthMacedoniaMarket |
 | `norway` | not started |  | no nanoql type: Norway |
 | `nullcalendar` | ported | Time/Calendars/NullCalendar.cs |  |
@@ -2009,11 +2009,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `southafrica` | not started |  | no nanoql type: SouthAfrica |
 | `southkorea` | not started |  | no nanoql type: SouthKorea, SouthKoreaMarket |
 | `sweden` | not started |  | no nanoql type: Sweden |
-| `switzerland` | not started |  | no nanoql type: Switzerland |
+| `switzerland` | ported | Time/Calendars/Switzerland.cs |  |
 | `taiwan` | not started |  | no nanoql type: Taiwan, TaiwanMarket |
 | `target` | ported | Time/Calendars/TARGET.cs |  |
 | `thailand` | not started |  | no nanoql type: Thailand |
-| `turkey` | not started |  | no nanoql type: Turkey |
+| `turkey` | ported | Time/Calendars/Turkey.cs |  |
 | `ukraine` | not started |  | no nanoql type: Ukraine, UkraineMarket |
 | `unitedkingdom` | ported | Time/Calendars/UnitedKingdom.cs, Time/Calendars/UnitedKingdomMarket.cs |  |
 | `unitedstates` | ported | Time/Calendars/UnitedStates.cs, Time/Calendars/UnitedStatesMarket.cs |  |
@@ -2070,7 +2070,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bacheliercalculator` | not started |  | 8 cases |
 | `barrieroption` | not started |  | 15 cases |
 | `basismodels` | not started |  | 4 cases |
-| `basisswapratehelpers` | not started |  | 24 cases |
+| `basisswapratehelpers` | ported | TestSuite/BasisSwapRateHelpersTests.cs | 24 of 24 cases; moved: testOvernightIborAveragingAndTelescopicValueDates line 767 to Divergences/TelescopicValueDatesTests.cs; testOvernightOvernightTelescopicValueDatesWithSimpleAveraging line 920 to Divergences/TelescopicValueDatesTests.cs |
 | `basketoption` | not started |  | 25 cases |
 | `batesmodel` | not started |  | 4 cases |
 | `bermudanswaption` | partial | TestSuite/BermudanSwaptionTests.cs | 1 of 6 cases; not yet: testCachedG2Values, testTreeEngineTimeSnapping, testBermudanOISSwaptionWithHW, testBermudanOISSwaptionWithG2, testBermudanOISSwaptionPreservesFeatures |
@@ -2080,14 +2080,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackformula` | ported | TestSuite/BlackFormulaTests.cs | 15 of 15 cases |
 | `blackvolsurfacedelta` | not started |  | 5 cases |
 | `bondforward` | not started |  | 3 cases |
-| `bonds` | partial | TestSuite/BondsTests.cs | 20 of 22 cases; not yet: testCachedFloating, testBrazilianCached |
+| `bonds` | partial | TestSuite/BondsTests.cs | 21 of 22 cases; not yet: testBrazilianCached |
 | `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
 | `businessdayconventions` | not started |  | 1 cases |
-| `calendars` | partial | TestSuite/CalendarsTests.cs | 16 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
+| `calendars` | partial | TestSuite/CalendarsTests.cs | 19 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
 | `callablebonds` | ported | TestSuite/CallableBondsTests.cs | 14 of 14 cases; replaced: testObservability by Vectors/Experimental/CallableBonds/CallableBondVectorTests.cs |
 | `capfloor` | ported | TestSuite/CapFloorTests.cs | 10 of 10 cases |
 | `capflooredcoupon` | ported | TestSuite/CapFlooredCouponTests.cs | 2 of 2 cases |
-| `cashflows` | partial | TestSuite/CashFlowsTests.cs | 10 of 16 cases; not yet: testAccessViolation, testInterpolatedIborStubCoupon, testIborStubInterpolationEndpointsAndRegularSchedule, testFinalAndLongIborStubCoupons, testIborStubCouponHistoricalFixingsAndRelinking, testIborStubCouponHasFixedUsesSelectedIndices |
+| `cashflows` | ported | TestSuite/CashFlowsTests.cs | 16 of 16 cases |
 | `catbonds` | not started |  | 9 cases |
 | `cdo` | not started |  | 0 cases |
 | `cdsoption` | not started |  | 1 cases |
@@ -2134,9 +2134,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmlinearop` | partial | TestSuite/FdmLinearOpTests.cs | 6 of 19 cases; not yet: testUniformGridMesher, testFirstDerivativesMapApply, testSecondDerivativesMapApply, testDerivativeWeightsOnNonUniformGrids, testSecondOrderMixedDerivativesMapApply, testTripleBandMapSolve, testFdmHestonBarrier, testFdmHestonAmerican, testFdmHestonExpress, testFdmHestonHullWhiteOp, testBiCGstab, testGMRES, testFdmMesherIntegral |
 | `fdsabr` | not started |  | 5 cases |
 | `fittedbonddiscountcurve` | not started |  | 5 cases |
-| `floatfloatswap` | not started |  | 6 cases |
+| `floatfloatswap` | ported | TestSuite/FloatFloatSwapTests.cs | 6 of 6 cases |
 | `forwardoption` | not started |  | 8 cases |
-| `forwardrateagreement` | not started |  | 1 cases |
+| `forwardrateagreement` | ported | TestSuite/ForwardRateAgreementTests.cs | 1 of 1 cases |
 | `functions` | ported | TestSuite/FunctionsTests.cs | 9 of 9 cases |
 | `fxforward` | ported | TestSuite/FxForwardTests.cs | 13 of 13 cases |
 | `g2process` | not started |  | 8 cases |
@@ -2154,7 +2154,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcapflooredcoupon` | not started |  | 2 cases |
 | `inflationcpibond` | ported | TestSuite/InflationCPIBondTests.cs | 2 of 2 cases |
 | `inflationcpicapfloor` | not started |  | 2 cases |
-| `inflationcpiswap` | partial | TestSuite/CPISwapTests.cs | 3 of 5 cases; not yet: consistency, cpibondconsistency |
+| `inflationcpiswap` | ported | TestSuite/CPISwapTests.cs | 5 of 5 cases |
 | `inflationvolatility` | not started |  | 3 cases |
 | `instruments` | not started |  | 2 cases |
 | `integrals` | partial | TestSuite/IntegralsTests.cs | 5 of 21 cases; not yet: testSegment, testTrapezoid, testMidPointTrapezoid, testSimpson, testGaussKronrodAdaptive, testGaussLobatto, testTanhSinh, testExpSinh, testGaussLegendreIntegrator, testGaussKronrodNonAdaptive, testTwoDimensionalIntegration, testFolinIntegration, testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator, testPiecewiseIntegral |
@@ -2195,7 +2195,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `optionletstripper` | ported | TestSuite/OptionletStripperTests.cs | 19 of 19 cases |
 | `overnightindexedcoupon` | ported | TestSuite/OvernightIndexedCouponTests.cs | 45 of 45 cases; moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 to Divergences/TelescopicValueDatesTests.cs; testOvernightLegNPV line 1033 to Divergences/TelescopicValueDatesTests.cs |
 | `overnightindexedfundingratehelper` | not started |  | 3 cases |
-| `overnightindexedswap` | partial | TestSuite/OvernightIndexedSwapTests.cs | 22 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs; not yet: testBootstrapRegression, testMakeOisEndOfMonthRegression2453, testNonstandardSwapConversionPreservesObservationConventions |
+| `overnightindexedswap` | partial | TestSuite/OvernightIndexedSwapTests.cs | 23 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs; not yet: testMakeOisEndOfMonthRegression2453, testNonstandardSwapConversionPreservesObservationConventions |
 | `pagodaoption` | not started |  | 1 cases |
 | `paralleltestrunner` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `partialtimebarrieroption` | not started |  | 3 cases |
@@ -2203,7 +2203,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `period` | ported | TestSuite/PeriodTests.cs | 9 of 9 cases |
 | `perpetualfutures` | not started |  | 1 cases |
 | `piecewiseblackvariancesurface` | not started |  | 20 cases |
-| `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 24 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency, testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency, testParFraRegression, testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate, testGlobalBootstrapVariables, testMultiCurveTwoPiecewiseYieldCurves, testPiecewiseSpreadYieldCurve, testSwapHelpersWithOnceFrequency, testFraForDates, testBmaHelperSwap |
+| `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 31 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency, testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency, testGlobalBootstrapVariables, testPiecewiseSpreadYieldCurve, testSwapHelpersWithOnceFrequency |
 | `piecewisezerospreadedtermstructure` | not started |  | 10 cases |
 | `preconditions` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `prices` | not started |  | 6 cases |
@@ -2229,7 +2229,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `svivolatility` | not started |  | 1 cases |
 | `swap` | partial | TestSuite/SwapTests.cs | 12 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs; not yet: testInArrears, testFixedTenorInferenceWithTerminationDate, testSpotDateUsesFixingCalendar |
 | `swapforwardmappings` | not started |  | 3 cases |
-| `swaption` | partial | TestSuite/SwaptionTests.cs | 12 of 13 cases; replaced: testBlackEngineCaching by Vectors/Instruments/SwaptionVectorTests.cs; not yet: testImpliedVolatilityOis |
+| `swaption` | ported | TestSuite/SwaptionTests.cs | 13 of 13 cases; replaced: testBlackEngineCaching by Vectors/Instruments/SwaptionVectorTests.cs |
 | `swaptionvolatilitycube` | ported | TestSuite/SwaptionVolatilityCubeTests.cs | 17 of 17 cases; replaced: testObservability by Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs; testZabrObservability by Vectors/TermStructures/ZabrSwaptionVolatilityCubeVectorTests.cs |
 | `swaptionvolatilitymatrix` | ported | TestSuite/SwaptionVolatilityMatrixTests.cs | 2 of 2 cases; replaced: testSwaptionVolMatrixObservability by Vectors/TermStructures/SwaptionVolMatrixVectorTests.cs |
 | `swaptionvolstructuresutilities` | ported | TestSuite/SwaptionVolStructuresUtilitiesTests.cs | 0 of 0 cases |

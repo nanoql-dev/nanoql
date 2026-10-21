@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/overnightindexedswap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBootstrapRegression, which waits for batch 2's FedFunds; testMakeOisEndOfMonthRegression2453, which waits for batch 2's Aonia; testNonstandardSwapConversionPreservesObservationConventions, which waits for B3.2's NonstandardSwap; and testMakeOISDefaultSettlementDays' lines for EONIA, FedFunds, AONIA, SARON, NZOCR, DESTR, SWESTR and KOFR, which wait for batch 2's indexes
+// Partial: testMakeOisEndOfMonthRegression2453, which waits for batch 2's Aonia; testNonstandardSwapConversionPreservesObservationConventions, which waits for B3.2's NonstandardSwap; and testMakeOISDefaultSettlementDays' lines for AONIA, SARON, NZOCR, DESTR, SWESTR and KOFR, which wait for batch 2's indexes
 // Replaced: testNotifications (Vectors/Instruments/OvernightIndexedSwapVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -348,6 +348,86 @@ public class OvernightIndexedSwapTests
         }
     }
 
+    // Adapted: the check that discount(1.0) doesn't throw (line 728) is the curve's construction, which bootstraps,
+    // and the discount; the moving curve (line 725) is built by Create in the case's context, the MonotonicLogCubic
+    // given converting to the LogCubic it is.
+    [Fact]
+    public void TestBootstrapRegression()
+    {
+        // Testing 1.16 regression with OIS bootstrap...
+
+        Datum[] data =
+        [
+            new(0, 1, TimeUnit.Days, 0.0066),
+            new(2, 1, TimeUnit.Weeks, 0.006445),
+            new(2, 2, TimeUnit.Weeks, 0.006455),
+            new(2, 3, TimeUnit.Weeks, 0.00645),
+            new(2, 1, TimeUnit.Months, 0.00675),
+            new(2, 2, TimeUnit.Months, 0.007),
+            new(2, 3, TimeUnit.Months, 0.00724),
+            new(2, 4, TimeUnit.Months, 0.007533),
+            new(2, 5, TimeUnit.Months, 0.00785),
+            new(2, 6, TimeUnit.Months, 0.00814),
+            new(2, 9, TimeUnit.Months, 0.00889),
+            new(2, 1, TimeUnit.Years, 0.00967),
+            new(2, 2, TimeUnit.Years, 0.01221),
+            new(2, 3, TimeUnit.Years, 0.01413),
+            new(2, 4, TimeUnit.Years, 0.01555),
+            new(2, 5, TimeUnit.Years, 0.01672),
+            new(2, 10, TimeUnit.Years, 0.02005),
+            new(2, 12, TimeUnit.Years, 0.0208),
+            new(2, 15, TimeUnit.Years, 0.02152),
+            new(2, 20, TimeUnit.Years, 0.02215),
+            new(2, 25, TimeUnit.Years, 0.02233),
+            new(2, 30, TimeUnit.Years, 0.02234),
+            new(2, 40, TimeUnit.Years, 0.02233),
+        ];
+
+        var context = new EvaluationContext { EvaluationDate = new Date(21, February, 2017) };
+
+        var helpers = new List<RateHelper>();
+        var index = new FedFunds();
+        Spread spread = 0.0;
+
+        helpers.Add(
+            new DepositRateHelper(
+                data[0].Rate,
+                new Period(data[0].N, data[0].Unit),
+                index.FixingDays,
+                index.FixingCalendar,
+                index.BusinessDayConvention,
+                index.EndOfMonth,
+                index.DayCounter,
+                context));
+
+        for (int i = 1; i < data.Length; ++i)
+        {
+            helpers.Add(
+                new OISRateHelper(
+                    data[i].SettlementDays,
+                    new Period(data[i].N, data[i].Unit),
+                    data[i].Rate,
+                    index,
+                    context,
+                    null,
+                    false,
+                    2,
+                    BusinessDayConvention.Following,
+                    Frequency.Annual,
+                    null,
+                    new Period(0, TimeUnit.Days),
+                    spread,
+                    // this bootstrap fails with the default LastRelevantDate choice
+                    PillarChoice.MaturityDate));
+        }
+
+        var curve = PiecewiseYieldCurve<Discount, LogCubic, IterativeBootstrap>.Create(
+            0, new UnitedStates(UnitedStatesMarket.GovernmentBond), helpers, new Actual365Fixed(), context,
+            i: new MonotonicLogCubic());
+
+        _ = curve.Discount(1.0);
+    }
+
     // Adapted: the check that nodes() doesn't throw (line 744) becomes a check that construction, which bootstraps,
     // doesn't throw; the moving curve (line 743) is built by Create in the case's context.
     [Fact]
@@ -553,9 +633,8 @@ public class OvernightIndexedSwapTests
         Assert.Equal(nominal / 2, ois4.OvernightNominals[3]);
     }
 
-    // Adapted: the evaluation dates (lines 965 and 1014) are two contexts; the indexes of batch 2 (EONIA, FedFunds,
-    // AONIA, SARON, NZOCR, DESTR, SWESTR, KOFR) are left out of both loops (lines 968-985), and the weekend block on
-    // EONIA (lines 1030-1035) waits with them.
+    // Adapted: the evaluation dates (lines 965 and 1014) are two contexts; the indexes of batch 2 (AONIA, SARON,
+    // NZOCR, DESTR, SWESTR, KOFR) are left out of both loops (lines 968-985).
     [Fact]
     public void TestMakeOISDefaultSettlementDays()
     {
@@ -574,7 +653,9 @@ public class OvernightIndexedSwapTests
             ("CORRA", new Corra()),
 
             // 2-day settlement indices
+            ("EONIA", new Eonia()),
             ("ESTR", new Estr()),
+            ("FedFunds", new FedFunds()),
             ("SOFR", new Sofr()),
             ("TONAR", new Tonar()),
         ];
@@ -626,6 +707,15 @@ public class OvernightIndexedSwapTests
                 .WithFixedRate(0.01)
                 .ToOvernightIndexedSwap(onWeekend); // CORRA
             Date expected = new(12, May, 2025); // Monday: T+1 from the actual trade date
+            Assert.Equal(expected, swap.StartDate());
+        }
+
+        // Test 2-day settlement index on weekend
+        {
+            OvernightIndexedSwap swap = new MakeOIS(new Period(6, TimeUnit.Months), indices[2].Index)
+                .WithFixedRate(0.01)
+                .ToOvernightIndexedSwap(onWeekend); // EONIA
+            Date expected = new(13, May, 2025); // Tuesday: T+2 from the actual trade date
             Assert.Equal(expected, swap.StartDate());
         }
     }

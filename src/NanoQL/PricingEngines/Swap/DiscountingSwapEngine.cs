@@ -8,6 +8,7 @@
 using System.Collections.Immutable;
 using NanoQL.Coupons;
 using NanoQL.Instruments;
+using NanoQL.Numerics;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 using NanoQL.Utilities;
@@ -19,9 +20,10 @@ namespace NanoQL.PricingEngines;
 /// A static class: <c>Calculate</c> takes the engine's inputs and returns the results, in place of QuantLib's engine
 /// object, whose <c>discountCurve()</c> accessor has no instance to belong to. Its overloads for
 /// <see cref="FixedVsFloatingSwap"/>, <see cref="OvernightIndexedSwap"/>, <see cref="BMASwap"/>,
-/// <see cref="YearOnYearInflationSwap"/> and <see cref="CPISwap"/> run the same steps and body and return those swaps'
-/// results records, so a caller needs no cast; the <see cref="CPISwap"/> overload also gives the fair rate, which
-/// QuantLib's swap derives from the CPI leg's BPS (see <see cref="CPISwapResults"/>).
+/// <see cref="FloatFloatSwap"/>, <see cref="YearOnYearInflationSwap"/> and <see cref="CPISwap"/> run the same steps and
+/// body and return those swaps' results records, so a caller needs no cast; the <see cref="CPISwap"/> overload also
+/// gives the fair rate, which QuantLib's swap derives from the CPI leg's BPS (see <see cref="CPISwapResults"/>), and
+/// the <see cref="FloatFloatSwap"/> overload solves a capped or floored leg's fair spread.
 /// </remarks>
 public static class DiscountingSwapEngine
 {
@@ -161,6 +163,59 @@ public static class DiscountingSwapEngine
         return swap.FetchResults(results);
     }
 
+    /// <summary>Prices a float-float swap, with the fair spreads that zero its NPV.</summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="includeSettlementDateFlows">
+    /// Whether cash flows on the settlement date count; the context's
+    /// <see cref="EvaluationContext.IncludeReferenceDateEvents"/> when <see langword="null"/>.
+    /// </param>
+    /// <param name="settlementDate">The settlement date; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the NPV is given at; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <returns>The swap's results: the expired results when the swap has expired.</returns>
+    /// <remarks>
+    /// A leg's fair spread is QuantLib's, derived from its BPS, where the leg has no cap or floor: there its amount
+    /// moves one for one with its spread, and the BPS route is exact. On a capped or floored leg QuantLib's BPS route
+    /// doesn't zero the NPV, once a cap or floor binds; there the fair spread is the leg's first spread plus the
+    /// uniform shift of its coupons' spreads that zeroes the NPV, solved on the swap's own pricing, each coupon keeping
+    /// its pricer, cap and floor. The shift is bracketed from the BPS route's estimate within the spreads the pricers
+    /// price, and is <see langword="null"/> where no shift in that domain, within a shift of 100%, changes the NPV's
+    /// sign (the S-rx review's B1-1, under R8;
+    /// <c>tests/NanoQL.Tests/Divergences/FloatFloatSwapOptionalLegFairSpreadTests.cs</c>).
+    /// </remarks>
+    /// <exception cref="ArgumentException">
+    /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
+    /// </exception>
+    /// <exception cref="NanoQLException">A leg fails to price; the message names the leg.</exception>
+    public static FloatFloatSwapResults Calculate(
+        FloatFloatSwap swap,
+        EvaluationContext context,
+        YieldTermStructure discountCurve,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        CheckArguments(swap, context, discountCurve, settlementDate, npvDate);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        SwapResults results = Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate);
+        FloatFloatSwapResults fetched = swap.FetchResults(results);
+        double Npv(FloatFloatSwap shifted) =>
+            Body(shifted, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate).NPV!.Value;
+        return fetched with
+        {
+            FairSpread1 = FairSpread(swap, 0, fetched.FairSpread1, fetched.NPV, Npv),
+            FairSpread2 = FairSpread(swap, 1, fetched.FairSpread2, fetched.NPV, Npv),
+        };
+    }
+
     /// <summary>Prices a year-on-year inflation swap, with the fair rate and spread its results derive.</summary>
     /// <param name="swap">The swap.</param>
     /// <param name="context">The evaluation context.</param>
@@ -261,6 +316,28 @@ public static class DiscountingSwapEngine
             ? swap.FixedRate - (npv / (swap.PayerMultipliers[0] * sensitivity))
             : null;
         return swap.FetchResults(new CPISwapResults(results) { FairRate = fairRate });
+    }
+
+    /// <summary>
+    /// Prices a swap as QuantLib's engine does on an empty discount-curve handle, the engine a helper sets when it is
+    /// given none: an expired swap's results, which QuantLib's instrument gives before it calls the engine, and
+    /// otherwise QuantLib's refusal, once the swap's arguments are validated (<c>discountingswapengine.cpp:42</c>).
+    /// </summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <returns>The expired swap's results.</returns>
+    /// <exception cref="NanoQLException">The swap has not expired.</exception>
+    internal static SwapResults CalculateWithoutCurve(Swap swap, EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(swap);
+        ArgumentNullException.ThrowIfNull(context);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        throw new NanoQLException("discounting term structure handle is empty");
     }
 
     /// <summary>
@@ -421,6 +498,101 @@ public static class DiscountingSwapEngine
             EndDiscounts = [.. endDiscounts],
         };
     }
+
+    // A float-float swap's fair spread on a leg: QuantLib's BPS route on a leg with no cap or floor, the solved one on
+    // a capped or floored leg (see the overload's remarks).
+    private static double? FairSpread(
+        FloatFloatSwap swap, int j, double? bpsRoute, double? npv, Func<FloatFloatSwap, double> npvOf)
+    {
+        if (!swap.IsOptional(j) || bpsRoute is not double estimate || npv is not double npv0)
+        {
+            return bpsRoute;
+        }
+
+        double spread = (j == 0 ? swap.Spread1 : swap.Spread2)[0];
+        double? shift = ZeroNpvShift(x => npvOf(swap.WithLegSpreadShift(j, x)), npv0, estimate - spread);
+        return shift is double s ? spread + s : null;
+    }
+
+    // The shift whose NPV is zero, the NPV being monotone in it: steps from the estimate, doubling, until the NPV
+    // changes sign, then Brent's solve between the last two shifts. A shift the pricers refuse (a lognormal caplet's
+    // strike past its displacement) ends the domain: its end is approached by bisection, and without a sign change by
+    // then there is no root.
+    private static double? ZeroNpvShift(Func<double, double> npvAt, double npv0, double estimate)
+    {
+        const double MaxShift = 1.0;
+        if (npv0 == 0.0)
+        {
+            return 0.0;
+        }
+
+        double last = 0.0;
+        double step = estimate;
+        while (Math.Abs(step) <= MaxShift)
+        {
+            if (!TryNpv(npvAt, step, out double npv))
+            {
+                double valid = last, invalid = step, npvValid = npv0;
+                for (int i = 0; i < 100; ++i)
+                {
+                    double mid = 0.5 * (valid + invalid);
+                    if (mid == valid || mid == invalid)
+                    {
+                        break;
+                    }
+
+                    if (TryNpv(npvAt, mid, out double npvMid))
+                    {
+                        valid = mid;
+                        npvValid = npvMid;
+                    }
+                    else
+                    {
+                        invalid = mid;
+                    }
+                }
+
+                if (npvValid == 0.0)
+                {
+                    return valid;
+                }
+
+                return Math.Sign(npvValid) != Math.Sign(npv0) ? Solve(npvAt, last, valid) : null;
+            }
+
+            if (npv == 0.0)
+            {
+                return step;
+            }
+
+            if (Math.Sign(npv) != Math.Sign(npv0))
+            {
+                return Solve(npvAt, last, step);
+            }
+
+            last = step;
+            step *= 2.0;
+        }
+
+        return null;
+    }
+
+    private static bool TryNpv(Func<double, double> npvAt, double shift, out double npv)
+    {
+        try
+        {
+            npv = npvAt(shift);
+            return true;
+        }
+        catch (Exception e) when (e is NanoQLException or ArgumentException)
+        {
+            npv = 0.0;
+            return false;
+        }
+    }
+
+    private static double Solve(Func<double, double> f, double a, double b) =>
+        new Brent().Solve(f, 1.0e-12, 0.5 * (a + b), Math.Min(a, b), Math.Max(a, b));
 
     // The failure's text as QuantLib's what() gives it: without the parameter suffix .NET appends to an
     // ArgumentException's message. The bootstraps' wrapped texts call it too.

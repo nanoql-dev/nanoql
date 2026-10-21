@@ -13,7 +13,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/calendars.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testTurkeyCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testSwitzerlandCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testNewZealand, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia
+// Partial: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia
 
 using System.Collections.Immutable;
 using NanoQL.Time;
@@ -593,6 +593,37 @@ public class CalendarsTests
     }
 
     [Fact]
+    public void TestTurkeyCalendar()
+    {
+        Calendar calendar = new Turkey();
+        Assert.Equal("Turkey", calendar.Name);
+        Assert.True(calendar.IsHoliday(new Date(1, January, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(23, April, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(1, May, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(19, May, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(15, July, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(30, August, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(29, October, 2024)));
+        Assert.True(calendar.IsBusinessDay(new Date(2, January, 2024)));
+
+        Date[] historical =
+        [
+            new(1, February, 2004), new(19, January, 2005), new(10, January, 2006),
+            new(2, January, 2007), new(30, September, 2008), new(20, September, 2009),
+            new(9, September, 2010), new(9, November, 2011), new(18, August, 2012),
+            new(7, August, 2013), new(27, July, 2014), new(17, July, 2015),
+            new(5, July, 2016), new(25, June, 2017), new(15, June, 2018),
+            new(4, June, 2019), new(24, May, 2020), new(13, May, 2021),
+            new(2, May, 2022), new(21, April, 2023), new(10, April, 2024),
+            new(31, March, 2025), new(20, March, 2026),
+        ];
+        foreach (Date date in historical)
+        {
+            Assert.True(calendar.IsHoliday(date), date.ToString());
+        }
+    }
+
+    [Fact]
     public void TestCanadaCalendars()
     {
         Calendar settlement = new Canada(CanadaMarket.Settlement);
@@ -603,6 +634,100 @@ public class CalendarsTests
         Assert.True(exchange.IsHoliday(new Date(29, March, 2024))); // Good Friday
         Assert.True(exchange.IsHoliday(new Date(11, November, 2024)) == false);
         Assert.True(exchange.IsBusinessDay(new Date(2, January, 2024)));
+    }
+
+    [Fact]
+    public void TestSwitzerlandCalendar()
+    {
+        Calendar calendar = new Switzerland();
+        Assert.True(calendar.IsHoliday(new Date(1, January, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(2, January, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(29, March, 2024))); // Good Friday
+        Assert.True(calendar.IsHoliday(new Date(1, May, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(1, August, 2024)));
+        Assert.True(calendar.IsBusinessDay(new Date(3, January, 2024)));
+    }
+
+    [Fact]
+    public void TestNewZealand()
+    {
+        // Testing a few holiday rules for New Zealand...
+
+        var auckland = new NewZealand(NewZealandMarket.Auckland);
+        var wellington = new NewZealand(NewZealandMarket.Wellington);
+
+        foreach (NewZealand calendar in new[] { auckland, wellington })
+        {
+            // mid-week New Year's day
+            Assert.True(calendar.IsHoliday(new Date(1, January, 2025)));
+            Assert.True(calendar.IsHoliday(new Date(2, January, 2025)));
+            Assert.True(calendar.IsBusinessDay(new Date(3, January, 2025)));
+            // New Year's day on Sunday
+            Assert.True(calendar.IsHoliday(new Date(1, January, 2023)));
+            Assert.True(calendar.IsHoliday(new Date(2, January, 2023)));
+            Assert.True(calendar.IsHoliday(new Date(3, January, 2023)));
+            Assert.True(calendar.IsBusinessDay(new Date(4, January, 2023)));
+            // New Year's day on Saturday
+            Assert.True(calendar.IsHoliday(new Date(1, January, 2022)));
+            Assert.True(calendar.IsHoliday(new Date(2, January, 2022)));
+            Assert.True(calendar.IsHoliday(new Date(3, January, 2022)));
+            Assert.True(calendar.IsHoliday(new Date(4, January, 2022)));
+            Assert.True(calendar.IsBusinessDay(new Date(5, January, 2022)));
+            // New Year's day on Friday
+            Assert.True(calendar.IsHoliday(new Date(1, January, 2027)));
+            Assert.True(calendar.IsHoliday(new Date(2, January, 2027)));
+            Assert.True(calendar.IsHoliday(new Date(3, January, 2027)));
+            Assert.True(calendar.IsHoliday(new Date(4, January, 2027)));
+            Assert.True(calendar.IsBusinessDay(new Date(5, January, 2027)));
+
+            // mid-week Christmas day
+            Assert.True(calendar.IsHoliday(new Date(25, December, 2024)));
+            Assert.True(calendar.IsHoliday(new Date(26, December, 2024)));
+            Assert.True(calendar.IsBusinessDay(new Date(27, December, 2024)));
+            // Christmas day on Sunday
+            Assert.True(calendar.IsHoliday(new Date(25, December, 2022)));
+            Assert.True(calendar.IsHoliday(new Date(26, December, 2022)));
+            Assert.True(calendar.IsHoliday(new Date(27, December, 2022)));
+            Assert.True(calendar.IsBusinessDay(new Date(28, December, 2022)));
+            // Christmas day on Saturday
+            Assert.True(calendar.IsHoliday(new Date(25, December, 2021)));
+            Assert.True(calendar.IsHoliday(new Date(26, December, 2021)));
+            Assert.True(calendar.IsHoliday(new Date(27, December, 2021)));
+            Assert.True(calendar.IsHoliday(new Date(28, December, 2021)));
+            Assert.True(calendar.IsBusinessDay(new Date(29, December, 2021)));
+            // Christmas day on Friday
+            Assert.True(calendar.IsHoliday(new Date(25, December, 2026)));
+            Assert.True(calendar.IsHoliday(new Date(26, December, 2026)));
+            Assert.True(calendar.IsHoliday(new Date(27, December, 2026)));
+            Assert.True(calendar.IsHoliday(new Date(28, December, 2026)));
+            Assert.True(calendar.IsBusinessDay(new Date(29, December, 2026)));
+
+            // Waitangi Day is moved to Monday but only since 2013
+            Assert.True(calendar.IsHoliday(new Date(8, February, 2021)));
+            Assert.True(calendar.IsHoliday(new Date(7, February, 2022)));
+            Assert.True(calendar.IsBusinessDay(new Date(8, February, 2010)));
+            Assert.True(calendar.IsBusinessDay(new Date(7, February, 2011)));
+
+            // The same goes for ANZAC Day
+            Assert.True(calendar.IsHoliday(new Date(27, April, 2020)));
+            Assert.True(calendar.IsHoliday(new Date(26, April, 2021)));
+            Assert.True(calendar.IsBusinessDay(new Date(27, April, 2009)));
+            Assert.True(calendar.IsBusinessDay(new Date(26, April, 2010)));
+        }
+
+        // different Anniversary Day for the two calendars
+        Assert.True(auckland.IsBusinessDay(new Date(22, January, 2024)));
+        Assert.True(wellington.IsHoliday(new Date(22, January, 2024)));
+        Assert.True(auckland.IsHoliday(new Date(29, January, 2024)));
+        Assert.True(wellington.IsBusinessDay(new Date(29, January, 2024)));
+        Assert.True(auckland.IsBusinessDay(new Date(19, January, 2026)));
+        Assert.True(wellington.IsHoliday(new Date(19, January, 2026)));
+        Assert.True(auckland.IsHoliday(new Date(26, January, 2026)));
+        Assert.True(wellington.IsBusinessDay(new Date(26, January, 2026)));
+        Assert.True(auckland.IsBusinessDay(new Date(25, January, 2027)));
+        Assert.True(wellington.IsHoliday(new Date(25, January, 2027)));
+        Assert.True(auckland.IsHoliday(new Date(1, February, 2027)));
+        Assert.True(wellington.IsBusinessDay(new Date(1, February, 2027)));
     }
 
     [Fact]

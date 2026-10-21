@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/swaption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testImpliedVolatilityOis and testCachedValue's overnight-indexed swaption (lines 449-466), which wait for batch 2's Eonia
 // Replaced: testBlackEngineCaching (Vectors/Instruments/SwaptionVectorTests.cs)
 
 using NanoQL.Indexes;
@@ -252,8 +251,7 @@ public class SwaptionTests
     }
 
     // Adapted: the evaluation date and settlement date set after the fixture read today's date, and the curve
-    // relinked under the index (lines 424-427), become the fixture built on 13 March 2002, its index on the curve; the
-    // overnight-indexed swaption (lines 449-466) is on the partial line.
+    // relinked under the index (lines 424-427), become the fixture built on 13 March 2002, its indexes on the curve.
     [Fact]
     public void TestCachedValue()
     {
@@ -279,6 +277,23 @@ public class SwaptionTests
         Assert.True(
             Math.Abs(npv - cachedNPV) <= 1.0e-12,
             $"failed to reproduce cached swaption value: calculated {npv:F12}, expected {cachedNPV:F12}");
+
+        OvernightIndexedSwap oiswap = new MakeOIS(new Period(10, TimeUnit.Years), vars.OisIndex)
+            .WithFixedRate(0.06)
+            .WithEffectiveDate(startDate)
+            .WithPaymentFrequency(Frequency.Annual)
+            .WithFixedLegDayCount(vars.FixedDayCount)
+            .ToOvernightIndexedSwap(vars.Context);
+
+        Swaption oiswaption = vars.MakeOISwaption(oiswap, exerciseDate);
+
+        cachedNPV = 0.014101075767;
+
+        Real oisNpv = vars.Npv(oiswaption, 0.20);
+        Assert.True(
+            Math.Abs(oisNpv - cachedNPV) <= 1.0e-12,
+            $"failed to reproduce cached overnight-indexed swaption value: calculated {oisNpv:F12}, expected "
+            + $"{cachedNPV:F12}");
     }
 
     [Fact]
@@ -662,6 +677,111 @@ public class SwaptionTests
             priceType == SwaptionPriceType.Spot ? results.NPV!.Value : results.Result<Real>("forwardPrice");
     }
 
+    [Fact]
+    public void TestImpliedVolatilityOis()
+    {
+        // Testing implied volatility for overnight-indexed swaptions...
+
+        var vars = new CommonVars();
+
+        Size maxEvaluations = 100;
+        Real tolerance = 1.0e-08;
+
+        SettlementType[] types = [SettlementType.Physical, SettlementType.Cash];
+        SettlementMethod[] methods = [SettlementMethod.PhysicalOTC, SettlementMethod.ParYieldCurve];
+        SwaptionPriceType[] priceTypes = [SwaptionPriceType.Spot, SwaptionPriceType.Forward];
+
+        // test data
+        Rate[] strikes = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07];
+        Volatility[] vols = [0.01, 0.05, 0.10, 0.20, 0.30, 0.70, 0.90];
+
+        foreach (Period exercise in Exercises)
+        {
+            foreach (Period length in Lengths)
+            {
+                Date exerciseDate = vars.Calendar.Advance(vars.Today, exercise);
+                Date startDate = vars.Calendar.Advance(exerciseDate, vars.SettlementDays, TimeUnit.Days);
+
+                foreach (Rate strike in strikes)
+                {
+                    foreach (SwapType k in Type)
+                    {
+                        OvernightIndexedSwap swap = new MakeOIS(length, vars.OisIndex)
+                            .WithFixedRate(strike)
+                            .WithEffectiveDate(startDate)
+                            .WithPaymentFrequency(Frequency.Annual)
+                            .WithFixedLegDayCount(vars.FixedDayCount)
+                            .WithType(k)
+                            .ToOvernightIndexedSwap(vars.Context);
+                        for (int h = 0; h < types.Length; h++)
+                        {
+                            foreach (SwaptionPriceType priceType in priceTypes)
+                            {
+                                foreach (Volatility vol in vols)
+                                {
+                                    Swaption swaption = vars.MakeOISwaption(swap, exerciseDate, types[h], methods[h]);
+
+                                    // Black price
+                                    Real value = Value(
+                                        vars.Price(swaption, vol, CashAnnuityModel.DiscountCurve), priceType);
+                                    Volatility implVol = 0.0;
+                                    try
+                                    {
+                                        implVol = swaption.ImpliedVolatility(
+                                            value,
+                                            vars.TermStructure,
+                                            0.10,
+                                            vars.Context,
+                                            tolerance,
+                                            maxEvaluations,
+                                            1.0e-7,
+                                            4.0,
+                                            VolatilityType.ShiftedLognormal,
+                                            0.0,
+                                            priceType);
+                                    }
+                                    catch (Exception e) when (e is ArgumentException or NanoQLException)
+                                    {
+                                        // couldn't bracket?
+                                        Real value0 = Value(
+                                            vars.Price(swaption, 0.0, CashAnnuityModel.DiscountCurve), priceType);
+                                        if (Math.Abs(value - value0) < tolerance)
+                                        {
+                                            // ok, just skip:
+                                            continue;
+                                        }
+
+                                        // otherwise, report error
+                                        Assert.Fail(
+                                            $"implied vol failure: {exercise}x{length} {k}, settlement "
+                                            + $"{SwaptionFunctions.ToString(types[h])}, strike {strike}, vol {vol}, "
+                                            + $"price {value}, type {priceType}: {e.Message}");
+                                    }
+
+                                    if (Math.Abs(implVol - vol) > tolerance)
+                                    {
+                                        // the difference might not matter
+                                        Real value2 = Value(
+                                            vars.Price(swaption, implVol, CashAnnuityModel.DiscountCurve), priceType);
+                                        Assert.True(
+                                            Math.Abs(value - value2) <= tolerance,
+                                            $"implied vol failure: {exercise}x{length} {k}, settlement "
+                                            + $"{SwaptionFunctions.ToString(types[h])}, strike {strike}, vol {vol}, "
+                                            + $"price {value}, type {priceType}, implied vol {implVol}, implied price "
+                                            + $"{value2}");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        static Real Value(InstrumentResults results, SwaptionPriceType priceType) =>
+            priceType == SwaptionPriceType.Spot ? results.NPV!.Value : results.Result<Real>("forwardPrice");
+    }
+
     // Adapted: the projection quote relinked to the bumped rate (lines 1083 and 1107), with the swap's fair rate, the
     // swaption's NPV and its delta read again, becomes a second curve, index, swap and swaption built on the bumped
     // rate.
@@ -898,6 +1018,7 @@ public class SwaptionTests
             Settlement = settlement ?? Calendar.Advance(Today, SettlementDays, TimeUnit.Days);
             TermStructure = new FlatForward(Settlement, 0.05, new Actual365Fixed());
             Index = new Euribor6M(TermStructure);
+            OisIndex = new Eonia(new ZeroSpreadedTermStructure(TermStructure, -0.01));
         }
 
         // global data
@@ -921,6 +1042,8 @@ public class SwaptionTests
 
         public IborIndex Index { get; }
 
+        public OvernightIndex OisIndex { get; }
+
         public Natural SettlementDays { get; }
 
         public YieldTermStructure TermStructure { get; }
@@ -935,7 +1058,14 @@ public class SwaptionTests
             SettlementMethod settlementMethod = SettlementMethod.PhysicalOTC) =>
             new(swap, new EuropeanExercise(exercise), settlementType, settlementMethod);
 
-        // The engine QuantLib's makeSwaption and makeEngine set: a Black engine on a volatility quote.
+        public Swaption MakeOISwaption(
+            OvernightIndexedSwap swap,
+            Date exercise,
+            SettlementType settlementType = SettlementType.Physical,
+            SettlementMethod settlementMethod = SettlementMethod.PhysicalOTC) =>
+            new(swap, new EuropeanExercise(exercise), settlementType, settlementMethod);
+
+        // The engine QuantLib's makeSwaption, makeOISwaption and makeEngine set: a Black engine on a volatility quote.
         public InstrumentResults Price(
             Swaption swaption, Volatility volatility, CashAnnuityModel model = CashAnnuityModel.SwapRate) =>
             BlackSwaptionEngine.Calculate(swaption, Context, TermStructure, volatility, new Actual365Fixed(), 0.0, model);

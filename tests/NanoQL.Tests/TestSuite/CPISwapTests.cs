@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/inflationcpiswap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: consistency and cpibondconsistency, which wait for batch 2's GBPLibor
 
+using NanoQL.Coupons;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Numerics;
@@ -19,6 +19,129 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class CPISwapTests
 {
+    // Adapted: the fixings added to the indexes (lines 304 and 311) are stored in the context the swap is priced in,
+    // whose at-par switch is QuantLib's usingAtParCoupons; QuantLib's QL_REQUIREs are assertions.
+    [Fact]
+    public void Consistency()
+    {
+        // Checking CPI swap against inflation term structure...
+
+        // check inflation leg vs calculation directly from inflation TS
+        var common = new CommonVars();
+
+        SwapType type = SwapType.Payer;
+        double nominal = 1000000.0;
+        bool subtractInflationNominal = true;
+
+        // float+spread leg
+        double spread = 0.0;
+        DayCounter floatDayCount = new Actual365Fixed();
+        BusinessDayConvention floatPaymentConvention = BusinessDayConvention.ModifiedFollowing;
+        int fixingDays = 0;
+        IborIndex floatIndex = new GBPLibor(new Period(6, TimeUnit.Months), common.NominalTS);
+
+        // fixed x inflation leg
+        double fixedRate = 0.1; // 1% would be 0.01
+        double baseCPI = 206.1; // would be 206.13871 if we were interpolating
+        DayCounter fixedDayCount = new Actual365Fixed();
+        BusinessDayConvention fixedPaymentConvention = BusinessDayConvention.ModifiedFollowing;
+        ZeroInflationIndex fixedIndex = common.Ii;
+        Period contractObservationLag = common.ContractObservationLag;
+        CPIInterpolationType observationInterpolation = common.ContractObservationInterpolation;
+
+        // set the schedules
+        var startDate = new Date(2, October, 2007);
+        var endDate = new Date(2, October, 2052);
+        Schedule floatSchedule = new MakeSchedule().From(startDate).To(endDate)
+            .WithTenor(new Period(6, TimeUnit.Months))
+            .WithCalendar(new UnitedKingdom())
+            .WithConvention(floatPaymentConvention)
+            .Backwards()
+            .ToSchedule();
+        Schedule fixedSchedule = new MakeSchedule().From(startDate).To(endDate)
+            .WithTenor(new Period(6, TimeUnit.Months))
+            .WithCalendar(new UnitedKingdom())
+            .WithConvention(BusinessDayConvention.Unadjusted)
+            .Backwards()
+            .ToSchedule();
+
+        var zisV = new CPISwap(
+            type,
+            nominal,
+            subtractInflationNominal,
+            spread,
+            floatDayCount,
+            floatSchedule,
+            floatPaymentConvention,
+            fixingDays,
+            floatIndex,
+            fixedRate,
+            baseCPI,
+            fixedDayCount,
+            fixedSchedule,
+            fixedPaymentConvention,
+            contractObservationLag,
+            fixedIndex,
+            common.Context,
+            observationInterpolation);
+        Date asofDate = common.Context.EvaluationDate;
+        double[] floatFix = [0.06255, 0.05975, 0.0637, 0.018425, 0.0073438, -1, -1];
+        double[] cpiFix = [211.4, 217.2, 211.4, 213.4, -2, -2];
+        IndexFixings fixings = common.Context.Fixings;
+        for (int i = 0; i < floatSchedule.Size; i++)
+        {
+            if (floatSchedule[i] < common.EvaluationDate)
+            {
+                fixings = fixings.AddFixing(floatIndex, floatSchedule[i], floatFix[i], true); // true=overwrite
+            }
+
+            if (zisV.CpiLeg[i] is CPICoupon zic)
+            {
+                if (zic.FixingDate() < (common.EvaluationDate - new Period(1, TimeUnit.Months)))
+                {
+                    fixings = fixings.AddFixing(fixedIndex, zic.FixingDate(), cpiFix[i], true);
+                }
+            }
+        }
+
+        EvaluationContext context = common.Context with { Fixings = fixings };
+
+        // simple structure so simple pricing engine - most work done by index
+        CPISwapResults results = DiscountingSwapEngine.Calculate(zisV, context, common.NominalTS);
+        bool usingAtParCoupons = context.UseAtParCoupons;
+
+        // get float+spread & fixed*inflation leg prices separately
+        double testInfLegNPV = 0.0;
+        for (int i = 0; i < zisV.Leg(0).Length; i++)
+        {
+            Date zicPayDate = zisV.Leg(0)[i].Date;
+            if (zicPayDate > asofDate)
+            {
+                testInfLegNPV += zisV.Leg(0)[i].Amount(context) * common.NominalTS.Discount(zicPayDate);
+            }
+
+            if (zisV.CpiLeg[i] is CPICoupon zicV)
+            {
+                double couponDiff = Math.Abs(zicV.Rate(context) - (fixedRate * (zicV.IndexFixing(context) / baseCPI)));
+                Assert.True(
+                    couponDiff < 1e-8,
+                    $"failed {i}th coupon reconstruction as {fixedRate * (zicV.IndexFixing(context) / baseCPI)} vs rate = "
+                    + $"{zicV.Rate(context)}, with difference: {couponDiff}");
+            }
+        }
+
+        double error = Math.Abs(testInfLegNPV - results.LegNPV[0]!.Value);
+        Assert.True(
+            error < 1e-5,
+            $"failed manual inf leg NPV calc vs pricing engine: {testInfLegNPV} vs {results.LegNPV[0]}");
+
+        double diff = Math.Abs(1 - (results.NPV!.Value / 4191797.54));
+
+        double maxDiff = usingAtParCoupons ? 1e-5 : 3e-5;
+
+        Assert.True(diff < maxDiff, $"failed stored consistency value test, ratio = {diff}");
+    }
+
     // Adapted: the swaps are priced by calling the engine; QuantLib's QL_REQUIREs are assertions.
     [Fact]
     public void Zciisconsistency()
@@ -89,6 +212,115 @@ public class CPISwapTests
                 Math.Abs(cSResults.LegNPV[i]!.Value - zciisResults.LegNPV[i]!.Value) < 1e-3,
                 "zciis leg does not equal CPISwap leg");
         }
+    }
+
+    // Adapted: as Consistency; the bond is priced by calling the engine.
+    [Fact]
+    public void Cpibondconsistency()
+    {
+        // Checking CPI swap against CPI bond...
+
+        var common = new CommonVars();
+
+        SwapType type = SwapType.Payer;
+        double nominal = 1000000.0;
+        bool subtractInflationNominal = false;
+
+        // float+spread leg
+        double spread = 0.0;
+        DayCounter floatDayCount = new Actual365Fixed();
+        BusinessDayConvention floatPaymentConvention = BusinessDayConvention.ModifiedFollowing;
+        int fixingDays = 0;
+        IborIndex floatIndex = new GBPLibor(new Period(6, TimeUnit.Months), common.NominalTS);
+
+        // fixed x inflation leg
+        double fixedRate = 0.1; // 1% would be 0.01
+        double baseCPI = 206.1; // would be 206.13871 if we were interpolating
+        DayCounter fixedDayCount = new Actual365Fixed();
+        BusinessDayConvention fixedPaymentConvention = BusinessDayConvention.ModifiedFollowing;
+        ZeroInflationIndex fixedIndex = common.Ii;
+        Period contractObservationLag = common.ContractObservationLag;
+        CPIInterpolationType observationInterpolation = common.ContractObservationInterpolation;
+
+        // set the schedules
+        var startDate = new Date(2, October, 2007);
+        var endDate = new Date(2, October, 2052);
+        Schedule floatSchedule = new MakeSchedule().From(startDate).To(endDate)
+            .WithTenor(new Period(6, TimeUnit.Months))
+            .WithCalendar(new UnitedKingdom())
+            .WithConvention(floatPaymentConvention)
+            .Backwards()
+            .ToSchedule();
+        Schedule fixedSchedule = new MakeSchedule().From(startDate).To(endDate)
+            .WithTenor(new Period(6, TimeUnit.Months))
+            .WithCalendar(new UnitedKingdom())
+            .WithConvention(BusinessDayConvention.Unadjusted)
+            .Backwards()
+            .ToSchedule();
+
+        var zisV = new CPISwap(
+            type,
+            nominal,
+            subtractInflationNominal,
+            spread,
+            floatDayCount,
+            floatSchedule,
+            floatPaymentConvention,
+            fixingDays,
+            floatIndex,
+            fixedRate,
+            baseCPI,
+            fixedDayCount,
+            fixedSchedule,
+            fixedPaymentConvention,
+            contractObservationLag,
+            fixedIndex,
+            common.Context,
+            observationInterpolation);
+        double[] floatFix = [0.06255, 0.05975, 0.0637, 0.018425, 0.0073438, -1, -1];
+        double[] cpiFix = [211.4, 217.2, 211.4, 213.4, -2, -2];
+        IndexFixings fixings = common.Context.Fixings;
+        for (int i = 0; i < floatSchedule.Size; i++)
+        {
+            if (floatSchedule[i] < common.EvaluationDate)
+            {
+                fixings = fixings.AddFixing(floatIndex, floatSchedule[i], floatFix[i], true); // true=overwrite
+            }
+
+            if (zisV.CpiLeg[i] is CPICoupon zic)
+            {
+                if (zic.FixingDate() < (common.EvaluationDate - new Period(1, TimeUnit.Months)))
+                {
+                    fixings = fixings.AddFixing(fixedIndex, zic.FixingDate(), cpiFix[i], true);
+                }
+            }
+        }
+
+        EvaluationContext context = common.Context with { Fixings = fixings };
+
+        // simple structure so simple pricing engine - most work done by index
+        CPISwapResults results = DiscountingSwapEngine.Calculate(zisV, context, common.NominalTS);
+
+        // now do the bond equivalent
+        double[] fixedRates = [fixedRate];
+        int settlementDays = 1; // cannot be zero!
+        var cpiB = new CPIBond(
+            settlementDays,
+            nominal,
+            baseCPI,
+            contractObservationLag,
+            fixedIndex,
+            observationInterpolation,
+            fixedSchedule,
+            fixedRates,
+            fixedDayCount,
+            fixedPaymentConvention);
+
+        double bondNpv = DiscountingBondEngine.Calculate(cpiB, context, common.NominalTS).NPV!.Value;
+
+        Assert.True(
+            Math.Abs(bondNpv - results.LegNPV[0]!.Value) < 1e-5,
+            "cpi bond does not equal equivalent cpi swap leg");
     }
 
     // Adapted: QuantLib's fairRate() and fairSpread() refuse "result not available" where the results hold none, a
@@ -232,6 +464,9 @@ public class CPISwapTests
     {
         public CommonVars()
         {
+            ContractObservationLag = new Period(3, TimeUnit.Months);
+            ContractObservationInterpolation = CPIInterpolationType.Flat;
+
             // usual setup
             Calendar = new UnitedKingdom();
             Convention = BusinessDayConvention.ModifiedFollowing;
@@ -356,6 +591,10 @@ public class CPISwapTests
         public EvaluationContext Context { get; }
 
         public UKRPI Ii { get; }
+
+        public Period ContractObservationLag { get; }
+
+        public CPIInterpolationType ContractObservationInterpolation { get; }
 
         public YieldTermStructure NominalTS { get; }
     }

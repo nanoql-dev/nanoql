@@ -7,7 +7,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/capflooredcoupon.hpp ql/cashflows/capflooredcoupon.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: CappedFlooredCmsCoupon, which waits for S-rx with CmsCoupon
 
 using System.Globalization;
 

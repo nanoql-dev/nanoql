@@ -71,6 +71,27 @@ public class ResultsEqualityTests
     }
 
     [Fact]
+    public void FloatFloatSwapResultsCompareTheSwapsResultsAndTheFairSpreads()
+    {
+        static FloatFloatSwapResults Results() => new()
+        {
+            NPV = 12.5,
+            LegNPV = [-100.0, 112.5],
+            LegBPS = [-0.4, 0.45],
+            FairSpread1 = 0.002,
+            FairSpread2 = null,
+        };
+
+        FloatFloatSwapResults a = Results(), b = Results();
+        Assert.Equal(a, b);
+        Assert.Equal(a.GetHashCode(), b.GetHashCode());
+        Assert.NotEqual(a, a with { LegNPV = [-100.0, 112.6] });
+        Assert.NotEqual(a, a with { FairSpread1 = 0.0021 });
+        Assert.NotEqual(a, a with { FairSpread2 = 0.0 });
+        Assert.False(a.Equals(null));
+    }
+
+    [Fact]
     public void ResultsOfDifferentTypesCompareUnequal()
     {
         var instrument = new InstrumentResults { NPV = 1.0 };

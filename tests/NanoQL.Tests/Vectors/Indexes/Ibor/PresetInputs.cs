@@ -13,9 +13,11 @@ namespace NanoQL.Tests.Vectors;
 /// <c>tools/vectors/gen/indexes/ibor/euribor.py</c>'s <c>index_case</c> builds them, and checks a case's outputs.
 /// </summary>
 /// <remarks>
-/// A preset is <c>{"type": &lt;class&gt;}</c>, with a <c>"tenor"</c> (<c>[length, units]</c>) for <c>Euribor</c>,
-/// <c>Euribor365</c> and <c>Tibor</c>; each is built without a forwarding curve. A case without dates is a refused
-/// construction, whose one output is the name's throw.
+/// A preset is <c>{"type": &lt;class&gt;}</c>, with a <c>"tenor"</c> (<c>[length, units]</c>) for the classes that take
+/// one, the <c>"settlementDays"</c> for the daily-tenor LIBORs, and for <c>Libor</c> and <c>DailyTenorLibor</c> their
+/// constructors' other arguments: the family name, the currency's code, the financial center's calendar and the day
+/// counter, by name; each is built without a forwarding curve. A case without dates is a refused construction, whose
+/// one output is the name's throw.
 /// </remarks>
 internal static class PresetInputs
 {
@@ -40,6 +42,36 @@ internal static class PresetInputs
             "Tonar" => new Tonar(),
             "Tibor" => new Tibor(Tenor(spec)),
             "Corra" => new Corra(),
+            "Libor" => new Libor(
+                spec.GetProperty("familyName").GetString()!,
+                Tenor(spec),
+                SettlementDays(spec),
+                VectorCurrencies.ByCode(spec.GetProperty("currency").GetString()!),
+                CalendarOf(spec),
+                DayCounterOf(spec)),
+            "DailyTenorLibor" => new DailyTenorLibor(
+                spec.GetProperty("familyName").GetString()!,
+                SettlementDays(spec),
+                VectorCurrencies.ByCode(spec.GetProperty("currency").GetString()!),
+                CalendarOf(spec),
+                DayCounterOf(spec)),
+            "USDLibor" => new USDLibor(Tenor(spec)),
+            "USDLiborON" => new USDLiborON(),
+            "DailyTenorUSDLibor" => new DailyTenorUSDLibor(SettlementDays(spec)),
+            "GBPLibor" => new GBPLibor(Tenor(spec)),
+            "GBPLiborON" => new GBPLiborON(),
+            "DailyTenorGBPLibor" => new DailyTenorGBPLibor(SettlementDays(spec)),
+            "JPYLibor" => new JPYLibor(Tenor(spec)),
+            "DailyTenorJPYLibor" => new DailyTenorJPYLibor(SettlementDays(spec)),
+            "Eonia" => new Eonia(),
+            "FedFunds" => new FedFunds(),
+            "Bkbm" => new Bkbm(Tenor(spec)),
+            "Bkbm1M" => new Bkbm1M(),
+            "Bkbm2M" => new Bkbm2M(),
+            "Bkbm3M" => new Bkbm3M(),
+            "Bkbm4M" => new Bkbm4M(),
+            "Bkbm5M" => new Bkbm5M(),
+            "Bkbm6M" => new Bkbm6M(),
             _ => throw new InvalidOperationException($"unknown preset '{type}'"),
         };
     }
@@ -80,6 +112,23 @@ internal static class PresetInputs
         JsonElement tenor = spec.GetProperty("tenor");
         return new Period(tenor[0].GetInt32(), (TimeUnit)tenor[1].GetInt32());
     }
+
+    private static int SettlementDays(JsonElement spec) => spec.GetProperty("settlementDays").GetInt32();
+
+    private static Calendar CalendarOf(JsonElement spec) => spec.GetProperty("calendar").GetString() switch
+    {
+        "Canada" => new Canada(),
+        "Switzerland" => new Switzerland(),
+        "TARGET" => new TARGET(),
+        var name => throw new InvalidOperationException($"unknown calendar '{name}'"),
+    };
+
+    private static DayCounter DayCounterOf(JsonElement spec) => spec.GetProperty("dayCounter").GetString() switch
+    {
+        "Actual365Fixed" => new Actual365Fixed(),
+        "Actual360" => new Actual360(),
+        var name => throw new InvalidOperationException($"unknown day counter '{name}'"),
+    };
 
     private static Func<object?>[] Each<TOut>(Date[] dates, Func<Date, TOut> f) =>
         dates.Select(d => (Func<object?>)(() => f(d))).ToArray();

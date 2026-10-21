@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/bonds.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCachedFloating, which waits for batch 2's USDLibor; testBrazilianCached, which waits for batch 2's Brazil calendar and Business252 day counter
+// Partial: testBrazilianCached, which waits for batch 2's Brazil calendar and Business252 day counter
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -730,6 +730,115 @@ public class BondsTests
         Assert.False(
             Math.Abs(price - cachedPrice3) > tolerance,
             $"failed to reproduce cached price: calculated {price}, expected {cachedPrice3}, error {price - cachedPrice3}");
+    }
+
+    // Adapted: the evaluation date the case sets (line 938) is the context, whose at-par switch is QuantLib's
+    // usingAtParCoupons; the bonds' engines (lines 970-972, 997-999, 1030, 1053) are DiscountingBondEngine.Calculate,
+    // their clean prices read from its results; setCouponPricer returns the bond with its coupons' pricer set; the
+    // fixing added to the index (line 1052) is stored in the context bond4 is priced in.
+    [Fact]
+    public void TestCachedFloating()
+    {
+        // Testing floating-rate bond prices against cached values...
+
+        var vars = new CommonVars();
+
+        var today = new Date(22, November, 2004);
+        var context = new EvaluationContext { EvaluationDate = today };
+        bool usingAtParCoupons = context.UseAtParCoupons;
+
+        Natural settlementDays = 1;
+
+        var riskFreeRate = new FlatForward(today, 0.025, new Actual360());
+        var discountCurve = new FlatForward(today, 0.03, new Actual360());
+
+        IborIndex index = new USDLibor(6 * TimeUnit.Months, riskFreeRate);
+        Natural fixingDays = 1;
+
+        Real tolerance = 1.0e-6;
+
+        IborCouponPricer pricer = new BlackIborCouponPricer(context);
+
+        Real CleanPrice(Bond bond, YieldTermStructure curve, EvaluationContext ctx) =>
+            bond.CleanPrice(DiscountingBondEngine.Calculate(bond, ctx, curve), ctx);
+
+        // plain
+
+        var sch = new Schedule(
+            new Date(30, November, 2004), new Date(30, November, 2008), new Period(Frequency.Semiannual),
+            new UnitedStates(UnitedStatesMarket.GovernmentBond), BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing, DateGenerationRule.Backward, false, context);
+
+        var bond1 = new FloatingRateBond(
+            settlementDays, vars.FaceAmount, sch, index, new ActualActual(ActualActualConvention.ISMA), context,
+            BusinessDayConvention.ModifiedFollowing, fixingDays, [], [], [], [], false, 100.0,
+            new Date(30, November, 2004));
+
+        bond1 = CouponPricerFunctions.SetCouponPricer(bond1, pricer);
+
+        Real cachedPrice1 = usingAtParCoupons ? 99.874646 : 99.874645;
+
+        Real price = CleanPrice(bond1, riskFreeRate, context);
+        Assert.False(
+            Math.Abs(price - cachedPrice1) > tolerance,
+            $"failed to reproduce cached price: calculated {price}, expected {cachedPrice1}, error {price - cachedPrice1}");
+
+        // different risk-free and discount curve
+
+        var bond2 = new FloatingRateBond(
+            settlementDays, vars.FaceAmount, sch, index, new ActualActual(ActualActualConvention.ISMA), context,
+            BusinessDayConvention.ModifiedFollowing, fixingDays, [], [], [], [], false, 100.0,
+            new Date(30, November, 2004));
+
+        bond2 = CouponPricerFunctions.SetCouponPricer(bond2, pricer);
+
+        Real cachedPrice2 = 97.955904;
+
+        price = CleanPrice(bond2, discountCurve, context);
+        Assert.False(
+            Math.Abs(price - cachedPrice2) > tolerance,
+            $"failed to reproduce cached price: calculated {price}, expected {cachedPrice2}, error {price - cachedPrice2}");
+
+        // varying spread
+
+        Rate[] spreads = [0.001, 0.0012, 0.0014, 0.0016];
+
+        var bond3 = new FloatingRateBond(
+            settlementDays, vars.FaceAmount, sch, index, new ActualActual(ActualActualConvention.ISMA), context,
+            BusinessDayConvention.ModifiedFollowing, fixingDays, [], spreads, [], [], false, 100.0,
+            new Date(30, November, 2004));
+
+        bond3 = CouponPricerFunctions.SetCouponPricer(bond3, pricer);
+
+        Real cachedPrice3 = usingAtParCoupons ? 98.495459 : 98.495458;
+
+        price = CleanPrice(bond3, discountCurve, context);
+        Assert.False(
+            Math.Abs(price - cachedPrice3) > tolerance,
+            $"failed to reproduce cached price: calculated {price}, expected {cachedPrice3}, error {price - cachedPrice3}");
+
+        var sch2 = new Schedule(
+            new Date(26, November, 2003), new Date(26, November, 2007), new Period(Frequency.Semiannual),
+            new UnitedStates(UnitedStatesMarket.GovernmentBond), BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing, DateGenerationRule.Backward, false, context);
+        var bond4 = new FloatingRateBond(
+            settlementDays, vars.FaceAmount, sch2, index, new ActualActual(ActualActualConvention.ISMA), context,
+            BusinessDayConvention.ModifiedFollowing, fixingDays, [], spreads, [], [], false, 100.0,
+            new Date(29, October, 2004), new Period(6, TimeUnit.Days));
+
+        EvaluationContext withFixing = context with
+        {
+            Fixings = context.Fixings.AddFixing(index, new Date(25, May, 2004), 0.0402),
+        };
+
+        bond4 = CouponPricerFunctions.SetCouponPricer(bond4, pricer);
+
+        Real cachedPrice4 = usingAtParCoupons ? 98.892055 : 98.892346;
+
+        price = CleanPrice(bond4, discountCurve, withFixing);
+        Assert.False(
+            Math.Abs(price - cachedPrice4) > tolerance,
+            $"failed to reproduce cached price: calculated {price}, expected {cachedPrice4}, error {price - cachedPrice4}");
     }
 
     // Adapted: no evaluation date is read, every call taking an explicit settlement date; the context is the test

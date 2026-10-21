@@ -49,4 +49,19 @@ public class ExperimentalMarkerTests
         ];
         Assert.Empty(marked);
     }
+
+    [Fact]
+    public void TheBasisSwapRateHelpersCarryTheMarker()
+    {
+        foreach (Type t in new[]
+        {
+            typeof(NanoQL.Experimental.IborIborBasisSwapRateHelper),
+            typeof(NanoQL.Experimental.OvernightIborBasisSwapRateHelper),
+            typeof(NanoQL.Experimental.OvernightOvernightBasisSwapRateHelper),
+        })
+        {
+            Assert.Equal(Namespace, t.Namespace);
+            Assert.Equal(DiagnosticId, t.GetCustomAttribute<ExperimentalAttribute>(inherit: false)?.DiagnosticId);
+        }
+    }
 }

@@ -746,6 +746,40 @@ Facts:
 
 - `ANullDecoratedInterpolationIsRefused`
 
+## FloatFloatSwapOneDateScheduleTests
+
+[`Divergences/FloatFloatSwapOneDateScheduleTests.cs`](../tests/NanoQL.Tests/Divergences/FloatFloatSwapOneDateScheduleTests.cs)
+
+A float-float swap on a schedule of one date (the S-rx plan's SRXR3 (ix)). Its leg has no coupon, so each of its vectors is empty, and QuantLib reads the first cap of each leg unchecked (`floatfloatswap.cpp:170`, `:182`): undefined behaviour, which on the wheel ends the process (0xC0000005). nanoql refuses the schedule just before the read, with an `ArgumentException` naming it, from either constructor.
+
+Facts:
+
+- `TheConstantTermsConstructorRefusesIt`
+- `ThePerCouponConstructorRefusesIt`
+
+## FloatFloatSwapOptionalLegFairSpreadTests
+
+[`Divergences/FloatFloatSwapOptionalLegFairSpreadTests.cs`](../tests/NanoQL.Tests/Divergences/FloatFloatSwapOptionalLegFairSpreadTests.cs)
+
+A float-float swap's fair spread on a capped or floored leg (the S-rx review's B1-1, fixed under R8). QuantLib derives every fair spread from the leg's BPS, `spread[0] − NPV / (BPS / 1bp)` (`floatfloatswap.cpp:545-571`), which is exact only while each coupon's amount moves one for one with its spread: once a cap or floor binds, the swap rebuilt at QuantLib's fair spread is worth thousands. nanoql's engine solves a capped or floored leg's fair spread on the swap's own pricing, and gives none where no spread zeroes the NPV; an uncapped leg keeps QuantLib's BPS route and its bits. QuantLib's check: its own NPV of the swap rebuilt at the solved spread, −2.9e-11 on 1,000,000 for each of the three solved cases [executed on the wheel: Brent on the swap's NPV, accuracy 1e-12].
+
+Facts:
+
+- `ACappedOrFlooredLegsFairSpreadZeroesTheNpv`
+- `NoFairSpreadWhereNoSpreadZeroesTheNpv`
+- `ARootPastTheDomainsEndIsFound`
+- `NoFairSpreadWhereTheSearchRunsOutAtAFullShift`
+
+## FloatFloatSwapRefusalTextTests
+
+[`Divergences/FloatFloatSwapRefusalTextTests.cs`](../tests/NanoQL.Tests/Divergences/FloatFloatSwapRefusalTextTests.cs)
+
+The float-float swap's refusal of a second leg's nominals that don't match its schedule (the S-rx plan's SRXR3 (xix)). QuantLib's check names "schedule2 size" and prints the nominals' size in its place (`floatfloatswap.cpp:119-122`): three nominals on a schedule of five dates read "nominal2 size (3) does not match schedule2 size (3)". nanoql prints the schedule's size, as QuantLib's first leg's check two lines up does, its wording kept.
+
+Facts:
+
+- `TheSecondLegsCheckPrintsTheSchedulesSize`
+
 ## FloatingLegUndefinedInputsTests
 
 [`Divergences/FloatingLegUndefinedInputsTests.cs`](../tests/NanoQL.Tests/Divergences/FloatingLegUndefinedInputsTests.cs)
@@ -765,6 +799,17 @@ The forward-flat interpolation's primitive past its last node. QuantLib's `primi
 Facts:
 
 - `ThePrimitivePastTheLastNodeGrowsAtTheValueThere`
+
+## ForwardRateAgreementExpiredTests
+
+[`Divergences/ForwardRateAgreementExpiredTests.cs`](../tests/NanoQL.Tests/Divergences/ForwardRateAgreementExpiredTests.cs)
+
+The FRA after its value date (the S-rx plan's SRXR3 (vii)). QuantLib's `setupExpired` computes the forward rate (`forwardrateagreement.cpp:84-87`): under the par approximation it reads the curve at the value date, before a curve dated on the evaluation date, and throws "negative time (-0.00277778) given"; and `amount()` then returns `amount_`, which nothing computed (`:74-77`; the wheel read 0.0 for a FRA first priced after its value date) or which a live calculation left. nanoql's expired results carry QuantLib's zero NPV; for the indexed coupon, the forward rate is its fixing and the amount QuantLib's own `calculateAmount` on it (`:110-117`), which reads only the fixing, the strike, the notional and the two dates, so it equals QuantLib's `amount()` on the fixing date, live with the fixing published; for the par approximation, whose curve can't reach the date, both are null.
+
+Facts:
+
+- `AnExpiredIndexedFraCarriesItsFixingsAmount`
+- `AnExpiredParFraHasNeitherAmountNorRate`
 
 ## FuturesNullMaturityTests
 
@@ -1620,6 +1665,7 @@ Facts:
 
 - `ATelescopicCouponGivesTheFullSchedulesResults`
 - `ATelescopicCouponListsEveryDailyDate`
+- `TheBasisHelpersTelescopicCouponsListEveryDailyDate`
 - `ALockoutLegsNPVIsTheFullSchedules`
 
 ## TimeSeriesFewerValuesTests

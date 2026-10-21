@@ -3,10 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/piecewiseyieldcurve.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the consistency cases' FRA and futures checks, which wait for S-rx's ForwardRateAgreement, and testBMACurveConsistency, which waits for batch 2's USDLibor; testDefaultInstantiation's ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testHelperDatesFromNonBusinessEvaluationDate's BMA helper check, which waits for batch 2's USDLibor; testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testParFraRegression, testMultiCurveTwoPiecewiseYieldCurves and testFraForDates (S-rx); testPiecewiseSpreadYieldCurve (B3.5); testJpyLibor, testSwapRateHelperLastRelevantDate, testSwapRateHelperSpotDate and testBmaHelperSwap (batch 2's Libor indexes); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
+// Partial: testDefaultInstantiation's ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testPiecewiseSpreadYieldCurve (B3.5); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
 // Replaced: testObservability (Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs)
 
 using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Numerics;
@@ -34,7 +35,23 @@ public class PiecewiseYieldCurveTests
         new(9, TimeUnit.Months, 4.490),
     ];
 
+    private static readonly Datum[] FraData =
+    [
+        new(1, TimeUnit.Months, 4.581),
+        new(2, TimeUnit.Months, 4.573),
+        new(3, TimeUnit.Months, 4.557),
+        new(6, TimeUnit.Months, 4.496),
+        new(9, TimeUnit.Months, 4.490),
+    ];
+
     private static readonly Datum[] ImmFutData =
+    [
+        new(1, TimeUnit.Months, 4.581),
+        new(2, TimeUnit.Months, 4.573),
+        new(3, TimeUnit.Months, 4.557),
+    ];
+
+    private static readonly Datum[] AsxFutData =
     [
         new(1, TimeUnit.Months, 4.581),
         new(2, TimeUnit.Months, 4.573),
@@ -69,6 +86,20 @@ public class PiecewiseYieldCurveTests
         new(10, TimeUnit.Years, 11, Frequency.Semiannual, 3.75, 104.070),
     ];
 
+    private static readonly Datum[] BmaData =
+    [
+        new(1, TimeUnit.Years, 67.56),
+        new(2, TimeUnit.Years, 68.00),
+        new(3, TimeUnit.Years, 68.25),
+        new(4, TimeUnit.Years, 68.50),
+        new(5, TimeUnit.Years, 68.81),
+        new(7, TimeUnit.Years, 69.50),
+        new(10, TimeUnit.Years, 70.44),
+        new(15, TimeUnit.Years, 71.69),
+        new(20, TimeUnit.Years, 72.69),
+        new(30, TimeUnit.Years, 73.81),
+    ];
+
     [Fact]
     public void TestLogLinearDiscountConsistency()
     {
@@ -76,6 +107,7 @@ public class PiecewiseYieldCurveTests
         var vars = new CommonVars();
 
         TestCurveConsistency<Discount, LogLinear, IterativeBootstrap>(vars);
+        TestBMACurveConsistency<Discount, LogLinear, IterativeBootstrap>(vars);
     }
 
     [Fact]
@@ -85,6 +117,7 @@ public class PiecewiseYieldCurveTests
         var vars = new CommonVars();
 
         TestCurveConsistency<Discount, Linear, IterativeBootstrap>(vars);
+        TestBMACurveConsistency<Discount, Linear, IterativeBootstrap>(vars);
     }
 
     [Fact]
@@ -94,6 +127,7 @@ public class PiecewiseYieldCurveTests
         var vars = new CommonVars();
 
         TestCurveConsistency<ZeroYield, Linear, IterativeBootstrap>(vars);
+        TestBMACurveConsistency<ZeroYield, Linear, IterativeBootstrap>(vars);
     }
 
     [Fact]
@@ -111,6 +145,15 @@ public class PiecewiseYieldCurveTests
                 0.0,
                 CubicInterpolationBoundaryCondition.SecondDerivative,
                 0.0));
+        TestBMACurveConsistency<ZeroYield, Cubic, IterativeBootstrap>(
+            vars,
+            new Cubic(
+                CubicInterpolationDerivativeApprox.Spline,
+                true,
+                CubicInterpolationBoundaryCondition.SecondDerivative,
+                0.0,
+                CubicInterpolationBoundaryCondition.SecondDerivative,
+                0.0));
     }
 
     [Fact]
@@ -120,6 +163,7 @@ public class PiecewiseYieldCurveTests
         var vars = new CommonVars();
 
         TestCurveConsistency<ForwardRate, Linear, IterativeBootstrap>(vars);
+        TestBMACurveConsistency<ForwardRate, Linear, IterativeBootstrap>(vars);
     }
 
     [Fact]
@@ -129,6 +173,46 @@ public class PiecewiseYieldCurveTests
         var vars = new CommonVars();
 
         TestCurveConsistency<ForwardRate, BackwardFlat, IterativeBootstrap>(vars);
+        TestBMACurveConsistency<ForwardRate, BackwardFlat, IterativeBootstrap>(vars);
+    }
+
+    // Adapted: the curve's handle linked after the curve is built (line 806) becomes the index and the FRAs on the
+    // curve; the FRAs' forward rates are read from their results.
+    [Fact]
+    public void TestParFraRegression()
+    {
+        // Testing regression for at-par FRA...
+
+        var vars = new CommonVars(new Date(23, February, 2023));
+
+        bool useIndexedFra = false;
+
+        YieldTermStructure termStructure = new PiecewiseYieldCurve<ZeroYield, Linear, IterativeBootstrap>(
+            vars.Settlement, vars.FraHelpers(useIndexedFra), new Actual360(), vars.Context);
+        var euribor3m = new Euribor3M(termStructure);
+
+        for (int i = 0; i < vars.Fras; i++)
+        {
+            Date start = vars.Calendar.Advance(
+                vars.Settlement,
+                FraData[i].N,
+                FraData[i].Units,
+                euribor3m.BusinessDayConvention,
+                euribor3m.EndOfMonth);
+            Assert.Equal(TimeUnit.Months, FraData[i].Units);
+
+            Date end = vars.Calendar.Advance(
+                vars.Settlement, 3 + FraData[i].N, TimeUnit.Months, euribor3m.BusinessDayConvention, euribor3m.EndOfMonth);
+            var fra = new ForwardRateAgreement(
+                euribor3m, start, end, PositionType.Long, FraData[i].Rate / 100, 100.0, termStructure);
+            Rate expectedRate = FraData[i].Rate / 100;
+            Rate estimatedRate = fra.Calculate(vars.Context).ForwardRate!.Rate;
+            Real tolerance = 1.0e-6;
+            Assert.True(
+                Math.Abs(expectedRate - estimatedRate) <= tolerance,
+                $"{NanoQL.Utilities.DataFormattersFunctions.Ordinal(i + 1)} FRA (at par) failure: estimated rate "
+                + $"{estimatedRate}, expected rate {expectedRate}");
+        }
     }
 
     // Adapted: today's fixing added after the curve was priced (line 936) becomes a second context holding it, the
@@ -168,6 +252,76 @@ public class PiecewiseYieldCurveTests
 
     // Adapted: the check that nodes() doesn't throw (line 1069) becomes a check that construction, which bootstraps,
     // doesn't throw; the fixture's futures helpers, which the case replaces (line 1059), are a list of its own.
+    // Adapted: the fixture's evaluation date, calendar and settlement reset (lines 973-978) are the case's own, its
+    // context on 4 October 2007; the curve's handle (lines 1005-1006) is the curve, the index built on it.
+    [Fact]
+    public void TestJpyLibor()
+    {
+        // Testing bootstrap over JPY LIBOR swaps...
+
+        var vars = new CommonVars();
+
+        var today = new Date(4, October, 2007);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Calendar calendar = new Japan();
+        Date settlement = calendar.Advance(today, vars.SettlementDays, TimeUnit.Days);
+
+        // market elements
+        var rates = new Rate[vars.Swaps];
+        for (int i = 0; i < vars.Swaps; i++)
+        {
+            rates[i] = SwapData[i].Rate / 100;
+        }
+
+        // rate helpers
+        var instruments = new List<RateHelper>();
+
+        var index = new JPYLibor(new Period(6, TimeUnit.Months));
+        for (int i = 0; i < vars.Swaps; i++)
+        {
+            instruments.Add(new SwapRateHelper(
+                rates[i],
+                new Period(SwapData[i].N, SwapData[i].Units),
+                calendar,
+                vars.FixedLegFrequency,
+                vars.FixedLegConvention,
+                vars.FixedLegDayCounter,
+                index,
+                context));
+        }
+
+        YieldTermStructure termStructure = new PiecewiseYieldCurve<Discount, LogLinear, IterativeBootstrap>(
+            settlement, instruments, new Actual360(), context);
+
+        // check swaps
+        var jpylibor6m = new JPYLibor(new Period(6, TimeUnit.Months), termStructure);
+        for (int i = 0; i < vars.Swaps; i++)
+        {
+            var tenor = new Period(SwapData[i].N, SwapData[i].Units);
+
+            VanillaSwap swap = new MakeVanillaSwap(tenor, jpylibor6m)
+                .WithFixedRate(0.0)
+                .WithEffectiveDate(settlement)
+                .WithFixedLegDayCount(vars.FixedLegDayCounter)
+                .WithFixedLegTenor(new Period(vars.FixedLegFrequency))
+                .WithFixedLegConvention(vars.FixedLegConvention)
+                .WithFixedLegTerminationDateConvention(vars.FixedLegConvention)
+                .WithFixedLegCalendar(calendar)
+                .WithFloatingLegCalendar(calendar)
+                .ToVanillaSwap(context);
+
+            Rate expectedRate = SwapData[i].Rate / 100, estimatedRate = FairRate(swap, context, termStructure);
+            Spread error = Math.Abs(expectedRate - estimatedRate);
+            Real tolerance = 1.0e-9;
+
+            Assert.True(
+                error <= tolerance,
+                $"{SwapData[i].N} year(s) swap: estimated rate {estimatedRate}, expected rate {expectedRate}, error "
+                + $"{error}, tolerance {tolerance}");
+        }
+    }
+
     [Fact]
     public void TestCA365Futures()
     {
@@ -245,6 +399,65 @@ public class PiecewiseYieldCurveTests
     // 12 October 2017 (lines 1176-1180) is dropped: the curve is built under the second evaluation date (line 1183),
     // which re-dates its helpers, and has no previous curve to start from (a documented divergence). The handle linked
     // after the curve exists (lines 1185-1186) becomes the curve itself.
+    // Adapted: the check that discount(1.0) doesn't throw (line 1115) is the curve's construction, which bootstraps,
+    // and the discount.
+    [Fact]
+    public void TestSwapRateHelperLastRelevantDate()
+    {
+        // Testing SwapRateHelper last relevant date...
+
+        var today = new Date(22, December, 2016);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        YieldTermStructure flat3m = new FlatForward(today, 0.02, new Actual365Fixed());
+        IborIndex usdLibor3m = new USDLibor(new Period(3, TimeUnit.Months), flat3m);
+
+        // note that the calendar should be US+UK here actually, but technically it should also work with
+        // the US calendar only
+        RateHelper helper = new SwapRateHelper(
+            0.02,
+            new Period(50, TimeUnit.Years),
+            new UnitedStates(UnitedStatesMarket.GovernmentBond),
+            Frequency.Semiannual,
+            BusinessDayConvention.ModifiedFollowing,
+            new Thirty360(Thirty360Convention.BondBasis),
+            usdLibor3m,
+            context);
+
+        var curve = new PiecewiseYieldCurve<Discount, LogLinear, IterativeBootstrap>(
+            today, [helper], new Actual365Fixed(), context);
+        _ = curve.Discount(1.0);
+    }
+
+    // Adapted: the evaluation date set after the helper is built (line 1127), which re-dates it in QuantLib, is the
+    // context the helper is built under.
+    [Fact]
+    public void TestSwapRateHelperSpotDate()
+    {
+        // Testing SwapRateHelper spot date...
+
+        var context = new EvaluationContext { EvaluationDate = new Date(11, October, 2019) };
+
+        IborIndex usdLibor3m = new USDLibor(new Period(3, TimeUnit.Months));
+
+        var helper = new SwapRateHelper(
+            0.02,
+            new Period(5, TimeUnit.Years),
+            new UnitedStates(UnitedStatesMarket.GovernmentBond),
+            Frequency.Semiannual,
+            BusinessDayConvention.ModifiedFollowing,
+            new Thirty360(Thirty360Convention.BondBasis),
+            usdLibor3m,
+            context);
+
+        // Advancing 2 days on the US calendar would yield October 16th (because October 14th
+        // is Columbus day), but the LIBOR spot is calculated advancing on the UK calendar,
+        // resulting in October 15th which is also a business day for the US calendar.
+        var expected = new Date(15, October, 2019);
+        Date calculated = helper.Swap.StartDate();
+        Assert.True(calculated == expected, $"expected spot date: {expected}, calculated: {calculated}");
+    }
+
     [Fact]
     public void TestBadPreviousCurve()
     {
@@ -636,6 +849,198 @@ public class PiecewiseYieldCurveTests
         Assert.Equal(1, initialGuessCalls);
     }
 
+    // Adapted: the empty internal handles (line 1634) are the cycle's members, each created with the reference date
+    // and day counter of the curve it is linked to; the bootstrapped curves, which QuantLib builds and then adds (lines
+    // 1673-1681), are added with their arguments, and Build builds them, links both members and returns the curves
+    // QuantLib's adds return; the FRAs' forward rates are read from their results, and the swaps' engine (lines 1718,
+    // 1745, 1757) is a static call.
+    [Fact]
+    public void TestMultiCurveTwoPiecewiseYieldCurves()
+    {
+        // Testing multicurve bootstrap with two piecewise yield curves...
+
+        var vars = new CommonVars(new Date(23, October, 2025));
+
+        const double accuracy = 1E-10;
+
+        YieldTermStructure discountCurve = new FlatForward(vars.Settlement, 0.02, new Actual360());
+
+        var intcurve3m = new MultiCurveMember(vars.Today, new Actual360());
+        var intcurve6m = new MultiCurveMember(vars.Today, new Actual360());
+
+        var euribor3m = new Euribor3M(intcurve3m);
+        var euribor6m = new Euribor6M(intcurve6m);
+
+        var helpers3m = new List<RateHelper>();
+        var helpers6m = new List<RateHelper>();
+
+        Real q = 0.03;
+        Real b = 0.0020;
+
+        for (int i = 1; i <= 9; ++i)
+        {
+            helpers3m.Add(new FraRateHelper(
+                q,
+                i,
+                i + 3,
+                euribor3m.FixingDays,
+                euribor3m.FixingCalendar,
+                euribor3m.BusinessDayConvention,
+                euribor3m.EndOfMonth,
+                euribor3m.DayCounter,
+                vars.Context,
+                PillarChoice.LastRelevantDate));
+        }
+
+        for (int i = 2; i <= 10; ++i)
+        {
+            helpers3m.Add(new IborIborBasisSwapRateHelper(
+                b,
+                new Period(i, TimeUnit.Years),
+                euribor3m.FixingDays,
+                euribor3m.FixingCalendar,
+                euribor3m.BusinessDayConvention,
+                euribor3m.EndOfMonth,
+                euribor3m,
+                euribor6m,
+                discountCurve,
+                true,
+                vars.Context));
+        }
+
+        for (int i = 1; i <= 3; ++i)
+        {
+            helpers6m.Add(new IborIborBasisSwapRateHelper(
+                b,
+                new Period(i * 6, TimeUnit.Months),
+                euribor3m.FixingDays,
+                euribor3m.FixingCalendar,
+                euribor3m.BusinessDayConvention,
+                euribor3m.EndOfMonth,
+                euribor3m,
+                euribor6m,
+                discountCurve,
+                false,
+                vars.Context));
+        }
+
+        for (int i = 2; i <= 10; ++i)
+        {
+            helpers6m.Add(new SwapRateHelper(
+                q,
+                new Period(i, TimeUnit.Years),
+                euribor6m.FixingCalendar,
+                Frequency.Annual,
+                BusinessDayConvention.Following,
+                new Thirty360(Thirty360Convention.BondBasis),
+                euribor6m,
+                vars.Context,
+                fwdStart: new Period(0, TimeUnit.Days),
+                discountingCurve: discountCurve));
+        }
+
+        var curves = new MultiCurve(accuracy)
+            .AddBootstrappedCurve<Discount, LogLinear>(
+                intcurve3m,
+                vars.Today,
+                helpers3m,
+                new Actual360(),
+                i: default(LogLinear),
+                bootstrap: new GlobalBootstrap(accuracy))
+            .AddBootstrappedCurve<Discount, LogLinear>(
+                intcurve6m,
+                vars.Today,
+                helpers6m,
+                new Actual360(),
+                i: default(LogLinear),
+                bootstrap: new GlobalBootstrap(accuracy))
+            .Build(vars.Context);
+        YieldTermStructure curve3m = curves[0];
+
+        // check instrument npvs
+
+        const double tolerance = 1E-10;
+
+        for (int i = 1; i <= 9; ++i)
+        {
+            Date start = euribor3m.FixingCalendar.Advance(
+                euribor3m.FixingCalendar.Advance(vars.Today, euribor3m.FixingDays, TimeUnit.Days),
+                i,
+                TimeUnit.Months,
+                euribor3m.BusinessDayConvention,
+                euribor3m.EndOfMonth);
+            var fra = new ForwardRateAgreement(euribor3m, start, PositionType.Long, q, 1.0, curve3m);
+            CheckClose(fra.Calculate(vars.Context).ForwardRate!.Rate, q, tolerance);
+        }
+
+        for (int i = 2; i <= 10; ++i)
+        {
+            Date start = euribor3m.FixingCalendar.Advance(vars.Today, euribor3m.FixingDays, TimeUnit.Days);
+            Date maturity = euribor3m.FixingCalendar.Advance(
+                start, new Period(i, TimeUnit.Years), euribor3m.BusinessDayConvention);
+            CheckBasisSwapIsFair(vars, euribor3m, euribor6m, start, maturity, b, discountCurve, tolerance);
+        }
+
+        for (int i = 1; i <= 3; ++i)
+        {
+            Date start = euribor3m.FixingCalendar.Advance(vars.Today, euribor3m.FixingDays, TimeUnit.Days);
+            Date maturity = euribor3m.FixingCalendar.Advance(
+                start, new Period(i * 6, TimeUnit.Months), euribor3m.BusinessDayConvention);
+            CheckBasisSwapIsFair(vars, euribor3m, euribor6m, start, maturity, b, discountCurve, tolerance);
+        }
+
+        for (int i = 2; i <= 10; ++i)
+        {
+            VanillaSwap swap = new MakeVanillaSwap(new Period(i, TimeUnit.Years), euribor6m)
+                .WithFixedRate(q)
+                .WithSettlementDays(euribor6m.FixingDays)
+                .WithFixedLegDayCount(new Thirty360(Thirty360Convention.BondBasis))
+                .WithFixedLegTenor(new Period(1, TimeUnit.Years))
+                .WithFixedLegConvention(BusinessDayConvention.Following)
+                .WithFixedLegTerminationDateConvention(BusinessDayConvention.Following)
+                .ToVanillaSwap(vars.Context);
+            Real npv = DiscountingSwapEngine.Calculate(swap, vars.Context, discountCurve).NPV!.Value;
+            Assert.True(Math.Abs(npv) <= tolerance, $"swap {i}Y: NPV {npv:R} isn't within {tolerance:R} of 0");
+        }
+
+        // testMultiCurveTwoPiecewiseYieldCurves' basis swaps (lines 1699-1719, 1726-1746): the 3M leg plus the basis
+        // against the 6M leg, on schedules generated forwards, priced at zero.
+        static void CheckBasisSwapIsFair(
+            CommonVars vars,
+            IborIndex euribor3m,
+            IborIndex euribor6m,
+            Date start,
+            Date maturity,
+            Real b,
+            YieldTermStructure discountCurve,
+            double tolerance)
+        {
+            Schedule baseSchedule = new MakeSchedule()
+                .From(start)
+                .To(maturity)
+                .WithTenor(new Period(3, TimeUnit.Months))
+                .WithCalendar(euribor3m.FixingCalendar)
+                .WithConvention(euribor3m.BusinessDayConvention)
+                .EndOfMonth(euribor3m.EndOfMonth)
+                .Forwards()
+                .ToSchedule();
+            Schedule otherSchedule = new MakeSchedule()
+                .From(start)
+                .To(maturity)
+                .WithTenor(new Period(6, TimeUnit.Months))
+                .WithCalendar(euribor6m.FixingCalendar)
+                .WithConvention(euribor6m.BusinessDayConvention)
+                .EndOfMonth(euribor6m.EndOfMonth)
+                .Forwards()
+                .ToSchedule();
+            Leg baseLeg = new IborLeg(baseSchedule, euribor3m).WithSpreads(b).WithNotionals(1.0).ToLeg(vars.Context);
+            Leg otherLeg = new IborLeg(otherSchedule, euribor6m).WithNotionals(1.0).ToLeg(vars.Context);
+            var swap = new Swap(baseLeg, otherLeg);
+            Real npv = DiscountingSwapEngine.Calculate(swap, vars.Context, discountCurve).NPV!.Value;
+            Assert.True(Math.Abs(npv) <= tolerance, $"basis swap to {maturity}: NPV {npv:R} isn't within {tolerance:R} of 0");
+        }
+    }
+
     // Adapted: the empty internal handles (lines 1771-1772) are the cycle's members, each created with the reference
     // date and day counter of the curve it is linked to; the bootstrapped curve, which QuantLib builds and then adds
     // (lines 1791-1793), is added with its arguments, and Build builds it, links both members and returns the two
@@ -978,6 +1383,57 @@ public class PiecewiseYieldCurveTests
 
     // Adapted: the fixings added to the index (lines 2297-2299) are held by the case's context; the index rebuilt on
     // the curve's handle (line 2321) is built on the curve.
+    // Adapted: the curve's handle (line 2250) is the curve, the index built on it; the FRAs' forward rates are read
+    // from their results.
+    [Fact]
+    public void TestFraForDates()
+    {
+        // Testing FraRateHelper with custom dates...
+
+        var vars = new CommonVars();
+
+        var helpers = new List<RateHelper>();
+        var euribor6m = new Euribor6M();
+        for (int i = 0; i < vars.Fras; i++)
+        {
+            Rate r = vars.FraRates[i];
+            Date startDate = vars.Calendar.Advance(
+                vars.Settlement, FraData[i].N, FraData[i].Units, euribor6m.BusinessDayConvention, euribor6m.EndOfMonth);
+            Date endDate = vars.Calendar.Advance(
+                vars.Settlement,
+                FraData[i].N + 3,
+                FraData[i].Units,
+                euribor6m.BusinessDayConvention,
+                euribor6m.EndOfMonth);
+            helpers.Add(new FraRateHelper(r, startDate, endDate, euribor6m, PillarChoice.LastRelevantDate, null, false));
+        }
+
+        YieldTermStructure curve = new PiecewiseYieldCurve<ZeroYield, Linear, IterativeBootstrap>(
+            vars.Settlement, helpers, new Actual365Fixed(), vars.Context);
+        euribor6m = new Euribor6M(curve);
+
+        const double tolerance = 1.0e-9;
+        for (int i = 0; i < vars.Fras; i++)
+        {
+            Date start = vars.Calendar.Advance(
+                vars.Settlement, FraData[i].N, FraData[i].Units, euribor6m.BusinessDayConvention, euribor6m.EndOfMonth);
+            Date end = vars.Calendar.Advance(
+                vars.Settlement,
+                FraData[i].N + 3,
+                FraData[i].Units,
+                euribor6m.BusinessDayConvention,
+                euribor6m.EndOfMonth);
+            Assert.Equal(TimeUnit.Months, FraData[i].Units);
+
+            var fra = new ForwardRateAgreement(euribor6m, start, end, PositionType.Long, FraData[i].Rate / 100, 100.0);
+            Rate expectedRate = FraData[i].Rate / 100, estimatedRate = fra.Calculate(vars.Context).ForwardRate!.Rate;
+            Assert.True(
+                Math.Abs(expectedRate - estimatedRate) <= tolerance,
+                $"{NanoQL.Utilities.DataFormattersFunctions.Ordinal(i + 1)} FRA failure: estimated rate {estimatedRate}, "
+                + $"expected rate {expectedRate}");
+        }
+    }
+
     [Fact]
     public void TestDatedSwapHelpers()
     {
@@ -1145,7 +1601,6 @@ public class PiecewiseYieldCurveTests
         }
     }
 
-    // Adapted: the BMA helper's check (lines 2459-2470) is on the partial line: its calendar joins USDLibor's.
     [Fact]
     public void TestHelperDatesFromNonBusinessEvaluationDate()
     {
@@ -1184,6 +1639,61 @@ public class PiecewiseYieldCurveTests
             fra.EarliestDate == expectedFraStart,
             $"FRA helper earliest date not calculated from the actual evaluation date:\n    expected: "
             + $"{expectedFraStart}\n    obtained: {fra.EarliestDate}");
+
+        Calendar bmaCalendar = new JointCalendar(
+            new BMAIndex().FixingCalendar, new USDLibor(new Period(3, TimeUnit.Months)).FixingCalendar);
+        var bmaHelper = new BMASwapRateHelper(
+            0.75,
+            new Period(5, TimeUnit.Years),
+            3,
+            bmaCalendar,
+            new Period(Frequency.Quarterly),
+            BusinessDayConvention.Following,
+            new Actual360(),
+            new BMAIndex(),
+            new USDLibor(new Period(3, TimeUnit.Months)),
+            context);
+        Date expectedBmaStart = bmaCalendar.Advance(today, 3, TimeUnit.Days, BusinessDayConvention.Following);
+        Assert.True(
+            bmaHelper.EarliestDate == expectedBmaStart,
+            $"BMA helper earliest date not calculated from the actual evaluation date:\n    expected: "
+            + $"{expectedBmaStart}\n    obtained: {bmaHelper.EarliestDate}");
+    }
+
+    // Adapted: the evaluation date moved a month on (line 2493), which re-dates QuantLib's helper and rebuilds its
+    // swap, is a second helper built under that date.
+    [Fact]
+    public void TestBmaHelperSwap()
+    {
+        // Testing the swap underlying a BMA swap-rate helper...
+
+        var today = new Date(15, January, 2024);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Calendar bmaCalendar = new JointCalendar(
+            new BMAIndex().FixingCalendar, new USDLibor(new Period(3, TimeUnit.Months)).FixingCalendar);
+        var bmaIndex = new BMAIndex();
+        BMASwapRateHelper Helper(EvaluationContext on) => new(
+            0.75,
+            new Period(5, TimeUnit.Years),
+            2,
+            bmaCalendar,
+            new Period(Frequency.Quarterly),
+            BusinessDayConvention.Following,
+            new Actual360(),
+            bmaIndex,
+            new USDLibor(new Period(3, TimeUnit.Months)),
+            on);
+        BMASwapRateHelper helper = Helper(context);
+
+        BMASwap swap = helper.Swap;
+        Assert.NotNull(swap);
+        Assert.Equal(helper.EarliestDate, swap.StartDate());
+        Assert.Equal(20, swap.BmaLeg.Length);
+
+        BMASwapRateHelper later = Helper(context with { EvaluationDate = bmaCalendar.Advance(today, new Period(1, TimeUnit.Months)) });
+        Assert.NotSame(swap, later.Swap);
+        Assert.Equal(later.EarliestDate, later.Swap.StartDate());
     }
 
     // testGlobalBootstrap's and testGlobalBootstrapPenalty's expected pillar dates.
@@ -1344,6 +1854,211 @@ public class PiecewiseYieldCurveTests
                 $"{NanoQL.Utilities.DataFormattersFunctions.Ordinal(i + 1)} bond failure:\n  estimated price: "
                 + $"{estimatedPrice}\n  expected price:  {expectedPrice}\n  error:           {error}");
         }
+
+        // check FRA, use indexed
+        bool useIndexedFra = true;
+
+        termStructure = new PiecewiseYieldCurve<TTraits, TInterpolator, IterativeBootstrap>(
+            vars.Settlement, vars.FraHelpers(useIndexedFra), new Actual360(), vars.Context, i: interpolator);
+        var euribor3m = new Euribor3M(termStructure);
+
+        for (int i = 0; i < vars.Fras; i++)
+        {
+            Date start = vars.Calendar.Advance(
+                vars.Settlement, FraData[i].N, FraData[i].Units, euribor3m.BusinessDayConvention, euribor3m.EndOfMonth);
+            Assert.Equal(TimeUnit.Months, FraData[i].Units);
+
+            var fra = new ForwardRateAgreement(
+                euribor3m, start, PositionType.Long, FraData[i].Rate / 100, 100.0, termStructure);
+            Rate expectedRate = FraData[i].Rate / 100, estimatedRate = fra.Calculate(vars.Context).ForwardRate!.Rate;
+            Assert.True(
+                Math.Abs(expectedRate - estimatedRate) <= tolerance,
+                $"{NanoQL.Utilities.DataFormattersFunctions.Ordinal(i + 1)} FRA (indexed) failure: estimated rate "
+                + $"{estimatedRate}, expected rate {expectedRate}");
+        }
+
+        // check FRA, don't use indexed
+        useIndexedFra = false;
+
+        termStructure = new PiecewiseYieldCurve<TTraits, TInterpolator, IterativeBootstrap>(
+            vars.Settlement, vars.FraHelpers(useIndexedFra), new Actual360(), vars.Context, i: interpolator);
+        euribor3m = new Euribor3M(termStructure);
+
+        for (int i = 0; i < vars.Fras; i++)
+        {
+            Date start = vars.Calendar.Advance(
+                vars.Settlement, FraData[i].N, FraData[i].Units, euribor3m.BusinessDayConvention, euribor3m.EndOfMonth);
+            Assert.Equal(TimeUnit.Months, FraData[i].Units);
+
+            Date end = vars.Calendar.Advance(
+                vars.Settlement, 3 + FraData[i].N, TimeUnit.Months, euribor3m.BusinessDayConvention, euribor3m.EndOfMonth);
+            var fra = new ForwardRateAgreement(
+                euribor3m, start, end, PositionType.Long, FraData[i].Rate / 100, 100.0, termStructure);
+            Rate expectedRate = FraData[i].Rate / 100, estimatedRate = fra.Calculate(vars.Context).ForwardRate!.Rate;
+            Assert.True(
+                Math.Abs(expectedRate - estimatedRate) <= tolerance,
+                $"{NanoQL.Utilities.DataFormattersFunctions.Ordinal(i + 1)} FRA (at par) failure: estimated rate "
+                + $"{estimatedRate}, expected rate {expectedRate}");
+        }
+
+        // check immFuts
+        termStructure = new PiecewiseYieldCurve<TTraits, TInterpolator, IterativeBootstrap>(
+            vars.Settlement, vars.ImmFutHelpers, new Actual360(), vars.Context, i: interpolator);
+        euribor3m = new Euribor3M(termStructure);
+
+        Date? immStart = null;
+        for (int i = 0; i < vars.ImmFuts; i++)
+        {
+            immStart = IMM.NextDate(vars.Context, immStart, false);
+
+            // if the fixing is before the evaluation date, we
+            // just jump forward by one future maturity
+            if (euribor3m.FixingDate(immStart.Value) < vars.Context.EvaluationDate)
+            {
+                immStart = IMM.NextDate(vars.Context, immStart, false);
+            }
+
+            var immFut = new ForwardRateAgreement(
+                euribor3m, immStart.Value, PositionType.Long, ImmFutData[i].Rate / 100, 100.0, termStructure);
+            Rate expectedRate = ImmFutData[i].Rate / 100, estimatedRate = immFut.Calculate(vars.Context).ForwardRate!.Rate;
+            Assert.True(
+                Math.Abs(expectedRate - estimatedRate) <= tolerance,
+                $"{NanoQL.Utilities.DataFormattersFunctions.Ordinal(i + 1)} IMM futures failure: estimated rate "
+                + $"{estimatedRate}, expected rate {expectedRate}");
+        }
+
+        // check asxFuts
+        termStructure = new PiecewiseYieldCurve<TTraits, TInterpolator, IterativeBootstrap>(
+            vars.Settlement, vars.AsxFutHelpers, new Actual360(), vars.Context, i: interpolator);
+        euribor3m = new Euribor3M(termStructure);
+
+        Date? asxStart = null;
+        for (int i = 0; i < vars.AsxFuts; i++)
+        {
+            asxStart = ASX.NextDate(vars.Context, asxStart, false);
+
+            // if the fixing is before the evaluation date, we
+            // just jump forward by one future maturity
+            if (euribor3m.FixingDate(asxStart.Value) < vars.Context.EvaluationDate)
+            {
+                asxStart = ASX.NextDate(vars.Context, asxStart, false);
+            }
+
+            if (euribor3m.FixingCalendar.IsHoliday(asxStart.Value))
+            {
+                continue;
+            }
+
+            var asxFut = new ForwardRateAgreement(
+                euribor3m, asxStart.Value, PositionType.Long, AsxFutData[i].Rate / 100, 100.0, termStructure);
+            Rate expectedRate = AsxFutData[i].Rate / 100, estimatedRate = asxFut.Calculate(vars.Context).ForwardRate!.Rate;
+            Assert.True(
+                Math.Abs(expectedRate - estimatedRate) <= tolerance,
+                $"{NanoQL.Utilities.DataFormattersFunctions.Ordinal(i + 1)} ASX futures failure: estimated rate "
+                + $"{estimatedRate}, expected rate {expectedRate}");
+        }
+
+        // end checks
+    }
+
+    // Adapted: the fixture's calendar, today and settlement, which QuantLib re-adjusts (lines 573-579), are the case's
+    // own, and the BMA index's last fixing (line 604) is in its context, built before the helpers; the curve's handle
+    // (lines 611-612) is the curve, the BMA index built on it; the swaps' engine (lines 641-642) is a static call on
+    // the Libor index's curve, and the fair Libor fraction is read from its results.
+    private static void TestBMACurveConsistency<TTraits, TInterpolator, TBootstrap>(
+        CommonVars vars, TInterpolator interpolator = default, Real tolerance = 1.0e-9)
+        where TTraits : struct, IYieldTraits
+        where TInterpolator : struct, IInterpolator
+        where TBootstrap : struct, IBootstrap
+    {
+        // re-adjust settlement
+        Calendar calendar = new JointCalendar(
+            new BMAIndex().FixingCalendar,
+            new USDLibor(new Period(3, TimeUnit.Months)).FixingCalendar,
+            JointCalendarRule.JoinHolidays);
+        Date today = calendar.Adjust(Date.TodaysDate());
+        Date settlement = calendar.Advance(today, vars.SettlementDays, TimeUnit.Days);
+
+        YieldTermStructure riskFreeCurve = new FlatForward(settlement, 0.04, new Actual360());
+
+        var bmaIndex = new BMAIndex();
+        var liborIndex = new USDLibor(new Period(3, TimeUnit.Months), riskFreeCurve);
+
+        int w = (int)today.Weekday;
+        Date lastWednesday = w >= 4 ? today - (w - 4) : today + (4 - w - 7);
+        Date lastFixing = bmaIndex.FixingCalendar.Adjust(lastWednesday);
+        var context = new EvaluationContext
+        {
+            EvaluationDate = today,
+            Fixings = IndexFixings.Empty.AddFixing(bmaIndex, lastFixing, 0.03),
+        };
+
+        var bmaHelpers = new List<RateHelper>();
+        for (int i = 0; i < vars.Bmas; ++i)
+        {
+            Real f = vars.Fractions[i];
+            bmaHelpers.Add(new BMASwapRateHelper(
+                f,
+                new Period(BmaData[i].N, BmaData[i].Units),
+                vars.SettlementDays,
+                calendar,
+                new Period(vars.BmaFrequency),
+                vars.BmaConvention,
+                vars.BmaDayCounter,
+                bmaIndex,
+                liborIndex,
+                context));
+        }
+
+        YieldTermStructure termStructure = new PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap>(
+            today, bmaHelpers, new Actual360(), context, i: interpolator);
+
+        // check BMA swaps
+        var bma = new BMAIndex(termStructure);
+        var libor3m = new USDLibor(new Period(3, TimeUnit.Months), riskFreeCurve);
+        for (int i = 0; i < vars.Bmas; i++)
+        {
+            var tenor = new Period(BmaData[i].N, BmaData[i].Units);
+
+            Schedule bmaSchedule = new MakeSchedule()
+                .From(settlement)
+                .To(settlement + tenor)
+                .WithFrequency(vars.BmaFrequency)
+                .WithCalendar(bma.FixingCalendar)
+                .WithConvention(vars.BmaConvention)
+                .Backwards()
+                .ToSchedule();
+            Schedule liborSchedule = new MakeSchedule()
+                .From(settlement)
+                .To(settlement + tenor)
+                .WithTenor(libor3m.Tenor)
+                .WithCalendar(libor3m.FixingCalendar)
+                .WithConvention(libor3m.BusinessDayConvention)
+                .EndOfMonth(libor3m.EndOfMonth)
+                .Backwards()
+                .ToSchedule();
+
+            var swap = new BMASwap(
+                SwapType.Payer,
+                100.0,
+                liborSchedule,
+                0.75,
+                0.0,
+                libor3m,
+                libor3m.DayCounter,
+                bmaSchedule,
+                bma,
+                vars.BmaDayCounter,
+                context);
+            BMASwapResults results = DiscountingSwapEngine.Calculate(swap, context, libor3m.ForwardingTermStructure!);
+
+            Real expectedFraction = BmaData[i].Rate / 100, estimatedFraction = results.FairLiborFraction!.Value;
+            Real error = Math.Abs(expectedFraction - estimatedFraction);
+            Assert.True(
+                error <= tolerance,
+                $"{BmaData[i].N} year(s) BMA swap: estimated libor fraction {estimatedFraction}, expected libor "
+                + $"fraction {expectedFraction}, error {error}, tolerance {tolerance}");
+        }
     }
 
     // testLiborFixing's checks, on a curve bootstrapped under the given context.
@@ -1431,11 +2146,17 @@ public class PiecewiseYieldCurveTests
             BondDayCounter = new ActualActual(ActualActualConvention.ISDA);
             BondConvention = BusinessDayConvention.Following;
             BondRedemption = 100.0;
+            BmaFrequency = Frequency.Quarterly;
+            BmaConvention = BusinessDayConvention.Following;
+            BmaDayCounter = new ActualActual(ActualActualConvention.ISDA);
 
             Deposits = DepositData.Length;
+            Fras = FraData.Length;
             ImmFuts = ImmFutData.Length;
+            AsxFuts = AsxFutData.Length;
             Swaps = SwapData.Length;
             Bonds = BondData.Length;
+            Bmas = BmaData.Length;
 
             // market elements
             Rates = new Rate[Deposits + Swaps];
@@ -1449,10 +2170,28 @@ public class PiecewiseYieldCurveTests
                 Rates[i + Deposits] = SwapData[i].Rate / 100;
             }
 
+            FraRates = new Rate[Fras];
+            for (int i = 0; i < Fras; i++)
+            {
+                FraRates[i] = FraData[i].Rate / 100;
+            }
+
             ImmFutPrices = new Real[ImmFuts];
             for (int i = 0; i < ImmFuts; i++)
             {
                 ImmFutPrices[i] = 100.0 - ImmFutData[i].Rate;
+            }
+
+            AsxFutPrices = new Real[AsxFuts];
+            for (int i = 0; i < AsxFuts; i++)
+            {
+                AsxFutPrices[i] = 100.0 - AsxFutData[i].Rate;
+            }
+
+            Fractions = new Real[Bmas];
+            for (int i = 0; i < Bmas; i++)
+            {
+                Fractions[i] = BmaData[i].Rate / 100;
             }
 
             // rate helpers
@@ -1476,6 +2215,42 @@ public class PiecewiseYieldCurveTests
                     FixedLegDayCounter,
                     euribor6m,
                     Context));
+            }
+
+            Date? immDate = null;
+            var euribor3m = new Euribor3M();
+            for (int i = 0; i < ImmFuts; i++)
+            {
+                Real r = ImmFutPrices[i];
+                immDate = IMM.NextDate(Context, immDate, false);
+
+                // if the fixing is before the evaluation date, we
+                // just jump forward by one future maturity
+                if (euribor3m.FixingDate(immDate.Value) < Context.EvaluationDate)
+                {
+                    immDate = IMM.NextDate(Context, immDate, false);
+                }
+
+                ImmFutHelpers.Add(new FuturesRateHelper(r, immDate.Value, euribor3m, 0.0, FuturesType.IMM));
+            }
+
+            Date? asxDate = null;
+            for (int i = 0; i < AsxFuts; i++)
+            {
+                Real r = AsxFutPrices[i];
+                asxDate = ASX.NextDate(Context, asxDate, false);
+
+                // if the fixing is before the evaluation date, we
+                // just jump forward by one future maturity
+                if (euribor3m.FixingDate(asxDate.Value) < Context.EvaluationDate)
+                {
+                    asxDate = ASX.NextDate(Context, asxDate, false);
+                }
+
+                if (euribor3m.FixingCalendar.IsBusinessDay(asxDate.Value))
+                {
+                    AsxFutHelpers.Add(new FuturesRateHelper(r, asxDate.Value, euribor3m, 0.0, FuturesType.ASX));
+                }
             }
 
             Schedules = new Schedule[Bonds];
@@ -1525,9 +2300,31 @@ public class PiecewiseYieldCurveTests
 
         public DayCounter FixedLegDayCounter { get; }
 
+        public Frequency BmaFrequency { get; }
+
+        public BusinessDayConvention BmaConvention { get; }
+
+        public DayCounter BmaDayCounter { get; }
+
         public int Deposits { get; }
 
+        public int Fras { get; }
+
         public int ImmFuts { get; }
+
+        public int AsxFuts { get; }
+
+        public int Bmas { get; }
+
+        public Rate[] FraRates { get; }
+
+        public Real[] AsxFutPrices { get; }
+
+        public Real[] Fractions { get; }
+
+        public List<RateHelper> ImmFutHelpers { get; } = [];
+
+        public List<RateHelper> AsxFutHelpers { get; } = [];
 
         public int Swaps { get; }
 
@@ -1550,5 +2347,31 @@ public class PiecewiseYieldCurveTests
         public Schedule[] Schedules { get; }
 
         public List<RateHelper> BondHelpers { get; } = [];
+
+        // Adapted: the helpers take the fixture's context.
+        public List<RateHelper> FraHelpers(bool useIndexedFra)
+        {
+            var helpers = new List<RateHelper>(Fras);
+            var euribor3m = new Euribor3M();
+            for (int i = 0; i < Fras; i++)
+            {
+                Rate r = FraRates[i];
+                helpers.Add(new FraRateHelper(
+                    r,
+                    FraData[i].N,
+                    FraData[i].N + 3,
+                    euribor3m.FixingDays,
+                    euribor3m.FixingCalendar,
+                    euribor3m.BusinessDayConvention,
+                    euribor3m.EndOfMonth,
+                    euribor3m.DayCounter,
+                    Context,
+                    PillarChoice.LastRelevantDate,
+                    null,
+                    useIndexedFra));
+            }
+
+            return helpers;
+        }
     }
 }

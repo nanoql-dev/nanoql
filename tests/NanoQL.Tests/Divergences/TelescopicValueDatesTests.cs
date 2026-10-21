@@ -3,6 +3,7 @@
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
@@ -121,6 +122,39 @@ public class TelescopicValueDatesTests
         Assert.StartsWith("Lockout period cannot be negative or exceed the number of fixing days.", e.Message, StringComparison.Ordinal);
 
         static Calendar cal(OvernightIndex index) => index.FixingCalendar;
+    }
+
+    [Fact]
+    public void TheBasisHelpersTelescopicCouponsListEveryDailyDate()
+    {
+        // QuantLib's own testOvernightIborAveragingAndTelescopicValueDates and
+        // testOvernightOvernightTelescopicValueDatesWithSimpleAveraging (test-suite/basisswapratehelpers.cpp:767,
+        // :920) assert that a helper's telescopic compounded coupon lists fewer value dates than the full schedule's;
+        // here it lists the same, and a simple-averaged one, which the flag leaves alone in QuantLib too, the same.
+        var context = new EvaluationContext { EvaluationDate = T0 };
+        Calendar calendar = new UnitedStates(UnitedStatesMarket.GovernmentBond);
+        var curve = new FlatForward(T0, 0.01, new Actual365Fixed());
+        var sofr = new Sofr(curve);
+        var libor = new USDLibor(new Period(3, TimeUnit.Months), curve);
+
+        OvernightIndexedCoupon OvernightIbor(RateAveragingType averaging, bool telescopic) =>
+            (OvernightIndexedCoupon)new OvernightIborBasisSwapRateHelper(
+                0.0010, new Period(2, TimeUnit.Years), 2, calendar, BusinessDayConvention.Following, false, sofr, libor,
+                context, curve, false, 0, Frequency.Annual, null, DateGenerationRule.Backward, averaging, telescopic)
+                .Swap.Leg(0)[0];
+        OvernightIndexedCoupon OvernightOvernight(bool telescopic) =>
+            (OvernightIndexedCoupon)new OvernightOvernightBasisSwapRateHelper(
+                0.0010, new Period(1, TimeUnit.Years), 2, calendar, BusinessDayConvention.Following, false,
+                new FedFunds(curve), new Sofr(), context, null, false, 0, Frequency.Annual, RateAveragingType.Simple,
+                RateAveragingType.Compound, telescopic).Swap.Leg(1)[0];
+
+        Assert.Equal(
+            OvernightIbor(RateAveragingType.Compound, false).ValueDates(),
+            OvernightIbor(RateAveragingType.Compound, true).ValueDates());
+        Assert.Equal(
+            OvernightIbor(RateAveragingType.Simple, false).ValueDates(),
+            OvernightIbor(RateAveragingType.Simple, true).ValueDates());
+        Assert.Equal(OvernightOvernight(false).ValueDates(), OvernightOvernight(true).ValueDates());
     }
 
     [Fact]
