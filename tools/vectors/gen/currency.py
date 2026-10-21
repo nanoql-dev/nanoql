@@ -2,10 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's Currency (ql/currency.hpp): 20 bespoke currencies built with the eight-argument constructor,
 among them currencies with and without a triangulation currency, with empty symbols, with non-ASCII symbols, and
-two with USD's name, one with USD's code and one with another, which compare equal. Each currency gives its name,
-code, numeric code, symbol, fraction symbol and fractions per unit; its rounding applied to five values; its
-triangulation currency's emptiness and code (null when it is empty); its own emptiness; and its == and != against each
-of the 20 currencies, in file order, and against the empty currency.
+two with USD's name, one with USD's code and one with another. Each currency gives its name, code, numeric code,
+symbol, fraction symbol and fractions per unit; its rounding applied to five values; its triangulation currency's
+emptiness and code (null when it is empty); its own emptiness; and its == and != against each of the 20 currencies,
+in file order, and against the empty currency.
+
+Left out: the == and != between two currencies with one name and two codes, which QuantLib's name equality calls
+equal and nanoql's equality, by name and code, unequal (Divergences/CurrencyNameAndCodeTests.cs); each list skips
+them, as the test does.
 
 Each case's inputs are "currency", the constructor's arguments by the accessors' names: the rounding is null for
 Rounding() or {"precision", "type", "digit"}, the type as Rounding::Type's integer, and the triangulation currency is
@@ -71,6 +75,11 @@ def make_rounding(spec):
     return KINDS[spec["type"]](spec["precision"], spec["digit"])
 
 
+def apart(c, o):
+    """Whether nanoql tells apart two currencies QuantLib's == calls equal: one name, two codes."""
+    return c.name() == o.name() and c.code() != o.code()
+
+
 def cases():
     st = v.settings(ql.Date(15, ql.October, 2026))
     built = []
@@ -98,8 +107,8 @@ def cases():
             "triangulationCurrencyEmpty": t.empty(),
             "triangulationCurrency": None if t.empty() else t.code(),
             "empty": c.empty(),
-            "equals": [c == o for o in built],
-            "notEquals": [c != o for o in built],
+            "equals": [c == o for o in built if not apart(c, o)],
+            "notEquals": [c != o for o in built if not apart(c, o)],
             "equalsEmpty": c == empty,
             "notEqualsEmpty": c != empty}})
     return out

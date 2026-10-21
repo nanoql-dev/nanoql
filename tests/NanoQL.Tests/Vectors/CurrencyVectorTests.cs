@@ -10,7 +10,9 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The currency vectors, <c>tests/vectors/currency.json</c>: 20 bespoke <see cref="Currency"/> instances built from
 /// eight arguments, each giving its accessors, its rounding applied to five values, its triangulation currency, and
-/// its <c>==</c> and <c>!=</c> against each of the others and against QuantLib's empty currency, a null.
+/// its <c>==</c> and <c>!=</c> against each of the others and against QuantLib's empty currency, a null. The
+/// comparisons between two currencies with one name and two codes are left out of the vectors, which QuantLib's name
+/// equality calls equal (<c>Divergences/CurrencyNameAndCodeTests.cs</c>), and skipped here alike.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class CurrencyVectorTests
@@ -40,6 +42,7 @@ public class CurrencyVectorTests
         foreach (VectorCase c in file.Cases)
         {
             Currency currency = built[c.Index];
+            Currency[] compared = [.. built.Where(o => !(o.Name == currency.Name && o.Code != currency.Code))];
             check.Output(c, "name", currency.Name);
             check.Output(c, "code", currency.Code);
             check.Output(c, "numericCode", currency.NumericCode);
@@ -50,8 +53,8 @@ public class CurrencyVectorTests
             check.Output(c, "triangulationCurrencyEmpty", currency.TriangulationCurrency is null);
             check.Output(c, "triangulationCurrency", currency.TriangulationCurrency?.Code);
             check.Output(c, "empty", currency is null);
-            check.Output(c, "equals", built.Select(o => (object?)(currency == o)));
-            check.Output(c, "notEquals", built.Select(o => (object?)(currency != o)));
+            check.Output(c, "equals", compared.Select(o => (object?)(currency == o)));
+            check.Output(c, "notEquals", compared.Select(o => (object?)(currency != o)));
             check.Output(c, "equalsEmpty", currency == empty);
             check.Output(c, "notEqualsEmpty", currency != empty);
         }

@@ -58,24 +58,28 @@ In this order:
 | S-eq | Equity: European and American vanilla options; the Black-Scholes processes; the analytic European, analytic Heston and finite-difference Black-Scholes engines; Heston calibration; variance swaps by replication; constant, surface and local volatility; the finite-difference core. It settles the state of finite differences. 81 units, 9,567 code lines. |
 | S-rx | FRA, basis and cross-currency swaps, and FX: `ForwardRateAgreement`; `FloatFloatSwap` and the basis-swap rate helpers; the constant-notional and mark-to-market cross-currency swaps, their engines and rate helpers; exchange rates and `Money`, with `context.ExchangeRates` and `context.MoneySettings`; `FxForward` and its engine; barrier options with the analytic, finite-difference and Vanna-Volga engines; SVI smiles; the Black delta calculator and delta-volatility quotes. 34 units, 7,190 code lines, 11 of them experimental. |
 | S-fx | Merged into S-rx. |
-| S-bind | Bindings, at the end of batch 1: a language-neutral C interface over Native AOT's exports, with a generated C header, opaque handles released by the caller, and error codes with a last-error message; then a generated Python wrapper over that header, and one Windows x64 wheel that builds a curve and prices a swap from Python. It ports no QuantLib units. Its header and wheel are rebuilt and tested at milestones, the preview and the release, rather than in each slot. |
-| S-xl | The Excel add-in, after S-bind: Excel-DNA on `net10.0-windows`; curve and swap functions from Excel; immutable objects behind handles keyed by their inputs; export of a cell's call in the vector format; debugging by stepping from Excel into nanoql's source. It ports no QuantLib units. Its functions are rebuilt and tested at milestones, as the bindings are. |
 
 ## Later batches
 
 | Batch | Content |
 |---:|---|
 | 2 | Conventions breadth: the remaining calendars, day counters and currencies; the Ibor, overnight, swap and inflation indexes. |
-| S-conv | Conventions as data: XML round-tripping of convention values, a resolver, and QuantLib's presets as generated XML records checked against the coded ones. It ports no QuantLib units, and starts the extensions layer. |
-| S-qlnet | QLNet's additions: mortgage-backed securities with prepayment, and accounting amortised cost, checked against QLNet with QLNet's notices kept. |
 | 3 | Rates and bonds beyond vanilla: short-rate models with their tree, finite-difference and Gaussian1d engines; Bermudan swaptions; CMS, digital and range-accrual coupons; inflation caps, floors and year-on-year swaps; the remaining yield-curve and volatility structures. |
 | 4 | Equity and FX beyond vanilla: Asian, barrier, basket, cliquet, lookback, compound, chooser and quanto options; the remaining vanilla engines; Bates and the other equity models. |
 | 5 | The LIBOR market-model framework. |
 | 6 | Core remainder: what no product above reaches, mostly the rest of the finite-difference framework, optimisers, random-number generators, interpolations, matrix utilities, quotes and copulas. |
+| S-conv | Conventions as data: XML round-tripping of convention values, a resolver, and QuantLib's presets as generated XML records checked against the coded ones. It ports no QuantLib units, and starts the extensions layer. |
+| S-qlnet | QLNet's additions: mortgage-backed securities with prepayment, and accounting amortised cost, checked against QLNet with QLNet's notices kept. |
 | 7 | Experimental remainder: credit portfolios and CDOs, experimental maths, commodities, volatility models, barrier engines, finite differences and inflation. Marked `[Experimental]`. |
 
-After batch 6 (and batch 7 if it is ready): the documentation, with a validation report per module, and the v0.1
-release. From the end of batch 1, private preview builds carry a pre-release version, `0.1.0-preview.<n>`.
+After batch 6 (and batch 7 if it is ready), the release steps, which port nothing. Nothing ships before v0.1, the first
+public release.
+
+| Step | Content |
+|---|---|
+| S-bind | Bindings: a language-neutral C interface over Native AOT's exports, with a generated C header, opaque handles released by the caller, and error codes with a last-error message; then wrappers generated over that header, each with its package and running the vector suite. v0.1 ships four bindings: Python, the C header, C++, and Java through Java's Foreign Function & Memory API (JDK 22 or later, no JNI). It builds the bindings once, over v0.1's whole API, after S-conv. |
+| S-xl | The Excel add-in, after S-bind: Excel-DNA on `net10.0-windows`; curve and swap functions from Excel; immutable objects behind handles keyed by their inputs; export of a cell's call in the vector format; debugging by stepping from Excel into nanoql's source. |
+| Release | The documentation, with a validation report per module, and the v0.1 release. |
 
 ## Partial ports
 

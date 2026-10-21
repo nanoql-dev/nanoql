@@ -6,6 +6,7 @@
 // Upstream: ql/settings.hpp ql/settings.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
+using NanoQL.Currencies;
 using NanoQL.Indexes;
 using NanoQL.Time;
 
@@ -25,15 +26,18 @@ namespace NanoQL;
 /// compiling and running.
 /// </para>
 /// <para>
-/// Equality is the record's: field by field. <see cref="Fixings"/> compares by content, since
-/// <see cref="IndexFixings"/> defines value equality, so two contexts holding the same fixings are equal however their
-/// stores were built.
+/// Equality is the record's: field by field. <see cref="Fixings"/> and <see cref="ExchangeRates"/> compare by content,
+/// since <see cref="IndexFixings"/> and <see cref="Currencies.ExchangeRates"/> define value equality, so two contexts
+/// holding the same fixings and rates are equal however their stores were built; <see cref="MoneySettings"/> is a
+/// record.
 /// </para>
 /// </remarks>
 public sealed record EvaluationContext
 {
     private readonly Date evaluationDate;
     private readonly IndexFixings fixings = IndexFixings.Empty;
+    private readonly ExchangeRates exchangeRates = Currencies.ExchangeRates.Default;
+    private readonly MoneySettings moneySettings = new();
 
     /// <summary>Gets the evaluation date; required.</summary>
     /// <exception cref="ArgumentException">Set to <c>default(Date)</c>, which is not a valid date.</exception>
@@ -81,4 +85,27 @@ public sealed record EvaluationContext
     /// the choice it was built with.
     /// </summary>
     public bool UseAtParCoupons { get; init; } = true;
+
+    /// <summary>
+    /// Gets the exchange-rate registry, QuantLib's <c>ExchangeRateManager</c>; by default
+    /// <see cref="Currencies.ExchangeRates.Default"/>, QuantLib's known rates alone. <see cref="Money"/>'s conversions
+    /// read it.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Set to <see langword="null"/>.</exception>
+    public ExchangeRates ExchangeRates
+    {
+        get => exchangeRates;
+        init => exchangeRates = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    /// <summary>
+    /// Gets the settings that say how <see cref="Money"/> amounts in different currencies combine, QuantLib's
+    /// <c>Money::Settings</c>; by default QuantLib's, no conversion and no base currency.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Set to <see langword="null"/>.</exception>
+    public MoneySettings MoneySettings
+    {
+        get => moneySettings;
+        init => moneySettings = value ?? throw new ArgumentNullException(nameof(value));
+    }
 }

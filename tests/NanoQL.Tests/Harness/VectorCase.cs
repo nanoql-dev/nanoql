@@ -76,11 +76,13 @@ public sealed class VectorCase
 
     /// <summary>
     /// The evaluation context the case's generator set, from <c>inputs.settings</c>: the four settings, and, when the
-    /// case wrote them, the at-par switch (<c>useAtParCoupons</c>) and the stored fixings (<c>fixings</c>, as
+    /// case wrote them, the at-par switch (<c>useAtParCoupons</c>), the stored fixings (<c>fixings</c>, as
     /// <c>{name: [[serial, value], ...]}</c>), each history stored under its name through a
-    /// <see cref="VectorFixingIndex"/>. A value is encoded as the vectors encode reals: "NaN", "Infinity" and
-    /// "-Infinity" as strings, and QuantLib's <c>Null&lt;Real&gt;()</c> as <c>null</c>, which QuantLib reads as no fixing,
-    /// so that date stores none.
+    /// <see cref="VectorFixingIndex"/>, the exchange rates added after QuantLib's known ones (<c>exchangeRates</c>, as
+    /// <c>[{source, target, rate, startDate, endDate}, ...]</c>, the currencies by code and a null date QuantLib's
+    /// default), and the money settings (<c>moneySettings</c>, as <c>{conversionType, baseCurrency}</c>). A value is
+    /// encoded as the vectors encode reals: "NaN", "Infinity" and "-Infinity" as strings, and QuantLib's
+    /// <c>Null&lt;Real&gt;()</c> as <c>null</c>, which QuantLib reads as no fixing, so that date stores none.
     /// </summary>
     /// <returns>The context.</returns>
     public EvaluationContext Context()
@@ -114,13 +116,49 @@ public sealed class VectorCase
             context = context with { Fixings = store };
         }
 
+        if (s.TryGetProperty("exchangeRates", out JsonElement rates))
+        {
+            NanoQL.Currencies.ExchangeRates registry = NanoQL.Currencies.ExchangeRates.Default;
+            foreach (JsonElement r in rates.EnumerateArray())
+            {
+                var rate = new ExchangeRate(
+                    VectorCurrencies.ByCode(r.GetProperty("source").GetString()!),
+                    VectorCurrencies.ByCode(r.GetProperty("target").GetString()!),
+                    Real(r.GetProperty("rate")));
+                registry = registry.Add(rate, NullableDate(r.GetProperty("startDate")), NullableDate(r.GetProperty("endDate")));
+            }
+
+            context = context with { ExchangeRates = registry };
+        }
+
+        if (s.TryGetProperty("moneySettings", out JsonElement money))
+        {
+            JsonElement baseCurrency = money.GetProperty("baseCurrency");
+            context = context with
+            {
+                MoneySettings = new MoneySettings
+                {
+                    ConversionType = (MoneyConversionType)money.GetProperty("conversionType").GetInt32(),
+                    BaseCurrency = baseCurrency.ValueKind == JsonValueKind.Null
+                        ? null
+                        : VectorCurrencies.ByCode(baseCurrency.GetString()!),
+                },
+            };
+        }
+
         return context;
     }
+
+    /// <summary>A date written as its serial number, or <see langword="null"/>.</summary>
+    /// <param name="e">The JSON value.</param>
+    /// <returns>The date, or <see langword="null"/>.</returns>
+    private static NanoQL.Time.Date? NullableDate(JsonElement e) =>
+        e.ValueKind == JsonValueKind.Null ? null : new NanoQL.Time.Date(e.GetInt32());
 
     /// <summary>A real as the vectors encode it: a number, or "NaN", "Infinity" or "-Infinity".</summary>
     /// <param name="e">The JSON value.</param>
     /// <returns>The real.</returns>
-    private static double Real(JsonElement e) =>
+    internal static double Real(JsonElement e) =>
         e.ValueKind == JsonValueKind.String
             ? double.Parse(e.GetString()!, System.Globalization.CultureInfo.InvariantCulture)
             : e.GetDouble();

@@ -62,16 +62,22 @@ def enc(x):
 
 
 def settings(evaluation_date, include_reference_date_events=False, include_todays_cash_flows=None,
-             enforces_todays_historic_fixings=False, use_at_par_coupons=None, fixings=None):
+             enforces_todays_historic_fixings=False, use_at_par_coupons=None, fixings=None, exchange_rates=None,
+             money_settings=None):
     """Sets every Settings value QuantLib reads, and returns them as a case's inputs.settings.
 
     use_at_par_coupons, when given, sets the wheel's at-par switch (IborCoupon.createAtParCoupons() or
     createIndexedCoupons()); call settings() before building the case's legs, since QuantLib reads the switch when a
     leg's pricer is built. fixings, when given, is a list of (index, [(date, value), ...]) pairs: each is added through
     its index (index.addFixings), so QuantLib's checks run, and the stored histories are written as
-    {name: [[serial, value], ...]}, each name as QuantLib forms it, in the store's order. A key not given is not
-    written, so a case that sets neither writes the same bytes as before. Use case_settings() to restore both globals
-    after the case."""
+    {name: [[serial, value], ...]}, each name as QuantLib forms it, in the store's order. exchange_rates, when given, is
+    a list of (rate, start_date, end_date) triples, the dates None for QuantLib's defaults (Date::minDate(),
+    Date::maxDate()): the registry is cleared, back to QuantLib's known rates, and each is added in order, written as
+    "exchangeRates": [{"source", "target" (codes), "rate", "startDate", "endDate" (serials or null)}, ...].
+    money_settings, when given, is a (conversion type, base currency or None) pair, set on Money's settings and
+    written as "moneySettings": {"conversionType", "baseCurrency" (a code or null)}. A key not given is not written,
+    so a case that sets none of them writes the same bytes as before. Use case_settings() to restore the globals after
+    the case."""
     s = ql.Settings.instance()
     s.evaluationDate = evaluation_date
     s.includeReferenceDateEvents = include_reference_date_events
@@ -93,6 +99,23 @@ def settings(evaluation_date, include_reference_date_events=False, include_today
             index.addFixings([d for d, _ in pairs], [v for _, v in pairs])
             indexes.setdefault(name_key(index.name()), index)
         out["fixings"] = written_fixings(indexes)
+    if exchange_rates is not None:
+        manager = ql.ExchangeRateManager.instance()
+        manager.clear()
+        written = []
+        for rate, start, end in exchange_rates:
+            manager.add(rate, start if start is not None else ql.Date.minDate(),
+                        end if end is not None else ql.Date.maxDate())
+            written.append({"source": rate.source().code(), "target": rate.target().code(), "rate": enc(rate.rate()),
+                            "startDate": enc(start) if start is not None else None,
+                            "endDate": enc(end) if end is not None else None})
+        out["exchangeRates"] = written
+    if money_settings is not None:
+        conversion_type, base_currency = money_settings
+        ql.Money.setConversionType(conversion_type)
+        ql.Money.setBaseCurrency(base_currency if base_currency is not None else ql.Currency())
+        out["moneySettings"] = {"conversionType": int(conversion_type),
+                                "baseCurrency": base_currency.code() if base_currency is not None else None}
     return out
 
 
@@ -119,13 +142,17 @@ def written_fixings(indexes):
 
 @contextlib.contextmanager
 def case_settings(evaluation_date, **kw):
-    """settings(evaluation_date, **kw) for one case, restoring the at-par switch to QuantLib-Python's default (at par)
-    and clearing every stored fixing afterwards, whatever the case did."""
+    """settings(evaluation_date, **kw) for one case, restoring the at-par switch to QuantLib-Python's default (at par),
+    clearing every stored fixing and the exchange-rate registry, and restoring Money's settings to QuantLib's defaults
+    (no conversion, no base currency) afterwards, whatever the case did."""
     try:
         yield settings(evaluation_date, **kw)
     finally:
         ql.IborCoupon.createAtParCoupons()
         ql.IndexManager.instance().clearHistories()
+        ql.ExchangeRateManager.instance().clear()
+        ql.Money.setConversionType(ql.Money.NoConversion)
+        ql.Money.setBaseCurrency(ql.Currency())
 
 
 THROWS = {"throws": True}

@@ -509,6 +509,17 @@ Facts:
 - `ANotAKnotSplineOnTwoPointsIsRefused`
 - `ACubicCurveWithANotAKnotEndBuildsThroughTheFirstPassFallback`
 
+## CurrencyNameAndCodeTests
+
+[`Divergences/CurrencyNameAndCodeTests.cs`](../tests/NanoQL.Tests/Divergences/CurrencyNameAndCodeTests.cs)
+
+Two currencies with one name. QuantLib's `operator==` compares names alone (`currency.hpp:179-182`), and it names both BGL, the lev of 1962 (numeric code 100), and BGN, the lev of 1999 (975), "Bulgarian lev" (`europe.cpp:35`, `:389`): QuantLib takes them for one currency, so 1,000 BGL plus 1 BGN is 1,001 BGL, a EUR/BGN rate exchanges 1,000 BGL into 511.29 EUR, a lookup from BGL to BGN is 1.0 whatever the registry holds, and a forward from BGL to BGN is refused as one currency. nanoql compares currencies by name and code, so they are two; each expected value is QuantLib's own with BGL renamed apart ("Bulgarian lev (1962)"), its data otherwise QuantLib's. The exchange-rate registry tells currencies apart by QuantLib's numeric code and chains as QuantLib's `chain` does, so a currency equal to another with another numeric code is chained as QuantLib chains it.
+
+Facts:
+
+- `BglAndBgnAreTwoCurrencies`
+- `TheRegistryTellsCurrenciesApartByTheirNumericCodesAsQuantLibs`
+
 ## CurveRecalculationTests
 
 [`Divergences/CurveRecalculationTests.cs`](../tests/NanoQL.Tests/Divergences/CurveRecalculationTests.cs)
@@ -601,6 +612,27 @@ Facts:
 
 - `EachRateMovesOverItsOwnCurvesTime`
 - `CurvesSharingTheirTimesAreQuantLibs`
+
+## ExchangeRateChainRefusalTests
+
+[`Divergences/ExchangeRateChainRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/ExchangeRateChainRefusalTests.cs)
+
+Chaining two exchange rates over one pair of currencies. QuantLib's `ExchangeRate::chain` matches the rates' currencies in order (`exchangerate.cpp:57-73`), so EUR→USD at 1.1 with EUR→USD at 1.2 chains into USD→USD at 1.0909, which exchanges 100 USD into 109.09 USD. nanoql refuses two rates over one pair with QuantLib's own "exchange rates not chainable" (`:74`); rates over different pairs chain as QuantLib's.
+
+Facts:
+
+- `TwoRatesOverOnePairAreRefused`
+
+## ExchangeRateKeyTests
+
+[`Divergences/ExchangeRateKeyTests.cs`](../tests/NanoQL.Tests/Divergences/ExchangeRateKeyTests.cs)
+
+The exchange-rate registry's key for currencies coded 1,000 or more. QuantLib keys a pair by `min(code) × 1000 + max(code)` and finds a currency's pairs by the key's thousands and units (`exchangeratemanager.cpp:89-98`), so a currency coded 1,000 or more (QuantLib's crypto currencies, 10000 to 10007, or any currency of one's own) matches none of its pairs: with BTC/EUR and EUR/USD held, a lookup from BTC to USD throws "no conversion available" while the reverse chains, and no chain passes through BTC. nanoql keys a pair by its two currencies, in QuantLib's order, so both lookups chain, and chains pass through it.
+
+Facts:
+
+- `APairWithACodeOf10000IsLookedUpBothWays`
+- `AChainPassesThroughACodeOf10000`
 
 ## ExerciseBeforeReferenceDateTests
 
@@ -1349,6 +1381,17 @@ Facts:
 - `OisSettlementDaysOfIntMaxValueAreAValue`
 - `AFloatingRateBondsFixingDaysOfIntMaxValueAreAValue`
 - `ASwaptionHelpersSettlementDaysOfIntMaxValueAreAValue`
+
+## SharedNumericCodeTests
+
+[`Divergences/SharedNumericCodeTests.cs`](../tests/NanoQL.Tests/Divergences/SharedNumericCodeTests.cs)
+
+Two currencies sharing a numeric code in the exchange-rate registry. CNY and CNH both carry ISO 4217's 156 (`asia.cpp:44`, `:248`), and QuantLib keys a pair by the numeric codes (`exchangeratemanager.cpp:89-98`), so a USD/CNY rate and a USD/CNH rate share one entry list: with both held, a lookup of USD to CNY returns the USD/CNH rate added last (100 USD exchange into 715 CNH), and a USD/CNY rate answers a lookup of USD to CNH, shadowing a chain through EUR. nanoql keys a pair by its two currencies, so each lookup finds its own pair's rate, or chains.
+
+Facts:
+
+- `CnyAndCnhAreLookedUpApart`
+- `AUsdCnyRateNoLongerShadowsAChainForCnh`
 
 ## SharedPricerStateTests
 

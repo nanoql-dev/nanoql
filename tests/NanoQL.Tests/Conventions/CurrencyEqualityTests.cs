@@ -6,31 +6,40 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// <see cref="Currency"/> compares by name, ordinally, as QuantLib's <c>operator==</c> does
-/// (<c>currency.hpp:179-185</c>), and QuantLib's empty currency is a null: two nulls are equal, as two empty
-/// currencies are, and a null never equals a currency. Equal currencies hash equal.
+/// <see cref="Currency"/> compares by name and code, ordinally, and hashes by name; QuantLib's <c>operator==</c>
+/// compares names alone (<c>currency.hpp:179-185</c>), a documented divergence
+/// (<c>Divergences/CurrencyNameAndCodeTests.cs</c>). QuantLib's empty currency is a null: two nulls are equal, as two
+/// empty currencies are, and a null never equals a currency. Equal currencies hash equal.
 /// </summary>
 public class CurrencyEqualityTests
 {
     [Fact]
-    public void CurrenciesCompareByNameAndNullIsTheEmptyCurrency()
+    public void CurrenciesCompareByNameAndCodeAndNullIsTheEmptyCurrency()
     {
         var usd = new Currency("U.S. dollar", "USD", 840, "$", "¢", 100, new Rounding());
-        var other = new Currency("U.S. dollar", "XUS", 999, "US$", "c", 10, new ClosestRounding(2), usd, ["USc"]);
+        var other = new Currency("U.S. dollar", "USD", 999, "US$", "c", 10, new ClosestRounding(2), usd, ["USc"]);
+        var otherCode = new Currency("U.S. dollar", "XUS", 840, "$", "¢", 100, new Rounding());
         var lower = new Currency("u.s. dollar", "USD", 840, "$", "¢", 100, new Rounding());
+        var lowerCode = new Currency("U.S. dollar", "usd", 840, "$", "¢", 100, new Rounding());
         Currency? none = null, alsoNone = null;
 
-        // Another code, numeric code, symbols, rounding, triangulation and minor units, but the same name.
+        // Another numeric code, symbols, rounding, triangulation and minor units, but the same name and code.
         Assert.True(usd == other);
         Assert.False(usd != other);
         Assert.True(usd.Equals(other));
         Assert.True(usd.Equals((object)other));
         Assert.Equal(usd.GetHashCode(), other.GetHashCode());
 
-        // The name compares ordinally: case counts.
+        // The same name with another code (QuantLib: equal).
+        Assert.False(usd == otherCode);
+        Assert.True(usd != otherCode);
+        Assert.False(usd.Equals(otherCode));
+
+        // The name and the code compare ordinally: case counts.
         Assert.False(usd == lower);
         Assert.True(usd != lower);
         Assert.False(usd.Equals(lower));
+        Assert.False(usd == lowerCode);
 
         // Nulls.
         Assert.True(none == alsoNone);

@@ -522,4 +522,34 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, "unknown complex log formula");
         }
     }
+
+    /// <summary>Refuses a conversion type outside <see cref="MoneyConversionType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>
+    /// QuantLib reads any other value as no conversion, refusing a mismatch with "currency mismatch and no conversion
+    /// specified" (<c>money.cpp:62</c>, <c>:81</c>); the text names the value.
+    /// </remarks>
+    internal static void Check(MoneyConversionType value, string paramName)
+    {
+        if (value is < MoneyConversionType.NoConversion or > MoneyConversionType.AutomatedConversion)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown conversion type ({(int)value})");
+        }
+    }
+
+    /// <summary>Refuses an exchange-rate type outside <see cref="ExchangeRateType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's <c>ExchangeRate::exchange</c> fails "unknown exchange-rate type"
+    /// (<c>exchangerate.cpp:46</c>).</remarks>
+    internal static void Check(ExchangeRateType value, string paramName)
+    {
+        if (value is < ExchangeRateType.Direct or > ExchangeRateType.Derived)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown exchange-rate type");
+        }
+    }
 }

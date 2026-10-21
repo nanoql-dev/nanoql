@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 889 | 116 |
+| not started | 884 | 113 |
 | partial | 29 | 37 |
-| ported | 343 | 29 |
+| ported | 348 | 32 |
 | replaced | 20 | 6 |
 | total | 1,456 | 194 |
 
@@ -45,7 +45,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `discretizedasset` | ported | DiscretizedAsset/DiscretizedAsset.cs, DiscretizedAsset/DiscretizedDiscountBond.cs, DiscretizedAsset/DiscretizedOption.cs |  |
 | `errors` | replaced: ArgumentException and NanoQLException |  |  |
 | `event` | ported | Event.cs, SimpleEvent.cs |  |
-| `exchangerate` | not started |  | no nanoql type: ExchangeRate, ExchangeRateType |
+| `exchangerate` | ported | ExchangeRate.cs, ExchangeRateType.cs |  |
 | `exercise` | ported | Exercise/AmericanExercise.cs, Exercise/BermudanExercise.cs, Exercise/EarlyExercise.cs, Exercise/EuropeanExercise.cs, Exercise/Exercise.cs, Exercise/ExerciseType.cs |  |
 | `functional` | not ported: deprecated |  |  |
 | `grid` | not ported: deprecated |  |  |
@@ -54,7 +54,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `instrument` | ported | Instrument.cs, InstrumentResults.cs |  |
 | `interestrate` | ported | InterestRate.cs |  |
 | `mathconstants` | ported | MathConstants.cs |  |
-| `money` | not started |  | no nanoql type: Money, MoneyConversionType, MoneySettings |
+| `money` | ported | Money/CurrencyExtensions.cs, Money/Money.cs, Money/MoneyConversionType.cs, Money/MoneyFunctions.cs, Money/MoneySettings.cs |  |
 | `numericalmethod` | ported | Lattice.cs |  |
 | `option` | ported | Option.cs, OptionType.cs | replaced: Greeks by OneAssetOptionResults; MoreGreeks by OneAssetOptionResults |
 | `optional` | not ported: C++ platform header |  |  |
@@ -130,7 +130,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `asia` | ported | Currencies/Asia/AEDCurrency.cs, Currencies/Asia/BDTCurrency.cs, Currencies/Asia/BHDCurrency.cs, Currencies/Asia/CNHCurrency.cs, Currencies/Asia/CNYCurrency.cs, Currencies/Asia/HKDCurrency.cs, Currencies/Asia/IDRCurrency.cs, Currencies/Asia/ILSCurrency.cs, Currencies/Asia/INRCurrency.cs, Currencies/Asia/IQDCurrency.cs, Currencies/Asia/IRRCurrency.cs, Currencies/Asia/JODCurrency.cs, Currencies/Asia/JPYCurrency.cs, Currencies/Asia/KRWCurrency.cs, Currencies/Asia/KWDCurrency.cs, Currencies/Asia/KZTCurrency.cs, Currencies/Asia/LKRCurrency.cs, Currencies/Asia/MYRCurrency.cs, Currencies/Asia/NPRCurrency.cs, Currencies/Asia/OMRCurrency.cs, Currencies/Asia/PHPCurrency.cs, Currencies/Asia/PKRCurrency.cs, Currencies/Asia/QARCurrency.cs, Currencies/Asia/SARCurrency.cs, Currencies/Asia/SGDCurrency.cs, Currencies/Asia/THBCurrency.cs, Currencies/Asia/TWDCurrency.cs, Currencies/Asia/UZSCurrency.cs, Currencies/Asia/VNDCurrency.cs |  |
 | `crypto` | not started |  | no nanoql type: BTCCurrency, ETHCurrency, ETCCurrency, BCHCurrency, XRPCurrency, LTCCurrency, DASHCurrency, ZECCurrency |
 | `europe` | ported | Currencies/Europe/ATSCurrency.cs, Currencies/Europe/BEFCurrency.cs, Currencies/Europe/BGLCurrency.cs, Currencies/Europe/BGNCurrency.cs, Currencies/Europe/BYRCurrency.cs, Currencies/Europe/CHFCurrency.cs, Currencies/Europe/CYPCurrency.cs, Currencies/Europe/CZKCurrency.cs, Currencies/Europe/DEMCurrency.cs, Currencies/Europe/DKKCurrency.cs, Currencies/Europe/EEKCurrency.cs, Currencies/Europe/ESPCurrency.cs, Currencies/Europe/EURCurrency.cs, Currencies/Europe/FIMCurrency.cs, Currencies/Europe/FRFCurrency.cs, Currencies/Europe/GBPCurrency.cs, Currencies/Europe/GELCurrency.cs, Currencies/Europe/GRDCurrency.cs, Currencies/Europe/HRKCurrency.cs, Currencies/Europe/HUFCurrency.cs, Currencies/Europe/IEPCurrency.cs, Currencies/Europe/ISKCurrency.cs, Currencies/Europe/ITLCurrency.cs, Currencies/Europe/LTLCurrency.cs, Currencies/Europe/LUFCurrency.cs, Currencies/Europe/LVLCurrency.cs, Currencies/Europe/MKDCurrency.cs, Currencies/Europe/MTLCurrency.cs, Currencies/Europe/NLGCurrency.cs, Currencies/Europe/NOKCurrency.cs, Currencies/Europe/PLNCurrency.cs, Currencies/Europe/PTECurrency.cs, Currencies/Europe/ROLCurrency.cs, Currencies/Europe/RONCurrency.cs, Currencies/Europe/RSDCurrency.cs, Currencies/Europe/RUBCurrency.cs, Currencies/Europe/SEKCurrency.cs, Currencies/Europe/SITCurrency.cs, Currencies/Europe/SKKCurrency.cs, Currencies/Europe/TRLCurrency.cs, Currencies/Europe/TRYCurrency.cs, Currencies/Europe/UAHCurrency.cs |  |
-| `exchangeratemanager` | not started |  | no nanoql type: ExchangeRateManager, ExchangeRateManagerEntry |
+| `exchangeratemanager` | ported | Currencies/ExchangeRates.cs | no nanoql type: ExchangeRateManagerEntry |
 | `oceania` | ported | Currencies/Oceania/AUDCurrency.cs, Currencies/Oceania/NZDCurrency.cs |  |
 
 ### `ql/experimental/`
@@ -653,7 +653,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `forwardrateagreement` | not started |  | no nanoql type: ForwardRateAgreement |
 | `forwardvanillaoption` | not started |  | no nanoql type: ForwardOptionArguments, ForwardVanillaOption |
 | `futures` | ported | Instruments/FuturesType.cs |  |
-| `fxforward` | not started |  | no nanoql type: FxForward, FxForwardResults |
+| `fxforward` | ported | Instruments/FxForward.cs, Instruments/FxForwardResults.cs |  |
 | `holderextensibleoption` | not started |  | no nanoql type: HolderExtensibleOption |
 | `impliedvolatility` | ported | Instruments/ImpliedVolatilityHelper.cs |  |
 | `inflationcapfloor` | ported | Instruments/InflationCapFloor/InflationCapFloorFunctions.cs, Instruments/InflationCapFloor/YoYInflationCap.cs, Instruments/InflationCapFloor/YoYInflationCapFloor.cs, Instruments/InflationCapFloor/YoYInflationCapFloorArguments.cs, Instruments/InflationCapFloor/YoYInflationCapFloorType.cs, Instruments/InflationCapFloor/YoYInflationCollar.cs, Instruments/InflationCapFloor/YoYInflationFloor.cs |  |
@@ -1594,7 +1594,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `discountingfxforwardengine` | not started |  | no nanoql type: DiscountingFxForwardEngine |
+| `discountingfxforwardengine` | ported | PricingEngines/Forward/DiscountingFxForwardEngine.cs |  |
 | `forwardengine` | not started |  | no nanoql type: ForwardVanillaEngine |
 | `forwardperformanceengine` | not started |  | no nanoql type: ForwardPerformanceVanillaEngine |
 | `mcforwardeuropeanbsengine` | not started |  | no nanoql type: MCForwardEuropeanBSEngine, MakeMCForwardEuropeanBSEngine, ForwardEuropeanBSPathPricer |
@@ -2123,7 +2123,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `equitytotalreturnswap` | not started |  | 5 cases |
 | `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 22 of 27 cases; not yet: testIntegralEngines, testMcEngines, testQmcEngines, testFFTEngines, testFdEnginesWithNonStrikedPayoff |
 | `everestoption` | not started |  | 1 cases |
-| `exchangerate` | not started |  | 5 cases |
+| `exchangerate` | ported | TestSuite/ExchangeRateTests.cs | 5 of 5 cases |
 | `extendedblackvariancesurface` | not started |  | 1 cases |
 | `extendedtrees` | not started |  | 7 cases |
 | `extensibleoptions` | not started |  | 2 cases |
@@ -2138,7 +2138,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `forwardoption` | not started |  | 8 cases |
 | `forwardrateagreement` | not started |  | 1 cases |
 | `functions` | ported | TestSuite/FunctionsTests.cs | 9 of 9 cases |
-| `fxforward` | not started |  | 13 cases |
+| `fxforward` | ported | TestSuite/FxForwardTests.cs | 13 of 13 cases |
 | `g2process` | not started |  | 8 cases |
 | `garch` | not started |  | 2 cases |
 | `gaussianquadratures` | partial | TestSuite/GaussianQuadraturesTests.cs | 8 of 12 cases; not yet: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial, testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes |
@@ -2179,7 +2179,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `matrices` | partial | TestSuite/MatricesTests.cs | 6 of 20 cases; not yet: testEigenvectors, testSqrt, testHighamSqrt, testSVD, testQRDecomposition, testQRSolve, testOrthogonalProjection, testCholeskyDecomposition, testMoorePenroseInverse, testPrincipalMatrixSqrt, testCholeskySolverFor, testCholeskySolverForIncomplete, testHouseholderTransformation, testHouseholderReflection; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
 | `mclongstaffschwartzengine` | not started |  | 2 cases |
 | `mersennetwister` | ported | TestSuite/MersenneTwisterTests.cs | 1 of 1 cases |
-| `money` | not started |  | 4 cases |
+| `money` | ported | TestSuite/MoneyTests.cs | 4 of 4 cases |
 | `mtmcrosscurrencybasisswap` | not started |  | 15 cases |
 | `multipleresetscoupons` | not started |  | 5 cases |
 | `multipleresetsswap` | not started |  | 8 cases |

@@ -20,9 +20,11 @@ namespace NanoQL;
 /// QuantLib's empty <c>Currency()</c>, a placeholder whose members throw, is a <c>Currency?</c> null.
 /// </para>
 /// <para>
-/// Two currencies are equal when their names are, compared ordinally, as QuantLib's <c>operator==</c> compares them:
-/// a currency built with another currency's name equals it, whatever its other data. The equality is sealed, so every
-/// subclass compares the same way.
+/// Two currencies are equal when their names and their codes are, compared ordinally, whatever their other data; the
+/// hash is the name's. QuantLib's <c>operator==</c> compares names alone (<c>currency.hpp:179-182</c>), so its BGL and
+/// BGN, both named "Bulgarian lev", are one currency there: the code tells them apart, a documented divergence
+/// (<c>Divergences/CurrencyNameAndCodeTests.cs</c>). The equality is sealed, so every subclass compares the same
+/// way.
 /// </para>
 /// </remarks>
 public class Currency : IEquatable<Currency>
@@ -102,22 +104,26 @@ public class Currency : IEquatable<Currency>
     /// <summary>Gets the minor units' codes, such as "GBp" and "GBX" for GBP, in ordinal order.</summary>
     public ImmutableSortedSet<string> MinorUnitCodes { get; }
 
-    /// <summary>Compares two currencies by name, as QuantLib's <c>operator==</c> does; two nulls are equal.</summary>
+    /// <summary>Compares two currencies by name and code; two nulls are equal.</summary>
     /// <param name="left">The first currency.</param>
     /// <param name="right">The second currency.</param>
-    /// <returns><see langword="true"/> when both are null or both have the same name.</returns>
+    /// <returns><see langword="true"/> when both are null or both have the same name and code.</returns>
     public static bool operator ==(Currency? left, Currency? right) => left is null ? right is null : left.Equals(right);
 
-    /// <summary>Compares two currencies by name, as QuantLib's <c>operator!=</c> does.</summary>
+    /// <summary>Compares two currencies by name and code.</summary>
     /// <param name="left">The first currency.</param>
     /// <param name="right">The second currency.</param>
-    /// <returns><see langword="true"/> unless both are null or both have the same name.</returns>
+    /// <returns><see langword="true"/> unless both are null or both have the same name and code.</returns>
     public static bool operator !=(Currency? left, Currency? right) => !(left == right);
 
-    /// <summary>Compares this currency with another by name, ordinally.</summary>
+    /// <summary>Compares this currency with another by name and code, ordinally.</summary>
     /// <param name="other">The other currency.</param>
-    /// <returns><see langword="true"/> when the other currency isn't null and has this currency's name.</returns>
-    public bool Equals(Currency? other) => other is not null && string.Equals(Name, other.Name, StringComparison.Ordinal);
+    /// <returns><see langword="true"/> when the other currency isn't null and has this currency's name and
+    /// code.</returns>
+    public bool Equals(Currency? other) =>
+        other is not null
+        && string.Equals(Name, other.Name, StringComparison.Ordinal)
+        && string.Equals(Code, other.Code, StringComparison.Ordinal);
 
     /// <inheritdoc/>
     public sealed override bool Equals(object? obj) => obj is Currency other && Equals(other);
