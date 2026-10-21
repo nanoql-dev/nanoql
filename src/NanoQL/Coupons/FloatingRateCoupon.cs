@@ -206,6 +206,14 @@ public class FloatingRateCoupon : Coupon
         return copy;
     }
 
+    // Whether the coupon compounds its spread daily, so its amount isn't linear in the spread: an overnight coupon's
+    // choice, which a fair spread's derivation from the BPS can't follow.
+    internal virtual bool SpreadIsCompoundedDaily => false;
+
+    // A copy whose spread is shifted, every other term and the pricer the same, or null where none is defined: the
+    // legs a fair spread's solve prices.
+    internal virtual FloatingRateCoupon? WithSpreadShift(double shift) => null;
+
     /// <summary>The convexity adjustment of a given fixing: 0 at a zero gearing, else the adjusted fixing less it.</summary>
     /// <param name="fixing">The fixing.</param>
     /// <param name="context">The evaluation context.</param>

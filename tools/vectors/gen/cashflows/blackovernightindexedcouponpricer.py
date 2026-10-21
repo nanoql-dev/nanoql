@@ -26,6 +26,10 @@ must keep as they are), the plain compounding and averaging pricers (whose two-a
 implement), and the refusals of a pricer of the other averaging. Each leg's outputs are the capped coupons' and their
 underlyings' rates, or the call's throw.
 
+A capped coupon whose underlying's spread QuantLib's Black compounding pricer drops over the telescopic forecast
+range, which nanoql compounds (the S-rx plan's C3 review, B1-1; overnightindexedcoupon.py's spread_dropped), is
+generated and left out; the random draws all come before it, so the other cases are kept.
+
 Each case's inputs hold its settings and its "capped" spec (or "coupons") and "pricer", as
 tools/vectors/gen/cashflows/overnightindexedcoupon.py writes them. Read back by
 tests/NanoQL.Tests/Vectors/Coupons/BlackOvernightIndexedCouponPricerVectorTests.cs."""
@@ -137,6 +141,7 @@ def fixings(index, spec):
 
 
 def capped_case_doc(name, spec, pspec):
+    """The case, or None where QuantLib drops the underlying's spread (B1-1)."""
     index = oic.make_index(spec["underlying"]["index"])
     start, end = ql.Date(spec["underlying"]["startDate"]), ql.Date(spec["underlying"]["endDate"])
     accrual_dates = [start + (end - start) // 2, end]
@@ -146,6 +151,9 @@ def capped_case_doc(name, spec, pspec):
         except RuntimeError:
             expected = {"built": dict(v.THROWS)}
         else:
+            if pspec["type"] in ("Compounding", "BlackCompounding") and oic.spread_dropped(
+                    oic.make_coupon(spec["underlying"], index), TODAY):
+                return None
             p = oic.make_pricer(pspec)
             c.setPricer(p)
             expected = capped_outputs(c, p, spec["underlying"]["nominal"], accrual_dates)
@@ -216,7 +224,7 @@ def cases():
         out.append(capped_case_doc(name, spec, pspec))
     for name, specs, pspec in leg_cases():
         out.append(leg_case_doc(name, specs, pspec))
-    return out
+    return [c for c in out if c is not None]
 
 
 if __name__ == "__main__":

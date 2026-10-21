@@ -33,9 +33,13 @@ wheel gives as a default-constructed schedule's calendar) with Unadjusted conven
 its payment calendar, or on WeekendsOnly when it has none (overnightindexedcoupon.cpp:583-588), with a payment lag, in
 advance and with a short front stub.
 
-The three paths of a spread compounded daily (D23; plan premise SP26): a 3-month SOFR coupon on a flat 3.12345% curve
-with a 1.23456% spread, every fixing ahead, where the telescopic formula applies and QuantLib 1.44 drops the spread;
-the same with a lookback of 2 days and no shift, where it doesn't apply; and the same coupon once fixed.
+The paths of a spread compounded daily (S3's D23, plan premise SP26): a 3-month SOFR coupon on a flat 3.12345% curve
+with a 1.23456% spread, with a lookback of 2 days and no shift, where the telescopic formula doesn't apply, and the same
+coupon once fixed. Where the formula applies and a fixing is ahead, QuantLib 1.44 drops a spread compounded daily over
+the forecast range, which nanoql compounds (the S-rx plan's C3 review, B1-1, fixed under R8, reversing D23;
+tests/NanoQL.Tests/Divergences/OvernightCompoundedSpreadForecastTests.cs): such a coupon or leg, SP26's telescopic path
+among them, is generated and left out (spread_dropped, where the coupon's averaging gives it the compounding pricer),
+so the random sequence of the cases after it is kept.
 
 Each case's inputs hold its settings (with the fixings stored, by vectors.case_settings) and its "coupon" or "leg"
 spec. The spec functions here are shared by the other overnight generators, which import this file. Read back by
@@ -294,6 +298,15 @@ def fixings_for(index, first, last, rng, skip=None):
     return [(d, round(0.02 + 0.03 * rng.random(), 6)) for d in dates]
 
 
+def spread_dropped(c, today):
+    """Whether QuantLib's compounding pricer may drop the coupon's spread compounded daily over the telescopic forecast
+    range (overnightindexedcouponpricer.cpp:191-195): the spread compounded daily and nonzero, the telescopic formula
+    applicable and a fixing on or after the evaluation date. nanoql compounds the spread there (B1-1), so the
+    generators leave out a case that prices such a coupon with a compounding pricer."""
+    return (c.compoundSpreadDaily() and c.spread() != 0.0 and c.canApplyTelescopicFormula()
+            and c.fixingDates()[-1] >= today)
+
+
 def coupon_outputs(c, spec, accrual_dates):
     nominal = spec["nominal"]
     return {
@@ -402,7 +415,8 @@ def invalid_coupons(today):
 
 
 def named_coupons():
-    """D10's two Saturday starts and the three D23 paths, each (name, spec, today, accrual dates, fixings window)."""
+    """D10's two Saturday starts and the D23 paths, each (name, spec, today, accrual dates, fixings window); the
+    telescopic one is left out (B1-1)."""
     out = []
     # D10, SD26: a SOFR coupon starting on Saturday 14 June 2025 with the shift, the lookback null or 0.
     today = ql.Date(2, 6, 2025)
@@ -431,6 +445,8 @@ def named_coupons():
 
 
 def coupon_case(name, spec, today, accrual_dates, window, rng, store_today=False, skip=None):
+    """The case, or None where QuantLib's compounding pricer drops the coupon's spread (spread_dropped), after the
+    fixings are drawn."""
     index = make_index(spec["index"])
     start = ql.Date(spec["startDate"])
     first = (ql.Date(spec["rateComputationStartDate"]) if spec["rateComputationStartDate"] is not None else start) - 20
@@ -443,6 +459,8 @@ def coupon_case(name, spec, today, accrual_dates, window, rng, store_today=False
         except RuntimeError:
             expected = {"built": dict(v.THROWS)}
         else:
+            if c.averagingMethod() == ql.RateAveraging.Compound and spread_dropped(c, today):
+                return None
             expected = coupon_outputs(c, spec, accrual_dates)
         return {"name": name, "inputs": {"settings": st, "coupon": spec, "accrualDates": v.enc(accrual_dates)},
                 "expected": expected}
@@ -564,6 +582,8 @@ def empty_calendar_legs(today):
 
 
 def leg_case(name, spec, today, rng):
+    """The case, or None where QuantLib's compounding pricer drops a coupon's spread (spread_dropped), after the
+    fixings are drawn."""
     index = make_index(spec["index"])
     pairs = fixings_for(index, today - 120, today - 1, rng)
     with v.case_settings(today, fixings=[(index, pairs)]) as st:
@@ -572,6 +592,9 @@ def leg_case(name, spec, today, rng):
         except RuntimeError:
             expected = {"size": dict(v.THROWS)}
         else:
+            if any(c is not None and c.averagingMethod() == ql.RateAveraging.Compound and spread_dropped(c, today)
+                   for c in map(ql.as_overnight_indexed_coupon, leg)):
+                return None
             expected = leg_outputs(leg, max(spec["notionals"]))
         return {"name": name, "inputs": {"settings": st, "leg": spec}, "expected": expected}
 
@@ -599,7 +622,7 @@ def cases():
         out.append(leg_case(name, spec, ql.Date(3, 3, 2025), rng))
     for name, spec in empty_calendar_legs(ql.Date(3, 3, 2025)):
         out.append(leg_case(name, spec, ql.Date(3, 3, 2025), rng))
-    return out
+    return [c for c in out if c is not None]
 
 
 if __name__ == "__main__":

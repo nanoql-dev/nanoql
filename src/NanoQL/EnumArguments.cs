@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Methods;
@@ -550,6 +551,21 @@ internal static class EnumArguments
         if (value is < ExchangeRateType.Direct or > ExchangeRateType.Derived)
         {
             throw new ArgumentOutOfRangeException(paramName, value, "unknown exchange-rate type");
+        }
+    }
+
+    /// <summary>Refuses a swap type outside <see cref="MtMCrossCurrencyBasisSwapType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib reads any value but <c>PayFxBaseCurrency</c> as receiving the base-currency leg
+    /// (<c>mtmcrosscurrencybasisswap.hpp:159</c>).</remarks>
+    internal static void Check(MtMCrossCurrencyBasisSwapType value, string paramName)
+    {
+        if (value is < MtMCrossCurrencyBasisSwapType.PayFxBaseCurrency
+            or > MtMCrossCurrencyBasisSwapType.ReceiveFxBaseCurrency)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown MtM cross-currency basis swap type");
         }
     }
 }

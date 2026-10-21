@@ -514,6 +514,21 @@ public static class DiscountingSwapEngine
         return shift is double s ? spread + s : null;
     }
 
+    // A leg's fair spread solved on the swap's own pricing, from QuantLib's BPS route as the estimate: its first spread
+    // plus the shift of its coupons' spreads that zeroes the NPV, null where none does or where the BPS route gives
+    // none. The cross-currency swaps' legs compounding their spreads take it (the S-rx plan's C3 review, B1-2).
+    internal static double? SolvedFairSpread(
+        double spread, double? bpsRoute, double? npv, Func<double, double> npvAtShift)
+    {
+        if (bpsRoute is not double estimate || npv is not double npv0)
+        {
+            return bpsRoute;
+        }
+
+        double? shift = ZeroNpvShift(npvAtShift, npv0, estimate - spread);
+        return shift is double s ? spread + s : null;
+    }
+
     // The shift whose NPV is zero, the NPV being monotone in it: steps from the estimate, doubling, until the NPV
     // changes sign, then Brent's solve between the last two shifts. A shift the pricers refuse (a lognormal caplet's
     // strike past its displacement) ends the domain: its end is approached by bisection, and without a sign change by

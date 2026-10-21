@@ -14,6 +14,10 @@ coupons (a pricer prices a capped coupon's underlying); past, spanning and futur
 shift on compounded coupons, a spread compounded daily on some. A refused value is {"throws": true}: the Black
 averaging pricer on a compounded coupon, a daily caplet with the effective-volatility flag, a missing volatility.
 
+A compounding pricer on a coupon whose spread it drops over the telescopic forecast range, which nanoql compounds (the
+S-rx plan's C3 review, B1-1; overnightindexedcoupon.py's spread_dropped), is generated and left out, after its draws,
+so the random sequence of the cases after it is kept.
+
 Each case's inputs hold its settings (the fixings stored under the index's name), the "pricer" and "coupon" specs, as
 tools/vectors/gen/cashflows/overnightindexedcoupon.py writes them, the "dates" and the "strikes".
 tests/NanoQL.Tests/Vectors/Cxx/Coupons/OvernightIndexedCouponPricerCxxVectorTests.cs reads it back."""
@@ -94,6 +98,9 @@ def cases():
             dates = v.enc([start + 1, start + (end - start) // 3, start + 2 * (end - start) // 3, end])
             strikes = [0.035, 0.042]
             kw = {"fixings": fixings} if fixings else {}
+            if pricer["type"] in ("Compounding", "BlackCompounding") and oic.spread_dropped(
+                    oic.make_coupon(u, index), TODAY):
+                continue
             with H.case_settings(v.enc(TODAY), **kw) as st:
                 def each(method, *head):
                     return [v.attempt(lambda k_=k_, daily=daily: H.call(method, *head, k_, daily))

@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 870 | 110 |
+| not started | 861 | 105 |
 | partial | 29 | 34 |
-| ported | 362 | 38 |
+| ported | 371 | 43 |
 | replaced | 20 | 6 |
 | total | 1,456 | 194 |
 
@@ -352,9 +352,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `blackdeltacalculator` | not ported: deprecated |  |  |
 | `deltavolquote` | not ported: deprecated |  |  |
-| `discountingmtmcrosscurrencybasisswapengine` | not started |  | no nanoql type: DiscountingMtMCrossCurrencyBasisSwapEngine |
-| `fxresetcashflows` | not started |  | no nanoql type: FxReset, FxResetConvention, FxResetPricer, DiscountingFxResetPricer, FxResetCoupon, FxResetNotionalExchange |
-| `mtmcrosscurrencybasisswap` | not started |  | no nanoql type: MtMCrossCurrencyBasisSwap, MtMCrossCurrencyBasisSwapType, MtMCrossCurrencyBasisSwapResults |
+| `discountingmtmcrosscurrencybasisswapengine` | ported | Experimental/FX/DiscountingMtMCrossCurrencyBasisSwapEngine.cs |  |
+| `fxresetcashflows` | ported | Experimental/FX/FxResetCashFlows/DiscountingFxResetPricer.cs, Experimental/FX/FxResetCashFlows/FxReset.cs, Experimental/FX/FxResetCashFlows/FxResetCashFlowsFunctions.cs, Experimental/FX/FxResetCashFlows/FxResetConvention.cs, Experimental/FX/FxResetCashFlows/FxResetCoupon.cs, Experimental/FX/FxResetCashFlows/FxResetNotionalExchange.cs, Experimental/FX/FxResetCashFlows/FxResetPricer.cs |  |
+| `mtmcrosscurrencybasisswap` | ported | Experimental/FX/MtMCrossCurrencyBasisSwap/MtMCrossCurrencyBasisSwap.cs, Experimental/FX/MtMCrossCurrencyBasisSwap/MtMCrossCurrencyBasisSwapResults.cs, Experimental/FX/MtMCrossCurrencyBasisSwap/MtMCrossCurrencyBasisSwapType.cs |  |
 
 ### `ql/experimental/inflation/`
 
@@ -472,7 +472,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `basisswapratehelpers` | ported | Experimental/TermStructures/BasisSwapRateHelpers/IborIborBasisSwapRateHelper.cs, Experimental/TermStructures/BasisSwapRateHelpers/OvernightIborBasisSwapRateHelper.cs, Experimental/TermStructures/BasisSwapRateHelpers/OvernightOvernightBasisSwapRateHelper.cs |  |
-| `crosscurrencyratehelpers` | not started |  | no nanoql type: CrossCurrencySwapRateHelperBase, CrossCurrencyBasisSwapRateHelperBase, ConstNotionalCrossCurrencyBasisSwapRateHelper, MtMCrossCurrencyBasisSwapRateHelper, ConstNotionalCrossCurrencySwapRateHelper |
+| `crosscurrencyratehelpers` | ported | Experimental/TermStructures/CrossCurrencyRateHelpers/ConstNotionalCrossCurrencyBasisSwapRateHelper.cs, Experimental/TermStructures/CrossCurrencyRateHelpers/ConstNotionalCrossCurrencySwapRateHelper.cs, Experimental/TermStructures/CrossCurrencyRateHelpers/CrossCurrencyBasisSwapRateHelperBase.cs, Experimental/TermStructures/CrossCurrencyRateHelpers/CrossCurrencyRateHelpersFunctions.cs, Experimental/TermStructures/CrossCurrencyRateHelpers/CrossCurrencySwapRateHelperBase.cs, Experimental/TermStructures/CrossCurrencyRateHelpers/MtMCrossCurrencyBasisSwapRateHelper.cs |  |
 | `overnightindexedfundingratehelper` | not started |  | no nanoql type: OvernightIndexedFundingRateHelper |
 
 ### `ql/experimental/variancegamma/`
@@ -634,13 +634,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `complexchooseroption` | not started |  | no nanoql type: ComplexChooserOption |
 | `compositeinstrument` | not started |  | no nanoql type: CompositeInstrument |
 | `compoundoption` | not started |  | no nanoql type: CompoundOption |
-| `constnotionalcrosscurrencybasisswap` | not started |  | no nanoql type: ConstNotionalCrossCurrencyBasisSwap, ConstNotionalCrossCurrencyBasisSwapResults |
-| `constnotionalcrosscurrencyfixedvsfloatingswap` | not started |  | no nanoql type: ConstNotionalCrossCurrencyFixedVsFloatingSwap, ConstNotionalCrossCurrencyFixedVsFloatingSwapResults |
-| `constnotionalcrosscurrencyswap` | not started |  | no nanoql type: ConstNotionalCrossCurrencySwap, ConstNotionalCrossCurrencySwapResults |
+| `constnotionalcrosscurrencybasisswap` | ported | Instruments/ConstNotionalCrossCurrencyBasisSwap.cs, Instruments/ConstNotionalCrossCurrencyBasisSwapResults.cs |  |
+| `constnotionalcrosscurrencyfixedvsfloatingswap` | ported | Instruments/ConstNotionalCrossCurrencyFixedVsFloatingSwap.cs, Instruments/ConstNotionalCrossCurrencyFixedVsFloatingSwapResults.cs |  |
+| `constnotionalcrosscurrencyswap` | ported | Instruments/ConstNotionalCrossCurrencySwap.cs | no nanoql type: ConstNotionalCrossCurrencySwapResults |
 | `cpicapfloor` | not started |  | no nanoql type: CPICapFloor |
 | `cpiswap` | ported | Instruments/CPISwap.cs, Instruments/CPISwapResults.cs |  |
 | `creditdefaultswap` | ported | Instruments/CreditDefaultSwap/CreditDefaultSwap.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapFunctions.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapPricingModel.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapResults.cs |  |
-| `crosscurrencyswap` | not started |  | no nanoql type: CrossCurrencySwap, CrossCurrencySwapResults |
+| `crosscurrencyswap` | ported | Instruments/CrossCurrencySwap.cs, Instruments/CrossCurrencySwapResults.cs |  |
 | `dividendschedule` | ported | Instruments/DividendSchedule.cs |  |
 | `doublebarrieroption` | not started |  | no nanoql type: DoubleBarrierOption |
 | `doublebarriertype` | not started |  | no nanoql type: DoubleBarrierType |
@@ -1641,7 +1641,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `cvaswapengine` | not started |  | no nanoql type: CounterpartyAdjSwapEngine |
-| `discountingconstnotionalcrosscurrencyswapengine` | not started |  | no nanoql type: DiscountingConstNotionalCrossCurrencySwapEngine |
+| `discountingconstnotionalcrosscurrencyswapengine` | ported | PricingEngines/Swap/DiscountingConstNotionalCrossCurrencySwapEngine.cs |  |
 | `discountingswapengine` | ported | PricingEngines/Swap/DiscountingSwapEngine.cs |  |
 | `discretizedswap` | ported | PricingEngines/Swap/DiscretizedSwap.cs |  |
 | `treeswapengine` | not started |  | no nanoql type: TreeVanillaSwapEngine |
@@ -2099,14 +2099,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `commodityunitofmeasure` | not started |  | 2 cases |
 | `compiledboostversion` | not ported: tests the C++ platform |  |  |
 | `compoundoption` | not started |  | 2 cases |
-| `constnotionalcrosscurrencybasisswap` | not started |  | 2 cases |
-| `constnotionalcrosscurrencyfixedvsfloatingswap` | not started |  | 1 cases |
-| `constnotionalcrosscurrencyswap` | not started |  | 3 cases |
+| `constnotionalcrosscurrencybasisswap` | ported | TestSuite/ConstNotionalCrossCurrencyBasisSwapTests.cs | 2 of 2 cases |
+| `constnotionalcrosscurrencyfixedvsfloatingswap` | ported | TestSuite/ConstNotionalCrossCurrencyFixedVsFloatingSwapTests.cs | 1 of 1 cases |
+| `constnotionalcrosscurrencyswap` | ported | TestSuite/ConstNotionalCrossCurrencySwapTests.cs | 3 of 3 cases |
 | `convertiblebonds` | not started |  | 4 cases |
 | `copulas` | not started |  | 3 cases |
 | `covariance` | not started |  | 3 cases |
 | `creditdefaultswap` | ported | TestSuite/CreditDefaultSwapTests.cs | 10 of 10 cases |
-| `crosscurrencyratehelpers` | not started |  | 30 cases |
+| `crosscurrencyratehelpers` | ported | TestSuite/CrossCurrencyRateHelpersTests.cs | 30 of 30 cases |
 | `currency` | ported | TestSuite/CurrencyTests.cs | 1 of 1 cases |
 | `curvestates` | not started |  | 3 cases |
 | `dates` | partial | TestSuite/DatesTests.cs | 7 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; not yet: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, isoDates, parseDates, intraday |
@@ -2180,7 +2180,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `mclongstaffschwartzengine` | not started |  | 2 cases |
 | `mersennetwister` | ported | TestSuite/MersenneTwisterTests.cs | 1 of 1 cases |
 | `money` | ported | TestSuite/MoneyTests.cs | 4 of 4 cases |
-| `mtmcrosscurrencybasisswap` | not started |  | 15 cases |
+| `mtmcrosscurrencybasisswap` | ported | TestSuite/MtMCrossCurrencyBasisSwapTests.cs | 14 of 15 cases; not ported: testFxResetCouponUpdates (observer notifications and deepUpdate, which immutable cash flows have no use for, R1) |
 | `multipleresetscoupons` | not started |  | 5 cases |
 | `multipleresetsswap` | not started |  | 8 cases |
 | `noarbsabr` | not started |  | 2 cases |

@@ -20,8 +20,10 @@ namespace NanoQL.Coupons;
 /// <remarks>
 /// Unsealed, as in QuantLib, where the Black compounding pricer derives from it. Past fixings come from the context's
 /// store; the forward part is forecast on the index's curve, telescoped through one discount ratio wherever the
-/// coupon's <see cref="OvernightIndexedCoupon.CanApplyTelescopicFormula"/> holds. Over that range a spread compounded
-/// daily is dropped, QuantLib 1.44's own result: both compound factors take the same discount ratio.
+/// coupon's <see cref="OvernightIndexedCoupon.CanApplyTelescopicFormula"/> holds. A nonzero spread compounded daily
+/// is compounded day by day over that range, on the forecast fixings, as QuantLib compounds it outside the range and
+/// once the fixings are published; QuantLib multiplies both compound factors by the discount ratio, which drops the
+/// spread (a documented divergence; the S-rx plan's C3 review, B1-1, ruled under R8).
 /// </remarks>
 public class CompoundingOvernightIndexedCouponPricer : OvernightIndexedCouponPricer
 {
@@ -256,9 +258,22 @@ public class CompoundingOvernightIndexedCouponPricer : OvernightIndexedCouponPri
 
                     double startDiscount = curve.Discount(valueDates[telescopicStartIdx]);
                     double endDiscount = curve.Discount(valueDates[telescopicEndIdx]);
-                    compoundFactor *= startDiscount / endDiscount;
                     compoundFactorWithoutSpread *= startDiscount / endDiscount;
-                    i = telescopicEndIdx;
+                    if (compoundSpreadDaily && couponSpread != 0.0)
+                    {
+                        // the spread compounds each day on the forecast fixings, where QuantLib's discount ratio
+                        // drops it
+                        while (i < telescopicEndIdx)
+                        {
+                            compoundFactor *= ProjGrowthFactor(i).GfSpread;
+                            ++i;
+                        }
+                    }
+                    else
+                    {
+                        compoundFactor *= startDiscount / endDiscount;
+                        i = telescopicEndIdx;
+                    }
                 }
             }
 

@@ -92,6 +92,90 @@ public class ResultsEqualityTests
     }
 
     [Fact]
+    public void CrossCurrencySwapResultsCompareTheSwapsResultsAndTheInCurrencyArrays()
+    {
+        static CrossCurrencySwapResults Results() => new()
+        {
+            NPV = 12.5,
+            LegNPV = [-100.0, 112.5],
+            LegBPS = [-0.4, 0.45],
+            InCcyLegNPV = [-90.0, 112.5],
+            InCcyLegBPS = [-0.36, 0.45],
+            NpvDateDiscounts = [0.99, 0.98],
+        };
+
+        CrossCurrencySwapResults a = Results(), b = Results();
+        Assert.Equal(a, b);
+        Assert.Equal(a.GetHashCode(), b.GetHashCode());
+        Assert.NotEqual(a, a with { LegNPV = [-100.0, 112.6] });
+        Assert.NotEqual(a, a with { InCcyLegNPV = [-90.0, 112.6] });
+        Assert.NotEqual(a, a with { InCcyLegBPS = [-0.36, 0.46] });
+        Assert.NotEqual(a, a with { NpvDateDiscounts = [0.99, 0.97] });
+        Assert.NotEqual(a, a with { NpvDateDiscounts = [] });
+        Assert.False(a.Equals(null));
+    }
+
+    [Fact]
+    public void ConstNotionalCrossCurrencySwapResultsCompareTheirFairSpreadsAndRates()
+    {
+        static ConstNotionalCrossCurrencyBasisSwapResults Basis() => new()
+        {
+            NPV = 12.5,
+            InCcyLegNPV = [-90.0, 112.5],
+            FairPaySpread = 0.002,
+            FairRecSpread = null,
+        };
+        static ConstNotionalCrossCurrencyFixedVsFloatingSwapResults FixedVsFloating() => new()
+        {
+            NPV = 12.5,
+            InCcyLegNPV = [-90.0, 112.5],
+            FairFixedRate = 0.03,
+            FairSpread = null,
+        };
+
+        ConstNotionalCrossCurrencyBasisSwapResults a = Basis(), b = Basis();
+        Assert.Equal(a, b);
+        Assert.Equal(a.GetHashCode(), b.GetHashCode());
+        Assert.NotEqual(a, a with { InCcyLegNPV = [-90.0, 112.6] });
+        Assert.NotEqual(a, a with { FairPaySpread = 0.0021 });
+        Assert.NotEqual(a, a with { FairRecSpread = 0.0 });
+        Assert.False(a.Equals(null));
+
+        ConstNotionalCrossCurrencyFixedVsFloatingSwapResults c = FixedVsFloating(), d = FixedVsFloating();
+        Assert.Equal(c, d);
+        Assert.Equal(c.GetHashCode(), d.GetHashCode());
+        Assert.NotEqual(c, c with { InCcyLegNPV = [-90.0, 112.6] });
+        Assert.NotEqual(c, c with { FairFixedRate = 0.031 });
+        Assert.NotEqual(c, c with { FairSpread = 0.0 });
+        Assert.False(c.Equals(null));
+    }
+
+    [Fact]
+    public void MtMCrossCurrencyBasisSwapResultsCompareTheirFairSpreadsAndResets()
+    {
+        static NanoQL.Experimental.MtMCrossCurrencyBasisSwapResults Results() => new()
+        {
+            NPV = 12.5,
+            InCcyLegNPV = [-90.0, 112.5],
+            FairFxBaseSpread = 0.001,
+            FairFxQuoteSpread = null,
+            FxResetRates = [1.1, 1.104],
+            FxResetNotionals = [1.1e6, 1.104e6],
+        };
+
+        NanoQL.Experimental.MtMCrossCurrencyBasisSwapResults a = Results(), b = Results();
+        Assert.Equal(a, b);
+        Assert.Equal(a.GetHashCode(), b.GetHashCode());
+        Assert.NotEqual(a, a with { InCcyLegNPV = [-90.0, 112.6] });
+        Assert.NotEqual(a, a with { FairFxBaseSpread = 0.0011 });
+        Assert.NotEqual(a, a with { FairFxQuoteSpread = 0.0 });
+        Assert.NotEqual(a, a with { FxResetRates = [1.1, 1.105] });
+        Assert.NotEqual(a, a with { FxResetNotionals = [1.1e6] });
+        Assert.Equal(a with { FxResetRates = [] }, a with { FxResetRates = default });
+        Assert.False(a.Equals(null));
+    }
+
+    [Fact]
     public void ResultsOfDifferentTypesCompareUnequal()
     {
         var instrument = new InstrumentResults { NPV = 1.0 };

@@ -20,6 +20,10 @@ averaging pricer on averaged ones, the Black pricers on each, and the refusals o
 coupons, an averaging pricer on compounded ones, and a mixed leg. Each leg's outputs are the coupons' rates after the
 call, or the call's throw.
 
+A compounded coupon whose spread QuantLib's compounding pricer drops over the telescopic forecast range, which nanoql
+compounds (the S-rx plan's C3 review, B1-1; overnightindexedcoupon.py's spread_dropped), is generated and left out, so
+the random sequence of the cases after it is kept.
+
 The wheel's ArithmeticAveragedOvernightIndexedCouponPricer is built with keyword arguments only. Each case's inputs
 hold its settings, its "coupon" (or "coupons") and its "pricer", as tools/vectors/gen/cashflows/overnightindexedcoupon.py
 writes them. Read back by tests/NanoQL.Tests/Vectors/Coupons/OvernightIndexedCouponPricerVectorTests.cs."""
@@ -101,11 +105,14 @@ def coupon_and_pricer(k, rng):
 
 
 def coupon_case(k, rng):
+    """The case, or None where QuantLib drops the coupon's spread (B1-1), after the fixings are drawn."""
     spec, pspec, dates = coupon_and_pricer(k, rng)
     index = oic.make_index(spec["index"])
     pairs = oic.fixings_for(index, ql.Date(spec["startDate"]) - 20, TODAY - 1, rng)
     with v.case_settings(TODAY, fixings=[(index, pairs)]) as st:
         c = oic.make_coupon(spec, index)
+        if pspec["type"] == "Compounding" and oic.spread_dropped(c, TODAY):
+            return None
         p = oic.make_pricer(pspec)
         c.setPricer(p)
         expected = priced(c, spec, dates)
@@ -168,7 +175,7 @@ def leg_cases(rng):
 
 def cases():
     rng = random.Random(v.SEED + 1)
-    out = [coupon_case(k, rng) for k in range(60)]
+    out = [c for c in (coupon_case(k, rng) for k in range(60)) if c is not None]
     out += leg_cases(rng)
     return out
 

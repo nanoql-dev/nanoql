@@ -64,4 +64,32 @@ public class ExperimentalMarkerTests
             Assert.Equal(DiagnosticId, t.GetCustomAttribute<ExperimentalAttribute>(inherit: false)?.DiagnosticId);
         }
     }
+
+    [Fact]
+    public void TheFxResetsTheMtMSwapAndTheCrossCurrencyHelpersCarryTheMarker()
+    {
+        foreach (Type t in new[]
+        {
+            typeof(NanoQL.Experimental.FxReset),
+            typeof(NanoQL.Experimental.FxResetConvention),
+            typeof(NanoQL.Experimental.FxResetPricer),
+            typeof(NanoQL.Experimental.DiscountingFxResetPricer),
+            typeof(NanoQL.Experimental.FxResetCoupon),
+            typeof(NanoQL.Experimental.FxResetNotionalExchange),
+            typeof(NanoQL.Experimental.FxResetCashFlowsFunctions),
+            typeof(NanoQL.Experimental.MtMCrossCurrencyBasisSwap),
+            typeof(NanoQL.Experimental.MtMCrossCurrencyBasisSwapResults),
+            typeof(NanoQL.Experimental.MtMCrossCurrencyBasisSwapType),
+            typeof(NanoQL.Experimental.DiscountingMtMCrossCurrencyBasisSwapEngine),
+            typeof(NanoQL.Experimental.CrossCurrencySwapRateHelperBase),
+            typeof(NanoQL.Experimental.CrossCurrencyBasisSwapRateHelperBase),
+            typeof(NanoQL.Experimental.ConstNotionalCrossCurrencyBasisSwapRateHelper),
+            typeof(NanoQL.Experimental.MtMCrossCurrencyBasisSwapRateHelper),
+            typeof(NanoQL.Experimental.ConstNotionalCrossCurrencySwapRateHelper),
+        })
+        {
+            Assert.Equal(Namespace, t.Namespace);
+            Assert.Equal(DiagnosticId, t.GetCustomAttribute<ExperimentalAttribute>(inherit: false)?.DiagnosticId);
+        }
+    }
 }

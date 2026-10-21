@@ -271,6 +271,33 @@ public sealed class OvernightIndexedCoupon : FloatingRateCoupon
     public bool CanApplyTelescopicFormula =>
         FixingDays == Index.FixingDays || (ApplyObservationShift && Index.FixingDays == 0);
 
+    /// <inheritdoc/>
+    internal override bool SpreadIsCompoundedDaily => CompoundSpreadDaily;
+
+    /// <inheritdoc/>
+    internal override FloatingRateCoupon WithSpreadShift(double shift) =>
+        new OvernightIndexedCoupon(
+            Date,
+            ContractNominal,
+            AccrualStartDate,
+            AccrualEndDate,
+            (OvernightIndex)Index,
+            Gearing,
+            Spread + shift,
+            ReferencePeriodStart,
+            ReferencePeriodEnd,
+            DayCounter,
+            false,
+            AveragingMethod,
+            FixingDays,
+            LockoutDays,
+            ApplyObservationShift,
+            CompoundSpreadDaily,
+            RateComputationStartDate,
+            RateComputationEndDate,
+            ExCouponDate,
+            roundingPrecision).WithPricer(Pricer);
+
     /// <summary>The fixing dates of the rates compounded or averaged, one per accrual period.</summary>
     /// <returns>The fixing dates.</returns>
     public ImmutableArray<Date> FixingDates() => fixingDates;

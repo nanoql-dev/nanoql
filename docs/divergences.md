@@ -477,6 +477,40 @@ Facts:
 
 - `AFixedOptionletPaysOnTheIndexRatio`
 
+## CrossCurrencySwapCompoundedSpreadFairSpreadTests
+
+[`Divergences/CrossCurrencySwapCompoundedSpreadFairSpreadTests.cs`](../tests/NanoQL.Tests/Divergences/CrossCurrencySwapCompoundedSpreadFairSpreadTests.cs)
+
+The cross-currency swaps' fair spread on an overnight leg compounding its spread daily (the S-rx plan's C3 review, B1-2, fixed under R8). Each swap derives a leg's fair spread from its BPS, `spread − NPV/(BPS/1bp)` (`constnotionalcrosscurrencybasisswap.cpp:180-187`, `constnotionalcrosscurrencyfixedvsfloatingswap.cpp:161-163`, `mtmcrosscurrencybasisswap.cpp:235-249`), which is exact only while the leg's amount moves one for one with its spread; compounded daily, the amount is convex in it. On a five-year basis swap paying SOFR compounded with a 2-day lookback (QuantLib's path that compounds the spread) against ESTR + 1%, QuantLib's fair pay spread leaves the swap worth −2,387.78 on 1,100,000. nanoql solves a compounding leg's fair spread on the swap's own pricing, as C2's float-float swap does for capped legs; a leg that doesn't compound keeps QuantLib's BPS route and its bits. QuantLib's check: its own NPV, whose Brent root the solved spreads equal [executed on the wheel].
+
+Facts:
+
+- `TheBasisSwapsCompoundingLegsFairSpreadIsSolved`
+- `TheFixedVsFloatingSwapsCompoundingLegsFairSpreadIsSolved`
+- `TheMtMSwapsCompoundingLegsFairSpreadIsSolved`
+
+## CrossCurrencySwapNpvDateFxTests
+
+[`Divergences/CrossCurrencySwapNpvDateFxTests.cs`](../tests/NanoQL.Tests/Divergences/CrossCurrencySwapNpvDateFxTests.cs)
+
+The constant-notional cross-currency engine's spot with an explicit FX settlement date and an NPV date away from the curves' reference date (the S-rx plan's SRXR3 (vi), fixed under R8). QuantLib's engine takes its spot as the NPV date's rate, "w.r.t. a settlement equal to the npv date", and uses it as is when no FX settlement date is given (`discountingconstnotionalcrosscurrencyswapengine.hpp:54-67`, `.cpp:127`); given one, it moves the spot to the reference date (`.cpp:128-137`) and multiplies values discounted to the NPV date by it, so a USD 1.1M against EUR 1M two-year swap priced three months on is off its consistent NPV by −46.593470, with a settlement date of T+2 and with one on the reference date, which QuantLib reads as unset (`:74-77`). nanoql moves an explicitly settled spot to the NPV date, `S × D_dom(s)/D_for(s) × D_for(npv)/D_dom(npv)`, as QuantLib's own MtM engine does (`discountingmtmcrosscurrencybasisswapengine.cpp:103-121`); without one, and with the NPV date on the reference date, QuantLib's bits stand. QuantLib's check: its own engine with no settlement date and the spot moved to the NPV date, 26,787.661557906977 [executed on the wheel].
+
+Facts:
+
+- `AnExplicitFxSettlementDateMovesTheSpotToTheNpvDate`
+- `AnExplicitFxSettlementDateOnTheReferenceDateMovesTheSpotToo`
+
+## CrossCurrencySwapZeroBpsTests
+
+[`Divergences/CrossCurrencySwapZeroBpsTests.cs`](../tests/NanoQL.Tests/Divergences/CrossCurrencySwapZeroBpsTests.cs)
+
+The constant-notional cross-currency swaps' fair spread and fixed rate on a leg whose BPS is zero (the S-rx plan's SRXR3 (xviii), fixed under R8). Both swaps test the leg's BPS against `Null` alone before dividing by it (`constnotionalcrosscurrencybasisswap.cpp:180-187`, `constnotionalcrosscurrencyfixedvsfloatingswap.cpp:157-163`), so a zero-notional leg's fair pay spread and fair rate are an infinity. nanoql gives null, the results' "not available", as QuantLib's sibling swaps do with their `legBPS != 0` checks (`fixedvsfloatingswap.cpp:201-207`, `floatfloatswap.cpp:560`, `:566`; `mtmcrosscurrencybasisswap.cpp:238-246`, which refuses); the other leg's keeps QuantLib's value. QuantLib's check: those siblings, and its `testZeroBpsFairSpread`, which asserts the float-float swap's "fair spread 1 not available" [executed on the wheel].
+
+Facts:
+
+- `TheBasisSwapsFairPaySpreadOnAZeroNotionalLegIsNull`
+- `TheFixedVsFloatingSwapsFairRateOnAZeroNotionalLegIsNull`
+
 ## CubeAtmExtrapolationTests
 
 [`Divergences/CubeAtmExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/CubeAtmExtrapolationTests.cs)
@@ -821,6 +855,17 @@ Facts:
 
 - `ACustomFuturesHelperWithNoEndDateRefusesItsImpliedQuote`
 
+## FxResetTodaysFixingTests
+
+[`Divergences/FxResetTodaysFixingTests.cs`](../tests/NanoQL.Tests/Divergences/FxResetTodaysFixingTests.cs)
+
+The discounting FX reset pricer's rate for a reset fixed today (the S-rx plan's SRXR3 (xiii), fixed under R8). QuantLib forecasts today's rate when the registry's lookup fails, as a fixing not yet published, but catches every `Error` to do so (`fxresetcashflows.cpp:92-98`): a published fixing of zero or below, which its own check refuses ("FX fixing … must be positive", `:126-129`), is forecast instead, 1.100090414674525 on the facts' curves, while the same fixing yesterday is refused. nanoql forecasts only a missing rate, which the registry refuses with either of its two texts, the smart lookup's "no conversion available" and the direct lookup's "no direct conversion available", which a pair triangulated through the other currency reaches (`exchangeratemanager.cpp:137-146`, `:65-79`); every other refusal passes. QuantLib's check: the same fixing on a past date [executed on the wheel].
+
+Facts:
+
+- `TodaysNonPositiveFixingIsRefused`
+- `ATriangulatedPairsMissingFixingIsForecast`
+
 ## GaussianQuadratureRefusalTests
 
 [`Divergences/GaussianQuadratureRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/GaussianQuadratureRefusalTests.cs)
@@ -1142,6 +1187,17 @@ A stripper's implied volatilities on a second strip. QuantLib's `OptionletStripp
 Facts:
 
 - `EveryStripGivesQuantLibsFirstStrip`
+
+## OvernightCompoundedSpreadForecastTests
+
+[`Divergences/OvernightCompoundedSpreadForecastTests.cs`](../tests/NanoQL.Tests/Divergences/OvernightCompoundedSpreadForecastTests.cs)
+
+A compounded overnight coupon's spread compounded daily over the forecast range (the S-rx plan's C3 review, B1-1, fixed under R8, reversing S3's D23). Where the telescopic formula applies, QuantLib's compounding pricer multiplies both compound factors, with and without the spread, by the same discount ratio (`overnightindexedcouponpricer.cpp:191-195`), so the spread is dropped: a SOFR coupon with a 1.23456% spread on a flat 3.12345% curve forecasts 0.030928216305566813, the no-spread rate, while the same coupon with the same fixings published compounds the spread, 0.043388368686242844 (−124.6bp). nanoql compounds the spread day by day on the forecast fixings, as QuantLib does outside the range and once the fixings are published; a spread added rather than compounded, a zero spread and a lookback that leaves the formula aside keep QuantLib's bits. QuantLib's check: its own published route [executed on the wheel].
+
+Facts:
+
+- `ADailyCompoundedSpreadIsCompoundedOverTheForecastRange`
+- `TheOtherSpreadsKeepQuantLibsBits`
 
 ## OvernightIndexedCouponRefusalTests
 
