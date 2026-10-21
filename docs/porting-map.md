@@ -20,10 +20,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 942 | 120 |
-| partial | 27 | 33 |
-| ported | 293 | 29 |
-| replaced | 19 | 6 |
+| not started | 899 | 118 |
+| partial | 28 | 35 |
+| ported | 334 | 29 |
+| replaced | 20 | 6 |
 | total | 1,456 | 194 |
 
 ## Library
@@ -689,7 +689,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `swaption` | ported | Instruments/Swaption/Settlement.cs, Instruments/Swaption/SettlementMethod.cs, Instruments/Swaption/SettlementType.cs, Instruments/Swaption/Swaption.cs, Instruments/Swaption/SwaptionFunctions.cs, Instruments/Swaption/SwaptionPriceType.cs |  |
 | `twoassetbarrieroption` | not started |  | no nanoql type: TwoAssetBarrierOption |
 | `twoassetcorrelationoption` | not started |  | no nanoql type: TwoAssetCorrelationOption |
-| `vanillaoption` | partial | Instruments/VanillaOption.cs | partial: ImpliedVolatility's American and Bermudan branch, which builds the finite-difference engine and waits for this slot's third commit |
+| `vanillaoption` | ported | Instruments/VanillaOption.cs |  |
 | `vanillastorageoption` | not started |  | no nanoql type: VanillaStorageOption |
 | `vanillaswap` | ported | Instruments/VanillaSwap.cs |  |
 | `vanillaswingoption` | not started |  | no nanoql type: SwingExercise, VanillaForwardPayoff, VanillaSwingOption |
@@ -991,7 +991,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `boundarycondition` | not started |  | no nanoql type: BoundaryCondition, BoundaryConditionSide, NeumannBC, DirichletBC |
+| `boundarycondition` | ported | Methods/FiniteDifferences/BoundaryConditionSide.cs, Methods/FiniteDifferences/BoundaryCondition{TOperator}.cs | no nanoql type: NeumannBC, DirichletBC |
 | `bsmoperator` | not ported: deprecated |  |  |
 | `cranknicolson` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `dminus` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
@@ -999,13 +999,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `dplusdminus` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `dzero` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `expliciteuler` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
-| `finitedifferencemodel` | not started |  | no nanoql type: FiniteDifferenceModel |
+| `finitedifferencemodel` | ported | Methods/FiniteDifferences/FiniteDifferenceModel{TScheme}.cs, Methods/FiniteDifferences/IFdmScheme.cs |  |
 | `impliciteuler` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `mixedscheme` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
-| `operatortraits` | not started |  | no nanoql type: OperatorTraits |
+| `operatortraits` | replaced: generics: BoundaryCondition<TOperator>; StepCondition is on arrays alone |  |  |
 | `pde` | not ported: deprecated |  |  |
 | `pdebsm` | not ported: deprecated |  |  |
-| `stepcondition` | not started |  | no nanoql type: StepCondition, NullCondition |
+| `stepcondition` | partial | Methods/FiniteDifferences/StepCondition.cs | partial: NullCondition, which no QuantLib 1.44 class or test uses and which waits for its first user; no nanoql type: NullCondition |
 | `trbdf2` | not started |  | no nanoql type: TRBDF2 |
 | `tridiagonaloperator` | ported | Methods/FiniteDifferences/TridiagonalOperator.cs, Methods/FiniteDifferences/TridiagonalOperatorTimeSetter.cs |  |
 | `zerocondition` | not started |  | no nanoql type: ZeroCondition |
@@ -1015,18 +1015,18 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `concentrating1dmesher` | not started |  | no nanoql type: Concentrating1dMesher |
+| `concentrating1dmesher` | ported | Methods/FiniteDifferences/Meshers/Concentrating1dMesher.cs |  |
 | `exponentialjump1dmesher` | not started |  | no nanoql type: ExponentialJump1dMesher |
-| `fdm1dmesher` | not started |  | no nanoql type: Fdm1dMesher |
-| `fdmblackscholesmesher` | not started |  | no nanoql type: FdmBlackScholesMesher |
+| `fdm1dmesher` | ported | Methods/FiniteDifferences/Meshers/Fdm1dMesher.cs |  |
+| `fdmblackscholesmesher` | ported | Methods/FiniteDifferences/Meshers/FdmBlackScholesMesher.cs |  |
 | `fdmblackscholesmultistrikemesher` | not started |  | no nanoql type: FdmBlackScholesMultiStrikeMesher |
 | `fdmcev1dmesher` | not started |  | no nanoql type: FdmCEV1dMesher |
 | `fdmhestonvariancemesher` | not started |  | no nanoql type: FdmHestonVarianceMesher, FdmHestonLocalVolatilityVarianceMesher |
-| `fdmmesher` | not started |  | no nanoql type: FdmMesher |
-| `fdmmeshercomposite` | not started |  | no nanoql type: FdmMesherComposite |
+| `fdmmesher` | ported | Methods/FiniteDifferences/Meshers/FdmMesher.cs |  |
+| `fdmmeshercomposite` | ported | Methods/FiniteDifferences/Meshers/FdmMesherComposite.cs |  |
 | `fdmsimpleprocess1dmesher` | not started |  | no nanoql type: FdmSimpleProcess1dMesher |
 | `predefined1dmesher` | not started |  | no nanoql type: Predefined1dMesher |
-| `uniform1dmesher` | not started |  | no nanoql type: Uniform1dMesher |
+| `uniform1dmesher` | ported | Methods/FiniteDifferences/Meshers/Uniform1dMesher.cs |  |
 | `uniformgridmesher` | not started |  | no nanoql type: UniformGridMesher |
 
 ### `ql/methods/finitedifferences/operators/`
@@ -1037,7 +1037,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdm2dblackscholesop` | not started |  | no nanoql type: Fdm2dBlackScholesOp |
 | `fdmbatesop` | not started |  | no nanoql type: FdmBatesOp |
 | `fdmblackscholesfwdop` | not started |  | no nanoql type: FdmBlackScholesFwdOp |
-| `fdmblackscholesop` | not started |  | no nanoql type: FdmBlackScholesOp |
+| `fdmblackscholesop` | ported | Methods/FiniteDifferences/Operators/FdmBlackScholesOp.cs |  |
 | `fdmcevop` | not started |  | no nanoql type: FdmCEVOp |
 | `fdmcirop` | not started |  | no nanoql type: FdmCIREquityPart, FdmCIRRatesPart, FdmCIRMixedPart, FdmCIROp |
 | `fdmg2op` | not started |  | no nanoql type: FdmG2Op |
@@ -1045,52 +1045,52 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmhestonhullwhiteop` | not started |  | no nanoql type: FdmHestonHullWhiteEquityPart, FdmHestonHullWhiteOp |
 | `fdmhestonop` | not started |  | no nanoql type: FdmHestonEquityPart, FdmHestonVariancePart, FdmHestonOp |
 | `fdmhullwhiteop` | not started |  | no nanoql type: FdmHullWhiteOp |
-| `fdmlinearop` | not started |  | no nanoql type: FdmLinearOp |
-| `fdmlinearopcomposite` | not started |  | no nanoql type: FdmLinearOpComposite |
-| `fdmlinearopiterator` | not started |  | no nanoql type: FdmLinearOpIterator |
-| `fdmlinearoplayout` | not started |  | no nanoql type: FdmLinearOpLayout |
+| `fdmlinearop` | ported | Methods/FiniteDifferences/Operators/FdmLinearOp.cs |  |
+| `fdmlinearopcomposite` | ported | Methods/FiniteDifferences/Operators/FdmLinearOpComposite.cs |  |
+| `fdmlinearopiterator` | ported | Methods/FiniteDifferences/Operators/FdmLinearOpIterator.cs |  |
+| `fdmlinearoplayout` | ported | Methods/FiniteDifferences/Operators/FdmLinearOpLayout.cs |  |
 | `fdmlocalvolfwdop` | not started |  | no nanoql type: FdmLocalVolFwdOp |
 | `fdmornsteinuhlenbeckop` | not started |  | no nanoql type: FdmOrnsteinUhlenbeckOp |
 | `fdmsabrop` | not started |  | no nanoql type: FdmSabrOp |
 | `fdmsquarerootfwdop` | not started |  | no nanoql type: FdmSquareRootFwdOp, FdmSquareRootFwdOpTransformationType |
 | `fdmwienerop` | not started |  | no nanoql type: FdmWienerOp |
-| `firstderivativeop` | not started |  | no nanoql type: FirstDerivativeOp |
+| `firstderivativeop` | ported | Methods/FiniteDifferences/Operators/FirstDerivativeOp.cs |  |
 | `modtriplebandlinearop` | not started |  | no nanoql type: ModTripleBandLinearOp |
 | `ninepointlinearop` | not started |  | no nanoql type: NinePointLinearOp |
 | `nthorderderivativeop` | not started |  | no nanoql type: NthOrderDerivativeOp |
 | `numericaldifferentiation` | not started |  | no nanoql type: NumericalDifferentiation, NumericalDifferentiationScheme |
-| `secondderivativeop` | not started |  | no nanoql type: SecondDerivativeOp |
+| `secondderivativeop` | ported | Methods/FiniteDifferences/Operators/SecondDerivativeOp.cs |  |
 | `secondordermixedderivativeop` | not started |  | no nanoql type: SecondOrderMixedDerivativeOp |
-| `triplebandlinearop` | not started |  | no nanoql type: TripleBandLinearOp |
+| `triplebandlinearop` | ported | Methods/FiniteDifferences/Operators/TripleBandLinearOp.cs |  |
 
 ### `ql/methods/finitedifferences/schemes/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `boundaryconditionschemehelper` | not started |  | no nanoql type: BoundaryConditionSchemeHelper |
-| `craigsneydscheme` | not started |  | no nanoql type: CraigSneydScheme |
-| `cranknicolsonscheme` | not started |  | no nanoql type: CrankNicolsonScheme |
-| `douglasscheme` | not started |  | no nanoql type: DouglasScheme |
-| `expliciteulerscheme` | not started |  | no nanoql type: ExplicitEulerScheme |
-| `hundsdorferscheme` | not started |  | no nanoql type: HundsdorferScheme |
-| `impliciteulerscheme` | not started |  | no nanoql type: ImplicitEulerScheme, ImplicitEulerSchemeSolverType |
-| `methodoflinesscheme` | not started |  | no nanoql type: MethodOfLinesScheme |
-| `modifiedcraigsneydscheme` | not started |  | no nanoql type: ModifiedCraigSneydScheme |
-| `trbdf2scheme` | not started |  | no nanoql type: TrBDF2Scheme, TrBDF2SchemeSolverType |
+| `boundaryconditionschemehelper` | ported | Methods/FiniteDifferences/Schemes/BoundaryConditionSchemeHelper.cs |  |
+| `craigsneydscheme` | ported | Methods/FiniteDifferences/Schemes/CraigSneydScheme.cs |  |
+| `cranknicolsonscheme` | ported | Methods/FiniteDifferences/Schemes/CrankNicolsonScheme.cs |  |
+| `douglasscheme` | ported | Methods/FiniteDifferences/Schemes/DouglasScheme.cs |  |
+| `expliciteulerscheme` | ported | Methods/FiniteDifferences/Schemes/ExplicitEulerScheme.cs |  |
+| `hundsdorferscheme` | ported | Methods/FiniteDifferences/Schemes/HundsdorferScheme.cs |  |
+| `impliciteulerscheme` | ported | Methods/FiniteDifferences/Schemes/ImplicitEulerScheme.cs, Methods/FiniteDifferences/Schemes/ImplicitEulerSchemeSolverType.cs |  |
+| `methodoflinesscheme` | ported | Methods/FiniteDifferences/Schemes/MethodOfLinesScheme.cs |  |
+| `modifiedcraigsneydscheme` | ported | Methods/FiniteDifferences/Schemes/ModifiedCraigSneydScheme.cs |  |
+| `trbdf2scheme` | ported | Methods/FiniteDifferences/Schemes/IFdmSetOperatorScheme.cs, Methods/FiniteDifferences/Schemes/TrBDF2SchemeSolverType.cs, Methods/FiniteDifferences/Schemes/TrBDF2Scheme{TTrapezoidalScheme}.cs |  |
 
 ### `ql/methods/finitedifferences/solvers/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `fdm1dimsolver` | not started |  | no nanoql type: Fdm1DimSolver |
+| `fdm1dimsolver` | ported | Methods/FiniteDifferences/Solvers/Fdm1DimSolver.cs |  |
 | `fdm2dblackscholessolver` | not started |  | no nanoql type: Fdm2dBlackScholesSolver |
 | `fdm2dimsolver` | not started |  | no nanoql type: Fdm2DimSolver |
 | `fdm3dimsolver` | not started |  | no nanoql type: Fdm3DimSolver |
-| `fdmbackwardsolver` | not started |  | no nanoql type: FdmSchemeDesc, FdmSchemeDescFdmSchemeType, FdmBackwardSolver |
+| `fdmbackwardsolver` | ported | Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmBackwardSolver.cs, Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmSchemeDesc.cs, Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmSchemeDescFdmSchemeType.cs |  |
 | `fdmbatessolver` | not started |  | no nanoql type: FdmBatesSolver |
-| `fdmblackscholessolver` | not started |  | no nanoql type: FdmBlackScholesSolver |
+| `fdmblackscholessolver` | ported | Methods/FiniteDifferences/Solvers/FdmBlackScholesSolver.cs |  |
 | `fdmcirsolver` | not started |  | no nanoql type: FdmCIRSolver |
 | `fdmg2solver` | not started |  | no nanoql type: FdmG2Solver |
 | `fdmhestonhullwhitesolver` | not started |  | no nanoql type: FdmHestonHullWhiteSolver |
@@ -1098,20 +1098,20 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmhullwhitesolver` | not started |  | no nanoql type: FdmHullWhiteSolver |
 | `fdmndimsolver` | not started |  | no nanoql type: FdmNdimSolver |
 | `fdmsimple2dbssolver` | not started |  | no nanoql type: FdmSimple2dBSSolver |
-| `fdmsolverdesc` | not started |  | no nanoql type: FdmSolverDesc |
+| `fdmsolverdesc` | ported | Methods/FiniteDifferences/Solvers/FdmSolverDesc.cs |  |
 
 ### `ql/methods/finitedifferences/stepconditions/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `fdmamericanstepcondition` | not started |  | no nanoql type: FdmAmericanStepCondition |
+| `fdmamericanstepcondition` | ported | Methods/FiniteDifferences/StepConditions/FdmAmericanStepCondition.cs |  |
 | `fdmarithmeticaveragecondition` | not started |  | no nanoql type: FdmArithmeticAverageCondition |
-| `fdmbermudanstepcondition` | not started |  | no nanoql type: FdmBermudanStepCondition |
+| `fdmbermudanstepcondition` | ported | Methods/FiniteDifferences/StepConditions/FdmBermudanStepCondition.cs |  |
 | `fdmsimplestoragecondition` | not started |  | no nanoql type: FdmSimpleStorageCondition |
 | `fdmsimpleswingcondition` | not started |  | no nanoql type: FdmSimpleSwingCondition |
-| `fdmsnapshotcondition` | not started |  | no nanoql type: FdmSnapshotCondition |
-| `fdmstepconditioncomposite` | not started |  | no nanoql type: FdmStepConditionComposite |
+| `fdmsnapshotcondition` | ported | Methods/FiniteDifferences/StepConditions/FdmSnapshotCondition.cs |  |
+| `fdmstepconditioncomposite` | ported | Methods/FiniteDifferences/StepConditions/FdmStepConditionComposite.cs |  |
 
 ### `ql/methods/finitedifferences/utilities/`
 
@@ -1120,19 +1120,19 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `bsmrndcalculator` | not started |  | no nanoql type: BSMRNDCalculator |
 | `cevrndcalculator` | not started |  | no nanoql type: CEVRNDCalculator |
-| `escroweddividendadjustment` | not started |  | no nanoql type: EscrowedDividendAdjustment |
+| `escroweddividendadjustment` | ported | Methods/FiniteDifferences/Utilities/EscrowedDividendAdjustment.cs |  |
 | `fdmaffinemodelswapinnervalue` | not started |  | no nanoql type: FdmAffineModelSwapInnerValue |
 | `fdmaffinemodeltermstructure` | not started |  | no nanoql type: FdmAffineModelTermStructure |
-| `fdmboundaryconditionset` | not started |  | no nanoql type: FdmBoundaryConditionSet |
+| `fdmboundaryconditionset` | ported | Methods/FiniteDifferences/Utilities/FdmBoundaryConditionSet.cs |  |
 | `fdmdirichletboundary` | not started |  | no nanoql type: FdmDirichletBoundary |
 | `fdmdiscountdirichletboundary` | not started |  | no nanoql type: FdmDiscountDirichletBoundary |
-| `fdmdividendhandler` | not started |  | no nanoql type: FdmDividendHandler |
-| `fdmescrowedloginnervaluecalculator` | not started |  | no nanoql type: FdmEscrowedLogInnerValueCalculator |
+| `fdmdividendhandler` | ported | Methods/FiniteDifferences/Utilities/FdmDividendHandler.cs |  |
+| `fdmescrowedloginnervaluecalculator` | ported | Methods/FiniteDifferences/Utilities/FdmEscrowedLogInnerValueCalculator.cs |  |
 | `fdmhestongreensfct` | not started |  | no nanoql type: FdmHestonGreensFct, FdmHestonGreensFctAlgorithm |
 | `fdmindicesonboundary` | not started |  | no nanoql type: FdmIndicesOnBoundary |
-| `fdminnervaluecalculator` | not started |  | no nanoql type: FdmInnerValueCalculator, FdmCellAveragingInnerValue, FdmLogInnerValue, FdmLogBasketInnerValue, FdmZeroInnerValue |
+| `fdminnervaluecalculator` | partial | Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmCellAveragingInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmLogInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmZeroInnerValue.cs | partial: FdmLogBasketInnerValue, which waits for B4.5 with the basket option's payoff; no nanoql type: FdmLogBasketInnerValue |
 | `fdmmesherintegral` | not started |  | no nanoql type: FdmMesherIntegral |
-| `fdmquantohelper` | not started |  | no nanoql type: FdmQuantoHelper |
+| `fdmquantohelper` | ported | Methods/FiniteDifferences/Utilities/FdmQuantoHelper.cs |  |
 | `fdmshoutloginnervaluecalculator` | not started |  | no nanoql type: FdmShoutLogInnerValueCalculator |
 | `fdmtimedepdirichletboundary` | not started |  | no nanoql type: FdmTimeDepDirichletBoundary |
 | `gbsmrndcalculator` | not started |  | no nanoql type: GBSMRNDCalculator |
@@ -1692,7 +1692,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `exponentialfittinghestonengine` | not started |  | no nanoql type: ExponentialFittingHestonEngine |
 | `fdbatesvanillaengine` | not started |  | no nanoql type: FdBatesVanillaEngine |
 | `fdblackscholesshoutengine` | not started |  | no nanoql type: FdBlackScholesShoutEngine |
-| `fdblackscholesvanillaengine` | not started |  | no nanoql type: FdBlackScholesVanillaEngine, FdBlackScholesVanillaEngineCashDividendModel, MakeFdBlackScholesVanillaEngine |
+| `fdblackscholesvanillaengine` | ported | PricingEngines/Vanilla/FdBlackScholesVanillaEngine/FdBlackScholesVanillaEngine.cs, PricingEngines/Vanilla/FdBlackScholesVanillaEngine/FdBlackScholesVanillaEngineCashDividendModel.cs, PricingEngines/Vanilla/FdBlackScholesVanillaEngine/MakeFdBlackScholesVanillaEngine.cs |  |
 | `fdcevvanillaengine` | not started |  | no nanoql type: FdCEVVanillaEngine |
 | `fdcirvanillaengine` | not started |  | no nanoql type: FdCIRVanillaEngine, MakeFdCIRVanillaEngine |
 | `fdhestonhullwhitevanillaengine` | not started |  | no nanoql type: FdHestonHullWhiteVanillaEngine |
@@ -2060,7 +2060,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `americanoption` | not started |  | 32 cases |
+| `americanoption` | partial | TestSuite/AmericanOptionTests.cs | 6 of 32 cases; not yet: testBaroneAdesiWhaleyValues, testBaroneAdesiWhaleyValuesAtNonPositiveRate, testBjerksundStenslandValues, testJuValues, testJuValuesAtZeroRate, testBaroneAdesiWhaleyAndJuAtLowVolatility, testJuNotBelowExerciseValue, testBjerksundStenslandAtUnitBeta, testFdShoutGreeks, testFDShoutNPV, testZeroVolFDShoutNPV, testLargeDividendShoutNPV, testQdPlusBoundaryValues, testQdPlusBoundaryConvergence, testQdAmericanEngines, testQdFpIterationScheme, testAndersenLakeHighPrecisionExample, testQdEngineStandardExample, testBulkQdFpAmericanEngine, testQdEngineWithLobattoIntegral, testQdEnginesNotBelowExerciseValue, testQdNegativeDividendYield, testBjerksundStenslandEuropeanGreeks, testBjerksundStenslandAmericanGreeks, testSingleBjerksundStenslandGreeks, testBaroneAdesiWhaleyNegativeRates |
 | `amortizingbond` | partial | TestSuite/AmortizingBondTests.cs | 2 of 3 cases; not yet: testBrazilianAmortizingFixedRateBond |
 | `andreasenhugevolatilityinterpl` | not started |  | 14 cases |
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
@@ -2115,13 +2115,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `digitalcoupon` | not started |  | 8 cases |
 | `digitaloption` | partial | TestSuite/DigitalOptionTests.cs | 3 of 10 cases; not yet: testCashAtHitOrNothingAmericanValues, testAssetAtHitOrNothingAmericanValues, testCashAtExpiryOrNothingAmericanValues, testAssetAtExpiryOrNothingAmericanValues, testCashAtHitOrNothingAmericanGreeks, testCashAtHitOrNothingAmericanLowVolatility, testMCCashAtHit |
 | `distributions` | partial | TestSuite/DistributionsTests.cs | 13 of 21 cases; not yet: testBivariate, testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation |
-| `dividendoption` | partial | TestSuite/DividendOptionTests.cs | 4 of 18 cases; not yet: testEuropeanEndLimit, testFdEuropeanValues, testFdEuropeanGreeks, testFdAmericanGreeks, testFdEuropeanDegenerate, testFdAmericanDegenerate, testFdEuropeanWithDividendToday, testFdAmericanWithDividendToday, testEscrowedDividendModel, testCashDividendEuropeanEngine, testCashDividendEuropeanEngineWithManyDividends, testCashDividendEuropeanEngineWithSingleDividends, testZeroStrikeCallWithCashDividends, testAmericanOptionsWithEscrowedDividends |
+| `dividendoption` | partial | TestSuite/DividendOptionTests.cs | 13 of 18 cases; not yet: testEuropeanEndLimit, testCashDividendEuropeanEngine, testCashDividendEuropeanEngineWithManyDividends, testCashDividendEuropeanEngineWithSingleDividends, testZeroStrikeCallWithCashDividends |
 | `doublebarrieroption` | not started |  | 3 cases |
 | `doublebinaryoption` | not started |  | 2 cases |
 | `equitycashflow` | not started |  | 8 cases |
 | `equityindex` | not started |  | 12 cases |
 | `equitytotalreturnswap` | not started |  | 5 cases |
-| `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 6 of 27 cases; not yet: testValues, testJRBinomialEngines, testCRRBinomialEngines, testEQPBinomialEngines, testTGEOBinomialEngines, testTIANBinomialEngines, testLRBinomialEngines, testJOSHIBinomialEngines, testFarOutOfTheMoneyBinomialEngines, testLargeDriftBinomialEngines, testFdEngines, testIntegralEngines, testMcEngines, testQmcEngines, testLocalVolatility, testPDESchemes, testFdEngineWithNonConstantParameters, testDouglasVsCrankNicolson, testFFTEngines, testBinomialGreeksWithCoincidentNodes, testFdEnginesWithNonStrikedPayoff |
+| `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 12 of 27 cases; not yet: testJRBinomialEngines, testCRRBinomialEngines, testEQPBinomialEngines, testTGEOBinomialEngines, testTIANBinomialEngines, testLRBinomialEngines, testJOSHIBinomialEngines, testFarOutOfTheMoneyBinomialEngines, testLargeDriftBinomialEngines, testIntegralEngines, testMcEngines, testQmcEngines, testFFTEngines, testBinomialGreeksWithCoincidentNodes, testFdEnginesWithNonStrikedPayoff |
 | `everestoption` | not started |  | 1 cases |
 | `exchangerate` | not started |  | 5 cases |
 | `extendedblackvariancesurface` | not started |  | 1 cases |
@@ -2131,7 +2131,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdcev` | not started |  | 2 cases |
 | `fdcir` | not started |  | 1 cases |
 | `fdheston` | not started |  | 12 cases |
-| `fdmlinearop` | partial | TestSuite/FdmLinearOpTests.cs | 2 of 19 cases; not yet: testFdmLinearOpLayout, testUniformGridMesher, testFirstDerivativesMapApply, testSecondDerivativesMapApply, testDerivativeWeightsOnNonUniformGrids, testSecondOrderMixedDerivativesMapApply, testTripleBandMapSolve, testFdmHestonBarrier, testFdmHestonAmerican, testFdmHestonExpress, testFdmHestonHullWhiteOp, testBiCGstab, testGMRES, testCrankNicolsonWithDamping, testFdmMesherIntegral, testHighInterestRateBlackScholesMesher, testLowVolatilityHighDiscreteDividendBlackScholesMesher |
+| `fdmlinearop` | partial | TestSuite/FdmLinearOpTests.cs | 6 of 19 cases; not yet: testUniformGridMesher, testFirstDerivativesMapApply, testSecondDerivativesMapApply, testDerivativeWeightsOnNonUniformGrids, testSecondOrderMixedDerivativesMapApply, testTripleBandMapSolve, testFdmHestonBarrier, testFdmHestonAmerican, testFdmHestonExpress, testFdmHestonHullWhiteOp, testBiCGstab, testGMRES, testFdmMesherIntegral |
 | `fdsabr` | not started |  | 5 cases |
 | `fittedbonddiscountcurve` | not started |  | 5 cases |
 | `floatfloatswap` | not started |  | 6 cases |
@@ -2210,7 +2210,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `quantlibbenchmark` | not ported: a timing runner |  |  |
 | `quantlibglobalfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `quantlibtestsuite` | replaced: test infrastructure: xUnit and the vector harness |  |  |
-| `quantooption` | not started |  | 10 cases |
+| `quantooption` | partial | TestSuite/QuantoOptionTests.cs | 1 of 10 cases; not yet: testValues, testGreeks, testForwardValues, testForwardGreeks, testForwardPerformanceValues, testBarrierValues, testPDEOptionValues, testAmericanQuantoOption, testDoubleBarrierValues |
 | `quotes` | not started |  | 6 cases |
 | `rangeaccrual` | not started |  | 3 cases |
 | `riskneutraldensitycalculator` | not started |  | 14 cases |

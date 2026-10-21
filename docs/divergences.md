@@ -575,6 +575,46 @@ Facts:
 - `TheCopyKeepsItsTypeAndItsValues`
 - `ANullReceiverThrows`
 
+## FdmDividendHandler3dTests
+
+[`Divergences/FdmDividendHandler3dTests.cs`](../tests/NanoQL.Tests/Divergences/FdmDividendHandler3dTests.cs)
+
+`FdmDividendHandler` on a grid of three dimensions. At a dividend's time QuantLib moves, for each direction other than the equity's, only the lines along the equity direction through that direction's points with every further coordinate 0 (`fdmdividendhandler.cpp:84-103`): all of a two-dimensional grid, but in three dimensions the lines with two nonzero other coordinates stay as they were, 6 of a 3 × 5 × 4 grid's 12, while the lines it moves equal its one-dimensional handler's. nanoql moves every line as the one-dimensional handler does.
+
+Facts:
+
+- `EveryLineMovesAsTheOneDimensionalHandlerMovesIt`
+
+## FdmMismatchedTimesTests
+
+[`Divergences/FdmMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/FdmMismatchedTimesTests.cs)
+
+The finite-difference Black-Scholes engine on structures that measure time differently. Its times are the risk-free curve's, measured from its reference date in its day counter (`blackscholesprocess.cpp:149-152`), and QuantLib reads the dividend curve, the volatility and the quanto helper's structures at those times (`fdmblackscholesop.cpp:51-66`, `fdmblackscholesmesher.cpp:63-103`, `fdmquantohelper.cpp:43-55`), each of which measures time from its own reference date in its own day counter. A one-year put on a risk-free curve on Act/360, with the same discount factor at every date as one on Act/365, prices 0.93% above QuantLib's analytic engine, which reads every structure by date and agrees on both; on a curve settling two business days after its volatility's date, 0.74% below. nanoql's operator and mesher refuse structures that aren't on the risk-free curve's day counter and reference date, "all term structures must share one day counter" and "... one reference date", as `QuantoTermStructure` does for day counters. A dividend curve that is a flat forward at zero, as QuantLib's `BlackScholesProcess` builds on Act/365 and the evaluation date, discounts by 1 at any time and is taken however it is dated, so that process prices as QuantLib's does.
+
+Facts:
+
+- `ARiskFreeCurveOnAnotherDayCounterIsRefused`
+- `ARiskFreeCurveOnAnotherReferenceDateIsRefused`
+- `EachStructureTheEngineReadsIsChecked`
+- `AZeroDividendCurveOnAnotherDayCounterIsTaken`
+
+## FdmUndefinedPathRefusalTests
+
+[`Divergences/FdmUndefinedPathRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/FdmUndefinedPathRefusalTests.cs)
+
+The finite-difference core's inputs QuantLib leaves undefined (the S-eq plan's SEQR7 (vii)), each refused before the undefined step. A mesher of no point writes the first and last of an empty vector, and runs its loop to the unsigned size less one (`uniform1dmesher.hpp:41-50`, `concentrating1dmesher.cpp:61-103`); a mesher of one point divides by zero and leaves that point at its end and its distances null. A one-point splitting solve runs its back substitution from the unsigned size less two (`triplebandlinearop.cpp:301-303`). An empty layout takes the element before its dimensions' first and the last of an empty spacing (`fdmlinearoplayout.hpp:37-42`). A composite of more meshers than its layout's dimensions reads past them (`fdmmeshercomposite.cpp:80-83`). Bands of different sizes, added or multiplied, are read past the shorter's end (`triplebandlinearop.cpp:163-188`).
+
+Facts:
+
+- `AUniformMesherOfNoPointIsRefused`
+- `AUniformMesherOfOnePointIsRefused`
+- `AConcentratingMesherOfNoPointIsRefused`
+- `AConcentratingMesherOfOnePointIsRefused`
+- `AOnePointSolveIsRefused`
+- `AnEmptyLayoutIsRefused`
+- `MoreMeshersThanDimensionsAreRefused`
+- `BandsOfDifferentSizesAreRefused`
+
 ## FlatExtrapolator2DNullTests
 
 [`Divergences/FlatExtrapolator2DNullTests.cs`](../tests/NanoQL.Tests/Divergences/FlatExtrapolator2DNullTests.cs)
@@ -1405,6 +1445,16 @@ Facts:
 - `PairedEigenvaluesUnderNoShiftAreRefused`
 - `ANaNOffDiagonalIsRefused`
 - `AGaussJacobiQuadratureWithOverflowingParametersIsRefused`
+
+## TrBdf2TimeDependentTests
+
+[`Divergences/TrBdf2TimeDependentTests.cs`](../tests/NanoQL.Tests/Divergences/TrBdf2TimeDependentTests.cs)
+
+`TrBDF2Scheme{TTrapezoidalScheme}` with time-dependent coefficients (the S-eq plan's SEQR9). QuantLib's step sets the operator over its trapezoidal sub-step's interval, [t − α·dt, t], and solves its BDF2 stage with that operator (`trbdf2scheme.hpp:106-124`), so where a curve's rate moves within the step the stage reads the wrong one: first order, or stalling. nanoql sets the operator once over the whole step, [t − dt, t], the interval QuantLib's other schemes set, for both stages. On a zero curve whose forward rate jumps at half a year, an at-the-money call priced on 800 points lies within 1e-3 of the analytic engine at 365 and 640 steps, where QuantLib's engine errs by 2.7e-2 and 2.0e-2. QuantLib's TR-BDF2 cases are all on flat inputs, where the two forms differ in the last bits only (the scheme's vectors, within R7).
+
+Facts:
+
+- `BothStagesOverTheWholeStepConvergeOnATimeDependentCurve`
 
 ## TrapezoidMidPointTests
 

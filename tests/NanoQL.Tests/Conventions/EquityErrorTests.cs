@@ -191,8 +191,7 @@ public class EquityErrorTests
             () => european.ImpliedVolatility(5.0, process, context, 1e-4, 100, 2.0, 1.0), "minVol", "invalid range: xMin_ (2) >= xMax_ (1)");
         Refused<ArgumentOutOfRangeException>(() => european.ImpliedVolatility(5.0, process, context, 1e-4, -1), "maxEvaluations", null);
         Refused<NanoQLException>(() => european.ImpliedVolatility(150.0, process, context), null, "root not bracketed");
-        Refused<NanoQLException>(
-            () => american.ImpliedVolatility(5.0, process, context), null, "the implied volatility of an American or Bermudan option waits for the finite-difference engine");
+        Refused<NanoQLException>(() => american.ImpliedVolatility(150.0, process, context), null, "root not bracketed");
     }
 
     // A Black variance of 0.04 at time 0 and 0.01 after it, which no ported structure gives: LocalVolSurface's check at

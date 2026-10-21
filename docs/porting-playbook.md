@@ -282,12 +282,14 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `Seasonality`, `CPIVolatilitySurface`, `YoYOptionletVolatilitySurface`, `InflationCoupon`, `InflationCouponPricer`,
   `DefaultProbabilityTermStructure`, `HazardRateStructure`, `DefaultDensityStructure`, `SurvivalProbabilityStructure`,
   `Claim`, `CdsHelper`, `BlackVolTermStructure`, `BlackVolatilityTermStructure`, `BlackVarianceTermStructure`,
-  `LocalVolTermStructure`, `OneAssetOption`, `Dividend`, `Integrator` and `GaussianOrthogonalPolynomial` (abstract);
+  `LocalVolTermStructure`, `OneAssetOption`, `Dividend`, `Integrator`, `GaussianOrthogonalPolynomial`, `FdmMesher`,
+  `FdmLinearOp`, `FdmLinearOpComposite`, `StepCondition`, `BoundaryCondition<TOperator>` and
+  `FdmInnerValueCalculator` (abstract);
   `DiscretizedOption`, `Vasicek`, `TermStructureFittingParameter`, `Projection`, `ZeroInflationIndex`,
   `YoYInflationIndex`, `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`,
   `YoYInflationCouponPricer`, `CPICouponPricer`, `YoYInflationCapFloor`, `GeneralizedBlackScholesProcess`,
-  `LocalVolSurface`, `VanillaOption`, `OneAssetOptionResults`, `BlackCalculator`, `GaussianQuadrature` and
-  `GaussJacobiPolynomial` (unsealed); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
+  `LocalVolSurface`, `VanillaOption`, `OneAssetOptionResults`, `BlackCalculator`, `GaussianQuadrature`,
+  `GaussJacobiPolynomial`, `Fdm1dMesher`, `TripleBandLinearOp` and `FdmCellAveragingInnerValue` (unsealed); `Swap`, `SimpleCashFlow`, `InstrumentResults`, `SwapResults`,
   `FixedVsFloatingSwapResults`, `OvernightIndexedSwapResults`, `Bond`, `BondResults`, `FixedRateBond`,
   `FloatingRateBond`, `CapFloor`, `BondHelper`, `Callability`, `IborIndex`, `OvernightIndex`, `Euribor`, `SwapIndex`,
   `Currency`, `Rounding`, `FloatingRateCoupon`, `IborCoupon`, `CappedFlooredCoupon`, `BlackIborCouponPricer`,
@@ -315,7 +317,8 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   concept), the generator concepts `IRng`, `IInt32Rng`, `ISeedableRng<TSelf>`, `IRsg`, `ISeedableRsg<TSelf>`,
   `IInverseCumulative` and `IRngTraits`, and the model contracts `ICalibratedModel`, `IAffineModel` and
   `ITermStructureConsistentModel`, `IXabrInterpolation`, a fit's results, `IXabrCubeModel`, a cube's smile model, and
-  the ZABR kernel tag `IZabrEvaluation`, whose members are internal, so that its tags are QuantLib's (interfaces); and
+  the ZABR kernel tag `IZabrEvaluation`, whose members are internal, so that its tags are QuantLib's, and
+  `IFdmScheme`, the finite-difference schemes' concept for `FiniteDifferenceModel<TScheme>` (interfaces); and
   `Solver1DBracket`, `ProblemState` and `BootstrapState<TTermStructure>`, sealed, which a solver's `SolveCore`, a
   method's `MinimizeCore` and a bootstrap's `Calculate` receive.
 - **A bond's construction contract:** `Bond`'s derived constructors follow QuantLib's protected interface. They call

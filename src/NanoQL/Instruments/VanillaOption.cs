@@ -5,10 +5,10 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/instruments/vanillaoption.hpp ql/instruments/vanillaoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: ImpliedVolatility's American and Bermudan branch, which builds the finite-difference engine and waits for this slot's third commit
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Methods;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
 
@@ -127,8 +127,21 @@ public class VanillaOption : OneAssetOption
                 break;
             case ExerciseType.American:
             case ExerciseType.Bermudan:
-                throw new NanoQLException(
-                    "the implied volatility of an American or Bermudan option waits for the finite-difference engine");
+                // QuantLib's FdBlackScholesVanillaEngine on its defaults, with the dividends
+                body = p => FdBlackScholesVanillaEngine.Body(
+                    this,
+                    context,
+                    p,
+                    dividends,
+                    null,
+                    100,
+                    100,
+                    0,
+                    FdmSchemeDesc.Douglas(),
+                    false,
+                    null,
+                    FdBlackScholesVanillaEngineCashDividendModel.Spot);
+                break;
             default:
                 throw new NanoQLException("unknown exercise type");
         }

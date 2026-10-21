@@ -11,12 +11,14 @@ oneassetoption.hpp, .cpp, europeanoption.hpp, .cpp) and its implied volatility (
   BlackScholesProcess) solved back with QuantLib's C++ defaults (accuracy 1e-4, 100 evaluations, the bracket [1e-7,
   4]) and tighter accuracies, by Brent's method from the middle of the bracket. Then the refusals: an expired option
   ("option expired"), a target no volatility reaches, too few evaluations, and an empty bracket.
+- Implied volatilities of American and Bermudan options: the finite-difference engine's value on its default grid
+  (100 x 100, the Douglas scheme), which QuantLib's impliedVolatility builds for these exercises, solved back at
+  accuracy 1e-8: puts and calls at two strikes, with and without dividends, and a Bermudan put of quarterly dates.
 
 The stability filter of the S-eq plan's S7R6 runs on each solve: the solve is redone with the target price, the spot
 and the two curves' rates moved one ulp up, then down, together and each alone, and the implied volatility is written
 only where every move leaves it within 1e-12 x max(|a|, |b|, 1), or throwing where it throws; the generator prints
-"dropped n of m outputs" per solve and for the file. American and Bermudan options' implied volatilities, which build
-the finite-difference engine, are a later commit's.
+"dropped n of m outputs" per solve and for the file.
 
 The process specs are tools/vectors/gen/processes/blackscholesprocess.py's, a payoff spec
 tools/vectors/gen/pricingengines/blackcalculator.py's, a dividend tools/vectors/gen/pricingengines/vanilla/
@@ -70,23 +72,42 @@ def market(x0, r, q, vol, kind):
     return bsp.process_spec(kind, x0, bsp.flat_spec(R, r), bsp.bvts.vol_spec_constant(R, vol), bsp.flat_spec(R, q))
 
 
-def option(payoff_spec, days, european=True):
-    ex = ql.EuropeanExercise(R + days)
+def exercise_spec(kind, days):
+    if kind == "Bermudan":
+        return {"type": kind, "date": (R + days).serialNumber(),
+                "dates": [(R + d).serialNumber() for d in range(days % 91 or 91, days + 1, 91)]}
+    return {"type": kind, "date": (R + days).serialNumber()}
+
+
+def exercise(spec):
+    if spec["type"] == "European":
+        return ql.EuropeanExercise(ql.Date(spec["date"]))
+    if spec["type"] == "American":
+        return ql.AmericanExercise(R, ql.Date(spec["date"]))
+    return ql.BermudanExercise([ql.Date(d) for d in spec["dates"]])
+
+
+def option(payoff_spec, days, european=True, kind="European"):
+    ex = exercise(exercise_spec(kind, days))
     return (ql.EuropeanOption if european else ql.VanillaOption)(bc.payoff(payoff_spec), ex)
 
 
-def npv(payoff_spec, days, pspec, dividends):
-    o = option(payoff_spec, days)
+def npv(payoff_spec, days, pspec, dividends, kind="European"):
+    o = option(payoff_spec, days, kind == "European", kind)
     p = bsp.process(pspec)
-    if dividends:
+    if kind != "European":
+        # the engine QuantLib's impliedVolatility builds for an early exercise, on its default grid
+        o.setPricingEngine(ql.FdBlackScholesVanillaEngine(p, [ade.dividend(d) for d in dividends], 100, 100)
+                           if dividends else ql.FdBlackScholesVanillaEngine(p, 100, 100))
+    elif dividends:
         o.setPricingEngine(ql.AnalyticDividendEuropeanEngine(p, [ade.dividend(d) for d in dividends]))
     else:
         o.setPricingEngine(ql.AnalyticEuropeanEngine(p))
     return o.NPV()
 
 
-def solve(payoff_spec, days, pspec, dividends, target, args):
-    o = option(payoff_spec, days, european=False)
+def solve(payoff_spec, days, pspec, dividends, target, args, kind="European"):
+    o = option(payoff_spec, days, european=False, kind=kind)
     p = bsp.process(pspec)
     a = (args["accuracy"], args["maxEvaluations"], args["minVol"], args["maxVol"])
     if dividends:
@@ -147,11 +168,20 @@ def cases():
                    "BlackScholesMertonProcess", [], dict(defaults, minVol=2.0, maxVol=1.0), None))
     solves.append(("an expired option", bc.payoff_spec("PlainVanilla", CALL, 100.0), -1, 100.0, 0.04, 0.02, 0.2,
                    "BlackScholesMertonProcess", [], dict(defaults), 5.0))
+    solves = [s + ("European",) for s in solves]
+    for ex_kind, days in (("American", 365), ("Bermudan", 364)):
+        for option_type in (CALL, PUT):
+            for strike in (90.0, 110.0):
+                for dname, dividends in (("", []), (" with dividends", divs)):
+                    solves.append((f"{ex_kind} {option_type} K {strike}{dname}",
+                                   bc.payoff_spec("PlainVanilla", option_type, strike), days, 100.0, 0.04, 0.03, 0.25,
+                                   "BlackScholesMertonProcess", dividends, dict(defaults, accuracy=1e-8), None,
+                                   ex_kind))
     dropped_total, outputs_total = 0, 0
-    for name, payoff_spec, days, x0, r, q, vol, kind, dividends, args, fixed_target in solves:
+    for name, payoff_spec, days, x0, r, q, vol, kind, dividends, args, fixed_target, ex_kind in solves:
         pspec = market(x0, r, q, vol, kind)
-        target = fixed_target if fixed_target is not None else npv(payoff_spec, days, pspec, dividends)
-        base = solve(payoff_spec, days, pspec, dividends, target, args)
+        target = fixed_target if fixed_target is not None else npv(payoff_spec, days, pspec, dividends, ex_kind)
+        base = solve(payoff_spec, days, pspec, dividends, target, args, ex_kind)
         keep = True
         inputs = [target, x0, r, q]
         moves = [[moved(x, d) for x in inputs] for d in (math.inf, -math.inf)]
@@ -161,7 +191,7 @@ def cases():
                 m[i] = moved(inputs[i], d)
                 moves.append(m)
         for m_target, m_x0, m_r, m_q in moves:
-            m = solve(payoff_spec, days, market(m_x0, m_r, m_q, vol, kind), dividends, m_target, args)
+            m = solve(payoff_spec, days, market(m_x0, m_r, m_q, vol, kind), dividends, m_target, args, ex_kind)
             if not stable(base, m):
                 keep = False
                 break
@@ -173,8 +203,7 @@ def cases():
         if keep:
             e["impliedVolatility"] = base
         out.append({"name": f"implied volatility, {name}",
-                    "inputs": {"settings": st, "payoff": payoff_spec,
-                               "exercise": {"type": "European", "date": (R + days).serialNumber()},
+                    "inputs": {"settings": st, "payoff": payoff_spec, "exercise": exercise_spec(ex_kind, days),
                                "process": pspec, "dividends": dividends, "targetFrom": fixed_target is None,
                                **args},
                     "expected": e})

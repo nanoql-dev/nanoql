@@ -4,7 +4,9 @@
 using NanoQL.Coupons;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
+using NanoQL.Methods;
 using NanoQL.Numerics;
+using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 
@@ -423,6 +425,60 @@ internal static class EnumArguments
         if (value is < TqrEigenDecompositionShiftStrategy.NoShift or > TqrEigenDecompositionShiftStrategy.CloseEigenValue)
         {
             throw new ArgumentOutOfRangeException(paramName, value, "unknown shift strategy");
+        }
+    }
+
+    /// <summary>Refuses an implicit scheme's solver outside <see cref="ImplicitEulerSchemeSolverType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib fails "unknown/illegal solver type" at a multi-directional step.</remarks>
+    internal static void Check(ImplicitEulerSchemeSolverType value, string paramName)
+    {
+        if (value is < ImplicitEulerSchemeSolverType.BiCGstab or > ImplicitEulerSchemeSolverType.GMRES)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown/illegal solver type");
+        }
+    }
+
+    /// <summary>Refuses a TR-BDF2 scheme's solver outside <see cref="TrBDF2SchemeSolverType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib fails "unknown/illegal solver type" at a multi-directional step.</remarks>
+    internal static void Check(TrBDF2SchemeSolverType value, string paramName)
+    {
+        if (value is < TrBDF2SchemeSolverType.BiCGstab or > TrBDF2SchemeSolverType.GMRES)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown/illegal solver type");
+        }
+    }
+
+    /// <summary>Refuses a scheme type outside <see cref="FdmSchemeDescFdmSchemeType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's backward solver fails "Unknown scheme type" at its rollback.</remarks>
+    internal static void Check(FdmSchemeDescFdmSchemeType value, string paramName)
+    {
+        if (value is < FdmSchemeDescFdmSchemeType.HundsdorferType or > FdmSchemeDescFdmSchemeType.CrankNicolsonType)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "Unknown scheme type");
+        }
+    }
+
+    /// <summary>Refuses a cash dividend model outside
+    /// <see cref="FdBlackScholesVanillaEngineCashDividendModel"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's engine fails "unknwon cash dividend model" at its calculation.</remarks>
+    internal static void Check(FdBlackScholesVanillaEngineCashDividendModel value, string paramName)
+    {
+        if (value is < FdBlackScholesVanillaEngineCashDividendModel.Spot
+            or > FdBlackScholesVanillaEngineCashDividendModel.Escrowed)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknwon cash dividend model");
         }
     }
 }

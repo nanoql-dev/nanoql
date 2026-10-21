@@ -159,8 +159,10 @@ internal static class EquityInputs
         };
     }
 
-    /// <summary>The exercise a spec describes: European at its date, or American from the evaluation date to
-    /// it.</summary>
+    /// <summary>
+    /// The exercise a spec describes: European at its date, American from the evaluation date to it, or Bermudan at its
+    /// dates.
+    /// </summary>
     /// <param name="spec">The spec.</param>
     /// <param name="context">The case's evaluation context.</param>
     /// <returns>The exercise.</returns>
@@ -171,6 +173,7 @@ internal static class EquityInputs
         {
             "European" => new EuropeanExercise(date),
             "American" => new AmericanExercise(context.EvaluationDate, date),
+            "Bermudan" => new BermudanExercise(DatesOf(spec.GetProperty("dates"))),
             string s => throw new InvalidOperationException($"unknown exercise '{s}'"),
             null => throw new InvalidOperationException("no exercise type"),
         };

@@ -282,6 +282,67 @@ public abstract class YieldTermStructure : TermStructure
         return InterestRate.ImpliedRate(compound, DayCounter, comp, freq, t2 - t1);
     }
 
+    /// <summary>
+    /// The continuously compounded forward rate between two times: <see cref="ForwardRate(double, double, Compounding,
+    /// Frequency, bool)"/>'s rate, from the same compound factor by the same arithmetic, without building the
+    /// <see cref="InterestRate"/>, so that a finite-difference operator's time step allocates nothing.
+    /// </summary>
+    /// <param name="t1">The start time.</param>
+    /// <param name="t2">The end time, not before <paramref name="t1"/>.</param>
+    /// <returns>The forward rate.</returns>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="t2"/> is before <paramref name="t1"/>, the compound factor isn't positive, or the time isn't.
+    /// </exception>
+    internal double ContinuousForwardRate(double t1, double t2)
+    {
+        double compound;
+        if (t2 == t1)
+        {
+            CheckRange(t1, false);
+            double shifted = t1 - (Dt / 2.0);
+            t1 = shifted < 0.0 ? 0.0 : shifted;
+            t2 = t1 + Dt;
+            compound = Discount(t1, true) / Discount(t2, true);
+        }
+        else
+        {
+            if (!(t2 > t1))
+            {
+                throw new ArgumentException(
+                    string.Create(System.Globalization.CultureInfo.InvariantCulture, $"t1 ({t1}) >= t2 ({t2})"), nameof(t1));
+            }
+
+            compound = Discount(t1, false) / Discount(t2, false);
+        }
+
+        // InterestRate.ImpliedRate's checks and continuous branch
+        double t = t2 - t1;
+        if (!(compound > 0.0))
+        {
+            throw new ArgumentException("positive compound factor required", nameof(t1));
+        }
+
+        if (compound == 1.0)
+        {
+            if (!(t >= 0.0))
+            {
+                throw new ArgumentException(
+                    string.Create(System.Globalization.CultureInfo.InvariantCulture, $"non negative time ({t}) required"),
+                    nameof(t1));
+            }
+
+            return 0.0;
+        }
+
+        if (!(t > 0.0))
+        {
+            throw new ArgumentException(
+                string.Create(System.Globalization.CultureInfo.InvariantCulture, $"positive time ({t}) required"), nameof(t1));
+        }
+
+        return Math.Log(compound) / t;
+    }
+
     /// <summary>The dates of the discount-factor jumps, one per jump.</summary>
     /// <returns>The dates, empty for a curve without jumps.</returns>
     public virtual ImmutableArray<Date> JumpDates() => jumpDates;
