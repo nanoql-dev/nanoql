@@ -83,8 +83,12 @@ public sealed class FdmStepConditionComposite : StepCondition
     /// <param name="exercise">The exercise: European, American or Bermudan.</param>
     /// <param name="mesher">The mesher.</param>
     /// <param name="calculator">The inner value's calculator.</param>
-    /// <param name="refDate">The date of time 0.</param>
-    /// <param name="dayCounter">The day counter measuring times.</param>
+    /// <param name="refDate">
+    /// The date of time 0: for the Black-Scholes engine, <see cref="FdmBlackScholesOp.Clock"/>'s reference date.
+    /// </param>
+    /// <param name="dayCounter">
+    /// The day counter measuring times: for the Black-Scholes engine, <see cref="FdmBlackScholesOp.Clock"/>'s.
+    /// </param>
     /// <param name="context">The evaluation context the dividends' amounts are read in.</param>
     /// <returns>The composite.</returns>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>

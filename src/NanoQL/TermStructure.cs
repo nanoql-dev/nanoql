@@ -74,6 +74,84 @@ public abstract class TermStructure : Extrapolator
         return DayCounter.YearFraction(ReferenceDate, date);
     }
 
+    // Whether this structure measures time as another does: the same day counter from the same reference date.
+    internal bool SharesTimes(TermStructure other) => DayCounter == other.DayCounter && ReferenceDate == other.ReferenceDate;
+
+    // The time on this structure's own clock of the instant a time on another structure's clock denotes, for the
+    // engines and processes whose times are one structure's and that read others at them (the S-eq plan's rulings of
+    // 2026-10-20 and 2026-10-21, under R8): the identity where the two share their times; otherwise the clock's time
+    // is taken to its date, the last whose year fraction is at most the time, and the fraction of the next day past
+    // it, and read as this structure's year fraction, linear within the day. Between Actual/N day counters it is
+    // exact, a reference date's offset a constant shift. An instant before the structure's reference date has a
+    // negative own time, which AccrualTime takes to 0.
+    internal double OwnTime(TermStructure clock, double t)
+    {
+        if (SharesTimes(clock))
+        {
+            return t;
+        }
+
+        if (!double.IsFinite(t))
+        {
+            return double.NaN;
+        }
+
+        DayCounter clockDc = clock.DayCounter;
+        Date clockReference = clock.ReferenceDate;
+        double year = clockDc.YearFraction(clockReference, clockReference + 365);
+        int n = (int)Math.Floor(t / year * 365.0);
+        while (clockDc.YearFraction(clockReference, clockReference + n) > t)
+        {
+            --n;
+        }
+
+        while (clockDc.YearFraction(clockReference, clockReference + (n + 1)) <= t)
+        {
+            ++n;
+        }
+
+        Date day = clockReference + n;
+        double from = clockDc.YearFraction(clockReference, day);
+        double fraction = (t - from) / (clockDc.YearFraction(clockReference, day + 1) - from);
+        double own = DayCounter.YearFraction(ReferenceDate, day);
+        return own + (fraction * (DayCounter.YearFraction(ReferenceDate, day + 1) - own));
+    }
+
+    // The own time up to which this structure has accrued at the instant a time on another structure's clock denotes:
+    // each structure counts from its own reference date, as QuantLib's analytic engines do (the user's rulings of
+    // 2026-10-21 on the S-eq plan, C4-O1 and C4R2-O2). An instant before the reference date is its time 0, so a
+    // structure dated after the clock's accrues nothing before its date.
+    internal double AccrualTime(TermStructure clock, double t)
+    {
+        double own = OwnTime(clock, t);
+        return own < 0.0 ? 0.0 : own;
+    }
+
+    // This structure's time to a date, none before its reference date: TimeFromReference on and after that date (the
+    // user's rulings of 2026-10-21 on the S-eq plan, C4R2-O2 (i): nothing accrues before a structure's reference date).
+    internal double AccrualTimeTo(Date date) => Math.Max(TimeFromReference(date), 0.0);
+
+    // The year fraction on another day counter from this structure's reference date to a date, none before that date:
+    // this structure's time to the date measured in another's units.
+    internal double AccrualTimeTo(Date date, DayCounter dayCounter) =>
+        Math.Max(dayCounter.YearFraction(ReferenceDate, date), 0.0);
+
+    // This structure's accrual time elapsed per unit of another structure's between two times on that one's clock,
+    // the rate at which a rate or variance read at its own times accrues per unit of the clock's (AccrualTime); a
+    // zero-length interval widened as QuantLib widens a forward rate's.
+    internal double AccruedPerClockTime(TermStructure clock, double t1, double t2)
+    {
+        if (t2 == t1)
+        {
+            const double Dt = 0.0001;
+            double shifted = t1 - (Dt / 2.0);
+            t1 = shifted < 0.0 ? 0.0 : shifted;
+            t2 = t1 + Dt;
+        }
+
+        return (AccrualTime(clock, t2) - AccrualTime(clock, t1)) / (t2 - t1);
+    }
+
     /// <summary>Checks that a date is within the curve's range, or that extrapolation is allowed.</summary>
     /// <param name="d">The date.</param>
     /// <param name="extrapolate">Whether this call extrapolates.</param>

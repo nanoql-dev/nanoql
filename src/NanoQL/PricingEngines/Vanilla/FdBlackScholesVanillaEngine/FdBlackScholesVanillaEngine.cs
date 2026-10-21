@@ -28,6 +28,15 @@ namespace NanoQL.PricingEngines;
 /// working types are built inside each calculation and dropped after it (the S-eq plan's SEQR1).
 /// </para>
 /// <para>
+/// Its times run on <see cref="FdmBlackScholesOp.Clock"/>, from the earliest reference date of the structures it reads,
+/// each structure accruing nothing before its own date; where no structure is dated before the risk-free curve, they
+/// are QuantLib's (<c>Divergences/FdmMismatchedTimesTests.cs</c>). The theta is the change over the clock's first
+/// calendar day, QuantLib's own engine's theta on the market restated from that date: where a structure is dated after
+/// the evaluation date, that day accrues none of its dividends or variance, so the theta differs from the formula theta
+/// of the analytic and binomial engines, even in sign (+2.47 against the analytic engine's −27.57 on a 14-day put whose
+/// dividend curve and volatility start four days later).
+/// </para>
+/// <para>
 /// QuantLib's four constructors are one method here: the dividends and the quanto helper are optional arguments.
 /// </para>
 /// </remarks>
@@ -135,10 +144,12 @@ public static class FdBlackScholesVanillaEngine
         double? illegalLocalVolOverwrite,
         FdBlackScholesVanillaEngineCashDividendModel cashDividendModel)
     {
-        // 0. Cash dividend model
+        // 0. Cash dividend model; the times the engine's clock's (FdmBlackScholesOp.Clock), from the earliest reference
+        // date of the structures it reads, the process's where none is dated before the risk-free curve
+        TermStructure clock = FdmBlackScholesOp.Clock(process, quantoHelper);
         Date exerciseDate = option.Exercise.LastDate();
-        double maturity = process.Time(exerciseDate);
-        Date settlementDate = process.RiskFreeRate.ReferenceDate;
+        double maturity = clock.TimeFromReference(exerciseDate);
+        Date settlementDate = clock.ReferenceDate;
 
         double spotAdjustment = 0.0;
         ImmutableArray<Dividend> dividendSchedule = [];
@@ -167,11 +178,12 @@ public static class FdBlackScholesVanillaEngine
                     dividends,
                     process.RiskFreeRate,
                     process.DividendYield,
-                    d => process.Time(d),
+                    clock.TimeFromReference,
                     maturity,
-                    context);
+                    context,
+                    clock);
 
-                spotAdjustment = escrowedDivAdj.DividendAdjustment(process.Time(settlementDate));
+                spotAdjustment = escrowedDivAdj.DividendAdjustment(clock.TimeFromReference(settlementDate));
 
                 if (!(process.X0 + spotAdjustment > 0.0))
                 {
@@ -221,8 +233,8 @@ public static class FdBlackScholesVanillaEngine
             option.Exercise,
             mesher,
             earlyExerciseCalculator,
-            process.RiskFreeRate.ReferenceDate,
-            process.RiskFreeRate.DayCounter,
+            clock.ReferenceDate,
+            clock.DayCounter,
             context);
 
         // 4. Boundary conditions

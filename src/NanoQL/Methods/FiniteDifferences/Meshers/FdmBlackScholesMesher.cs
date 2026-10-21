@@ -20,16 +20,19 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <remarks>
 /// Immutable. QuantLib reads the dividend curve and the volatility at the risk-free curve's times
-/// (<c>fdmblackscholesmesher.cpp:63-103</c>), so the process's curves and volatility, and the quanto helper's, must
-/// share the risk-free curve's day counter and reference date, a dividend curve at zero apart, as
-/// <see cref="FdmBlackScholesOp"/> requires; a documented divergence.
+/// (<c>fdmblackscholesmesher.cpp:63-103</c>); here each is read at the instants those times denote, on its own clock,
+/// as <see cref="FdmBlackScholesOp"/> reads them, on the engine's times from the earliest reference date of the
+/// structures, each accruing nothing before its own: the curves' discounts there, and the variance accrued to maturity.
+/// A structure that shares the risk-free curve's day counter and reference date is read as QuantLib reads it; a
+/// documented divergence (the S-eq plan's rulings of 2026-10-20 and 2026-10-21, under R8).
 /// </remarks>
 public sealed class FdmBlackScholesMesher : Fdm1dMesher
 {
     /// <summary>Initializes a new instance of the <see cref="FdmBlackScholesMesher"/> class.</summary>
     /// <param name="size">The number of points, at least 2.</param>
     /// <param name="process">The Black-Scholes process.</param>
-    /// <param name="maturity">The maturity, as a time.</param>
+    /// <param name="maturity">The maturity, as a time on the engine's clock
+    /// (<see cref="FdmBlackScholesOp.Clock"/>).</param>
     /// <param name="strike">The strike the volatility is read at.</param>
     /// <param name="xMinConstraint">The lower edge in log space, or <see langword="null"/> to compute it.</param>
     /// <param name="xMaxConstraint">The upper edge in log space, or <see langword="null"/> to compute it.</param>
@@ -39,15 +42,18 @@ public sealed class FdmBlackScholesMesher : Fdm1dMesher
     /// The critical point, in the underlying's units, and its density; <see langword="null"/> for none, QuantLib's
     /// <c>Null&lt;Real&gt;()</c>.
     /// </param>
-    /// <param name="dividendSchedule">The cash dividends, empty by default.</param>
+    /// <param name="dividendSchedule">The cash dividends, empty by default, placed at their times on the engine's
+    /// clock.</param>
     /// <param name="fdmQuantoHelper">The quanto helper, or <see langword="null"/> for none.</param>
     /// <param name="spotAdjustment">The adjustment added to the spot.</param>
     /// <param name="context">The evaluation context the dividends' amounts are read in; needed with dividends.</param>
     /// <exception cref="ArgumentNullException"><paramref name="process"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">
-    /// The spot isn't positive, the process's curves and volatility or the quanto helper's don't share the risk-free
-    /// curve's day counter and reference date, a dividend is <see langword="null"/>, dividends are given without a
-    /// context, or the size is below 2.
+    /// The spot isn't positive, a dividend is <see langword="null"/>, dividends are given without a context, or the
+    /// size is below 2.
+    /// </exception>
+    /// <exception cref="NanoQLException">
+    /// A curve or the volatility can't be read, as at an instant before its reference date.
     /// </exception>
     public FdmBlackScholesMesher(
         int size,
@@ -83,15 +89,16 @@ public sealed class FdmBlackScholesMesher : Fdm1dMesher
             throw new ArgumentException("negative or null underlying given", nameof(process));
         }
 
-        FdmBlackScholesOp.CheckSharedTimes(process, false, fdmQuantoHelper, nameof(process));
-
+        // the engine's times (FdmBlackScholesOp.Clock): the process's where no structure is dated before the risk-free
+        // curve
+        TermStructure clock = FdmBlackScholesOp.Clock(process, fdmQuantoHelper);
         var intermediateSteps = new List<(double Time, double Amount)>();
         foreach (Dividend d in dividends)
         {
-            double t = process.Time(d.Date);
+            double t = clock.TimeFromReference(d.Date);
             if (t <= maturity && t >= 0.0)
             {
-                intermediateSteps.Add((process.Time(d.Date), d.Amount(context!)));
+                intermediateSteps.Add((clock.TimeFromReference(d.Date), d.Amount(context!)));
             }
         }
 
@@ -125,8 +132,8 @@ public sealed class FdmBlackScholesMesher : Fdm1dMesher
 
         foreach ((double divTime, double divAmount) in intermediateSteps)
         {
-            fwd = fwd / rTS.Discount(divTime) * rTS.Discount(lastDivTime)
-                * qTS.Discount(divTime) / qTS.Discount(lastDivTime);
+            fwd = fwd / rTS.DiscountAt(clock, divTime) * rTS.DiscountAt(clock, lastDivTime)
+                * qTS.DiscountAt(clock, divTime) / qTS.DiscountAt(clock, lastDivTime);
 
             mi = Min(mi, fwd);
             ma = Max(ma, fwd);
@@ -141,7 +148,10 @@ public sealed class FdmBlackScholesMesher : Fdm1dMesher
 
         // Set the grid boundaries
         double normInvEps = new InverseCumulativeNormal().Evaluate(1 - eps);
-        double sigmaSqrtT = process.BlackVolatility.BlackVol(maturity, strike) * Math.Sqrt(maturity);
+        BlackVolTermStructure volTS = process.BlackVolatility;
+        double sigmaSqrtT = volTS.SharesTimes(clock)
+            ? volTS.BlackVol(maturity, strike) * Math.Sqrt(maturity)
+            : Math.Sqrt(volTS.BlackForwardVarianceAt(clock, 0.0, maturity, strike));
 
         double xMin = Math.Log(mi) - (sigmaSqrtT * normInvEps * scaleFactor);
         double xMax = Math.Log(ma) + (sigmaSqrtT * normInvEps * scaleFactor);

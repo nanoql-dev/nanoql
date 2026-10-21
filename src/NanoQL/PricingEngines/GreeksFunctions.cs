@@ -5,6 +5,7 @@
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
 using NanoQL.Processes;
+using NanoQL.Time;
 
 namespace NanoQL.PricingEngines;
 
@@ -29,6 +30,20 @@ public static class GreeksFunctions
         double r = p.RiskFreeRate.ZeroRate(0.0, Compounding.Continuous).Rate;
         double q = p.DividendYield.ZeroRate(0.0, Compounding.Continuous).Rate;
         double v = p.LocalVolatility.LocalVol(0.0, u);
+
+        return (r * value) - ((r - q) * u * delta) - (0.5 * v * v * u * u * gamma);
+    }
+
+    // BlackScholesTheta for an option expiring on a date: a structure dated on or after it accrues nothing over the
+    // option's life, so its rate or volatility is 0 (the S-eq plan's ruling of 2026-10-21, C4R2-O2 (i)), where QuantLib
+    // reads it at the structure's own time 0; BlackScholesTheta where every structure is dated before the exercise.
+    internal static double BlackScholesTheta(
+        GeneralizedBlackScholesProcess p, double value, double delta, double gamma, Date exercise)
+    {
+        double u = p.StateVariable;
+        double r = p.RiskFreeRate.ReferenceDate < exercise ? p.RiskFreeRate.ZeroRate(0.0, Compounding.Continuous).Rate : 0.0;
+        double q = p.DividendYield.ReferenceDate < exercise ? p.DividendYield.ZeroRate(0.0, Compounding.Continuous).Rate : 0.0;
+        double v = p.LocalVolatility.ReferenceDate < exercise ? p.LocalVolatility.LocalVol(0.0, u) : 0.0;
 
         return (r * value) - ((r - q) * u * delta) - (0.5 * v * v * u * u * gamma);
     }

@@ -503,6 +503,41 @@ public class BlackCalculator
             + (0.5 * variance * spot * spot * Gamma(spot))) / maturity;
     }
 
+    /// <summary>
+    /// The theta where the structures run on different times: each of <see cref="Theta(double, double)"/>'s terms over
+    /// its own structure's time to maturity, the payoff's discount, the forward's risk-free and dividend discounts and
+    /// the variance, none for a structure whose time is 0. QuantLib's <see cref="Theta(double, double)"/> where the
+    /// four times agree.
+    /// </summary>
+    /// <param name="spot">The spot.</param>
+    /// <param name="discountTime">The payoff's discount's time to maturity, not negative.</param>
+    /// <param name="riskFreeDiscount">The forward's risk-free discount.</param>
+    /// <param name="riskFreeTime">Its time to maturity, not negative.</param>
+    /// <param name="dividendDiscount">The forward's dividend discount.</param>
+    /// <param name="dividendTime">Its time to maturity, not negative.</param>
+    /// <param name="varianceTime">The variance's time to maturity, not negative.</param>
+    /// <returns>The theta, per unit of the times.</returns>
+    /// <exception cref="ArgumentException">The times agree and are negative, or the spot isn't positive.</exception>
+    internal double Theta(
+        double spot,
+        double discountTime,
+        double riskFreeDiscount,
+        double riskFreeTime,
+        double dividendDiscount,
+        double dividendTime,
+        double varianceTime)
+    {
+        if (discountTime == riskFreeTime && riskFreeTime == dividendTime && dividendTime == varianceTime)
+        {
+            return Theta(spot, varianceTime);
+        }
+
+        return -((PerTime(Math.Log(discount), discountTime) * Value)
+            + ((PerTime(Math.Log(dividendDiscount), dividendTime) - PerTime(Math.Log(riskFreeDiscount), riskFreeTime))
+               * spot * Delta(spot))
+            + (0.5 * PerTime(variance, varianceTime) * spot * spot * Gamma(spot)));
+    }
+
     /// <summary>The sensitivity to the time to maturity per day, assuming 365 days a year.</summary>
     /// <param name="spot">The spot.</param>
     /// <param name="maturity">The time to maturity.</param>
@@ -680,4 +715,8 @@ public class BlackCalculator
     }
 
     private static string Show(double value) => value.ToString(CultureInfo.InvariantCulture);
+
+    // A structure's log discount or variance per unit of its own time to maturity, none where that time is 0, its
+    // discount 1 and its variance 0 there
+    private static double PerTime(double x, double time) => time > 0.0 ? x / time : 0.0;
 }

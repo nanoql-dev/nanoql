@@ -8,8 +8,8 @@ tools/vectors/gen/methods/finitedifferences/operators/fdmblackscholesop.py reads
 volatility, over helpers with five correlations, two constant and one curve exchange-rate volatility, flat and zero
 foreign curves, two at-the-money levels (the strike the exchange-rate volatility is read at, which a surface reads), and
 a domestic curve other than the process's. Every structure is on Act/365 and dated from the evaluation date, the
-risk-free curve's day counter and reference date, which nanoql requires
-(tests/NanoQL.Tests/Divergences/FdmMismatchedTimesTests.cs).
+risk-free curve's day counter and reference date: on others QuantLib reads them at the risk-free curve's times,
+where nanoql reads them at their instants (tests/NanoQL.Tests/Divergences/FdmMismatchedTimesTests.cs).
 
 The specs are fdmblackscholesmesher.py's quanto helpers and fdmblackscholesop.py's operators. The wheel's calls, by
 QuantLib-SWIG 1.44's fdm.i: FdmQuantoHelper(rTS, fTS, fxVolTS, equityFxCorrelation, exchRateATMlevel), the C++

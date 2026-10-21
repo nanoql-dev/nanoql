@@ -2,15 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's FdmLinearOpLayout and FdmLinearOpIterator
 (ql/methods/finitedifferences/operators/fdmlinearoplayout.hpp, .cpp, fdmlinearopiterator.hpp): layouts of one to three
-dimensions, single points among them; for each: the dimensions, size and spacing; the iterator's walk from begin, its
-index and coordinates at each step; the index of each point's coordinates; and at each point the neighbourhood index in
-each direction for every offset of at most the direction's size less one (QuantLib reflects an offset past an edge back
-inside, and an offset beyond that reads past the layout), the neighbourhood index in two directions for offset pairs,
-and the index of iter_neighbourhood's iterator.
+dimensions, single points among them; for each: the dimensions, size and spacing; end's index; the iterator's walk from
+begin, its index and coordinates at each step, and whether it differs from end at each step and after the last; the
+index of each point's coordinates; and at each point the neighbourhood index in each direction for every offset of at
+most the direction's size less one (QuantLib reflects an offset past an edge back inside, and an offset beyond that
+reads past the layout), the neighbourhood index in two directions for offset pairs, and the index of
+iter_neighbourhood's iterator.
 
 A layout is its list of dimensions. The wheel's calls, by QuantLib-SWIG 1.44's fdm.i: FdmLinearOpLayout(dim), the C++
-constructor; dim, size, spacing, begin, index(coordinates), neighbourhood (both overloads) and iter_neighbourhood the
-C++ members, the iterator's increment, index and coordinates its own. Read back by
+constructor; dim, size, spacing, begin, end, index(coordinates), neighbourhood (both overloads) and iter_neighbourhood
+the C++ members, the iterator's increment, index and coordinates its own and notEqual its operator!=. Read back by
 tests/NanoQL.Tests/Vectors/Methods/FiniteDifferences/Operators/FdmLinearOpLayoutVectorTests.cs."""
 import importlib.util
 import os
@@ -46,9 +47,12 @@ def offsets(n):
 def outputs(dims):
     layout = ql.FdmLinearOpLayout(dims)
     out = {"dim": list(layout.dim()), "size": layout.size(), "spacing": list(layout.spacing()), "indices": [],
-           "coordinates": [], "index": [], "neighbourhood": [], "neighbourhood2": [], "iterNeighbourhood": []}
+           "coordinates": [], "index": [], "neighbourhood": [], "neighbourhood2": [], "iterNeighbourhood": [],
+           "endIndex": layout.end().index(), "notEqualEnd": []}
     it = layout.begin()
+    end = layout.end()
     for _ in range(layout.size()):
+        out["notEqualEnd"].append(it.notEqual(end))
         coords = list(it.coordinates())
         out["indices"].append(it.index())
         out["coordinates"].append(coords)
@@ -65,6 +69,7 @@ def outputs(dims):
                                   if abs(o1) < dims[d1] and abs(o2) < dims[d2]])
         out["neighbourhood2"].append(pairs)
         it.increment()
+    out["notEqualEnd"].append(it.notEqual(end))
     return out
 
 

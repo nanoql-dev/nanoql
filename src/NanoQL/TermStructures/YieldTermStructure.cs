@@ -343,6 +343,47 @@ public abstract class YieldTermStructure : TermStructure
         return Math.Log(compound) / t;
     }
 
+    // The discount the curve has accrued by a date, 1 before its reference date (TermStructure.AccrualTimeTo), where
+    // QuantLib's read throws: Discount on and after that date.
+    internal double AccruedDiscount(Date d) => d < ReferenceDate ? 1.0 : Discount(d);
+
+    // The discount the curve has accrued at the instant a time on another structure's clock denotes, from its own
+    // reference date (TermStructure.AccrualTime): QuantLib's read where the two share their times.
+    internal double DiscountAt(TermStructure clock, double t, bool extrapolate = false) =>
+        SharesTimes(clock) ? Discount(t, extrapolate) : Discount(AccrualTime(clock, t), extrapolate);
+
+    // The continuously compounded forward rate between the instants two times on another structure's clock denote, per
+    // unit of that clock's time: QuantLib's ContinuousForwardRate where the two share their times; otherwise the log
+    // of the accrued discounts' ratio over the clock's interval (TermStructure.AccrualTime), a zero-length interval
+    // widened as QuantLib's.
+    internal double ContinuousForwardRateAt(TermStructure clock, double t1, double t2, bool extrapolate = false)
+    {
+        if (SharesTimes(clock))
+        {
+            return ContinuousForwardRate(t1, t2);
+        }
+
+        if (t2 == t1)
+        {
+            double shifted = t1 - (Dt / 2.0);
+            t1 = shifted < 0.0 ? 0.0 : shifted;
+            t2 = t1 + Dt;
+        }
+        else if (!(t2 > t1))
+        {
+            throw new ArgumentException(
+                string.Create(System.Globalization.CultureInfo.InvariantCulture, $"t1 ({t1}) >= t2 ({t2})"), nameof(t1));
+        }
+
+        double compound = Discount(AccrualTime(clock, t1), extrapolate) / Discount(AccrualTime(clock, t2), extrapolate);
+        if (!(compound > 0.0))
+        {
+            throw new ArgumentException("positive compound factor required", nameof(t1));
+        }
+
+        return Math.Log(compound) / (t2 - t1);
+    }
+
     /// <summary>The dates of the discount-factor jumps, one per jump.</summary>
     /// <returns>The dates, empty for a curve without jumps.</returns>
     public virtual ImmutableArray<Date> JumpDates() => jumpDates;

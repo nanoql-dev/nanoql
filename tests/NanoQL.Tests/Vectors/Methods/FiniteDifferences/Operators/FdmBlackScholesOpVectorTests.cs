@@ -12,7 +12,8 @@ namespace NanoQL.Tests.Vectors;
 /// The FdmBlackScholesOp vectors, <c>tests/vectors/methods/finitedifferences/operators/fdmblackscholesop.json</c>:
 /// <see cref="FdmBlackScholesOp"/> after <see cref="FdmBlackScholesOp.SetTime"/> at three time steps, over six
 /// processes, with the Black and the local volatility, with and without a quanto helper, in one and two dimensions: its
-/// apply, directional apply, mixed apply, splitting solve and preconditioner on a seeded vector.
+/// apply, directional apply, mixed apply, splitting solve and preconditioner on a seeded vector, and its sparse
+/// matrix's stored elements (<see cref="FdmLinearOpComposite.ToMatrix"/>).
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class FdmBlackScholesOpVectorTests
@@ -32,7 +33,7 @@ public class FdmBlackScholesOpVectorTests
             var outputs = new Dictionary<string, List<object?>>
             {
                 ["apply"] = [], ["applyDirection"] = [], ["applyOther"] = [], ["applyMixed"] = [], ["solveSplitting"] = [],
-                ["solveOther"] = [], ["preconditioner"] = [],
+                ["solveOther"] = [], ["preconditioner"] = [], ["matrixRows"] = [], ["matrixColumns"] = [], ["matrixValues"] = [],
             };
             foreach (var t in c.Input("times").EnumerateArray())
             {
@@ -42,6 +43,10 @@ public class FdmBlackScholesOpVectorTests
                 outputs["applyMixed"].Add(op.ApplyMixed(r).ToArray());
                 outputs["solveSplitting"].Add(op.SolveSplitting(d, r, s).ToArray());
                 outputs["preconditioner"].Add(op.Preconditioner(r, s).ToArray());
+                (int[] rows, int[] columns, double[] values) = Stored(op.ToMatrix());
+                outputs["matrixRows"].Add(rows);
+                outputs["matrixColumns"].Add(columns);
+                outputs["matrixValues"].Add(values);
                 if (two)
                 {
                     outputs["applyOther"].Add(op.ApplyDirection(1 - d, r).ToArray());
@@ -59,5 +64,20 @@ public class FdmBlackScholesOpVectorTests
         }
 
         check.Complete();
+    }
+
+    // A sparse matrix's stored elements in storage order, as the wheel's row_idx, col_idx and data list them.
+    private static (int[] Rows, int[] Columns, double[] Values) Stored(SparseMatrix m)
+    {
+        var rows = new List<int>();
+        for (int i = 0; i + 1 < m.Filled1; ++i)
+        {
+            for (int k = m.Index1Data[i]; k < m.Index1Data[i + 1]; ++k)
+            {
+                rows.Add(i);
+            }
+        }
+
+        return ([.. rows], m.Index2Data[..rows.Count].ToArray(), m.ValueData[..rows.Count].ToArray());
     }
 }

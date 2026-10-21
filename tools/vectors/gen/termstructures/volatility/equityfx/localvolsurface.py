@@ -3,12 +3,14 @@
 """Vectors for QuantLib's LocalVolSurface (ql/termstructures/volatility/equityfx/localvolsurface.hpp, .cpp), on the
 evaluation date 15 October 2026: Dupire's local volatility from a Black volatility and two curves.
 
-Five surfaces, on a constant volatility, a variance curve and three variance surfaces (with a smile, with a skew
-and flat), over flat curves and linear zero curves, at a spot of 100 (and 50): the reference and maximum dates, the
-minimum and maximum strikes and the day counter's name, which are the Black structure's, the calendar (QuantLib's
-empty one) and the local volatility at 14 (time, level) points, the time 0 branch and the flat-smile shortcut (a
-zero strike derivative) among them, extrapolated. A Black structure whose variance falls in time, or whose smile is
-too steep, gives QuantLib's refusals: "decreasing variance at strike …" and "negative local vol^2 at strike …".
+Five surfaces, on a constant volatility, a variance curve and three variance surfaces (with a smile, with a skew and
+flat), over flat curves and linear zero curves on the Black structure's day counter, at a spot of 100 (and 50): on
+another day counter QuantLib reads the curves at the structure's times, where nanoql reads them at their instants
+(tests/NanoQL.Tests/Divergences/LocalVolSurfaceMismatchedTimesTests.cs). The outputs are the reference and maximum
+dates, the minimum and maximum strikes and the day counter's name, which are the Black structure's, the calendar
+(QuantLib's empty one) and the local volatility at 14 (time, level) points, the time 0 branch and the flat-smile
+shortcut (a zero strike derivative) among them, extrapolated. A Black structure whose variance falls in time, or whose
+smile is too steep, gives QuantLib's refusals: "decreasing variance at strike …" and "negative local vol^2 at strike …".
 
 The specs are tools/vectors/gen/termstructures/volatility/equityfx/blackvoltermstructure.py's and
 tools/vectors/gen/processes/blackscholesprocess.py's. The wheel's calls, by QuantLib-SWIG 1.44's volatilities.i:
@@ -50,7 +52,7 @@ CASES = [
     ("constant volatility, flat curves", bvts.vol_spec_constant(R, 0.25), bsp.FLAT_R, bsp.FLAT_Q, 100.0),
     ("variance curve, zero curves", bsp.CURVE, bsp.ZERO_R, bsp.ZERO_Q, 100.0),
     ("smile, zero curves", SMILE, bsp.ZERO_R, bsp.ZERO_Q, 100.0),
-    ("skew, flat curves, spot 50", SKEW, bsp.FLAT_R, bsp.FLAT_Q, 50.0),
+    ("skew, flat curves, spot 50", SKEW, bsp.flat_spec(R, 0.04, bvts.A360), bsp.flat_spec(R, 0.02, bvts.A360), 50.0),
     ("flat surface, zero curves", FLAT, bsp.ZERO_R, bsp.ZERO_Q, 100.0),
 ]
 POINTS = [(0.0, 100.0), (0.0, 80.0), (0.05, 100.0), (0.25, 90.0), (0.5, 100.0), (0.5, 120.0), (1.0, 75.0),

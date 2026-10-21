@@ -3,16 +3,17 @@
 """Vectors for QuantLib's FdmMesherComposite (ql/methods/finitedifferences/meshers/fdmmeshercomposite.hpp, .cpp): a
 composite of one to four 1-D meshers (uniform, concentrating and Black-Scholes ones), built from the meshers, which size
 the layout, and from an explicit layout of the meshers' sizes; for each: the layout's dimensions and size, the locations
-in each direction over the whole layout, and at every layout point, in each direction, the location, dplus and dminus
-(QuantLib's Null<Real> written as null). Then the refusal of a layout whose size in a direction isn't its mesher's
-("size of 1d mesher ... does not fit to layout"). More meshers than the layout's dimensions, where QuantLib reads past
-the layout's sizes, are nanoql's refusal (tests/NanoQL.Tests/Divergences/FdmUndefinedPathRefusalTests.cs).
+in each direction over the whole layout, the locations of each of getFdm1dMeshers' meshers, and at every layout point,
+in each direction, the location, dplus and dminus (QuantLib's Null<Real> written as null). Then the refusal of a layout
+whose size in a direction isn't its mesher's ("size of 1d mesher ... does not fit to layout"). More meshers than the
+layout's dimensions, where QuantLib reads past the layout's sizes, are nanoql's refusal
+(tests/NanoQL.Tests/Divergences/FdmUndefinedPathRefusalTests.cs).
 
 A composite is {"meshers": [1-D mesher specs], "layout": the dimensions, or null to size it from the meshers}, a 1-D
 spec tools/vectors/gen/methods/finitedifferences/meshers/fdmblackscholesmesher.py's. The wheel's calls, by QuantLib-SWIG
 1.44's fdm.i: FdmMesherComposite(meshers) and FdmMesherComposite(layout, meshers), the C++ constructors; layout,
-locations(direction), location, dplus and dminus (at a layout iterator) the C++ members, the iterator walked by the
-layout's begin and increment. Read back by
+locations(direction), getFdm1dMeshers, location, dplus and dminus (at a layout iterator) the C++ members, the iterator
+walked by the layout's begin and increment. Read back by
 tests/NanoQL.Tests/Vectors/Methods/FiniteDifferences/Meshers/FdmMesherCompositeVectorTests.cs."""
 import importlib.util
 import os
@@ -55,7 +56,8 @@ def composite(spec):
 def outputs(m):
     layout = m.layout()
     dims = list(layout.dim())
-    out = {"dim": dims, "size": layout.size(), "locations": [], "location": [], "dplus": [], "dminus": []}
+    out = {"dim": dims, "size": layout.size(), "locations": [], "location": [], "dplus": [], "dminus": [],
+           "fdm1dMeshers": [v.enc(list(m1.locations())) for m1 in m.getFdm1dMeshers()]}
     for d in range(len(dims)):
         out["locations"].append(v.enc(list(m.locations(d))))
         loc, dp, dm = [], [], []

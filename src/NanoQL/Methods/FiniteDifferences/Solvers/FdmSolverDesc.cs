@@ -16,7 +16,10 @@ namespace NanoQL.Methods;
 /// <param name="BcSet">The boundary conditions.</param>
 /// <param name="Condition">The step conditions.</param>
 /// <param name="Calculator">The inner value's calculator, which gives the values at maturity.</param>
-/// <param name="Maturity">The maturity, as a time.</param>
+/// <param name="Maturity">
+/// The maturity, as a time on the solver's clock: for the Black-Scholes solver,
+/// <see cref="FdmBlackScholesOp.Clock"/>'s.
+/// </param>
 /// <param name="TimeSteps">The number of time steps.</param>
 /// <param name="DampingSteps">The number of implicit damping steps before them.</param>
 /// <remarks>

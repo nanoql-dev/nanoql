@@ -10,7 +10,8 @@ damping steps, every named scheme description, the local volatility, a quanto he
 model; on the surface of QuantLib's testLocalVolatility (europeanoption.cpp), whose local variance turns negative on
 the grid, the local volatility refused, and taken with an overwrite; and an expired option, whose results are zero. The
 escrowed dividend model is tools/vectors/gen/methods/finitedifferences/utilities/escroweddividendadjustment.py's.
-Structures on different day counters or reference dates are nanoql's refusal
+Every structure is on the risk-free curve's day counter and reference date: on others QuantLib reads them at the
+risk-free curve's times, where nanoql reads them at their instants
 (tests/NanoQL.Tests/Divergences/FdmMismatchedTimesTests.cs).
 
 The specs, which the escrowed adjustment's generator shares, are a pricing {"process", "payoff", "exercise",

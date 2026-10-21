@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Text.Json;
+using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.Tests.Harness;
 using static NanoQL.Tests.Vectors.ArrayVectorTests;
@@ -56,6 +57,7 @@ internal static class OptimizationSpecs
         "CompositeConstraint" => new CompositeConstraint(Constraint(spec.GetProperty("c1")), Constraint(spec.GetProperty("c2"))),
         "NonhomogeneousBoundaryConstraint" =>
             new NonhomogeneousBoundaryConstraint(Numbers(spec.GetProperty("low")), Numbers(spec.GetProperty("high"))),
+        "HestonModel::FellerConstraint" => new HestonModelFellerConstraint(),
         string type => throw new InvalidOperationException($"unknown constraint {type}"),
         null => throw new InvalidOperationException("a constraint spec without a type"),
     };

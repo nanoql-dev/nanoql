@@ -4,6 +4,7 @@
 #include "math/optimization/specs.hpp"
 
 #include <ql/errors.hpp>
+#include <ql/models/equity/hestonmodel.hpp>
 
 #include <cmath>
 #include <set>
@@ -117,7 +118,8 @@ namespace harness::optimization {
 
         const std::set<std::string>& constraintTypes() {
             static const std::set<std::string> types = {"NoConstraint", "PositiveConstraint", "BoundaryConstraint",
-                                                        "CompositeConstraint", "NonhomogeneousBoundaryConstraint"};
+                                                        "CompositeConstraint", "NonhomogeneousBoundaryConstraint",
+                                                        "HestonModel::FellerConstraint"};
             return types;
         }
 
@@ -186,7 +188,7 @@ namespace harness::optimization {
         s.type = text(key(o, "type", "a constraint spec"));
         if (constraintTypes().count(s.type) == 0)
             throw InvalidParams("unknown constraint " + s.type);
-        if (s.type == "NoConstraint" || s.type == "PositiveConstraint") {
+        if (s.type == "NoConstraint" || s.type == "PositiveConstraint" || s.type == "HestonModel::FellerConstraint") {
             onlyKeys(o, {"type"}, s.type);
         } else if (s.type == "BoundaryConstraint") {
             onlyKeys(o, {"type", "low", "high"}, s.type);
@@ -215,6 +217,8 @@ namespace harness::optimization {
             return CompositeConstraint(makeConstraint(*s.c1), makeConstraint(*s.c2));
         if (s.type == "NonhomogeneousBoundaryConstraint")
             return NonhomogeneousBoundaryConstraint(makeArray(s.lows), makeArray(s.highs));
+        if (s.type == "HestonModel::FellerConstraint")
+            return HestonModel::FellerConstraint();
         throw InvalidParams("the constraint " + s.type + " was not checked");
     }
 

@@ -10,7 +10,8 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The FdmMesherComposite vectors, <c>tests/vectors/methods/finitedifferences/meshers/fdmmeshercomposite.json</c>:
 /// <see cref="FdmMesherComposite"/> over one to four 1-D meshers, with and without an explicit layout, its layout's
-/// dimensions and size, its locations in each direction, and the location, dplus and dminus at every layout point; and
+/// dimensions and size, its locations in each direction and its 1-D meshers'
+/// (<see cref="FdmMesherComposite.GetFdm1dMeshers"/>), and the location, dplus and dminus at every layout point; and
 /// the refusal of a layout that doesn't fit its meshers.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
@@ -39,6 +40,7 @@ public class FdmMesherCompositeVectorTests
             check.Output(c, "location", AtEachPoint(mesher, (it, d) => mesher.Location(it, d)));
             check.Output(c, "dplus", AtEachPoint(mesher, (it, d) => Nullable(mesher.Dplus(it, d))));
             check.Output(c, "dminus", AtEachPoint(mesher, (it, d) => Nullable(mesher.Dminus(it, d))));
+            check.Output(c, "fdm1dMeshers", mesher.GetFdm1dMeshers().Select(m => m.Locations().ToArray()).ToArray());
         }
 
         check.Complete();

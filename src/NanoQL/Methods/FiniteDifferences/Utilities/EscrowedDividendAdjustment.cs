@@ -15,21 +15,31 @@ namespace NanoQL.Methods;
 /// The escrowed dividend model's adjustment of the spot: minus the value at a time of the dividends paid from then to
 /// maturity, each discounted by the risk-free curve and compounded by the dividend curve.
 /// </summary>
-/// <remarks>Immutable (the S-eq plan's SEQR1).</remarks>
+/// <remarks>
+/// Immutable (the S-eq plan's SEQR1). Its times are the risk-free curve's, or in the finite-difference engine the
+/// engine's; QuantLib reads the dividend curve at them, where here each curve is read at the instants they denote, on
+/// its own clock, as <see cref="FdmBlackScholesOp"/> reads it, and as QuantLib reads it where the curves share the
+/// times' day counter and reference date (the S-eq plan's rulings of 2026-10-20 and 2026-10-21, under R8).
+/// </remarks>
 public sealed class EscrowedDividendAdjustment
 {
     private readonly ImmutableArray<Dividend> dividendSchedule;
     private readonly double[] amounts;
     private readonly Func<Date, double> toTime;
     private readonly double maturity;
+    private readonly TermStructure clock;
 
     /// <summary>Initializes a new instance of the <see cref="EscrowedDividendAdjustment"/> class.</summary>
     /// <param name="dividendSchedule">The cash dividends.</param>
     /// <param name="rTS">The risk-free curve.</param>
     /// <param name="qTS">The dividend curve.</param>
-    /// <param name="toTime">The mapping of a date to a time.</param>
-    /// <param name="maturity">The maturity, as a time.</param>
+    /// <param name="toTime">The mapping of a date to a time on <paramref name="clock"/>.</param>
+    /// <param name="maturity">The maturity, as a time on <paramref name="clock"/>.</param>
     /// <param name="context">The evaluation context the dividends' amounts are read in.</param>
+    /// <param name="clock">
+    /// The clock the times are on, each curve read at the instants they denote: the risk-free curve by default, and in
+    /// the finite-difference engine the engine's (<see cref="FdmBlackScholesOp.Clock"/>).
+    /// </param>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">
     /// The schedule is <c>default(ImmutableArray)</c> or holds a null dividend.
@@ -40,7 +50,8 @@ public sealed class EscrowedDividendAdjustment
         YieldTermStructure qTS,
         Func<Date, double> toTime,
         double maturity,
-        EvaluationContext context)
+        EvaluationContext context,
+        TermStructure? clock = null)
     {
         if (dividendSchedule.IsDefault)
         {
@@ -63,6 +74,7 @@ public sealed class EscrowedDividendAdjustment
         DividendYield = qTS;
         this.toTime = toTime;
         this.maturity = maturity;
+        this.clock = clock ?? rTS;
     }
 
     /// <summary>Gets the risk-free curve.</summary>
@@ -84,8 +96,8 @@ public sealed class EscrowedDividendAdjustment
             if (divTime >= t && divTime <= maturity)
             {
                 divAdj -= amounts[i]
-                    * RiskFreeRate.Discount(divTime) / RiskFreeRate.Discount(t)
-                    * DividendYield.Discount(t) / DividendYield.Discount(divTime);
+                    * RiskFreeRate.DiscountAt(clock, divTime) / RiskFreeRate.DiscountAt(clock, t)
+                    * DividendYield.DiscountAt(clock, t) / DividendYield.DiscountAt(clock, divTime);
             }
         }
 

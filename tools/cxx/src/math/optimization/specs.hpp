@@ -22,8 +22,9 @@
 // A call refuses a point whose size isn't its function's number of variables, which the functions don't check.
 //
 // A constraint is {"type": "NoConstraint"}, {"type": "PositiveConstraint"}, {"type": "BoundaryConstraint", "low",
-// "high"}, {"type": "CompositeConstraint", "c1", "c2"} with two constraint specs, or {"type":
-// "NonhomogeneousBoundaryConstraint", "low", "high"} with two lists of reals. End criteria are {"maxIterations",
+// "high"}, {"type": "CompositeConstraint", "c1", "c2"} with two constraint specs, {"type":
+// "NonhomogeneousBoundaryConstraint", "low", "high"} with two lists of reals, or {"type":
+// "HestonModel::FellerConstraint"}. End criteria are {"maxIterations",
 // "maxStationaryStateIterations", "rootEpsilon", "functionEpsilon", "gradientNormEpsilon"}, the second and last null
 // for Null<Size>() and Null<Real>(). A Problem result is {"currentValue", "functionValue", "gradientNormValue",
 // "functionEvaluation", "gradientEvaluation"}, with "endCriteriaType" after a minimization, null for Null<Real>().

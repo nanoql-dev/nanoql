@@ -16,38 +16,15 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// The exception type, message and parameter name of the finite-difference core's refusals that the vector files can't
 /// tell apart (they record a refusal as <c>{"throws": true}</c>, accepting either type), and those of the inputs
-/// QuantLib leaves undefined: the structures on different day counters and reference dates
-/// (<c>Divergences/FdmMismatchedTimesTests.cs</c>), and meshers of fewer than two points, a one-point solve, an empty
-/// layout, more meshers than dimensions and bands of different sizes
+/// QuantLib leaves undefined: meshers of fewer than two points, a one-point solve, an empty layout, more meshers than
+/// dimensions and bands of different sizes
 /// (<c>Divergences/FdmUndefinedPathRefusalTests.cs</c>); and the argument checks no vector reaches: the dividend
 /// schedules' null and default values, the backward solver's null boundary condition, the model's rollback forward in
-/// time, and the Thomas sweep's zero pivot.
+/// time, the Thomas sweep's zero pivot, and an operator's sparse matrices where it has none.
 /// </summary>
 public class FdmErrorTests
 {
     private static readonly Date Today = new(15, Month.October, 2026);
-
-    [Fact]
-    public void MixedDayCounterRefusals()
-    {
-        const string Message = "all term structures must share one day counter";
-        var mesher = new FdmMesherComposite(new Uniform1dMesher(3.0, 6.0, 11));
-        var process = new BlackScholesMertonProcess(
-            100.0,
-            new FlatForward(Today, 0.02, new Actual360()),
-            new FlatForward(Today, 0.05, new Actual365Fixed()),
-            new BlackConstantVol(Today, new NullCalendar(), 0.25, new Actual365Fixed()));
-        Refused(() => new FdmBlackScholesOp(mesher, process, 100.0), "bsProcess", Message);
-        Refused(() => new FdmBlackScholesMesher(11, process, 1.0, 100.0), "process", Message);
-
-        var later = new BlackScholesMertonProcess(
-            100.0,
-            new FlatForward(Today, 0.02, new Actual365Fixed()),
-            new FlatForward(Today, 0.05, new Actual365Fixed()),
-            new BlackConstantVol(Today + 2, new NullCalendar(), 0.25, new Actual365Fixed()));
-        Refused(() => new FdmBlackScholesOp(mesher, later, 100.0), "bsProcess", "all term structures must share one reference date");
-        Refused(() => new FdmBlackScholesMesher(11, later, 1.0, 100.0), "process", "all term structures must share one reference date");
-    }
 
     [Fact]
     public void UndefinedPathRefusals()
@@ -120,10 +97,39 @@ public class FdmErrorTests
         Assert.Equal("division by zero", e.Message);
     }
 
+    [Fact]
+    public void AnOperatorWithoutSparseMatricesRefusesThem()
+    {
+        // QuantLib's FdmLinearOpComposite::toMatrixDecomp, which an operator overrides where it has a sparse form
+        var op = new NoMatrixOp();
+        Assert.Equal(" ublas representation is not implemented", Assert.Throws<NanoQLException>(() => op.ToMatrixDecomp()).Message);
+        Assert.Equal(" ublas representation is not implemented", Assert.Throws<NanoQLException>(() => op.ToMatrix()).Message);
+    }
+
     private static void Refused(Action call, string paramName, string message)
     {
         var e = Assert.Throws<ArgumentException>(call);
         Assert.Equal(paramName, e.ParamName);
         Assert.StartsWith(message, e.Message, StringComparison.Ordinal);
+    }
+
+    // An operator of one direction that keeps QuantLib's default toMatrixDecomp.
+    private sealed class NoMatrixOp : FdmLinearOpComposite
+    {
+        public override int Size => 1;
+
+        public override void SetTime(double t1, double t2)
+        {
+        }
+
+        public override void Apply(ReadOnlySpan<double> r, Span<double> result) => r.CopyTo(result);
+
+        public override void ApplyMixed(ReadOnlySpan<double> r, Span<double> result) => result.Clear();
+
+        public override void ApplyDirection(int direction, ReadOnlySpan<double> r, Span<double> result) => r.CopyTo(result);
+
+        public override void SolveSplitting(int direction, ReadOnlySpan<double> r, double s, Span<double> result) => r.CopyTo(result);
+
+        public override void Preconditioner(ReadOnlySpan<double> r, double s, Span<double> result) => r.CopyTo(result);
     }
 }

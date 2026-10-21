@@ -299,6 +299,34 @@ internal static class FdInputs
     }
 
     /// <summary>
+    /// Compares a case of a scheme stepped on its own: the values after each step back from the case's time, and the
+    /// scheme's number of iterations after the last.
+    /// </summary>
+    /// <param name="check">The file's assertion.</param>
+    /// <param name="c">The case.</param>
+    /// <param name="make">The scheme on an operator, with its number of iterations.</param>
+    public static void CheckDirectScheme(VectorAssert check, VectorCase c, Func<FdmLinearOpComposite, (IFdmScheme Scheme, Func<int> Iterations)> make)
+    {
+        JsonElement spec = c.Input("scheme");
+        (FdmBlackScholesOp op, _) = OperatorOf(spec.GetProperty("op"), c.Context());
+        (IFdmScheme scheme, Func<int> iterations) = make(op);
+        double dt = spec.GetProperty("dt").GetDouble();
+        double t = spec.GetProperty("from").GetDouble();
+        double[] a = Doubles(c.Input("initial"));
+        scheme.SetStep(dt);
+        var values = new List<object?>();
+        for (int k = 0; k < spec.GetProperty("steps").GetInt32(); ++k)
+        {
+            scheme.Step(a, t);
+            t -= dt;
+            values.Add(a.ToArray());
+        }
+
+        check.Output(c, "values", values);
+        check.Output(c, "numberOfIterations", iterations());
+    }
+
+    /// <summary>
     /// Compares a 1-D mesher case: its locations, dplus and dminus, or its refusal where the file expects a
     /// <c>mesher</c> output.
     /// </summary>

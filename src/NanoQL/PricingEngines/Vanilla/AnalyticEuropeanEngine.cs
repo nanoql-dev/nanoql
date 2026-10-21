@@ -29,7 +29,17 @@ namespace NanoQL.PricingEngines;
 /// <para>
 /// The "volatility" result of an option expiring on the evaluation date is the Black volatility at its exercise date
 /// and strike. QuantLib's is √(variance / time to expiry), 0/0 there (<c>analyticeuropeanengine.cpp:113</c>); a
-/// documented divergence. Every other value is QuantLib's.
+/// documented divergence.
+/// </para>
+/// <para>
+/// QuantLib divides the theta's terms by the volatility's time, and runs the rho's two rates, the forward's and the
+/// payoff discount's, over one time, the discount curve's day counter from the risk-free curve's reference date. Here
+/// each term runs over its own structure's time on the volatility's day counter, as QuantLib's
+/// <c>blackScholesTheta</c> reads them, and each rate over its own curve's time. An exercise before a structure's
+/// reference date sees nothing accrue on it, where QuantLib's reads throw. Where the structures share their times,
+/// every value is QuantLib's. A documented divergence (the S-eq plan's rulings of 2026-10-21,
+/// <c>Divergences/AnalyticThetaMismatchedTimesTests.cs</c>, <c>Divergences/EuropeanRhoDiscountCurveTests.cs</c>,
+/// <c>Divergences/ExerciseBeforeReferenceDateTests.cs</c>).
 /// </para>
 /// </remarks>
 public static class AnalyticEuropeanEngine
@@ -114,11 +124,13 @@ public static class AnalyticEuropeanEngine
             throw new NanoQLException("non-striked payoff given");
         }
 
+        // each structure read at the exercise date, none accruing before its own reference date, where QuantLib's reads
+        // throw (the S-eq plan's ruling of 2026-10-21, C4R2-O2 (i))
         Date lastDate = option.Exercise.LastDate();
-        double variance = process.BlackVolatility.BlackVariance(lastDate, payoff.Strike);
-        double dividendDiscount = process.DividendYield.Discount(lastDate);
-        double df = discountPtr.Discount(lastDate);
-        double riskFreeDiscountForFwdEstimation = process.RiskFreeRate.Discount(lastDate);
+        double variance = process.BlackVolatility.AccruedVariance(lastDate, payoff.Strike);
+        double dividendDiscount = process.DividendYield.AccruedDiscount(lastDate);
+        double df = discountPtr.AccruedDiscount(lastDate);
+        double riskFreeDiscountForFwdEstimation = process.RiskFreeRate.AccruedDiscount(lastDate);
         double spot = process.StateVariable;
         if (!(spot > 0.0))
         {
@@ -135,22 +147,35 @@ public static class AnalyticEuropeanEngine
         double elasticity = black.Elasticity(spot);
         double gamma = black.Gamma(spot);
 
-        DayCounter rfdc = discountPtr.DayCounter;
-        DayCounter divdc = process.DividendYield.DayCounter;
+        // each structure's time to the exercise its own, none before its reference date; QuantLib's rho runs the
+        // forward's and the payoff discount's rates over one time, the discount curve's day counter from the risk-free
+        // curve's date, and here each runs over its own curve's time (the S-eq plan's ruling of 2026-10-21), QuantLib's
+        // where the two curves share their times
         DayCounter voldc = process.BlackVolatility.DayCounter;
-        double t = rfdc.YearFraction(process.RiskFreeRate.ReferenceDate, lastDate);
-        double rho = black.Rho(t);
+        double riskFreeTime = process.RiskFreeRate.AccrualTimeTo(lastDate);
+        double rho = discountPtr.SharesTimes(process.RiskFreeRate)
+            ? black.Rho(riskFreeTime)
+            : black.Rho(riskFreeTime) + ((riskFreeTime - discountPtr.AccrualTimeTo(lastDate)) * value);
 
-        t = divdc.YearFraction(process.DividendYield.ReferenceDate, lastDate);
-        double dividendRho = black.DividendRho(t);
+        double dividendRho = black.DividendRho(process.DividendYield.AccrualTimeTo(lastDate));
 
-        t = voldc.YearFraction(process.BlackVolatility.ReferenceDate, lastDate);
+        double t = process.BlackVolatility.AccrualTimeTo(lastDate);
         double vega = black.Vega(t);
+
+        // QuantLib divides the theta's terms by the volatility's time; here each by its own structure's, on the
+        // volatility's day counter (the S-eq plan's ruling of 2026-10-21, under R8), QuantLib's where they agree
         double? theta, thetaPerDay;
         try
         {
-            theta = black.Theta(spot, t);
-            thetaPerDay = black.ThetaPerDay(spot, t);
+            theta = black.Theta(
+                spot,
+                discountPtr.AccrualTimeTo(lastDate, voldc),
+                riskFreeDiscountForFwdEstimation,
+                process.RiskFreeRate.AccrualTimeTo(lastDate, voldc),
+                dividendDiscount,
+                process.DividendYield.AccrualTimeTo(lastDate, voldc),
+                t);
+            thetaPerDay = theta / 365.0;
         }
         catch (Exception e) when (e is ArgumentException or NanoQLException)
         {
@@ -161,11 +186,12 @@ public static class AnalyticEuropeanEngine
         double strikeSensitivity = black.StrikeSensitivity;
         double itmCashProbability = black.ItmCashProbability;
 
-        double tte = process.BlackVolatility.TimeFromReference(lastDate);
+        double tte = t;
 
-        // QuantLib's √(variance / tte) is 0/0 for an option expiring today; the volatility there is the structure's.
+        // QuantLib's √(variance / tte) is 0/0 for an option expiring today; the volatility there is the structure's,
+        // and none for an option expiring before the structure's reference date, which sees no variance.
         double volatility = tte == 0.0
-            ? process.BlackVolatility.BlackVol(lastDate, payoff.Strike)
+            ? (lastDate < process.BlackVolatility.ReferenceDate ? 0.0 : process.BlackVolatility.BlackVol(lastDate, payoff.Strike))
             : Math.Sqrt(variance / tte);
 
         ImmutableSortedDictionary<string, object>.Builder additional = ImmutableSortedDictionary.CreateBuilder<string, object>();

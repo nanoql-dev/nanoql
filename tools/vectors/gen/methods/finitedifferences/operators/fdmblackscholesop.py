@@ -9,9 +9,10 @@ two-dimensional mesher with the underlying in direction 1.
 
 For each and for (t1, t2) of (0, 0.25), (0.5, 0.75) and (0.9, 1): apply, apply_direction in the underlying's direction
 (and in the other one, which returns zeros), apply_mixed (zeros), solve_splitting at s = -0.01 (in the other direction,
-the vector itself) and preconditioner at s = -0.01, each on a seeded vector. Structures on different day counters or
-reference dates, which QuantLib reads at the risk-free curve's times, are nanoql's refusal
-(tests/NanoQL.Tests/Divergences/FdmMismatchedTimesTests.cs).
+the vector itself) and preconditioner at s = -0.01, each on a seeded vector; and to_sparse_matrix, the operator's
+toMatrix, the sum of its toMatrixDecomp, as its stored elements' rows, columns and values in storage order. Every
+structure is on the risk-free curve's day counter and reference date: on others QuantLib reads them at the risk-free
+curve's times, where nanoql reads them at their instants (tests/NanoQL.Tests/Divergences/FdmMismatchedTimesTests.cs).
 
 The specs, which the solver and scheme generators share, are an operator {"mesher", "process", "strike", "localVol",
 "illegalLocalVolOverwrite" (null for QuantLib's default, -Null<Real>()), "direction", "quanto"}, the mesher
@@ -19,7 +20,8 @@ tools/vectors/gen/methods/finitedifferences/meshers/fdmmeshercomposite.py's comp
 tools/vectors/gen/processes/blackscholesprocess.py's, the quanto helper fdmblackscholesmesher.py's. The wheel's calls,
 by QuantLib-SWIG 1.44's fdm.i: FdmBlackScholesOp(mesher, process, strike, localVol, illegalLocalVolOverwrite, direction,
 quantoHelper), the C++ constructor; setTime, apply, apply_direction, apply_mixed, solve_splitting and preconditioner the
-C++ members, the Arrays built from lists. Read back by
+C++ members, the Arrays built from lists, and to_sparse_matrix toMatrix, its row_idx, col_idx and data the stored
+elements'. Read back by
 tests/NanoQL.Tests/Vectors/Methods/FiniteDifferences/Operators/FdmBlackScholesOpVectorTests.cs."""
 import importlib.util
 import os
@@ -78,7 +80,7 @@ def outputs(spec, r):
     d = spec["direction"]
     other = 1 - d if len(spec["mesher"]["meshers"]) == 2 else None
     out = {k: [] for k in ("apply", "applyDirection", "applyOther", "applyMixed", "solveSplitting", "solveOther",
-                           "preconditioner")}
+                           "preconditioner", "matrixRows", "matrixColumns", "matrixValues")}
     ra = ql.Array(r)
     for t1, t2 in TIMES:
         op.setTime(t1, t2)
@@ -87,6 +89,10 @@ def outputs(spec, r):
         out["applyMixed"].append(arr(op.apply_mixed(ra)))
         out["solveSplitting"].append(arr(op.solve_splitting(d, ra, S)))
         out["preconditioner"].append(arr(op.preconditioner(ra, S)))
+        m = op.to_sparse_matrix()
+        out["matrixRows"].append([int(i) for i in m.row_idx])
+        out["matrixColumns"].append([int(j) for j in m.col_idx])
+        out["matrixValues"].append(v.enc(list(m.data)))
         if other is not None:
             out["applyOther"].append(arr(op.apply_direction(other, ra)))
             out["solveOther"].append(arr(op.solve_splitting(other, ra, S)))

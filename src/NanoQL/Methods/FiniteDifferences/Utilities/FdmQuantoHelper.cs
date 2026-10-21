@@ -105,4 +105,26 @@ public sealed class FdmQuantoHelper
             result[i] = rDomestic - rForeign + (equityVol[i] * fxVol * EquityFxCorrelation);
         }
     }
+
+    // The adjustment over the instants two times on another structure's clock denote, the operator's and the mesher's
+    // (TermStructure.OwnTime): each structure read on its own clock, the rates and the exchange rate's volatility per
+    // unit of the clock's time; QuantLib's where every structure shares the clock's times.
+    internal void QuantoAdjustmentAt(
+        TermStructure clock, ReadOnlySpan<double> equityVol, double t1, double t2, Span<double> result)
+    {
+        if (RTS.SharesTimes(clock) && FTS.SharesTimes(clock) && FxVolTS.SharesTimes(clock))
+        {
+            QuantoAdjustment(equityVol, t1, t2, result);
+            return;
+        }
+
+        double rDomestic = RTS.ContinuousForwardRateAt(clock, t1, t2);
+        double rForeign = FTS.ContinuousForwardRateAt(clock, t1, t2);
+        double fxVol = Math.Sqrt(FxVolTS.BlackForwardVarianceAt(clock, t1, t2, ExchRateATMlevel) / (t2 - t1));
+
+        for (int i = 0; i < equityVol.Length; ++i)
+        {
+            result[i] = rDomestic - rForeign + (equityVol[i] * fxVol * EquityFxCorrelation);
+        }
+    }
 }

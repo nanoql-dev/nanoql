@@ -40,6 +40,19 @@ Facts:
 
 - `TheVolatilityAtExpiryIsTheStructures`
 
+## AnalyticThetaMismatchedTimesTests
+
+[`Divergences/AnalyticThetaMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/AnalyticThetaMismatchedTimesTests.cs)
+
+The analytic engines' theta on structures dated differently. QuantLib's Black theta divides the payoff discount's, the forward's and the variance's terms by one time, the volatility's in the European engine (`analyticeuropeanengine.cpp:92-98`) and the risk-free curve's in the dividend engine (`analyticdividendeuropeanengine.cpp:108-111`), exact only where the structures share it. On a risk-free curve settling T+2 beside a dividend curve and a volatility dated today, the two engines read different thetas for the same option: the dividend engine's −83.74 at a week where the decay is −34.44, and 0 on the risk-free curve's own date, `BlackCalculator::theta`'s at a zero time. nanoql's engines divide each term by its own structure's time, on the engine's day counter, none for a structure whose time is 0. That is QuantLib's `blackScholesTheta` (`greeks.cpp:25-35`, the binomial engine's theta) at each structure's own rate on QuantLib's analytic value, delta and gamma, to the 1e-11 its rates read over 1e-4 years carry, and the identity −(r ρ / T_r + q ρ_q / T_q + σ ν / (2 T_v)) over QuantLib's own rho, dividend rho and vega to 1e-14. With no dividend the two engines now read the same theta. Where the structures share their times, it is QuantLib's.
+
+Facts:
+
+- `EachTermRunsOverItsOwnStructuresTime`
+- `OnTheRiskFreeCurvesDateItsTermIsNone`
+- `APayoffDiscountCurveRunsOverItsOwnTime`
+- `EachEnginesThetaIsPerItsOwnDayCountersYear`
+
 ## BMANullIndexTests
 
 [`Divergences/BMANullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/BMANullIndexTests.cs)
@@ -60,6 +73,29 @@ Facts:
 
 - `ASystemSolvedInTheLastIterationIsSolved`
 - `ABreakdownShortOfTheToleranceIsRefused`
+
+## BinomialEvenStepsTests
+
+[`Divergences/BinomialEvenStepsTests.cs`](../tests/NanoQL.Tests/Divergences/BinomialEvenStepsTests.cs)
+
+The Leisen-Reimer and Joshi trees on an even step count. Both build their tree on the next odd count (`binomialtree.cpp:106-109`, `:148-151`), while QuantLib's engine builds its time grid and its lattice on the count given (`binomialengine.hpp:111-116`, `bsmlattice.hpp:77-79`), so it rolls back a tree built for n + 1 steps over n: at 250 steps a one-year at-the-money call reads 9.1899281 on the Leisen-Reimer tree, 3.7e-2 below the analytic engine's 9.2270055, where at 251 it reads 6.0e-6 below. nanoql's engine takes its count from the tree it built, so at 250 steps it computes QuantLib's engine at 251, step for step; every odd count and every other tree is QuantLib's.
+
+Facts:
+
+- `AnEvenCountRollsBackTheTreeItBuilt`
+
+## BinomialMismatchedTimesTests
+
+[`Divergences/BinomialMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/BinomialMismatchedTimesTests.cs)
+
+The binomial engine on structures that measure time differently. QuantLib reads the risk-free rate, the dividend yield and the volatility at the maturity date, each on its own day counter, flattens each on that day counter, and runs the tree over the risk-free curve's time to maturity (`binomialengine.hpp:84-105`), so a dividend curve or a volatility on another day counter or reference date accrues over the wrong time: a one-year put on a dividend curve and a volatility on Act/360 beside a risk-free curve on Act/365 reads 8.6306060 on 801 Cox-Ross-Rubinstein steps, against QuantLib's analytic engine's 8.7101995, which reads every structure by date. nanoql runs the tree on the risk-free curve's day counter from the earliest reference date of the structures, as the finite-difference engine's grid, and flattens such a structure on it, its rate or volatility the one with its discount or variance at the maturity date: QuantLib's own engine on the market restated so, each structure accruing nothing before its own date. A market whose structures share the risk-free curve's day counter and reference date is QuantLib's.
+
+Facts:
+
+- `StructuresOnAnotherDayCounterAreReadByDate`
+- `StructuresOnAnotherReferenceDateAreReadByDate`
+- `StructuresDatedAfterTheRiskFreeCurveAccrueNothingBeforeTheirDate`
+- `StructuresSharingTheRiskFreeTimesAreQuantLibs`
 
 ## BlackCalculatorItmProbabilityTests
 
@@ -527,6 +563,19 @@ Facts:
 - `AnUninitializedAssetIsRefused`
 - `AnAmericanOptionReadPastItsExerciseTimesIsRefused`
 
+## DividendMismatchedTimesTests
+
+[`Divergences/DividendMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/DividendMismatchedTimesTests.cs)
+
+Cash dividends on structures that measure time differently. QuantLib's analytic dividend engine counts dividends from the risk-free curve's reference date (`analyticdividendeuropeanengine.cpp:43-56`), and its finite-difference engine places them on the risk-free curve's times, where this one's is negative, so a dividend paid between the evaluation date and a risk-free curve settling later is left out: on a one-year put, a 2.0 dividend paid the day after the evaluation date doesn't move the analytic price. On the market restated from the evaluation date, the risk-free curve discounting nothing before its own date, both engines count it. nanoql's engines run from the earliest reference date of the structures, each discounting nothing before its own (the user's rulings), so they count it, and price the market as QuantLib's engines price it restated: the analytic engine's value, delta, gamma and vega, and the finite-difference engine's value under both cash-dividend models. The analytic engine's rho keeps QuantLib's times, the risk-free curve's own, so a dividend before its reference date adds nothing to it: QuantLib's rho on the market as given, with that dividend's value taken off the spot. Its theta runs each structure over its own time (`AnalyticThetaMismatchedTimesTests`), QuantLib's `blackScholesTheta` at the spot less the dividends' value plus QuantLib's own dividend term. QuantLib's analytic engine also reads the dividend curve's rate per its own day counter's year in the theta, and the curve at the risk-free curve's time in the rho (`:93-105`); here each is read per the risk-free curve's time and by date, as on the curve restated on that day counter, QuantLib's read where the two curves share their times. Where every structure shares the risk-free curve's day counter and reference date, the settlement date, the times and the reads are QuantLib's.
+
+Facts:
+
+- `ADividendInTheGapIsTheOptions`
+- `ADividendAfterTheGapIsQuantLibs`
+- `ADividendCurveSettlingWithTheRiskFreeCurveIsReadByDate`
+- `ADividendCurveOnAnotherDayCounterIsReadPerTheRiskFreeCurvesTime`
+
 ## EngineSequenceTests
 
 [`Divergences/EngineSequenceTests.cs`](../tests/NanoQL.Tests/Divergences/EngineSequenceTests.cs)
@@ -541,6 +590,31 @@ Facts:
 - `TheResultsAreWhatFetchResultsReturns`
 - `TheArgumentChecksRunBeforeTheExpiryCheck`
 - `ALegFailureNamesTheLegAndKeepsTheCause`
+
+## EuropeanRhoDiscountCurveTests
+
+[`Divergences/EuropeanRhoDiscountCurveTests.cs`](../tests/NanoQL.Tests/Divergences/EuropeanRhoDiscountCurveTests.cs)
+
+The analytic European engine's rho with a payoff discount curve of its own. QuantLib's rho moves the forward's rate and the payoff discount's over one time, the discount curve's day counter from the risk-free curve's reference date (`analyticeuropeanengine.cpp:81-86`), exact only where the two curves share their times. Against the value's central difference with both curves' zero rates moved, it is 3.5% off at a week and 0.19% at a year with the risk-free curve settling T+2 and the discount curve dated today, 1.6% and 0.19% the other way round, and 1.4% and 1.1% with the discount curve on Act/360. nanoql moves each rate over its own curve's time (the user's ruling): the identity −(T_r / T_q) ρ_q − T_d V over QuantLib's own dividend rho and value, each time its own curve's, which meets the central difference to 2e-9; no QuantLib function computes it. Where the two curves share their date and day counter, the rho is QuantLib's.
+
+Facts:
+
+- `EachRateMovesOverItsOwnCurvesTime`
+- `CurvesSharingTheirTimesAreQuantLibs`
+
+## ExerciseBeforeReferenceDateTests
+
+[`Divergences/ExerciseBeforeReferenceDateTests.cs`](../tests/NanoQL.Tests/Divergences/ExerciseBeforeReferenceDateTests.cs)
+
+Options expiring on or before a structure's reference date. QuantLib's analytic, binomial and Heston engines read each structure at the exercise date, so a put expiring between the evaluation date and a risk-free curve settling T+2 throws "negative time"; on the curve's own date the Heston engine's integrations read 0/0 (`analytichestonengine.cpp:644-674`) and the dividend engine's theta is 0. QuantLib's finite-difference engine on the market restated from today, every structure accruing nothing before its own date, prices them, as nanoql's does on its clock (the user's rulings). nanoql's other engines read each structure as accruing nothing before its own date, so each prices them as QuantLib's engine prices the restated market: the analytic engines' value and Greeks, and the binomial engine's value, delta, gamma and theta; the Heston engine's model time runs from the earliest curve date (`HestonMismatchedTimesTests`), and at its time 0, on or before every curve's date, its value is the forward's intrinsic value, as QuantLib's European engine reads it at zero volatility. The rho of an option expiring before the risk-free curve's date is 0, as no risk-free rate reaches it. Where every structure is dated after the exercise, the finite-difference and binomial engines' clocks have no time for it, and they refuse it as QuantLib's do on structures dated together.
+
+Facts:
+
+- `TheAnalyticEnginesPriceAPutExpiringInTheGap`
+- `AVolatilityDatedAfterTheExerciseAccruesNoVariance`
+- `TheBinomialEnginePricesAPutExpiringInTheGap`
+- `TheHestonEnginePricesTheForwardsIntrinsicValueAtItsTimeZero`
+- `TheFiniteDifferenceEnginePricesItOnItsClock`
 
 ## ExerciseDatesTests
 
@@ -589,14 +663,18 @@ Facts:
 
 [`Divergences/FdmMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/FdmMismatchedTimesTests.cs)
 
-The finite-difference Black-Scholes engine on structures that measure time differently. Its times are the risk-free curve's, measured from its reference date in its day counter (`blackscholesprocess.cpp:149-152`), and QuantLib reads the dividend curve, the volatility and the quanto helper's structures at those times (`fdmblackscholesop.cpp:51-66`, `fdmblackscholesmesher.cpp:63-103`, `fdmquantohelper.cpp:43-55`), each of which measures time from its own reference date in its own day counter. A one-year put on a risk-free curve on Act/360, with the same discount factor at every date as one on Act/365, prices 0.93% above QuantLib's analytic engine, which reads every structure by date and agrees on both; on a curve settling two business days after its volatility's date, 0.74% below. nanoql's operator and mesher refuse structures that aren't on the risk-free curve's day counter and reference date, "all term structures must share one day counter" and "... one reference date", as `QuantoTermStructure` does for day counters. A dividend curve that is a flat forward at zero, as QuantLib's `BlackScholesProcess` builds on Act/365 and the evaluation date, discounts by 1 at any time and is taken however it is dated, so that process prices as QuantLib's does.
+The finite-difference Black-Scholes engine on structures that measure time differently. Its times are the risk-free curve's, measured from its reference date in its day counter (`blackscholesprocess.cpp:149-152`), and QuantLib reads the dividend curve, the volatility, the local volatility's curves, the quanto helper's structures and the escrowed dividends' curve at those times (`fdmblackscholesop.cpp:51-66`, `fdmblackscholesmesher.cpp:63-103`, `fdmquantohelper.cpp:43-55`, `localvolsurface.cpp:82-118`, `escroweddividendadjustment.cpp`), each of which measures time from its own reference date in its own day counter: a one-year put on a risk-free curve on Act/360, with the discount of one on Act/365 at every date, prices 0.93% above the same market restated on one day counter, and one on a risk-free curve settling two business days after its other structures 0.74% below QuantLib's analytic engine, which counts each structure from its own reference date. nanoql's grid runs on the risk-free curve's day counter from the earliest reference date of the structures it reads, and reads each structure at the instants its times denote, on its own clock, accruing nothing before its own reference date, as the analytic engine counts it (the user's rulings): the days before a later-dated structure's date are calendar time on the grid. So the engine prices the market restated from the earliest date, each structure accruing nothing before its own, and QuantLib's own engine on that market is the check, price and theta: exact between Actual/N day counters, and on others, read through the dates and linear within a day, its analytic engine within the grid's error. The theta is the change over the grid's first calendar day, QuantLib's engine's on the restated market: where a structure is dated after the evaluation date, that day accrues none of its dividends or variance, so the theta differs from the formula theta of the analytic and binomial engines, even in sign. The clock is public (`FdmBlackScholesOp.Clock`), and a solver assembled from the engine's types on it is the engine. A market whose structures are dated with the risk-free curve, on its day counter, is read as QuantLib reads it, and keeps QuantLib's bits.
 
 Facts:
 
-- `ARiskFreeCurveOnAnotherDayCounterIsRefused`
-- `ARiskFreeCurveOnAnotherReferenceDateIsRefused`
-- `EachStructureTheEngineReadsIsChecked`
-- `AZeroDividendCurveOnAnotherDayCounterIsTaken`
+- `ARiskFreeCurveOnAnotherDayCounterPricesTheRestatedMarket`
+- `ARiskFreeCurveSettlingLaterIsPricedFromTheEarliestDate`
+- `EveryMaturityAndGridRunsFromTheEarliestDate`
+- `ASolverAssembledOnTheEnginesClockIsTheEngine`
+- `EachStructureTheEngineReadsIsReadAtItsInstants`
+- `OtherDayCountersAgreeWithTheAnalyticEngine`
+- `AStructureDatedAfterTheRiskFreeCurveAccruesNothingBeforeItsDate`
+- `AZeroDividendCurveOnAnotherDayCounterIsQuantLibs`
 
 ## FdmUndefinedPathRefusalTests
 
@@ -614,6 +692,17 @@ Facts:
 - `AnEmptyLayoutIsRefused`
 - `MoreMeshersThanDimensionsAreRefused`
 - `BandsOfDifferentSizesAreRefused`
+
+## FellerConstraintSizeTests
+
+[`Divergences/FellerConstraintSizeTests.cs`](../tests/NanoQL.Tests/Divergences/FellerConstraintSizeTests.cs)
+
+The Heston model's Feller constraint given fewer than three parameters is refused, with `ArgumentException` "the Feller constraint reads three parameters". QuantLib's test reads theta, kappa and sigma as the first three of any array (`hestonmodel.hpp:71-73`), past a shorter one's end, a result C++ leaves undefined. Three parameters or more are QuantLib's defined path, kept.
+
+Facts:
+
+- `FewerThanThreeParametersAreRefused`
+- `ThreeParametersAreRead`
 
 ## FlatExtrapolator2DNullTests
 
@@ -686,6 +775,29 @@ The tree engine's spread on a lattice reused across calls. QuantLib's time-grid 
 Facts:
 
 - `ASharedLatticeKeepsNoSpreadAcrossCalls`
+
+## HestonForwardByDateTests
+
+[`Divergences/HestonForwardByDateTests.cs`](../tests/NanoQL.Tests/Divergences/HestonForwardByDateTests.cs)
+
+The Heston helper's and `AnalyticHestonEngineOptimalAlpha`'s forward on a dividend curve that measures time differently. QuantLib's helper reads both curves at the risk-free curve's time to the exercise date for its Black price and its option's type (`hestonmodelhelper.cpp:68-69`, `:89-91`), where its engine reads them by date (`analytichestonengine.cpp:648-653`): on a dividend curve on Act/360 beside a risk-free curve on Act/365, the helper's one-year at-the-money market value is a put at the forward 101.0050, 7.2184670, while QuantLib's analytic European engine prices that put at 7.2362869 on the forward 100.9629, so a calibration fits its model's prices to the wrong market values. QuantLib's `OptimalAlpha` takes a time and reads both curves at it (`:219-223`). nanoql's helper reads both curves by the exercise date, its market value the analytic engine's price, and `AnalyticHestonEngineOptimalAlpha` gains a date form that reads the forward by date, as the engine does; on curves that share the risk-free curve's day counter and reference date both are QuantLib's.
+
+Facts:
+
+- `TheHelpersMarketValueReadsTheDividendCurveByDate`
+- `OptimalAlphasDateFormReadsTheForwardByDate`
+
+## HestonMismatchedTimesTests
+
+[`Divergences/HestonMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/HestonMismatchedTimesTests.cs)
+
+The Heston model on curves dated differently. QuantLib's analytic Heston engine runs the model's time from the risk-free curve's reference date (`analytichestonengine.cpp:644-653`), so beside a risk-free curve settling T+2 and a dividend curve dated today the variance accrues only from T+2, where the dividend accrues from today: a one-year put reads 7.816084368797552 against 7.863347278811837 on the market restated from today, the risk-free curve accruing nothing before T+2, and a put expiring before or on the curve's date throws "negative time" or reads 0/0. Its calibration helper and its optimal alpha's date form read the same time. nanoql's engine, helper and alpha run the model's time on the risk-free curve's day counter from the earliest curve date, each curve accruing nothing before its own (the user's rulings), and read the risk-free discount by date: QuantLib's engine, helper and alpha on the restated market. Where the dividend curve isn't dated before the risk-free curve, the time is QuantLib's.
+
+Facts:
+
+- `TheModelsTimeRunsFromTheEarliestCurveDate`
+- `TheHelpersMaturityRunsFromTheEarlierCurveDate`
+- `TheOptimalAlphasDateFormReadsTheEnginesTime`
 
 ## IborNegativeCountTests
 
@@ -833,6 +945,16 @@ Facts:
 Facts:
 
 - `AFallingVarianceIsRefused`
+
+## LocalVolSurfaceMismatchedTimesTests
+
+[`Divergences/LocalVolSurfaceMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/LocalVolSurfaceMismatchedTimesTests.cs)
+
+`LocalVolSurface` on curves that measure time differently from its Black surface. QuantLib reads the risk-free and dividend curves at the surface's times (`localvolsurface.cpp:82-118`), each measuring time from its own reference date in its own day counter. nanoql reads each curve at the instant the surface's time denotes, on its own clock, so a surface on Act/360 over curves on Act/365 gives the local volatility of the same surface restated on Act/365, the same variances at every date: QuantLib's own surface on that market is the check, a local volatility being a rate per the surface's own year, so the two differ by √(365/360). Dupire's time derivative steps 1e-4 on each surface's own clock, so they agree to 1e-6; curves on the surface's day counter and reference date are QuantLib's.
+
+Facts:
+
+- `CurvesOnAnotherDayCounterAreReadAtTheSurfacesInstants`
 
 ## MakeSwaptionNullIndexTests
 
@@ -1017,15 +1139,27 @@ Facts:
 - `ToStringNeverThrows`
 - `ShortPeriodThrowsAsQuantLibDoes`
 
+## ProcessMismatchedTimesTests
+
+[`Divergences/ProcessMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/ProcessMismatchedTimesTests.cs)
+
+The Black-Scholes and Heston processes on structures that measure time differently. A process's times are the risk-free curve's (`blackscholesprocess.cpp:149-152`), and QuantLib reads the dividend curve, the volatility and the local volatility at those times (`blackscholesprocess.cpp:65-130`, `hestonprocess.cpp:474-475`), each of which measures time from its own reference date in its own day counter: on a dividend curve and a volatility on Act/360 beside a risk-free curve on Act/365, the Black-Scholes process evolves a year 2.8e-4 away from the same market restated on one day counter. nanoql reads each structure at the instants the times denote, on its own clock, as the finite-difference engine does (`FdmMismatchedTimesTests`): QuantLib's process on the market restated on the risk-free curve's day counter is the check. A structure accrues nothing before its own reference date, as QuantLib's analytic engines count it; the days before the process's time 0, the risk-free curve's reference date, aren't the process's, but an engine's that runs from the earliest date, as the finite-difference engine does. Every read is at the instants, so the exact evolve and the discretization's agree. A structure on the risk-free curve's day counter and reference date is read as QuantLib reads it.
+
+Facts:
+
+- `TheBlackScholesProcessReadsEachStructureAtItsInstants`
+- `TheHestonProcessReadsTheDividendCurveAtItsInstants`
+- `EachStructureAccruesNothingBeforeItsOwnDate`
+
 ## QuantoTermStructureDayCounterTests
 
 [`Divergences/QuantoTermStructureDayCounterTests.cs`](../tests/NanoQL.Tests/Divergences/QuantoTermStructureDayCounterTests.cs)
 
-`QuantoTermStructure` on structures with different day counters. QuantLib reads every structure at the time the dividend curve's day counter measures, with its own comment that this assumes one day count and "It should be QL_REQUIREd" (`quantotermstructure.hpp:124-131`): two risk-free curves equal at every date, one on Actual/365 (Fixed) and one on Actual/360, give quanto zero rates of 5.0000% and 4.9589%. nanoql makes the check QuantLib names and refuses with `ArgumentException`, "all term structures must share one day counter", naming the first structure that differs; QuantLib's case (`testFDMQuantoHelper`, Actual/360 throughout) is unchanged.
+`QuantoTermStructure` on structures with different day counters. QuantLib reads every structure at the time the dividend curve's day counter measures, with its own comment that this assumes one day count and "It should be QL_REQUIREd" (`quantotermstructure.hpp:124-131`): two risk-free curves equal at every date, one on Actual/365 (Fixed) and one on Actual/360, give quanto zero rates of 5.0000% and 4.9589%. nanoql reads each structure at the instants the curve's times denote, on its own clock, so both give QuantLib's value on one day counter; QuantLib's case (`testFDMQuantoHelper`, Actual/360 throughout) is QuantLib's arithmetic.
 
 Facts:
 
-- `StructuresOnDifferentDayCountersAreRefused`
+- `StructuresOnDifferentDayCountersAreReadAtTheirInstants`
 
 ## QuoteSentinelTests
 
@@ -1047,6 +1181,26 @@ Facts:
 
 - `AHelperGivenANullIndexIsRefused`
 - `AFuturesFraOrOisHelperGivenANullIndexIsRefused`
+
+## ReplicatingVarianceSwapDividendTests
+
+[`Divergences/ReplicatingVarianceSwapDividendTests.cs`](../tests/NanoQL.Tests/Divergences/ReplicatingVarianceSwapDividendTests.cs)
+
+The replicating variance-swap engine at a nonzero dividend yield. QuantLib's fair variance is 2·r − (2/T)·((S/D − f)/f + ln(f/S)) + Π/D, with r and D the risk-free zero rate and discount (`replicatingvarianceswapengine.hpp:153-175`), as if the dividend yield were zero, where the log contract's replication needs the drift r − q and the forward S·D_q/D_r: at a flat 20% volatility, 5% rates and a 3% yield, QuantLib reads 0.0412007, against 0.0417209 on the equivalent zero-dividend process, whose risk-free discount is D_r/D_q. nanoql's drift is 2·(z_r − z_q) and its forward S·D_q/D_r, the dividend curve read by the maturity date, so it reads the equivalent process's value; at a zero yield it is QuantLib's, and the NPV keeps QuantLib's discounting.
+
+Facts:
+
+- `TheDividendYieldEntersTheDriftAndTheForward`
+
+## ReplicatingVarianceSwapRefusalTests
+
+[`Divergences/ReplicatingVarianceSwapRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/ReplicatingVarianceSwapRefusalTests.cs)
+
+The replicating variance-swap engine's lowest put strike. The portfolio adds an end strike max(k − dk, 0) below the lowest put strike k, and weighs the put at k by the log payoff's slope down to it (`replicatingvarianceswapengine.hpp:94-142`): at or below the step dk the end strike is 0, whose log payoff is infinite, and QuantLib's variance and NPV are NaN. nanoql refuses, "put strikes must be greater than dk"; a put strike above the step prices as QuantLib's.
+
+Facts:
+
+- `APutStrikeAtOrBelowTheStepIsRefused`
 
 ## ResultsNullTests
 
@@ -1257,6 +1411,17 @@ Facts:
 
 - `SkipToTheLastIndexIsRefusedWithTheGrayCode`
 - `TheDrawThatWouldReachTheLastCounterThrowsWithTheGrayCode`
+
+## SparseMatrixPlusAssignTests
+
+[`Divergences/SparseMatrixPlusAssignTests.cs`](../tests/NanoQL.Tests/Divergences/SparseMatrixPlusAssignTests.cs)
+
+`SparseMatrix`'s in-place sum of a matrix that stores a nonzero element outside the target is refused, with `ArgumentException` "element (i, j) outside the m x n matrix". uBLAS checks the sizes only in its debug builds (`BOOST_UBLAS_CHECK`, `detail/matrix_assign.hpp:1057-1058`); under `NDEBUG`, which QuantLib's builds use, `make_conformant` stores such an element in the target (`:147-148`). In a row outside, its insertion writes row starts past the target's rows (`matrix_sparse.hpp:3070-3073`), a result C++ leaves undefined; in a column outside, it stores an element past the target's columns, which a product then reads past its vector. An addend of other sizes whose elements all lie inside the target, a zero outside among them, is uBLAS's defined path, kept.
+
+Facts:
+
+- `ANonzeroElementOutsideTheMatrixIsRefused`
+- `AnAddendInsideTheMatrixIsAdded`
 
 ## SparseMatrixProductTests
 
@@ -1508,6 +1673,16 @@ Facts:
 
 - `ATreesIndicesOutOfRangeAreRefused`
 - `StatePricesBeyondTheGridAreRefused`
+
+## VarianceSwapMismatchedTimesTests
+
+[`Divergences/VarianceSwapMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/VarianceSwapMismatchedTimesTests.cs)
+
+The replicating variance-swap engine on structures dated differently. QuantLib's fair variance is per year of the risk-free curve's own time (`replicatingvarianceswapengine.hpp:149`, `:170-171`, `:211-213`), the portfolio's options priced on each structure's own times, so where a risk-free curve settling T+2 sits beside a volatility dated today, QuantLib divides the volatility's variance by the risk-free curve's shorter time: 2.33 times high at a week and 1.1% at a year, the ratio of the two times. nanoql's variance is per year of the swap's time on the risk-free curve's day counter from the earliest reference date, each structure accruing nothing before its own (the user's rulings): QuantLib's on the market restated from today. Where no structure is dated before the risk-free curve, it is QuantLib's.
+
+Facts:
+
+- `TheVarianceIsPerYearOfTheSwapsTime`
 
 ## WeightedIndexNullComponentTests
 

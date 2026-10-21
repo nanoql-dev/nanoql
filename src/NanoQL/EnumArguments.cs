@@ -7,6 +7,7 @@ using NanoQL.Instruments;
 using NanoQL.Methods;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
+using NanoQL.Processes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 
@@ -479,6 +480,46 @@ internal static class EnumArguments
             or > FdBlackScholesVanillaEngineCashDividendModel.Escrowed)
         {
             throw new ArgumentOutOfRangeException(paramName, value, "unknwon cash dividend model");
+        }
+    }
+
+    /// <summary>Refuses a Heston discretization outside <see cref="HestonProcessDiscretization"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's process fails "unknown discretization schema" when it evolves.</remarks>
+    internal static void Check(HestonProcessDiscretization value, string paramName)
+    {
+        if (value is < HestonProcessDiscretization.PartialTruncation
+            or > HestonProcessDiscretization.BroadieKayaExactSchemeTrapezoidal)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown discretization schema");
+        }
+    }
+
+    /// <summary>Refuses a position outside <see cref="PositionType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's replicating variance-swap engine fails "Unknown position" when it prices.</remarks>
+    internal static void Check(PositionType value, string paramName)
+    {
+        if (value is < PositionType.Long or > PositionType.Short)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "Unknown position");
+        }
+    }
+
+    /// <summary>Refuses a complex-log formula outside <see cref="AnalyticHestonEngineComplexLogFormula"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's engine fails "unknown complex log formula" when it prices.</remarks>
+    internal static void Check(AnalyticHestonEngineComplexLogFormula value, string paramName)
+    {
+        if (value is < AnalyticHestonEngineComplexLogFormula.Gatheral or > AnalyticHestonEngineComplexLogFormula.OptimalCV)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown complex log formula");
         }
     }
 }

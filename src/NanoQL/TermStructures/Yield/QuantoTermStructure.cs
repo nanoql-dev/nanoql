@@ -21,10 +21,14 @@ namespace NanoQL.TermStructures;
 /// maximum date is the earliest of the five structures'.
 /// </para>
 /// <para>
-/// The five structures must share one day counter, or the curve refuses them, "all term structures must share one day
-/// counter". QuantLib reads every structure at the time the dividend curve's day counter measures, with its own
-/// comment that this assumes one day count and "should be QL_REQUIREd" (<c>quantotermstructure.hpp:124-131</c>), so
-/// curves equal at every date but on different day counters give different quanto rates; a documented divergence.
+/// QuantLib reads every structure at the time the dividend curve's day counter measures, with its own comment that this
+/// assumes one day count and "should be QL_REQUIREd" (<c>quantotermstructure.hpp:124-131</c>), so curves equal at every
+/// date but on different day counters give different quanto rates. Here a structure on another day counter or
+/// reference date is read at the instants the curve's times denote, on its own clock: the curves' discounts and the
+/// volatilities' variances accrued from the curve's reference date to the time, the correlation term the root of the
+/// two variances' product. Where every structure shares the dividend curve's day counter and reference date, the zero
+/// rate is QuantLib's. A documented divergence (the S-eq plan's SEQR7 (xi), re-ruled on 2026-10-20 under R8 with the
+/// finite-difference engine's mismatched times).
 /// </para>
 /// </remarks>
 public sealed class QuantoTermStructure : ZeroYieldStructure
@@ -48,7 +52,6 @@ public sealed class QuantoTermStructure : ZeroYieldStructure
     /// <param name="exchRateATMlevel">The level the exchange rate's volatility is read at.</param>
     /// <param name="underlyingExchRateCorrelation">The correlation of the underlying and the exchange rate.</param>
     /// <exception cref="ArgumentNullException">A structure is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">The structures don't share one day counter.</exception>
     public QuantoTermStructure(
         YieldTermStructure underlyingDividendTS,
         YieldTermStructure riskFreeTS,
@@ -68,11 +71,6 @@ public sealed class QuantoTermStructure : ZeroYieldStructure
         ArgumentNullException.ThrowIfNull(foreignRiskFreeTS);
         ArgumentNullException.ThrowIfNull(underlyingBlackVolTS);
         ArgumentNullException.ThrowIfNull(exchRateBlackVolTS);
-        DayCounter dc = underlyingDividendTS.DayCounter;
-        CheckDayCounter(riskFreeTS.DayCounter, dc, nameof(riskFreeTS));
-        CheckDayCounter(foreignRiskFreeTS.DayCounter, dc, nameof(foreignRiskFreeTS));
-        CheckDayCounter(underlyingBlackVolTS.DayCounter, dc, nameof(underlyingBlackVolTS));
-        CheckDayCounter(exchRateBlackVolTS.DayCounter, dc, nameof(exchRateBlackVolTS));
         this.underlyingDividendTS = underlyingDividendTS;
         this.riskFreeTS = riskFreeTS;
         this.foreignRiskFreeTS = foreignRiskFreeTS;
@@ -97,26 +95,36 @@ public sealed class QuantoTermStructure : ZeroYieldStructure
     }
 
     /// <inheritdoc/>
-    protected override double ZeroYieldImpl(double t) =>
-        underlyingDividendTS.ZeroRate(t, Compounding.Continuous, Frequency.NoFrequency, true).Rate
-        + riskFreeTS.ZeroRate(t, Compounding.Continuous, Frequency.NoFrequency, true).Rate
-        - foreignRiskFreeTS.ZeroRate(t, Compounding.Continuous, Frequency.NoFrequency, true).Rate
-        + (underlyingExchRateCorrelation
-            * underlyingBlackVolTS.BlackVol(t, strike, true)
-            * exchRateBlackVolTS.BlackVol(t, exchRateATMlevel, true));
+    protected override double ZeroYieldImpl(double t)
+    {
+        if (riskFreeTS.SharesTimes(this) && foreignRiskFreeTS.SharesTimes(this)
+            && underlyingBlackVolTS.SharesTimes(this) && exchRateBlackVolTS.SharesTimes(this))
+        {
+            return underlyingDividendTS.ZeroRate(t, Compounding.Continuous, Frequency.NoFrequency, true).Rate
+                + riskFreeTS.ZeroRate(t, Compounding.Continuous, Frequency.NoFrequency, true).Rate
+                - foreignRiskFreeTS.ZeroRate(t, Compounding.Continuous, Frequency.NoFrequency, true).Rate
+                + (underlyingExchRateCorrelation
+                    * underlyingBlackVolTS.BlackVol(t, strike, true)
+                    * exchRateBlackVolTS.BlackVol(t, exchRateATMlevel, true));
+        }
+
+        // each structure's log discount or variance accrued between the instants of times 0 and t, per unit of the
+        // curve's time, a structure dated after the curve accruing nothing before its date (TermStructure.AccrualTime);
+        // at 0, the rate over QuantLib's forward-rate step
+        double tt = t > 0.0 ? t : 0.0001;
+        double logDiscount = -Math.Log(underlyingDividendTS.Discount(tt, true))
+            - Math.Log(riskFreeTS.DiscountAt(this, tt, true) / riskFreeTS.DiscountAt(this, 0.0, true))
+            + Math.Log(foreignRiskFreeTS.DiscountAt(this, tt, true) / foreignRiskFreeTS.DiscountAt(this, 0.0, true))
+            + (underlyingExchRateCorrelation
+                * Math.Sqrt(underlyingBlackVolTS.BlackForwardVarianceAt(this, 0.0, tt, strike, true)
+                            * exchRateBlackVolTS.BlackForwardVarianceAt(this, 0.0, tt, exchRateATMlevel, true)));
+        return logDiscount / tt;
+    }
 
     private static YieldTermStructure DividendCurveOf(YieldTermStructure underlyingDividendTS)
     {
         ArgumentNullException.ThrowIfNull(underlyingDividendTS);
         return underlyingDividendTS;
-    }
-
-    private static void CheckDayCounter(DayCounter dc, DayCounter expected, string paramName)
-    {
-        if (dc != expected)
-        {
-            throw new ArgumentException("all term structures must share one day counter", paramName);
-        }
     }
 
     private static Date Min(Date a, Date b) => b < a ? b : a;

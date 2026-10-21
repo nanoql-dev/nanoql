@@ -24,6 +24,13 @@ namespace NanoQL.TermStructures;
 /// surface's are fixed. Its calendar is QuantLib's empty one, as QuantLib's surface leaves it. The underlying's level
 /// is a number, so QuantLib's constructors taking a quote and a number coincide.
 /// </para>
+/// <para>
+/// QuantLib reads the risk-free and dividend curves at the Black surface's times (<c>localvolsurface.cpp:82-118</c>),
+/// each measuring time from its own reference date in its own day counter. Here a curve on another day counter or
+/// reference date is read at the instant the surface's time denotes, on its own clock (between Actual/N day counters
+/// exactly, on others through the date, linear within the day); a curve that shares the surface's is read as QuantLib
+/// reads it. A documented divergence (the S-eq plan's ruling of 2026-10-20, under R8).
+/// </para>
 /// </remarks>
 public class LocalVolSurface : LocalVolTermStructure
 {
@@ -64,8 +71,8 @@ public class LocalVolSurface : LocalVolTermStructure
     /// negative.</exception>
     protected override double LocalVolImpl(double t, double strike)
     {
-        double dr = riskFreeTS.Discount(t, true);
-        double dq = dividendTS.Discount(t, true);
+        double dr = riskFreeTS.DiscountAt(this, t, true);
+        double dq = dividendTS.DiscountAt(this, t, true);
         double forwardValue = underlying * dq / dr;
 
         // strike derivatives
@@ -87,8 +94,8 @@ public class LocalVolSurface : LocalVolTermStructure
         if (t == 0.0)
         {
             dt = 0.0001;
-            double drpt = riskFreeTS.Discount(t + dt, true);
-            double dqpt = dividendTS.Discount(t + dt, true);
+            double drpt = riskFreeTS.DiscountAt(this, t + dt, true);
+            double dqpt = dividendTS.DiscountAt(this, t + dt, true);
             double strikept = underlyingLevel * dr * dqpt / (drpt * dq);
 
             wpt = blackTS.BlackVariance(t + dt, strikept, true);
@@ -103,10 +110,10 @@ public class LocalVolSurface : LocalVolTermStructure
         else
         {
             dt = Min(0.0001, t / 2.0);
-            double drpt = riskFreeTS.Discount(t + dt, true);
-            double drmt = riskFreeTS.Discount(t - dt, true);
-            double dqpt = dividendTS.Discount(t + dt, true);
-            double dqmt = dividendTS.Discount(t - dt, true);
+            double drpt = riskFreeTS.DiscountAt(this, t + dt, true);
+            double drmt = riskFreeTS.DiscountAt(this, t - dt, true);
+            double dqpt = dividendTS.DiscountAt(this, t + dt, true);
+            double dqmt = dividendTS.DiscountAt(this, t - dt, true);
 
             double strikept = underlyingLevel * dr * dqpt / (drpt * dq);
             double strikemt = underlyingLevel * dr * dqmt / (drmt * dq);

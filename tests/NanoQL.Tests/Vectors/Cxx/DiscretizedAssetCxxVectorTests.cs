@@ -16,7 +16,7 @@ namespace NanoQL.Tests.Vectors;
 /// the asset's <see cref="DiscretizedAsset.Time"/> and <see cref="DiscretizedAsset.Values"/>, and its bond's, after
 /// each rollback its <see cref="DiscretizedAsset.PresentValue"/>, and its
 /// <see cref="DiscretizedAsset.MandatoryTimes"/>; the lattice's <see cref="Methods.TreeLattice.StatePrices"/> and
-/// <see cref="Methods.TreeLattice1D.Grid"/>, one lattice with a spread
+/// <see cref="Methods.TreeLattice1D.Grid(double)"/>, one lattice with a spread
 /// (<see cref="OneFactorModelShortRateTree.SetSpread"/>); then the refusals.
 /// </summary>
 [Trait("Oracle", "QuantLib")]

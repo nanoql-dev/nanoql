@@ -194,6 +194,84 @@ public class EquityErrorTests
         Refused<NanoQLException>(() => american.ImpliedVolatility(150.0, process, context), null, "root not bracketed");
     }
 
+    [Fact]
+    public void BinomialEngineRefusals()
+    {
+        var context = new EvaluationContext { EvaluationDate = Today };
+        var process = new BlackScholesMertonProcess(
+            100.0, new FlatForward(Today, 0.02, Dc), new FlatForward(Today, 0.04, Dc), new BlackConstantVol(Today, null, 0.2, Dc));
+        var european = new VanillaOption(new PlainVanillaPayoff(OptionType.Call, 100.0), new EuropeanExercise(Today + 182));
+
+        Refused<ArgumentException>(
+            () => BinomialCRRVanillaEngine.Calculate(european, context, process, 1), "timeSteps", "at least 2 time steps required, 1 provided");
+        var digital = new VanillaOption(new CashOrNothingPayoff(OptionType.Call, 100.0, 1.0), new EuropeanExercise(Today + 182));
+        Refused<NanoQLException>(() => BinomialCRRVanillaEngine.Calculate(digital, context, process, 51), null, "non-plain payoff given");
+        var zeroSpot = new BlackScholesMertonProcess(
+            0.0, new FlatForward(Today, 0.02, Dc), new FlatForward(Today, 0.04, Dc), new BlackConstantVol(Today, null, 0.2, Dc));
+        Refused<NanoQLException>(
+            () => BinomialCRRVanillaEngine.Calculate(european, context, zeroSpot, 51), null, "negative or null underlying given");
+        var zeroStrike = new VanillaOption(new PlainVanillaPayoff(OptionType.Call, 0.0), new EuropeanExercise(Today + 182));
+        Refused<ArgumentException>(() => BinomialLRVanillaEngine.Calculate(zeroStrike, context, process, 51), "strike", "strike must be positive");
+        Refused<ArgumentException>(() => BinomialJ4VanillaEngine.Calculate(zeroStrike, context, process, 51), "strike", "strike must be positive");
+
+        // a volatility too low for the trees' probabilities
+        var lowVol = new BlackScholesMertonProcess(
+            100.0, new FlatForward(Today, 0.0, Dc), new FlatForward(Today, 0.3, Dc), new BlackConstantVol(Today, null, 0.01, Dc));
+        Refused<NanoQLException>(() => BinomialCRRVanillaEngine.Calculate(european, context, lowVol, 3), null, "negative probability");
+        // Trigeorgis's and Tian's probabilities stay in [0, 1] for real inputs; a NaN volatility reaches their checks
+        var nanVol = new BlackScholesMertonProcess(
+            100.0, new FlatForward(Today, 0.0, Dc), new FlatForward(Today, 0.03, Dc), new BlackConstantVol(Today, null, double.NaN, Dc));
+        Refused<NanoQLException>(() => BinomialTrigeorgisVanillaEngine.Calculate(european, context, nanVol, 3), null, "negative probability");
+        Refused<NanoQLException>(() => BinomialTianVanillaEngine.Calculate(european, context, nanVol, 3), null, "negative probability");
+        Refused<NanoQLException>(
+            () => BinomialEQPVanillaEngine.Calculate(european, context, lowVol, 3),
+            null,
+            "drift per step too large for the additive EQP tree: more steps are needed");
+    }
+
+    [Fact]
+    public void VarianceSwapRefusals()
+    {
+        var context = new EvaluationContext { EvaluationDate = Today };
+        var process = new BlackScholesMertonProcess(
+            100.0, new FlatForward(Today, 0.0, Dc), new FlatForward(Today, 0.05, Dc), new BlackConstantVol(Today, null, 0.2, Dc));
+        var swap = new VarianceSwap(PositionType.Long, 0.04, 50000, Today, Today + 90);
+        double[] calls = [100.0, 110.0, 120.0];
+        double[] puts = [80.0, 90.0, 100.0];
+
+        Refused<ArgumentOutOfRangeException>(() => new VarianceSwap((PositionType)2, 0.04, 1.0, Today, Today + 90), "position", "Unknown position");
+        Refused<ArgumentException>(() => new VarianceSwap(PositionType.Long, 0.04, 1.0, default, Today + 90), "startDate", null);
+        Refused<ArgumentException>(() => new VarianceSwap(PositionType.Long, 0.04, 1.0, Today, default), "maturityDate", null);
+
+        Refused<ArgumentNullException>(() => ReplicatingVarianceSwapEngine.Calculate(swap, context, null!, 5.0, calls, puts), "process", "no process given");
+        Refused<ArgumentException>(() => ReplicatingVarianceSwapEngine.Calculate(swap, context, process, 5.0, [], puts), "callStrikes", "no strike(s) given");
+        Refused<ArgumentException>(() => ReplicatingVarianceSwapEngine.Calculate(swap, context, process, 5.0, calls, []), "putStrikes", "no strike(s) given");
+        Refused<ArgumentException>(
+            () => ReplicatingVarianceSwapEngine.Calculate(swap, context, process, 5.0, calls, [0.0, 100.0]), "putStrikes", "min put strike must be positive");
+        Refused<ArgumentException>(
+            () => ReplicatingVarianceSwapEngine.Calculate(swap, context, process, 5.0, calls, [80.0, 95.0]),
+            "callStrikes",
+            "min call and max put strikes differ");
+
+        Refused<NanoQLException>(
+            () => ReplicatingVarianceSwapEngine.Calculate(
+                new VarianceSwap(PositionType.Long, 0.0, 1.0, Today, Today + 90), context, process, 5.0, calls, puts),
+            null,
+            "negative or null strike given");
+        Refused<NanoQLException>(
+            () => ReplicatingVarianceSwapEngine.Calculate(
+                new VarianceSwap(PositionType.Short, 0.04, -1.0, Today, Today + 90), context, process, 5.0, calls, puts),
+            null,
+            "negative or null notional given");
+
+        // an expired swap is worth nothing and has no variance
+        VarianceSwapResults expired = ReplicatingVarianceSwapEngine.Calculate(
+            new VarianceSwap(PositionType.Long, 0.04, 1.0, Today - 90, Today - 1), context, process, 5.0, calls, puts);
+        Assert.Equal(0.0, expired.NPV);
+        Assert.Null(expired.Variance);
+        Refused<ArgumentException>(() => swap.FetchResults(new InstrumentResults()), "results", "wrong results type");
+    }
+
     // A Black variance of 0.04 at time 0 and 0.01 after it, which no ported structure gives: LocalVolSurface's check at
     // t = 0 reads it.
     private sealed class VarianceFallingAfterZero(Date referenceDate, DayCounter dayCounter)

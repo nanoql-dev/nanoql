@@ -9,7 +9,7 @@ surface read at the strike and the exchange rate's level), and a correlation (ne
 date, calendar, settlement days and day counter, which are the dividend curve's, the maximum date, the earliest of the
 five structures', and the discount, a continuous zero rate and a simple forward rate at eight dates. All five
 structures share one day counter: QuantLib reads every structure at the time the dividend curve's day counter
-measures, so curves on different day counters are left out, where nanoql refuses them
+measures, so curves on different day counters are left out, where nanoql reads each at its instants
 (tests/NanoQL.Tests/Divergences/QuantoTermStructureDayCounterTests.cs).
 
 The specs are tools/vectors/gen/termstructures/volatility/equityfx/blackvoltermstructure.py's and

@@ -9,7 +9,8 @@ namespace NanoQL.Numerics;
 /// <summary>
 /// uBLAS's <c>compressed_matrix&lt;double&gt;</c> (<c>matrix_sparse.hpp</c>), row-major with zero-based indices, the
 /// members QuantLib's <c>SparseMatrix</c> and its tests use: the compressed row storage with its filled counts, element
-/// access with insertion, the capacity's growth, and the sum's sparse assignment, which keeps only nonzero elements.
+/// access with insertion, the capacity's growth, the sum's sparse assignment, which keeps only nonzero elements, and
+/// the in-place sum's, which adds into the stored elements.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -139,6 +140,48 @@ internal sealed class CompressedMatrix
         return m;
     }
 
+    /// <summary>
+    /// Adds a matrix in place: uBLAS's <c>operator+=</c> of a container, <c>plus_assign</c>, through
+    /// <c>matrix_assign&lt;scalar_plus_assign&gt;</c>'s sparse-proxy case (<c>detail/matrix_assign.hpp</c>).
+    /// </summary>
+    /// <param name="e">The matrix added, none of whose nonzero elements lies outside this one.</param>
+    /// <remarks>
+    /// <c>make_conformant</c> first stores a zero at each nonzero element of <paramref name="e"/> this matrix doesn't
+    /// store; then each element of <paramref name="e"/> this matrix stores is added to it. So an element that cancels
+    /// stays stored, and a zero of <paramref name="e"/> this matrix doesn't store isn't.
+    /// </remarks>
+    internal void PlusAssign(CompressedMatrix e)
+    {
+        var index = new List<(int Row, int Column)>();
+        for (int i = 0; i + 1 < e.filled1_; ++i)
+        {
+            for (int k = e.index1Data_[i]; k < e.index1Data_[i + 1]; ++k)
+            {
+                if (e.valueData_[k] != 0.0 && FindElement(i, e.index2Data_[k]) < 0)
+                {
+                    index.Add((i, e.index2Data_[k]));
+                }
+            }
+        }
+
+        foreach ((int row, int column) in index)
+        {
+            At(row, column) = 0.0;
+        }
+
+        for (int i = 0; i + 1 < e.filled1_; ++i)
+        {
+            for (int k = e.index1Data_[i]; k < e.index1Data_[i + 1]; ++k)
+            {
+                int p = FindElement(i, e.index2Data_[k]);
+                if (p >= 0)
+                {
+                    valueData_[p] += e.valueData_[k];
+                }
+            }
+        }
+    }
+
     /// <summary>The stored element's position in the data arrays, or −1.</summary>
     /// <param name="i">The row.</param>
     /// <param name="j">The column.</param>
@@ -195,20 +238,6 @@ internal sealed class CompressedMatrix
         }
 
         return ref valueData_[p];
-    }
-
-    /// <summary>Takes the other matrix's sizes and storage, uBLAS's <c>assign_temporary</c> (a swap).</summary>
-    /// <param name="m">The matrix whose storage is taken.</param>
-    internal void AssignTemporary(CompressedMatrix m)
-    {
-        size1_ = m.size1_;
-        size2_ = m.size2_;
-        capacity_ = m.capacity_;
-        filled1_ = m.filled1_;
-        filled2_ = m.filled2_;
-        index1Data_ = m.index1Data_;
-        index2Data_ = m.index2Data_;
-        valueData_ = m.valueData_;
     }
 
     private int RestrictCapacity(int nonZeros)

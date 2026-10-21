@@ -60,4 +60,25 @@ public abstract class Lattice
     /// <param name="t">The time.</param>
     /// <returns>A new vector, one value per node.</returns>
     public abstract Vector Grid(double t);
+
+    /// <summary>
+    /// The lattice's values of the underlying variable at a time, written into the caller's span, so that a working
+    /// asset reads them at each step without allocating (the S-eq plan's SEQD18). This default copies
+    /// <see cref="Grid(double)"/>; a lattice that can write its nodes directly overrides it.
+    /// </summary>
+    /// <param name="t">The time.</param>
+    /// <param name="destination">The span the values go to, at least one per node.</param>
+    /// <returns>The number of values written, one per node.</returns>
+    /// <exception cref="ArgumentException"><paramref name="destination"/> is shorter than the grid.</exception>
+    public virtual int Grid(double t, Span<double> destination)
+    {
+        Vector grid = Grid(t);
+        if (!(destination.Length >= grid.Size))
+        {
+            throw new ArgumentException($"a destination of {grid.Size} values needed, not {destination.Length}", nameof(destination));
+        }
+
+        grid.AsSpan().CopyTo(destination);
+        return grid.Size;
+    }
 }

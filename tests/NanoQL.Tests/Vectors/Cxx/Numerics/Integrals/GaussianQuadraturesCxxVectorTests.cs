@@ -10,8 +10,9 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's Gaussian quadrature vectors, <c>tests/vectors/cxx/math/integrals/gaussianquadratures.json</c>:
 /// <see cref="GaussLegendreIntegrator"/>, <see cref="GaussChebyshevIntegrator"/> and
 /// <see cref="GaussChebyshev2ndIntegrator"/> over the named integrands, each the integral, the number of evaluations
-/// and the quadrature's order; and the orthogonal polynomials' members, each polynomial built for each value, so that a
-/// constructor's refusal is each value's.
+/// and the quadrature's order; the orthogonal polynomials' members, each polynomial built for each value, so that a
+/// constructor's refusal is each value's; and <see cref="TabulatedGaussLegendre.Order()"/> and
+/// <see cref="MultiDimGaussianIntegration"/>'s weights and abscissas.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class GaussianQuadraturesCxxVectorTests
@@ -24,6 +25,26 @@ public class GaussianQuadraturesCxxVectorTests
         foreach (VectorCase c in file.Cases)
         {
             string kind = c.String("kind");
+            if (kind == "TabulatedGaussLegendre")
+            {
+                int n = c.Int("n");
+                int? other = c.Input("other").ValueKind == System.Text.Json.JsonValueKind.Null ? null : c.Int("other");
+                check.Output(
+                    c, "order", () => other is int m ? new TabulatedGaussLegendre(n).Order(m).Order() : new TabulatedGaussLegendre(n).Order());
+                continue;
+            }
+
+            if (kind.StartsWith("MultiDim", StringComparison.Ordinal))
+            {
+                Func<int, GaussianQuadrature> quadrature = kind == "MultiDimHermite"
+                    ? n => new GaussHermiteIntegration(n)
+                    : n => new GaussLegendreIntegration(n);
+                var integration = new MultiDimGaussianIntegration(c.Ints("ns"), quadrature);
+                check.Output(c, "weights", integration.Weights());
+                check.Output(c, "x", integration.X().Select(x => (object?)x).ToArray());
+                continue;
+            }
+
             if (c.Inputs.TryGetProperty("integrals", out _))
             {
                 int n = c.Int("n");

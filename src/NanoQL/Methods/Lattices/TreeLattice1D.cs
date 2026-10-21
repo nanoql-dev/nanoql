@@ -50,6 +50,31 @@ public abstract class TreeLattice1D : TreeLattice
         return grid;
     }
 
+    /// <summary>
+    /// The underlying variable's value at each node of a time, written into the caller's span without allocating.
+    /// </summary>
+    /// <param name="t">The time, on the grid.</param>
+    /// <param name="destination">The span the values go to, at least one per node.</param>
+    /// <returns>The number of values written, one per node.</returns>
+    /// <exception cref="NanoQLException"><paramref name="t"/> isn't on the grid (the grid's own refusal).</exception>
+    /// <exception cref="ArgumentException"><paramref name="destination"/> is shorter than the grid.</exception>
+    public override int Grid(double t, Span<double> destination)
+    {
+        int i = TimeGrid.Index(t);
+        int size = Size(i);
+        if (!(destination.Length >= size))
+        {
+            throw new ArgumentException($"a destination of {size} values needed, not {destination.Length}", nameof(destination));
+        }
+
+        for (int j = 0; j < size; j++)
+        {
+            destination[j] = Underlying(i, j);
+        }
+
+        return size;
+    }
+
     /// <summary>The underlying variable's value at a node.</summary>
     /// <param name="i">The step's index on the grid.</param>
     /// <param name="index">The node's index at the step.</param>

@@ -8,8 +8,11 @@ Six curves (one to six dates, the three time extrapolations, linear and cubic in
 two dates): the local volatility's reference and maximum dates, minimum and maximum strikes and day counter's name,
 which are the Black curve's, and at 12 (time, level) points, at and between the dates, past the last and at level
 1e6 (which the curve ignores), the local volatility read through the process's localVolatility() and the process's
-diffusion. A curve whose variance falls is left out: QuantLib returns the square root of a negative derivative, NaN,
-where nanoql refuses (tests/NanoQL.Tests/Divergences/LocalVolCurveRefusalTests.cs).
+diffusion. Each process's curves are on its volatility's day counter: on another, QuantLib's process reads the local
+volatility at the risk-free curve's times, where nanoql reads it at its instants
+(tests/NanoQL.Tests/Divergences/ProcessMismatchedTimesTests.cs). A curve whose variance falls is left out: QuantLib
+returns the square root of a negative derivative, NaN, where nanoql refuses
+(tests/NanoQL.Tests/Divergences/LocalVolCurveRefusalTests.cs).
 
 The specs are tools/vectors/gen/processes/blackscholesprocess.py's. The wheel's calls, by QuantLib-SWIG 1.44's
 stochasticprocess.i: BlackScholesMertonProcess's constructor, localVolatility(), whose handle holds the
@@ -50,6 +53,10 @@ CURVES = [
     ("flat variance between two dates", bvts.vol_spec_curve(R, [182, 365], [0.20, 0.2 * (182 / 365) ** 0.5],
                                                              force=False)),
 ]
+# the curves of a case whose volatility isn't on Act/365: on its day counter, so that the process shares its times
+CURVES_ON = {"linear variance, Actual/360": (
+    bsp.zero_spec(R, [0, 91, 365, 730, 1825, 3650], [0.03, 0.032, 0.035, 0.038, 0.04, 0.042], bvts.A360),
+    bsp.zero_spec(R, [0, 182, 365, 1095, 3650], [0.015, 0.018, 0.02, 0.022, 0.025], bvts.A360))}
 POINTS = [(0.0, 100.0), (0.05, 90.0), (0.0821917808219178, 100.0), (0.2, 110.0), (0.5, 100.0), (0.75, 1e6),
           (1.0, 100.0), (1.5, 80.0), (2.0, 100.0), (3.0, 120.0), (5.0027397260274, 100.0), (8.0, 100.0)]
 
@@ -58,7 +65,8 @@ def cases():
     out = []
     st = v.settings(R)
     for name, vol in CURVES:
-        spec = bsp.process_spec("BlackScholesMertonProcess", 100.0, bsp.ZERO_R, vol, bsp.ZERO_Q)
+        curves = CURVES_ON.get(name, (bsp.ZERO_R, bsp.ZERO_Q))
+        spec = bsp.process_spec("BlackScholesMertonProcess", 100.0, curves[0], vol, curves[1])
         p = bsp.process(spec)
         lv = p.localVolatility()
         out.append({

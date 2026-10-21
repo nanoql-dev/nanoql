@@ -8,7 +8,8 @@ namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The exception type, message and parameter name of the numerics' refusals that no vector reaches: QuantLib's checks
-/// of an argument, each an <see cref="ArgumentException"/> naming it, with QuantLib's text. QuantLib's guards on paths
+/// of an argument, each an <see cref="ArgumentException"/> naming it, with QuantLib's text, and the in-place sparse
+/// sum's refusal of an element outside the matrix. QuantLib's guards on paths
 /// no ordinary input takes (the series' and continued fractions' iteration limits, the Gauss-Lobatto rule's "no more
 /// machine number") have no fact.
 /// </summary>
@@ -48,6 +49,16 @@ public class NumericsErrorTests
             () => SparseMatrixFunctions.Prod(a, new Vector(3)),
             "x",
             "vectors and sparse matrices with different sizes (3, 3x2) cannot be multiplied");
+    }
+
+    [Fact]
+    public void SparseMatrixPlusAssignRefusal()
+    {
+        // an undefined write in uBLAS (Divergences/SparseMatrixPlusAssignTests.cs)
+        var a = new SparseMatrix(2, 2);
+        var b = new SparseMatrix(3, 2);
+        b[2, 1] = 1.0;
+        Refused(() => a += b, "other", "element (2, 1) outside the 2 x 2 matrix");
     }
 
     private static void Refused(Action call, string paramName, string message)

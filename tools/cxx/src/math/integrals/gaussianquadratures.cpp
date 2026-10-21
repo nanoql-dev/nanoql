@@ -4,8 +4,10 @@
 // ql/math/integrals/gaussianquadratures.hpp, .cpp and gaussianorthogonalpolynomial.hpp, .cpp, the members the wheel
 // doesn't expose: the integrators over [a, b] (GaussLegendreIntegrator, GaussChebyshevIntegrator,
 // GaussChebyshev2ndIntegrator), their value, count and quadrature's order; and the orthogonal polynomials' members
-// (mu_0, alpha, beta, w, logW, value, weightedValue), one a call, so that each refusal is its member's. The integrand
-// is named, as
+// (mu_0, alpha, beta, w, logW, value, weightedValue), one a call, so that each refusal is its member's; and the
+// inspectors no QuantLib test reads: TabulatedGaussLegendre's order (built at n, then set to another order, so that a
+// refusal is the constructor's or order(Size)'s) and MultiDimGaussianIntegration's weights and x (over Gauss-Hermite
+// or Gauss-Legendre quadratures of each dimension's order). The integrand is named, as
 // tools/vectors/gen/math/integrals/simpsonintegral.py names it.
 
 #include "convert.hpp"
@@ -74,6 +76,52 @@ namespace harness {
         }
 
         const Register unit({
+            {"TabulatedGaussLegendre::order",
+             [](const Args& a) -> Call {
+                 arity(a, 2);
+                 Integer n = integer(a[0]);
+                 Real other = real(a[1]);
+                 if (n < 0 || (other != Null<Real>() && (other < 0 || other != std::floor(other))))
+                     throw InvalidParams("orders must be non-negative integers");
+                 return [=] {
+                     TabulatedGaussLegendre quadrature(static_cast<Size>(n));
+                     if (other != Null<Real>())
+                         quadrature.order(static_cast<Size>(other));
+                     return json::value(static_cast<std::int64_t>(quadrature.order()));
+                 };
+             }},
+            {"MultiDimGaussianIntegration",
+             [](const Args& a) -> Call {
+                 arity(a, 2);
+                 std::string kind = text(a[0]);
+                 std::vector<Integer> ns = integers(a[1]);
+                 if (kind != "Hermite" && kind != "Legendre")
+                     throw InvalidParams("unknown quadrature " + kind);
+                 std::vector<Size> orders;
+                 for (Integer n : ns) {
+                     if (n < 0)
+                         throw InvalidParams("orders must be non-negative");
+                     orders.push_back(static_cast<Size>(n));
+                 }
+                 return [=] {
+                     MultiDimGaussianIntegration integration(
+                         orders, [kind](Size n) -> ext::shared_ptr<GaussianQuadrature> {
+                             if (kind == "Hermite")
+                                 return ext::make_shared<GaussHermiteIntegration>(n);
+                             return ext::make_shared<GaussLegendreIntegration>(n);
+                         });
+                     json::array weights, x;
+                     for (Real w : integration.weights())
+                         weights.emplace_back(w);
+                     for (const Array& point : integration.x()) {
+                         json::array p;
+                         for (Real y : point)
+                             p.emplace_back(y);
+                         x.emplace_back(p);
+                     }
+                     return json::value(json::object{{"weights", weights}, {"x", x}});
+                 };
+             }},
             {"GaussianQuadratureIntegrator",
              [](const Args& a) -> Call {
                  arity(a, 5);

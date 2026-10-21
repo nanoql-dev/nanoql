@@ -9,7 +9,9 @@ The ten named descriptions' types, thetas and mus; then rollbacks under the Doug
 descriptions with no, two and three damping steps, from one year to zero and to a quarter; with an American condition, a
 Bermudan condition, a snapshot, cash dividends, and an American condition with dividends; and the refusal of a
 description of an unknown type ("Unknown scheme type"). Each scheme's own file
-(tools/vectors/gen/methods/finitedifferences/schemes/) rolls back through this solver too.
+(tools/vectors/gen/methods/finitedifferences/schemes/) rolls back through this solver too, and the implicit Euler and
+Crank-Nicolson files step their scheme on its own as well (direct_cases: {"scheme": {"op", "dt", "from", "steps"}},
+the initial values an input).
 
 The specs, which the scheme and step-condition generators share, are a rollback {"op", "calculator", "conditions",
 "stoppingTimes", "referenceDate", "dayCounter", "scheme", "from", "to", "steps", "dampingSteps"} with the initial values
@@ -172,6 +174,33 @@ def scheme_cases(descs, explicit=False, flat_only=False):
         out.append({"name": f"{dname}, towards negative time", "inputs": {"settings": st, "rollback": spec,
                                                                           "initial": initial},
                     "expected": {"values": values}})
+    return out
+
+
+def direct_cases(dname, make):
+    """A scheme built on its own and stepped back ten steps of 0.05 from 1 on three of the set-ups' operators, a seeded
+    vector its start: the values after each step, and numberOfIterations after the last. make builds the wheel's
+    scheme on an operator."""
+    import random
+    st = v.settings(R)
+    rng = random.Random(20261030)
+    out = []
+    for name, op, *_ in [setups()[i] for i in (0, 2, 6)]:
+        wop, mesher, keep = fbo.bs_op(op)
+        scheme = make(wop)
+        a = ql.Array([rng.uniform(0.0, 1.0) for _ in range(mesher.layout().size())])
+        start = [a[i] for i in range(len(a))]
+        scheme.setStep(0.05)
+        values = []
+        t = 1.0
+        for _ in range(10):
+            scheme.step(a, t)
+            t -= 0.05
+            values.append(v.enc([a[i] for i in range(len(a))]))
+        out.append({"name": f"{dname} on its own, {name}",
+                    "inputs": {"settings": st, "scheme": {"op": op, "dt": 0.05, "from": 1.0, "steps": 10},
+                               "initial": start},
+                    "expected": {"values": values, "numberOfIterations": scheme.numberOfIterations()}})
     return out
 
 

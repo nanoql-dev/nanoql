@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/europeanoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testJRBinomialEngines, testCRRBinomialEngines, testEQPBinomialEngines, testTGEOBinomialEngines, testTIANBinomialEngines, testLRBinomialEngines, testJOSHIBinomialEngines, testFarOutOfTheMoneyBinomialEngines, testLargeDriftBinomialEngines and testBinomialGreeksWithCoincidentNodes, which wait for this slot's binomial engines; testIntegralEngines, which waits for B4.5's IntegralEngine; testMcEngines and testQmcEngines, which wait for B4.4's MCEuropeanEngine; testFFTEngines, which waits for B7.6's FFTVanillaEngine; testFdEnginesWithNonStrikedPayoff, which waits for B4.3's FdHestonVanillaEngine and FdCIRVanillaEngine
+// Partial: testIntegralEngines, which waits for B4.5's IntegralEngine; testMcEngines and testQmcEngines, which wait for B4.4's MCEuropeanEngine; testFFTEngines, which waits for B7.6's FFTVanillaEngine; testFdEnginesWithNonStrikedPayoff, which waits for B4.3's FdHestonVanillaEngine and FdCIRVanillaEngine
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -537,6 +537,208 @@ public class EuropeanOptionTests
     }
 
     [Fact]
+    public void TestJRBinomialEngines()
+    {
+        // Testing JR binomial European engines against analytic results...
+
+        EngineType engine = EngineType.JR;
+        Size steps = 251;
+        Size samples = 0; // QuantLib's Null<Size>(), which a binomial engine doesn't read
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 0.002;
+        relativeTol["delta"] = 1.0e-3;
+        relativeTol["gamma"] = 1.0e-4;
+        relativeTol["theta"] = 0.03;
+        TestEngineConsistency(engine, steps, samples, relativeTol, true);
+    }
+
+    [Fact]
+    public void TestCRRBinomialEngines()
+    {
+        // Testing CRR binomial European engines against analytic results...
+
+        EngineType engine = EngineType.CRR;
+        Size steps = 501;
+        Size samples = 0; // QuantLib's Null<Size>(), which a binomial engine doesn't read
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 0.02;
+        relativeTol["delta"] = 1.0e-3;
+        relativeTol["gamma"] = 1.0e-4;
+        relativeTol["theta"] = 0.03;
+        TestEngineConsistency(engine, steps, samples, relativeTol, true);
+    }
+
+    [Fact]
+    public void TestEQPBinomialEngines()
+    {
+        // Testing EQP binomial European engines against analytic results...
+
+        EngineType engine = EngineType.EQP;
+        Size steps = 501;
+        Size samples = 0; // QuantLib's Null<Size>(), which a binomial engine doesn't read
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 0.02;
+        relativeTol["delta"] = 1.0e-3;
+        relativeTol["gamma"] = 1.0e-4;
+        relativeTol["theta"] = 0.03;
+        TestEngineConsistency(engine, steps, samples, relativeTol, true);
+    }
+
+    [Fact]
+    public void TestTGEOBinomialEngines()
+    {
+        // Testing TGEO binomial European engines against analytic results...
+
+        EngineType engine = EngineType.TGEO;
+        Size steps = 251;
+        Size samples = 0; // QuantLib's Null<Size>(), which a binomial engine doesn't read
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 0.002;
+        relativeTol["delta"] = 1.0e-3;
+        relativeTol["gamma"] = 1.0e-4;
+        relativeTol["theta"] = 0.03;
+        TestEngineConsistency(engine, steps, samples, relativeTol, true);
+    }
+
+    [Fact]
+    public void TestTIANBinomialEngines()
+    {
+        // Testing TIAN binomial European engines against analytic results...
+
+        EngineType engine = EngineType.TIAN;
+        Size steps = 251;
+        Size samples = 0; // QuantLib's Null<Size>(), which a binomial engine doesn't read
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 0.002;
+        relativeTol["delta"] = 1.0e-3;
+        relativeTol["gamma"] = 1.0e-4;
+        relativeTol["theta"] = 0.03;
+        TestEngineConsistency(engine, steps, samples, relativeTol, true);
+    }
+
+    [Fact]
+    public void TestLRBinomialEngines()
+    {
+        // Testing LR binomial European engines against analytic results...
+
+        EngineType engine = EngineType.LR;
+        Size steps = 251;
+        Size samples = 0; // QuantLib's Null<Size>(), which a binomial engine doesn't read
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 1.0e-6;
+        relativeTol["delta"] = 1.0e-3;
+        relativeTol["gamma"] = 1.0e-4;
+        relativeTol["theta"] = 0.03;
+        TestEngineConsistency(engine, steps, samples, relativeTol, true);
+    }
+
+    [Fact]
+    public void TestJOSHIBinomialEngines()
+    {
+        // Testing Joshi binomial European engines against analytic results...
+
+        EngineType engine = EngineType.JOSHI;
+        Size steps = 251;
+        Size samples = 0; // QuantLib's Null<Size>(), which a binomial engine doesn't read
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 1.0e-7;
+        relativeTol["delta"] = 1.0e-3;
+        relativeTol["gamma"] = 1.0e-4;
+        relativeTol["theta"] = 0.03;
+        TestEngineConsistency(engine, steps, samples, relativeTol, true);
+    }
+
+    [Fact]
+    public void TestFarOutOfTheMoneyBinomialEngines()
+    {
+        // Testing binomial European engines far out of the money...
+
+        DayCounter dc = new Actual365Fixed();
+        var today = new Date(15, Month.August, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Real spot = 100.0;
+        Rate qRate = 0.01;
+        Rate rRate = 0.03;
+        Volatility vol = 0.15;
+
+        GeneralizedBlackScholesProcess stochProcess = new BlackScholesMertonProcess(
+            spot, FlatRate(today, qRate, dc), FlatRate(today, rRate, dc), FlatVol(today, vol, dc));
+
+        var payoff = new PlainVanillaPayoff(OptionType.Put, 500.0);
+        Exercise exercise = new EuropeanExercise(today + new Period(1, TimeUnit.Days));
+
+        var option = new EuropeanOption(payoff, exercise);
+        Size steps = 801;
+
+        Real expected = AnalyticEuropeanEngine.Calculate(option, context, stochProcess).NPV!.Value;
+
+        Real calculated = BinomialVanillaEngine.Calculate<LeisenReimer>(option, context, stochProcess, steps).NPV!.Value;
+        Real tolerance = 1.0e-6;
+        if (Math.Abs(calculated - expected) > tolerance * expected)
+        {
+            Assert.Fail(
+                $"value: expected {expected}, calculated {calculated}, error {Math.Abs(calculated - expected)}, "
+                + $"tolerance {tolerance}");
+        }
+
+        // the Joshi up probability is an asymptotic series, and diverges this
+        // far from the money
+        var e = Assert.Throws<NanoQLException>(
+            () => BinomialVanillaEngine.Calculate<Joshi4>(option, context, stochProcess, steps));
+        Assert.Contains("invalid up probability", e.Message, StringComparison.Ordinal);
+
+        // the other direction rounds the Leisen-Reimer up probability to one,
+        // leaving the tree without a down step
+        var deepPayoff = new PlainVanillaPayoff(OptionType.Call, 20.0);
+        var deepOption = new EuropeanOption(deepPayoff, exercise);
+        e = Assert.Throws<NanoQLException>(
+            () => BinomialVanillaEngine.Calculate<LeisenReimer>(deepOption, context, stochProcess, steps));
+        Assert.Contains("invalid up probability", e.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TestLargeDriftBinomialEngines()
+    {
+        // Testing binomial European engines with a large drift per step...
+
+        DayCounter dc = new Actual365Fixed();
+        var today = new Date(15, Month.August, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Real spot = 100.0;
+        Rate qRate = 0.0;
+        Rate rRate = 0.10;
+        Volatility vol = 0.02;
+
+        GeneralizedBlackScholesProcess stochProcess = new BlackScholesMertonProcess(
+            spot, FlatRate(today, qRate, dc), FlatRate(today, rRate, dc), FlatVol(today, vol, dc));
+
+        var payoff = new PlainVanillaPayoff(OptionType.Call, 100.0);
+        Exercise exercise = new EuropeanExercise(today + new Period(1, TimeUnit.Years));
+
+        var option = new EuropeanOption(payoff, exercise);
+
+        Real expected = AnalyticEuropeanEngine.Calculate(option, context, stochProcess).NPV!.Value;
+
+        // at ten steps 4*variance is below 3*drift^2, so the equal-probability
+        // up step has no real solution
+        var e = Assert.Throws<NanoQLException>(
+            () => BinomialVanillaEngine.Calculate<AdditiveEQPBinomialTree>(option, context, stochProcess, 10));
+        Assert.Contains("more steps are needed", e.Message, StringComparison.Ordinal);
+
+        Real calculated =
+            BinomialVanillaEngine.Calculate<AdditiveEQPBinomialTree>(option, context, stochProcess, 501).NPV!.Value;
+        Real tolerance = 0.02;
+        if (Math.Abs(calculated - expected) > tolerance * expected)
+        {
+            Assert.Fail(
+                $"value: expected {expected}, calculated {calculated}, error {Math.Abs(calculated - expected)}, "
+                + $"tolerance {tolerance}");
+        }
+    }
+
+    [Fact]
     public void TestFdEngines()
     {
         // Testing finite-difference European engines against analytic results...
@@ -879,6 +1081,42 @@ public class EuropeanOptionTests
         }
     }
 
+    [Fact]
+    public void TestBinomialGreeksWithCoincidentNodes()
+    {
+        // Testing binomial greeks when the tree collapses to one price...
+
+        // At low volatility deep in the money the Leisen-Reimer up probability is
+        // 0.99999999999999645, and the up and down factors round to one double.
+        DayCounter dc = new Actual360();
+        Date today = Date.TodaysDate();
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Real spot = 100.0;
+        Rate qRate = 0.0;
+        Rate rRate = 0.0;
+        Volatility vol = 0.01;
+
+        GeneralizedBlackScholesProcess stochProcess = new BlackScholesMertonProcess(
+            spot, FlatRate(today, qRate, dc), FlatRate(today, rRate, dc), FlatVol(today, vol, dc));
+
+        var payoff = new PlainVanillaPayoff(OptionType.Call, 20.0);
+        Exercise exercise = new EuropeanExercise(today + new Period(1, TimeUnit.Years));
+
+        var option = new VanillaOption(payoff, exercise);
+        OneAssetOptionResults results = BinomialVanillaEngine.Calculate<LeisenReimer>(option, context, stochProcess, 801);
+
+        var reference = new VanillaOption(payoff, exercise);
+        OneAssetOptionResults referenceResults = AnalyticEuropeanEngine.Calculate(reference, context, stochProcess);
+
+        CheckClose(results.NPV!.Value, referenceResults.NPV!.Value, 1.0e-8);
+
+        // QuantLib's "delta not provided", "gamma not provided" and "theta not provided": nanoql's results are null
+        Assert.Null(results.Delta);
+        Assert.Null(results.Gamma);
+        Assert.Null(results.Theta);
+    }
+
     // Adapted: the quotes changed in place become a process built for each value; the engines are the analytic and
     // finite-difference branches of QuantLib's makeOption, which the other branches' slots extend (the S-eq plan's
     // SEQD8).
@@ -976,6 +1214,14 @@ public class EuropeanOptionTests
         engineType switch
         {
             EngineType.Analytic => (option, context) => AnalyticEuropeanEngine.Calculate(option, context, stochProcess),
+            EngineType.JR => (option, context) => BinomialJRVanillaEngine.Calculate(option, context, stochProcess, binomialSteps),
+            EngineType.CRR => (option, context) => BinomialCRRVanillaEngine.Calculate(option, context, stochProcess, binomialSteps),
+            EngineType.EQP => (option, context) => BinomialEQPVanillaEngine.Calculate(option, context, stochProcess, binomialSteps),
+            EngineType.TGEO => (option, context) =>
+                BinomialTrigeorgisVanillaEngine.Calculate(option, context, stochProcess, binomialSteps),
+            EngineType.TIAN => (option, context) => BinomialTianVanillaEngine.Calculate(option, context, stochProcess, binomialSteps),
+            EngineType.LR => (option, context) => BinomialLRVanillaEngine.Calculate(option, context, stochProcess, binomialSteps),
+            EngineType.JOSHI => (option, context) => BinomialJ4VanillaEngine.Calculate(option, context, stochProcess, binomialSteps),
             EngineType.FiniteDifferences => (option, context) =>
                 FdBlackScholesVanillaEngine.Calculate(option, context, stochProcess, tGrid: binomialSteps, xGrid: samples),
             _ => throw new InvalidOperationException($"the {engineType} engine waits for its slot"),
@@ -1063,6 +1309,15 @@ public class EuropeanOptionTests
         BlackConstantVol.Create(0, new NullCalendar(), vol, dc, context);
 
     // The test suite's relativeError: the difference relative to the reference, or absolute for a zero reference.
+    // BOOST_CHECK_CLOSE: the difference within the tolerance, in percent, of both values.
+    private static void CheckClose(Real a, Real b, Real percent)
+    {
+        Real diff = Math.Abs(a - b);
+        Assert.True(
+            diff <= Math.Abs(a) * percent / 100.0 && diff <= Math.Abs(b) * percent / 100.0,
+            $"difference between {a} and {b} exceeds {percent}%");
+    }
+
     private static Real RelativeError(Real x1, Real x2, Real reference) =>
         reference != 0.0 ? Math.Abs(x1 - x2) / reference : Math.Abs(x1 - x2);
 

@@ -122,6 +122,25 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
     /// <summary>Gets the Black volatility.</summary>
     public BlackVolTermStructure BlackVolatility => blackVolatility;
 
+    // The earliest reference date of the risk-free curve, the dividend curve and the Black volatility: the date the
+    // engines' times run from, each structure accruing nothing before its own (the user's rulings of 2026-10-21 on the
+    // S-eq plan, C4R2-O2 (i) and C4R3-O2 (a)); the risk-free curve's where none is dated before it.
+    internal Date EarliestReferenceDate()
+    {
+        Date origin = riskFreeRate.ReferenceDate;
+        if (dividendYield.ReferenceDate < origin)
+        {
+            origin = dividendYield.ReferenceDate;
+        }
+
+        if (blackVolatility.ReferenceDate < origin)
+        {
+            origin = blackVolatility.ReferenceDate;
+        }
+
+        return origin;
+    }
+
     /// <summary>Gets the local volatility: the one given, or the one derived from the Black volatility.</summary>
     public LocalVolTermStructure LocalVolatility => localVolatility;
 
@@ -138,16 +157,29 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
         // for which the drift will be used
         double t1 = t + 0.0001;
         return riskFreeRate.ForwardRate(t, t1, Compounding.Continuous, Frequency.NoFrequency, true).Rate
-            - dividendYield.ForwardRate(t, t1, Compounding.Continuous, Frequency.NoFrequency, true).Rate
+            - DividendRate(t, t1)
             - (0.5 * sigma * sigma);
     }
 
-    /// <summary>The diffusion: the local volatility at the time and value, extrapolated.</summary>
+    /// <summary>
+    /// The diffusion: the local volatility at the time and value, extrapolated; on another clock than the risk-free
+    /// curve's, at the instant's own time, per unit of the risk-free curve's time, and nothing before its reference
+    /// date.
+    /// </summary>
     /// <param name="t">The time.</param>
     /// <param name="x">The underlying's value.</param>
     /// <returns>The diffusion.</returns>
     /// <exception cref="NanoQLException">The local volatility can't be read there.</exception>
-    public override double Diffusion(double t, double x) => localVolatility.LocalVol(t, x, true);
+    public override double Diffusion(double t, double x)
+    {
+        if (localVolatility.SharesTimes(riskFreeRate))
+        {
+            return localVolatility.LocalVol(t, x, true);
+        }
+
+        double scale = localVolatility.AccruedPerClockTime(riskFreeRate, t, t);
+        return localVolatility.LocalVol(localVolatility.AccrualTime(riskFreeRate, t), x, true) * Math.Sqrt(scale);
+    }
 
     /// <summary>Applies a change of ln S: x0 eᵈˣ.</summary>
     /// <param name="x0">The underlying's value.</param>
@@ -174,7 +206,7 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
             // exact value for curves
             return x0 * Math.Exp(dt * (
                 riskFreeRate.ForwardRate(t0, t0 + dt, Compounding.Continuous, Frequency.NoFrequency, true).Rate
-                - dividendYield.ForwardRate(t0, t0 + dt, Compounding.Continuous, Frequency.NoFrequency, true).Rate));
+                - DividendRate(t0, t0 + dt)));
         }
         else
         {
@@ -215,8 +247,10 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
     {
         if (isStrikeIndependent && !forceDiscretization)
         {
-            // exact value for curves
-            return blackVolatility.BlackVariance(t0 + dt, 0.01) - blackVolatility.BlackVariance(t0, 0.01);
+            // exact value for curves; on another clock than the risk-free curve's, accrued between the instants
+            return blackVolatility.SharesTimes(riskFreeRate)
+                ? blackVolatility.BlackVariance(t0 + dt, 0.01) - blackVolatility.BlackVariance(t0, 0.01)
+                : blackVolatility.BlackForwardVarianceAt(riskFreeRate, t0, t0 + dt, 0.01);
         }
         else
         {
@@ -240,7 +274,7 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
             // exact value for curves
             double var = Variance(t0, x0, dt);
             double drift = ((riskFreeRate.ForwardRate(t0, t0 + dt, Compounding.Continuous, Frequency.NoFrequency, true).Rate
-                - dividendYield.ForwardRate(t0, t0 + dt, Compounding.Continuous, Frequency.NoFrequency, true).Rate)
+                - DividendRate(t0, t0 + dt))
                 * dt) - (0.5 * var);
             return Apply(x0, (Math.Sqrt(var) * dw) + drift);
         }
@@ -259,6 +293,14 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
         Date.ThrowIfDefault(date, nameof(date));
         return riskFreeRate.DayCounter.YearFraction(riskFreeRate.ReferenceDate, date);
     }
+
+    // q over [t1, t2] on the risk-free curve's clock: QuantLib's read where the dividend curve shares its times;
+    // otherwise at the instants they denote, nothing accruing before the curve's reference date (the user's rulings of
+    // 2026-10-21 on the S-eq plan, C4-O2 and C4R2-O2; TermStructure.AccrualTime)
+    private double DividendRate(double t1, double t2) =>
+        dividendYield.SharesTimes(riskFreeRate)
+            ? dividendYield.ForwardRate(t1, t2, Compounding.Continuous, Frequency.NoFrequency, true).Rate
+            : dividendYield.ContinuousForwardRateAt(riskFreeRate, t1, t2, true);
 
     // QuantLib's localVolatility(): the local volatility by the Black volatility's type, and whether it is
     // strike-independent.

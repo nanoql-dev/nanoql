@@ -19,7 +19,9 @@ namespace NanoQL.Numerics;
 /// </para>
 /// <para>
 /// As uBLAS's <c>NDEBUG</c> build, which QuantLib's builds use, indices aren't checked against the sizes, and the sum
-/// of matrices of different sizes has the smaller of each.
+/// of matrices of different sizes has the smaller of each; an in-place sum refuses only a nonzero element outside the
+/// matrix: uBLAS writes a row outside past the matrix's row starts, and stores a column outside past its columns, which
+/// a product then reads past its vector.
 /// </para>
 /// </remarks>
 public sealed class SparseMatrix
@@ -53,12 +55,6 @@ public sealed class SparseMatrix
     /// <summary>Gets the number of filled entries of <see cref="Index1Data"/>, one more than the last row written
     /// to.</summary>
     public int Filled1 => m.Filled1;
-
-    /// <summary>Gets the number of stored elements.</summary>
-    public int Filled2 => m.Filled2;
-
-    /// <summary>Gets the number of elements the storage holds before it grows.</summary>
-    public int NnzCapacity => m.NnzCapacity;
 
     /// <summary>Gets the rows' starts in <see cref="Index2Data"/> and <see cref="ValueData"/>, the filled
     /// entries.</summary>
@@ -95,13 +91,39 @@ public sealed class SparseMatrix
         return new SparseMatrix(CompressedMatrix.Sum(a.m, b.m, 0));
     }
 
-    /// <summary>Adds a matrix in place: uBLAS's <c>+=</c>, the sum assigned with this matrix's capacity.</summary>
+    /// <summary>
+    /// Adds a matrix in place, as uBLAS's <c>+=</c> of a matrix does: each element <paramref name="other"/> stores is
+    /// added to this matrix's, which stores a nonzero one it lacked, so an element that cancels stays stored and a zero
+    /// of <paramref name="other"/> this matrix lacks isn't stored.
+    /// </summary>
     /// <param name="other">The matrix added.</param>
     /// <exception cref="ArgumentNullException"><paramref name="other"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="other"/> stores a nonzero element outside this matrix: in a row outside, which uBLAS writes past
+    /// this matrix's row starts, or in a column outside, which it stores past this matrix's columns.
+    /// </exception>
     public void operator +=(SparseMatrix other)
     {
         ArgumentNullException.ThrowIfNull(other);
-        m.AssignTemporary(CompressedMatrix.Sum(m, other.m, m.NnzCapacity));
+
+        // uBLAS's size check is off under NDEBUG: an element in a row outside this matrix writes past its row starts,
+        // and one in a column outside is stored past its columns
+        ReadOnlySpan<int> index1 = other.m.Index1Data;
+        ReadOnlySpan<int> index2 = other.m.Index2Data;
+        ReadOnlySpan<double> values = other.m.ValueData;
+        for (int i = 0; i + 1 < index1.Length; ++i)
+        {
+            for (int k = index1[i]; k < index1[i + 1]; ++k)
+            {
+                if (values[k] != 0.0 && (i >= Size1 || index2[k] >= Size2))
+                {
+                    throw new ArgumentException(
+                        $"element ({i}, {index2[k]}) outside the {Size1} x {Size2} matrix", nameof(other));
+                }
+            }
+        }
+
+        m.PlusAssign(other.m);
     }
 
     /// <summary>A copy, storage included: explicit zeros stay stored.</summary>

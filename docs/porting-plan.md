@@ -92,6 +92,7 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Models/ShortRate/OneFactorModel/OneFactorModelShortRateTree.cs`: the constructor fitting the tree to a term structure numerically, with its solver helper, which waits for B3.1's `ExtendedCoxIngersollRoss`, its only user.
 - `src/NanoQL/Numerics/Integrals/FourierIntegration.cs`: the Gauss-Kronrod, discrete Simpson and trapezoid, tanh-sinh and exp-sinh algorithms, which wait for their integrators: B3.4's Kronrod rules, B4.2's discrete integrals, B4.5's tanh-sinh and B6.2's exp-sinh.
 - `src/NanoQL/Numerics/Integrals/Integrator.cs`: `absoluteError` and `integrationSuccess`, which wait for B3.3's CMS pricer, their first caller, on B3.4's Kronrod rules: no integrator S-eq ports computes an error.
+- `src/NanoQL/Processes/HestonProcess/HestonProcess.cs`: `pdf`, the Fokker-Planck density, which waits for B3.1's `SegmentIntegral` and Boost's non-central chi-squared density.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/TermStructures/Credit/DefaultDensityStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the default density, which waits for S-eq's `GaussChebyshevIntegration` and B7.2, its only users.
 - `src/NanoQL/TermStructures/Credit/HazardRateStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-eq's `GaussChebyshevIntegration` and B7.2, its only users.
@@ -127,9 +128,10 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/DigitalOptionTests.cs`: the American digital cases, which wait for B4.5's `AnalyticDigitalAmericanEngine`; `testMCCashAtHit`, which waits for B4.4's `MCDigitalEngine`.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, Student t and stochastic-collocation cases, whose distributions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/DividendOptionTests.cs`: the cash-dividend engine's cases, which wait for B4.5's `CashDividendEuropeanEngine`.
-- `tests/NanoQL.Tests/TestSuite/EuropeanOptionTests.cs`: the binomial cases, which wait for S-eq's binomial engines; `testIntegralEngines` (B4.5), `testMcEngines` and `testQmcEngines` (B4.4), `testFFTEngines` (B7.6) and `testFdEnginesWithNonStrikedPayoff` (B4.3).
+- `tests/NanoQL.Tests/TestSuite/EuropeanOptionTests.cs`: `testIntegralEngines` (B4.5), `testMcEngines` and `testQmcEngines` (B4.4), `testFFTEngines` (B7.6) and `testFdEnginesWithNonStrikedPayoff` (B4.3).
 - `tests/NanoQL.Tests/TestSuite/FdmLinearOpTests.cs`: the uniform-grid mesher, derivative-map, triple-band solve, Heston and iterative-solver cases, which wait for B6.2; and `testFdmMesherIntegral`, which waits for B4.2.
 - `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testMomentBasedGaussianPolynomial` and `testGaussLaguerreCosinePolynomial`, which wait for B6.2; `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for B7.3.
+- `tests/NanoQL.Tests/TestSuite/HestonModelTests.cs`: the COS, expansion, exponential-fitting, PDF and time-dependent engines' cases (B4.5), the finite-difference Heston cases (B4.3), `testMcVsCached` (B4.4), `testFdBarrierVsCached` (B4.6), `testAllIntegrationMethods` and `testCosHestonCumulants` (B6.2), `testAndersenPiterbargControlVariateIntegrand` (B4.8), `testAndersenPiterbargConvergence` (B4.2), and the Heston Black-volatility surface's cases (B4.1).
 - `tests/NanoQL.Tests/TestSuite/IndexesTests.cs`: the custom-index, CDI and SHIR cases, which wait for batch 2's indexes and calendars.
 - `tests/NanoQL.Tests/TestSuite/InflationTests.cs`: `testZeroIndex`'s UK HICP and quarterly AU CPI checks, which wait for batch 2's `UKHICP` and `AUCPI`.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: the cases on B3.3's `AbcdSquared` (`testSegment`, with B3.1's `SegmentIntegral`, and the trapezoid, midpoint, Simpson, Gauss-Lobatto and Gauss-Legendre integrator cases); the Gauss-Kronrod cases (B3.4); the discrete cases (B4.2); `testTanhSinh` (B4.5); `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (B6.2); and `testPiecewiseIntegral` (B7.3).
@@ -150,4 +152,5 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/SwaptionTests.cs`: `testImpliedVolatilityOis` and `testCachedValue`'s overnight-indexed swaption (lines 449-466), which wait for batch 2's `Eonia`.
 - `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported.
 - `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, B4.2).
+- `tests/NanoQL.Tests/TestSuite/VarianceSwapsTests.cs`: `testMCVarianceSwap`, which waits for B4.8's `MCVarianceSwapEngine`.
 - `tests/NanoQL.Tests/TestSuite/ZabrTests.cs`: `testConsistency`'s local-volatility and full finite-difference sections and checks, which wait for B3.3 with `ZabrModel`'s `fdPrice` and `fullFdPrice`.

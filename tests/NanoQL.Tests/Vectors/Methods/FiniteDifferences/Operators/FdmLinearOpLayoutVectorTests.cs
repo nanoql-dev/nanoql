@@ -8,9 +8,10 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The FdmLinearOpLayout vectors, <c>tests/vectors/methods/finitedifferences/operators/fdmlinearoplayout.json</c>:
-/// <see cref="FdmLinearOpLayout"/>'s dimensions, size and spacing, the walk of its <see cref="FdmLinearOpIterator"/>,
-/// the index of each point's coordinates, and each point's neighbourhoods in one and two directions and through
-/// <see cref="FdmLinearOpLayout.IterNeighbourhood"/>, over layouts of one to three dimensions.
+/// <see cref="FdmLinearOpLayout"/>'s dimensions, size and spacing, its <see cref="FdmLinearOpLayout.End"/>, the walk of
+/// its <see cref="FdmLinearOpIterator"/> and where it meets the end, the index of each point's coordinates, and each
+/// point's neighbourhoods in one and two directions and through <see cref="FdmLinearOpLayout.IterNeighbourhood"/>, over
+/// layouts of one to three dimensions.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class FdmLinearOpLayoutVectorTests
@@ -32,9 +33,12 @@ public class FdmLinearOpLayoutVectorTests
             var neighbourhood = new List<object?>();
             var neighbourhood2 = new List<object?>();
             var iterNeighbourhood = new List<object?>();
+            var notEqualEnd = new List<object?>();
+            FdmLinearOpIterator end = layout.End();
             FdmLinearOpIterator iter = layout.Begin();
             for (int i = 0; i < layout.Size; i++, iter.Increment())
             {
+                notEqualEnd.Add(!iter.IsAtSameIndex(end));
                 indices.Add(iter.Index);
                 coordinates.Add(iter.Coordinates.ToArray());
                 index.Add(layout.Index(iter.Coordinates));
@@ -58,6 +62,8 @@ public class FdmLinearOpLayoutVectorTests
                 neighbourhood2.Add(twos.ToArray());
             }
 
+            notEqualEnd.Add(!iter.IsAtSameIndex(end));
+
             check.Output(c, "dim", layout.Dim.ToArray());
             check.Output(c, "size", layout.Size);
             check.Output(c, "spacing", layout.Spacing.ToArray());
@@ -67,6 +73,8 @@ public class FdmLinearOpLayoutVectorTests
             check.Output(c, "neighbourhood", neighbourhood);
             check.Output(c, "neighbourhood2", neighbourhood2);
             check.Output(c, "iterNeighbourhood", iterNeighbourhood);
+            check.Output(c, "endIndex", end.Index);
+            check.Output(c, "notEqualEnd", notEqualEnd);
         }
 
         check.Complete();

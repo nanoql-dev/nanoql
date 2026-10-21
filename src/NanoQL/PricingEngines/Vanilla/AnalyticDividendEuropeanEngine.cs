@@ -8,17 +8,38 @@ using System.Collections.Immutable;
 using NanoQL.Coupons;
 using NanoQL.Instruments;
 using NanoQL.Processes;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 
 namespace NanoQL.PricingEngines;
 
 /// <summary>
 /// The analytic pricing engine for European options with discrete dividends: the Black-Scholes formulas on the spot
-/// less the present value of the dividends paid from the risk-free curve's reference date to the exercise date.
+/// less the present value of the dividends paid from the settlement date to the exercise date.
 /// </summary>
 /// <remarks>
+/// <para>
 /// The engine reports the value, delta, gamma, vega, theta and rho; the other Greeks are <see langword="null"/>, as
 /// QuantLib leaves them. A theta the calculator refuses is <see langword="null"/>.
+/// </para>
+/// <para>
+/// QuantLib's settlement date is the risk-free curve's reference date. Here it is the earliest reference date of the
+/// process's structures, each discounting nothing before its own, so a dividend paid between the evaluation date and a
+/// later risk-free curve's reference date is the option's, as on the market restated from the evaluation date; where
+/// no structure is dated before the risk-free curve, it is QuantLib's. The theta's and rho's times are the risk-free
+/// curve's own, as QuantLib's, so a dividend before its reference date adds to neither. The theta reads each curve's
+/// zero rate per the risk-free curve's time and the rho reads the dividend curve by date, where QuantLib reads the rate
+/// per the curve's own day counter's year and the curve at the risk-free curve's time. A documented divergence (the
+/// S-eq plan's rulings of 2026-10-20 and 2026-10-21, <c>Divergences/DividendMismatchedTimesTests.cs</c>).
+/// </para>
+/// <para>
+/// QuantLib divides the theta's terms by the risk-free curve's time; here each runs over its own structure's, the
+/// discount's, the dividend curve's and the variance's, on the risk-free curve's day counter, as QuantLib's
+/// <c>blackScholesTheta</c> reads them. An exercise before a structure's reference date sees nothing accrue on it,
+/// where QuantLib's reads throw. Where the structures share their times, every value is QuantLib's. A documented
+/// divergence (the S-eq plan's ruling of 2026-10-21, <c>Divergences/AnalyticThetaMismatchedTimesTests.cs</c>,
+/// <c>Divergences/ExerciseBeforeReferenceDateTests.cs</c>).
+/// </para>
 /// </remarks>
 public static class AnalyticDividendEuropeanEngine
 {
@@ -96,8 +117,11 @@ public static class AnalyticDividendEuropeanEngine
             throw new NanoQLException("non-striked payoff given");
         }
 
+        // the dividends and times from the earliest reference date of the structures, each structure discounting
+        // nothing before its own (the user's rulings of 2026-10-21 on the S-eq plan, C4R2-O2 (i) and C4R3-O2 (a)):
+        // QuantLib's settlement date, the risk-free curve's, where none is dated before it
         Date lastDate = option.Exercise.LastDate();
-        Date settlementDate = process.RiskFreeRate.ReferenceDate;
+        Date settlementDate = process.EarliestReferenceDate();
         double riskless = 0.0;
         int i;
         for (i = 0; i < dividends.Length; i++)
@@ -107,8 +131,8 @@ public static class AnalyticDividendEuropeanEngine
             if (cashFlowDate >= settlementDate && cashFlowDate <= lastDate)
             {
                 riskless += dividends[i].Amount(context)
-                    * process.RiskFreeRate.Discount(cashFlowDate)
-                    / process.DividendYield.Discount(cashFlowDate);
+                    * process.RiskFreeRate.AccruedDiscount(cashFlowDate)
+                    / process.DividendYield.AccruedDiscount(cashFlowDate);
             }
         }
 
@@ -118,11 +142,13 @@ public static class AnalyticDividendEuropeanEngine
             throw new NanoQLException("negative or null underlying after subtracting dividends");
         }
 
-        double dividendDiscount = process.DividendYield.Discount(lastDate);
-        double riskFreeDiscount = process.RiskFreeRate.Discount(lastDate);
+        // each structure read at the exercise date, none accruing before its own reference date, where QuantLib's reads
+        // throw
+        double dividendDiscount = process.DividendYield.AccruedDiscount(lastDate);
+        double riskFreeDiscount = process.RiskFreeRate.AccruedDiscount(lastDate);
         double forwardPrice = spot * dividendDiscount / riskFreeDiscount;
 
-        double variance = process.BlackVolatility.BlackVariance(lastDate, payoff.Strike);
+        double variance = process.BlackVolatility.AccruedVariance(lastDate, payoff.Strike);
 
         var black = new BlackCalculator(payoff, forwardPrice, Math.Sqrt(variance), riskFreeDiscount);
 
@@ -131,9 +157,7 @@ public static class AnalyticDividendEuropeanEngine
         double gamma = black.Gamma(spot);
 
         DayCounter rfdc = process.RiskFreeRate.DayCounter;
-        DayCounter dydc = process.DividendYield.DayCounter;
-        DayCounter voldc = process.BlackVolatility.DayCounter;
-        double t = voldc.YearFraction(process.BlackVolatility.ReferenceDate, lastDate);
+        double t = process.BlackVolatility.AccrualTimeTo(lastDate);
         double vega = black.Vega(t);
 
         double deltaTheta = 0.0, deltaRho = 0.0;
@@ -144,23 +168,37 @@ public static class AnalyticDividendEuropeanEngine
             if (d >= settlementDate && d <= lastDate)
             {
                 deltaTheta -= dividends[i].Amount(context)
-                    * (process.RiskFreeRate.ZeroRate(d, rfdc, Compounding.Continuous, Frequency.Annual).Rate
-                        - process.DividendYield.ZeroRate(d, dydc, Compounding.Continuous, Frequency.Annual).Rate)
-                    * process.RiskFreeRate.Discount(d)
-                    / process.DividendYield.Discount(d);
+                    * (ZeroRate(process.RiskFreeRate, rfdc, d) - ZeroRate(process.DividendYield, rfdc, d))
+                    * process.RiskFreeRate.AccruedDiscount(d)
+                    / process.DividendYield.AccruedDiscount(d);
 
-                double ti = process.Time(d);
+                // the risk-free curve's own time to the dividend, none before its reference date, where the dividend's
+                // value has no risk-free discount; QuantLib reads the dividend curve at that time, here by date, as the
+                // value reads it (the S-eq plan's ruling of 2026-10-20), which is QuantLib's read where the two curves
+                // share their times
+                double ti = process.RiskFreeRate.AccrualTimeTo(d);
                 deltaRho += dividends[i].Amount(context) * ti
-                    * process.RiskFreeRate.Discount(ti)
-                    / process.DividendYield.Discount(ti);
+                    * process.RiskFreeRate.AccruedDiscount(d)
+                    / process.DividendYield.AccruedDiscount(d);
             }
         }
 
-        t = process.Time(lastDate);
+        // the theta's and rho's times the risk-free curve's own, as QuantLib's; QuantLib divides the theta's terms by
+        // that time, and here each by its own structure's, on the risk-free curve's day counter (the S-eq plan's ruling
+        // of 2026-10-21, under R8), QuantLib's where they agree
+        t = process.RiskFreeRate.AccrualTimeTo(lastDate);
         double? theta;
         try
         {
-            theta = black.Theta(spot, t) + (deltaTheta * black.Delta(spot));
+            theta = black.Theta(
+                    spot,
+                    t,
+                    riskFreeDiscount,
+                    t,
+                    dividendDiscount,
+                    process.DividendYield.AccrualTimeTo(lastDate, rfdc),
+                    process.BlackVolatility.AccrualTimeTo(lastDate, rfdc))
+                + (deltaTheta * black.Delta(spot));
         }
         catch (Exception e) when (e is ArgumentException or NanoQLException)
         {
@@ -178,5 +216,28 @@ public static class AnalyticDividendEuropeanEngine
             Theta = theta,
             Rho = rho,
         };
+    }
+
+    // A curve's continuous zero rate to a date from its own reference date, per unit of the risk-free curve's time,
+    // none before that date: QuantLib's where the curve is on the risk-free curve's day counter; on another, where
+    // QuantLib reads it per the curve's own year, its discount's rate over the risk-free curve's time between the two
+    // dates
+    private static double ZeroRate(YieldTermStructure curve, DayCounter rfdc, Date d)
+    {
+        if (d < curve.ReferenceDate)
+        {
+            return 0.0;
+        }
+
+        if (curve.DayCounter == rfdc)
+        {
+            return curve.ZeroRate(d, rfdc, Compounding.Continuous, Frequency.Annual).Rate;
+        }
+
+        double t = rfdc.YearFraction(curve.ReferenceDate, d);
+        return t > 0.0
+            ? Math.Log(1.0 / curve.Discount(d)) / t
+            : curve.ZeroRate(d, curve.DayCounter, Compounding.Continuous, Frequency.Annual).Rate
+                * curve.DayCounter.YearFraction(d, d + 1) / rfdc.YearFraction(d, d + 1);
     }
 }

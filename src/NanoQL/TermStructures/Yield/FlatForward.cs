@@ -61,9 +61,6 @@ public sealed class FlatForward : YieldTermStructure
     /// <inheritdoc/>
     public override Date MaxDate => Date.MaxDate;
 
-    /// <summary>Gets the forward rate, under the curve's compounding.</summary>
-    internal double Forward => rate.Rate;
-
     /// <summary>
     /// A flat forward curve whose reference date is the given number of business days after the evaluation date.
     /// </summary>

@@ -27,16 +27,21 @@ namespace NanoQL.Methods;
 /// <c>forwardRate</c> computes them, without building the rate object.
 /// </para>
 /// <para>
-/// The process's curves and volatilities, and the quanto helper's, must share the risk-free curve's day counter and
-/// reference date, or the operator refuses them, "all term structures must share one day counter" and "... one
-/// reference date". The finite-difference engine's times are the risk-free curve's, measured from its reference date in
-/// its day counter (<c>blackscholesprocess.cpp:149-152</c>), and QuantLib reads the dividend curve, the volatility and
-/// the quanto helper's structures at those times (<c>fdmblackscholesop.cpp:51-66</c>), each of which measures time from
-/// its own reference date in its own day counter. A put on a risk-free curve on Act/360 prices 0.93% above the analytic
-/// engine's value, one on a curve settling two days after its volatility's date 0.74% below, where the same structures
-/// dated alike on one day counter price within the grid's error. A dividend curve that is a flat forward at zero, which
-/// QuantLib's <c>BlackScholesProcess</c> builds on Act/365 and the evaluation date whatever its other structures,
-/// discounts by 1 at any time and is taken however it is dated. A documented divergence.
+/// The finite-difference engine's times are the risk-free curve's, measured from its reference date in its day counter
+/// (<c>blackscholesprocess.cpp:149-152</c>), and QuantLib reads the dividend curve, the volatility and the quanto
+/// helper's structures at those times (<c>fdmblackscholesop.cpp:51-66</c>), each of which measures time from its own
+/// reference date in its own day counter: a one-year put on a risk-free curve on Act/360 prices 0.93% above the same
+/// market restated on one day counter, and one on a risk-free curve settling two business days after its dividend
+/// curve's and volatility's date 0.74% below QuantLib's analytic engine, which counts each structure from its own date.
+/// Here the engine's times, the ones <see cref="SetTime"/> takes, run on the risk-free curve's day counter from the
+/// earliest reference date of the structures it reads (<see cref="Clock"/>), and each structure, the risk-free curve
+/// among them, is read at the instants the step's times denote, on its own clock, accruing nothing before its own
+/// reference date, as the analytic engine counts it: its forward rate or variance between them per unit of the engine's
+/// time, the local volatility at the step's midpoint scaled to that time. Between Actual/N day counters the instants
+/// are exact, a reference date's offset a constant shift; on others a time is read through its date, linear within the
+/// day. Where no structure is dated before the risk-free curve, the times are its own, and a structure that shares its
+/// day counter and reference date is read as QuantLib reads it. A documented divergence (the S-eq plan's rulings of
+/// 2026-10-20 and 2026-10-21, under R8).
 /// </para>
 /// </remarks>
 public sealed class FdmBlackScholesOp : FdmLinearOpComposite
@@ -45,6 +50,7 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
 
     private readonly FdmMesher mesher;
     private readonly YieldTermStructure rTS;
+    private readonly TermStructure clock;
     private readonly YieldTermStructure qTS;
     private readonly BlackVolTermStructure volTS;
     private readonly LocalVolTermStructure? localVol;
@@ -76,10 +82,6 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
     /// <param name="quantoHelper">The quanto helper, or <see langword="null"/> for none.</param>
     /// <exception cref="ArgumentNullException">The mesher or the process is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The direction isn't one of the layout's.</exception>
-    /// <exception cref="ArgumentException">
-    /// The process's curves and volatilities, or the quanto helper's, don't share the risk-free curve's day counter and
-    /// reference date.
-    /// </exception>
     public FdmBlackScholesOp(
         FdmMesher mesher,
         GeneralizedBlackScholesProcess bsProcess,
@@ -91,9 +93,9 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
     {
         ArgumentNullException.ThrowIfNull(mesher);
         ArgumentNullException.ThrowIfNull(bsProcess);
-        CheckSharedTimes(bsProcess, localVol, quantoHelper, nameof(bsProcess));
         this.mesher = mesher;
         rTS = bsProcess.RiskFreeRate;
+        clock = Clock(bsProcess, quantoHelper);
         qTS = bsProcess.DividendYield;
         volTS = bsProcess.BlackVolatility;
         this.localVol = localVol ? bsProcess.LocalVolatility : null;
@@ -123,30 +125,39 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
     /// <exception cref="NanoQLException">A curve, the volatility or the local volatility can't be read.</exception>
     public override void SetTime(double t1, double t2)
     {
-        double r = rTS.ContinuousForwardRate(t1, t2);
-        double q = qTS.ContinuousForwardRate(t1, t2);
+        double r = rTS.ContinuousForwardRateAt(clock, t1, t2);
+        double q = qTS.ContinuousForwardRateAt(clock, t1, t2);
 
         if (localVol is not null)
         {
+            // the local volatility at the step's midpoint on its own clock, its variance scaled to the risk-free
+            // curve's time by its accrual over the step (TermStructure.AccrualTime), so nothing accrues before its
+            // reference date; QuantLib's read where the two share their times
+            bool shares = localVol.SharesTimes(clock);
+            double tMid = 0.5 * (t1 + t2);
+            double lvTime = shares ? tMid : localVol.AccrualTime(clock, tMid);
+            double scale = shares ? 1.0 : localVol.AccruedPerClockTime(clock, t1, t2);
+
             // QuantLib walks the layout for each point's index, in storage order
             int n = mesher.Layout.Size;
             for (int i = 0; i < n; ++i)
             {
                 if (illegalLocalVolOverwrite < 0.0)
                 {
-                    double lv = localVol.LocalVol(0.5 * (t1 + t2), x[i], true);
-                    localVariance[i] = lv * lv;
+                    double lv = localVol.LocalVol(lvTime, x[i], true);
+                    localVariance[i] = shares ? lv * lv : lv * lv * scale;
                 }
                 else
                 {
                     try
                     {
-                        double lv = localVol.LocalVol(0.5 * (t1 + t2), x[i], true);
-                        localVariance[i] = lv * lv;
+                        double lv = localVol.LocalVol(lvTime, x[i], true);
+                        localVariance[i] = shares ? lv * lv : lv * lv * scale;
                     }
                     catch (Exception e) when (e is NanoQLException or ArgumentException)
                     {
-                        localVariance[i] = illegalLocalVolOverwrite * illegalLocalVolOverwrite;
+                        double overwrite = illegalLocalVolOverwrite * illegalLocalVolOverwrite;
+                        localVariance[i] = shares ? overwrite : overwrite * scale;
                     }
                 }
             }
@@ -159,7 +170,7 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
                     adjustment[i] = Math.Sqrt(localVariance[i]);
                 }
 
-                quantoHelper.QuantoAdjustment(adjustment, t1, t2, adjustment);
+                quantoHelper.QuantoAdjustmentAt(clock, adjustment, t1, t2, adjustment);
                 for (int i = 0; i < n; ++i)
                 {
                     drift[i] = r - q - (0.5 * localVariance[i]) - adjustment[i];
@@ -182,14 +193,14 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
         }
         else
         {
-            double v = volTS.BlackForwardVariance(t1, t2, strike) / (t2 - t1);
+            double v = volTS.BlackForwardVarianceAt(clock, t1, t2, strike) / (t2 - t1);
 
             double s;
             if (quantoHelper is not null)
             {
                 double sqrtV = Math.Sqrt(v);
                 double adj = 0.0;
-                quantoHelper.QuantoAdjustment(new ReadOnlySpan<double>(in sqrtV), t1, t2, new Span<double>(ref adj));
+                quantoHelper.QuantoAdjustmentAt(clock, new ReadOnlySpan<double>(in sqrtV), t1, t2, new Span<double>(ref adj));
                 s = r - q - (0.5 * v) - adj;
             }
             else
@@ -242,46 +253,39 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
     public override ImmutableArray<SparseMatrix> ToMatrixDecomp() => [mapT.ToMatrix()];
 
     /// <summary>
-    /// Refuses a process whose dividend curve (unless a flat forward at zero), Black volatility or, where it is read,
-    /// local volatility, or a quanto helper whose curves or exchange-rate volatility, isn't on the process's risk-free
-    /// day counter and reference date, at whose times the finite-difference engine reads them all.
+    /// The finite-difference Black-Scholes engine's clock: the times its mesher, this operator, the solver's maturity,
+    /// the step conditions and the escrowed dividend adjustment run on. Its day counter is the risk-free curve's and
+    /// its reference date the earliest of the structures the engine reads, the process's curves and volatilities and
+    /// the quanto helper's, so the days before a later-dated structure's date are time on the grid, each structure
+    /// accruing nothing before its own date (the S-eq plan's rulings of 2026-10-21). Where no structure is dated before
+    /// the risk-free curve, the clock is the risk-free curve itself, whose times are the process's.
     /// </summary>
-    /// <param name="process">The process.</param>
-    /// <param name="localVol">Whether the process's local volatility is read.</param>
-    /// <param name="quantoHelper">The quanto helper, or <see langword="null"/>.</param>
-    /// <param name="paramName">The process's parameter name.</param>
-    /// <exception cref="ArgumentException">A structure is on another day counter, or dated otherwise.</exception>
-    internal static void CheckSharedTimes(
-        GeneralizedBlackScholesProcess process, bool localVol, FdmQuantoHelper? quantoHelper, string paramName)
+    /// <remarks>
+    /// A solver assembled from these types, as QuantLib's other finite-difference engines assemble theirs, takes its
+    /// maturity and its other times from the clock's <see cref="TermStructure.TimeFromReference"/>, and the step
+    /// conditions' reference date and day counter from the clock, where QuantLib takes them from the process. Its only
+    /// use is its times.
+    /// </remarks>
+    /// <param name="process">The Black-Scholes process.</param>
+    /// <param name="quantoHelper">The quanto helper, or <see langword="null"/> for none.</param>
+    /// <returns>A term structure whose reference date and day counter give the engine's times.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="process"/> is <see langword="null"/>.</exception>
+    public static TermStructure Clock(GeneralizedBlackScholesProcess process, FdmQuantoHelper? quantoHelper = null)
     {
-        TermStructure riskFree = process.RiskFreeRate;
-
-        // a flat dividend curve at zero, as QuantLib's BlackScholesProcess builds on Act/365 and the evaluation date,
-        // discounts by 1 at any time, so no day counter or reference date misreads it
-        bool timeless = process.DividendYield is FlatForward { Forward: 0.0 };
-        TermStructure?[] read =
-        [
-            timeless ? null : process.DividendYield,
-            process.BlackVolatility,
-            localVol ? process.LocalVolatility : null,
-            quantoHelper?.RTS,
-            quantoHelper?.FTS,
-            quantoHelper?.FxVolTS,
-        ];
-        foreach (TermStructure? structure in read)
+        ArgumentNullException.ThrowIfNull(process);
+        YieldTermStructure rTS = process.RiskFreeRate;
+        Date origin = process.EarliestReferenceDate();
+        TermStructure[] structures = quantoHelper is null
+            ? [process.LocalVolatility]
+            : [process.LocalVolatility, quantoHelper.RTS, quantoHelper.FTS, quantoHelper.FxVolTS];
+        foreach (TermStructure structure in structures)
         {
-            if (structure is not null && structure.DayCounter != riskFree.DayCounter)
+            if (structure.ReferenceDate < origin)
             {
-                throw new ArgumentException("all term structures must share one day counter", paramName);
+                origin = structure.ReferenceDate;
             }
         }
 
-        foreach (TermStructure? structure in read)
-        {
-            if (structure is not null && structure.ReferenceDate != riskFree.ReferenceDate)
-            {
-                throw new ArgumentException("all term structures must share one reference date", paramName);
-            }
-        }
+        return origin == rTS.ReferenceDate ? rTS : new FlatForward(origin, 0.0, rTS.DayCounter);
     }
 }

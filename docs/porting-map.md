@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 899 | 118 |
-| partial | 28 | 35 |
-| ported | 334 | 29 |
+| not started | 889 | 116 |
+| partial | 29 | 37 |
+| ported | 343 | 29 |
 | replaced | 20 | 6 |
 | total | 1,456 | 194 |
 
@@ -693,7 +693,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `vanillastorageoption` | not started |  | no nanoql type: VanillaStorageOption |
 | `vanillaswap` | ported | Instruments/VanillaSwap.cs |  |
 | `vanillaswingoption` | not started |  | no nanoql type: SwingExercise, VanillaForwardPayoff, VanillaSwingOption |
-| `varianceswap` | not started |  | no nanoql type: VarianceSwap, VarianceSwapResults |
+| `varianceswap` | ported | Instruments/VarianceSwap.cs, Instruments/VarianceSwapResults.cs |  |
 | `writerextensibleoption` | not started |  | no nanoql type: WriterExtensibleOption |
 | `yearonyearinflationswap` | ported | Instruments/YearOnYearInflationSwap.cs, Instruments/YearOnYearInflationSwapResults.cs |  |
 | `zerocouponinflationswap` | ported | Instruments/ZeroCouponInflationSwap.cs |  |
@@ -1147,8 +1147,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `binomialtree` | not started |  | no nanoql type: BinomialTree, BinomialTreeBranches, EqualProbabilitiesBinomialTree, EqualJumpsBinomialTree, JarrowRudd, CoxRossRubinstein, AdditiveEQPBinomialTree, Trigeorgis, Tian, LeisenReimer, Joshi4 |
-| `bsmlattice` | not started |  | no nanoql type: BlackScholesLattice |
+| `binomialtree` | ported | Methods/Lattices/BinomialTree/AdditiveEQPBinomialTree.cs, Methods/Lattices/BinomialTree/BinomialTree{T}.cs, Methods/Lattices/BinomialTree/CoxRossRubinstein.cs, Methods/Lattices/BinomialTree/EqualJumpsBinomialTree{T}.cs, Methods/Lattices/BinomialTree/EqualProbabilitiesBinomialTree{T}.cs, Methods/Lattices/BinomialTree/IBinomialTree{TSelf}.cs, Methods/Lattices/BinomialTree/JarrowRudd.cs, Methods/Lattices/BinomialTree/Joshi4.cs, Methods/Lattices/BinomialTree/LeisenReimer.cs, Methods/Lattices/BinomialTree/Tian.cs, Methods/Lattices/BinomialTree/Trigeorgis.cs | no nanoql type: BinomialTreeBranches |
+| `bsmlattice` | ported | Methods/Lattices/BlackScholesLattice{T}.cs |  |
 | `lattice` | ported | Methods/Lattices/TreeLattice.cs |  |
 | `lattice1d` | ported | Methods/Lattices/TreeLattice1D.cs |  |
 | `lattice2d` | not started |  | no nanoql type: TreeLattice2D |
@@ -1194,8 +1194,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `batesmodel` | not started |  | no nanoql type: BatesModel, BatesDetJumpModel, BatesDoubleExpModel, BatesDoubleExpDetJumpModel |
 | `gjrgarchmodel` | not started |  | no nanoql type: GJRGARCHModel |
-| `hestonmodel` | not started |  | no nanoql type: HestonModel, HestonModelFellerConstraint |
-| `hestonmodelhelper` | not started |  | no nanoql type: HestonModelHelper |
+| `hestonmodel` | ported | Models/Equity/HestonModel.cs, Models/Equity/HestonModelFellerConstraint.cs |  |
+| `hestonmodelhelper` | ported | Models/Equity/HestonModelHelper.cs |  |
 | `hestonslvfdmmodel` | not started |  | no nanoql type: HestonSLVFokkerPlanckFdmParams, HestonSLVFDMModel, HestonSLVFDMModelLogEntry |
 | `hestonslvmcmodel` | not started |  | no nanoql type: HestonSLVMCModel |
 | `piecewisetimedependenthestonmodel` | not started |  | no nanoql type: PiecewiseTimeDependentHestonModel |
@@ -1601,7 +1601,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `mcforwardeuropeanhestonengine` | not started |  | no nanoql type: MCForwardEuropeanHestonEngine, MakeMCForwardEuropeanHestonEngine, ForwardEuropeanHestonPathPricer |
 | `mcforwardvanillaengine` | not started |  | no nanoql type: MCForwardVanillaEngine |
 | `mcvarianceswapengine` | not started |  | no nanoql type: MCVarianceSwapEngine, MakeMCVarianceSwapEngine, VariancePathPricer |
-| `replicatingvarianceswapengine` | not started |  | no nanoql type: ReplicatingVarianceSwapEngine |
+| `replicatingvarianceswapengine` | ported | PricingEngines/Forward/ReplicatingVarianceSwapEngine.cs |  |
 
 ### `ql/pricingengines/futures/`
 
@@ -1677,18 +1677,18 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `analyticeuropeanvasicekengine` | not started |  | no nanoql type: AnalyticBlackVasicekEngine |
 | `analyticgjrgarchengine` | not started |  | no nanoql type: AnalyticGJRGARCHEngine |
 | `analytich1hwengine` | not started |  | no nanoql type: AnalyticH1HWEngine |
-| `analytichestonengine` | not started |  | no nanoql type: AnalyticHestonEngine, AnalyticHestonEngineComplexLogFormula, AnalyticHestonEngineAP_Helper, AnalyticHestonEngineOptimalAlpha |
+| `analytichestonengine` | ported | PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngine.cs, PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngineAPHelper.cs, PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngineComplexLogFormula.cs, PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngineOptimalAlpha.cs | no nanoql type: AnalyticHestonEngineAP_Helper |
 | `analytichestonhullwhiteengine` | not started |  | no nanoql type: AnalyticHestonHullWhiteEngine |
 | `analyticpdfhestonengine` | not started |  | no nanoql type: AnalyticPDFHestonEngine |
 | `analyticptdhestonengine` | not started |  | no nanoql type: AnalyticPTDHestonEngine, AnalyticPTDHestonEngineComplexLogFormula |
 | `analyticroughhestonengine` | not started |  | no nanoql type: AnalyticRoughHestonEngine, AnalyticRoughHestonEngineApproximation |
 | `baroneadesiwhaleyengine` | not started |  | no nanoql type: BaroneAdesiWhaleyApproximationEngine |
 | `batesengine` | not started |  | no nanoql type: BatesEngine, BatesDetJumpEngine, BatesDoubleExpEngine, BatesDoubleExpDetJumpEngine |
-| `binomialengine` | not started |  | no nanoql type: BinomialVanillaEngine |
+| `binomialengine` | ported | PricingEngines/Vanilla/BinomialEngine/BinomialCRRVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialEQPVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialJ4VanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialJRVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialLRVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialTianVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialTrigeorgisVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialVanillaEngine.cs |  |
 | `bjerksundstenslandengine` | not started |  | no nanoql type: BjerksundStenslandApproximationEngine |
 | `cashdividendeuropeanengine` | not started |  | no nanoql type: CashDividendEuropeanEngine, CashDividendEuropeanEngineCashDividendModel |
 | `coshestonengine` | not started |  | no nanoql type: COSHestonEngine |
-| `discretizedvanillaoption` | not started |  | no nanoql type: DiscretizedVanillaOption |
+| `discretizedvanillaoption` | ported | PricingEngines/Vanilla/DiscretizedVanillaOption.cs |  |
 | `exponentialfittinghestonengine` | not started |  | no nanoql type: ExponentialFittingHestonEngine |
 | `fdbatesvanillaengine` | not started |  | no nanoql type: FdBatesVanillaEngine |
 | `fdblackscholesshoutengine` | not started |  | no nanoql type: FdBlackScholesShoutEngine |
@@ -1729,7 +1729,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `gjrgarchprocess` | not started |  | no nanoql type: GJRGARCHProcess, GJRGARCHProcessDiscretization |
 | `gsrprocess` | not started |  | no nanoql type: GsrProcess |
 | `gsrprocesscore` | not started |  |  |
-| `hestonprocess` | not started |  | no nanoql type: HestonProcess, HestonProcessDiscretization |
+| `hestonprocess` | partial | Processes/HestonProcess/HestonProcess.cs, Processes/HestonProcess/HestonProcessDiscretization.cs | partial: pdf, the Fokker-Planck density, which waits for B3.1's SegmentIntegral and Boost's non-central chi-squared density |
 | `hestonslvprocess` | not started |  | no nanoql type: HestonSLVProcess |
 | `hullwhiteprocess` | not started |  | no nanoql type: HullWhiteProcess, HullWhiteForwardProcess |
 | `hybridhestonhullwhiteprocess` | not started |  | no nanoql type: HybridHestonHullWhiteProcess, HybridHestonHullWhiteProcessDiscretization |
@@ -2121,7 +2121,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `equitycashflow` | not started |  | 8 cases |
 | `equityindex` | not started |  | 12 cases |
 | `equitytotalreturnswap` | not started |  | 5 cases |
-| `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 12 of 27 cases; not yet: testJRBinomialEngines, testCRRBinomialEngines, testEQPBinomialEngines, testTGEOBinomialEngines, testTIANBinomialEngines, testLRBinomialEngines, testJOSHIBinomialEngines, testFarOutOfTheMoneyBinomialEngines, testLargeDriftBinomialEngines, testIntegralEngines, testMcEngines, testQmcEngines, testFFTEngines, testBinomialGreeksWithCoincidentNodes, testFdEnginesWithNonStrikedPayoff |
+| `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 22 of 27 cases; not yet: testIntegralEngines, testMcEngines, testQmcEngines, testFFTEngines, testFdEnginesWithNonStrikedPayoff |
 | `everestoption` | not started |  | 1 cases |
 | `exchangerate` | not started |  | 5 cases |
 | `extendedblackvariancesurface` | not started |  | 1 cases |
@@ -2144,7 +2144,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `gaussianquadratures` | partial | TestSuite/GaussianQuadraturesTests.cs | 8 of 12 cases; not yet: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial, testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes |
 | `gjrgarchmodel` | not started |  | 2 cases |
 | `gsr` | not started |  | 13 cases |
-| `hestonmodel` | not started |  | 39 cases |
+| `hestonmodel` | partial | TestSuite/HestonModelTests.cs | 7 of 39 cases; not yet: testDAXCalibration, testAnalyticVsBlack, testMcVsCached, testFdBarrierVsCached, testFdVanillaVsCached, testFdVanillaWithDividendsVsCached, testFdAmerican, testKahlJaeckelCase, testMultipleStrikesEngine, testAnalyticPiecewiseTimeDependent, testDAXCalibrationOfTimeDependentModel, testAlanLewisReferencePrices, testExpansionOnAlanLewisReference, testExpansionOnFordeReference, testAllIntegrationMethods, testCosHestonCumulants, testCosHestonEngine, testCosHestonEngineTruncation, testCharacteristicFct, testAndersenPiterbargPricing, testAndersenPiterbargControlVariateIntegrand, testAndersenPiterbargConvergence, testPiecewiseTimeDependentChFvsHestonChF, testPiecewiseTimeDependentComparison, testPiecewiseTimeDependentChFAsymtotic, testSmallSigmaExpansion4ExpFitting, testExponentialFitting4StrikesAndMaturities, testAsymptoticControlVariate, testLocalVolFromHestonModel, testOptimalAlphaKmin, testHestonBlackVolSurfaceAtmLevel, testAnalyticPDFHestonEngine |
 | `hestonslvmodel` | not started |  | 19 cases |
 | `himalayaoption` | not started |  | 1 cases |
 | `hybridhestonhullwhiteprocess` | not started |  | 13 cases |
@@ -2247,7 +2247,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `utilities` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `variancegamma` | not started |  | 2 cases |
 | `varianceoption` | not started |  | 1 cases |
-| `varianceswaps` | not started |  | 2 cases |
+| `varianceswaps` | partial | TestSuite/VarianceSwapsTests.cs | 1 of 2 cases; not yet: testMCVarianceSwap |
 | `volatilitymodels` | not started |  | 1 cases |
 | `vpp` | not started |  | 6 cases |
 | `xoshiro256starstar` | not started |  | 3 cases |

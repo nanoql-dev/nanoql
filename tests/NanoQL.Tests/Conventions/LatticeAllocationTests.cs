@@ -6,8 +6,10 @@ using NanoQL.Coupons;
 using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
+using NanoQL.Methods;
 using NanoQL.Models;
 using NanoQL.PricingEngines;
+using NanoQL.Processes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 
@@ -156,6 +158,41 @@ public class LatticeAllocationTests
         // the asset the engine rolls back on that lattice
         Assert.Equal(
             TreeCallableFixedRateBondEngine.Calculate(bond, context, model, lattice).NPV, asset.PresentValue());
+    }
+
+    [Fact]
+    public void AnAmericanBinomialRollbackAllocatesNothing()
+    {
+        var today = new Date(15, Month.January, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual365Fixed();
+        var process = new BlackScholesMertonProcess(
+            100.0, new FlatForward(today, 0.03, dc), Curve, new BlackConstantVol(today, null, 0.25, dc));
+        var payoff = new PlainVanillaPayoff(OptionType.Put, 100.0);
+        var exercise = new AmericanExercise(today, today + 365);
+        double maturity = dc.YearFraction(today, today + 365);
+        var tree = new CoxRossRubinstein(process, maturity, 101, payoff.Strike);
+        var lattice = new BlackScholesLattice<CoxRossRubinstein>(tree, 0.04, maturity, 101);
+        var grid = new TimeGrid(maturity, 101);
+
+        var warm = new DiscretizedVanillaOption(payoff, exercise, process, grid);
+        warm.Initialize(lattice, maturity);
+        warm.Rollback(0.0);
+
+        // the early-exercise condition at each step reads the lattice's grid into the option's buffer
+        DiscretizedVanillaOption option = AllocationAssert.AllocatesNothing(
+            () =>
+            {
+                var fresh = new DiscretizedVanillaOption(payoff, exercise, process, grid);
+                fresh.Initialize(lattice, maturity);
+                return fresh;
+            },
+            fresh => fresh.Rollback(0.0));
+
+        // the binomial engine's value on the same tree
+        var american = new VanillaOption(payoff, exercise);
+        Assert.Equal(
+            BinomialCRRVanillaEngine.Calculate(american, context, process, 101).NPV!.Value, option.PresentValue(), 1e-12);
     }
 
     private static OneFactorModelShortRateTree Tree()
