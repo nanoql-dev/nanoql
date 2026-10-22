@@ -3,6 +3,7 @@
 
 using NanoQL.Methods;
 using NanoQL.Numerics;
+using NanoQL.PricingEngines;
 using NanoQL.Processes;
 using NanoQL.Time;
 
@@ -130,5 +131,72 @@ public class MonteCarloErrorTests
 
         NanoQLException n = Assert.Throws<NanoQLException>(() => process.Time(new Date(17, Month.October, 2026)));
         Assert.Equal("date/time conversion not supported", n.Message);
+    }
+
+    [Fact]
+    public void MultiPathAndItsGeneratorRefusals()
+    {
+        ArgumentOutOfRangeException o = Assert.Throws<ArgumentOutOfRangeException>(() => new MultiPath(0, new TimeGrid(1.0, 2)));
+        Assert.Equal("nAsset", o.ParamName);
+        Assert.StartsWith("number of asset must be positive", o.Message);
+
+        var array = new StochasticProcessArray(
+            [new OrnsteinUhlenbeckProcess(0.1, 0.2), new OrnsteinUhlenbeckProcess(0.2, 0.1)],
+            new Matrix(new[,] { { 1.0, 0.3 }, { 0.3, 1.0 } }));
+        ArgumentException e = Assert.Throws<ArgumentException>(
+            () => new MultiPathGenerator<IRsg>(array, new TimeGrid(1.0, 4), PseudoRandom.MakeSequenceGenerator(7, 42)));
+        Assert.Equal("generator", e.ParamName);
+        Assert.StartsWith(
+            "dimension (7) is not equal to (2 * 4) the number of factors times the number of time steps", e.Message);
+        e = Assert.Throws<ArgumentException>(
+            () => new MultiPathGenerator<IRsg>(array, new TimeGrid([0.0]), PseudoRandom.MakeSequenceGenerator(1, 42)));
+        Assert.Equal("generator", e.ParamName);
+        Assert.StartsWith("dimension (1) is not equal to (2 * 0)", e.Message);
+    }
+
+    [Fact]
+    public void MonteCarloModelAndSimulationRefusals()
+    {
+        var grid = new TimeGrid(1.0, 2);
+        IPathGenerator<MonteCarloPath> generator = SingleVariate<PseudoRandom>.MakePathGenerator(
+            new OrnsteinUhlenbeckProcess(0.1, 0.2), grid, PseudoRandom.MakeSequenceGenerator(2, 42), false);
+        var model = new MonteCarloModel<MonteCarloPath, GeneralStatistics>(
+            generator, new BackPricer(), new GeneralStatistics(), false);
+        ArgumentOutOfRangeException o = Assert.Throws<ArgumentOutOfRangeException>(() => model.AddSamples(-1));
+        Assert.Equal("samples", o.ParamName);
+        o = Assert.Throws<ArgumentOutOfRangeException>(
+            () => McSimulation<MonteCarloPath, GeneralStatistics>.Value(model, 0.1, -1));
+        Assert.Equal("maxSamples", o.ParamName);
+        o = Assert.Throws<ArgumentOutOfRangeException>(
+            () => McSimulation<MonteCarloPath, GeneralStatistics>.Value(model, 0.1, 100, -1));
+        Assert.Equal("minSamples", o.ParamName);
+    }
+
+    [Fact]
+    public void StochasticProcessArrayRefusals()
+    {
+        var correlation = new Matrix(new[,] { { 1.0, 0.3 }, { 0.3, 1.0 } });
+        ArgumentException e = Assert.Throws<ArgumentException>(
+            () => new StochasticProcessArray([], new Matrix(new[,] { { 1.0 } })));
+        Assert.Equal("processes", e.ParamName);
+        Assert.StartsWith("no processes given", e.Message);
+        e = Assert.Throws<ArgumentException>(
+            () => new StochasticProcessArray([new OrnsteinUhlenbeckProcess(0.1, 0.2)], correlation));
+        Assert.Equal("correlation", e.ParamName);
+        Assert.StartsWith("mismatch between number of processes and size of correlation matrix", e.Message);
+        e = Assert.Throws<ArgumentException>(
+            () => new StochasticProcessArray([new OrnsteinUhlenbeckProcess(0.1, 0.2), null!], correlation));
+        Assert.Equal("processes", e.ParamName);
+        Assert.StartsWith("null 1-D stochastic process", e.Message);
+
+        // The correlation's square root comes first, as QuantLib's member initialisers take it first.
+        e = Assert.Throws<ArgumentException>(() => new StochasticProcessArray([], new Matrix()));
+        Assert.Equal("matrix", e.ParamName);
+        Assert.StartsWith("matrix must not be empty", e.Message);
+    }
+
+    private sealed class BackPricer : PathPricer<MonteCarloPath>
+    {
+        public override double Evaluate(MonteCarloPath path) => path.Back();
     }
 }

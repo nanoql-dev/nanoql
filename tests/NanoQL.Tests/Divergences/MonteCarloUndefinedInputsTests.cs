@@ -114,4 +114,13 @@ public class MonteCarloUndefinedInputsTests
                 process, new TimeGrid(), generator, true));
         Assert.Equal("timeGrid", e.ParamName);
     }
+
+    [Fact]
+    public void AnEmptyMultiPathsPathSizeIsRefused()
+    {
+        // multipath.hpp:48 reads multiPath_[0] of a MultiPath built with no asset, undefined.
+        NanoQLException e = Assert.Throws<NanoQLException>(() => new MultiPath().PathSize());
+        Assert.Equal("no path size for empty multi-path", e.Message);
+        Assert.Equal(0, new MultiPath().AssetNumber);
+    }
 }

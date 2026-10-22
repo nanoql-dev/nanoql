@@ -148,4 +148,21 @@ public class OptimizationErrorTests
 
     private static string Refusal(OptimizationMethod method, CostFunction f, double[] start, EndCriteria criteria) =>
         Assert.Throws<NanoQLException>(() => method.Minimize(new Problem(f, new NoConstraint(), start), criteria)).Message;
+
+    [Fact]
+    public void ALineSearchRefusesAConstraintItCantReach()
+    {
+        // linesearch.cpp:35-42: the step halved until the new point satisfies the constraint, at most 200 times.
+        var search = new ArmijoLineSearch();
+        var point = new Vector(1, 1.0);
+        NanoQLException n = Assert.Throws<NanoQLException>(
+            () => search.Update(point, new Vector(1, 1.0), 1.0, new NeverConstraint()));
+        Assert.Equal("can't update linesearch", n.Message);
+        Assert.Equal(1.0, point[0]);
+    }
+
+    private sealed class NeverConstraint : Constraint
+    {
+        public override bool Test(Vector p) => false;
+    }
 }

@@ -243,9 +243,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ## Boost
 
-nanoql ports parts of Boost 1.90.0: Boost.Math's normal distribution, error functions and polynomial evaluation, and
-uBLAS's LU factorization, under `src/NanoQL/Boost/`. Each ported file carries its Boost copyright notices. Boost's
-license file, `LICENSE_1_0.txt` at release 1.90.0, is reproduced verbatim below.
+nanoql ports parts of Boost 1.90.0: Boost.Math's normal distribution, error functions and polynomial evaluation,
+uBLAS's LU factorization, and Boost.Accumulators' weighted mean, variance, moments, skewness and kurtosis, under
+`src/NanoQL/Boost/`. Each ported file carries its Boost copyright notices. Boost's license file, `LICENSE_1_0.txt` at
+release 1.90.0, is reproduced verbatim below.
 
 ```text
 Boost Software License - Version 1.0 - August 17th, 2003

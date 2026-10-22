@@ -156,6 +156,28 @@ public static class DataFormattersFunctions
         return TrimZeros(x.ToString("F" + (5 - exponent).ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture));
     }
 
+    // A C++ stream's std::scientific output at its default precision: %e, six digits after the point and an exponent of
+    // at least two digits ("-1.234567e-17").
+    internal static string Scientific(double x)
+    {
+        if (double.IsNaN(x))
+        {
+            return "nan";
+        }
+
+        if (double.IsInfinity(x))
+        {
+            return x > 0 ? "inf" : "-inf";
+        }
+
+        if (x == 0)
+        {
+            return double.IsNegative(x) ? "-0.000000e+00" : "0.000000e+00";
+        }
+
+        return x.ToString("0.000000e+00", CultureInfo.InvariantCulture);
+    }
+
     private static string TrimZeros(string number) =>
         number.Contains('.', StringComparison.Ordinal) ? number.TrimEnd('0').TrimEnd('.') : number;
 }

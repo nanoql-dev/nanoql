@@ -6,11 +6,13 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/matrices.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testEigenvectors, testCholeskyDecomposition, testCholeskySolverFor, testCholeskySolverForIncomplete, testSqrt, testHighamSqrt, testPrincipalMatrixSqrt (S-sr's matrix utilities); testHouseholderTransformation, testHouseholderReflection (S-exo's Householder transformation); testSVD (S-van); testOrthogonalProjection (S-mm); testQRDecomposition, testQRSolve (S-core); testMoorePenroseInverse (S-xrt)
+// Partial: testHouseholderTransformation, testHouseholderReflection (S-exo's Householder transformation); testSVD (S-van); testOrthogonalProjection (S-mm); testQRDecomposition, testQRSolve (S-core); testMoorePenroseInverse (S-xrt)
 // Moved: testSparseMatrixMemory line 755 (Divergences/SparseMatrixProductTests.cs)
 
 using NanoQL.Numerics;
+using static NanoQL.Numerics.CholeskyDecompositionFunctions;
 using static NanoQL.Numerics.MatrixFunctions;
+using static NanoQL.Numerics.PseudoSqrtFunctions;
 
 namespace NanoQL.Tests.TestSuite;
 
@@ -361,6 +363,257 @@ public class MatricesTests
     }
 
     // QuantLib's MatrixMult: the product of a copy of the matrix with a vector.
+    [Fact]
+    public void TestEigenvectors()
+    {
+        // Testing eigenvalues and eigenvectors calculation...
+
+        Matrix[] testMatrices = [M1, M2];
+
+        foreach (Matrix M in testMatrices)
+        {
+            var dec = new SymmetricSchurDecomposition(M);
+            Vector eigenValues = dec.Eigenvalues();
+            Matrix eigenVectors = dec.Eigenvectors();
+            Real minHolder = double.MaxValue;
+
+            for (Size i = 0; i < N; i++)
+            {
+                var v = new Vector(N);
+                for (Size j = 0; j < N; j++)
+                {
+                    v[j] = eigenVectors[j, i];
+                }
+
+                // check definition
+                Vector a = M * v;
+                Vector b = eigenValues[i] * v;
+                if (Norm(a - b) > 1.0e-15)
+                {
+                    Assert.Fail("Eigenvector definition not satisfied");
+                }
+
+                // check decreasing ordering
+                if (eigenValues[i] >= minHolder)
+                {
+                    Assert.Fail($"Eigenvalues not ordered: {eigenValues}");
+                }
+                else
+                {
+                    minHolder = eigenValues[i];
+                }
+            }
+
+            // check normalization
+            Matrix m = eigenVectors * Transpose(eigenVectors);
+            if (Norm(m - I) > 1.0e-15)
+            {
+                Assert.Fail("Eigenvector not normalized");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestSqrt()
+    {
+        // Testing matricial square root...
+
+        Matrix m = PseudoSqrt(M1, SalvagingAlgorithmType.None);
+        Matrix temp = m * Transpose(m);
+        Real error = Norm(temp - M1);
+        Real tolerance = 1.0e-12;
+        if (error > tolerance)
+        {
+            Assert.Fail(
+                $"Matrix square root calculation failed\noriginal matrix:\n{M1}pseudoSqrt:\n{m}pseudoSqrt*pseudoSqrt:\n{temp}"
+                + $"\nerror:     {error}\ntolerance: {tolerance}");
+        }
+    }
+
+    [Fact]
+    public void TestHighamSqrt()
+    {
+        // Testing Higham matricial square root...
+
+        Matrix tempSqrt = PseudoSqrt(M5, SalvagingAlgorithmType.Higham);
+        Matrix ansSqrt = PseudoSqrt(M6, SalvagingAlgorithmType.None);
+        Real error = Norm(ansSqrt - tempSqrt);
+        Real tolerance = 1.0e-4;
+        if (error > tolerance)
+        {
+            Assert.Fail(
+                $"Higham matrix correction failed\noriginal matrix:\n{M5}pseudoSqrt:\n{tempSqrt}should be:\n{ansSqrt}"
+                + $"\nerror:     {error}\ntolerance: {tolerance}");
+        }
+    }
+
+    [Fact]
+    public void TestCholeskyDecomposition()
+    {
+        // Testing Cholesky Decomposition...
+
+        // This test case fails prior to release 1.8
+
+        // The eigenvalues of this matrix are
+        // 0.0438523; 0.0187376; 0.000245617; 0.000127656; 8.35899e-05; 6.14215e-05;
+        // 1.94241e-05; 1.14417e-06; 9.79481e-18; 1.31141e-18; 5.81155e-19
+
+        Real[,] tmp =
+        {
+            {
+                6.4e-05, 5.28e-05, 2.28e-05, 0.00032, 0.00036, 6.4e-05,
+                6.3968010664e-06, 7.2e-05, 7.19460269899e-06, 1.2e-05,
+                1.19970004999e-06,
+            },
+            {
+                5.28e-05, 0.000121, 1.045e-05, 0.00044, 0.000165, 2.2e-05,
+                2.19890036657e-06, 1.65e-05, 1.64876311852e-06, 1.1e-05,
+                1.09972504583e-06,
+            },
+            {
+                2.28e-05, 1.045e-05, 9.025e-05, 0, 0.0001425, 9.5e-06,
+                9.49525158294e-07, 2.85e-05, 2.84786356835e-06, 4.75e-06,
+                4.74881269789e-07,
+            },
+            {
+                0.00032, 0.00044, 0, 0.04, 0.009, 0.0008, 7.996001333e-05, 0.0006,
+                5.99550224916e-05, 0.0001, 9.99750041661e-06,
+            },
+            {
+                0.00036, 0.000165, 0.0001425, 0.009, 0.0225, 0.0003, 2.99850049987e-05,
+                0.001125, 0.000112415667172, 0.000225, 2.24943759374e-05,
+            },
+            {
+                6.4e-05, 2.2e-05, 9.5e-06, 0.0008, 0.0003, 0.0001, 9.99500166625e-06,
+                7.5e-05, 7.49437781145e-06, 2e-05, 1.99950008332e-06,
+            },
+            {
+                6.3968010664e-06, 2.19890036657e-06, 9.49525158294e-07,
+                7.996001333e-05, 2.99850049987e-05, 9.99500166625e-06,
+                9.99000583083e-07, 7.49625124969e-06, 7.49063187129e-07,
+                1.99900033325e-06, 1.99850066645e-07,
+            },
+            {
+                7.2e-05, 1.65e-05, 2.85e-05, 0.0006, 0.001125, 7.5e-05,
+                7.49625124969e-06, 0.000225, 2.24831334343e-05, 1.5e-05,
+                1.49962506249e-06,
+            },
+            {
+                7.19460269899e-06, 1.64876311852e-06, 2.84786356835e-06,
+                5.99550224916e-05, 0.000112415667172, 7.49437781145e-06,
+                7.49063187129e-07, 2.24831334343e-05, 2.24662795123e-06,
+                1.49887556229e-06, 1.49850090584e-07,
+            },
+            {
+                1.2e-05, 1.1e-05, 4.75e-06, 0.0001, 0.000225, 2e-05, 1.99900033325e-06,
+                1.5e-05, 1.49887556229e-06, 2.5e-05, 2.49937510415e-06,
+            },
+            {
+                1.19970004999e-06, 1.09972504583e-06, 4.74881269789e-07,
+                9.99750041661e-06, 2.24943759374e-05, 1.99950008332e-06,
+                1.99850066645e-07, 1.49962506249e-06, 1.49850090584e-07,
+                2.49937510415e-06, 2.49875036451e-07,
+            },
+        };
+
+        var m = new Matrix(11, 11);
+        for (Size i = 0; i < 11; ++i)
+        {
+            for (Size j = 0; j < 11; ++j)
+            {
+                m[i, j] = tmp[i, j];
+            }
+        }
+
+        Matrix c = CholeskyDecomposition(m, true);
+        Matrix m2 = c * Transpose(c);
+
+        Real tol = 1.0E-12;
+        for (Size i = 0; i < 11; ++i)
+        {
+            for (Size j = 0; j < 11; ++j)
+            {
+                if (double.IsNaN(m2[i, j]))
+                {
+                    Assert.Fail($"Faield to verify Cholesky decomposition at (i,j)=({i},{j}), replicated value is nan");
+                }
+
+                // this does not detect nan values
+                if (Math.Abs(m[i, j] - m2[i, j]) > tol)
+                {
+                    Assert.Fail(
+                        $"Failed to verify Cholesky decomposition at (i,j)=({i},{j}), original value is {m[i, j]}, "
+                        + $"replicated value is {m2[i, j]}");
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestPrincipalMatrixSqrt()
+    {
+        // Testing principal matrix pseudo sqrt...
+
+        Size[] dims = [1, 4, 10, 40];
+        foreach (Size n in dims)
+        {
+            Matrix rho = CreateTestCorrelationMatrix(n);
+            Matrix sqrtRho = PseudoSqrt(rho, SalvagingAlgorithmType.Principal);
+
+            // matrix is symmetric
+            CheckCloseMatrixTol(sqrtRho, Transpose(sqrtRho), 1e3 * QL_EPSILON);
+
+            // matrix is square root of original matrix
+            CheckCloseMatrixTol(sqrtRho * sqrtRho, rho, 1e5 * QL_EPSILON);
+        }
+
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public void TestCholeskySolverFor()
+    {
+        // Testing CholeskySolverFor...
+
+        var rng = new MersenneTwisterUniformRng(1234);
+
+        Size[] dims = [1, 4, 10, 25, 50];
+        foreach (Size n in dims)
+        {
+            var b = new Vector(n);
+            for (Size i = 0; i < n; ++i)
+            {
+                b[i] = rng.NextReal();
+            }
+
+            Matrix rho = CreateTestCorrelationMatrix(n);
+            Vector x = CholeskySolveFor(CholeskyDecomposition(rho), b);
+
+            Vector diff = ArrayFunctions.Abs((rho * x) - b);
+
+            CheckSmall(Math.Sqrt(ArrayFunctions.DotProduct(diff, diff)), 20 * Math.Sqrt(n) * QL_EPSILON);
+        }
+
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public void TestCholeskySolverForIncomplete()
+    {
+        // Testing CholeskySolverFor with incomplete matrix...
+
+        const Size n = 4;
+
+        var rho = new Matrix(n, n, 0.0);
+        rho[0, 0] = rho[1, 1] = 1;
+        rho[0, 1] = rho[1, 0] = 0.9;
+
+        Matrix L = CholeskyDecomposition(rho, true);
+        CheckCloseMatrix(L * Transpose(L), rho);
+
+        Assert.Empty(errors);
+    }
+
     private static Func<Vector, Vector> MatrixMult(Matrix m)
     {
         Matrix m_ = m.Clone();
@@ -400,6 +653,9 @@ public class MatricesTests
 
     private sealed record CoordinateTuple(List<Size> RowIndices, List<Size> ColumnIndices, List<Real> Data);
 
+    // QuantLib's norm(const Array&): the Euclidean norm.
+    private static Real Norm(Vector v) => Math.Sqrt(ArrayFunctions.DotProduct(v, v));
+
     // QuantLib's norm(const Matrix&): the Frobenius norm.
     private static Real Norm(Matrix m)
     {
@@ -425,12 +681,15 @@ public class MatricesTests
 
     // QL_CHECK_CLOSE_MATRIX: the dimensions required equal, then each element within 100 epsilon percent of the
     // expected one, by BOOST_CHECK_CLOSE's strong test (Boost's safe_fpt_division).
-    private void CheckCloseMatrix(Matrix actual, Matrix expected)
+    private void CheckCloseMatrix(Matrix actual, Matrix expected) => CheckCloseMatrixTol(actual, expected, 100 * QL_EPSILON);
+
+    // QL_CHECK_CLOSE_MATRIX_TOL: as QL_CHECK_CLOSE_MATRIX, each element within tol percent.
+    private void CheckCloseMatrixTol(Matrix actual, Matrix expected, double tol)
     {
         Assert.True(
             actual.Rows == expected.Rows && actual.Columns == expected.Columns,
             "critical check actual.rows() == expected.rows() && actual.columns() == expected.columns() has failed");
-        double fraction = 100 * QL_EPSILON * 0.01;
+        double fraction = tol * 0.01;
         for (int i = 0; i < actual.Rows; i++)
         {
             for (int j = 0; j < actual.Columns; j++)
@@ -438,10 +697,35 @@ public class MatricesTests
                 double a = actual[i, j], e = expected[i, j], diff = Math.Abs(a - e);
                 if (!(SafeDivision(diff, Math.Abs(e)) <= fraction && SafeDivision(diff, Math.Abs(a)) <= fraction))
                 {
-                    errors.Add($"difference between {a:R} and {e:R} exceeds {100 * QL_EPSILON:R}%");
+                    errors.Add($"difference between {a:R} and {e:R} exceeds {tol:R}%");
                 }
             }
         }
+    }
+
+    // QL_CHECK_SMALL: BOOST_CHECK_SMALL, |value| <= tolerance.
+    private void CheckSmall(double value, double tolerance)
+    {
+        if (!(Math.Abs(value) <= tolerance))
+        {
+            errors.Add($"absolute value of {value:R} exceeds {tolerance:R}");
+        }
+    }
+
+    // MatrixTests::createTestCorrelationMatrix (lines 851-860).
+    private static Matrix CreateTestCorrelationMatrix(Size n)
+    {
+        var rho = new Matrix(n, n);
+        for (Size i = 0; i < n; ++i)
+        {
+            for (Size j = i; j < n; ++j)
+            {
+                rho[i, j] = rho[j, i] =
+                    Math.Exp((-0.1 * Math.Abs((Real)i - (Real)j)) - ((i != j) ? 0.02 * (i + j) : 0.0));
+            }
+        }
+
+        return rho;
     }
 
     // Boost's safe_fpt_division: f1 / f2, without overflow or underflow.

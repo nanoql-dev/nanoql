@@ -149,17 +149,17 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: the cases on S-g1d's `AbcdSquared` (`testSegment`, with S-sr's `SegmentIntegral`, and the trapezoid, midpoint, Simpson, Gauss-Lobatto and Gauss-Legendre integrator cases); the Gauss-Kronrod cases (S-cms); the discrete cases and `testTanhSinh` (S-van); `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (S-core); and `testPiecewiseIntegral` (S-xrt).
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (Lagrange, Chebyshev, multi-dimensional splines, no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace, B-splines, flat extrapolation).
 - `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice, Faure and Burley 2020 cases and the discrepancy cases, whose generators and statistics aren't ported yet.
-- `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the cases needing matrix utilities not yet ported (decompositions, square roots, projections, Moore-Penrose).
+- `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the Householder, singular-value, orthogonal-projection, QR and Moore-Penrose cases, whose matrix utilities aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/NthOrderDerivativeOpTests.cs`: every case but `testSparseMatrixApply`, which wait for S-core's `NthOrderDerivativeOp`.
 - `tests/NanoQL.Tests/TestSuite/OdeTests.cs`: `testMatrixExponential` and `testMatrixExponentialOfZero`, which wait for S-core's `Expm`.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing, L-BFGS-B, differential evolution and CMA-ES cases, whose optimizers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/OvernightIndexedSwapTests.cs`: `testNonstandardSwapConversionPreservesObservationConventions`, which waits for S-g1d's `NonstandardSwap`.
-- `tests/NanoQL.Tests/TestSuite/PathGeneratorTests.cs`: `testMultiPathGenerator`, which waits for `MultiPathGenerator` (S-sr).
 - `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: `testDefaultInstantiation`'s ConvexMonotone curve (S-core); `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (S-core); `testConvexMonotoneForwardConsistency`, `testLocalBootstrapConsistency` and `testGlobalBootstrapVariables` (S-core); and `testPiecewiseSpreadYieldCurve` (S-sr).
 - `tests/NanoQL.Tests/TestSuite/QuantoOptionTests.cs`: the analytic and forward cases and `testPDEOptionValues`, which wait for S-exo's quanto engines; the barrier case, which waits for S-bar's quanto barrier option; `testAmericanQuantoOption`, which waits for S-hes's Heston engine; and `testDoubleBarrierValues`, which waits for S-xeq's quanto double-barrier option.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
 - `tests/NanoQL.Tests/TestSuite/ShortRateModelsTests.cs`: `testSwaps`, which waits for S-sr's `TreeVanillaSwapEngine`; and the two extended Cox-Ingersoll-Ross cases, which wait for S-sr's `ExtendedCoxIngersollRoss`.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant, Newton, Ridder and Halley cases, whose solvers aren't ported yet.
+- `tests/NanoQL.Tests/TestSuite/StatsTests.cs`: `testSequenceStatistics` and `testConvergenceStatistics`, which wait for S-mmp's sequence and convergence statistics.
 - `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported.
 - `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, S-bar).
 - `tests/NanoQL.Tests/TestSuite/VarianceSwapsTests.cs`: `testMCVarianceSwap`, which waits for S-exo's `MCVarianceSwapEngine`.

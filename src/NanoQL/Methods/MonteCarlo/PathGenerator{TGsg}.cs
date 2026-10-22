@@ -34,7 +34,7 @@ namespace NanoQL.Methods;
 /// The Gaussian sequence generator's type, whose <see cref="IRsg.Clone"/> returns a <typeparamref name="TGsg"/>, as
 /// every generator's does.
 /// </typeparam>
-public class PathGenerator<TGsg>
+public class PathGenerator<TGsg> : IPathGenerator<MonteCarloPath>
     where TGsg : class, IRsg
 {
     private readonly bool brownianBridge;

@@ -43,9 +43,9 @@ public class OptimizersTests
         lbfgsb,
     }
 
-    // Adapted: setup's methods (lines 314-317) are simplex, levenbergMarquardt and levenbergMarquardt2, the methods
-    // ported, without conjugateGradient, bfgs and lbfgsb (S-sr's and S-core's methods, not ported yet), whose
-    // makeOptimizationMethod cases (lines 238-251) are dropped too. The problem (lines 342-343) is a ProblemState, the
+    // Adapted: setup's methods (lines 314-317) are simplex, levenbergMarquardt, levenbergMarquardt2 and
+    // conjugateGradient, the methods ported, without bfgs and lbfgsb (S-core's methods, not ported yet), whose
+    // makeOptimizationMethod cases (lines 240-251) are dropped too. The problem (lines 342-343) is a ProblemState, the
     // working type with QuantLib's Problem API, so the loop calls setCurrentValue, minimize and values on it as
     // QuantLib's does.
     [Fact]
@@ -168,6 +168,7 @@ public class OptimizersTests
                 new LevenbergMarquardt(levenbergMarquardtEpsfcn, levenbergMarquardtXtol, levenbergMarquardtGtol),
             OptimizationMethodType.levenbergMarquardt2 =>
                 new LevenbergMarquardt(levenbergMarquardtEpsfcn, levenbergMarquardtXtol, levenbergMarquardtGtol, true),
+            OptimizationMethodType.conjugateGradient => new ConjugateGradient(),
             _ => throw new NanoQLException("unknown OptimizationMethod type"),
         };
 
@@ -241,7 +242,7 @@ public class OptimizersTests
         OptimizationMethodType[] optimizationMethodTypes =
         [
             OptimizationMethodType.simplex, OptimizationMethodType.levenbergMarquardt,
-            OptimizationMethodType.levenbergMarquardt2,
+            OptimizationMethodType.levenbergMarquardt2, OptimizationMethodType.conjugateGradient,
         ];
         Real simplexLambda = 0.1;                   // characteristic search length for simplex
         Real levenbergMarquardtEpsfcn = 1.0e-8;     // parameters specific for Levenberg-Marquardt

@@ -20,10 +20,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 752 | 100 |
+| not started | 731 | 98 |
 | partial | 31 | 28 |
-| ported | 478 | 54 |
-| replaced | 20 | 6 |
+| ported | 498 | 56 |
+| replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
 ## Library
@@ -867,18 +867,18 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `basisincompleteordered` | not started |  | no nanoql type: BasisIncompleteOrdered, OrthogonalProjections |
 | `bicgstab` | ported | Numerics/MatrixUtilities/BiCGStabResult.cs, Numerics/MatrixUtilities/BiCGstab.cs |  |
-| `choleskydecomposition` | not started |  |  |
+| `choleskydecomposition` | ported | Numerics/MatrixUtilities/CholeskyDecompositionFunctions.cs |  |
 | `expm` | not started |  |  |
 | `factorreduction` | not started |  |  |
 | `getcovariance` | not started |  | no nanoql type: CovarianceDecomposition |
 | `gmres` | ported | Numerics/MatrixUtilities/GMRES.cs, Numerics/MatrixUtilities/GMRESResult.cs |  |
 | `householder` | not started |  | no nanoql type: HouseholderTransformation, HouseholderReflection |
-| `pseudosqrt` | not started |  | no nanoql type: SalvagingAlgorithmType |
+| `pseudosqrt` | ported | Numerics/MatrixUtilities/PseudoSqrtFunctions.cs, Numerics/MatrixUtilities/SalvagingAlgorithmType.cs |  |
 | `qrdecomposition` | not started |  |  |
 | `sparseilupreconditioner` | not started |  | no nanoql type: SparseILUPreconditioner |
 | `sparsematrix` | ported | Numerics/MatrixUtilities/SparseMatrix.cs, Numerics/MatrixUtilities/SparseMatrixFunctions.cs, Numerics/MatrixUtilities/SparseMatrixReference.cs |  |
 | `svd` | not started |  | no nanoql type: SVD |
-| `symmetricschurdecomposition` | not started |  | no nanoql type: SymmetricSchurDecomposition |
+| `symmetricschurdecomposition` | ported | Numerics/MatrixUtilities/SymmetricSchurDecomposition.cs |  |
 | `tapcorrelations` | not started |  | no nanoql type: FrobeniusCostFunction |
 | `tqreigendecomposition` | ported | Numerics/MatrixUtilities/TqrEigenDecomposition/TqrEigenDecomposition.cs, Numerics/MatrixUtilities/TqrEigenDecomposition/TqrEigenDecompositionEigenVectorCalculation.cs, Numerics/MatrixUtilities/TqrEigenDecomposition/TqrEigenDecompositionShiftStrategy.cs |  |
 
@@ -896,10 +896,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `armijo` | not started |  | no nanoql type: ArmijoLineSearch |
+| `armijo` | ported | Numerics/Optimization/ArmijoLineSearch.cs |  |
 | `bfgs` | not started |  | no nanoql type: BFGS |
 | `cmaes` | not started |  | no nanoql type: Cmaes, CmaesConfiguration |
-| `conjugategradient` | not started |  | no nanoql type: ConjugateGradient |
+| `conjugategradient` | ported | Numerics/Optimization/ConjugateGradient.cs |  |
 | `constraint` | ported | Numerics/Optimization/Constraint/BoundaryConstraint.cs, Numerics/Optimization/Constraint/CompositeConstraint.cs, Numerics/Optimization/Constraint/Constraint.cs, Numerics/Optimization/Constraint/NoConstraint.cs, Numerics/Optimization/Constraint/NonhomogeneousBoundaryConstraint.cs, Numerics/Optimization/Constraint/PositiveConstraint.cs |  |
 | `costfunction` | ported | Numerics/Optimization/CostFunction/CostFunction.cs, Numerics/Optimization/CostFunction/ParametersTransformation.cs, Numerics/Optimization/CostFunction/SimpleCostFunction.cs |  |
 | `differentialevolution` | not started |  | no nanoql type: DifferentialEvolution, DifferentialEvolutionStrategy, DifferentialEvolutionCrossoverType, DifferentialEvolutionCandidate, DifferentialEvolutionConfiguration |
@@ -908,8 +908,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `lbfgsb` | not started |  | no nanoql type: LBFGSB |
 | `leastsquare` | not started |  | no nanoql type: LeastSquareProblem, LeastSquareFunction, NonLinearLeastSquare |
 | `levenbergmarquardt` | ported | Numerics/Optimization/LevenbergMarquardt.cs |  |
-| `linesearch` | not started |  | no nanoql type: LineSearch |
-| `linesearchbasedmethod` | not started |  | no nanoql type: LineSearchBasedMethod |
+| `linesearch` | ported | Numerics/Optimization/LineSearch.cs |  |
+| `linesearchbasedmethod` | ported | Numerics/Optimization/LineSearchBasedMethod.cs |  |
 | `lmdif` | ported | Numerics/Optimization/LmdifFunctions.cs |  |
 | `method` | ported | Numerics/Optimization/OptimizationMethod.cs |  |
 | `problem` | ported | Numerics/Optimization/Problem/Problem.cs, Numerics/Optimization/Problem/ProblemResults.cs, Numerics/Optimization/Problem/ProblemState.cs |  |
@@ -972,13 +972,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `convergencestatistics` | not started |  | no nanoql type: DoublingConvergenceSteps, ConvergenceStatistics |
 | `discrepancystatistics` | not started |  | no nanoql type: DiscrepancyStatistics |
-| `gaussianstatistics` | not started |  | no nanoql type: GenericGaussianStatistics, GaussianStatistics, StatsHolder |
-| `generalstatistics` | not started |  | no nanoql type: GeneralStatistics |
+| `gaussianstatistics` | ported | Numerics/Statistics/GaussianStatistics/GaussianStatisticsExtensions.cs, Numerics/Statistics/GaussianStatistics/ISummaryStatistics.cs, Numerics/Statistics/GaussianStatistics/StatsHolder.cs | no nanoql type: GenericGaussianStatistics, GaussianStatistics |
+| `generalstatistics` | ported | Numerics/Statistics/GeneralStatistics/GeneralStatistics.cs, Numerics/Statistics/GeneralStatistics/IEmpiricalStatistics.cs, Numerics/Statistics/GeneralStatistics/IStatistics.cs |  |
 | `histogram` | not started |  | no nanoql type: Histogram, HistogramAlgorithm |
-| `incrementalstatistics` | not started |  | no nanoql type: IncrementalStatistics |
-| `riskstatistics` | not started |  | no nanoql type: GenericRiskStatistics, RiskStatistics |
+| `incrementalstatistics` | ported | Numerics/Statistics/IncrementalStatistics.cs |  |
+| `riskstatistics` | ported | Numerics/Statistics/RiskStatisticsExtensions.cs | no nanoql type: GenericRiskStatistics, RiskStatistics |
 | `sequencestatistics` | not started |  | no nanoql type: GenericSequenceStatistics, SequenceStatistics, SequenceStatisticsInc |
-| `statistics` | not started |  |  |
+| `statistics` | replaced: GeneralStatistics, with the Gaussian and empirical risk measures as extension members |  |  |
 
 ### `ql/methods/`
 
@@ -1167,15 +1167,15 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `genericlsregression` | not started |  |  |
 | `longstaffschwartzpathpricer` | not started |  | no nanoql type: LongstaffSchwartzPathPricer |
 | `lsmbasissystem` | not started |  | no nanoql type: LsmBasisSystem, LsmBasisSystemPolynomialType |
-| `mctraits` | not started |  | no nanoql type: SingleVariate, MultiVariate |
-| `montecarlomodel` | not started |  | no nanoql type: MonteCarloModel |
-| `multipath` | not started |  | no nanoql type: MultiPath |
-| `multipathgenerator` | not started |  | no nanoql type: MultiPathGenerator |
+| `mctraits` | ported | Methods/MonteCarlo/McTraits/IMcTraits{TPath}.cs, Methods/MonteCarlo/McTraits/MultiVariate{TRng}.cs, Methods/MonteCarlo/McTraits/SingleVariate{TRng}.cs |  |
+| `montecarlomodel` | ported | Methods/MonteCarlo/IPathGenerator{TPath}.cs, Methods/MonteCarlo/MonteCarloModel{TPath,TStats}.cs |  |
+| `multipath` | ported | Methods/MonteCarlo/MultiPath.cs |  |
+| `multipathgenerator` | ported | Methods/MonteCarlo/MultiPathGenerator/GaussianMultiPathGenerator.cs, Methods/MonteCarlo/MultiPathGenerator/GaussianSobolMultiPathGenerator.cs, Methods/MonteCarlo/MultiPathGenerator/MultiPathGenerator{TGsg}.cs |  |
 | `nodedata` | not started |  | no nanoql type: NodeData |
 | `parametricexercise` | not started |  | no nanoql type: ParametricExercise |
 | `path` | ported | Methods/MonteCarlo/MonteCarloPath.cs |  |
 | `pathgenerator` | ported | Methods/MonteCarlo/GaussianSobolPathGenerator.cs, Methods/MonteCarlo/InvCumulativeMersenneTwisterPathGenerator.cs, Methods/MonteCarlo/PathGenerator{TGsg}.cs |  |
-| `pathpricer` | not started |  | no nanoql type: PathPricer |
+| `pathpricer` | ported | Methods/MonteCarlo/PathPricer{TPath}.cs |  |
 | `sample` | ported | Methods/MonteCarlo/Sample.cs |  |
 
 ### `ql/models/`
@@ -1470,7 +1470,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `greeks` | ported | PricingEngines/GreeksFunctions.cs |  |
 | `latticeshortratemodelengine` | ported | PricingEngines/LatticeShortRateModelEngine.cs |  |
 | `mclongstaffschwartzengine` | not started |  | no nanoql type: MCLongstaffSchwartzEngine |
-| `mcsimulation` | not started |  | no nanoql type: McSimulation |
+| `mcsimulation` | ported | PricingEngines/McSimulation{TPath,TStats}.cs |  |
 
 ### `ql/pricingengines/asian/`
 
@@ -1725,7 +1725,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `eulerdiscretization` | ported | Processes/EulerDiscretization.cs |  |
 | `forwardmeasureprocess` | not started |  | no nanoql type: ForwardMeasureProcess, ForwardMeasureProcess1D |
 | `g2process` | not started |  | no nanoql type: G2Process, G2ForwardProcess |
-| `geometricbrownianprocess` | not started |  | no nanoql type: GeometricBrownianMotionProcess |
+| `geometricbrownianprocess` | ported | Processes/GeometricBrownianMotionProcess.cs |  |
 | `gjrgarchprocess` | not started |  | no nanoql type: GJRGARCHProcess, GJRGARCHProcessDiscretization |
 | `gsrprocess` | not started |  | no nanoql type: GsrProcess |
 | `gsrprocesscore` | not started |  |  |
@@ -1737,8 +1737,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `merton76process` | not started |  | no nanoql type: Merton76Process |
 | `mfstateprocess` | not started |  | no nanoql type: MfStateProcess |
 | `ornsteinuhlenbeckprocess` | ported | Processes/OrnsteinUhlenbeckProcess.cs |  |
-| `squarerootprocess` | not started |  | no nanoql type: SquareRootProcess |
-| `stochasticprocessarray` | not started |  | no nanoql type: StochasticProcessArray |
+| `squarerootprocess` | ported | Processes/SquareRootProcess.cs |  |
+| `stochasticprocessarray` | ported | Processes/StochasticProcessArray.cs |  |
 
 ### `ql/quotes/`
 
@@ -2176,7 +2176,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `marketmodel_smmcapletcalibration` | not started |  | 1 cases |
 | `marketmodel_smmcaplethomocalibration` | not started |  | 3 cases |
 | `markovfunctional` | not started |  | 7 cases |
-| `matrices` | partial | TestSuite/MatricesTests.cs | 6 of 20 cases; not yet: testEigenvectors, testSqrt, testHighamSqrt, testSVD, testQRDecomposition, testQRSolve, testOrthogonalProjection, testCholeskyDecomposition, testMoorePenroseInverse, testPrincipalMatrixSqrt, testCholeskySolverFor, testCholeskySolverForIncomplete, testHouseholderTransformation, testHouseholderReflection; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
+| `matrices` | partial | TestSuite/MatricesTests.cs | 13 of 20 cases; not yet: testSVD, testQRDecomposition, testQRSolve, testOrthogonalProjection, testMoorePenroseInverse, testHouseholderTransformation, testHouseholderReflection; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
 | `mclongstaffschwartzengine` | not started |  | 2 cases |
 | `mersennetwister` | ported | TestSuite/MersenneTwisterTests.cs | 1 of 1 cases |
 | `money` | ported | TestSuite/MoneyTests.cs | 4 of 4 cases |
@@ -2199,7 +2199,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `pagodaoption` | not started |  | 1 cases |
 | `paralleltestrunner` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `partialtimebarrieroption` | not started |  | 3 cases |
-| `pathgenerator` | partial | TestSuite/PathGeneratorTests.cs | 1 of 2 cases; not yet: testMultiPathGenerator |
+| `pathgenerator` | ported | TestSuite/PathGeneratorTests.cs | 2 of 2 cases |
 | `period` | ported | TestSuite/PeriodTests.cs | 9 of 9 cases |
 | `perpetualfutures` | not started |  | 1 cases |
 | `piecewiseblackvariancesurface` | not started |  | 20 cases |
@@ -2214,7 +2214,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `quotes` | not started |  | 6 cases |
 | `rangeaccrual` | not started |  | 3 cases |
 | `riskneutraldensitycalculator` | not started |  | 14 cases |
-| `riskstats` | not started |  | 1 cases |
+| `riskstats` | ported | TestSuite/RiskStatsTests.cs | 1 of 1 cases |
 | `rngtraits` | partial | TestSuite/RngTraitsTests.cs | 3 of 4 cases; not yet: testRanLux |
 | `roughhestonmodel` | not started |  | 24 cases |
 | `rounding` | ported | TestSuite/RoundingTests.cs | 5 of 5 cases |
@@ -2225,7 +2225,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `softbarrieroption` | not started |  | 1 cases |
 | `solvers` | partial | TestSuite/SolversTests.cs | 3 of 9 cases; not yet: testBisection, testFalsePosition, testNewton, testRidder, testSecant, testHalley |
 | `squarerootclvmodel` | not started |  | 3 cases |
-| `stats` | not started |  | 4 cases |
+| `stats` | partial | TestSuite/StatsTests.cs | 2 of 4 cases; not yet: testSequenceStatistics, testConvergenceStatistics |
 | `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |
 | `swap` | ported | TestSuite/SwapTests.cs | 15 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs |
 | `swapforwardmappings` | not started |  | 3 cases |

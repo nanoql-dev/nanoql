@@ -862,6 +862,17 @@ Facts:
 - `AnIndexOutOfRangeIsRefused`
 - `ASwaptionOnAnExerciseWithNoDatesIsRefusedWhereItsDateIsRead`
 
+## ExpectedShortfallNoLossTests
+
+[`Divergences/ExpectedShortfallNoLossTests.cs`](../tests/NanoQL.Tests/Divergences/ExpectedShortfallNoLossTests.cs)
+
+The expected shortfall where no sample lies below the value-at-risk's level (the S-sr plan's SSR6 (xx)): QuantLib refuses "no data below the target" (riskstatistics.hpp:196-202). With no loss the level is 0, and the port returns it, the value QuantLib's own comment gives ("must be a loss, i.e., capped at 0.0 and negated", line 203); where the tail is an atom at the level, every tail sample sits at it, and the port returns the level, the value-at-risk, QuantLib's own limit as the atom splits. The average shortfall keeps QuantLib's refusal: a conditional average over no data has no value. QuantLib's checks: its own shortfall and value-at-risk on the same samples, and its expected shortfall on the split atom.
+
+Facts:
+
+- `SamplesWithNoLossHaveNoShortfall`
+- `ATailThatIsAnAtomHasTheAtomsShortfall`
+
 ## ExpiredCallableBondSpreadTests
 
 [`Divergences/ExpiredCallableBondSpreadTests.cs`](../tests/NanoQL.Tests/Divergences/ExpiredCallableBondSpreadTests.cs)
@@ -1134,6 +1145,17 @@ Facts:
 
 - `NegativeFixingDaysAreRefused`
 
+## IncrementalStatisticsLeadingZeroWeightTests
+
+[`Divergences/IncrementalStatisticsLeadingZeroWeightTests.cs`](../tests/NanoQL.Tests/Divergences/IncrementalStatisticsLeadingZeroWeightTests.cs)
+
+`IncrementalStatistics`' variance after samples of no weight (the S-sr plan's C1 review, B1-2): QuantLib's `variance()` (`incrementalstatistics.cpp:47-54`) reads Boost's iterative weighted variance, σ² ← σ²(S − w)/S + (x − μ)²w/(S − w) from the second sample on (`weighted_variance.hpp:89-97`), whose second term is 0/0 while every earlier sample weighs 0, and x/0 while their weights vanish in the sum, below its rounding, so the variance is NaN or infinite for good. The port resets the variance to 0 there, the first term's value and the second's limit (the review's B2-1: a skip there would keep the earlier samples' variance as the set's). QuantLib's check: its `Statistics` on the same samples, and its `IncrementalStatistics` with the samples of no weight moved after the first one that carries weight, which Boost's recurrence reads without a 0/0.
+
+Facts:
+
+- `LeadingSamplesOfNoWeightLeaveTheVarianceOfTheOthers`
+- `LeadingWeightsTheSumAbsorbsLeaveTheVarianceOfTheOthers`
+
 ## IndexFixingsTests
 
 [`Divergences/IndexFixingsTests.cs`](../tests/NanoQL.Tests/Divergences/IndexFixingsTests.cs)
@@ -1272,6 +1294,17 @@ Facts:
 - `AFixingTheRatioBranchDoesntReadChangesNothing`
 - `ALagShorterThanThePeriodForecastsThroughTheYoYCurve`
 
+## LineSearchReturnTests
+
+[`Divergences/LineSearchReturnTests.cs`](../tests/NanoQL.Tests/Divergences/LineSearchReturnTests.cs)
+
+A line-search-based minimization ends at the point its line search last accepted (the S-sr plan's SSR6 (xvii)): QuantLib's `LineSearchBasedMethod::minimize` returns on the function tolerance or the iteration limit (linesearchbasedmethod.cpp:98-103) before it sets the problem's current value (line 105), so its problem holds the point before with the function value of the point after. The port sets the current value first, the failed search's own line (line 112). QuantLib's check: the point its line search last accepted, read from the cost function's trace on the wheel. The hypersphere and lower-diagonal pseudo square roots, which minimize with `ConjugateGradient` (pseudosqrt.cpp:166-244), move with it.
+
+Facts:
+
+- `ConjugateGradientEndsAtItsLastAcceptedPoint`
+- `TheHypersphereAndLowerDiagonalRootsMoveWithIt`
+
 ## LocalVolCurveRefusalTests
 
 [`Divergences/LocalVolCurveRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/LocalVolCurveRefusalTests.cs)
@@ -1313,6 +1346,17 @@ Facts:
 - `FridaysAreBusinessDaysAndSundaysWeekendDays`
 - `TestMaltasListOnFridaysAndSundays`
 
+## McSimulationUndefinedTests
+
+[`Divergences/McSimulationUndefinedTests.cs`](../tests/NanoQL.Tests/Divergences/McSimulationUndefinedTests.cs)
+
+The tolerance loop of `McSimulation{TPath, TStats}.Value` refuses what QuantLib skips or leaves undefined (mcsimulation.hpp:118-134): a NaN error estimate, which QuantLib's comparison with the tolerance skips, returning the mean (the S-sr plan's SSD17, after playbook §2's NaN row for `std::max_element`); and a next-batch estimate past `Size`'s range, which QuantLib converts to `Size`, undefined there (the undefined-path row): a tolerance of 0 makes the estimate infinite.
+
+Facts:
+
+- `ANaNErrorEstimateIsRefused`
+- `ANextBatchPastTheSamplesRangeIsRefused`
+
 ## MinimizeContinuationTests
 
 [`Divergences/MinimizeContinuationTests.cs`](../tests/NanoQL.Tests/Divergences/MinimizeContinuationTests.cs)
@@ -1335,6 +1379,7 @@ Facts:
 - `ATimeGridsUndefinedInputsAreRefused`
 - `AnEmptyPathsEndsAreRefused`
 - `APathGeneratorOfNoStepIsRefused`
+- `AnEmptyMultiPathsPathSizeIsRefused`
 
 ## NegativeCountTests
 
@@ -1520,6 +1565,16 @@ Facts:
 - `TheHestonProcessReadsTheDividendCurveAtItsInstants`
 - `EachStructureAccruesNothingBeforeItsOwnDate`
 
+## PseudoSqrtEmptyMatrixTests
+
+[`Divergences/PseudoSqrtEmptyMatrixTests.cs`](../tests/NanoQL.Tests/Divergences/PseudoSqrtEmptyMatrixTests.cs)
+
+An empty matrix's pseudo square root is refused with QuantLib's master's text, "matrix must not be empty", before the decomposition reads it (#2846, f3f789067, the S-sr plan's SSR5), where QuantLib 1.44 refuses it inside the symmetric Schur decomposition with "null matrix given" (symmetricschurdecomposition.cpp:29).
+
+Facts:
+
+- `AnEmptyMatrixIsRefusedBeforeItsDecomposition`
+
 ## QuantoTermStructureDayCounterTests
 
 [`Divergences/QuantoTermStructureDayCounterTests.cs`](../tests/NanoQL.Tests/Divergences/QuantoTermStructureDayCounterTests.cs)
@@ -1539,6 +1594,17 @@ A quote is a `double`, so a quote equal to QuantLib's null sentinel, `Null<Real>
 Facts:
 
 - `AQuoteEqualToQuantLibsNullIsAValue`
+
+## RankReducedSqrtNegativeEigenvalueTests
+
+[`Divergences/RankReducedSqrtNegativeEigenvalueTests.cs`](../tests/NanoQL.Tests/Divergences/RankReducedSqrtNegativeEigenvalueTests.cs)
+
+`rankReducedSqrt` with a retained negative eigenvalue (the S-sr plan's C1 review, B1-1): QuantLib floors negative eigenvalues under `Spectral` only (`pseudosqrt.cpp:496`), so the eigenvalues `None` accepts down to −1e-16 (`:486-491`) and those of Higham's adjusted matrix, positive semi-definite only to its projections' tolerance (`:498-505`), reach `std::sqrt(eigenValues[i])` (`:531`): a NaN column, and `normalizePseudoRoot` skips every row whose norm is NaN (`:64`), leaving the others unnormalized. The port floors the root at 0. QuantLib's check: its own root at the rank that keeps the non-negative eigenvalues, with zero columns appended, bit for bit (the harness's).
+
+Facts:
+
+- `HighamsNegativeAdjustedEigenvalueGivesAZeroColumn`
+- `NonesRoundOffNegativeEigenvalueGivesAZeroColumn`
 
 ## RateHelperNullIndexTests
 
@@ -1844,6 +1910,17 @@ Facts:
 
 - `TheConvertedVolatilityComparesTheUnderlyingsType`
 
+## SquareRootProcessTruncationTests
+
+[`Divergences/SquareRootProcessTruncationTests.cs`](../tests/NanoQL.Tests/Divergences/SquareRootProcessTruncationTests.cs)
+
+`SquareRootProcess` below 0 (the S-sr plan's C1 review, B1-3): QuantLib's diffusion is σ√x (`squarerootprocess.cpp:40-42`), and its default Euler step x + a(b − x)dt + σ√x√dt·dw leaves [0, ∞), so a path that steps below 0 turns NaN for good. The port's diffusion is σ√max(x, 0), the partial truncation QuantLib's `HestonProcess` takes for its variance (`hestonprocess.cpp:350-359`), the drift on the state as it is. QuantLib's check: the Heston process's partially truncated variance step with no correlation, on the same draws.
+
+Facts:
+
+- `AStepFromANegativeStateIsHestonsPartialTruncation`
+- `AnEulerPathBelowZeroStaysFinite`
+
 ## StatePriceCacheTests
 
 [`Divergences/StatePriceCacheTests.cs`](../tests/NanoQL.Tests/Divergences/StatePriceCacheTests.cs)
@@ -1853,6 +1930,28 @@ A tree's state prices read past the rows its construction stored. QuantLib's `Tr
 Facts:
 
 - `ARowReadBeforeTheSpreadIsSetDoesntKeepItsUnspreadValues`
+
+## StatisticsUndefinedInputsTests
+
+[`Divergences/StatisticsUndefinedInputsTests.cs`](../tests/NanoQL.Tests/Divergences/StatisticsUndefinedInputsTests.cs)
+
+Inputs for which QuantLib's statistics are undefined are refused (playbook §2's undefined-path row): a NaN sample where the percentiles sort the samples with `std::sort`, whose ordering a NaN breaks (generalstatistics.hpp:247-252), with a `NanoQLException`; and fewer weights than samples given to `AddSequence`, whose loop reads past the weights' end (generalstatistics.hpp:174-179, incrementalstatistics.hpp:142-147), with an `ArgumentException` naming them. Where nothing sorts, a NaN sample is read as QuantLib reads it.
+
+Facts:
+
+- `ANaNSampleCantBeSorted`
+- `FewerWeightsThanSamplesAreRefused`
+
+## StatisticsZeroWeightTests
+
+[`Divergences/StatisticsZeroWeightTests.cs`](../tests/NanoQL.Tests/Divergences/StatisticsZeroWeightTests.cs)
+
+Where the samples a member averages weigh 0 in all, the statistics refuse (the S-sr plan's SSR6 (ix)), where QuantLib divides 0 by 0 and returns NaN: `GeneralStatistics.ExpectationValue(Func{double, double}, Func{double, bool})`, which every empirical member reads, refuses with the text QuantLib's percentile gives a set of zero weight, "empty sample set" (generalstatistics.hpp:115-133, generalstatistics.cpp:94-95); and `IncrementalStatistics`'s skewness and kurtosis refuse as its mean does, "sampleWeight_= 0, unsufficient" (incrementalstatistics.cpp:42). QuantLib's check: its own refusals.
+
+Facts:
+
+- `EveryEmpiricalMemberRefusesSamplesOfNoWeight`
+- `IncrementalSkewnessAndKurtosisRefuseSamplesOfNoWeight`
 
 ## StochasticProcessDiscretizationRefusalTests
 
@@ -1993,6 +2092,16 @@ A discrete swaption volatility structure on no option tenors, no option dates or
 Facts:
 
 - `AnEmptyGridIsRefused`
+
+## SymmetricSchurNaNSortTests
+
+[`Divergences/SymmetricSchurNaNSortTests.cs`](../tests/NanoQL.Tests/Divergences/SymmetricSchurNaNSortTests.cs)
+
+A NaN eigenvalue is refused before the eigenvalues are sorted (playbook §2's undefined-path row): QuantLib sorts the (eigenvalue, eigenvector) pairs with `std::sort` and `std::greater` (symmetricschurdecomposition.cpp:116-124), whose ordering a NaN breaks. A NaN on a diagonal whose other elements are 0 ends the Jacobi loop at once and reaches the sort; a matrix of one row sorts nothing, and keeps QuantLib's NaN.
+
+Facts:
+
+- `ANaNEigenvalueCantBeSorted`
 
 ## TelescopicValueDatesTests
 

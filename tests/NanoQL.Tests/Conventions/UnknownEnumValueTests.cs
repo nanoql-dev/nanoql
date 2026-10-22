@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System.Collections.Immutable;
-using System.Reflection;
 using NanoQL.Coupons;
 using NanoQL.Instruments;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
 using NanoQL.Time;
+using System.Collections.Immutable;
+using System.Reflection;
 
 namespace NanoQL.Tests.Conventions;
 
@@ -237,4 +237,27 @@ public class UnknownEnumValueTests
     // A calendar's constructor taking a market enum and nothing else.
     private static ConstructorInfo? MarketConstructor(Type t) =>
         t.GetConstructors().SingleOrDefault(c => c.GetParameters() is [{ Name: "market", ParameterType.IsEnum: true }]);
+
+    [Fact]
+    public void ThePseudoSquareRootsRefuseAnUnknownSalvagingAlgorithm()
+    {
+        var m = new Matrix(new[,] { { 1.0, 0.5 }, { 0.5, 1.0 } });
+        ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(
+            () => PseudoSqrtFunctions.PseudoSqrt(m, (SalvagingAlgorithmType)6));
+        Assert.Equal("sa", e.ParamName);
+        Assert.StartsWith("unknown salvaging algorithm", e.Message);
+        e = Assert.Throws<ArgumentOutOfRangeException>(
+            () => PseudoSqrtFunctions.PseudoSqrt(m, (SalvagingAlgorithmType)(-1)));
+        Assert.Equal("sa", e.ParamName);
+        foreach (SalvagingAlgorithmType sa in new[]
+                 {
+                     SalvagingAlgorithmType.Hypersphere, SalvagingAlgorithmType.LowerDiagonal, SalvagingAlgorithmType.Principal,
+                     (SalvagingAlgorithmType)6,
+                 })
+        {
+            e = Assert.Throws<ArgumentOutOfRangeException>(() => PseudoSqrtFunctions.RankReducedSqrt(m, 2, 0.9, sa));
+            Assert.Equal("sa", e.ParamName);
+            Assert.StartsWith("unknown or invalid salvaging algorithm", e.Message);
+        }
+    }
 }
