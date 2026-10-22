@@ -98,6 +98,7 @@ public sealed class VectorAssert
     /// </summary>
     public void Complete()
     {
+        WriteTally();
         foreach (VectorCase c in file.Cases)
         {
             foreach (JsonProperty output in c.Expected.EnumerateObject())
@@ -140,6 +141,22 @@ public sealed class VectorAssert
 
     private static bool IsThrows(JsonElement expected) =>
         expected.ValueKind == JsonValueKind.Object && expected.TryGetProperty("throws", out _);
+
+    // G3's bit-identical reading: with NANOQL_BITID_DIR set, the file's real outputs and those equal to the vector's
+    // bit for bit, one tally file per instance, so tests running together never write the same file.
+    private void WriteTally()
+    {
+        string? dir = Environment.GetEnvironmentVariable("NANOQL_BITID_DIR");
+        if (string.IsNullOrEmpty(dir))
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(dir);
+        string name = $"{file.Path.Replace('/', '~')}.{Guid.NewGuid():N}.tsv";
+        File.WriteAllText(
+            Path.Combine(dir, name), string.Create(CultureInfo.InvariantCulture, $"{file.Path}\t{BitIdentical}\t{Reals}\n"));
+    }
 
     private void Start(VectorCase vectorCase, string output, object? actual, Mapping? mapping)
     {

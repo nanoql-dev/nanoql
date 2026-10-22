@@ -4,15 +4,20 @@
 # REUSE-IgnoreStart
 """The coverage gate's type check, and its member line (docs/porting-playbook.md §9.5).
 
-Usage: .venv\\Scripts\\python -I tools/check-coverage.py <results folder> [--all <results folder>]
+Usage: .venv\\Scripts\\python -I tools/check-coverage.py <results folder> [--all <results folder>] [--since <commit>]
 
 Run it after the coverage runs, each of which writes one Cobertura report into its emptied results folder: the
-tagged run, and for --all the whole suite's, both from the repository root:
+tagged run, and for --all the rest of the suite's, the tests the tagged run leaves out, both from the repository root:
 
-    dotnet test --solution NanoQL.slnx -c Release --filter-trait "Oracle=QuantLib" --coverlet
-        --coverlet-output-format cobertura --results-directory TestResults\\G7
-    dotnet test --solution NanoQL.slnx -c Release --coverlet --coverlet-output-format cobertura
-        --results-directory TestResults\\G7all
+    dotnet test --solution NanoQL.slnx -c Release --filter-trait "Oracle=QuantLib" --coverage
+        --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
+        --coverage-settings tests\\NanoQL.Tests\\CodeCoverage.xml --results-directory TestResults\\G7
+    dotnet test --solution NanoQL.slnx -c Release --filter-not-trait "Oracle=QuantLib" --coverage
+        --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
+        --coverage-settings tests\\NanoQL.Tests\\CodeCoverage.xml --results-directory TestResults\\G7rest
+
+The members report reads the two reports merged, each line's hits the most either gives, so the two runs count as one
+run of the whole suite; a whole-suite report in --all's folder reads the same.
 
 The types it checks are the top-level public types of the .cs files under src/NanoQL/ that the commit adds or
 changes (the working tree against HEAD, untracked files included) and that carry an Upstream line. Report entries
@@ -21,12 +26,15 @@ match those files by path, so nested, file and compiler-generated classes count 
 Red when: the folder doesn't hold exactly one report; the commit ports a public type and the report doesn't list the
 NanoQL package; a listed type has no covered line; a ported file carries ExcludeFromCodeCoverage; a type whose only
 executable lines are its equality members lacks a "// Equality-tested:" line naming an existing test file; or, with
---all, the whole suite's folder doesn't hold exactly one report, or a NanoQL class of that report resolves to no file,
-which would leave every member unmatched and the line at 0.
-Listed apart: the types the report doesn't list, with their kinds, and the equality-only types.
+--all, its folder doesn't hold exactly one report, or a NanoQL class of that report resolves to no file, which would
+leave every member unmatched and the line at 0.
+Listed apart: the types the report doesn't list, with their kinds, and the equality-only types. A constructor the
+source doesn't declare (field and property initialisers, a primary constructor's parameters) counts as no code,
+as the coverage engines don't agree on listing one.
 
-With --all it also prints, without failing, the members no test reaches: the public members of the same files whose
-lines in the whole suite's report have no hit. A member is a report method of a class the compiler didn't generate;
+With --all it also prints, without failing, the members no test reaches: the public members of the same files, or
+with --since of the files changed since that commit (a slot's, at its last commit), whose lines no report hits.
+A member is a report method of a class the compiler didn't generate;
 a lambda, iterator or local function belongs to the member whose source span holds it, and an iterator or async
 method, whose code is all in its generated class, is named by that class. A member counts as public when its
 declaration, and every type around it, is declared public; a file type is not.
@@ -77,6 +85,15 @@ def changed_files(root):
     return sorted(paths)
 
 
+def files_since(root, commit):
+    """The .cs files under src/NanoQL/ that the working tree adds or changes against commit, committed or not."""
+    tracked = subprocess.run(["git", "-C", root, "diff", "--name-only", "--diff-filter=AMR", "-z", commit],
+                             capture_output=True, check=True).stdout.decode("utf-8").split("\0")
+    untracked = subprocess.run(["git", "-C", root, "ls-files", "--others", "--exclude-standard", "-z"],
+                               capture_output=True, check=True).stdout.decode("utf-8").split("\0")
+    return sorted({p for p in tracked + untracked if p.startswith(SRC) and p.endswith(".cs")})
+
+
 def ported_files(root):
     """Every .cs file under src/NanoQL/ that carries an Upstream line."""
     return [p for p in sources.git_files(root)
@@ -101,6 +118,41 @@ def read_report(path):
             key = os.path.normcase(os.path.normpath(found or candidates[0]))
             read_class(cls, by_file.setdefault(key, {"lines": {}, "methods": {}, "report methods": []}))
     return by_file, packages, unresolved
+
+
+def merged(first, second):
+    """Two reports' entries as one: each line's hits the most either gives; a report method's lines merged with the
+    same method's in the other report, paired by class, name, signature and occurrence, so a member either reaches
+    counts as reached, and one report's entries are its own."""
+    out = {}
+    for key in set(first) | set(second):
+        a = first.get(key, {"lines": {}, "methods": {}, "report methods": []})
+        b = second.get(key, {"lines": {}, "methods": {}, "report methods": []})
+        lines = dict(a["lines"])
+        for n, h in b["lines"].items():
+            lines[n] = max(lines.get(n, 0), h)
+        methods = {name: list(numbers) for name, numbers in a["methods"].items()}
+        for name, numbers in b["methods"].items():
+            methods.setdefault(name, []).extend(numbers)
+        report, at, seen = [], {}, {}
+        for cls, name, signature, hits in a["report methods"]:
+            k = (cls, name, signature)
+            seen[k] = seen.get(k, 0) + 1
+            at[(k, seen[k])] = len(report)
+            report.append((cls, name, signature, dict(hits)))
+        seen = {}
+        for cls, name, signature, hits in b["report methods"]:
+            k = (cls, name, signature)
+            seen[k] = seen.get(k, 0) + 1
+            i = at.get((k, seen[k]))
+            if i is None:
+                report.append((cls, name, signature, dict(hits)))
+                continue
+            mine = report[i][3]
+            for n, h in hits.items():
+                mine[n] = max(mine.get(n, 0), h)
+        out[key] = {"lines": lines, "methods": methods, "report methods": report}
+    return out
 
 
 def read_class(cls, entry):
@@ -406,6 +458,17 @@ def attribute(decls, name, lines):
     return None
 
 
+def implicit_lines(text, entry):
+    """A file's lines that only constructors its source doesn't declare hold: field and property initialisers, a
+    primary constructor's parameters. Microsoft's coverage lists such a constructor and Coverlet's doesn't; they count
+    as no executable line, so a type's code is what its source declares, whichever engine reports it."""
+    found = [(name, lines) for _, name, _, lines in entry["report methods"] if name in (".ctor", ".cctor") and lines]
+    if not found:
+        return set()
+    decls = declarations(text)
+    return {n for name, lines in found if attribute(decls, name, lines) is None for n in lines}
+
+
 def shown(cls):
     """A report class's name without its namespace, nested names joined by dots: Calendar.WesternImpl."""
     outer, *nested = cls.split("/")
@@ -446,14 +509,15 @@ def unreached_members(root, paths, by_file):
     return sorted(listed)
 
 
-def check(root, results, commit_files, all_files, whole=None):
-    """Returns (errors, lines of the report); with whole, the whole suite's results folder, the member line too."""
+def check(root, results, commit_files, all_files, whole=None, member_files=None):
+    """Returns (errors, lines of the report); with whole, the rest of the suite's results folder (or the whole
+    suite's), the member line too, over member_files, the commit's files by default."""
     errors, out = [], []
     reports = sorted(glob.glob(os.path.join(results, "**", "*.cobertura*.xml"), recursive=True))
     if len(reports) != 1:
         return [f"the results folder holds {len(reports)} Cobertura reports, not exactly one"], out
     by_file, packages, unresolved = read_report(reports[0])
-    # Coverlet lists every class of the instrumented module, so in a healthy run every NanoQL entry resolves to a
+    # The engine lists every class of the instrumented module, so in a healthy run every NanoQL entry resolves to a
     # file; one that doesn't means the report's paths don't match the repository's, and no type could be matched.
     for cls in unresolved:
         errors.append(f"the report's class {cls} resolves to no file under its <source> roots")
@@ -473,13 +537,15 @@ def check(root, results, commit_files, all_files, whole=None):
             if record and "ExcludeFromCodeCoverage" in header.text:
                 errors.append(f"{path}: carries ExcludeFromCodeCoverage")
             entry = by_file.get(os.path.normcase(os.path.normpath(full)))
-            if entry is None or not entry["lines"]:
+            implicit = implicit_lines(header.text, entry) if entry is not None else set()
+            lines = {} if entry is None else {n: h for n, h in entry["lines"].items() if n not in implicit}
+            if not lines:
                 apart.append(f"{name} ({kind})")
                 continue
-            lines_valid += len(entry["lines"])
-            covered = sum(1 for h in entry["lines"].values() if h > 0)
+            lines_valid += len(lines)
+            covered = sum(1 for h in lines.values() if h > 0)
             lines_covered += covered
-            with_lines = {m for m, numbers in entry["methods"].items() if numbers}
+            with_lines = {m for m, numbers in entry["methods"].items() if set(numbers) - implicit}
             if with_lines and with_lines <= EQUALITY:
                 tested = header.equality_tested
                 if tested and os.path.isfile(os.path.join(root, tested)):
@@ -509,15 +575,17 @@ def check(root, results, commit_files, all_files, whole=None):
     out.append(f"every ported file: types {tc2}/{t2}; lines {lc2}/{lv2}; "
                f"listed apart {len(apart2)} not in the report, {len(eq2)} equality only")
     if whole is not None:
-        # The whole suite's report only informs: a member no test reaches is listed, never red.
+        # The members report only informs: a member no test reaches is listed, never red. It reads the tagged report
+        # merged with --all's, the rest of the suite's (or the whole suite's), as one run of the whole suite.
         wholes = sorted(glob.glob(os.path.join(whole, "**", "*.cobertura*.xml"), recursive=True))
         if len(wholes) != 1:
-            errors.append(f"the whole suite's results folder holds {len(wholes)} Cobertura reports, not exactly one")
+            errors.append(f"the --all results folder holds {len(wholes)} Cobertura reports, not exactly one")
         else:
-            whole_by_file, _, whole_unresolved = read_report(wholes[0])
-            for cls in whole_unresolved:
-                errors.append(f"the whole suite's report's class {cls} resolves to no file under its <source> roots")
-            members = unreached_members(root, commit_files, whole_by_file)
+            rest_by_file, _, rest_unresolved = read_report(wholes[0])
+            for cls in rest_unresolved:
+                errors.append(f"the --all report's class {cls} resolves to no file under its <source> roots")
+            members = unreached_members(root, commit_files if member_files is None else member_files,
+                                        merged(by_file, rest_by_file))
             out.append(f"members no test reaches: {len(members)}" + "".join(f"\n    {m}" for m in members))
     return errors, out
 
@@ -530,12 +598,20 @@ def main(argv):
             print(__doc__)
             return 2
         whole, argv = argv[k + 1], argv[:k] + argv[k + 2:]
+    since = None
+    if "--since" in argv:
+        k = argv.index("--since")
+        if k + 1 >= len(argv) or argv[k + 1].startswith("--"):
+            print(__doc__)
+            return 2
+        since, argv = argv[k + 1], argv[:k] + argv[k + 2:]
     args = [a for a in argv if not a.startswith("--")]
     if len(args) != 1:
         print(__doc__)
         return 2
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    errors, out = check(root, args[0], changed_files(root), ported_files(root), whole)
+    errors, out = check(root, args[0], changed_files(root), ported_files(root), whole,
+                        None if since is None else files_since(root, since))
     print("\n".join(out))
     for e in errors:
         print("RED " + e)

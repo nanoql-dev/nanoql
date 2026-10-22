@@ -12,8 +12,9 @@
 
   <ItemGroup>
     <PackageReference Include="xunit.v3" Version="4.0.2" />
-    <!-- The coverage gate's engine: Coverlet's Microsoft.Testing.Platform extension. -->
-    <PackageReference Include="coverlet.MTP" Version="10.1.0" />
+    <!-- The coverage gate's engine: Microsoft's code coverage for Microsoft.Testing.Platform, its settings in
+         CodeCoverage.xml beside this file. -->
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
   </ItemGroup>
 
   <ItemGroup>
