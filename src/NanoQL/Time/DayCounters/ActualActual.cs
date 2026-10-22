@@ -20,6 +20,13 @@ namespace NanoQL.Time;
 /// <para>
 /// For more details, refer to https://www.isda.org/a/pIJEE/The-Actual-Actual-Day-Count-Fraction-1999.pdf
 /// </para>
+/// <para>
+/// With the ISMA or Bond convention and a schedule, the counts read the schedule's period dates, quasi-coupon dates
+/// included, which the day counter derives once, at construction; two such day counters are equal when they derive
+/// the same dates, and one with a schedule never equals one without, where QuantLib compares their names alone. A
+/// schedule built from dates alone can't be derived from (its tenor and end-of-month flag aren't available): the
+/// counts then refuse it, as QuantLib's do, and two such day counters are equal when their schedules' dates are.
+/// </para>
 /// </remarks>
 public sealed class ActualActual : DayCounter
 {
@@ -41,6 +48,19 @@ public sealed class ActualActual : DayCounter
     /// <inheritdoc/>
     public override string Name => impl.Name;
 
+    /// <summary>
+    /// Whether the day counter equals another: the same name and, with the ISMA or Bond convention and a schedule, the
+    /// same period dates.
+    /// </summary>
+    /// <param name="other">The other day counter.</param>
+    /// <returns><see langword="true"/> when equal.</returns>
+    public override bool Equals(DayCounter? other) =>
+        other is ActualActual a && base.Equals(a) && (ReferenceEquals(this, a) || SameData(impl, a.impl));
+
+    /// <inheritdoc/>
+    public override int GetHashCode() =>
+        impl is ISMAImpl isma ? HashCode.Combine(base.GetHashCode(), isma.DataHash()) : base.GetHashCode();
+
     /// <inheritdoc/>
     /// <exception cref="ArgumentException">
     /// Under the ISMA and Bond conventions with a schedule, the dates are out of the schedule's range; without a
@@ -51,6 +71,15 @@ public sealed class ActualActual : DayCounter
         RequireDates(d1, d2, refPeriodStart, refPeriodEnd);
         return impl.YearFraction(d1, d2, refPeriodStart, refPeriodEnd);
     }
+
+    // An ISMA implementation with a schedule equals only another with the same data; the other implementations hold
+    // none beyond their names.
+    private static bool SameData(Impl a, Impl b) => (a, b) switch
+    {
+        (ISMAImpl x, ISMAImpl y) => x.SameData(y),
+        (ISMAImpl, _) or (_, ISMAImpl) => false,
+        _ => true,
+    };
 
     private static Impl Implementation(ActualActualConvention c, Schedule? schedule)
     {
@@ -93,12 +122,51 @@ public sealed class ActualActual : DayCounter
     {
         private readonly Schedule schedule;
 
+        // The period dates the counts read, derived once; null where the derivation refuses the schedule (one built
+        // from dates alone), so a count derives them again and refuses where QuantLib's does.
+        private readonly List<Date>? couponDates;
+
         public ISMAImpl(Schedule schedule)
         {
             this.schedule = schedule;
+            try
+            {
+                couponDates = ActualActualHelpers.GetListOfPeriodDatesIncludingQuasiPayments(schedule);
+            }
+            catch (Exception e) when (e is NanoQLException or ArgumentException)
+            {
+                couponDates = null;
+            }
         }
 
         public override string Name => "Actual/Actual (ISMA)";
+
+        // Equal when both derived the same dates, or both were refused over schedules with the same dates; a derived
+        // one never equals a refused one, which keeps the equality transitive.
+        public bool SameData(ISMAImpl other) =>
+            couponDates is not null
+                ? other.couponDates is not null && couponDates.SequenceEqual(other.couponDates)
+                : other.couponDates is null && schedule.Dates.SequenceEqual(other.schedule.Dates);
+
+        public int DataHash()
+        {
+            var hash = default(HashCode);
+            if (couponDates is not null)
+            {
+                hash.Add(couponDates.Count);
+                hash.Add(couponDates[0]);
+                hash.Add(couponDates[^1]);
+            }
+            else
+            {
+                hash.Add(-1);
+                hash.Add(schedule.Dates.Length);
+                hash.Add(schedule.Dates[0]);
+                hash.Add(schedule.Dates[^1]);
+            }
+
+            return hash.ToHashCode();
+        }
 
         public override double YearFraction(Date d1, Date d2, Date? d3, Date? d4)
         {
@@ -111,7 +179,8 @@ public sealed class ActualActual : DayCounter
                 return -YearFraction(d2, d1, d3, d4);
             }
 
-            List<Date> couponDates = ActualActualHelpers.GetListOfPeriodDatesIncludingQuasiPayments(schedule);
+            List<Date> couponDates =
+                this.couponDates ?? ActualActualHelpers.GetListOfPeriodDatesIncludingQuasiPayments(schedule);
 
             Date firstDate = couponDates.Min();
             Date lastDate = couponDates.Max();
@@ -377,12 +446,16 @@ file static class ActualActualHelpers
         {
             Date firstCoupon = schedule.Date(1);
 
+            // MSVC, which built the wheel, evaluates advance's arguments last to first, so a schedule built from dates
+            // alone is refused for its end-of-month flag before its tenor; so here.
+            bool endOfMonth = schedule.EndOfMonth();
+            Period tenor = schedule.Tenor();
             Date notionalFirstCoupon =
                 calendar.Advance(
                     firstCoupon,
-                    -schedule.Tenor(),
+                    -tenor,
                     schedule.BusinessDayConvention,
-                    schedule.EndOfMonth());
+                    endOfMonth);
 
             newDates[0] = notionalFirstCoupon;
 
@@ -392,21 +465,24 @@ file static class ActualActualHelpers
                 Date priorNotionalCoupon =
                     calendar.Advance(
                         notionalFirstCoupon,
-                        -schedule.Tenor(),
+                        -tenor,
                         schedule.BusinessDayConvention,
-                        schedule.EndOfMonth());
+                        endOfMonth);
                 newDates.Insert(0, priorNotionalCoupon); // insert as the first element?
             }
         }
 
         if (!schedule.HasIsRegular || !schedule.IsRegular(schedule.Size - 1))
         {
+            // in MSVC's order, as above
+            bool endOfMonth = schedule.EndOfMonth();
+            Period tenor = schedule.Tenor();
             Date notionalLastCoupon =
                 calendar.Advance(
                     schedule.Date(schedule.Size - 2),
-                    schedule.Tenor(),
+                    tenor,
                     schedule.BusinessDayConvention,
-                    schedule.EndOfMonth());
+                    endOfMonth);
 
             // As in QuantLib, this index is the schedule's, also after an insertion above.
             newDates[schedule.Size - 1] = notionalLastCoupon;
@@ -416,9 +492,9 @@ file static class ActualActualHelpers
                 Date nextNotionalCoupon =
                     calendar.Advance(
                         notionalLastCoupon,
-                        schedule.Tenor(),
+                        tenor,
                         schedule.BusinessDayConvention,
-                        schedule.EndOfMonth());
+                        endOfMonth);
                 newDates.Add(nextNotionalCoupon);
             }
         }

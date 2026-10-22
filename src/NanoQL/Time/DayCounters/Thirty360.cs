@@ -40,6 +40,10 @@ namespace NanoQL.Time;
 /// ending date is the 31st of a month and the starting date is earlier than the 30th of a month, the ending date
 /// becomes equal to the 1st of the next month, otherwise the ending date becomes equal to the 30th of the same month.
 /// </para>
+/// <para>
+/// With the ISDA and German conventions, two day counters are equal only when their termination dates are, where
+/// QuantLib compares their names alone: the termination date changes the counts.
+/// </para>
 /// </remarks>
 public sealed class Thirty360 : DayCounter
 {
@@ -66,6 +70,21 @@ public sealed class Thirty360 : DayCounter
 
     /// <inheritdoc/>
     public override string Name => impl.Name;
+
+    /// <summary>
+    /// Whether the day counter equals another: the same name and, with the ISDA or German convention, the same
+    /// termination date.
+    /// </summary>
+    /// <param name="other">The other day counter.</param>
+    /// <returns><see langword="true"/> when equal.</returns>
+    public override bool Equals(DayCounter? other) =>
+        other is Thirty360 t && base.Equals(t) && TerminationDate(impl) == TerminationDate(t.impl);
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), TerminationDate(impl));
+
+    // The termination date the ISDA implementation reads; null for the others, which read none.
+    private static Date? TerminationDate(Thirty360Impl impl) => impl is ISDAImpl isda ? isda.TerminationDate : null;
 
     /// <inheritdoc/>
     public override int DayCount(Date d1, Date d2) => impl.DayCount(d1, d2);
@@ -238,6 +257,8 @@ public sealed class Thirty360 : DayCounter
         }
 
         public override string Name => "30E/360 (ISDA)";
+
+        public Date? TerminationDate => terminationDate;
 
         public override int DayCount(Date d1, Date d2)
         {

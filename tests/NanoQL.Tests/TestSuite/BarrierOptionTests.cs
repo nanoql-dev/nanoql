@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/barrieroption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testParity's Business252 check, which waits for B2.2's Business252 day counter; testHaugValues' binomial checks, which wait for B4.6's BinomialBarrierEngine; testBabsiriValues' and testBeagleholeValues' Monte Carlo checks, which wait for B4.6's MCBarrierEngine; testDividendBarrierOption's and testDividendBarrierOptionWithDividendsPastMaturity's Heston checks, which wait for batch 4's FdHestonBarrierEngine; testLocalVolAndHestonComparison, which waits for batch 4's local volatility and Heston barrier engines; testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast and testPerturbativeOrder2FullResolution, which wait for batch 4's PerturbativeBarrierOptionEngine
+// Partial: testHaugValues' binomial checks, which wait for B4.6's BinomialBarrierEngine; testBabsiriValues' and testBeagleholeValues' Monte Carlo checks, which wait for B4.6's MCBarrierEngine; testDividendBarrierOption's and testDividendBarrierOptionWithDividendsPastMaturity's Heston checks, which wait for batch 4's FdHestonBarrierEngine; testLocalVolAndHestonComparison, which waits for batch 4's local volatility and Heston barrier engines; testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast and testPerturbativeOrder2FullResolution, which wait for batch 4's PerturbativeBarrierOptionEngine
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -66,7 +66,19 @@ public class BarrierOptionTests
             $"Failed to replicate European option: knock-in {knockInNpv}, knock-out {knockOutNpv}, "
             + $"replicated {replicated}, expected {expected}, error {error:E3}");
 
-        // try again with different day counters: waits for B2.2's Business252 day counter
+        // try again with different day counters
+        stochProcess = BlackScholesProcess.Create(
+            spot, rTS, FlatVol(today, 0.20, new Business252(new TARGET())), RunnerContext);
+
+        knockInNpv = AnalyticBarrierEngine.Calculate(knockIn, RunnerContext, stochProcess).NPV!.Value;
+        knockOutNpv = AnalyticBarrierEngine.Calculate(knockOut, RunnerContext, stochProcess).NPV!.Value;
+        replicated = knockInNpv + knockOutNpv;
+        expected = AnalyticEuropeanEngine.Calculate(european, RunnerContext, stochProcess).NPV!.Value;
+        error = Math.Abs(replicated - expected);
+        Assert.True(
+            error <= 1e-7,
+            $"Failed to replicate European option: knock-in {knockInNpv}, knock-out {knockOutNpv}, "
+            + $"replicated {replicated}, expected {expected}, error {error:E3}");
     }
 
     [Fact]

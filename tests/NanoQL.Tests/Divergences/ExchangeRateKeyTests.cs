@@ -62,4 +62,34 @@ public class ExchangeRateKeyTests
         Assert.Equal(1.0 / 66500.0, rates.Lookup(usd, Btc, context, type: ExchangeRateType.Direct).Rate);
         Assert.Equal(25.4, rates.Lookup(Btc, Eth, context, type: ExchangeRateType.Direct).Rate);
     }
+
+    [Fact]
+    public void QuantLibsBitcoinIsLookedUpBothWaysAndThroughAChain()
+    {
+        var context = new EvaluationContext { EvaluationDate = new Date(21, Month.October, 2026) };
+        Currency btc = new BTCCurrency(), usd = new USDCurrency(), eur = new EURCurrency();
+        Assert.Equal(10000, btc.NumericCode);
+        ExchangeRates rates = ExchangeRates.Default
+            .Add(new ExchangeRate(btc, usd, 66500.0))
+            .Add(new ExchangeRate(eur, usd, 1.0856));
+
+        // QuantLib's own: the stored rate, both ways
+        ExchangeRate btcUsd = rates.Lookup(btc, usd, context);
+        Assert.Equal(btc, btcUsd.Source);
+        Assert.Equal(66500.0, btcUsd.Rate);
+        ExchangeRate usdBtc = rates.Lookup(usd, btc, context);
+        Assert.Equal(btc, usdBtc.Source);
+        Assert.Equal(66500.0, usdBtc.Rate);
+
+        // QuantLib: "no conversion available from BTC to EUR for October 21st, 2026"
+        ExchangeRate btcEur = rates.Lookup(btc, eur, context);
+        Assert.Equal(ExchangeRateType.Derived, btcEur.Type);
+        Money inEur = btcEur.Exchange(new Money(1.0, btc));
+        Assert.Equal(eur, inEur.Currency);
+        Assert.Equal(66500.0 / 1.0856, inEur.Value, 1e-9);
+
+        // QuantLib's own: EUR to BTC chains, at 1.6324812030075185e-05
+        ExchangeRate eurBtc = rates.Lookup(eur, btc, context);
+        Assert.Equal(1.6324812030075185e-05, eurBtc.Rate);
+    }
 }

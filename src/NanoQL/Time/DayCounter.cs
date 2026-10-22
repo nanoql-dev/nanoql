@@ -11,18 +11,25 @@ namespace NanoQL.Time;
 /// A day counter: the length of a period by a market convention, as a number of days and as a year fraction.
 /// </summary>
 /// <remarks>
-/// Day counters are equal when their names are, as in QuantLib. QuantLib's empty day counter, <c>DayCounter()</c>, is
-/// <see langword="null"/>.
+/// <para>
+/// Two day counters are equal when they are of the same type and have the same name; one whose counts read data its
+/// name leaves out compares that data too: <see cref="Business252"/> its calendar, as calendars compare,
+/// <see cref="ActualActual"/> with the ISMA or Bond convention the period dates of its schedule, and
+/// <see cref="Thirty360"/> with the ISDA convention its termination date. QuantLib compares names alone
+/// (<c>daycounter.hpp:135-138</c>), which is sound there only where a name fixes the counts. Comparing the runtime
+/// types keeps equality symmetric when a derived day counter compares more than this does.
+/// </para>
+/// <para>QuantLib's empty day counter, <c>DayCounter()</c>, is <see langword="null"/>.</para>
 /// </remarks>
 public abstract class DayCounter : IEquatable<DayCounter>
 {
     /// <summary>Gets the day counter's name, used for output and comparison; not meant for switch-on-type code.</summary>
     public abstract string Name { get; }
 
-    /// <summary>Whether two day counters are equal, by name.</summary>
+    /// <summary>Whether two day counters are equal: the same type, name and the data their counts read.</summary>
     /// <param name="d1">The first day counter.</param>
     /// <param name="d2">The second day counter.</param>
-    /// <returns><see langword="true"/> when the names are equal, or both are <see langword="null"/>.</returns>
+    /// <returns><see langword="true"/> when equal, or both are <see langword="null"/>.</returns>
     public static bool operator ==(DayCounter? d1, DayCounter? d2) => d1 is null ? d2 is null : d1.Equals(d2);
 
     /// <summary>Whether two day counters differ.</summary>
@@ -63,16 +70,19 @@ public abstract class DayCounter : IEquatable<DayCounter>
         Date.ThrowIfDefault(refPeriodEnd, nameof(refPeriodEnd));
     }
 
-    /// <summary>Whether the day counter has the same name as another.</summary>
+    /// <summary>Whether the day counter is of the same type and has the same name as another.</summary>
     /// <param name="other">The other day counter.</param>
-    /// <returns><see langword="true"/> when the names are equal.</returns>
-    public bool Equals(DayCounter? other) => other is not null && Name == other.Name;
+    /// <returns><see langword="true"/> when equal.</returns>
+    /// <remarks>A day counter whose counts read data its name leaves out overrides this to compare that data
+    /// too.</remarks>
+    public virtual bool Equals(DayCounter? other) =>
+        other is not null && (ReferenceEquals(this, other) || (GetType() == other.GetType() && Name == other.Name));
 
     /// <inheritdoc/>
     public sealed override bool Equals(object? obj) => Equals(obj as DayCounter);
 
     /// <inheritdoc/>
-    public sealed override int GetHashCode() => Name.GetHashCode(StringComparison.Ordinal);
+    public override int GetHashCode() => Name.GetHashCode(StringComparison.Ordinal);
 
     /// <summary>The day counter's name.</summary>
     /// <returns>The name.</returns>

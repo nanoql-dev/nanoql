@@ -9,10 +9,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/dates.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, isoDates, parseDates, intraday
-// Replaced: nullDate (Divergences/NullDateTests.cs)
+// Not ported: intraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out)
+// Replaced: nullDate (Divergences/NullDateTests.cs); parseDates (Conventions/DateParserFormatTests.cs)
 
 using NanoQL.Time;
+using NanoQL.Utilities;
 
 namespace NanoQL.Tests.TestSuite;
 
@@ -22,6 +23,109 @@ public class DatesTests
     // The evaluation date QuantLib's test runner sets globally (playbook section 9.2): the IMM and ASX functions take
     // the context, and read it only for a null date, which these cases never pass.
     private static readonly EvaluationContext RunnerContext = new() { EvaluationDate = new Date(16, Month.September, 2015) };
+
+    [Fact]
+    public void EcbIsECBcode()
+    {
+        // Testing ECB codes for validity...
+        Assert.True(ECB.IsECBcode("JAN00"));
+        Assert.True(ECB.IsECBcode("FEB78"));
+        Assert.True(ECB.IsECBcode("mar58"));
+        Assert.True(ECB.IsECBcode("aPr99"));
+
+        Assert.False(ECB.IsECBcode(""));
+        Assert.False(ECB.IsECBcode("JUNE99"));
+        Assert.False(ECB.IsECBcode("JUN1999"));
+        Assert.False(ECB.IsECBcode("JUNE"));
+        Assert.False(ECB.IsECBcode("JUNE1999"));
+        Assert.False(ECB.IsECBcode("1999"));
+    }
+
+    // QuantLib's static set is ECB.Default here, and its addDate and removeDate return new values.
+    [Fact]
+    public void EcbDates()
+    {
+        // Testing ECB dates...
+        ECB ecb = ECB.Default;
+        var knownDates = ecb.KnownDates;
+        Assert.False(knownDates.IsEmpty, "empty ECB date vector");
+
+        int n = ecb.NextDates(RunnerContext, Date.MinDate).Length;
+        Assert.True(n == knownDates.Count, $"nextDates(minDate) returns {n} instead of {knownDates.Count} dates");
+
+        Date previousEcbDate = Date.MinDate;
+        foreach (Date currentEcbDate in knownDates)
+        {
+            if (!ecb.IsECBdate(currentEcbDate))
+            {
+                Assert.Fail($"{currentEcbDate} fails isECBdate check");
+            }
+
+            Date ecbDateMinusOne = currentEcbDate - 1;
+            if (ecb.IsECBdate(ecbDateMinusOne))
+            {
+                Assert.Fail($"{ecbDateMinusOne} fails isECBdate check");
+            }
+
+            if (ecb.NextDate(RunnerContext, ecbDateMinusOne) != currentEcbDate)
+            {
+                Assert.Fail($"next ECB date following {ecbDateMinusOne} must be {currentEcbDate}");
+            }
+
+            if (ecb.NextDate(RunnerContext, previousEcbDate) != currentEcbDate)
+            {
+                Assert.Fail($"next ECB date following {previousEcbDate} must be {currentEcbDate}");
+            }
+
+            previousEcbDate = currentEcbDate;
+        }
+
+        Date knownDate = knownDates.Min;
+        ECB removed = ecb.RemoveDate(knownDate);
+        Assert.False(removed.IsECBdate(knownDate), "unable to remove an ECB date");
+        ECB added = removed.AddDate(knownDate);
+        Assert.True(added.IsECBdate(knownDate), "unable to add an ECB date");
+    }
+
+    [Fact]
+    public void EcbGetDateFromCode()
+    {
+        // Testing conversion of ECB codes to dates...
+        ECB ecb = ECB.Default;
+        var ref2000 = new Date(1, Month.January, 2000);
+        Assert.Equal(new Date(19, Month.January, 2005), ecb.Date("JAN05", RunnerContext, ref2000));
+        Assert.Equal(new Date(8, Month.February, 2006), ecb.Date("FEB06", RunnerContext, ref2000));
+        Assert.Equal(new Date(14, Month.March, 2007), ecb.Date("MAR07", RunnerContext, ref2000));
+        Assert.Equal(new Date(16, Month.April, 2008), ecb.Date("APR08", RunnerContext, ref2000));
+        Assert.Equal(new Date(10, Month.June, 2009), ecb.Date("JUN09", RunnerContext, ref2000));
+        Assert.Equal(new Date(14, Month.July, 2010), ecb.Date("JUL10", RunnerContext));
+        Assert.Equal(new Date(10, Month.August, 2011), ecb.Date("AUG11", RunnerContext));
+        Assert.Equal(new Date(12, Month.September, 2012), ecb.Date("SEP12", RunnerContext));
+        Assert.Equal(new Date(9, Month.October, 2013), ecb.Date("OCT13", RunnerContext));
+        Assert.Equal(new Date(12, Month.November, 2014), ecb.Date("NOV14", RunnerContext));
+        Assert.Equal(new Date(9, Month.December, 2015), ecb.Date("DEC15", RunnerContext));
+    }
+
+    [Fact]
+    public void EcbGetCodeFromDate()
+    {
+        // Testing creation of ECB code from a given date...
+        ECB ecb = ECB.Default;
+        Assert.Equal("JAN06", ecb.Code(new Date(18, Month.January, 2006)));
+        Assert.Equal("MAR10", ecb.Code(new Date(10, Month.March, 2010)));
+        Assert.Equal("NOV17", ecb.Code(new Date(1, Month.November, 2017)));
+    }
+
+    [Fact]
+    public void EcbNextCode()
+    {
+        // Testing calculation of the next ECB code from a given code...
+        Assert.Equal("FEB06", ECB.NextCode("JAN06"));
+        Assert.Equal("MAR10", ECB.NextCode("FeB10"));
+        Assert.Equal("NOV17", ECB.NextCode("OCT17"));
+        Assert.Equal("JAN18", ECB.NextCode("dEC17"));
+        Assert.Equal("JAN00", ECB.NextCode("dec99"));
+    }
 
     [Fact]
     public void ImmDates()
@@ -281,6 +385,20 @@ public class DatesTests
             {
                 Assert.Fail($"inconsistent serial number:\n    date:          {t}\n    serial number: {i}\n    cloned date:   {s}\n    serial number: {serial}");
             }
+        }
+    }
+
+    [Fact]
+    public void IsoDates()
+    {
+        // Testing ISO dates...
+        string inputDate = "2006-01-15";
+        Date d = DateParser.ParseISO(inputDate);
+        if (d.DayOfMonth != 15 || d.Month != Month.January || d.Year != 2006)
+        {
+            Assert.Fail(
+                $"Iso date failed\n input date:    {inputDate}\n day of month:  {d.DayOfMonth}\n"
+                + $" month:         {d.Month}\n year:          {d.Year}");
         }
     }
 

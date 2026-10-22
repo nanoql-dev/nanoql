@@ -13,7 +13,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/calendars.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia
+// Partial: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testTASECalendar, testSHIRCalendar, testTelborCalendar, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia
+// Not ported: testIntradayAddHolidays (QL_HIGH_RESOLUTION_DATE, which the default build leaves out)
 
 using System.Collections.Immutable;
 using NanoQL.Time;
@@ -593,6 +594,50 @@ public class CalendarsTests
     }
 
     [Fact]
+    public void TestBrazil()
+    {
+        // Testing Brazil holiday list...
+        Date[] expectedHol =
+        [
+            // {1,January,2005}, // Saturday
+            new(7, February, 2005),
+            new(8, February, 2005),
+            new(25, March, 2005),
+            new(21, April, 2005),
+
+            // {1,May,2005}, // Sunday
+            new(26, May, 2005),
+            new(7, September, 2005),
+            new(12, October, 2005),
+            new(2, November, 2005),
+            new(15, November, 2005),
+
+            // {25,December,2005}, // Sunday
+
+            // {1,January,2006}, // Sunday
+            new(27, February, 2006),
+            new(28, February, 2006),
+            new(14, April, 2006),
+            new(21, April, 2006),
+            new(1, May, 2006),
+            new(15, June, 2006),
+            new(7, September, 2006),
+            new(12, October, 2006),
+            new(2, November, 2006),
+            new(15, November, 2006),
+            new(25, December, 2006),
+        ];
+
+        Calendar settlement = new Brazil(BrazilMarket.Settlement);
+        CheckHolidays(settlement.HolidayList(new Date(1, January, 2005), new Date(31, December, 2006)), expectedHol);
+
+        Calendar exchange = new Brazil(BrazilMarket.Exchange);
+        Date christmasEve = new(24, December, 2024);
+        Assert.True(settlement.IsBusinessDay(christmasEve));
+        Assert.True(exchange.IsHoliday(christmasEve));
+    }
+
+    [Fact]
     public void TestTurkeyCalendar()
     {
         Calendar calendar = new Turkey();
@@ -798,6 +843,144 @@ public class CalendarsTests
 
             counter = counter + 1;
         }
+    }
+
+    [Fact]
+    public void TestBusinessDaysBetween()
+    {
+        // Testing calculation of business days between dates...
+        Date[] testDates =
+        [
+            new(1, February, 2002), // isBusinessDay = true
+            new(4, February, 2002), // isBusinessDay = true
+            new(16, May, 2003), // isBusinessDay = true
+            new(17, December, 2003), // isBusinessDay = true
+            new(17, December, 2004), // isBusinessDay = true
+            new(19, December, 2005), // isBusinessDay = true
+            new(2, January, 2006), // isBusinessDay = true
+            new(13, March, 2006), // isBusinessDay = true
+            new(15, May, 2006), // isBusinessDay = true
+            new(17, March, 2006), // isBusinessDay = true
+            new(15, May, 2006), // isBusinessDay = true
+            new(26, July, 2006), // isBusinessDay = true
+            new(26, July, 2006), // isBusinessDay = true
+            new(27, July, 2006), // isBusinessDay = true
+            new(29, July, 2006), // isBusinessDay = false
+            new(29, July, 2006), // isBusinessDay = false
+        ];
+
+        // default params: from date included, to excluded
+        int[] expected = [1, 321, 152, 251, 252, 10, 48, 42, -38, 38, 51, 0, 1, 2, 0];
+
+        // exclude from, include to
+        int[] expectedIncludeTo = [1, 321, 152, 251, 252, 10, 48, 42, -38, 38, 51, 0, 1, 1, 0];
+
+        // include both from and to
+        int[] expectedIncludeAll = [2, 322, 153, 252, 253, 11, 49, 43, -39, 39, 52, 1, 2, 2, 0];
+
+        // exclude both from and to
+        int[] expectedExcludeAll = [0, 320, 151, 250, 251, 9, 47, 41, -37, 37, 50, 0, 0, 1, 0];
+
+        Calendar calendar = new Brazil();
+
+        for (int i = 1; i < testDates.Length; i++)
+        {
+            int calculated = calendar.BusinessDaysBetween(testDates[i - 1], testDates[i], true, false);
+            Assert.True(
+                calculated == expected[i - 1],
+                $"from {testDates[i - 1]} included to {testDates[i]} excluded:\n"
+                + $"    calculated: {calculated}\n    expected:   {expected[i - 1]}");
+
+            calculated = calendar.BusinessDaysBetween(testDates[i - 1], testDates[i], false, true);
+            Assert.True(
+                calculated == expectedIncludeTo[i - 1],
+                $"from {testDates[i - 1]} excluded to {testDates[i]} included:\n"
+                + $"    calculated: {calculated}\n    expected:   {expectedIncludeTo[i - 1]}");
+
+            calculated = calendar.BusinessDaysBetween(testDates[i - 1], testDates[i], true, true);
+            Assert.True(
+                calculated == expectedIncludeAll[i - 1],
+                $"from {testDates[i - 1]} included to {testDates[i]} included:\n"
+                + $"    calculated: {calculated}\n    expected:   {expectedIncludeAll[i - 1]}");
+
+            calculated = calendar.BusinessDaysBetween(testDates[i - 1], testDates[i], false, false);
+            Assert.True(
+                calculated == expectedExcludeAll[i - 1],
+                $"from {testDates[i - 1]} excluded to {testDates[i]} excluded:\n"
+                + $"    calculated: {calculated}\n    expected:   {expectedExcludeAll[i - 1]}");
+        }
+    }
+
+    // Adapted: a bespoke calendar's edits return a modified copy, so a2, QuantLib's copy "linked to a1" (line 3973),
+    // is a1 with the edits made through it, and a1 doesn't see them. Kept: every check of a1 before the copy and of a2
+    // after each edit. Dropped: lines 3977-3984 and 3997-4004, which check that a1 sees a2's edits;
+    // Conventions/BespokeCalendarValueTests.cs tests nanoql's behaviour in their place.
+    [Fact]
+    public void TestBespokeCalendars()
+    {
+        // Testing bespoke calendars...
+        var a1 = new BespokeCalendar();
+        var b1 = new BespokeCalendar();
+
+        Date testDate1 = new(4, October, 2008); // Saturday
+        Date testDate2 = new(5, October, 2008); // Sunday
+        Date testDate3 = new(6, October, 2008); // Monday
+        Date testDate4 = new(7, October, 2008); // Tuesday
+
+        CheckBusinessDay(a1, testDate1);
+        CheckBusinessDay(a1, testDate2);
+        CheckBusinessDay(a1, testDate3);
+        CheckBusinessDay(a1, testDate4);
+
+        CheckBusinessDay(b1, testDate1);
+        CheckBusinessDay(b1, testDate2);
+        CheckBusinessDay(b1, testDate3);
+        CheckBusinessDay(b1, testDate4);
+
+        a1 = a1.AddWeekend(Weekday.Sunday);
+
+        CheckBusinessDay(a1, testDate1);
+        CheckHoliday(a1, testDate2, "(Sunday) not detected as weekend");
+        CheckBusinessDay(a1, testDate3);
+        CheckBusinessDay(a1, testDate4);
+
+        CheckBusinessDay(b1, testDate1);
+        CheckBusinessDay(b1, testDate2);
+        CheckBusinessDay(b1, testDate3);
+        CheckBusinessDay(b1, testDate4);
+
+        a1 = (BespokeCalendar)a1.AddHoliday(testDate3);
+
+        CheckBusinessDay(a1, testDate1);
+        CheckHoliday(a1, testDate2, "(Sunday) not detected as weekend");
+        CheckHoliday(a1, testDate3, "(marked as holiday) not detected");
+        CheckBusinessDay(a1, testDate4);
+
+        CheckBusinessDay(b1, testDate1);
+        CheckBusinessDay(b1, testDate2);
+        CheckBusinessDay(b1, testDate3);
+        CheckBusinessDay(b1, testDate4);
+
+        BespokeCalendar a2 = a1;
+
+        a2 = a2.AddWeekend(Weekday.Saturday);
+
+        CheckHoliday(a2, testDate1, "(Saturday) not detected as weekend");
+        CheckHoliday(a2, testDate2, "(Sunday) not detected as weekend");
+        CheckHoliday(a2, testDate3, "(marked as holiday) not detected");
+        CheckBusinessDay(a2, testDate4);
+
+        a2 = (BespokeCalendar)a2.AddHoliday(testDate4);
+
+        CheckHoliday(a2, testDate1, "(Saturday) not detected as weekend");
+        CheckHoliday(a2, testDate2, "(Sunday) not detected as weekend");
+        CheckHoliday(a2, testDate3, "(marked as holiday) not detected");
+        CheckHoliday(a2, testDate4, "(marked as holiday) not detected");
+
+        static void CheckBusinessDay(Calendar c, Date d) =>
+            Assert.True(c.IsBusinessDay(d), $"{d} erroneously detected as holiday");
+
+        static void CheckHoliday(Calendar c, Date d, string what) => Assert.False(c.IsBusinessDay(d), $"{d} {what}");
     }
 
     // QuantLib's checkHolidays: the calculated and expected holidays compared as sets, in both directions.

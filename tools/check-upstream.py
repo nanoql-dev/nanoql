@@ -651,6 +651,8 @@ UBLAS_PROBE = "src/NanoQL/Boost/Numeric/Ublas/SelfTestMatrixSparseProbe.cs"
 # A committed table that tools/tables/sobolrsg.py generates (6).
 TABLE_FILE = "src/NanoQL/Numerics/RandomNumbers/SobolRsg/Initializers.bin"
 DATES_TESTS = "tests/NanoQL.Tests/TestSuite/DatesTests.cs"
+# A ported test class with both a // Partial: line and a // Replaced: line.
+LDS_TESTS = "tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs"
 # A ported test class with a // Not ported: line, and the line.
 OPERATORS_TESTS = "tests/NanoQL.Tests/TestSuite/OperatorsTests.cs"
 OPERATORS_NOT_PORTED = "// Not ported: testConsistency (exercises only deprecated code: DZero and DPlusDMinus, D5)\n"
@@ -910,8 +912,10 @@ def perturbations(ql_root, boost_root, tmp):
          lambda r: edit(r, DATES_TESTS, "// Replaced: nullDate (Divergences/NullDateTests.cs)",
                         "// Replaced: nullDate (Divergences/NullDateTests.cs); "
                         "testConsistency (Divergences/NullDateTests.cs)")),
-        ("a replaced case also on the // Partial: line", "replaced", "nullDate, which is also on its // Partial: line",
-         lambda r: edit(r, DATES_TESTS, ", parseDates, intraday\n", ", parseDates, intraday, nullDate\n")),
+        ("a replaced case also on the // Partial: line", "replaced",
+         "testSeedGenerator, which is also on its // Partial: line",
+         lambda r: edit(r, LDS_TESTS, ", testBurley2020SobolRsgOutputBounds\n",
+                        ", testBurley2020SobolRsgOutputBounds, testSeedGenerator\n")),
         ("a // Replaced: item that isn't '<case> (<test file>)'", "replaced", "isn't '<case> (<test file>)'",
          lambda r: edit(r, DATES_TESTS, "// Replaced: nullDate (", "// Replaced: nullDate, (")),
         ("a // Replaced: line outside a TestSuite class", "replaced", "belongs on a TestSuite class",

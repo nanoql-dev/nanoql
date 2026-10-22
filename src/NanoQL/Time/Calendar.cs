@@ -166,6 +166,10 @@ public abstract class Calendar : IEquatable<Calendar>
     /// <param name="to">The last date.</param>
     /// <param name="includeWeekEnds">Whether weekend days are listed too.</param>
     /// <returns>The holidays, in order.</returns>
+    /// <remarks>
+    /// The list stops at <paramref name="to"/>, where QuantLib's loop steps one day past it (<c>calendar.cpp:281</c>)
+    /// and so throws when <paramref name="to"/> is <see cref="Date.MaxDate"/>: a documented divergence.
+    /// </remarks>
     public ImmutableArray<Date> HolidayList(Date from, Date to, bool includeWeekEnds = false)
     {
         Date.ThrowIfDefault(from, nameof(from));
@@ -177,6 +181,11 @@ public abstract class Calendar : IEquatable<Calendar>
             {
                 result.Add(d);
             }
+
+            if (d == to)
+            {
+                break;
+            }
         }
 
         return result.ToImmutable();
@@ -186,6 +195,10 @@ public abstract class Calendar : IEquatable<Calendar>
     /// <param name="from">The first date.</param>
     /// <param name="to">The last date.</param>
     /// <returns>The business days, in order.</returns>
+    /// <remarks>
+    /// The list stops at <paramref name="to"/>, where QuantLib's loop steps one day past it (<c>calendar.cpp:292</c>)
+    /// and so throws when <paramref name="to"/> is <see cref="Date.MaxDate"/>: a documented divergence.
+    /// </remarks>
     public ImmutableArray<Date> BusinessDayList(Date from, Date to)
     {
         Date.ThrowIfDefault(from, nameof(from));
@@ -196,6 +209,11 @@ public abstract class Calendar : IEquatable<Calendar>
             if (IsBusinessDay(d))
             {
                 result.Add(d);
+            }
+
+            if (d == to)
+            {
+                break;
             }
         }
 

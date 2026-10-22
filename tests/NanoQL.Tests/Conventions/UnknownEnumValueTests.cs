@@ -28,6 +28,7 @@ public class UnknownEnumValueTests
         AssertParam("market", () => new UnitedStates((UnitedStatesMarket)99));
         AssertParam("market", () => new UnitedKingdom((UnitedKingdomMarket)99));
         AssertParam("market", () => new Canada((CanadaMarket)99));
+        AssertParam("market", () => new Brazil((BrazilMarket)99));
         AssertParam("r", () => new JointCalendar(new TARGET(), new TARGET(), (JointCalendarRule)99));
         AssertParam("r", () => new JointCalendar([new TARGET()], (JointCalendarRule)99));
         AssertParam("c", () => new Actual365Fixed((Actual365FixedConvention)99));
@@ -52,6 +53,8 @@ public class UnknownEnumValueTests
         AssertParam("f", () => FrequencyFunctions.ToString((Frequency)99));
         AssertParam("w", () => Date.NextWeekday(Today, (Weekday)9));
         AssertParam("w", () => Date.NthWeekday(1, (Weekday)0, Month.January, 2026));
+        AssertParam("w", () => new BespokeCalendar().AddWeekend((Weekday)9));
+        AssertParam("w", () => new BespokeCalendar().AddWeekend((Weekday)0));
     }
 
     [Fact]

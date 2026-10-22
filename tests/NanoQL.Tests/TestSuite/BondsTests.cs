@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/bonds.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBrazilianCached, which waits for batch 2's Brazil calendar and Business252 day counter
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -839,6 +838,75 @@ public class BondsTests
         Assert.False(
             Math.Abs(price - cachedPrice4) > tolerance,
             $"failed to reproduce cached price: calculated {price}, expected {cachedPrice4}, error {price - cachedPrice4}");
+    }
+
+    // Adapted: the evaluation date the case sets (line 1084) is the context; CommonVars (line 1073) is unused.
+    [Fact]
+    public void TestBrazilianCached()
+    {
+        // Testing Brazilian public bond prices against Andima cached values...
+        Natural settlementDays = 1;
+        Real faceAmount = 1000.0;
+        var today = new Date(6, June, 2007);
+        var issueDate = new Date(1, January, 2007);
+
+        // The tolerance is high because Andima truncate yields
+        Real tolerance = 1.0e-4;
+
+        // Reset evaluation date
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        // NTN-F maturity dates
+        Date[] maturityDates =
+        [
+            new(1, January, 2008),
+            new(1, January, 2010),
+            new(1, July, 2010),
+            new(1, January, 2012),
+            new(1, January, 2014),
+            new(1, January, 2017),
+        ];
+
+        // Andima NTN-F yields
+        Rate[] yields = [0.114614, 0.105726, 0.105328, 0.104283, 0.103218, 0.102948];
+
+        // Andima NTN-F prices
+        Rate[] prices = [1034.63031372, 1030.09919487, 1029.98307160, 1028.13585068, 1028.33383817, 1026.19716497];
+
+        InterestRate[] couponRates =
+        [
+            new(0.1, new Thirty360(Thirty360Convention.BondBasis), Compounding.Compounded, Frequency.Annual),
+        ];
+
+        for (int bondIndex = 0; bondIndex < maturityDates.Length; bondIndex++)
+        {
+            var yield = new InterestRate(
+                yields[bondIndex], new Business252(new Brazil()), Compounding.Compounded, Frequency.Annual);
+
+            var schedule = new Schedule(
+                new Date(1, January, 2007), maturityDates[bondIndex], new Period(Frequency.Semiannual),
+                new Brazil(BrazilMarket.Settlement), BusinessDayConvention.Unadjusted, BusinessDayConvention.Unadjusted,
+                DateGenerationRule.Backward, false, context);
+
+            ImmutableArray<CashFlow> coupons = new FixedRateLeg(schedule)
+                .WithNotionals(faceAmount)
+                .WithCouponRates(couponRates)
+                .WithPaymentAdjustment(BusinessDayConvention.Following)
+                .ToLeg();
+
+            var bond = new Bond(settlementDays, schedule.Calendar, issueDate, coupons);
+
+            Real cachedPrice = prices[bondIndex];
+            Real price = faceAmount
+                * (BondFunctions.CleanPrice(
+                    bond, yield.Rate, yield.DayCounter, yield.Compounding, yield.Frequency, context, today)
+                    + bond.AccruedAmount(context, today)) / 100.0;
+
+            Assert.False(
+                Math.Abs(price - cachedPrice) > tolerance,
+                $"failed to reproduce Andima cached price: calculated {price}, expected {cachedPrice}, "
+                + $"error {price - cachedPrice}");
+        }
     }
 
     // Adapted: no evaluation date is read, every call taking an explicit settlement date; the context is the test

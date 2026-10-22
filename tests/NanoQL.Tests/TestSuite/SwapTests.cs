@@ -3,9 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/swap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testInArrears, which waits for batch 2's SimpleDayCounter; testFixedTenorInferenceWithTerminationDate, which waits for batch 2's Bbsw; testSpotDateUsesFixingCalendar, which waits for batch 2's Taiwan calendar
+// Partial: testFixedTenorInferenceWithTerminationDate, which waits for batch 2's Bbsw; testSpotDateUsesFixingCalendar, which waits for batch 2's Taiwan calendar
 // Replaced: testNotifications (Vectors/Instruments/VanillaSwapVectorTests.cs)
 
+using NanoQL.Coupons;
+using NanoQL.Currencies;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.PricingEngines;
@@ -140,6 +142,68 @@ public class SwapTests
                 }
             }
         }
+    }
+
+    // Adapted: the fixture's curve relinked to the flat rate (line 248) is the curve the index and the engine are
+    // built on.
+    [Fact]
+    public void TestInArrears()
+    {
+        // Testing in-arrears swap calculation...
+        var vars = new CommonVars(Context);
+
+        // See Hull, 4th ed., page 550
+        // Note: the calculation in the book is wrong (work out the
+        // adjustment and you'll get 0.05 + 0.000115 T1)
+        Date maturity = vars.Today + (5 * TimeUnit.Years);
+        Calendar calendar = new NullCalendar();
+        var schedule = new Schedule(
+            vars.Today, maturity, new Period(Frequency.Annual), calendar,
+            BusinessDayConvention.Following, BusinessDayConvention.Following,
+            DateGenerationRule.Forward, false, Context);
+        DayCounter dayCounter = new SimpleDayCounter();
+        Real[] nominals = [100000000.0];
+        Rate oneYear = 0.05;
+        Rate r = Math.Log(1.0 + oneYear);
+        var termStructure = new FlatForward(vars.Today, r, dayCounter);
+        var index = new IborIndex(
+            "dummy", 1 * TimeUnit.Years, 0, new EURCurrency(), calendar, BusinessDayConvention.Following, false,
+            dayCounter, termStructure);
+
+        Rate[] coupons = [oneYear];
+        Leg fixedLeg = new FixedRateLeg(schedule)
+            .WithNotionals(nominals)
+            .WithCouponRates(coupons, dayCounter)
+            .ToLeg();
+
+        Real[] gearings = [];
+        Rate[] spreads = [];
+        Natural fixingDays = 0;
+
+        Volatility capletVolatility = 0.22;
+        OptionletVolatilityStructure vol = new ConstantOptionletVolatility(
+            vars.Today, new NullCalendar(), BusinessDayConvention.Following, capletVolatility, dayCounter);
+        IborCouponPricer pricer = new BlackIborCouponPricer(Context, vol);
+
+        Leg floatingLeg = new IborLeg(schedule, index)
+            .WithNotionals(nominals)
+            .WithPaymentDayCounter(dayCounter)
+            .WithFixingDays(fixingDays)
+            .WithGearings(gearings)
+            .WithSpreads(spreads)
+            .InArrears()
+            .ToLeg(Context);
+        floatingLeg = CouponPricerFunctions.SetCouponPricer(floatingLeg, pricer);
+
+        var swap = new Swap(floatingLeg, fixedLeg);
+        double npv = DiscountingSwapEngine.Calculate(swap, Context, termStructure).NPV!.Value;
+
+        Real storedValue = -144813.0;
+        Real tolerance = 1.0;
+
+        Assert.False(
+            Math.Abs(npv - storedValue) > tolerance,
+            $"Wrong NPV calculation:\n    expected:   {storedValue}\n    calculated: {npv}");
     }
 
     // Adapted: the evaluation date set after the fixture (line 299) becomes the fixture's context, and the curve

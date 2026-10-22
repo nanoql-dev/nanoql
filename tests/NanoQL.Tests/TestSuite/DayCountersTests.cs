@@ -6,8 +6,10 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/daycounters.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter
+// Partial: testActualActualOutOfScheduleRange
+// Not ported: testIntraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); testYearFractionToDateForLinearDayCounter (QL_HIGH_RESOLUTION_DATE, which the default build leaves out)
 
+using NanoQL.Numerics;
 using NanoQL.Time;
 using static NanoQL.Time.Month;
 
@@ -19,6 +21,26 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class DayCountersTests
 {
+    // The dates testAct366 and testAct36525 share.
+    private static readonly Date[] ActualTestDates =
+    [
+        new(1, February, 2002),
+        new(4, February, 2002),
+        new(16, May, 2003),
+        new(17, December, 2003),
+        new(17, December, 2004),
+        new(19, December, 2005),
+        new(2, January, 2006),
+        new(13, March, 2006),
+        new(15, May, 2006),
+        new(17, March, 2006),
+        new(15, May, 2006),
+        new(26, July, 2006),
+        new(28, June, 2007),
+        new(16, September, 2009),
+        new(26, July, 2016),
+    ];
+
     [Fact]
     public void TestActualActual()
     {
@@ -530,6 +552,164 @@ public class DayCountersTests
     }
 
     [Fact]
+    public void TestSimple()
+    {
+        // Testing simple day counter...
+        Period[] p = [new(3, TimeUnit.Months), new(6, TimeUnit.Months), new(1, TimeUnit.Years)];
+        double[] expected = [0.25, 0.5, 1.0];
+
+        // 4 years should be enough
+        Date first = new(1, January, 2002), last = new(31, December, 2005);
+        DayCounter dayCounter = new SimpleDayCounter();
+
+        for (Date start = first; start <= last; ++start)
+        {
+            for (int i = 0; i < p.Length; i++)
+            {
+                Date end = start + p[i];
+                double calculated = dayCounter.YearFraction(start, end);
+                if (Math.Abs(calculated - expected[i]) > 1.0e-12)
+                {
+                    Assert.Fail(
+                        $"from {start} to {end}:\n    calculated: {calculated}\n    expected:   {expected[i]}");
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestOne()
+    {
+        // Testing 1/1 day counter...
+        Period[] p = [new(3, TimeUnit.Months), new(6, TimeUnit.Months), new(1, TimeUnit.Years)];
+        double[] expected = [1.0, 1.0, 1.0];
+
+        // 1 years should be enough
+        Date first = new(1, January, 2004), last = new(31, December, 2004);
+        DayCounter dayCounter = new OneDayCounter();
+
+        for (Date start = first; start <= last; ++start)
+        {
+            for (int i = 0; i < p.Length; i++)
+            {
+                Date end = start + p[i];
+                double calculated = dayCounter.YearFraction(start, end);
+                if (Math.Abs(calculated - expected[i]) > 1.0e-12)
+                {
+                    Assert.Fail(
+                        $"from {start} to {end}:\n    calculated: {calculated}\n    expected:   {expected[i]}");
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestBusiness252()
+    {
+        // Testing business/252 day counter...
+        Date[] testDates =
+        [
+            new(1, February, 2002),
+            new(4, February, 2002),
+            new(16, May, 2003),
+            new(17, December, 2003),
+            new(17, December, 2004),
+            new(19, December, 2005),
+            new(2, January, 2006),
+            new(13, March, 2006),
+            new(15, May, 2006),
+            new(17, March, 2006),
+            new(15, May, 2006),
+            new(26, July, 2006),
+            new(28, June, 2007),
+            new(16, September, 2009),
+            new(26, July, 2016),
+        ];
+
+        double[] expected =
+        [
+            0.0039682539683,
+            1.2738095238095,
+            0.6031746031746,
+            0.9960317460317,
+            1.0000000000000,
+            0.0396825396825,
+            0.1904761904762,
+            0.1666666666667,
+            -0.1507936507937,
+            0.1507936507937,
+            0.2023809523810,
+            0.912698412698,
+            2.214285714286,
+            6.84126984127,
+        ];
+
+        DayCounter dayCounter1 = new Business252(new Brazil());
+
+        double calculated;
+
+        for (int i = 1; i < testDates.Length; i++)
+        {
+            calculated = dayCounter1.YearFraction(testDates[i - 1], testDates[i]);
+            if (Math.Abs(calculated - expected[i - 1]) > 1.0e-12)
+            {
+                Assert.Fail(
+                    $"from {testDates[i - 1]} to {testDates[i]}:\n"
+                    + $"    calculated: {calculated}\n    expected:   {expected[i - 1]}");
+            }
+        }
+
+        DayCounter dayCounter2 = new Business252();
+
+        for (int i = 1; i < testDates.Length; i++)
+        {
+            calculated = dayCounter2.YearFraction(testDates[i - 1], testDates[i]);
+            if (Math.Abs(calculated - expected[i - 1]) > 1.0e-12)
+            {
+                Assert.Fail(
+                    $"from {testDates[i - 1]} to {testDates[i]}:\n"
+                    + $"    calculated: {calculated}\n    expected:   {expected[i - 1]}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestThirty365()
+    {
+        // Testing 30/365 day counter...
+        (Date StartDate, Date EndDate, long Expected)[] testCases =
+        [
+            (new(17, June, 2011), new(30, December, 2012), 553),
+
+            // month end to month end
+            (new(31, March, 2025), new(30, April, 2025), 30),
+
+            // month end to 6 month ends later
+            (new(30, September, 2024), new(31, March, 2025), 180),
+
+            // no accrual beyond the 30th
+            (new(30, March, 2025), new(31, March, 2025), 0),
+        ];
+
+        DayCounter dayCounter = new Thirty365();
+        foreach ((Date d1, Date d2, long expectedDays) in testCases)
+        {
+            long days = dayCounter.DayCount(d1, d2);
+            if (days != expectedDays)
+            {
+                Assert.Fail($"from {d1} to {d2}:\n    calculated: {days}\n    expected:   {expectedDays}");
+            }
+
+            double t = dayCounter.YearFraction(d1, d2);
+            double expectedTime = expectedDays / 365.0;
+            if (Math.Abs(t - expectedTime) > 1.0e-12)
+            {
+                Assert.Fail($"from {d1} to {d2}:\n    calculated: {t}\n    expected:   {expectedTime}");
+            }
+        }
+    }
+
+    [Fact]
     public void TestThirty360_BondBasis()
     {
         // Testing 30/360 day counter (Bond Basis)...
@@ -780,10 +960,57 @@ public class DayCountersTests
                 new Date(8, January, 2027)));
     }
 
-    // Adapted: only the two Actual360 checks, lines 1309 and 1312, with the counters and year fractions they read
-    // (lines 1291, 1295-1296, 1300 and 1303-1304). Dropped: the Actual366, Actual364 and Actual36525 counters, which
-    // aren't ported, with their year fractions and checks (lines 1292-1294, 1301-1302, 1305, 1307-1308 and 1310-1311);
-    // and the high-resolution dates (lines 1273-1276 and 1284-1288), which the default build leaves out.
+    [Fact]
+    public void TestAct366()
+    {
+        // Testing Act/366 day counter...
+        double[] expected =
+        [
+            0.00819672131147541,
+            1.27322404371585,
+            0.587431693989071,
+            1.0000000000000,
+            1.00273224043716,
+            0.0382513661202186,
+            0.191256830601093,
+            0.172131147540984,
+            -0.16120218579235,
+            0.16120218579235,
+            0.19672131147541,
+            0.920765027322404,
+            2.21584699453552,
+            6.84426229508197,
+        ];
+
+        CheckYearFractions(new Actual366(), ActualTestDates, expected);
+    }
+
+    [Fact]
+    public void TestAct36525()
+    {
+        // Testing Act/365.25 day counter...
+        double[] expected =
+        [
+            0.0082135523613963,
+            1.27583846680356,
+            0.588637919233402,
+            1.00205338809035,
+            1.00479123887748,
+            0.0383299110198494,
+            0.191649555099247,
+            0.172484599589322,
+            -0.161533196440794,
+            0.161533196440794,
+            0.197125256673511,
+            0.922655715263518,
+            2.22039698836413,
+            6.85831622176591,
+        ];
+
+        CheckYearFractions(new Actual36525(), ActualTestDates, expected);
+    }
+
+    // Adapted: without the high-resolution dates (lines 1273-1276 and 1284-1288), which the default build leaves out.
     [Fact]
     public void TestActualConsistency()
     {
@@ -803,6 +1030,9 @@ public class DayCountersTests
         ];
 
         DayCounter actual365 = new Actual365Fixed();
+        DayCounter actual366 = new Actual366();
+        DayCounter actual364 = new Actual364();
+        DayCounter actual36525 = new Actual36525();
         DayCounter actual360 = new Actual360();
         DayCounter actual360incl = new Actual360(true);
 
@@ -811,11 +1041,97 @@ public class DayCountersTests
             foreach (Date d in testDates)
             {
                 double t365 = actual365.YearFraction(today, d);
+                double t366 = actual366.YearFraction(today, d);
+                double t364 = actual364.YearFraction(today, d);
                 double t360 = actual360.YearFraction(today, d);
                 double t360incl = actual360incl.YearFraction(today, d);
+                double t36525 = actual36525.YearFraction(today, d);
 
+                CheckSmall((t365 * 365 / 366.0) - t366, 1e-14);
+                CheckSmall((t365 * 365 / 364.0) - t364, 1e-14);
                 CheckSmall((t365 * 365 / 360.0) - t360, 1e-14);
+                CheckSmall((t365 * 365 / 364.0) - t364, 1e-14);
+                CheckSmall((t365 * 365 / 365.25) - t36525, 1e-14);
                 CheckSmall((t365 * 365 / 360.0) - (((t360incl * 360) - 1) / 360), 1e-14);
+            }
+        }
+    }
+
+    [Fact]
+    public void TestYearFraction2DateBulk()
+    {
+        // Testing bulk dates for YearFractionToDate ...
+        DayCounter[] dayCounters =
+        [
+            new Actual365Fixed(),
+            new Actual365Fixed(Actual365FixedConvention.NoLeap),
+            new Actual360(), new Actual360(true),
+            new Actual36525(), new Actual36525(true),
+            new Actual364(),
+            new Actual366(), new Actual366(true),
+            new ActualActual(ActualActualConvention.ISDA),
+            new ActualActual(ActualActualConvention.ISMA),
+            new ActualActual(ActualActualConvention.Bond),
+            new ActualActual(ActualActualConvention.Historical),
+            new ActualActual(ActualActualConvention.Actual365),
+            new ActualActual(ActualActualConvention.AFB),
+            new ActualActual(ActualActualConvention.Euro),
+            new Business252(),
+            new Thirty360(Thirty360Convention.USA),
+            new Thirty360(Thirty360Convention.BondBasis),
+            new Thirty360(Thirty360Convention.European),
+            new Thirty360(Thirty360Convention.EurobondBasis),
+            new Thirty360(Thirty360Convention.Italian),
+            new Thirty360(Thirty360Convention.German),
+            new Thirty360(Thirty360Convention.ISMA),
+            new Thirty360(Thirty360Convention.ISDA),
+            new Thirty360(Thirty360Convention.NASD),
+            new Thirty365(),
+            new SimpleDayCounter(),
+        ];
+
+        foreach (DayCounter dc in dayCounters)
+        {
+            for (int i = -360; i < 730; ++i)
+            {
+                Date today = new Date(1, January, 2020) + new Period(i, TimeUnit.Days);
+                Date target = today + new Period(i, TimeUnit.Days);
+
+                double t = dc.YearFraction(today, target);
+                Date time2Date = YearFractionToDateFunctions.YearFractionToDate(dc, today, t);
+                double tNew = dc.YearFraction(today, time2Date);
+
+                if (!ComparisonFunctions.CloseEnough(t, tNew))
+                {
+                    Assert.Fail(
+                        $"\ntoday      : {today}\ntarget     : {target}\ninverse    : {time2Date}"
+                        + $"\ntime diff  : {t - tNew}\nday counter: {dc.Name}");
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestYearFraction2DateRounding()
+    {
+        // Testing YearFractionToDate rounding to closer date...
+        DayCounter[] dayCounters = [new Thirty360(Thirty360Convention.USA), new Actual360(true)];
+        Date d1 = new(1, February, 2023), d2 = new(17, February, 2124);
+
+        foreach (DayCounter dc in dayCounters)
+        {
+            double t = dc.YearFraction(d1, d2);
+            for (double offset = 0; offset < 1 + 1e-10; offset += 0.05)
+            {
+                Date inv = YearFractionToDateFunctions.YearFractionToDate(dc, d1, t + (offset / 360));
+                if (offset < 0.4999)
+                {
+                    Assert.Equal(d2, inv);
+                }
+                else
+                {
+                    Assert.Equal(d2 + new Period(1, TimeUnit.Days), inv);
+                }
             }
         }
     }
@@ -878,6 +1194,22 @@ public class DayCountersTests
         Assert.True(
             e is ArgumentException or NanoQLException,
             $"expected an ArgumentException or a NanoQLException, got {e?.GetType().Name ?? "no exception"}");
+    }
+
+    // testAct366's and testAct36525's loop: each consecutive pair's year fraction against the expected one.
+    private static void CheckYearFractions(DayCounter dayCounter, Date[] testDates, double[] expected)
+    {
+        for (int i = 1; i < testDates.Length; i++)
+        {
+            double calculated = dayCounter.YearFraction(testDates[i - 1], testDates[i]);
+            if (Math.Abs(calculated - expected[i - 1]) > 1.0e-12)
+            {
+                Assert.Fail(
+                    $"from {testDates[i - 1]} to {testDates[i]}:" + Environment.NewLine
+                    + $"    calculated: {calculated}" + Environment.NewLine
+                    + $"    expected:   {expected[i - 1]}");
+            }
+        }
     }
 
     // QL_CHECK_SMALL: |fpv| <= tolerance.

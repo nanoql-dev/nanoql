@@ -118,16 +118,15 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
+- `src/NanoQL/Time/DayCounters/YearFractionToDateFunctions.cs`: `roundToDayStart`, which waits for S-exo's spread option tests, its only callers.
+- `src/NanoQL/Utilities/DataParsers/DateParser.cs`: `parseFormatted`, not ported: a `DateOnly`'s `ParseExact` does its job.
 - `tests/NanoQL.Tests/TestSuite/AmericanOptionTests.cs`: the Barone-Adesi-Whaley, Bjerksund-Stensland, Ju and QD-plus cases, which wait for B4.5's analytic and QD engines; the shout cases, which wait for B4.3's shout engine; and `testQdPlusBoundaryConvergence` and `testQdAmericanEngines`, which wait for B4.7's Halley solver.
-- `tests/NanoQL.Tests/TestSuite/AmortizingBondTests.cs`: `testBrazilianAmortizingFixedRateBond`, which waits for batch 2's Brazil calendar and `Business252` day counter.
-- `tests/NanoQL.Tests/TestSuite/BarrierOptionTests.cs`: `testParity`'s `Business252` check, which waits for B2.2's `Business252` day counter; `testHaugValues`' binomial checks, which wait for B4.6's `BinomialBarrierEngine`; `testBabsiriValues`' and `testBeagleholeValues`' Monte Carlo checks, which wait for B4.6's `MCBarrierEngine`; `testDividendBarrierOption`'s and `testDividendBarrierOptionWithDividendsPastMaturity`'s Heston checks, which wait for batch 4's `FdHestonBarrierEngine`; `testLocalVolAndHestonComparison`, which waits for batch 4's local volatility and Heston barrier engines; and the four perturbative cases, which wait for batch 4's `PerturbativeBarrierOptionEngine`.
+- `tests/NanoQL.Tests/TestSuite/BarrierOptionTests.cs`: `testHaugValues`' binomial checks, which wait for B4.6's `BinomialBarrierEngine`; `testBabsiriValues`' and `testBeagleholeValues`' Monte Carlo checks, which wait for B4.6's `MCBarrierEngine`; `testDividendBarrierOption`'s and `testDividendBarrierOptionWithDividendsPastMaturity`'s Heston checks, which wait for batch 4's `FdHestonBarrierEngine`; `testLocalVolAndHestonComparison`, which waits for batch 4's local volatility and Heston barrier engines; and the four perturbative cases, which wait for batch 4's `PerturbativeBarrierOptionEngine`.
 - `tests/NanoQL.Tests/TestSuite/BermudanSwaptionTests.cs`: `testCachedValues`' finite-difference checks, which wait for B3.2's `FdHullWhiteSwaptionEngine`; `testCachedG2Values`, which waits for B3.1's `G2` and B3.2's `FdG2SwaptionEngine`; `testTreeEngineTimeSnapping`, which waits for B3.2's `FdHullWhiteSwaptionEngine`; `testBermudanOISSwaptionWithHW` and `testBermudanOISSwaptionPreservesFeatures`, which wait for B3.2's `FdHullWhiteSwaptionEngine`; and `testBermudanOISSwaptionWithG2`, which waits for B3.1's `G2` and B3.2's `FdG2SwaptionEngine`.
-- `tests/NanoQL.Tests/TestSuite/BondsTests.cs`: `testBrazilianCached`, which waits for batch 2's Brazil calendar and `Business252` day counter.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for B5.3's `SequenceStatistics`.
 - `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
 - `tests/NanoQL.Tests/TestSuite/CreditDefaultSwapTests.cs`: `testCachedValue`'s integral-engine checks, which wait for B6.2's `IntegralCdsEngine`.
-- `tests/NanoQL.Tests/TestSuite/DatesTests.cs`: the ECB, parsing and intraday cases.
-- `tests/NanoQL.Tests/TestSuite/DayCountersTests.cs`: the cases for day counters not yet ported.
+- `tests/NanoQL.Tests/TestSuite/DayCountersTests.cs`: `testActualActualOutOfScheduleRange`, which waits for batch 2's China calendar.
 - `tests/NanoQL.Tests/TestSuite/DigitalOptionTests.cs`: the American digital cases, which wait for B4.5's `AnalyticDigitalAmericanEngine`; `testMCCashAtHit`, which waits for B4.4's `MCDigitalEngine`.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, Student t and stochastic-collocation cases, whose distributions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/DividendOptionTests.cs`: the cash-dividend engine's cases, which wait for B4.5's `CashDividendEuropeanEngine`.
@@ -151,7 +150,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
 - `tests/NanoQL.Tests/TestSuite/ShortRateModelsTests.cs`: `testSwaps`, which waits for B3.4's `TreeVanillaSwapEngine`; and the two extended Cox-Ingersoll-Ross cases, which wait for B3.1's `ExtendedCoxIngersollRoss`.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant, Newton, Ridder and Halley cases, whose solvers aren't ported yet.
-- `tests/NanoQL.Tests/TestSuite/SwapTests.cs`: `testInArrears`, which waits for batch 2's `SimpleDayCounter`; `testFixedTenorInferenceWithTerminationDate`, which waits for batch 2's `Bbsw`; and `testSpotDateUsesFixingCalendar`, which waits for batch 2's Taiwan calendar.
+- `tests/NanoQL.Tests/TestSuite/SwapTests.cs`: `testFixedTenorInferenceWithTerminationDate`, which waits for batch 2's `Bbsw`; and `testSpotDateUsesFixingCalendar`, which waits for batch 2's Taiwan calendar.
 - `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported.
 - `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, B4.2).
 - `tests/NanoQL.Tests/TestSuite/VarianceSwapsTests.cs`: `testMCVarianceSwap`, which waits for B4.8's `MCVarianceSwapEngine`.

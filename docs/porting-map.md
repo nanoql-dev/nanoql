@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 848 | 102 |
-| partial | 29 | 35 |
-| ported | 384 | 45 |
+| not started | 833 | 101 |
+| partial | 31 | 32 |
+| ported | 397 | 49 |
 | replaced | 20 | 6 |
 | total | 1,456 | 194 |
 
@@ -124,11 +124,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `africa` | not started |  | no nanoql type: AOACurrency, BWPCurrency, EGPCurrency, ETBCurrency, GHSCurrency, KESCurrency, MADCurrency, MURCurrency, NGNCurrency, TNDCurrency, UGXCurrency, XOFCurrency, ZARCurrency, ZMWCurrency |
+| `africa` | ported | Currencies/Africa/AOACurrency.cs, Currencies/Africa/BWPCurrency.cs, Currencies/Africa/EGPCurrency.cs, Currencies/Africa/ETBCurrency.cs, Currencies/Africa/GHSCurrency.cs, Currencies/Africa/KESCurrency.cs, Currencies/Africa/MADCurrency.cs, Currencies/Africa/MURCurrency.cs, Currencies/Africa/NGNCurrency.cs, Currencies/Africa/TNDCurrency.cs, Currencies/Africa/UGXCurrency.cs, Currencies/Africa/XOFCurrency.cs, Currencies/Africa/ZARCurrency.cs, Currencies/Africa/ZMWCurrency.cs |  |
 | `all` | not ported: include-only header |  |  |
 | `america` | ported | Currencies/America/ARSCurrency.cs, Currencies/America/BRLCurrency.cs, Currencies/America/CADCurrency.cs, Currencies/America/CLFCurrency.cs, Currencies/America/CLPCurrency.cs, Currencies/America/COPCurrency.cs, Currencies/America/COUCurrency.cs, Currencies/America/MXNCurrency.cs, Currencies/America/MXVCurrency.cs, Currencies/America/PEHCurrency.cs, Currencies/America/PEICurrency.cs, Currencies/America/PENCurrency.cs, Currencies/America/TTDCurrency.cs, Currencies/America/USDCurrency.cs, Currencies/America/UYUCurrency.cs, Currencies/America/VEBCurrency.cs |  |
 | `asia` | ported | Currencies/Asia/AEDCurrency.cs, Currencies/Asia/BDTCurrency.cs, Currencies/Asia/BHDCurrency.cs, Currencies/Asia/CNHCurrency.cs, Currencies/Asia/CNYCurrency.cs, Currencies/Asia/HKDCurrency.cs, Currencies/Asia/IDRCurrency.cs, Currencies/Asia/ILSCurrency.cs, Currencies/Asia/INRCurrency.cs, Currencies/Asia/IQDCurrency.cs, Currencies/Asia/IRRCurrency.cs, Currencies/Asia/JODCurrency.cs, Currencies/Asia/JPYCurrency.cs, Currencies/Asia/KRWCurrency.cs, Currencies/Asia/KWDCurrency.cs, Currencies/Asia/KZTCurrency.cs, Currencies/Asia/LKRCurrency.cs, Currencies/Asia/MYRCurrency.cs, Currencies/Asia/NPRCurrency.cs, Currencies/Asia/OMRCurrency.cs, Currencies/Asia/PHPCurrency.cs, Currencies/Asia/PKRCurrency.cs, Currencies/Asia/QARCurrency.cs, Currencies/Asia/SARCurrency.cs, Currencies/Asia/SGDCurrency.cs, Currencies/Asia/THBCurrency.cs, Currencies/Asia/TWDCurrency.cs, Currencies/Asia/UZSCurrency.cs, Currencies/Asia/VNDCurrency.cs |  |
-| `crypto` | not started |  | no nanoql type: BTCCurrency, ETHCurrency, ETCCurrency, BCHCurrency, XRPCurrency, LTCCurrency, DASHCurrency, ZECCurrency |
+| `crypto` | ported | Currencies/Crypto/BCHCurrency.cs, Currencies/Crypto/BTCCurrency.cs, Currencies/Crypto/DASHCurrency.cs, Currencies/Crypto/ETCCurrency.cs, Currencies/Crypto/ETHCurrency.cs, Currencies/Crypto/LTCCurrency.cs, Currencies/Crypto/XRPCurrency.cs, Currencies/Crypto/ZECCurrency.cs |  |
 | `europe` | ported | Currencies/Europe/ATSCurrency.cs, Currencies/Europe/BEFCurrency.cs, Currencies/Europe/BGLCurrency.cs, Currencies/Europe/BGNCurrency.cs, Currencies/Europe/BYRCurrency.cs, Currencies/Europe/CHFCurrency.cs, Currencies/Europe/CYPCurrency.cs, Currencies/Europe/CZKCurrency.cs, Currencies/Europe/DEMCurrency.cs, Currencies/Europe/DKKCurrency.cs, Currencies/Europe/EEKCurrency.cs, Currencies/Europe/ESPCurrency.cs, Currencies/Europe/EURCurrency.cs, Currencies/Europe/FIMCurrency.cs, Currencies/Europe/FRFCurrency.cs, Currencies/Europe/GBPCurrency.cs, Currencies/Europe/GELCurrency.cs, Currencies/Europe/GRDCurrency.cs, Currencies/Europe/HRKCurrency.cs, Currencies/Europe/HUFCurrency.cs, Currencies/Europe/IEPCurrency.cs, Currencies/Europe/ISKCurrency.cs, Currencies/Europe/ITLCurrency.cs, Currencies/Europe/LTLCurrency.cs, Currencies/Europe/LUFCurrency.cs, Currencies/Europe/LVLCurrency.cs, Currencies/Europe/MKDCurrency.cs, Currencies/Europe/MTLCurrency.cs, Currencies/Europe/NLGCurrency.cs, Currencies/Europe/NOKCurrency.cs, Currencies/Europe/PLNCurrency.cs, Currencies/Europe/PTECurrency.cs, Currencies/Europe/ROLCurrency.cs, Currencies/Europe/RONCurrency.cs, Currencies/Europe/RSDCurrency.cs, Currencies/Europe/RUBCurrency.cs, Currencies/Europe/SEKCurrency.cs, Currencies/Europe/SITCurrency.cs, Currencies/Europe/SKKCurrency.cs, Currencies/Europe/TRLCurrency.cs, Currencies/Europe/TRYCurrency.cs, Currencies/Europe/UAHCurrency.cs |  |
 | `exchangeratemanager` | ported | Currencies/ExchangeRates.cs | no nanoql type: ExchangeRateManagerEntry |
 | `oceania` | ported | Currencies/Oceania/AUDCurrency.cs, Currencies/Oceania/NZDCurrency.cs |  |
@@ -530,7 +530,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `bmaindex` | ported | Indexes/BMAIndex.cs |  |
-| `equityindex` | not started |  | no nanoql type: EquityIndex |
+| `equityindex` | ported | Indexes/EquityIndex.cs |  |
 | `iborindex` | ported | Indexes/IborIndex.cs, Indexes/OvernightIndex.cs |  |
 | `indexmanager` | replaced: the evaluation context's fixings | Indexes/IndexFixings.cs |  |
 | `inflationindex` | ported | Indexes/InflationIndex/CPI.cs, Indexes/InflationIndex/CPIInterpolationType.cs, Indexes/InflationIndex/InflationIndex.cs, Indexes/InflationIndex/YoYInflationIndex.cs, Indexes/InflationIndex/ZeroInflationIndex.cs |  |
@@ -1951,7 +1951,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `date` | partial | Time/Date/Date.cs, Time/Date/DateFunctions.cs, Time/Date/Month.cs | partial: io::formatted_date (not ported: a Date converts to DateOnly, whose ToString(format) does its job) |
 | `dategenerationrule` | ported | Time/DateGenerationRule.cs |  |
 | `daycounter` | ported | Time/DayCounter.cs |  |
-| `ecb` | not started |  | no nanoql type: ECB |
+| `ecb` | ported | Time/ECB.cs |  |
 | `frequency` | ported | Time/Frequency.cs, Time/FrequencyFunctions.cs |  |
 | `imm` | ported | Time/IMM.cs, Time/IMMMonth.cs |  |
 | `period` | ported | Time/Period/Period.cs, Time/Period/PeriodFunctions.cs, Time/Period/TimeUnitExtensions.cs |  |
@@ -1967,9 +1967,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `argentina` | not started |  | no nanoql type: Argentina, ArgentinaMarket |
 | `australia` | not started |  | no nanoql type: Australia, AustraliaMarket |
 | `austria` | not started |  | no nanoql type: Austria, AustriaMarket |
-| `bespokecalendar` | not started |  | no nanoql type: BespokeCalendar |
+| `bespokecalendar` | ported | Time/Calendars/BespokeCalendar.cs |  |
 | `botswana` | not started |  | no nanoql type: Botswana |
-| `brazil` | not started |  | no nanoql type: Brazil, BrazilMarket |
+| `brazil` | ported | Time/Calendars/Brazil.cs, Time/Calendars/BrazilMarket.cs |  |
 | `canada` | ported | Time/Calendars/Canada.cs, Time/Calendars/CanadaMarket.cs |  |
 | `chile` | not started |  | no nanoql type: Chile, ChileMarket |
 | `china` | not started |  | no nanoql type: China, ChinaMarket |
@@ -2025,18 +2025,18 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `actual360` | ported | Time/DayCounters/Actual360.cs |  |
-| `actual364` | not started |  | no nanoql type: Actual364 |
-| `actual36525` | not started |  | no nanoql type: Actual36525 |
+| `actual364` | ported | Time/DayCounters/Actual364.cs |  |
+| `actual36525` | ported | Time/DayCounters/Actual36525.cs |  |
 | `actual365fixed` | ported | Time/DayCounters/Actual365Fixed.cs, Time/DayCounters/Actual365FixedConvention.cs |  |
-| `actual366` | not started |  | no nanoql type: Actual366 |
+| `actual366` | ported | Time/DayCounters/Actual366.cs |  |
 | `actualactual` | ported | Time/DayCounters/ActualActual.cs, Time/DayCounters/ActualActualConvention.cs |  |
 | `all` | not ported: include-only header |  |  |
-| `business252` | not started |  | no nanoql type: Business252 |
-| `one` | not started |  | no nanoql type: OneDayCounter |
-| `simpledaycounter` | not started |  | no nanoql type: SimpleDayCounter |
+| `business252` | ported | Time/DayCounters/Business252.cs |  |
+| `one` | ported | Time/DayCounters/OneDayCounter.cs |  |
+| `simpledaycounter` | ported | Time/DayCounters/SimpleDayCounter.cs |  |
 | `thirty360` | ported | Time/DayCounters/Thirty360.cs, Time/DayCounters/Thirty360Convention.cs |  |
-| `thirty365` | not started |  | no nanoql type: Thirty365 |
-| `yearfractiontodate` | not started |  |  |
+| `thirty365` | ported | Time/DayCounters/Thirty365.cs |  |
+| `yearfractiontodate` | partial | Time/DayCounters/YearFractionToDateFunctions.cs | partial: roundToDayStart, which waits for S-exo's spread option tests, its only callers |
 
 ### `ql/utilities/`
 
@@ -2045,7 +2045,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `clone` | replaced: references |  |  |
 | `dataformatters` | ported | Utilities/DataFormattersFunctions.cs |  |
-| `dataparsers` | not started |  | no nanoql type: PeriodParser, DateParser |
+| `dataparsers` | partial | Utilities/DataParsers/DateParser.cs, Utilities/DataParsers/PeriodParser.cs | partial: parseFormatted (not ported: a DateOnly's ParseExact does its job) |
 | `null` | replaced: nullable types |  |  |
 | `null_deleter` | not ported: C++ platform header |  |  |
 | `observablevalue` | not ported: observer plumbing, removed |  |  |
@@ -2061,7 +2061,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `americanoption` | partial | TestSuite/AmericanOptionTests.cs | 6 of 32 cases; not yet: testBaroneAdesiWhaleyValues, testBaroneAdesiWhaleyValuesAtNonPositiveRate, testBjerksundStenslandValues, testJuValues, testJuValuesAtZeroRate, testBaroneAdesiWhaleyAndJuAtLowVolatility, testJuNotBelowExerciseValue, testBjerksundStenslandAtUnitBeta, testFdShoutGreeks, testFDShoutNPV, testZeroVolFDShoutNPV, testLargeDividendShoutNPV, testQdPlusBoundaryValues, testQdPlusBoundaryConvergence, testQdAmericanEngines, testQdFpIterationScheme, testAndersenLakeHighPrecisionExample, testQdEngineStandardExample, testBulkQdFpAmericanEngine, testQdEngineWithLobattoIntegral, testQdEnginesNotBelowExerciseValue, testQdNegativeDividendYield, testBjerksundStenslandEuropeanGreeks, testBjerksundStenslandAmericanGreeks, testSingleBjerksundStenslandGreeks, testBaroneAdesiWhaleyNegativeRates |
-| `amortizingbond` | partial | TestSuite/AmortizingBondTests.cs | 2 of 3 cases; not yet: testBrazilianAmortizingFixedRateBond |
+| `amortizingbond` | ported | TestSuite/AmortizingBondTests.cs | 3 of 3 cases |
 | `andreasenhugevolatilityinterpl` | not started |  | 14 cases |
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
 | `asianoptions` | not started |  | 23 cases |
@@ -2080,10 +2080,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackformula` | ported | TestSuite/BlackFormulaTests.cs | 15 of 15 cases |
 | `blackvolsurfacedelta` | not started |  | 5 cases |
 | `bondforward` | not started |  | 3 cases |
-| `bonds` | partial | TestSuite/BondsTests.cs | 21 of 22 cases; not yet: testBrazilianCached |
+| `bonds` | ported | TestSuite/BondsTests.cs | 22 of 22 cases |
 | `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
 | `businessdayconventions` | not started |  | 1 cases |
-| `calendars` | partial | TestSuite/CalendarsTests.cs | 19 of 81 cases; not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testBrazil, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testTASECalendar, testSHIRCalendar, testTelborCalendar, testBusinessDaysBetween, testBespokeCalendars, testIntradayAddHolidays, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
+| `calendars` | partial | TestSuite/CalendarsTests.cs | 22 of 81 cases; not ported: testIntradayAddHolidays (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testTASECalendar, testSHIRCalendar, testTelborCalendar, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
 | `callablebonds` | ported | TestSuite/CallableBondsTests.cs | 14 of 14 cases; replaced: testObservability by Vectors/Experimental/CallableBonds/CallableBondVectorTests.cs |
 | `capfloor` | ported | TestSuite/CapFloorTests.cs | 10 of 10 cases |
 | `capflooredcoupon` | ported | TestSuite/CapFlooredCouponTests.cs | 2 of 2 cases |
@@ -2109,8 +2109,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `crosscurrencyratehelpers` | ported | TestSuite/CrossCurrencyRateHelpersTests.cs | 30 of 30 cases |
 | `currency` | ported | TestSuite/CurrencyTests.cs | 1 of 1 cases |
 | `curvestates` | not started |  | 3 cases |
-| `dates` | partial | TestSuite/DatesTests.cs | 7 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; not yet: ecbIsECBcode, ecbDates, ecbGetDateFromCode, ecbGetCodeFromDate, ecbNextCode, isoDates, parseDates, intraday |
-| `daycounters` | partial | TestSuite/DayCountersTests.cs | 11 of 22 cases; not yet: testSimple, testOne, testBusiness252, testThirty365, testIntraday, testActualActualOutOfScheduleRange, testAct366, testAct36525, testYearFraction2DateBulk, testYearFraction2DateRounding, testYearFractionToDateForLinearDayCounter |
+| `dates` | ported | TestSuite/DatesTests.cs | 14 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; parseDates by Conventions/DateParserFormatTests.cs; not ported: intraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out) |
+| `daycounters` | partial | TestSuite/DayCountersTests.cs | 19 of 22 cases; not ported: testIntraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); testYearFractionToDateForLinearDayCounter (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); not yet: testActualActualOutOfScheduleRange |
 | `defaultprobabilitycurves` | ported | TestSuite/DefaultProbabilityCurvesTests.cs | 10 of 10 cases |
 | `digitalcoupon` | not started |  | 8 cases |
 | `digitaloption` | partial | TestSuite/DigitalOptionTests.cs | 3 of 10 cases; not yet: testCashAtHitOrNothingAmericanValues, testAssetAtHitOrNothingAmericanValues, testCashAtExpiryOrNothingAmericanValues, testAssetAtExpiryOrNothingAmericanValues, testCashAtHitOrNothingAmericanGreeks, testCashAtHitOrNothingAmericanLowVolatility, testMCCashAtHit |
@@ -2119,7 +2119,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `doublebarrieroption` | not started |  | 3 cases |
 | `doublebinaryoption` | not started |  | 2 cases |
 | `equitycashflow` | not started |  | 8 cases |
-| `equityindex` | not started |  | 12 cases |
+| `equityindex` | ported | TestSuite/EquityIndexTests.cs | 11 of 12 cases; not ported: testFixingObservability (observer notifications, which an immutable index has no use for, R1) |
 | `equitytotalreturnswap` | not started |  | 5 cases |
 | `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 22 of 27 cases; not yet: testIntegralEngines, testMcEngines, testQmcEngines, testFFTEngines, testFdEnginesWithNonStrikedPayoff |
 | `everestoption` | not started |  | 1 cases |
@@ -2227,7 +2227,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `squarerootclvmodel` | not started |  | 3 cases |
 | `stats` | not started |  | 4 cases |
 | `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |
-| `swap` | partial | TestSuite/SwapTests.cs | 12 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs; not yet: testInArrears, testFixedTenorInferenceWithTerminationDate, testSpotDateUsesFixingCalendar |
+| `swap` | partial | TestSuite/SwapTests.cs | 13 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs; not yet: testFixedTenorInferenceWithTerminationDate, testSpotDateUsesFixingCalendar |
 | `swapforwardmappings` | not started |  | 3 cases |
 | `swaption` | ported | TestSuite/SwaptionTests.cs | 13 of 13 cases; replaced: testBlackEngineCaching by Vectors/Instruments/SwaptionVectorTests.cs |
 | `swaptionvolatilitycube` | ported | TestSuite/SwaptionVolatilityCubeTests.cs | 17 of 17 cases; replaced: testObservability by Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs; testZabrObservability by Vectors/TermStructures/ZabrSwaptionVolatilityCubeVectorTests.cs |

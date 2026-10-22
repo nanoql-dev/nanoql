@@ -1,10 +1,12 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Day-counter equality (ql/time/daycounter.hpp): 23 day counters, every convention of Actual/360, Actual/365 (Fixed),
-30/360 and Actual/Actual, with Actual/Actual (ISMA) and (Bond) also given a schedule, compared pairwise with == and
-!=, which QuantLib defines by name. Each case's inputs.dayCounter and inputs.others describe day counters as
-{"type", "convention"} (Actual/360 as {"type", "includeLastDay"}), with "schedule": true for the 6-month unadjusted
-schedule on a null calendar from 15 February 2020 to 15 August 2030. Read back by
+30/360 and Actual/Actual, with Actual/Actual (ISMA) and (Bond) also given a schedule, compared pairwise with == and !=,
+which QuantLib defines by name. Each case's inputs.dayCounter and inputs.others describe day counters as {"type",
+"convention"} (Actual/360 as {"type", "includeLastDay"}), with "schedule": true for the 6-month unadjusted schedule on a
+null calendar from 15 February 2020 to 15 August 2030. An Actual/Actual (ISMA) or (Bond) with the schedule isn't
+compared with one without: QuantLib calls them equal by name, and nanoql, whose day counters compare the data their
+counts read, unequal (tests/NanoQL.Tests/Conventions/DayCounterEqualityTests.cs). Read back by
 tests/NanoQL.Tests/Vectors/Time/DayCounterVectorTests.cs."""
 import os
 import sys
@@ -45,15 +47,23 @@ def build(spec):
     return ql.ActualActual(spec["convention"])
 
 
+def with_and_without_schedule(a, b):
+    """An Actual/Actual (ISMA) or (Bond) pair of which one alone has the schedule."""
+    def isma(s):
+        return s["type"] == "ActualActual" and s["convention"] in (0, 1)
+    return isma(a) and isma(b) and bool(a.get("schedule")) != bool(b.get("schedule"))
+
+
 def cases():
     st = v.settings(ql.Date(15, ql.October, 2026))
     all_specs = specs()
     out = []
     for i, spec in enumerate(all_specs):
         dc = build(spec)
-        others = [build(o) for o in all_specs]
+        other_specs = [o for o in all_specs if not with_and_without_schedule(spec, o)]
+        others = [build(o) for o in other_specs]
         out.append({"name": f"{i} {dc.name()}" + (" with schedule" if spec.get("schedule") else ""),
-                    "inputs": {"settings": st, "dayCounter": spec, "others": all_specs},
+                    "inputs": {"settings": st, "dayCounter": spec, "others": other_specs},
                     "expected": {"name": dc.name(),
                                  "equal": [dc == o for o in others],
                                  "notEqual": [dc != o for o in others]}})

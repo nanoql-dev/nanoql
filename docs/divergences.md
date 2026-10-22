@@ -291,6 +291,17 @@ Facts:
 - `ToLegThrowsWhereQuantLibsConversionThrows`
 - `ADatesScheduleOnQuantLibsEmptyCalendarHasNoSpelling`
 
+## Business252CacheTests
+
+[`Divergences/Business252CacheTests.cs`](../tests/NanoQL.Tests/Divergences/Business252CacheTests.cs)
+
+Business/252's month counts. QuantLib caches them in two file-level maps keyed by the calendar's name, filled once and never invalidated (`business252.cpp:31-68`, `:87-105`): after a holiday edit every `Business252` on the calendar's name, a new one included, counts the days the first count saw, and two calendars of one name share their counts. nanoql counts each month once per day counter, on its own calendar, so a count is always its calendar's `businessDaysBetween`, QuantLib's own check.
+
+Facts:
+
+- `ACountAfterAHolidayEditIsTheEditedCalendars`
+- `TwoCalendarsOfOneNameCountTheirOwnDays`
+
 ## CPISwapFairRateTests
 
 [`Divergences/CPISwapFairRateTests.cs`](../tests/NanoQL.Tests/Divergences/CPISwapFairRateTests.cs)
@@ -315,6 +326,17 @@ Facts:
 - `JointCalendarsWhoseComponentsDifferByAnAddedHolidayAreUnequal`
 - `JointCalendarsBuiltFromEqualComponentsAreEqualWithEqualHashes`
 - `CalendarsOfDifferentKindsAreUnequalFromEitherSide`
+
+## CalendarListEndTests
+
+[`Divergences/CalendarListEndTests.cs`](../tests/NanoQL.Tests/Divergences/CalendarListEndTests.cs)
+
+A holiday or business-day list ending on Date's last day. QuantLib's loops step their date one day past the list's end (`calendar.cpp:281`, `:292`), so a list to 31 December 2199 throws "Date's serial number (109575) outside allowed range", in every calendar. nanoql's loops stop at the end; the lists are QuantLib's own to 30 December and its own `isHoliday` of the 31st.
+
+Facts:
+
+- `AHolidayListEndsOnDatesLastDay`
+- `ABusinessDayListEndsOnDatesLastDay`
 
 ## CalibratedModelSideEffectTests
 
@@ -618,6 +640,17 @@ Facts:
 - `AFixedReferenceCurveTakesItsContextsPillars`
 - `AMovingCurvesJumpsFollowItsReferenceDate`
 
+## DataParserStrictnessTests
+
+[`Divergences/DataParserStrictnessTests.cs`](../tests/NanoQL.Tests/Divergences/DataParserStrictnessTests.cs)
+
+Malformed input to the data parsers. QuantLib reads the numbers with `std::stoi`, which skips leading blanks and stops at the first non-digit: `DateParser::parseISO` checks only the length and the dashes (`dataparsers.cpp:106-114`), so "2006-1a-15" parses as 15 January 2006 and "2006-ab-15" throws `std::invalid_argument` past QuantLib's checks; `PeriodParser` reads a period's number from its first sign or digit (`:77-81`), so "x5D" and "5xD" parse as 5D. ISO 8601's YYYY-MM-DD is four, two and two digits, and QuantLib's own texts state the grammar: nanoql refuses a field or a number whose text isn't digits (a period's with an optional sign), with QuantLib's texts, "invalid format" and "unable to parse the number of units of ... in '...'". Every well-formed input parses as QuantLib's.
+
+Facts:
+
+- `AnIsoDateFieldMustBeDigits`
+- `APeriodsNumberMustBeASignAndDigits`
+
 ## DateAdvanceOverflowTests
 
 [`Divergences/DateAdvanceOverflowTests.cs`](../tests/NanoQL.Tests/Divergences/DateAdvanceOverflowTests.cs)
@@ -682,6 +715,27 @@ Facts:
 - `ADividendCurveSettlingWithTheRiskFreeCurveIsReadByDate`
 - `ADividendCurveOnAnotherDayCounterIsReadPerTheRiskFreeCurvesTime`
 
+## ECBNoKnownDatesTests
+
+[`Divergences/ECBNoKnownDatesTests.cs`](../tests/NanoQL.Tests/Divergences/ECBNoKnownDatesTests.cs)
+
+ECB's functions with no known dates. QuantLib's refusal "ECB dates after ... are unknown" reads `*knownDates().rbegin()` (`ecb.cpp:233-234`, `:245-246`), which is undefined on an empty set, as `removeDate` can leave it. nanoql refuses with "no ECB dates are known", the type QuantLib's refusal has.
+
+Facts:
+
+- `AnEmptySetIsRefused`
+
+## ECBRangeStartTests
+
+[`Divergences/ECBRangeStartTests.cs`](../tests/NanoQL.Tests/Divergences/ECBRangeStartTests.cs)
+
+ECB's functions at the start of Date's range. QuantLib's `isECBdate(d)` is `nextDate(d - 1) == d`, and a month's date is `nextDate(Date(1, m, y) - 1)` (`ecb.hpp:42`, `:81-84`; `ecb.cpp:200`), so on 1 January 1901 both step out of the range and throw "Date's serial number (366) outside allowed range". nanoql reads the first known date on or after the month's first day, and membership in the known dates up to the last one, which are QuantLib's answers on every other date; QuantLib's own `nextDate` for the following month is the check.
+
+Facts:
+
+- `IsECBdateAnswersOnDatesFirstDay`
+- `AMonthsDateIsFoundFromDatesFirstDay`
+
 ## EngineSequenceTests
 
 [`Divergences/EngineSequenceTests.cs`](../tests/NanoQL.Tests/Divergences/EngineSequenceTests.cs)
@@ -696,6 +750,19 @@ Facts:
 - `TheResultsAreWhatFetchResultsReturns`
 - `TheArgumentChecksRunBeforeTheExpiryCheck`
 - `ALegFailureNamesTheLegAndKeepsTheCause`
+
+## EquityIndexDatedCurveTests
+
+[`Divergences/EquityIndexDatedCurveTests.cs`](../tests/NanoQL.Tests/Divergences/EquityIndexDatedCurveTests.cs)
+
+The equity index's forecast on curves dated before the evaluation date. QuantLib's formula is I(t, T) = I(t, t) P_D(t, T) / P_R(t, T) from the evaluation date t (`equityindex.hpp:42-50`), but its forecast reads each curve's discount at T from the curve's own reference date (`equityindex.cpp:84-88`), so a curve dated before t carries its discount from its own date to t into the forward. nanoql reads each curve from t, its discount at T over its discount at t, nothing accruing before its reference date; QuantLib's own forecast on the curves restated at t is the check, and on a curve dated on or after t the read is QuantLib's bit for bit. A fixing before a later-dated curve's reference date reads that curve as accruing nothing yet, where QuantLib's discount refuses the date ("negative time").
+
+Facts:
+
+- `BothCurvesDatedBeforeTheEvaluationDate`
+- `OnlyTheRiskFreeCurveDatedBeforeTheEvaluationDate`
+- `ACurveDatedAfterTheEvaluationDateReadsAsQuantLibs`
+- `ACurveWhoseDiscountAtItsOwnDateIsntOneReadsAsQuantLibs`
 
 ## EuropeanRhoDiscountCurveTests
 
@@ -728,6 +795,7 @@ Facts:
 
 - `APairWithACodeOf10000IsLookedUpBothWays`
 - `AChainPassesThroughACodeOf10000`
+- `QuantLibsBitcoinIsLookedUpBothWaysAndThroughAChain`
 
 ## ExerciseBeforeReferenceDateTests
 
@@ -1999,6 +2067,16 @@ Facts:
 
 - `SabrsEdgesComeBackAsTheTransformsNearestValues`
 - `ZabrsTransformKeepsEachEdgeInItsRange`
+
+## YearFractionToDateNaNTests
+
+[`Divergences/YearFractionToDateNaNTests.cs`](../tests/NanoQL.Tests/Divergences/YearFractionToDateNaNTests.cs)
+
+`yearFractionToDate` on a NaN time. QuantLib casts `round(NaN * 365.25)` to an integer through `boost::numeric_cast`, whose range check a NaN passes (`yearfractiontodate.cpp:40-41`), so the cast is undefined: the wheel reads -2147439651 days and throws "Date's serial number (-2147439651) outside allowed range". nanoql refuses a NaN on entry with `ArgumentException` naming `t`.
+
+Facts:
+
+- `ANaNTimeIsRefusedOnEntry`
 
 ## YoYCapFloorEngineFixingTests
 
