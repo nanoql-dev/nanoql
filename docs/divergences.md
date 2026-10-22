@@ -63,6 +63,57 @@ Facts:
 
 - `ANullBMAIndexIsRefusedWithQuantLibsText`
 
+## BarrierMismatchedTimesTests
+
+[`Divergences/BarrierMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/BarrierMismatchedTimesTests.cs)
+
+The analytic barrier engine on structures that measure time differently (the S-rx plan's SRXR3 (iii), fixed under R8). QuantLib reads every structure by the exercise date (`analyticbarrierengine.cpp:128-170`), each rate over its own curve's time and the variance over the volatility's, and combines them as though they shared a clock: on a 5% Actual/360 risk-free curve a one-year down-and-out call at 90, strike 100, rebate 2, is 9.489629845557584 against 9.494843368487192 on the Actual/365 Fixed curve with the same discount factors, and in-out parity fails by 3.7e-5; on a risk-free curve settling two days later, or beside a dividend curve and volatility dated later, it is off its own engine on the market restated from the earliest date by up to 2.6e-3; and an exercise before the risk-free curve's date throws "negative time" [executed on the wheel]. nanoql reads each rate on the volatility's clock, the curve's zero rate times its own accrual time to the exercise over the volatility's, and each discount and the variance as accrued, nothing before a structure's own date (the mismatched-dates row of the master plan's §2.2): a factor of 1.0, and QuantLib's bits, where the clocks agree; the curve's own rate where the volatility accrues nothing, an option expiring on the evaluation date. QuantLib's check: its own engine on the market restated from the earliest date, each restated structure on Actual/365 Fixed (a curve dated later a discount curve at 1 up to its date, a volatility dated later a variance curve at 0 up to its date), and its master's value at expiry.
+
+Facts:
+
+- `AnAct360MarketPricesAsQuantLibOnTheEquivalentCurves`
+- `InOutParityHoldsOnMixedDayCounters`
+- `AnOptionExpiringOnTheEvaluationDateIsPricedAtExpiry`
+- `AnImpliedVolatilityOnMixedDayCountersIsTheOneOnTheEquivalentCurves`
+- `OnACurveSettlingLaterTheEngineIsQuantLibsOnTheRestatedMarket`
+- `OnStructuresDatedLaterTheEngineIsQuantLibsOnTheRestatedMarket`
+- `AnExerciseBeforeTheRiskFreeCurvesDateIsPriced`
+- `AnImpliedVolatilityOnACurveSettlingLaterIsTheOneOnTheRestatedMarket`
+
+## BarrierNegativeRateRebateTests
+
+[`Divergences/BarrierNegativeRateRebateTests.cs`](../tests/NanoQL.Tests/Divergences/BarrierNegativeRateRebateTests.cs)
+
+A knock-out's rebate under negative rates (the S-rx plan's SRXR3 (xv), fixed under R8). QuantLib's analytic engine takes `λ = √(μ² + 2r/σ²)` (`analyticbarrierengine.cpp:243-264`), the square root of a negative number where r < 0 and μ² < −2r/σ², so a knock-out with a rebate is NaN: at r −1%, q −1.5% and a volatility of 20%, a one-year down-and-out call at 90, strike 100, with 5 paid at the hit, where QuantLib's finite-difference engine gives 9.889092750723153 [executed on the wheel]. Where λ² < 0, nanoql's rebate term is the rebate's present value at the hit, `R ∫₀ᵀ e^(−rt) f(t) dt`, f the first-passage density of the log-price to the barrier, integrated by `GaussLobattoIntegral`; with the spot on the barrier it is the rebate, paid now. Where λ² ≥ 0 QuantLib's closed form stands, with its bits. QuantLib's checks: its closed form, the same quantity where it works, and its finite-difference engine (400 × 800) where it doesn't, within that engine's own grid error.
+
+Facts:
+
+- `WhereLambdaIsRealTheIntegralIsQuantLibsClosedForm`
+- `WhereLambdaIsNotRealTheRebateIsQuantLibsFiniteDifferenceValue`
+- `WithTheSpotOnTheBarrierTheRebateIsPaidNow`
+
+## BarrierNegativeRebateTests
+
+[`Divergences/BarrierNegativeRebateTests.cs`](../tests/NanoQL.Tests/Divergences/BarrierNegativeRebateTests.cs)
+
+A negative rebate (the S-rx plan's SRXR3 (ii), fixed under R8). QuantLib's analytic barrier engine pays a rebate only where `rebate() > 0` (`analyticbarrierengine.cpp:227`, `:244`), so a rebate of −3 prices as none: on a one-year call struck at 100 (spot 100, r 5%, q 2%, volatility 25%) its four barrier types are 2.0 to 2.1 from QuantLib's finite-difference engine, which prices the rebate [executed on the wheel]. nanoql tests `rebate != 0`, which leaves zero and positive rebates on QuantLib's bits; the Vanna-Volga engine and the implied volatility, which price through the analytic engine, follow. QuantLib's checks: its finite-difference engine, and the price's linearity in the rebate.
+
+Facts:
+
+- `ANegativeRebateIsPricedAsQuantLibsFiniteDifferenceEngineDoes`
+- `AVannaVolgaKnockOutsNegativeRebateIsLinearThroughZero`
+- `AnImpliedVolatilityWithANegativeRebateRepricesItsTarget`
+
+## BarrierZeroVolatilityTests
+
+[`Divergences/BarrierZeroVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/BarrierZeroVolatilityTests.cs)
+
+The analytic barrier engine at zero volatility (the S-rx plan's SRXR3 (i), taken from QuantLib's master ahead of the pin). QuantLib 1.44 divides by the zero standard deviation (`analyticbarrierengine.cpp:181-238`): a one-year up-and-out put at 107, strike 105, rebate 4, prices NaN [executed on the wheel]. QuantLib's master fixed it after the pin (#2853, `e29c64126`, merged as `2768fafdc` on 2026-10-14): with a variance below machine epsilon the underlying follows its forward, a spot on the barrier counts as a hit, a knock-in pays the vanilla payoff or the rebate at maturity, and a knock-out its rebate at the hit or the vanilla payoff. This is master's `testZeroVolatility`, until the pin moves to a release that carries it, as SBR7's case is.
+
+Facts:
+
+- `TestZeroVolatility`
+
 ## BiCGstabLastIterationTests
 
 [`Divergences/BiCGstabLastIterationTests.cs`](../tests/NanoQL.Tests/Divergences/BiCGstabLastIterationTests.cs)
@@ -597,6 +648,16 @@ Facts:
 
 - `ADefaultRoundingHasNoPrecisionOrDigit`
 
+## DeltaVolQuoteAtmDeltaTests
+
+[`Divergences/DeltaVolQuoteAtmDeltaTests.cs`](../tests/NanoQL.Tests/Divergences/DeltaVolQuoteAtmDeltaTests.cs)
+
+The ATM quote's delta (the S-rx plan's SRXR3 (viii)). QuantLib's ATM constructor leaves `delta_` uninitialized (`deltavolquote.cpp:32-37`), so its `delta()` reads whatever the memory held: on the wheel, after a 25-delta quote, 0.25 [executed on the wheel]. Here an ATM quote has no delta, `null` (R3); the delta-and-volatility constructor's is the one given, as QuantLib's. QuantLib's check: that constructor, unchanged.
+
+Facts:
+
+- `AnAtmQuoteHasNoDelta`
+
 ## DiscretizedAssetStateTests
 
 [`Divergences/DiscretizedAssetStateTests.cs`](../tests/NanoQL.Tests/Divergences/DiscretizedAssetStateTests.cs)
@@ -714,6 +775,30 @@ Facts:
 - `TheCopysFlagChangesAndTheReceiversDoesNot`
 - `TheCopyKeepsItsTypeAndItsValues`
 - `ANullReceiverThrows`
+
+## FdBarrierMismatchedTimesTests
+
+[`Divergences/FdBarrierMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/FdBarrierMismatchedTimesTests.cs)
+
+The finite-difference barrier and rebate engines on structures that measure time differently. QuantLib takes the maturity from the process's time, the risk-free curve's (`fdblackscholesbarrierengine.cpp:89`, `fdblackscholesrebateengine.cpp:73`), and the dividends' and the knock-in's vanilla conditions' reference date and day counter from the risk-free curve (`:118-120`, `:106-107`), while the operator and the mesher read the other structures at those times on their own clocks: on a risk-free curve on Actual/360, settling two days later, or beside a dividend curve and volatility dated later, its barrier engine is off its own engine on the market restated from the earliest date by 1.6e-3 to 9.6e-3 relative, the knock-ins most, and its rebate engine by 1.1e-4 to 3.6e-4 [executed on the wheel]. nanoql's engines take their times from the engine's clock (`FdmBlackScholesOp.Clock`), the earliest reference date of the structures on the risk-free curve's day counter, the operator reading each structure at the instants those times denote, nothing accrued before its own date (the mismatched-dates row of the master plan's §2.2), so a knock-in's three parts price on one clock. QuantLib's check: its own engines on the market restated from the earliest date on the clock's day counter (a curve dated later a discount curve at 1 up to its date, a volatility dated later a variance curve at 0 up to its date), to 1e-12, as S-eq's finite-difference engine meets it. Where every structure shares the risk-free curve's date and day counter, the clock is the risk-free curve, and the engines keep QuantLib's bits.
+
+Facts:
+
+- `OnAnAct360RiskFreeCurveTheBarrierEngineIsQuantLibsOnTheRestatedMarket`
+- `OnACurveSettlingLaterWithACashDividendTheBarrierEngineIsQuantLibsOnTheRestatedMarket`
+- `OnStructuresDatedLaterTheBarrierEngineIsQuantLibsOnTheRestatedMarket`
+- `OnACurveSettlingLaterTheRebateEngineIsQuantLibsOnTheRestatedMarket`
+
+## FdmBoundaryDirectionTests
+
+[`Divergences/FdmBoundaryDirectionTests.cs`](../tests/NanoQL.Tests/Divergences/FdmBoundaryDirectionTests.cs)
+
+A boundary's direction outside the layout (the S-rx plan's SRXR3 (xiv)). QuantLib's `FdmIndicesOnBoundary` writes `newDim[direction]` (`fdmindicesonboundary.cpp:31-32`) and `FdmDirichletBoundary` reads `locations(direction)`, past their vectors' ends: undefined behaviour. Here both refuse the direction on entry with `ArgumentOutOfRangeException`, before any read; a direction in the layout is QuantLib's.
+
+Facts:
+
+- `TheIndicesRefuseADirectionOutsideTheLayout`
+- `TheDirichletBoundaryRefusesADirectionOutsideTheLayout`
 
 ## FdmDividendHandler3dTests
 
@@ -1272,6 +1357,17 @@ Facts:
 - `ToStringNeverThrows`
 - `ShortPeriodThrowsAsQuantLibDoes`
 
+## PremiumAdjustedPutStrikeTests
+
+[`Divergences/PremiumAdjustedPutStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/PremiumAdjustedPutStrikeTests.cs)
+
+The premium-adjusted puts beyond the non-adjusted delta's range (the S-rx plan's SRXR3 (xi), fixed under R8). `deltaFromStrike` returns a premium-adjusted put delta whose size exceeds the foreign discount factor (spot) or 1 (forward), and `strikeFromDelta` refuses it through its non-adjusted guess (`blackdeltacalculator.cpp:102-111`, `:143-147`): with spot 1, discount factors 0.99 and 0.97 and a standard deviation of 0.2, the strikes 1.4, 2.0 and 3.0 give deltas QuantLib refuses as "Spot delta out of range." and "Forward delta out of range." [executed on the wheel]. nanoql starts QuantLib's Brent from the forward on QuantLib's own bracket, `[0, 100·spot]` (`:150`), where the guess is out of range. QuantLib's check: its own `deltaFromStrike` at the solved strike, and the strikes the deltas came from.
+
+Facts:
+
+- `ASpotPremiumAdjustedPutsStrikeIsSolved`
+- `AForwardPremiumAdjustedPutsStrikeIsSolved`
+
 ## ProcessMismatchedTimesTests
 
 [`Divergences/ProcessMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/ProcessMismatchedTimesTests.cs)
@@ -1637,6 +1733,32 @@ Facts:
 
 - `TheTimesAreTheConstructionsAndTheAdapterIsTheContexts`
 
+## SviFixedParameterTests
+
+[`Divergences/SviFixedParameterTests.cs`](../tests/NanoQL.Tests/Divergences/SviFixedParameterTests.cs)
+
+SVI fits with b or a fixed (the S-rx plan's SRXR3 (xvii), fixed under R8). QuantLib's direct transform keeps a free b inside b(1+|ρ|) < 4 and a free a inside a + bσ√(1−ρ²) > 0, but copies a fixed one as given while ρ, σ and b move (`sviinterpolation.hpp:112-128`), and every cost evaluation builds a section whose parameters' check refuses the excess (`xabrinterpolation.hpp:291-306`, `svismilesection.cpp:39-46`): on a seven-strike skew (a year, forward 100) QuantLib's fit throws midway with b fixed at 3.5 ("b(1+|rho|) must be less than or equal to 4, (b=3.5, rho=0.250507)"), with a, b and σ fixed at −0.05, 1 and 0.1 (at ρ 0.929163), and with a and σ fixed at −0.1 and 0.05 (at b 0.069537) [executed on the harness]. Here, where a trial would fail QuantLib's check, the free parameters move onto the set it admits, each rounded inward: ρ capped first at the tightest bound the fixed parameters set, then σ or b raised to meet a's constraint. A fixed set no ρ admits is refused before the fit, with QuantLib's text. A trial the check passes is QuantLib's, so a fit QuantLib completes is QuantLib's. QuantLib's check: a fresh section at the reported parameters reproduces the fitted volatilities and error.
+
+Facts:
+
+- `AFitWithBFixedAt3Point5Completes`
+- `AFitWithABAndSigmaFixedCapsRho`
+- `AFitWithAAndSigmaFixedRaisesBAndCapsRho`
+- `AFixedBAbove4IsRefusedBeforeTheFit`
+
+## SviTransformEdgeTests
+
+[`Divergences/SviTransformEdgeTests.cs`](../tests/NanoQL.Tests/Divergences/SviTransformEdgeTests.cs)
+
+SVI's inverse transforms at their edges (the S-rx plan's SRXR3 (x)). QuantLib's inverse (`sviinterpolation.hpp:98-108`) takes `asin` of ρ/0.999999, `√(σ − 10⁻⁶)`, `√(a − 10⁻⁶ + bσ√(1−ρ²))` and `tan` of an argument that passes π/2 once b(1+|ρ|) exceeds 4·0.999999, each of which a value its parameters' check accepts can push out of range: on a seven-strike skew (a year, forward 100) QuantLib's fit refuses a fixed ρ of 0.9999995 ("b (nan) must be non negative"), a fixed σ of 5·10⁻⁷ ("sigma (-nan(ind)) must be positive") and an a guessed at −bσ√(1−ρ²) ("a + b sigma sqrt(1-rho^2) (a=-nan(ind), …) must be non negative"), and fits a b guessed at 4/(1+|ρ|) from a wrapped guess [executed on the harness]. Here each argument is clamped into its transform's range (`asin`'s to [−1, 1], each square root's floored at 0, the `tan` argument capped at π/2), as S7R5 (vii) clamps SABR's and ZABR's. QuantLib's check: its own fit from the clamped value, which the direct transform maps back to.
+
+Facts:
+
+- `ARhoFixedBeyondTheTransformsRangeFitsAsItsClampedValue`
+- `ASigmaFixedBelowTheTransformsRangeFitsAsItsClampedValue`
+- `AnAGuessedAtItsConstraintsEdgeFitsAsItsClampedValue`
+- `ABGuessedAtItsConstraintsEdgeFitsAsItsClampedValue`
+
 ## SwapIndexNullIndexTests
 
 [`Divergences/SwapIndexNullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/SwapIndexNullIndexTests.cs)
@@ -1818,6 +1940,34 @@ Facts:
 
 - `ATreesIndicesOutOfRangeAreRefused`
 - `StatePricesBeyondTheGridAreRefused`
+
+## VannaVolgaMismatchedTimesTests
+
+[`Divergences/VannaVolgaMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/VannaVolgaMismatchedTimesTests.cs)
+
+The Vanna-Volga engine's own reads on curves that measure time differently from its volatility (the S-rx plan's SRXR3 (xx), fixed under R8). QuantLib dates the volatility by the evaluation date on Actual/365 Fixed (`vannavolgabarrierengine.cpp:83-86`) and prices its barrier through the analytic engine on it, but reads everything else at the quotes' time on each curve's own clock (`:97-137`, `:194-231`, `:313`): on Actual/360 curves a one-year up-and-out call at 1.40, strike 1.25, on a skewed smile, is 0.008044987558286639 against 0.007989598182293868 on the Actual/365 Fixed curves with the same discount factors, and on curves dated at the FX spot date, two days later, the common set-up, it is off its own engine on the curves restated from the evaluation date by 9.1e-5 to 2.8e-2, the down-and-in most [executed on the wheel]. nanoql reads each curve at the instant the quotes' time denotes on the volatility's clock, nothing accrued before the curve's own date (the mismatched-dates row of the master plan's §2.2): its discount factors, and the touch probability's zero rates, the logarithms of those discounts over the time, as SRXR3 (iii) reads the analytic engine's. Where the curves are dated today on Actual/365 Fixed the reads are QuantLib's, with its bits. QuantLib's check: its own engine on the curves restated from the evaluation date on Actual/365 Fixed (a curve dated later a discount curve at 1 up to its date), where the quotes' time is the exercise's and where it isn't.
+
+Facts:
+
+- `OnAct360CurvesTheEngineIsQuantLibsOnTheEquivalentCurves`
+- `OnAct365FixedCurvesTheEngineIsQuantLibsOwn`
+- `OnCurvesDatedAtTheSpotDateTheEngineIsQuantLibsOnTheRestatedCurves`
+- `WhereTheQuotesTimeIsNotTheExercisesTheEngineIsQuantLibsOnTheRestatedCurves`
+
+## VannaVolgaRebateTests
+
+[`Divergences/VannaVolgaRebateTests.cs`](../tests/NanoQL.Tests/Divergences/VannaVolgaRebateTests.cs)
+
+The Vanna-Volga engine with a rebate (the S-rx plan's SRXR3 (xvi), fixed under R8). QuantLib prices the out option with its rebate and the in option by parity, `vanilla − outPrice`, capping `outPrice` at the vanilla (`vannavolgabarrierengine.cpp:174-193`, `:326-339`), and gives an out option beyond the barrier 0 (`:141-168`): so a knock-in loses its own rebate and subtracts the knock-out's, a capped knock-out loses its rebate, and a knock-out at the barrier loses its rebate too. On a flat smile, where the method's adjustment vanishes and the engine should give the analytic engine's price, a 0.05 rebate leaves an up-and-in at 1.40, strike 1.25, at 0.06807979413354334 against 0.11711444573142975 [executed on the wheel]. nanoql prices each option's rebate-free part and bounds it as QuantLib does, then adds its own rebate: an out option's smile-adjusted rebate at the hit (QuantLib's own price where no bound binds), an in option's rebate at expiry by the analytic engine; with the spot at or beyond the barrier an out option is its rebate, due now, and an in option QuantLib's vanilla. A zero rebate keeps QuantLib's bits. QuantLib's checks: its own engine's rebate-free parts and uncapped prices, and its analytic engine.
+
+Facts:
+
+- `OnAFlatSmileAKnockInWithARebateIsTheAnalyticEnginesPrice`
+- `OnAFlatSmileAKnockOutQuantLibCapsIsTheAnalyticEnginesPrice`
+- `OnASkewedSmileAKnockInIsQuantLibsRebateFreePriceAndItsRebateAtExpiry`
+- `AtOrBeyondTheBarrierAKnockOutIsItsRebateAndAKnockInTheVanilla`
+- `AnUncappedKnockOutWithARebateIsQuantLibsOwnPrice`
+- `AZeroRebateKeepsQuantLibsValues`
 
 ## VarianceSwapMismatchedTimesTests
 

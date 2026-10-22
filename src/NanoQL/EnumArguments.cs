@@ -9,6 +9,7 @@ using NanoQL.Methods;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
+using NanoQL.Quotes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 
@@ -566,6 +567,45 @@ internal static class EnumArguments
             or > MtMCrossCurrencyBasisSwapType.ReceiveFxBaseCurrency)
         {
             throw new ArgumentOutOfRangeException(paramName, value, "unknown MtM cross-currency basis swap type");
+        }
+    }
+
+    /// <summary>Refuses a barrier type outside <see cref="BarrierType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "unknown type"
+    /// (<c>barrieroption.cpp:108-117</c>).</exception>
+    internal static void Check(BarrierType value, string paramName)
+    {
+        if (value is < BarrierType.DownIn or > BarrierType.UpOut)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown type");
+        }
+    }
+
+    /// <summary>Refuses a delta convention outside <see cref="DeltaVolQuoteDeltaType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "invalid delta type"
+    /// (<c>blackdeltacalculator.cpp:70</c>).</exception>
+    internal static void Check(DeltaVolQuoteDeltaType value, string paramName)
+    {
+        if (value is < DeltaVolQuoteDeltaType.Spot or > DeltaVolQuoteDeltaType.PaFwd)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "invalid delta type");
+        }
+    }
+
+    /// <summary>Refuses an at-the-money convention outside <see cref="DeltaVolQuoteAtmType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "invalid atm type"
+    /// (<c>blackdeltacalculator.cpp:183</c>).</exception>
+    internal static void Check(DeltaVolQuoteAtmType value, string paramName)
+    {
+        if (value is < DeltaVolQuoteAtmType.AtmNull or > DeltaVolQuoteAtmType.AtmPutCall50)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "invalid atm type");
         }
     }
 }

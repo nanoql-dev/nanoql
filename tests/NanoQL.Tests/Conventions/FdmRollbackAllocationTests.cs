@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Immutable;
 using NanoQL.Instruments;
 using NanoQL.Methods;
 using NanoQL.Numerics;
@@ -17,8 +18,9 @@ namespace NanoQL.Tests.Conventions;
 /// A rollback of <see cref="FdmBackwardSolver"/>, which keeps its schemes after the first, is measured under each of
 /// the eight schemes the solver runs step by step (the method of lines, whose adaptive Runge-Kutta allocates per step
 /// as QuantLib's does, is left out), with the local volatility, whose walk over the layout reads the local volatility
-/// at each point, and with a Bermudan condition. Each rollback is measured on fresh values after a warm-up on others
-/// (<see cref="AllocationAssert"/>), and gives the warm-up's values.
+/// at each point, with a Bermudan condition, and as a knock-out with a <see cref="FdmDirichletBoundary"/> on each side,
+/// which writes its value into the caller's span (the S-rx plan's SRXD13). Each rollback is measured on fresh values
+/// after a warm-up on others (<see cref="AllocationAssert"/>), and gives the warm-up's values.
 /// </summary>
 public class FdmRollbackAllocationTests
 {
@@ -56,7 +58,12 @@ public class FdmRollbackAllocationTests
     [Fact]
     public void ABermudanRollbackAllocatesNothing() => RollbackAllocatesNothing(FdmSchemeDesc.Douglas(), bermudan: true);
 
-    private static void RollbackAllocatesNothing(FdmSchemeDesc desc, int steps = 50, bool localVol = false, bool bermudan = false)
+    [Fact]
+    public void AKnockOutRollbackWithDirichletBoundariesAllocatesNothing() =>
+        RollbackAllocatesNothing(FdmSchemeDesc.Douglas(), dirichlet: true);
+
+    private static void RollbackAllocatesNothing(
+        FdmSchemeDesc desc, int steps = 50, bool localVol = false, bool bermudan = false, bool dirichlet = false)
     {
         var process = new BlackScholesMertonProcess(
             100.0, new FlatForward(Today, 0.02, Dc), new FlatForward(Today, 0.04, Dc), localVol ? Surface() : new BlackConstantVol(Today, null, 0.2, Dc));
@@ -77,7 +84,14 @@ public class FdmRollbackAllocationTests
             initial[i] = calculator.AvgInnerValue(iter, 1.0);
         }
 
-        var solver = new FdmBackwardSolver(op, [], conditions, desc);
+        ImmutableArray<BoundaryCondition<FdmLinearOp>> boundaries = dirichlet
+            ?
+            [
+                new FdmDirichletBoundary(mesher, 0.0, 0, BoundaryConditionSide.Lower),
+                new FdmDirichletBoundary(mesher, 0.0, 0, BoundaryConditionSide.Upper),
+            ]
+            : [];
+        var solver = new FdmBackwardSolver(op, boundaries, conditions, desc);
         double[] warm = [.. initial];
         solver.Rollback(warm, 1.0, 0.0, steps, 0);
 

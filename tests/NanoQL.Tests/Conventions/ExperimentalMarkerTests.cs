@@ -92,4 +92,23 @@ public class ExperimentalMarkerTests
             Assert.Equal(DiagnosticId, t.GetCustomAttribute<ExperimentalAttribute>(inherit: false)?.DiagnosticId);
         }
     }
+
+    [Fact]
+    public void TheVannaVolgaAndSviTypesCarryTheMarker()
+    {
+        foreach (Type t in new[]
+        {
+            typeof(NanoQL.Experimental.VannaVolga),
+            typeof(NanoQL.Experimental.VannaVolgaInterpolation),
+            typeof(NanoQL.Experimental.VannaVolgaBarrierEngine),
+            typeof(NanoQL.Experimental.Svi),
+            typeof(NanoQL.Experimental.SviInterpolation),
+            typeof(NanoQL.Experimental.SviInterpolationFunctions),
+            typeof(NanoQL.Experimental.SviSmileSection),
+        })
+        {
+            Assert.Equal(Namespace, t.Namespace);
+            Assert.Equal(DiagnosticId, t.GetCustomAttribute<ExperimentalAttribute>(inherit: false)?.DiagnosticId);
+        }
+    }
 }

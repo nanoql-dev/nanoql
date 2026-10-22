@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 861 | 105 |
-| partial | 29 | 34 |
-| ported | 371 | 43 |
+| not started | 848 | 102 |
+| partial | 29 | 35 |
+| ported | 384 | 45 |
 | replaced | 20 | 6 |
 | total | 1,456 | 194 |
 
@@ -167,9 +167,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `perturbativebarrieroptionengine` | not started |  | no nanoql type: PerturbativeBarrierOptionEngine |
 | `quantodoublebarrieroption` | not started |  | no nanoql type: QuantoDoubleBarrierOption |
 | `suowangdoublebarrierengine` | not started |  | no nanoql type: SuoWangDoubleBarrierEngine |
-| `vannavolgabarrierengine` | not started |  | no nanoql type: VannaVolgaBarrierEngine |
+| `vannavolgabarrierengine` | ported | Experimental/BarrierOption/VannaVolgaBarrierEngine.cs |  |
 | `vannavolgadoublebarrierengine` | not started |  | no nanoql type: VannaVolgaDoubleBarrierEngine |
-| `vannavolgainterpolation` | not started |  | no nanoql type: VannaVolgaInterpolation, VannaVolga |
+| `vannavolgainterpolation` | ported | Experimental/BarrierOption/VannaVolga.cs, Experimental/BarrierOption/VannaVolgaInterpolation.cs |  |
 
 ### `ql/experimental/basismodels/`
 
@@ -516,8 +516,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `sabrvolsurface` | not started |  | no nanoql type: SabrVolSurface |
 | `sabrvoltermstructure` | not started |  | no nanoql type: SABRVolTermStructure |
 | `sviinterpolatedsmilesection` | not started |  | no nanoql type: SviInterpolatedSmileSection |
-| `sviinterpolation` | not started |  | no nanoql type: SviInterpolation, Svi |
-| `svismilesection` | not started |  | no nanoql type: SviSmileSection |
+| `sviinterpolation` | ported | Experimental/Volatility/SviInterpolation/Svi.cs, Experimental/Volatility/SviInterpolation/SviInterpolation.cs, Experimental/Volatility/SviInterpolation/SviInterpolationFunctions.cs, Experimental/Volatility/SviInterpolation/SviSpecs.cs, Experimental/Volatility/SviInterpolation/SviWrapper.cs |  |
+| `svismilesection` | ported | Experimental/Volatility/SviSmileSection.cs |  |
 | `volcube` | not started |  | no nanoql type: VolatilityCube |
 | `zabr` | not ported: deprecated |  |  |
 | `zabrinterpolatedsmilesection` | not ported: deprecated |  |  |
@@ -621,8 +621,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `asianoption` | not started |  | no nanoql type: ContinuousAveragingAsianOption, DiscreteAveragingAsianOption |
 | `assetswap` | not started |  | no nanoql type: AssetSwap, AssetSwapResults |
 | `averagetype` | not started |  | no nanoql type: AverageType |
-| `barrieroption` | not started |  | no nanoql type: BarrierOption |
-| `barriertype` | not started |  | no nanoql type: BarrierType |
+| `barrieroption` | ported | Instruments/BarrierOption.cs |  |
+| `barriertype` | ported | Instruments/BarrierType.cs, Instruments/BarrierTypeFunctions.cs |  |
 | `basketoption` | not started |  | no nanoql type: BasketPayoff, MinBasketPayoff, MaxBasketPayoff, AverageBasketPayoff, SpreadBasketPayoff, BasketOption |
 | `bmaswap` | ported | Instruments/BMASwap.cs, Instruments/BMASwapResults.cs |  |
 | `bond` | ported | Instruments/Bond/Bond.cs, Instruments/Bond/BondPrice.cs, Instruments/Bond/BondPriceType.cs, Instruments/Bond/BondResults.cs |  |
@@ -1124,12 +1124,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmaffinemodelswapinnervalue` | not started |  | no nanoql type: FdmAffineModelSwapInnerValue |
 | `fdmaffinemodeltermstructure` | not started |  | no nanoql type: FdmAffineModelTermStructure |
 | `fdmboundaryconditionset` | ported | Methods/FiniteDifferences/Utilities/FdmBoundaryConditionSet.cs |  |
-| `fdmdirichletboundary` | not started |  | no nanoql type: FdmDirichletBoundary |
+| `fdmdirichletboundary` | ported | Methods/FiniteDifferences/Utilities/FdmDirichletBoundary.cs |  |
 | `fdmdiscountdirichletboundary` | not started |  | no nanoql type: FdmDiscountDirichletBoundary |
 | `fdmdividendhandler` | ported | Methods/FiniteDifferences/Utilities/FdmDividendHandler.cs |  |
 | `fdmescrowedloginnervaluecalculator` | ported | Methods/FiniteDifferences/Utilities/FdmEscrowedLogInnerValueCalculator.cs |  |
 | `fdmhestongreensfct` | not started |  | no nanoql type: FdmHestonGreensFct, FdmHestonGreensFctAlgorithm |
-| `fdmindicesonboundary` | not started |  | no nanoql type: FdmIndicesOnBoundary |
+| `fdmindicesonboundary` | ported | Methods/FiniteDifferences/Utilities/FdmIndicesOnBoundary.cs |  |
 | `fdminnervaluecalculator` | partial | Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmCellAveragingInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmLogInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmZeroInnerValue.cs | partial: FdmLogBasketInnerValue, which waits for B4.5 with the basket option's payoff; no nanoql type: FdmLogBasketInnerValue |
 | `fdmmesherintegral` | not started |  | no nanoql type: FdmMesherIntegral |
 | `fdmquantohelper` | ported | Methods/FiniteDifferences/Utilities/FdmQuantoHelper.cs |  |
@@ -1463,7 +1463,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `americanpayoffathit` | not started |  | no nanoql type: AmericanPayoffAtHit |
 | `bacheliercalculator` | not started |  | no nanoql type: BachelierCalculator |
 | `blackcalculator` | ported | PricingEngines/BlackCalculator.cs |  |
-| `blackdeltacalculator` | not started |  | no nanoql type: BlackDeltaCalculator, BlackDeltaPremiumAdjustedSolverClass, BlackDeltaPremiumAdjustedMaxStrikeClass |
+| `blackdeltacalculator` | ported | PricingEngines/BlackDeltaCalculator.cs | no nanoql type: BlackDeltaPremiumAdjustedSolverClass, BlackDeltaPremiumAdjustedMaxStrikeClass |
 | `blackformula` | ported | PricingEngines/BlackFormulaFunctions.cs |  |
 | `blackscholescalculator` | not started |  | no nanoql type: BlackScholesCalculator |
 | `genericmodelengine` | replaced: static engines: the model is an engine argument |  |  |
@@ -1496,7 +1496,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `analyticbarrierengine` | not started |  | no nanoql type: AnalyticBarrierEngine |
+| `analyticbarrierengine` | ported | PricingEngines/Barrier/AnalyticBarrierEngine.cs |  |
 | `analyticbinarybarrierengine` | not started |  | no nanoql type: AnalyticBinaryBarrierEngine |
 | `analyticdoublebarrierbinaryengine` | not started |  | no nanoql type: AnalyticDoubleBarrierBinaryEngine |
 | `analyticdoublebarrierengine` | not started |  | no nanoql type: AnalyticDoubleBarrierEngine |
@@ -1505,8 +1505,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `analytictwoassetbarrierengine` | not started |  | no nanoql type: AnalyticTwoAssetBarrierEngine |
 | `binomialbarrierengine` | not started |  | no nanoql type: BinomialBarrierEngine |
 | `discretizedbarrieroption` | not started |  | no nanoql type: DiscretizedBarrierOption, DiscretizedDermanKaniBarrierOption |
-| `fdblackscholesbarrierengine` | not started |  | no nanoql type: FdBlackScholesBarrierEngine |
-| `fdblackscholesrebateengine` | not started |  | no nanoql type: FdBlackScholesRebateEngine |
+| `fdblackscholesbarrierengine` | ported | PricingEngines/Barrier/FdBlackScholesBarrierEngine.cs |  |
+| `fdblackscholesrebateengine` | ported | PricingEngines/Barrier/FdBlackScholesRebateEngine.cs |  |
 | `fdhestonbarrierengine` | not started |  | no nanoql type: FdHestonBarrierEngine |
 | `fdhestondoublebarrierengine` | not started |  | no nanoql type: FdHestonDoubleBarrierEngine |
 | `fdhestonrebateengine` | not started |  | no nanoql type: FdHestonRebateEngine |
@@ -1746,7 +1746,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `compositequote` | not started |  | no nanoql type: CompositeQuote |
-| `deltavolquote` | not started |  | no nanoql type: DeltaVolQuote, DeltaVolQuoteDeltaType, DeltaVolQuoteAtmType |
+| `deltavolquote` | ported | Quotes/DeltaVolQuote/DeltaVolQuote.cs, Quotes/DeltaVolQuote/DeltaVolQuoteAtmType.cs, Quotes/DeltaVolQuote/DeltaVolQuoteDeltaType.cs |  |
 | `derivedquote` | not started |  | no nanoql type: DerivedQuote |
 | `eurodollarfuturesquote` | not started |  | no nanoql type: EurodollarFuturesImpliedStdDevQuote |
 | `forwardswapquote` | not started |  | no nanoql type: ForwardSwapQuote |
@@ -2068,7 +2068,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `assetswap` | not started |  | 9 cases |
 | `autocovariances` | not started |  | 3 cases |
 | `bacheliercalculator` | not started |  | 8 cases |
-| `barrieroption` | not started |  | 15 cases |
+| `barrieroption` | partial | TestSuite/BarrierOptionTests.cs | 10 of 15 cases; not yet: testLocalVolAndHestonComparison, testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast, testPerturbativeOrder2FullResolution |
 | `basismodels` | not started |  | 4 cases |
 | `basisswapratehelpers` | ported | TestSuite/BasisSwapRateHelpersTests.cs | 24 of 24 cases; moved: testOvernightIborAveragingAndTelescopicValueDates line 767 to Divergences/TelescopicValueDatesTests.cs; testOvernightOvernightTelescopicValueDatesWithSimpleAveraging line 920 to Divergences/TelescopicValueDatesTests.cs |
 | `basketoption` | not started |  | 25 cases |
@@ -2076,7 +2076,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bermudanswaption` | partial | TestSuite/BermudanSwaptionTests.cs | 1 of 6 cases; not yet: testCachedG2Values, testTreeEngineTimeSnapping, testBermudanOISSwaptionWithHW, testBermudanOISSwaptionWithG2, testBermudanOISSwaptionPreservesFeatures |
 | `binaryoption` | not started |  | 3 cases |
 | `blackcalculator` | ported | TestSuite/BlackCalculatorTests.cs | 6 of 6 cases |
-| `blackdeltacalculator` | not started |  | 4 cases |
+| `blackdeltacalculator` | ported | TestSuite/BlackDeltaCalculatorTests.cs | 4 of 4 cases |
 | `blackformula` | ported | TestSuite/BlackFormulaTests.cs | 15 of 15 cases |
 | `blackvolsurfacedelta` | not started |  | 5 cases |
 | `bondforward` | not started |  | 3 cases |
@@ -2226,7 +2226,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `solvers` | partial | TestSuite/SolversTests.cs | 3 of 9 cases; not yet: testBisection, testFalsePosition, testNewton, testRidder, testSecant, testHalley |
 | `squarerootclvmodel` | not started |  | 3 cases |
 | `stats` | not started |  | 4 cases |
-| `svivolatility` | not started |  | 1 cases |
+| `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |
 | `swap` | partial | TestSuite/SwapTests.cs | 12 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs; not yet: testInArrears, testFixedTenorInferenceWithTerminationDate, testSpotDateUsesFixingCalendar |
 | `swapforwardmappings` | not started |  | 3 cases |
 | `swaption` | ported | TestSuite/SwaptionTests.cs | 13 of 13 cases; replaced: testBlackEngineCaching by Vectors/Instruments/SwaptionVectorTests.cs |

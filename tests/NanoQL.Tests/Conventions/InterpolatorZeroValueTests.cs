@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Experimental;
 using NanoQL.Numerics;
 
 namespace NanoQL.Tests.Conventions;
@@ -241,6 +242,48 @@ public class InterpolatorZeroValueTests
         Assert.Equal(1, SABR.RequiredPoints);
         factory.CheckPoints(1);
         Assert.Throws<ArgumentException>(() => factory.CheckPoints(0));
+    }
+
+    [Fact]
+    public void SviAndVannaVolgaZeroValuesAreRefused()
+    {
+        // QuantLib's Svi and VannaVolga factories have no default constructor.
+        double[] strikes = [90.0, 100.0, 110.0];
+        double[] vols = [0.22, 0.2, 0.21];
+        foreach (Svi zero in new Svi[] { default, new(), (new Svi[1])[0] })
+        {
+            Assert.Throws<InvalidOperationException>(() => zero.Interpolate(strikes, vols));
+            Assert.Throws<InvalidOperationException>(() => zero.CheckPoints(3));
+        }
+
+        foreach (VannaVolga zero in new VannaVolga[] { default, new(), (new VannaVolga[1])[0] })
+        {
+            Assert.Throws<InvalidOperationException>(() => zero.Interpolate(strikes, vols));
+            Assert.Throws<InvalidOperationException>(() => zero.CheckPoints(3));
+        }
+
+        Assert.Throws<InvalidOperationException>(() => Consumer<Svi>(strikes, vols));
+        Assert.Throws<InvalidOperationException>(() => Consumer<VannaVolga>(strikes, vols));
+
+        // Built with their parameters, each builds its interpolation; the traits are QuantLib's (SVI's global, XABR's
+        // one point; Vanna-Volga's three points, global here as every value reads all three).
+        var svi = new Svi(1.0, 100.0, 0.01, 0.1, 0.1, -0.3, 0.0, true, true, true, true, true);
+        Assert.Equal(
+            new SviSmileSection(1.0, 100.0, [0.01, 0.1, 0.1, -0.3, 0.0]).Volatility(95.0),
+            Consumer(strikes, vols, svi).Evaluate(95.0));
+        Assert.True(Svi.Global);
+        Assert.Equal(1, Svi.RequiredPoints);
+        svi.CheckPoints(1);
+        Assert.Throws<ArgumentException>(() => svi.CheckPoints(0));
+
+        var vannaVolga = new VannaVolga(100.0, 0.98, 0.99, 1.0);
+        Assert.Equal(
+            new VannaVolgaInterpolation(strikes, vols, 100.0, 0.98, 0.99, 1.0).Evaluate(95.0),
+            Consumer(strikes, vols, vannaVolga).Evaluate(95.0));
+        Assert.True(VannaVolga.Global);
+        Assert.Equal(3, VannaVolga.RequiredPoints);
+        vannaVolga.CheckPoints(3);
+        Assert.Throws<ArgumentException>(() => vannaVolga.CheckPoints(2));
     }
 
     // A consumer generic over the 2-D factory, taking QuantLib's const Interpolator& i = {} as TInterpolator i = default.
