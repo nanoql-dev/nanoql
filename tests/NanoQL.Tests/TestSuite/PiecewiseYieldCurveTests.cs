@@ -3,10 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/piecewiseyieldcurve.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testDefaultInstantiation's ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testPiecewiseSpreadYieldCurve (B3.5); testSwapHelpersWithOnceFrequency (batch 2's Mexico calendar)
+// Partial: testDefaultInstantiation's ConvexMonotone curve (B6.2); testConstructionWithExplicitBootstrap's LocalBootstrap curve (B6.2); testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (B6.2); testPiecewiseSpreadYieldCurve (B3.5)
 // Replaced: testObservability (Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs)
 
 using NanoQL.Coupons;
+using NanoQL.Currencies;
 using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
@@ -1349,6 +1350,30 @@ public class PiecewiseYieldCurveTests
         Assert.True(
             error <= tolerance,
             $" third helper:\n\n estimated rate: {calculated:R}\n expected rate:  {expected:R}");
+    }
+
+    // Adapted: QuantLib's helpers read its evaluation date, the system date in its runner; here the context's,
+    // Date.TodaysDate().
+    [Fact]
+    public void TestSwapHelpersWithOnceFrequency()
+    {
+        // Testing single-coupon swap rate helpers...
+
+        var context = new EvaluationContext { EvaluationDate = Date.TodaysDate() };
+
+        var index = new IborIndex(
+            "TestIndex", 4 * TimeUnit.Weeks, 1, new MXNCurrency(), new Mexico(), BusinessDayConvention.Following, false,
+            new Actual360());
+
+        Real r = 0.02;
+
+        Assert.Null(Record.Exception(() => new SwapRateHelper(
+            r, 4 * TimeUnit.Weeks, new Mexico(), Frequency.Once, BusinessDayConvention.Following, new Actual360(), index,
+            context)));
+
+        Assert.Null(Record.Exception(() => new OISRateHelper(
+            2, 4 * TimeUnit.Weeks, r, new Estr(), context, null, false, 0, BusinessDayConvention.Following,
+            Frequency.Once)));
     }
 
     [Fact]

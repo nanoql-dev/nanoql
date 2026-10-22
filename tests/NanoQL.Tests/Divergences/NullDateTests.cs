@@ -98,6 +98,8 @@ public class NullDateTests
         }
 
         AssertParam("terminationDate", () => new Thirty360(Thirty360Convention.ISDA, d));
+        AssertParam("d", () => IslamicHolidaysFunctions.IsEidAlFitrByMoonSighting(d));
+        AssertParam("d", () => IslamicHolidaysFunctions.IsEidAlAdhaByMoonSighting(d));
     }
 
     [Fact]

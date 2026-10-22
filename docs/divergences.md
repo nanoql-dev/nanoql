@@ -1273,6 +1273,17 @@ Facts:
 
 - `ABuilderWithoutASwapIndexIsRefused`
 
+## MaltaWeekendTests
+
+[`Divergences/MaltaWeekendTests.cs`](../tests/NanoQL.Tests/Divergences/MaltaWeekendTests.cs)
+
+Malta's weekend. QuantLib's header lists Saturdays and Sundays, as the Malta Stock Exchange's trading calendar it cites does, but its code overrides `WesternImpl`'s weekend with Friday and Saturday (`malta.cpp:30-32`), so every Friday is a holiday and every Sunday a business day; the code, the header and QuantLib's test came in one commit, the test listing what the code gives. nanoql keeps `WesternImpl`'s weekend with QuantLib's own rules, which answer as QuantLib's on Mondays to Thursdays and Saturdays. `testMalta`'s list on Fridays and Sundays (`test-suite/calendars.cpp:4142-4174`) moves here, QuantLib's recorded beside nanoql's.
+
+Facts:
+
+- `FridaysAreBusinessDaysAndSundaysWeekendDays`
+- `TestMaltasListOnFridaysAndSundays`
+
 ## MinimizeContinuationTests
 
 [`Divergences/MinimizeContinuationTests.cs`](../tests/NanoQL.Tests/Divergences/MinimizeContinuationTests.cs)
@@ -1646,6 +1657,17 @@ Facts:
 
 - `EveryGeneratorRefusesSeedZero`
 
+## SerbiaEasterTests
+
+[`Divergences/SerbiaEasterTests.cs`](../tests/NanoQL.Tests/Divergences/SerbiaEasterTests.cs)
+
+Serbia's Easter. QuantLib's Belgrade calendar derives from `WesternImpl` (`serbia.hpp:50`), so its Good Friday and Easter Monday follow Western Easter, where the Belgrade Stock Exchange's calendar, which the header cites, closes on Orthodox Easter: May 3rd and 6th, 2024, April 10th and 13th, 2026. nanoql takes `OrthodoxImpl`'s Easter Monday, the one QuantLib's Romania, Russia, Ukraine and North Macedonia read, with the same weekend. `testSerbia`'s Easter dates (`test-suite/calendars.cpp:4275-4302`) move here, QuantLib's recorded beside nanoql's.
+
+Facts:
+
+- `GoodFridayAndEasterMondayFollowOrthodoxEaster`
+- `TestSerbiasEasterDates`
+
 ## SetSeasonalityColdStartTests
 
 [`Divergences/SetSeasonalityColdStartTests.cs`](../tests/NanoQL.Tests/Divergences/SetSeasonalityColdStartTests.cs)
@@ -1751,6 +1773,16 @@ Facts:
 
 - `SkipToTheLastIndexIsRefusedWithTheGrayCode`
 - `TheDrawThatWouldReachTheLastCounterThrowsWithTheGrayCode`
+
+## SouthKoreaElection2025Tests
+
+[`Divergences/SouthKoreaElection2025Tests.cs`](../tests/NanoQL.Tests/Divergences/SouthKoreaElection2025Tests.cs)
+
+South Korea's 2025 presidential election day. QuantLib 1.44 misses June 3rd, 2025, when the snap election closed the country and the Korea Exchange; QuantLib's master adds it to the settlement calendar, which KRX inherits (#2894, `46c4d4ed9`), with the date in both test cases' 2025 lists, which nanoql takes ahead of the pin, as R8 directs. The 2025 lists of `testSouthKoreanSettlement` and `testKoreaStockExchange` (`test-suite/calendars.cpp:1772-1788`, `:2443-2460`) move here, with upstream's line; QuantLib 1.44's answer is recorded beside them.
+
+Facts:
+
+- `The2025ListsHoldTheElectionDay`
 
 ## SparseMatrixPlusAssignTests
 
@@ -2083,11 +2115,12 @@ Facts:
 
 [`Divergences/WeekendOnDateHolidayListTests.cs`](../tests/NanoQL.Tests/Divergences/WeekendOnDateHolidayListTests.cs)
 
-A holiday list without weekends for a market whose weekend changed on a date. The Tel Aviv stock exchange kept Friday and Saturday until January 4th, 2026 (`israel.cpp:436-446`), while `isWeekend(Weekday)` answers today's weekend, Saturday and Sunday, so QuantLib's `holidayList(..., includeWeekEnds = false)` (`calendar.cpp:277-286`) holds every Friday before 2026; QuantLib's own TASE test says "using checkHolidays with includeWeekEnds = false doesn't work in this case" and filters the list by each date's weekend instead (`test-suite/calendars.cpp:3699-3722`). nanoql's list leaves out the days that are weekend days on their own date, which equals that test's filtered list; a joint calendar combines its components' weekends on the date as its weekend combines theirs. `IsWeekend(Weekday)` keeps QuantLib's answer.
+A holiday list without weekends for a market whose weekend changed on a date. The Tel Aviv stock exchange kept Friday and Saturday until January 4th, 2026 (`israel.cpp:436-446`), while `isWeekend(Weekday)` answers today's weekend, Saturday and Sunday, so QuantLib's `holidayList(..., includeWeekEnds = false)` (`calendar.cpp:277-286`) holds every Friday before 2026; QuantLib's own TASE test says "using checkHolidays with includeWeekEnds = false doesn't work in this case" and filters the list by each date's weekend instead (`test-suite/calendars.cpp:3699-3722`). Tadawul kept Thursday and Friday until June 28th, 2013 (`saudiarabia.cpp:31-37`), and its list holds every Thursday before July 2013 the same way. nanoql's list leaves out the days that are weekend days on their own date, which equals the TASE test's filtered list; a joint calendar combines its components' weekends on the date as its weekend combines theirs. `IsWeekend(Weekday)` keeps QuantLib's answer.
 
 Facts:
 
 - `TheTelAvivListsAreQuantLibsTestsFilteredLists`
+- `TheTadawulListLeavesOutEachDatesOwnWeekend`
 - `AJointCalendarCombinesItsComponentsWeekendsOnTheDate`
 
 ## WeightedIndexNullComponentTests

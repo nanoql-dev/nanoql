@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Immutable;
+using System.Reflection;
 using NanoQL.Coupons;
 using NanoQL.Instruments;
 using NanoQL.Numerics;
@@ -34,6 +35,27 @@ public class UnknownEnumValueTests
         AssertParam("c", () => new Actual365Fixed((Actual365FixedConvention)99));
         AssertParam("c", () => new Thirty360((Thirty360Convention)99));
         AssertParam("c", () => new ActualActual((ActualActualConvention)99));
+    }
+
+    [Fact]
+    public void EveryCalendarRefusesAMarketOutsideItsEnum()
+    {
+        // every public calendar whose constructor takes a market alone, as QuantLib's QL_FAIL("unknown market")
+        Type[] calendars =
+        [
+            .. typeof(Calendar).Assembly.GetExportedTypes()
+                .Where(t => t.IsSubclassOf(typeof(Calendar)) && MarketConstructor(t) is not null),
+        ];
+        Assert.True(calendars.Length >= 38, $"{calendars.Length} calendars take a market");
+        foreach (Type t in calendars)
+        {
+            ConstructorInfo constructor = MarketConstructor(t)!;
+            object market = Enum.ToObject(constructor.GetParameters()[0].ParameterType, 99);
+            TargetInvocationException e = Assert.Throws<TargetInvocationException>(() => constructor.Invoke([market]));
+            var refused = Assert.IsType<ArgumentOutOfRangeException>(e.InnerException);
+            Assert.Equal("market", refused.ParamName);
+            Assert.StartsWith("unknown market", refused.Message, StringComparison.Ordinal);
+        }
     }
 
     [Fact]
@@ -211,4 +233,8 @@ public class UnknownEnumValueTests
 
     private static void AssertParam(string paramName, Action action) =>
         Assert.Equal(paramName, Assert.Throws<ArgumentOutOfRangeException>(action).ParamName);
+
+    // A calendar's constructor taking a market enum and nothing else.
+    private static ConstructorInfo? MarketConstructor(Type t) =>
+        t.GetConstructors().SingleOrDefault(c => c.GetParameters() is [{ Name: "market", ParameterType.IsEnum: true }]);
 }

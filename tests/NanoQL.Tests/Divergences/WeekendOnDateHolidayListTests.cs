@@ -11,9 +11,11 @@ namespace NanoQL.Tests.Divergences;
 /// today's weekend, Saturday and Sunday, so QuantLib's <c>holidayList(..., includeWeekEnds = false)</c>
 /// (<c>calendar.cpp:277-286</c>) holds every Friday before 2026; QuantLib's own TASE test says "using checkHolidays
 /// with includeWeekEnds = false doesn't work in this case" and filters the list by each date's weekend instead
-/// (<c>test-suite/calendars.cpp:3699-3722</c>). nanoql's list leaves out the days that are weekend days on their own
-/// date, which equals that test's filtered list; a joint calendar combines its components' weekends on the date as its
-/// weekend combines theirs. <c>IsWeekend(Weekday)</c> keeps QuantLib's answer.
+/// (<c>test-suite/calendars.cpp:3699-3722</c>). Tadawul kept Thursday and Friday until June 28th, 2013
+/// (<c>saudiarabia.cpp:31-37</c>), and its list holds every Thursday before July 2013 the same way. nanoql's list
+/// leaves out the days that are weekend days on their own date, which equals the TASE test's filtered list; a joint
+/// calendar combines its components' weekends on the date as its weekend combines theirs. <c>IsWeekend(Weekday)</c>
+/// keeps QuantLib's answer.
 /// </summary>
 public class WeekendOnDateHolidayListTests
 {
@@ -45,6 +47,28 @@ public class WeekendOnDateHolidayListTests
         // QuantLib's isWeekend(Weekday) stands: today's weekend
         Assert.True(tase.IsWeekend(Weekday.Sunday));
         Assert.False(tase.IsWeekend(Weekday.Friday));
+    }
+
+    [Fact]
+    public void TheTadawulListLeavesOutEachDatesOwnWeekend()
+    {
+        var tadawul = new SaudiArabia();
+
+        // QuantLib: 61 dates in 2012, 52 of them Thursdays, and without the Saturdays August 18th, October 27th and
+        // November 3rd, weekend days today but not in 2012
+        Date[] expected =
+        [
+            new(18, Month.August, 2012), new(19, Month.August, 2012), new(20, Month.August, 2012),
+            new(21, Month.August, 2012), new(22, Month.August, 2012), new(23, Month.September, 2012),
+            new(27, Month.October, 2012), new(28, Month.October, 2012), new(29, Month.October, 2012),
+            new(30, Month.October, 2012), new(31, Month.October, 2012), new(3, Month.November, 2012),
+        ];
+        Assert.Equal(
+            expected, tadawul.HolidayList(new Date(1, Month.January, 2012), new Date(31, Month.December, 2012)));
+
+        // QuantLib's isWeekend(Weekday) stands: today's weekend
+        Assert.True(tadawul.IsWeekend(Weekday.Saturday));
+        Assert.False(tadawul.IsWeekend(Weekday.Thursday));
     }
 
     [Fact]

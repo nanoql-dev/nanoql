@@ -32,6 +32,22 @@ public class Business252RefusedMonthTests
         Assert.Equal("MOEX calendar for the year 2010 does not exist.", refused.Message);
     }
 
+    [Fact]
+    public void TheMoscowExchangeRefusesItsYearsBefore2012AtTheCount()
+    {
+        Calendar moex = new Russia(RussiaMarket.MOEX);
+        var dc = new Business252(moex);
+        Date d1 = new(15, Month.January, 2015), d2 = new(15, Month.January, 2020);
+
+        // QuantLib: 1,260, and 1,238 over MOEX joined with TARGET
+        Assert.Equal(1260, dc.DayCount(d1, d2));
+        Assert.Equal(1238, new Business252(new JointCalendar(moex, new TARGET())).DayCount(d1, d2));
+
+        NanoQLException refused = Assert.Throws<NanoQLException>(
+            () => dc.DayCount(new Date(15, Month.January, 2010), d2));
+        Assert.Equal("MOEX calendar for the year 2010 does not exist.", refused.Message);
+    }
+
     // TARGET's rules from 2012, refusing every earlier year with MOEX's text, as QuantLib's MOEX calendar does.
     private sealed class FromYear2012 : Calendar
     {

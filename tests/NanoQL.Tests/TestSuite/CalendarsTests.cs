@@ -13,7 +13,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/calendars.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testRussia, testSouthKoreanSettlement, testKoreaStockExchange, testTaiwanCalendar, testThailandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testRomaniaCalendars, testMexicoInaugurationDay, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit
+// Moved: testSouthKoreanSettlement line 2146 (Divergences/SouthKoreaElection2025Tests.cs); testKoreaStockExchange line 2843 (Divergences/SouthKoreaElection2025Tests.cs); testMalta line 4173 (Divergences/MaltaWeekendTests.cs); testSerbia line 4301 (Divergences/SerbiaEasterTests.cs)
 // Not ported: testIntradayAddHolidays (QL_HIGH_RESOLUTION_DATE, which the default build leaves out)
 
 using System.Collections.Immutable;
@@ -772,6 +772,603 @@ public class CalendarsTests
     }
 
     [Fact]
+    public void TestRussia()
+    {
+        // Testing Russia holiday list...
+
+        Date[] expectedHol =
+        [
+
+        // exhaustive holiday list for the year 2012
+            new(1, January, 2012),
+            new(2, January, 2012),
+            new(7, January, 2012),
+            new(8, January, 2012),
+            new(14, January, 2012),
+            new(15, January, 2012),
+            new(21, January, 2012),
+            new(22, January, 2012),
+            new(28, January, 2012),
+            new(29, January, 2012),
+            new(4, February, 2012),
+            new(5, February, 2012),
+            new(11, February, 2012),
+            new(12, February, 2012),
+            new(18, February, 2012),
+            new(19, February, 2012),
+            new(23, February, 2012),
+            new(25, February, 2012),
+            new(26, February, 2012),
+            new(3, March, 2012),
+            new(4, March, 2012),
+            new(8, March, 2012),
+            new(9, March, 2012),
+            new(10, March, 2012),
+            new(17, March, 2012),
+            new(18, March, 2012),
+            new(24, March, 2012),
+            new(25, March, 2012),
+            new(31, March, 2012),
+            new(1, April, 2012),
+            new(7, April, 2012),
+            new(8, April, 2012),
+            new(14, April, 2012),
+            new(15, April, 2012),
+            new(21, April, 2012),
+            new(22, April, 2012),
+            new(29, April, 2012),
+            new(30, April, 2012),
+            new(1, May, 2012),
+            new(6, May, 2012),
+            new(9, May, 2012),
+            new(13, May, 2012),
+            new(19, May, 2012),
+            new(20, May, 2012),
+            new(26, May, 2012),
+            new(27, May, 2012),
+            new(2, June, 2012),
+            new(3, June, 2012),
+            new(10, June, 2012),
+            new(11, June, 2012),
+            new(12, June, 2012),
+            new(16, June, 2012),
+            new(17, June, 2012),
+            new(23, June, 2012),
+            new(24, June, 2012),
+            new(30, June, 2012),
+            new(1, July, 2012),
+            new(7, July, 2012),
+            new(8, July, 2012),
+            new(14, July, 2012),
+            new(15, July, 2012),
+            new(21, July, 2012),
+            new(22, July, 2012),
+            new(28, July, 2012),
+            new(29, July, 2012),
+            new(4, August, 2012),
+            new(5, August, 2012),
+            new(11, August, 2012),
+            new(12, August, 2012),
+            new(18, August, 2012),
+            new(19, August, 2012),
+            new(25, August, 2012),
+            new(26, August, 2012),
+            new(1, September, 2012),
+            new(2, September, 2012),
+            new(8, September, 2012),
+            new(9, September, 2012),
+            new(15, September, 2012),
+            new(16, September, 2012),
+            new(22, September, 2012),
+            new(23, September, 2012),
+            new(29, September, 2012),
+            new(30, September, 2012),
+            new(6, October, 2012),
+            new(7, October, 2012),
+            new(13, October, 2012),
+            new(14, October, 2012),
+            new(20, October, 2012),
+            new(21, October, 2012),
+            new(27, October, 2012),
+            new(28, October, 2012),
+            new(3, November, 2012),
+            new(4, November, 2012),
+            new(5, November, 2012),
+            new(10, November, 2012),
+            new(11, November, 2012),
+            new(17, November, 2012),
+            new(18, November, 2012),
+            new(24, November, 2012),
+            new(25, November, 2012),
+            new(1, December, 2012),
+            new(2, December, 2012),
+            new(8, December, 2012),
+            new(9, December, 2012),
+            new(15, December, 2012),
+            new(16, December, 2012),
+            new(22, December, 2012),
+            new(23, December, 2012),
+            new(29, December, 2012),
+            new(30, December, 2012),
+            new(31, December, 2012),
+
+        // exhaustive holiday list for the year 2013
+            new(1, January, 2013),
+            new(2, January, 2013),
+            new(3, January, 2013),
+            new(4, January, 2013),
+            new(5, January, 2013),
+            new(6, January, 2013),
+            new(7, January, 2013),
+            new(12, January, 2013),
+            new(13, January, 2013),
+            new(19, January, 2013),
+            new(20, January, 2013),
+            new(26, January, 2013),
+            new(27, January, 2013),
+            new(2, February, 2013),
+            new(3, February, 2013),
+            new(9, February, 2013),
+            new(10, February, 2013),
+            new(16, February, 2013),
+            new(17, February, 2013),
+            new(23, February, 2013),
+            new(24, February, 2013),
+            new(2, March, 2013),
+            new(3, March, 2013),
+            new(8, March, 2013),
+            new(9, March, 2013),
+            new(10, March, 2013),
+            new(16, March, 2013),
+            new(17, March, 2013),
+            new(23, March, 2013),
+            new(24, March, 2013),
+            new(30, March, 2013),
+            new(31, March, 2013),
+            new(6, April, 2013),
+            new(7, April, 2013),
+            new(13, April, 2013),
+            new(14, April, 2013),
+            new(20, April, 2013),
+            new(21, April, 2013),
+            new(27, April, 2013),
+            new(28, April, 2013),
+            new(1, May, 2013),
+            new(4, May, 2013),
+            new(5, May, 2013),
+            new(9, May, 2013),
+            new(11, May, 2013),
+            new(12, May, 2013),
+            new(18, May, 2013),
+            new(19, May, 2013),
+            new(25, May, 2013),
+            new(26, May, 2013),
+            new(1, June, 2013),
+            new(2, June, 2013),
+            new(8, June, 2013),
+            new(9, June, 2013),
+            new(12, June, 2013),
+            new(15, June, 2013),
+            new(16, June, 2013),
+            new(22, June, 2013),
+            new(23, June, 2013),
+            new(29, June, 2013),
+            new(30, June, 2013),
+            new(6, July, 2013),
+            new(7, July, 2013),
+            new(13, July, 2013),
+            new(14, July, 2013),
+            new(20, July, 2013),
+            new(21, July, 2013),
+            new(27, July, 2013),
+            new(28, July, 2013),
+            new(3, August, 2013),
+            new(4, August, 2013),
+            new(10, August, 2013),
+            new(11, August, 2013),
+            new(17, August, 2013),
+            new(18, August, 2013),
+            new(24, August, 2013),
+            new(25, August, 2013),
+            new(31, August, 2013),
+            new(1, September, 2013),
+            new(7, September, 2013),
+            new(8, September, 2013),
+            new(14, September, 2013),
+            new(15, September, 2013),
+            new(21, September, 2013),
+            new(22, September, 2013),
+            new(28, September, 2013),
+            new(29, September, 2013),
+            new(5, October, 2013),
+            new(6, October, 2013),
+            new(12, October, 2013),
+            new(13, October, 2013),
+            new(19, October, 2013),
+            new(20, October, 2013),
+            new(26, October, 2013),
+            new(27, October, 2013),
+            new(2, November, 2013),
+            new(3, November, 2013),
+            new(4, November, 2013),
+            new(9, November, 2013),
+            new(10, November, 2013),
+            new(16, November, 2013),
+            new(17, November, 2013),
+            new(23, November, 2013),
+            new(24, November, 2013),
+            new(30, November, 2013),
+            new(1, December, 2013),
+            new(7, December, 2013),
+            new(8, December, 2013),
+            new(14, December, 2013),
+            new(15, December, 2013),
+            new(21, December, 2013),
+            new(22, December, 2013),
+            new(28, December, 2013),
+            new(29, December, 2013),
+            new(31, December, 2013),
+
+        // exhaustive holiday list for the year 2014
+            new(1, January, 2014),
+            new(2, January, 2014),
+            new(3, January, 2014),
+            new(4, January, 2014),
+            new(5, January, 2014),
+            new(7, January, 2014),
+            new(11, January, 2014),
+            new(12, January, 2014),
+            new(18, January, 2014),
+            new(19, January, 2014),
+            new(25, January, 2014),
+            new(26, January, 2014),
+            new(1, February, 2014),
+            new(2, February, 2014),
+            new(8, February, 2014),
+            new(9, February, 2014),
+            new(15, February, 2014),
+            new(16, February, 2014),
+            new(22, February, 2014),
+            new(23, February, 2014),
+            new(1, March, 2014),
+            new(2, March, 2014),
+            new(8, March, 2014),
+            new(9, March, 2014),
+            new(10, March, 2014),
+            new(15, March, 2014),
+            new(16, March, 2014),
+            new(22, March, 2014),
+            new(23, March, 2014),
+            new(29, March, 2014),
+            new(30, March, 2014),
+            new(5, April, 2014),
+            new(6, April, 2014),
+            new(12, April, 2014),
+            new(13, April, 2014),
+            new(19, April, 2014),
+            new(20, April, 2014),
+            new(26, April, 2014),
+            new(27, April, 2014),
+            new(1, May, 2014),
+            new(3, May, 2014),
+            new(4, May, 2014),
+            new(9, May, 2014),
+            new(10, May, 2014),
+            new(11, May, 2014),
+            new(17, May, 2014),
+            new(18, May, 2014),
+            new(24, May, 2014),
+            new(25, May, 2014),
+            new(31, May, 2014),
+            new(1, June, 2014),
+            new(7, June, 2014),
+            new(8, June, 2014),
+            new(12, June, 2014),
+            new(14, June, 2014),
+            new(15, June, 2014),
+            new(21, June, 2014),
+            new(22, June, 2014),
+            new(28, June, 2014),
+            new(29, June, 2014),
+            new(5, July, 2014),
+            new(6, July, 2014),
+            new(12, July, 2014),
+            new(13, July, 2014),
+            new(19, July, 2014),
+            new(20, July, 2014),
+            new(26, July, 2014),
+            new(27, July, 2014),
+            new(2, August, 2014),
+            new(3, August, 2014),
+            new(9, August, 2014),
+            new(10, August, 2014),
+            new(16, August, 2014),
+            new(17, August, 2014),
+            new(23, August, 2014),
+            new(24, August, 2014),
+            new(30, August, 2014),
+            new(31, August, 2014),
+            new(6, September, 2014),
+            new(7, September, 2014),
+            new(13, September, 2014),
+            new(14, September, 2014),
+            new(20, September, 2014),
+            new(21, September, 2014),
+            new(27, September, 2014),
+            new(28, September, 2014),
+            new(4, October, 2014),
+            new(5, October, 2014),
+            new(11, October, 2014),
+            new(12, October, 2014),
+            new(18, October, 2014),
+            new(19, October, 2014),
+            new(25, October, 2014),
+            new(26, October, 2014),
+            new(1, November, 2014),
+            new(2, November, 2014),
+            new(4, November, 2014),
+            new(8, November, 2014),
+            new(9, November, 2014),
+            new(15, November, 2014),
+            new(16, November, 2014),
+            new(22, November, 2014),
+            new(23, November, 2014),
+            new(29, November, 2014),
+            new(30, November, 2014),
+            new(6, December, 2014),
+            new(7, December, 2014),
+            new(13, December, 2014),
+            new(14, December, 2014),
+            new(20, December, 2014),
+            new(21, December, 2014),
+            new(27, December, 2014),
+            new(28, December, 2014),
+            new(31, December, 2014),
+
+        // exhaustive holiday list for the year 2015
+            new(1, January, 2015),
+            new(2, January, 2015),
+            new(3, January, 2015),
+            new(4, January, 2015),
+            new(7, January, 2015),
+            new(10, January, 2015),
+            new(11, January, 2015),
+            new(17, January, 2015),
+            new(18, January, 2015),
+            new(24, January, 2015),
+            new(25, January, 2015),
+            new(31, January, 2015),
+            new(1, February, 2015),
+            new(7, February, 2015),
+            new(8, February, 2015),
+            new(14, February, 2015),
+            new(15, February, 2015),
+            new(21, February, 2015),
+            new(22, February, 2015),
+            new(23, February, 2015),
+            new(28, February, 2015),
+            new(1, March, 2015),
+            new(7, March, 2015),
+            new(8, March, 2015),
+            new(9, March, 2015),
+            new(14, March, 2015),
+            new(15, March, 2015),
+            new(21, March, 2015),
+            new(22, March, 2015),
+            new(28, March, 2015),
+            new(29, March, 2015),
+            new(4, April, 2015),
+            new(5, April, 2015),
+            new(11, April, 2015),
+            new(12, April, 2015),
+            new(18, April, 2015),
+            new(19, April, 2015),
+            new(25, April, 2015),
+            new(26, April, 2015),
+            new(1, May, 2015),
+            new(2, May, 2015),
+            new(3, May, 2015),
+            new(9, May, 2015),
+            new(10, May, 2015),
+            new(11, May, 2015),
+            new(16, May, 2015),
+            new(17, May, 2015),
+            new(23, May, 2015),
+            new(24, May, 2015),
+            new(30, May, 2015),
+            new(31, May, 2015),
+            new(6, June, 2015),
+            new(7, June, 2015),
+            new(12, June, 2015),
+            new(13, June, 2015),
+            new(14, June, 2015),
+            new(20, June, 2015),
+            new(21, June, 2015),
+            new(27, June, 2015),
+            new(28, June, 2015),
+            new(4, July, 2015),
+            new(5, July, 2015),
+            new(11, July, 2015),
+            new(12, July, 2015),
+            new(18, July, 2015),
+            new(19, July, 2015),
+            new(25, July, 2015),
+            new(26, July, 2015),
+            new(1, August, 2015),
+            new(2, August, 2015),
+            new(8, August, 2015),
+            new(9, August, 2015),
+            new(15, August, 2015),
+            new(16, August, 2015),
+            new(22, August, 2015),
+            new(23, August, 2015),
+            new(29, August, 2015),
+            new(30, August, 2015),
+            new(5, September, 2015),
+            new(6, September, 2015),
+            new(12, September, 2015),
+            new(13, September, 2015),
+            new(19, September, 2015),
+            new(20, September, 2015),
+            new(26, September, 2015),
+            new(27, September, 2015),
+            new(3, October, 2015),
+            new(4, October, 2015),
+            new(10, October, 2015),
+            new(11, October, 2015),
+            new(17, October, 2015),
+            new(18, October, 2015),
+            new(24, October, 2015),
+            new(25, October, 2015),
+            new(31, October, 2015),
+            new(1, November, 2015),
+            new(4, November, 2015),
+            new(7, November, 2015),
+            new(8, November, 2015),
+            new(14, November, 2015),
+            new(15, November, 2015),
+            new(21, November, 2015),
+            new(22, November, 2015),
+            new(28, November, 2015),
+            new(29, November, 2015),
+            new(5, December, 2015),
+            new(6, December, 2015),
+            new(12, December, 2015),
+            new(13, December, 2015),
+            new(19, December, 2015),
+            new(20, December, 2015),
+            new(26, December, 2015),
+            new(27, December, 2015),
+            new(31, December, 2015),
+
+        // exhaustive holiday list for the year 2016
+            new(1, January, 2016),
+            new(2, January, 2016),
+            new(3, January, 2016),
+            new(7, January, 2016),
+            new(8, January, 2016),
+            new(9, January, 2016),
+            new(10, January, 2016),
+            new(16, January, 2016),
+            new(17, January, 2016),
+            new(23, January, 2016),
+            new(24, January, 2016),
+            new(30, January, 2016),
+            new(31, January, 2016),
+            new(6, February, 2016),
+            new(7, February, 2016),
+            new(13, February, 2016),
+            new(14, February, 2016),
+            new(21, February, 2016),
+            new(23, February, 2016),
+            new(27, February, 2016),
+            new(28, February, 2016),
+            new(5, March, 2016),
+            new(6, March, 2016),
+            new(8, March, 2016),
+            new(12, March, 2016),
+            new(13, March, 2016),
+            new(19, March, 2016),
+            new(20, March, 2016),
+            new(26, March, 2016),
+            new(27, March, 2016),
+            new(2, April, 2016),
+            new(3, April, 2016),
+            new(9, April, 2016),
+            new(10, April, 2016),
+            new(16, April, 2016),
+            new(17, April, 2016),
+            new(23, April, 2016),
+            new(24, April, 2016),
+            new(30, April, 2016),
+            new(1, May, 2016),
+            new(2, May, 2016),
+            new(3, May, 2016),
+            new(7, May, 2016),
+            new(8, May, 2016),
+            new(9, May, 2016),
+            new(14, May, 2016),
+            new(15, May, 2016),
+            new(21, May, 2016),
+            new(22, May, 2016),
+            new(28, May, 2016),
+            new(29, May, 2016),
+            new(4, June, 2016),
+            new(5, June, 2016),
+            new(11, June, 2016),
+            new(12, June, 2016),
+            new(13, June, 2016),
+            new(18, June, 2016),
+            new(19, June, 2016),
+            new(25, June, 2016),
+            new(26, June, 2016),
+            new(2, July, 2016),
+            new(3, July, 2016),
+            new(9, July, 2016),
+            new(10, July, 2016),
+            new(16, July, 2016),
+            new(17, July, 2016),
+            new(23, July, 2016),
+            new(24, July, 2016),
+            new(30, July, 2016),
+            new(31, July, 2016),
+            new(6, August, 2016),
+            new(7, August, 2016),
+            new(13, August, 2016),
+            new(14, August, 2016),
+            new(20, August, 2016),
+            new(21, August, 2016),
+            new(27, August, 2016),
+            new(28, August, 2016),
+            new(3, September, 2016),
+            new(4, September, 2016),
+            new(10, September, 2016),
+            new(11, September, 2016),
+            new(17, September, 2016),
+            new(18, September, 2016),
+            new(24, September, 2016),
+            new(25, September, 2016),
+            new(1, October, 2016),
+            new(2, October, 2016),
+            new(8, October, 2016),
+            new(9, October, 2016),
+            new(15, October, 2016),
+            new(16, October, 2016),
+            new(22, October, 2016),
+            new(23, October, 2016),
+            new(29, October, 2016),
+            new(30, October, 2016),
+            new(4, November, 2016),
+            new(5, November, 2016),
+            new(6, November, 2016),
+            new(12, November, 2016),
+            new(13, November, 2016),
+            new(19, November, 2016),
+            new(20, November, 2016),
+            new(26, November, 2016),
+            new(27, November, 2016),
+            new(3, December, 2016),
+            new(4, December, 2016),
+            new(10, December, 2016),
+            new(11, December, 2016),
+            new(17, December, 2016),
+            new(18, December, 2016),
+            new(24, December, 2016),
+            new(25, December, 2016),
+            new(30, December, 2016),
+            new(31, December, 2016),
+        ];
+
+        Calendar moex = new Russia(RussiaMarket.MOEX);
+        CheckHolidays(moex.HolidayList(new Date(1, January, 2012), new Date(31, December, 2016), true), expectedHol);
+
+        Calendar settlement = new Russia(RussiaMarket.Settlement);
+        var holiday = new Date(6, January, 2012);
+        Assert.True(settlement.IsHoliday(holiday));
+        Assert.True(moex.IsBusinessDay(holiday));
+    }
+
+    [Fact]
     public void TestBrazil()
     {
         // Testing Brazil holiday list...
@@ -870,6 +1467,1369 @@ public class CalendarsTests
     }
 
     [Fact]
+    public void TestSouthKoreanSettlement()
+    {
+        // Testing South-Korean settlement holiday list...
+
+        Date[] expectedHol =
+        [
+            new(1, January, 2004),
+            new(21, January, 2004),
+            new(22, January, 2004),
+            new(23, January, 2004),
+            new(1, March, 2004),
+            new(5, April, 2004),
+            new(15, April, 2004), // election day
+            new(5, May, 2004),
+            new(26, May, 2004),
+            new(27, September, 2004),
+            new(28, September, 2004),
+            new(29, September, 2004),
+            new(8, February, 2005),
+            new(9, February, 2005),
+            new(10, February, 2005),
+            new(1, March, 2005),
+            new(5, April, 2005),
+            new(5, May, 2005),
+            new(6, June, 2005),
+            new(15, August, 2005),
+            new(19, September, 2005),
+            new(3, October, 2005),
+            new(30, January, 2006),
+            new(1, March, 2006),
+            new(1, May, 2006),
+            new(5, May, 2006),
+            new(31, May, 2006), // election
+            new(6, June, 2006),
+            new(17, July, 2006),
+            new(15, August, 2006),
+            new(3, October, 2006),
+            new(5, October, 2006),
+            new(6, October, 2006),
+            new(25, December, 2006),
+            new(1, January, 2007),
+            new(19, February, 2007),
+            new(1, March, 2007),
+            new(1, May, 2007),
+            new(24, May, 2007),
+            new(6, June, 2007),
+            new(17, July, 2007),
+            new(15, August, 2007),
+            new(24, September, 2007),
+            new(25, September, 2007),
+            new(26, September, 2007),
+            new(3, October, 2007),
+            new(19, December, 2007), // election
+            new(25, December, 2007),
+            new(1, January, 2008),
+            new(6, February, 2008),
+            new(7, February, 2008),
+            new(8, February, 2008),
+            new(9, April, 2008),
+            new(1, May, 2008),
+            new(5, May, 2008),
+            new(12, May, 2008),
+            new(6, June, 2008),
+            new(15, August, 2008),
+            new(15, September, 2008),
+            new(3, October, 2008),
+            new(25, December, 2008),
+            new(1, January, 2009),
+            new(26, January, 2009),
+            new(27, January, 2009),
+            new(1, May, 2009),
+            new(5, May, 2009),
+            new(2, October, 2009),
+            new(25, December, 2009),
+            new(1, January, 2010),
+            new(15, February, 2010),
+            new(1, March, 2010),
+            new(5, May, 2010),
+            new(21, May, 2010),
+            new(2, June, 2010),
+            new(21, September, 2010),
+            new(22, September, 2010),
+            new(23, September, 2010),
+            new(2, February, 2011),
+            new(3, February, 2011),
+            new(4, February, 2011),
+            new(1, March, 2011),
+            new(5, May, 2011),
+            new(10, May, 2011),
+            new(6, June, 2011),
+            new(15, August, 2011),
+            new(12, September, 2011),
+            new(13, September, 2011),
+            new(3, October, 2011),
+            new(23, January, 2012),
+            new(24, January, 2012),
+            new(1, March, 2012),
+            new(11, April, 2012),
+            new(1, May, 2012),
+            new(28, May, 2012),
+            new(6, June, 2012),
+            new(15, August, 2012),
+            new(1, October, 2012),
+            new(3, October, 2012),
+            new(19, December, 2012),
+            new(25, December, 2012),
+            new(1, January, 2013),
+            new(11, February, 2013),
+            new(1, March, 2013),
+            new(1, May, 2013),
+            new(17, May, 2013),
+            new(6, June, 2013),
+            new(15, August, 2013),
+            new(18, September, 2013),
+            new(19, September, 2013),
+            new(20, September, 2013),
+            new(3, October, 2013),
+            new(9, October, 2013),
+            new(25, December, 2013),
+            new(1, January, 2014),
+            new(30, January, 2014),
+            new(31, January, 2014),
+            new(1, May, 2014),
+            new(5, May, 2014),
+            new(6, May, 2014),
+            new(4, June, 2014),
+            new(6, June, 2014),
+            new(15, August, 2014),
+            new(8, September, 2014),
+            new(9, September, 2014),
+            new(10, September, 2014),
+            new(3, October, 2014),
+            new(9, October, 2014),
+            new(25, December, 2014),
+            new(1, January, 2015),
+            new(18, February, 2015),
+            new(19, February, 2015),
+            new(20, February, 2015),
+            new(1, May, 2015),
+            new(5, May, 2015),
+            new(25, May, 2015),
+            new(14, August, 2015),
+            new(28, September, 2015),
+            new(29, September, 2015),
+            new(9, October, 2015),
+            new(25, December, 2015),
+            new(1, January, 2016),
+            new(8, February, 2016),
+            new(9, February, 2016),
+            new(10, February, 2016),
+            new(1, March, 2016),
+            new(13, April, 2016),
+            new(5, May, 2016),
+            new(6, June, 2016),
+            new(15, August, 2016),
+            new(14, September, 2016),
+            new(15, September, 2016),
+            new(16, September, 2016),
+            new(3, October, 2016),
+            new(27, January, 2017),
+            new(30, January, 2017),
+            new(1, March, 2017),
+            new(1, May, 2017),
+            new(3, May, 2017),
+            new(5, May, 2017),
+            new(9, May, 2017),
+            new(6, June, 2017),
+            new(15, August, 2017),
+            new(3, October, 2017),
+            new(4, October, 2017),
+            new(5, October, 2017),
+            new(6, October, 2017),
+            new(9, October, 2017),
+            new(25, December, 2017),
+            new(1, January, 2018),
+            new(15, February, 2018),
+            new(16, February, 2018),
+            new(1, March, 2018),
+            new(1, May, 2018),
+            new(7, May, 2018),
+            new(22, May, 2018),
+            new(6, June, 2018),
+            new(13, June, 2018),
+            new(15, August, 2018),
+            new(24, September, 2018),
+            new(25, September, 2018),
+            new(26, September, 2018),
+            new(3, October, 2018),
+            new(9, October, 2018),
+            new(25, December, 2018),
+            new(1, January, 2019),
+            new(4, February, 2019),
+            new(5, February, 2019),
+            new(6, February, 2019),
+            new(1, March, 2019),
+            new(1, May, 2019),
+            new(6, May, 2019),
+            new(6, June, 2019),
+            new(15, August, 2019),
+            new(12, September, 2019),
+            new(13, September, 2019),
+            new(3, October, 2019),
+            new(9, October, 2019),
+            new(25, December, 2019),
+            new(1, January, 2020),
+            new(24, January, 2020),
+            new(27, January, 2020),
+            new(15, April, 2020),
+            new(30, April, 2020),
+            new(1, May, 2020),
+            new(5, May, 2020),
+            new(17, August, 2020),
+            new(30, September, 2020),
+            new(1, October, 2020),
+            new(2, October, 2020),
+            new(9, October, 2020),
+            new(25, December, 2020),
+            new(1, January, 2021),
+            new(11, February, 2021),
+            new(12, February, 2021),
+            new(1, March, 2021),
+            new(5, May, 2021),
+            new(19, May, 2021),
+            new(16, August, 2021),
+            new(20, September, 2021),
+            new(21, September, 2021),
+            new(22, September, 2021),
+            new(4, October, 2021),
+            new(11, October, 2021),
+            new(31, January, 2022),
+            new(1, February, 2022),
+            new(2, February, 2022),
+            new(1, March, 2022),
+            new(9, March, 2022),
+            new(5, May, 2022),
+            new(1, June, 2022),
+            new(6, June, 2022),
+            new(15, August, 2022),
+            new(9, September, 2022),
+            new(12, September, 2022),
+            new(3, October, 2022),
+            new(10, October, 2022),
+            new(23, January, 2023),
+            new(24, January, 2023),
+            new(1, March, 2023),
+            new(1, May, 2023),
+            new(5, May, 2023),
+            new(29, May, 2023),
+            new(6, June, 2023),
+            new(15, August, 2023),
+            new(28, September, 2023),
+            new(29, September, 2023),
+            new(2, October, 2023),
+            new(3, October, 2023),
+            new(9, October, 2023),
+            new(25, December, 2023),
+            new(1, January, 2024),
+            new(9, February, 2024),
+            new(12, February, 2024),
+            new(1, March, 2024),
+            new(10, April, 2024),
+            new(1, May, 2024),
+            new(6, May, 2024),
+            new(15, May, 2024),
+            new(6, June, 2024),
+            new(15, August, 2024),
+            new(16, September, 2024),
+            new(17, September, 2024),
+            new(18, September, 2024),
+            new(1, October, 2024),
+            new(3, October, 2024),
+            new(9, October, 2024),
+            new(25, December, 2024),
+            new(1, January, 2025),
+            new(27, January, 2025),
+            new(28, January, 2025),
+            new(29, January, 2025),
+            new(30, January, 2025),
+            new(3, March, 2025),
+            new(1, May, 2025),
+            new(5, May, 2025),
+            new(6, May, 2025),
+            new(6, June, 2025),
+            new(15, August, 2025),
+            new(3, October, 2025),
+            new(6, October, 2025),
+            new(7, October, 2025),
+            new(8, October, 2025),
+            new(9, October, 2025),
+            new(25, December, 2025),
+            new(1, January, 2026),
+            new(16, February, 2026),
+            new(17, February, 2026),
+            new(18, February, 2026),
+            new(2, March, 2026),
+            new(1, May, 2026),
+            new(5, May, 2026),
+            new(25, May, 2026),
+            new(17, August, 2026),
+            new(24, September, 2026),
+            new(25, September, 2026),
+            new(5, October, 2026),
+            new(9, October, 2026),
+            new(25, December, 2026),
+            new(1, January, 2027),
+            new(8, February, 2027),
+            new(9, February, 2027),
+            new(1, March, 2027),
+            new(5, May, 2027),
+            new(13, May, 2027),
+            new(16, August, 2027),
+            new(14, September, 2027),
+            new(15, September, 2027),
+            new(16, September, 2027),
+            new(4, October, 2027),
+            new(11, October, 2027),
+            new(27, December, 2027),
+            new(26, January, 2028),
+            new(27, January, 2028),
+            new(28, January, 2028),
+            new(1, March, 2028),
+            new(1, May, 2028),
+            new(2, May, 2028),
+            new(5, May, 2028),
+            new(6, June, 2028),
+            new(15, August, 2028),
+            new(2, October, 2028),
+            new(3, October, 2028),
+            new(4, October, 2028),
+            new(5, October, 2028),
+            new(9, October, 2028),
+            new(25, December, 2028),
+            new(1, January, 2029),
+            new(12, February, 2029),
+            new(13, February, 2029),
+            new(14, February, 2029),
+            new(1, March, 2029),
+            new(1, May, 2029),
+            new(7, May, 2029),
+            new(21, May, 2029),
+            new(6, June, 2029),
+            new(15, August, 2029),
+            new(21, September, 2029),
+            new(24, September, 2029),
+            new(3, October, 2029),
+            new(9, October, 2029),
+            new(25, December, 2029),
+            new(1, January, 2030),
+            new(4, February, 2030),
+            new(5, February, 2030),
+            new(1, March, 2030),
+            new(1, May, 2030),
+            new(6, May, 2030),
+            new(9, May, 2030),
+            new(6, June, 2030),
+            new(15, August, 2030),
+            new(11, September, 2030),
+            new(12, September, 2030),
+            new(13, September, 2030),
+            new(3, October, 2030),
+            new(9, October, 2030),
+            new(25, December, 2030),
+            new(1, January, 2031),
+            new(22, January, 2031),
+            new(23, January, 2031),
+            new(24, January, 2031),
+            new(3, March, 2031),
+            new(1, May, 2031),
+            new(5, May, 2031),
+            new(28, May, 2031),
+            new(6, June, 2031),
+            new(15, August, 2031),
+            new(30, September, 2031),
+            new(1, October, 2031),
+            new(2, October, 2031),
+            new(3, October, 2031),
+            new(9, October, 2031),
+            new(25, December, 2031),
+            new(1, January, 2032),
+            new(10, February, 2032),
+            new(11, February, 2032),
+            new(12, February, 2032),
+            new(1, March, 2032),
+            new(5, May, 2032),
+            new(17, May, 2032),
+            new(16, August, 2032),
+            new(20, September, 2032),
+            new(21, September, 2032),
+            new(4, October, 2032),
+            new(11, October, 2032),
+            new(27, December, 2032),
+            new(31, January, 2033),
+            new(1, February, 2033),
+            new(2, February, 2033),
+            new(1, March, 2033),
+            new(5, May, 2033),
+            new(6, May, 2033),
+            new(6, June, 2033),
+            new(15, August, 2033),
+            new(7, September, 2033),
+            new(8, September, 2033),
+            new(9, September, 2033),
+            new(3, October, 2033),
+            new(10, October, 2033),
+            new(26, December, 2033),
+            new(20, February, 2034),
+            new(21, February, 2034),
+            new(1, March, 2034),
+            new(1, May, 2034),
+            new(5, May, 2034),
+            new(25, May, 2034),
+            new(6, June, 2034),
+            new(15, August, 2034),
+            new(26, September, 2034),
+            new(27, September, 2034),
+            new(28, September, 2034),
+            new(3, October, 2034),
+            new(9, October, 2034),
+            new(25, December, 2034),
+            new(1, January, 2035),
+            new(7, February, 2035),
+            new(8, February, 2035),
+            new(9, February, 2035),
+            new(1, March, 2035),
+            new(1, May, 2035),
+            new(7, May, 2035),
+            new(15, May, 2035),
+            new(6, June, 2035),
+            new(15, August, 2035),
+            new(17, September, 2035),
+            new(18, September, 2035),
+            new(3, October, 2035),
+            new(9, October, 2035),
+            new(25, December, 2035),
+            new(1, January, 2036),
+            new(28, January, 2036),
+            new(29, January, 2036),
+            new(30, January, 2036),
+            new(3, March, 2036),
+            new(1, May, 2036),
+            new(5, May, 2036),
+            new(6, May, 2036),
+            new(6, June, 2036),
+            new(15, August, 2036),
+            new(3, October, 2036),
+            new(6, October, 2036),
+            new(7, October, 2036),
+            new(9, October, 2036),
+            new(25, December, 2036),
+            new(1, January, 2037),
+            new(16, February, 2037),
+            new(17, February, 2037),
+            new(2, March, 2037),
+            new(1, May, 2037),
+            new(5, May, 2037),
+            new(22, May, 2037),
+            new(17, August, 2037),
+            new(23, September, 2037),
+            new(24, September, 2037),
+            new(25, September, 2037),
+            new(5, October, 2037),
+            new(9, October, 2037),
+            new(25, December, 2037),
+            new(1, January, 2038),
+            new(3, February, 2038),
+            new(4, February, 2038),
+            new(5, February, 2038),
+            new(1, March, 2038),
+            new(5, May, 2038),
+            new(11, May, 2038),
+            new(16, August, 2038),
+            new(13, September, 2038),
+            new(14, September, 2038),
+            new(15, September, 2038),
+            new(4, October, 2038),
+            new(11, October, 2038),
+            new(27, December, 2038),
+            new(24, January, 2039),
+            new(25, January, 2039),
+            new(26, January, 2039),
+            new(1, March, 2039),
+            new(2, May, 2039),
+            new(5, May, 2039),
+            new(6, June, 2039),
+            new(15, August, 2039),
+            new(3, October, 2039),
+            new(4, October, 2039),
+            new(5, October, 2039),
+            new(10, October, 2039),
+            new(26, December, 2039),
+            new(13, February, 2040),
+            new(14, February, 2040),
+            new(1, March, 2040),
+            new(1, May, 2040),
+            new(7, May, 2040),
+            new(18, May, 2040),
+            new(6, June, 2040),
+            new(15, August, 2040),
+            new(20, September, 2040),
+            new(21, September, 2040),
+            new(3, October, 2040),
+            new(9, October, 2040),
+            new(25, December, 2040),
+            new(1, January, 2041),
+            new(31, January, 2041),
+            new(1, February, 2041),
+            new(1, March, 2041),
+            new(1, May, 2041),
+            new(6, May, 2041),
+            new(7, May, 2041),
+            new(6, June, 2041),
+            new(15, August, 2041),
+            new(9, September, 2041),
+            new(10, September, 2041),
+            new(11, September, 2041),
+            new(3, October, 2041),
+            new(9, October, 2041),
+            new(25, December, 2041),
+            new(1, January, 2042),
+            new(21, January, 2042),
+            new(22, January, 2042),
+            new(23, January, 2042),
+            new(3, March, 2042),
+            new(1, May, 2042),
+            new(5, May, 2042),
+            new(26, May, 2042),
+            new(6, June, 2042),
+            new(15, August, 2042),
+            new(29, September, 2042),
+            new(30, September, 2042),
+            new(3, October, 2042),
+            new(9, October, 2042),
+            new(25, December, 2042),
+            new(1, January, 2043),
+            new(9, February, 2043),
+            new(10, February, 2043),
+            new(11, February, 2043),
+            new(2, March, 2043),
+            new(1, May, 2043),
+            new(5, May, 2043),
+            new(18, May, 2043),
+            new(17, August, 2043),
+            new(16, September, 2043),
+            new(17, September, 2043),
+            new(18, September, 2043),
+            new(5, October, 2043),
+            new(9, October, 2043),
+            new(25, December, 2043),
+            new(1, January, 2044),
+            new(29, January, 2044),
+            new(1, February, 2044),
+            new(1, March, 2044),
+            new(5, May, 2044),
+            new(6, May, 2044),
+            new(6, June, 2044),
+            new(15, August, 2044),
+            new(3, October, 2044),
+            new(4, October, 2044),
+            new(5, October, 2044),
+            new(6, October, 2044),
+            new(10, October, 2044),
+            new(26, December, 2044),
+            new(16, February, 2045),
+            new(17, February, 2045),
+            new(1, March, 2045),
+            new(1, May, 2045),
+            new(5, May, 2045),
+            new(24, May, 2045),
+            new(6, June, 2045),
+            new(15, August, 2045),
+            new(25, September, 2045),
+            new(26, September, 2045),
+            new(27, September, 2045),
+            new(3, October, 2045),
+            new(9, October, 2045),
+            new(25, December, 2045),
+            new(1, January, 2046),
+            new(5, February, 2046),
+            new(6, February, 2046),
+            new(7, February, 2046),
+            new(1, March, 2046),
+            new(1, May, 2046),
+            new(7, May, 2046),
+            new(14, May, 2046),
+            new(6, June, 2046),
+            new(15, August, 2046),
+            new(14, September, 2046),
+            new(17, September, 2046),
+            new(3, October, 2046),
+            new(9, October, 2046),
+            new(25, December, 2046),
+            new(1, January, 2047),
+            new(25, January, 2047),
+            new(28, January, 2047),
+            new(1, March, 2047),
+            new(1, May, 2047),
+            new(2, May, 2047),
+            new(6, May, 2047),
+            new(6, June, 2047),
+            new(15, August, 2047),
+            new(3, October, 2047),
+            new(4, October, 2047),
+            new(7, October, 2047),
+            new(9, October, 2047),
+            new(25, December, 2047),
+            new(1, January, 2048),
+            new(13, February, 2048),
+            new(14, February, 2048),
+            new(2, March, 2048),
+            new(1, May, 2048),
+            new(5, May, 2048),
+            new(20, May, 2048),
+            new(17, August, 2048),
+            new(21, September, 2048),
+            new(22, September, 2048),
+            new(23, September, 2048),
+            new(5, October, 2048),
+            new(9, October, 2048),
+            new(25, December, 2048),
+            new(1, January, 2049),
+            new(1, February, 2049),
+            new(2, February, 2049),
+            new(3, February, 2049),
+            new(1, March, 2049),
+            new(5, May, 2049),
+            new(10, May, 2049),
+            new(16, August, 2049),
+            new(10, September, 2049),
+            new(13, September, 2049),
+            new(4, October, 2049),
+            new(11, October, 2049),
+            new(27, December, 2049),
+            new(24, January, 2050),
+            new(25, January, 2050),
+            new(1, March, 2050),
+            new(5, May, 2050),
+            new(30, May, 2050),
+            new(6, June, 2050),
+            new(15, August, 2050),
+            new(29, September, 2050),
+            new(30, September, 2050),
+            new(3, October, 2050),
+            new(10, October, 2050),
+            new(26, December, 2050),
+        ];
+
+        Calendar c = new SouthKorea(SouthKoreaMarket.Settlement);
+
+        // Moved: the check of line 2146 on 2025, whose list misses the presidential election day, June 3rd, moves to
+        // Divergences/SouthKoreaElection2025Tests.cs with upstream's line; the rest of the list stands.
+        static bool Kept(Date d) => d.Year != 2025;
+        CheckHolidays(
+            c.HolidayList(new Date(1, January, 2004), new Date(31, December, 2050)).Where(Kept),
+            expectedHol.Where(Kept));
+    }
+
+    [Fact]
+    public void TestKoreaStockExchange()
+    {
+        // Testing Korea Stock Exchange holiday list...
+
+        Date[] expectedHol =
+        [
+            new(1, January, 2004),
+            new(21, January, 2004),
+            new(22, January, 2004),
+            new(23, January, 2004),
+            new(1, March, 2004),
+            new(5, April, 2004),
+            new(15, April, 2004), // election day
+            new(5, May, 2004),
+            new(26, May, 2004),
+            new(27, September, 2004),
+            new(28, September, 2004),
+            new(29, September, 2004),
+            new(31, December, 2004),
+            new(8, February, 2005),
+            new(9, February, 2005),
+            new(10, February, 2005),
+            new(1, March, 2005),
+            new(5, April, 2005),
+            new(5, May, 2005),
+            new(6, June, 2005),
+            new(15, August, 2005),
+            new(19, September, 2005),
+            new(3, October, 2005),
+            new(30, December, 2005),
+            new(30, January, 2006),
+            new(1, March, 2006),
+            new(1, May, 2006),
+            new(5, May, 2006),
+            new(31, May, 2006), // election
+            new(6, June, 2006),
+            new(17, July, 2006),
+            new(15, August, 2006),
+            new(3, October, 2006),
+            new(5, October, 2006),
+            new(6, October, 2006),
+            new(25, December, 2006),
+            new(29, December, 2006),
+            new(1, January, 2007),
+            new(19, February, 2007),
+            new(1, March, 2007),
+            new(1, May, 2007),
+            new(24, May, 2007),
+            new(6, June, 2007),
+            new(17, July, 2007),
+            new(15, August, 2007),
+            new(24, September, 2007),
+            new(25, September, 2007),
+            new(26, September, 2007),
+            new(3, October, 2007),
+            new(19, December, 2007), // election
+            new(25, December, 2007),
+            new(31, December, 2007),
+            new(1, January, 2008),
+            new(6, February, 2008),
+            new(7, February, 2008),
+            new(8, February, 2008),
+            new(9, April, 2008),
+            new(1, May, 2008),
+            new(5, May, 2008),
+            new(12, May, 2008),
+            new(6, June, 2008),
+            new(15, August, 2008),
+            new(15, September, 2008),
+            new(3, October, 2008),
+            new(25, December, 2008),
+            new(31, December, 2008),
+            new(1, January, 2009),
+            new(26, January, 2009),
+            new(27, January, 2009),
+            new(1, May, 2009),
+            new(5, May, 2009),
+            new(2, October, 2009),
+            new(25, December, 2009),
+            new(31, December, 2009),
+            new(1, January, 2010),
+            new(15, February, 2010),
+            new(1, March, 2010),
+            new(5, May, 2010),
+            new(21, May, 2010),
+            new(2, June, 2010),
+            new(21, September, 2010),
+            new(22, September, 2010),
+            new(23, September, 2010),
+            new(31, December, 2010),
+            new(2, February, 2011),
+            new(3, February, 2011),
+            new(4, February, 2011),
+            new(1, March, 2011),
+            new(5, May, 2011),
+            new(10, May, 2011),
+            new(6, June, 2011),
+            new(15, August, 2011),
+            new(12, September, 2011),
+            new(13, September, 2011),
+            new(3, October, 2011),
+            new(30, December, 2011),
+            new(23, January, 2012),
+            new(24, January, 2012),
+            new(1, March, 2012),
+            new(11, April, 2012),
+            new(1, May, 2012),
+            new(28, May, 2012),
+            new(6, June, 2012),
+            new(15, August, 2012),
+            new(1, October, 2012),
+            new(3, October, 2012),
+            new(19, December, 2012),
+            new(25, December, 2012),
+            new(31, December, 2012),
+            new(1, January, 2013),
+            new(11, February, 2013),
+            new(1, March, 2013),
+            new(1, May, 2013),
+            new(17, May, 2013),
+            new(6, June, 2013),
+            new(15, August, 2013),
+            new(18, September, 2013),
+            new(19, September, 2013),
+            new(20, September, 2013),
+            new(3, October, 2013),
+            new(9, October, 2013),
+            new(25, December, 2013),
+            new(31, December, 2013),
+            new(1, January, 2014),
+            new(30, January, 2014),
+            new(31, January, 2014),
+            new(1, May, 2014),
+            new(5, May, 2014),
+            new(6, May, 2014),
+            new(4, June, 2014),
+            new(6, June, 2014),
+            new(15, August, 2014),
+            new(8, September, 2014),
+            new(9, September, 2014),
+            new(10, September, 2014),
+            new(3, October, 2014),
+            new(9, October, 2014),
+            new(25, December, 2014),
+            new(31, December, 2014),
+            new(1, January, 2015),
+            new(18, February, 2015),
+            new(19, February, 2015),
+            new(20, February, 2015),
+            new(1, May, 2015),
+            new(5, May, 2015),
+            new(25, May, 2015),
+            new(14, August, 2015),
+            new(28, September, 2015),
+            new(29, September, 2015),
+            new(9, October, 2015),
+            new(25, December, 2015),
+            new(31, December, 2015),
+            new(1, January, 2016),
+            new(8, February, 2016),
+            new(9, February, 2016),
+            new(10, February, 2016),
+            new(1, March, 2016),
+            new(13, April, 2016),
+            new(5, May, 2016),
+            new(6, May, 2016),
+            new(6, June, 2016),
+            new(15, August, 2016),
+            new(14, September, 2016),
+            new(15, September, 2016),
+            new(16, September, 2016),
+            new(3, October, 2016),
+            new(30, December, 2016),
+            new(27, January, 2017),
+            new(30, January, 2017),
+            new(1, March, 2017),
+            new(1, May, 2017),
+            new(3, May, 2017),
+            new(5, May, 2017),
+            new(9, May, 2017),
+            new(6, June, 2017),
+            new(15, August, 2017),
+            new(2, October, 2017),
+            new(3, October, 2017),
+            new(4, October, 2017),
+            new(5, October, 2017),
+            new(6, October, 2017),
+            new(9, October, 2017),
+            new(25, December, 2017),
+            new(29, December, 2017),
+            new(1, January, 2018),
+            new(15, February, 2018),
+            new(16, February, 2018),
+            new(1, March, 2018),
+            new(1, May, 2018),
+            new(7, May, 2018),
+            new(22, May, 2018),
+            new(6, June, 2018),
+            new(13, June, 2018),
+            new(15, August, 2018),
+            new(24, September, 2018),
+            new(25, September, 2018),
+            new(26, September, 2018),
+            new(3, October, 2018),
+            new(9, October, 2018),
+            new(25, December, 2018),
+            new(31, December, 2018),
+            new(1, January, 2019),
+            new(4, February, 2019),
+            new(5, February, 2019),
+            new(6, February, 2019),
+            new(1, March, 2019),
+            new(1, May, 2019),
+            new(6, May, 2019),
+            new(6, June, 2019),
+            new(15, August, 2019),
+            new(12, September, 2019),
+            new(13, September, 2019),
+            new(3, October, 2019),
+            new(9, October, 2019),
+            new(25, December, 2019),
+            new(31, December, 2019),
+            new(1, January, 2020),
+            new(24, January, 2020),
+            new(27, January, 2020),
+            new(15, April, 2020),
+            new(30, April, 2020),
+            new(1, May, 2020),
+            new(5, May, 2020),
+            new(17, August, 2020),
+            new(30, September, 2020),
+            new(1, October, 2020),
+            new(2, October, 2020),
+            new(9, October, 2020),
+            new(25, December, 2020),
+            new(31, December, 2020),
+            new(1, January, 2021),
+            new(11, February, 2021),
+            new(12, February, 2021),
+            new(1, March, 2021),
+            new(5, May, 2021),
+            new(19, May, 2021),
+            new(16, August, 2021),
+            new(20, September, 2021),
+            new(21, September, 2021),
+            new(22, September, 2021),
+            new(4, October, 2021),
+            new(11, October, 2021),
+            new(31, December, 2021),
+            new(31, January, 2022),
+            new(1, February, 2022),
+            new(2, February, 2022),
+            new(1, March, 2022),
+            new(9, March, 2022),
+            new(5, May, 2022),
+            new(1, June, 2022),
+            new(6, June, 2022),
+            new(15, August, 2022),
+            new(9, September, 2022),
+            new(12, September, 2022),
+            new(3, October, 2022),
+            new(10, October, 2022),
+            new(30, December, 2022),
+            new(23, January, 2023),
+            new(24, January, 2023),
+            new(1, March, 2023),
+            new(1, May, 2023),
+            new(5, May, 2023),
+            new(29, May, 2023),
+            new(6, June, 2023),
+            new(15, August, 2023),
+            new(28, September, 2023),
+            new(29, September, 2023),
+            new(2, October, 2023),
+            new(3, October, 2023),
+            new(9, October, 2023),
+            new(25, December, 2023),
+            new(29, December, 2023),
+            new(1, January, 2024),
+            new(9, February, 2024),
+            new(12, February, 2024),
+            new(1, March, 2024),
+            new(10, April, 2024),
+            new(1, May, 2024),
+            new(6, May, 2024),
+            new(15, May, 2024),
+            new(6, June, 2024),
+            new(15, August, 2024),
+            new(16, September, 2024),
+            new(17, September, 2024),
+            new(18, September, 2024),
+            new(1, October, 2024),
+            new(3, October, 2024),
+            new(9, October, 2024),
+            new(25, December, 2024),
+            new(31, December, 2024),
+            new(1, January, 2025),
+            new(27, January, 2025),
+            new(28, January, 2025),
+            new(29, January, 2025),
+            new(30, January, 2025),
+            new(3, March, 2025),
+            new(1, May, 2025),
+            new(5, May, 2025),
+            new(6, May, 2025),
+            new(6, June, 2025),
+            new(15, August, 2025),
+            new(3, October, 2025),
+            new(6, October, 2025),
+            new(7, October, 2025),
+            new(8, October, 2025),
+            new(9, October, 2025),
+            new(25, December, 2025),
+            new(31, December, 2025),
+            new(1, January, 2026),
+            new(16, February, 2026),
+            new(17, February, 2026),
+            new(18, February, 2026),
+            new(2, March, 2026),
+            new(1, May, 2026),
+            new(5, May, 2026),
+            new(25, May, 2026),
+            new(17, August, 2026),
+            new(24, September, 2026),
+            new(25, September, 2026),
+            new(5, October, 2026),
+            new(9, October, 2026),
+            new(25, December, 2026),
+            new(31, December, 2026),
+            new(1, January, 2027),
+            new(8, February, 2027),
+            new(9, February, 2027),
+            new(1, March, 2027),
+            new(5, May, 2027),
+            new(13, May, 2027),
+            new(16, August, 2027),
+            new(14, September, 2027),
+            new(15, September, 2027),
+            new(16, September, 2027),
+            new(4, October, 2027),
+            new(11, October, 2027),
+            new(27, December, 2027),
+            new(31, December, 2027),
+            new(26, January, 2028),
+            new(27, January, 2028),
+            new(28, January, 2028),
+            new(1, March, 2028),
+            new(1, May, 2028),
+            new(2, May, 2028),
+            new(5, May, 2028),
+            new(6, June, 2028),
+            new(15, August, 2028),
+            new(2, October, 2028),
+            new(3, October, 2028),
+            new(4, October, 2028),
+            new(5, October, 2028),
+            new(9, October, 2028),
+            new(25, December, 2028),
+            new(29, December, 2028),
+            new(1, January, 2029),
+            new(12, February, 2029),
+            new(13, February, 2029),
+            new(14, February, 2029),
+            new(1, March, 2029),
+            new(1, May, 2029),
+            new(7, May, 2029),
+            new(21, May, 2029),
+            new(6, June, 2029),
+            new(15, August, 2029),
+            new(21, September, 2029),
+            new(24, September, 2029),
+            new(3, October, 2029),
+            new(9, October, 2029),
+            new(25, December, 2029),
+            new(31, December, 2029),
+            new(1, January, 2030),
+            new(4, February, 2030),
+            new(5, February, 2030),
+            new(1, March, 2030),
+            new(1, May, 2030),
+            new(6, May, 2030),
+            new(9, May, 2030),
+            new(6, June, 2030),
+            new(15, August, 2030),
+            new(11, September, 2030),
+            new(12, September, 2030),
+            new(13, September, 2030),
+            new(3, October, 2030),
+            new(9, October, 2030),
+            new(25, December, 2030),
+            new(31, December, 2030),
+            new(1, January, 2031),
+            new(22, January, 2031),
+            new(23, January, 2031),
+            new(24, January, 2031),
+            new(3, March, 2031),
+            new(1, May, 2031),
+            new(5, May, 2031),
+            new(28, May, 2031),
+            new(6, June, 2031),
+            new(15, August, 2031),
+            new(30, September, 2031),
+            new(1, October, 2031),
+            new(2, October, 2031),
+            new(3, October, 2031),
+            new(9, October, 2031),
+            new(25, December, 2031),
+            new(31, December, 2031),
+            new(1, January, 2032),
+            new(10, February, 2032),
+            new(11, February, 2032),
+            new(12, February, 2032),
+            new(1, March, 2032),
+            new(5, May, 2032),
+            new(17, May, 2032),
+            new(16, August, 2032),
+            new(20, September, 2032),
+            new(21, September, 2032),
+            new(4, October, 2032),
+            new(11, October, 2032),
+            new(27, December, 2032),
+            new(31, December, 2032),
+            new(31, January, 2033),
+            new(1, February, 2033),
+            new(2, February, 2033),
+            new(1, March, 2033),
+            new(5, May, 2033),
+            new(6, May, 2033),
+            new(6, June, 2033),
+            new(15, August, 2033),
+            new(7, September, 2033),
+            new(8, September, 2033),
+            new(9, September, 2033),
+            new(3, October, 2033),
+            new(10, October, 2033),
+            new(26, December, 2033),
+            new(30, December, 2033),
+            new(20, February, 2034),
+            new(21, February, 2034),
+            new(1, March, 2034),
+            new(1, May, 2034),
+            new(5, May, 2034),
+            new(25, May, 2034),
+            new(6, June, 2034),
+            new(15, August, 2034),
+            new(26, September, 2034),
+            new(27, September, 2034),
+            new(28, September, 2034),
+            new(3, October, 2034),
+            new(9, October, 2034),
+            new(25, December, 2034),
+            new(29, December, 2034),
+            new(1, January, 2035),
+            new(7, February, 2035),
+            new(8, February, 2035),
+            new(9, February, 2035),
+            new(1, March, 2035),
+            new(1, May, 2035),
+            new(7, May, 2035),
+            new(15, May, 2035),
+            new(6, June, 2035),
+            new(15, August, 2035),
+            new(17, September, 2035),
+            new(18, September, 2035),
+            new(3, October, 2035),
+            new(9, October, 2035),
+            new(25, December, 2035),
+            new(31, December, 2035),
+            new(1, January, 2036),
+            new(28, January, 2036),
+            new(29, January, 2036),
+            new(30, January, 2036),
+            new(3, March, 2036),
+            new(1, May, 2036),
+            new(5, May, 2036),
+            new(6, May, 2036),
+            new(6, June, 2036),
+            new(15, August, 2036),
+            new(3, October, 2036),
+            new(6, October, 2036),
+            new(7, October, 2036),
+            new(9, October, 2036),
+            new(25, December, 2036),
+            new(31, December, 2036),
+            new(1, January, 2037),
+            new(16, February, 2037),
+            new(17, February, 2037),
+            new(2, March, 2037),
+            new(1, May, 2037),
+            new(5, May, 2037),
+            new(22, May, 2037),
+            new(17, August, 2037),
+            new(23, September, 2037),
+            new(24, September, 2037),
+            new(25, September, 2037),
+            new(5, October, 2037),
+            new(9, October, 2037),
+            new(25, December, 2037),
+            new(31, December, 2037),
+            new(1, January, 2038),
+            new(3, February, 2038),
+            new(4, February, 2038),
+            new(5, February, 2038),
+            new(1, March, 2038),
+            new(5, May, 2038),
+            new(11, May, 2038),
+            new(16, August, 2038),
+            new(13, September, 2038),
+            new(14, September, 2038),
+            new(15, September, 2038),
+            new(4, October, 2038),
+            new(11, October, 2038),
+            new(27, December, 2038),
+            new(31, December, 2038),
+            new(24, January, 2039),
+            new(25, January, 2039),
+            new(26, January, 2039),
+            new(1, March, 2039),
+            new(2, May, 2039),
+            new(5, May, 2039),
+            new(6, June, 2039),
+            new(15, August, 2039),
+            new(3, October, 2039),
+            new(4, October, 2039),
+            new(5, October, 2039),
+            new(10, October, 2039),
+            new(26, December, 2039),
+            new(30, December, 2039),
+            new(13, February, 2040),
+            new(14, February, 2040),
+            new(1, March, 2040),
+            new(1, May, 2040),
+            new(7, May, 2040),
+            new(18, May, 2040),
+            new(6, June, 2040),
+            new(15, August, 2040),
+            new(20, September, 2040),
+            new(21, September, 2040),
+            new(3, October, 2040),
+            new(9, October, 2040),
+            new(25, December, 2040),
+            new(31, December, 2040),
+            new(1, January, 2041),
+            new(31, January, 2041),
+            new(1, February, 2041),
+            new(1, March, 2041),
+            new(1, May, 2041),
+            new(6, May, 2041),
+            new(7, May, 2041),
+            new(6, June, 2041),
+            new(15, August, 2041),
+            new(9, September, 2041),
+            new(10, September, 2041),
+            new(11, September, 2041),
+            new(3, October, 2041),
+            new(9, October, 2041),
+            new(25, December, 2041),
+            new(31, December, 2041),
+            new(1, January, 2042),
+            new(21, January, 2042),
+            new(22, January, 2042),
+            new(23, January, 2042),
+            new(3, March, 2042),
+            new(1, May, 2042),
+            new(5, May, 2042),
+            new(26, May, 2042),
+            new(6, June, 2042),
+            new(15, August, 2042),
+            new(29, September, 2042),
+            new(30, September, 2042),
+            new(3, October, 2042),
+            new(9, October, 2042),
+            new(25, December, 2042),
+            new(31, December, 2042),
+            new(1, January, 2043),
+            new(9, February, 2043),
+            new(10, February, 2043),
+            new(11, February, 2043),
+            new(2, March, 2043),
+            new(1, May, 2043),
+            new(5, May, 2043),
+            new(18, May, 2043),
+            new(17, August, 2043),
+            new(16, September, 2043),
+            new(17, September, 2043),
+            new(18, September, 2043),
+            new(5, October, 2043),
+            new(9, October, 2043),
+            new(25, December, 2043),
+            new(31, December, 2043),
+            new(1, January, 2044),
+            new(29, January, 2044),
+            new(1, February, 2044),
+            new(1, March, 2044),
+            new(5, May, 2044),
+            new(6, May, 2044),
+            new(6, June, 2044),
+            new(15, August, 2044),
+            new(3, October, 2044),
+            new(4, October, 2044),
+            new(5, October, 2044),
+            new(6, October, 2044),
+            new(10, October, 2044),
+            new(26, December, 2044),
+            new(30, December, 2044),
+            new(16, February, 2045),
+            new(17, February, 2045),
+            new(1, March, 2045),
+            new(1, May, 2045),
+            new(5, May, 2045),
+            new(24, May, 2045),
+            new(6, June, 2045),
+            new(15, August, 2045),
+            new(25, September, 2045),
+            new(26, September, 2045),
+            new(27, September, 2045),
+            new(3, October, 2045),
+            new(9, October, 2045),
+            new(25, December, 2045),
+            new(29, December, 2045),
+            new(1, January, 2046),
+            new(5, February, 2046),
+            new(6, February, 2046),
+            new(7, February, 2046),
+            new(1, March, 2046),
+            new(1, May, 2046),
+            new(7, May, 2046),
+            new(14, May, 2046),
+            new(6, June, 2046),
+            new(15, August, 2046),
+            new(14, September, 2046),
+            new(17, September, 2046),
+            new(3, October, 2046),
+            new(9, October, 2046),
+            new(25, December, 2046),
+            new(31, December, 2046),
+            new(1, January, 2047),
+            new(25, January, 2047),
+            new(28, January, 2047),
+            new(1, March, 2047),
+            new(1, May, 2047),
+            new(2, May, 2047),
+            new(6, May, 2047),
+            new(6, June, 2047),
+            new(15, August, 2047),
+            new(3, October, 2047),
+            new(4, October, 2047),
+            new(7, October, 2047),
+            new(9, October, 2047),
+            new(25, December, 2047),
+            new(31, December, 2047),
+            new(1, January, 2048),
+            new(13, February, 2048),
+            new(14, February, 2048),
+            new(2, March, 2048),
+            new(1, May, 2048),
+            new(5, May, 2048),
+            new(20, May, 2048),
+            new(17, August, 2048),
+            new(21, September, 2048),
+            new(22, September, 2048),
+            new(23, September, 2048),
+            new(5, October, 2048),
+            new(9, October, 2048),
+            new(25, December, 2048),
+            new(31, December, 2048),
+            new(1, January, 2049),
+            new(1, February, 2049),
+            new(2, February, 2049),
+            new(3, February, 2049),
+            new(1, March, 2049),
+            new(5, May, 2049),
+            new(10, May, 2049),
+            new(16, August, 2049),
+            new(10, September, 2049),
+            new(13, September, 2049),
+            new(4, October, 2049),
+            new(11, October, 2049),
+            new(27, December, 2049),
+            new(31, December, 2049),
+            new(24, January, 2050),
+            new(25, January, 2050),
+            new(1, March, 2050),
+            new(5, May, 2050),
+            new(30, May, 2050),
+            new(6, June, 2050),
+            new(15, August, 2050),
+            new(29, September, 2050),
+            new(30, September, 2050),
+            new(3, October, 2050),
+            new(10, October, 2050),
+            new(26, December, 2050),
+            new(30, December, 2050),
+        ];
+
+        Calendar c = new SouthKorea(SouthKoreaMarket.KRX);
+
+        // Moved: the check of line 2843 on 2025, whose list misses the presidential election day, June 3rd, moves to
+        // Divergences/SouthKoreaElection2025Tests.cs with upstream's line; the rest of the list stands.
+        static bool Kept(Date d) => d.Year != 2025;
+        CheckHolidays(
+            c.HolidayList(new Date(1, January, 2004), new Date(31, December, 2050)).Where(Kept),
+            expectedHol.Where(Kept));
+    }
+
+    [Fact]
     public void TestHongKong()
     {
         // Testing Hong Kong Stock Exchange holiday list...
@@ -961,6 +2921,65 @@ public class CalendarsTests
     }
 
     [Fact]
+    public void TestTaiwanCalendar()
+    {
+        Calendar calendar = new Taiwan(TaiwanMarket.TSEC);
+        Assert.True(calendar.IsHoliday(new Date(1, January, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(28, February, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(1, May, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(10, October, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(9, February, 2024))); // Lunar New Year
+        Assert.True(calendar.IsHoliday(new Date(9, February, 2002)));
+        Assert.True(calendar.IsBusinessDay(new Date(2, January, 2024)));
+        Date[] historical =
+        [
+            new(4, June, 2003), new(21, January, 2004),
+            new(9, February, 2005), new(5, April, 2006), new(19, February, 2007),
+            new(7, February, 2008), new(26, January, 2009),
+            new(13, January, 2010),
+            new(2, February, 2011), new(23, January, 2012), new(11, February, 2013),
+            new(31, January, 2014), new(18, February, 2015), new(8, February, 2016),
+            new(27, January, 2017),
+            new(16, February, 2018), new(5, February, 2019), new(27, January, 2020),
+            new(12, February, 2021), new(1, February, 2022), new(23, January, 2023),
+            new(27, January, 2025), new(16, February, 2026)
+        ];
+        foreach (Date date in historical)
+            Assert.True(calendar.IsHoliday(date), $"{date}");
+    }
+
+    [Fact]
+    public void TestThailandCalendar()
+    {
+        Calendar calendar = new Thailand();
+        Assert.True(calendar.IsHoliday(new Date(1, January, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(15, April, 2019))); // Songkran
+        Assert.True(calendar.IsBusinessDay(new Date(15, April, 2020))); // cancelled
+        Assert.True(calendar.IsHoliday(new Date(4, May, 2020)));
+        Assert.True(calendar.IsHoliday(new Date(3, June, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(29, July, 2024))); // substitution
+        Assert.True(calendar.IsHoliday(new Date(14, October, 2024))); // substitution
+        Assert.True(calendar.IsBusinessDay(new Date(2, January, 2024)));
+        Date[] historical =
+        [
+            new(5, May, 2001),
+            new(23, February, 2005), new(23, May, 2005), new(22, July, 2005),
+            new(13, February, 2006), new(12, June, 2006), new(11, July, 2006),
+            new(5, March, 2007), new(31, May, 2007), new(24, December, 2007),
+            new(21, February, 2008), new(19, May, 2008), new(17, July, 2008),
+            new(9, February, 2009), new(1, March, 2010), new(18, February, 2011),
+            new(2, January, 2012), new(7, May, 2012), new(4, June, 2012),
+            new(6, May, 2013), new(23, October, 2013),
+            new(14, February, 2014), new(4, March, 2015), new(22, February, 2016),
+            new(13, February, 2017), new(1, March, 2018), new(4, May, 2019),
+            new(3, June, 2019), new(12, February, 2021), new(16, February, 2022),
+            new(6, March, 2023)
+        ];
+        foreach (Date date in historical)
+            Assert.True(calendar.IsHoliday(date), $"{date}");
+    }
+
+    [Fact]
     public void TestTurkeyCalendar()
     {
         Calendar calendar = new Turkey();
@@ -1032,6 +3051,70 @@ public class CalendarsTests
     }
 
     [Fact]
+    public void TestNorwayCalendar()
+    {
+        Calendar calendar = new Norway();
+        Assert.True(calendar.IsHoliday(new Date(17, May, 2024)));
+        Assert.True(calendar.IsBusinessDay(new Date(16, May, 2024)));
+    }
+
+    [Fact]
+    public void TestPolandCalendars()
+    {
+        Calendar settlement = new Poland(PolandMarket.Settlement);
+        Calendar exchange = new Poland(PolandMarket.WSE);
+        var holiday = new Date(6, January, 2025);
+        Assert.True(settlement.IsHoliday(holiday));
+        Assert.True(exchange.IsHoliday(holiday));
+        Assert.True(settlement.IsBusinessDay(new Date(7, January, 2025)));
+        Assert.True(exchange.IsBusinessDay(new Date(7, January, 2025)));
+    }
+
+    [Fact]
+    public void TestSlovakiaCalendar()
+    {
+        Calendar calendar = new Slovakia(SlovakiaMarket.BSSE);
+        Assert.True(calendar.IsHoliday(new Date(1, September, 2025)));
+        Assert.True(calendar.IsBusinessDay(new Date(2, September, 2025)));
+    }
+
+    [Fact]
+    public void TestSouthAfricaCalendar()
+    {
+        Calendar calendar = new SouthAfrica();
+        Assert.True(calendar.IsHoliday(new Date(16, December, 2024)));
+        Assert.True(calendar.IsBusinessDay(new Date(17, December, 2024)));
+    }
+
+    [Fact]
+    public void TestSwedenCalendar()
+    {
+        Calendar calendar = new Sweden();
+        Assert.True(calendar.IsHoliday(new Date(6, June, 2024)));
+        Assert.True(calendar.IsBusinessDay(new Date(7, June, 2024)));
+    }
+
+    [Fact]
+    public void TestUkraineCalendar()
+    {
+        Calendar calendar = new Ukraine(UkraineMarket.USE);
+        Assert.True(calendar.IsHoliday(new Date(14, October, 2024)));
+        Assert.True(calendar.IsBusinessDay(new Date(15, October, 2024)));
+    }
+
+    [Fact]
+    public void TestSingaporeCalendar()
+    {
+        Calendar calendar = new Singapore();
+        Assert.True(calendar.IsHoliday(new Date(1, January, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(29, March, 2024))); // Good Friday
+        Assert.True(calendar.IsHoliday(new Date(1, May, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(9, August, 2024)));
+        Assert.True(calendar.IsHoliday(new Date(25, December, 2024)));
+        Assert.True(calendar.IsBusinessDay(new Date(2, January, 2024)));
+    }
+
+    [Fact]
     public void TestAustriaCalendars()
     {
         Calendar settlement = new Austria(AustriaMarket.Settlement);
@@ -1055,6 +3138,19 @@ public class CalendarsTests
         Assert.True(exchange.IsHoliday(new Date(29, March, 2024))); // Good Friday
         Assert.True(exchange.IsHoliday(new Date(24, December, 2024)));
         Assert.True(exchange.IsBusinessDay(new Date(2, January, 2024)));
+    }
+
+    [Fact]
+    public void TestRomaniaCalendars()
+    {
+        Calendar publicCalendar = new Romania(RomaniaMarket.Public);
+        Calendar exchange = new Romania(RomaniaMarket.BVB);
+        Assert.True(publicCalendar.IsHoliday(new Date(1, January, 2024)));
+        Assert.True(publicCalendar.IsHoliday(new Date(24, January, 2024)));
+        Assert.True(publicCalendar.IsHoliday(new Date(1, May, 2024)));
+        Assert.True(publicCalendar.IsHoliday(new Date(1, June, 2024)));
+        Assert.True(exchange.IsHoliday(new Date(1, January, 2014)));
+        Assert.True(exchange.IsBusinessDay(new Date(3, January, 2024)));
     }
 
     [Fact]
@@ -1524,6 +3620,54 @@ public class CalendarsTests
     }
 
     [Fact]
+    public void TestMexicoInaugurationDay()
+    {
+        // Testing Mexican Inauguration Day holiday...
+
+        // The first five Inauguration Days 2024 and later
+        Date[] expectedHol =
+        [
+            new(1, Oct, 2024),
+            new(1, Oct, 2030),
+            new(1, Oct, 2036),
+            new(1, Oct, 2042),
+            new(1, Oct, 2048),
+        ];
+
+        // Some years of non-Inaugurations
+        Date[] expectedWorkingDays =
+        [
+            new(1, Oct, 2018),
+            new(1, Oct, 2025),
+            new(1, Oct, 2026),
+            new(1, Oct, 2027),
+            // 2028 falls on a weekend
+            new(1, Oct, 2029),
+            new(1, Oct, 2031),
+            new(1, Oct, 2032),
+            // 2033 and 2034 fall on weekends
+            new(1, Oct, 2035),
+        ];
+
+        Calendar mexico = new Mexico();
+        foreach (Date holiday in expectedHol)
+        {
+            if (!mexico.IsHoliday(holiday))
+            {
+                Assert.Fail($"Expected to have an Inauguration Day holiday in the Mexican calendar for date {holiday}");
+            }
+        }
+
+        foreach (Date workingDay in expectedWorkingDays)
+        {
+            if (!mexico.IsBusinessDay(workingDay))
+            {
+                Assert.Fail($"Did not expect to have a holiday in the Mexican calendar for date {workingDay}");
+            }
+        }
+    }
+
+    [Fact]
     public void TestNewZealand()
     {
         // Testing a few holiday rules for New Zealand...
@@ -1954,6 +4098,265 @@ public class CalendarsTests
     }
 
     [Fact]
+    public void TestMalta()
+    {
+        // Testing Malta holiday list...
+
+        Date[] expectedHol =
+        [
+            new(1, January, 2026),
+            new(10, February, 2026),
+            new(19, March, 2026),
+            new(31, March, 2026),
+            new(6, April, 2026),
+            new(29, June, 2026),
+            new(8, September, 2026),
+            new(21, September, 2026),
+            new(8, December, 2026),
+            new(13, December, 2026),
+            new(24, December, 2026),
+            new(31, December, 2026),
+
+            new(10, February, 2027),
+            new(29, March, 2027),
+            new(31, March, 2027),
+            new(29, June, 2027),
+            new(15, August, 2027),
+            new(8, September, 2027),
+            new(21, September, 2027),
+            new(8, December, 2027),
+            new(13, December, 2027),
+            new(26, December, 2027),
+        ];
+
+        Calendar c = new Malta();
+
+        // Moved: the check of line 4173 on Fridays and Sundays, whose weekend QuantLib's Friday-and-Saturday override
+        // swaps, moves to Divergences/MaltaWeekendTests.cs; the rest of the list stands.
+        static bool Kept(Date d) => d.Weekday is not (Weekday.Friday or Weekday.Sunday);
+        CheckHolidays(
+            c.HolidayList(new Date(1, January, 2026), new Date(31, December, 2027)).Where(Kept),
+            expectedHol.Where(Kept));
+    }
+
+    [Fact]
+    public void TestMontenegro()
+    {
+        // Testing Montenegro holiday list...
+
+        Date[] expectedHol =
+        [
+            new(1, January, 2026),
+            new(2, January, 2026),
+            new(1, May, 2026),
+            new(21, May, 2026),
+            new(22, May, 2026),
+            new(13, July, 2026),
+            new(14, July, 2026),
+            new(13, November, 2026),
+
+            new(1, January, 2027),
+            new(21, May, 2027),
+            new(13, July, 2027),
+            new(14, July, 2027),
+        ];
+
+        Calendar c = new Montenegro();
+        CheckHolidays(c.HolidayList(new Date(1, January, 2026), new Date(31, December, 2027)), expectedHol);
+    }
+
+    [Fact]
+    public void TestNorthMacedonia()
+    {
+        // Testing North Macedonia holiday list...
+
+        Date[] expectedHol =
+        [
+            new(1, January, 2026),
+            new(7, January, 2026),
+            new(20, March, 2026),
+            new(13, April, 2026),
+            new(1, May, 2026),
+            new(27, May, 2026),
+            new(8, September, 2026),
+            new(23, October, 2026),
+            new(8, December, 2026),
+
+            new(1, January, 2027),
+            new(7, January, 2027),
+            new(10, March, 2027),
+            new(3, May, 2027),
+            new(17, May, 2027),
+            new(24, May, 2027),
+            new(2, August, 2027),
+            new(8, September, 2027),
+            new(11, October, 2027),
+            new(8, December, 2027),
+        ];
+
+        Calendar c = new NorthMacedonia();
+        CheckHolidays(c.HolidayList(new Date(1, January, 2026), new Date(31, December, 2027)), expectedHol);
+    }
+
+    [Fact]
+    public void TestNorthMacedoniaRamazanBajram()
+    {
+        // Testing North Macedonia Ramazan Bajram (Eid al-Fitr) dates...
+
+        Calendar c = new NorthMacedonia();
+
+        Assert.True(c.IsHoliday(new Date(20, March, 2026)));
+        Assert.True(c.IsHoliday(new Date(10, March, 2027)));
+        Assert.True(c.IsHoliday(new Date(27, February, 2028)));
+        Assert.True(c.IsHoliday(new Date(15, February, 2029)));
+        Assert.True(c.IsHoliday(new Date(5, February, 2030)));
+        Assert.True(c.IsHoliday(new Date(25, January, 2031)));
+        Assert.True(c.IsHoliday(new Date(14, January, 2032)));
+        Assert.True(c.IsHoliday(new Date(2, January, 2033)));
+        Assert.True(c.IsHoliday(new Date(23, December, 2033)));
+        Assert.True(c.IsHoliday(new Date(12, December, 2034)));
+        Assert.True(c.IsHoliday(new Date(1, December, 2035)));
+        Assert.True(c.IsHoliday(new Date(19, November, 2036)));
+    }
+
+    [Fact]
+    public void TestNorthMacedoniaKurbanBajram()
+    {
+        // Testing North Macedonia Kurban Bajram (Eid al-Adha) dates...
+
+        Calendar c = new NorthMacedonia();
+
+        Assert.True(c.IsHoliday(new Date(27, May, 2026)));
+        Assert.True(c.IsHoliday(new Date(17, May, 2027)));
+        Assert.True(c.IsHoliday(new Date(5, May, 2028)));
+        Assert.True(c.IsHoliday(new Date(24, April, 2029)));
+        Assert.True(c.IsHoliday(new Date(13, April, 2030)));
+        Assert.True(c.IsHoliday(new Date(3, April, 2031)));
+        Assert.True(c.IsHoliday(new Date(22, March, 2032)));
+        Assert.True(c.IsHoliday(new Date(11, March, 2033)));
+        Assert.True(c.IsHoliday(new Date(28, February, 2034)));
+        Assert.True(c.IsHoliday(new Date(18, February, 2035)));
+        Assert.True(c.IsHoliday(new Date(7, February, 2036)));
+        Assert.True(c.IsHoliday(new Date(27, January, 2037)));
+        Assert.True(c.IsHoliday(new Date(16, January, 2038)));
+        Assert.True(c.IsHoliday(new Date(5, January, 2039)));
+        Assert.True(c.IsHoliday(new Date(26, December, 2039)));
+        Assert.True(c.IsHoliday(new Date(15, December, 2040)));
+    }
+
+    [Fact]
+    public void TestSerbia()
+    {
+        // Testing Serbia holiday list...
+
+        Date[] expectedHol =
+        [
+            new(1, January, 2026),
+            new(2, January, 2026),
+            new(7, January, 2026),
+            new(16, February, 2026),
+            new(3, April, 2026),
+            new(6, April, 2026),
+            new(1, May, 2026),
+            new(11, November, 2026),
+            new(31, December, 2026),
+
+            new(1, January, 2027),
+            new(7, January, 2027),
+            new(15, February, 2027),
+            new(16, February, 2027),
+            new(26, March, 2027),
+            new(29, March, 2027),
+            new(11, November, 2027),
+            new(31, December, 2027),
+        ];
+
+        Calendar c = new Serbia();
+
+        // Moved: the check of line 4301 on the Western and the Orthodox Good Friday and Easter Monday, which follow
+        // Orthodox Easter in nanoql, moves to Divergences/SerbiaEasterTests.cs; the rest of the list stands.
+        Date[] easter =
+        [
+            new(3, April, 2026), new(6, April, 2026), new(10, April, 2026), new(13, April, 2026),
+            new(26, March, 2027), new(29, March, 2027), new(30, April, 2027), new(3, May, 2027),
+        ];
+        bool Kept(Date d) => !easter.Contains(d);
+        CheckHolidays(
+            c.HolidayList(new Date(1, January, 2026), new Date(31, December, 2027)).Where(Kept),
+            expectedHol.Where(Kept));
+    }
+
+    [Fact]
+    public void TestSaudiArabiaFoundingDayAndEidHolidays()
+    {
+        // Testing Saudi Arabia Founding Day and Eid holidays...
+
+        Calendar saudi = new SaudiArabia();
+
+        // Founding Day observed on Sunday 23 Feb 2025 (22 Feb is Saturday)
+        Assert.True(saudi.IsHoliday(new Date(23, February, 2025)));
+
+        // Founding Day on Sunday 22 Feb 2026
+        Assert.True(saudi.IsHoliday(new Date(22, February, 2026)));
+        Assert.True(saudi.IsBusinessDay(new Date(19, February, 2026)));
+
+        // Eid Al-Fitr 2015 (exchange: 18-21 Jul)
+        Assert.True(saudi.IsHoliday(new Date(21, July, 2015)));
+        Assert.True(saudi.IsBusinessDay(new Date(16, July, 2015)));
+        Assert.True(saudi.IsBusinessDay(new Date(22, July, 2015)));
+
+        // Eid Al-Adha 2015 (exchange: 22-27 Sep)
+        Assert.True(saudi.IsHoliday(new Date(22, September, 2015)));
+        Assert.True(saudi.IsBusinessDay(new Date(21, September, 2015)));
+        Assert.True(saudi.IsBusinessDay(new Date(28, September, 2015)));
+
+        // Eid Al-Adha 2025 (Saudi Exchange: 5-10 Jun, resume 11 Jun)
+        Assert.True(saudi.IsHoliday(new Date(5, June, 2025)));
+        Assert.True(saudi.IsHoliday(new Date(10, June, 2025)));
+        Assert.True(saudi.IsBusinessDay(new Date(4, June, 2025)));
+        Assert.True(saudi.IsBusinessDay(new Date(11, June, 2025)));
+
+        // Eid Al-Fitr 2026 (Saudi Exchange: 17-23 Mar, resume 24 Mar)
+        Assert.True(saudi.IsHoliday(new Date(20, March, 2026)));
+        Assert.True(saudi.IsBusinessDay(new Date(16, March, 2026)));
+        Assert.True(saudi.IsBusinessDay(new Date(24, March, 2026)));
+
+        // Eid Al-Adha 2026 (Saudi Exchange: 22-30 May, resume 31 May)
+        Assert.True(saudi.IsHoliday(new Date(25, May, 2026)));
+        Assert.True(saudi.IsBusinessDay(new Date(21, May, 2026)));
+        Assert.True(saudi.IsBusinessDay(new Date(31, May, 2026)));
+    }
+
+    [Fact]
+    public void TestSlovenia()
+    {
+        // Testing Slovenia holiday list...
+
+        Date[] expectedHol =
+        [
+            new(1, January, 2026),
+            new(2, January, 2026),
+            new(3, April, 2026),
+            new(6, April, 2026),
+            new(1, May, 2026),
+            new(25, June, 2026),
+            new(24, December, 2026),
+            new(25, December, 2026),
+            new(31, December, 2026),
+
+            new(1, January, 2027),
+            new(26, March, 2027),
+            new(29, March, 2027),
+            new(25, June, 2027),
+            new(24, December, 2027),
+            new(31, December, 2027),
+        ];
+
+        Calendar c = new Slovenia();
+        CheckHolidays(c.HolidayList(new Date(1, January, 2026), new Date(31, December, 2027)), expectedHol);
+    }
+
+    [Fact]
     public void TestCroatia()
     {
         // Testing Croatia holiday list...
@@ -1987,6 +4390,328 @@ public class CalendarsTests
 
         Calendar c = new Croatia();
         CheckHolidays(c.HolidayList(new Date(1, January, 2026), new Date(31, December, 2027)), expectedHol);
+    }
+
+    [Fact]
+    public void TestMalaysia()
+    {
+        // Testing Malaysia holiday list...
+
+        Date[] expectedHol =
+        [
+            // 2024
+            new(1, January, 2024), // New Year's Day
+            new(25, January, 2024), // Thaipusam
+            new(1, February, 2024), // Federal Territory Day
+            new(12, February, 2024), // Chinese New Year (substitute)
+            new(28, March, 2024), // Nuzul Al-Quran
+            new(10, April, 2024), // Hari Raya Aidilfitri
+            new(11, April, 2024), // Hari Raya Aidilfitri
+            new(1, May, 2024), // Labour Day
+            new(22, May, 2024), // Wesak Day
+            new(3, June, 2024), // Agong's Birthday
+            new(17, June, 2024), // Hari Raya Haji
+            new(8, July, 2024), // Awal Muharram (substitute)
+            new(16, September, 2024), // Malaysia Day / Maulidur Rasul
+            new(31, October, 2024), // Deepavali
+            new(25, December, 2024), // Christmas Day
+
+            // 2025
+            new(1, January, 2025), // New Year's Day
+            new(29, January, 2025), // Chinese New Year
+            new(30, January, 2025), // Chinese New Year
+            new(11, February, 2025), // Thaipusam
+            new(18, March, 2025), // Nuzul Al-Quran
+            new(31, March, 2025), // Hari Raya Aidilfitri
+            new(1, April, 2025), // Hari Raya Aidilfitri
+            new(1, May, 2025), // Labour Day
+            new(12, May, 2025), // Wesak Day
+            new(2, June, 2025), // Agong's Birthday
+            new(27, June, 2025), // Awal Muharram
+            new(1, September, 2025), // National Day (substitute)
+            new(5, September, 2025), // Maulidur Rasul
+            new(15, September, 2025), // Malaysia Day (additional)
+            new(16, September, 2025), // Malaysia Day
+            new(20, October, 2025), // Deepavali
+            new(25, December, 2025), // Christmas Day
+        ];
+
+        Calendar c = new Malaysia();
+        CheckHolidays(c.HolidayList(new Date(1, January, 2024), new Date(31, December, 2025)), expectedHol);
+    }
+
+    [Fact]
+    public void TestMalaysiaVariableHolidays()
+    {
+        // Testing Malaysia variable holidays across the tabulated range...
+
+        Calendar c = new Malaysia();
+
+        // One festival per tabulated year, so that a date added out of order in the
+        // holiday table is caught: the table is looked up with a binary search, and
+        // an unsorted entry makes its neighbours unfindable.
+        Assert.True(c.IsHoliday(new Date(3, February, 2015))); // Thaipusam
+        Assert.True(c.IsHoliday(new Date(24, January, 2016)));
+        Assert.True(c.IsHoliday(new Date(9, February, 2017)));
+        Assert.True(c.IsHoliday(new Date(31, January, 2018)));
+        Assert.True(c.IsHoliday(new Date(21, January, 2019)));
+        Assert.True(c.IsHoliday(new Date(9, February, 2020)));
+        Assert.True(c.IsHoliday(new Date(28, January, 2021)));
+        Assert.True(c.IsHoliday(new Date(18, January, 2022)));
+        Assert.True(c.IsHoliday(new Date(5, February, 2023)));
+        Assert.True(c.IsHoliday(new Date(25, January, 2024)));
+        Assert.True(c.IsHoliday(new Date(11, February, 2025)));
+        Assert.True(c.IsHoliday(new Date(22, January, 2027)));
+
+        Assert.True(c.IsHoliday(new Date(19, February, 2015))); // Chinese New Year
+        Assert.True(c.IsHoliday(new Date(8, February, 2016)));
+        Assert.True(c.IsHoliday(new Date(28, January, 2017)));
+        Assert.True(c.IsHoliday(new Date(16, February, 2018)));
+        Assert.True(c.IsHoliday(new Date(5, February, 2019)));
+        Assert.True(c.IsHoliday(new Date(25, January, 2020)));
+        Assert.True(c.IsHoliday(new Date(12, February, 2021)));
+        Assert.True(c.IsHoliday(new Date(1, February, 2022)));
+        Assert.True(c.IsHoliday(new Date(22, January, 2023)));
+        Assert.True(c.IsHoliday(new Date(10, February, 2024)));
+        Assert.True(c.IsHoliday(new Date(29, January, 2025)));
+        Assert.True(c.IsHoliday(new Date(17, February, 2026)));
+        Assert.True(c.IsHoliday(new Date(6, February, 2027)));
+    }
+
+    [Fact]
+    public void TestMalaysiaFixedHolidaysOutsideTabulatedRange()
+    {
+        // Testing Malaysia fixed holidays outside the tabulated range...
+
+        Calendar c = new Malaysia();
+
+        // The variable festivals are tabulated only for 2015-2027, but the
+        // fixed-date federal holidays are rule-based and must hold in any year.
+        Assert.True(c.IsHoliday(new Date(1, January, 2035))); // New Year's Day
+        Assert.True(c.IsHoliday(new Date(1, February, 2035))); // Federal Territory Day
+        Assert.True(c.IsHoliday(new Date(1, May, 2035))); // Labour Day
+        Assert.True(c.IsHoliday(new Date(31, August, 2035))); // National Day
+        Assert.True(c.IsHoliday(new Date(25, December, 2035))); // Christmas Day
+
+        // Malaysia Day only became a federal holiday in 2010.
+        Assert.True(c.IsHoliday(new Date(16, September, 2035)));
+        Assert.True(c.IsBusinessDay(new Date(16, September, 2009)));
+    }
+
+    [Fact]
+    public void TestPhilippines()
+    {
+        // Testing Philippine holiday list...
+
+        Date[] expectedHol =
+        [
+            // 2024
+            new(1, January, 2024), // New Year's Day
+            new(9, February, 2024), // Additional special (non-working) day
+            // Saturday: {10, February, 2024},  // Chinese New Year
+            new(28, March, 2024), // Maundy Thursday
+            new(29, March, 2024), // Good Friday
+            // Saturday: {30, March, 2024},     // Black Saturday
+            new(9, April, 2024), // Araw ng Kagitingan
+            new(10, April, 2024), // Eid'l Fitr
+            new(1, May, 2024), // Labor Day
+            new(12, June, 2024), // Independence Day
+            new(17, June, 2024), // Eid'l Adha
+            new(24, July, 2024), // Exchange closed by Typhoon Carina
+            new(23, August, 2024), // Ninoy Aquino Day, moved from August 21st
+            new(26, August, 2024), // National Heroes Day
+            new(1, November, 2024), // All Saints' Day
+            // Saturday: {2, November, 2024},   // All Souls' Day
+            // Saturday: {30, November, 2024},  // Bonifacio Day
+            // Sunday: {8, December, 2024},     // Immaculate Conception
+            new(24, December, 2024), // Christmas Eve
+            new(25, December, 2024), // Christmas Day
+            new(30, December, 2024), // Rizal Day
+            new(31, December, 2024), // Last Day of the Year
+
+            // 2025
+            new(1, January, 2025), // New Year's Day
+            new(29, January, 2025), // Chinese New Year
+            new(1, April, 2025), // Eid'l Fitr
+            new(9, April, 2025), // Araw ng Kagitingan
+            new(17, April, 2025), // Maundy Thursday
+            new(18, April, 2025), // Good Friday
+            // Saturday: {19, April, 2025},     // Black Saturday
+            new(1, May, 2025), // Labor Day
+            new(12, May, 2025), // National and local elections
+            new(6, June, 2025), // Eid'l Adha
+            new(12, June, 2025), // Independence Day
+            // Sunday: {27, July, 2025},        // Iglesia ni Cristo anniversary
+            new(21, August, 2025), // Ninoy Aquino Day
+            new(25, August, 2025), // National Heroes Day
+            new(31, October, 2025), // Additional special (non-working) day
+            // Saturday: {1, November, 2025},   // All Saints' Day
+            // Sunday: {30, November, 2025},    // Bonifacio Day
+            new(8, December, 2025), // Immaculate Conception
+            new(24, December, 2025), // Christmas Eve
+            new(25, December, 2025), // Christmas Day
+            new(30, December, 2025), // Rizal Day
+            new(31, December, 2025), // Last Day of the Year
+
+            // 2026
+            new(1, January, 2026), // New Year's Day
+            new(17, February, 2026), // Chinese New Year
+            new(20, March, 2026), // Eid'l Fitr
+            new(2, April, 2026), // Maundy Thursday
+            new(3, April, 2026), // Good Friday
+            // Saturday: {4, April, 2026},      // Black Saturday
+            new(9, April, 2026), // Araw ng Kagitingan
+            new(1, May, 2026), // Labor Day
+            new(27, May, 2026), // Eid'l Adha
+            new(12, June, 2026), // Independence Day
+            new(21, August, 2026), // Ninoy Aquino Day
+            new(31, August, 2026), // National Heroes Day
+            // Sunday: {1, November, 2026},     // All Saints' Day
+            new(2, November, 2026), // All Souls' Day
+            new(30, November, 2026), // Bonifacio Day
+            new(8, December, 2026), // Immaculate Conception
+            new(24, December, 2026), // Christmas Eve
+            new(25, December, 2026), // Christmas Day
+            new(30, December, 2026), // Rizal Day
+            new(31, December, 2026), // Last Day of the Year
+        ];
+
+        Calendar c = new Philippines();
+        CheckHolidays(c.HolidayList(new Date(1, January, 2024), new Date(31, December, 2026)), expectedHol);
+    }
+
+    [Fact]
+    public void TestPhilippinesTransferredHolidays()
+    {
+        // Testing Philippine transferred and withdrawn holidays...
+
+        Calendar c = new Philippines();
+
+        // Araw ng Kagitingan was moved from April 9th (a Sunday) to April 10th
+        // in 2023, and Bonifacio Day from November 30th to November 27th.
+        Assert.True(c.IsHoliday(new Date(10, April, 2023)));
+        Assert.True(c.IsBusinessDay(new Date(30, November, 2023)));
+        Assert.True(c.IsHoliday(new Date(27, November, 2023)));
+
+        // Ninoy Aquino Day was moved from August 21st to August 23rd in 2024.
+        Assert.True(c.IsBusinessDay(new Date(21, August, 2024)));
+        Assert.True(c.IsHoliday(new Date(23, August, 2024)));
+
+        // The Last Day of the Year was declared a special working day in 2021.
+        Assert.True(c.IsBusinessDay(new Date(31, December, 2021)));
+        Assert.True(c.IsHoliday(new Date(31, December, 2020)));
+
+        // The EDSA anniversary was a special non-working day up to 2023 and a
+        // special working day from 2025.
+        Assert.True(c.IsHoliday(new Date(25, February, 2022)));
+        Assert.True(c.IsHoliday(new Date(24, February, 2023)));
+        Assert.True(c.IsBusinessDay(new Date(25, February, 2025)));
+
+        // The exchange was closed by the COVID-19 trading suspension.
+        Assert.True(c.IsHoliday(new Date(17, March, 2020)));
+        Assert.True(c.IsHoliday(new Date(18, March, 2020)));
+        Assert.True(c.IsBusinessDay(new Date(19, March, 2020)));
+    }
+
+    [Fact]
+    public void TestPhilippinesFixedHolidaysOutsideTabulatedRange()
+    {
+        // Testing Philippine fixed holidays outside the tabulated range...
+
+        Calendar c = new Philippines();
+
+        // The proclaimed festivals are tabulated only for 2020-2027, but the
+        // rule-based holidays must hold in any year.
+        Assert.True(c.IsHoliday(new Date(1, January, 2035))); // New Year's Day
+        Assert.True(c.IsHoliday(new Date(9, April, 2035))); // Araw ng Kagitingan
+        Assert.True(c.IsHoliday(new Date(1, May, 2035))); // Labor Day
+        Assert.True(c.IsHoliday(new Date(12, June, 2035))); // Independence Day
+        Assert.True(c.IsHoliday(new Date(21, August, 2035))); // Ninoy Aquino Day
+        Assert.True(c.IsHoliday(new Date(27, August, 2035))); // National Heroes Day
+        Assert.True(c.IsHoliday(new Date(1, November, 2035))); // All Saints' Day
+        Assert.True(c.IsHoliday(new Date(30, November, 2035))); // Bonifacio Day
+        Assert.True(c.IsHoliday(new Date(25, December, 2035))); // Christmas Day
+        Assert.True(c.IsHoliday(new Date(31, December, 2035))); // Last Day of the Year
+
+        // National Heroes Day is the last Monday of August, not a fixed date.
+        Assert.True(c.IsBusinessDay(new Date(20, August, 2035)));
+
+        // Ninoy Aquino Day became a holiday under RA 9256 in 2004, and the Feast
+        // of the Immaculate Conception under RA 10966 in 2018.
+        Assert.True(c.IsBusinessDay(new Date(21, August, 2003)));
+        Assert.True(c.IsBusinessDay(new Date(8, December, 2015)));
+    }
+
+    [Fact]
+    public void TestUzbekistan()
+    {
+        // Testing Uzbekistan holiday list...
+
+        Date[] expectedHol =
+        [
+            new(1, January, 2026),
+            new(20, March, 2026),
+            new(27, May, 2026),
+            new(1, September, 2026),
+            new(1, October, 2026),
+            new(8, December, 2026),
+            new(1, January, 2027),
+            new(8, March, 2027),
+            new(10, March, 2027),
+            new(17, May, 2027),
+            new(1, September, 2027),
+            new(1, October, 2027),
+            new(8, December, 2027),
+        ];
+
+        Calendar c = new Uzbekistan();
+        CheckHolidays(c.HolidayList(new Date(1, January, 2026), new Date(31, December, 2027)), expectedHol);
+    }
+
+    [Fact]
+    public void TestUzbekistanRamazonHayit()
+    {
+        // Testing Uzbekistan Ramazon Hayit (Eid al-Fitr) dates...
+
+        Calendar c = new Uzbekistan();
+
+        Assert.True(c.IsHoliday(new Date(20, March, 2026)));
+        Assert.True(c.IsHoliday(new Date(10, March, 2027)));
+        Assert.True(c.IsHoliday(new Date(27, February, 2028)));
+        Assert.True(c.IsHoliday(new Date(15, February, 2029)));
+        Assert.True(c.IsHoliday(new Date(5, February, 2030)));
+        Assert.True(c.IsHoliday(new Date(25, January, 2031)));
+        Assert.True(c.IsHoliday(new Date(14, January, 2032)));
+        Assert.True(c.IsHoliday(new Date(2, January, 2033)));
+        Assert.True(c.IsHoliday(new Date(23, December, 2033)));
+        Assert.True(c.IsHoliday(new Date(12, December, 2034)));
+        Assert.True(c.IsHoliday(new Date(1, December, 2035)));
+        Assert.True(c.IsHoliday(new Date(19, November, 2036)));
+    }
+
+    [Fact]
+    public void TestUzbekistanQurbonHayit()
+    {
+        // Testing Uzbekistan Qurbon Hayit (Eid al-Adha) dates...
+
+        Calendar c = new Uzbekistan();
+
+        Assert.True(c.IsHoliday(new Date(27, May, 2026)));
+        Assert.True(c.IsHoliday(new Date(17, May, 2027)));
+        Assert.True(c.IsHoliday(new Date(5, May, 2028)));
+        Assert.True(c.IsHoliday(new Date(24, April, 2029)));
+        Assert.True(c.IsHoliday(new Date(13, April, 2030)));
+        Assert.True(c.IsHoliday(new Date(3, April, 2031)));
+        Assert.True(c.IsHoliday(new Date(22, March, 2032)));
+        Assert.True(c.IsHoliday(new Date(11, March, 2033)));
+        Assert.True(c.IsHoliday(new Date(28, February, 2034)));
+        Assert.True(c.IsHoliday(new Date(18, February, 2035)));
+        Assert.True(c.IsHoliday(new Date(7, February, 2036)));
+        Assert.True(c.IsHoliday(new Date(27, January, 2037)));
+        Assert.True(c.IsHoliday(new Date(16, January, 2038)));
+        Assert.True(c.IsHoliday(new Date(5, January, 2039)));
+        Assert.True(c.IsHoliday(new Date(26, December, 2039)));
+        Assert.True(c.IsHoliday(new Date(15, December, 2040)));
     }
 
     [Fact]

@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 814 | 101 |
-| partial | 31 | 31 |
-| ported | 416 | 50 |
+| not started | 791 | 100 |
+| partial | 31 | 30 |
+| ported | 439 | 52 |
 | replaced | 20 | 6 |
 | total | 1,456 | 194 |
 
@@ -1984,40 +1984,40 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `iceland` | ported | Time/Calendars/Iceland.cs, Time/Calendars/IcelandMarket.cs |  |
 | `india` | ported | Time/Calendars/India.cs, Time/Calendars/IndiaMarket.cs |  |
 | `indonesia` | ported | Time/Calendars/Indonesia.cs, Time/Calendars/IndonesiaMarket.cs |  |
-| `islamicholidays` | not started |  |  |
+| `islamicholidays` | ported | Time/Calendars/IslamicHolidaysFunctions.cs |  |
 | `israel` | ported | Time/Calendars/Israel.cs, Time/Calendars/IsraelMarket.cs |  |
 | `italy` | ported | Time/Calendars/Italy.cs, Time/Calendars/ItalyMarket.cs |  |
 | `japan` | ported | Time/Calendars/Japan.cs |  |
 | `jointcalendar` | ported | Time/Calendars/JointCalendar.cs, Time/Calendars/JointCalendarRule.cs |  |
-| `malaysia` | not started |  | no nanoql type: Malaysia, MalaysiaMarket |
-| `malta` | not started |  | no nanoql type: Malta, MaltaMarket |
-| `mexico` | not started |  | no nanoql type: Mexico, MexicoMarket |
-| `montenegro` | not started |  | no nanoql type: Montenegro, MontenegroMarket |
+| `malaysia` | ported | Time/Calendars/Malaysia.cs, Time/Calendars/MalaysiaMarket.cs |  |
+| `malta` | ported | Time/Calendars/Malta.cs, Time/Calendars/MaltaMarket.cs |  |
+| `mexico` | ported | Time/Calendars/Mexico.cs, Time/Calendars/MexicoMarket.cs |  |
+| `montenegro` | ported | Time/Calendars/Montenegro.cs, Time/Calendars/MontenegroMarket.cs |  |
 | `newzealand` | ported | Time/Calendars/NewZealand.cs, Time/Calendars/NewZealandMarket.cs |  |
-| `northmacedonia` | not started |  | no nanoql type: NorthMacedonia, NorthMacedoniaMarket |
-| `norway` | not started |  | no nanoql type: Norway |
+| `northmacedonia` | ported | Time/Calendars/NorthMacedonia.cs, Time/Calendars/NorthMacedoniaMarket.cs |  |
+| `norway` | ported | Time/Calendars/Norway.cs |  |
 | `nullcalendar` | ported | Time/Calendars/NullCalendar.cs |  |
-| `philippines` | not started |  | no nanoql type: Philippines, PhilippinesMarket |
-| `poland` | not started |  | no nanoql type: Poland, PolandMarket |
-| `romania` | not started |  | no nanoql type: Romania, RomaniaMarket |
-| `russia` | not started |  | no nanoql type: Russia, RussiaMarket |
-| `saudiarabia` | not started |  | no nanoql type: SaudiArabia, SaudiArabiaMarket |
-| `serbia` | not started |  | no nanoql type: Serbia, SerbiaMarket |
-| `singapore` | not started |  | no nanoql type: Singapore, SingaporeMarket |
-| `slovakia` | not started |  | no nanoql type: Slovakia, SlovakiaMarket |
-| `slovenia` | not started |  | no nanoql type: Slovenia, SloveniaMarket |
-| `southafrica` | not started |  | no nanoql type: SouthAfrica |
-| `southkorea` | not started |  | no nanoql type: SouthKorea, SouthKoreaMarket |
-| `sweden` | not started |  | no nanoql type: Sweden |
+| `philippines` | ported | Time/Calendars/Philippines.cs, Time/Calendars/PhilippinesMarket.cs |  |
+| `poland` | ported | Time/Calendars/Poland.cs, Time/Calendars/PolandMarket.cs |  |
+| `romania` | ported | Time/Calendars/Romania.cs, Time/Calendars/RomaniaMarket.cs |  |
+| `russia` | ported | Time/Calendars/Russia.cs, Time/Calendars/RussiaMarket.cs |  |
+| `saudiarabia` | ported | Time/Calendars/SaudiArabia.cs, Time/Calendars/SaudiArabiaMarket.cs |  |
+| `serbia` | ported | Time/Calendars/Serbia.cs, Time/Calendars/SerbiaMarket.cs |  |
+| `singapore` | ported | Time/Calendars/Singapore.cs, Time/Calendars/SingaporeMarket.cs |  |
+| `slovakia` | ported | Time/Calendars/Slovakia.cs, Time/Calendars/SlovakiaMarket.cs |  |
+| `slovenia` | ported | Time/Calendars/Slovenia.cs, Time/Calendars/SloveniaMarket.cs |  |
+| `southafrica` | ported | Time/Calendars/SouthAfrica.cs |  |
+| `southkorea` | ported | Time/Calendars/SouthKorea.cs, Time/Calendars/SouthKoreaMarket.cs |  |
+| `sweden` | ported | Time/Calendars/Sweden.cs |  |
 | `switzerland` | ported | Time/Calendars/Switzerland.cs |  |
-| `taiwan` | not started |  | no nanoql type: Taiwan, TaiwanMarket |
+| `taiwan` | ported | Time/Calendars/Taiwan.cs, Time/Calendars/TaiwanMarket.cs |  |
 | `target` | ported | Time/Calendars/TARGET.cs |  |
-| `thailand` | not started |  | no nanoql type: Thailand |
+| `thailand` | ported | Time/Calendars/Thailand.cs |  |
 | `turkey` | ported | Time/Calendars/Turkey.cs |  |
-| `ukraine` | not started |  | no nanoql type: Ukraine, UkraineMarket |
+| `ukraine` | ported | Time/Calendars/Ukraine.cs, Time/Calendars/UkraineMarket.cs |  |
 | `unitedkingdom` | ported | Time/Calendars/UnitedKingdom.cs, Time/Calendars/UnitedKingdomMarket.cs |  |
 | `unitedstates` | ported | Time/Calendars/UnitedStates.cs, Time/Calendars/UnitedStatesMarket.cs |  |
-| `uzbekistan` | not started |  | no nanoql type: Uzbekistan, UzbekistanMarket |
+| `uzbekistan` | ported | Time/Calendars/Uzbekistan.cs, Time/Calendars/UzbekistanMarket.cs |  |
 | `weekendsonly` | ported | Time/Calendars/WeekendsOnly.cs |  |
 
 ### `ql/time/daycounters/`
@@ -2082,8 +2082,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bondforward` | not started |  | 3 cases |
 | `bonds` | ported | TestSuite/BondsTests.cs | 22 of 22 cases |
 | `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
-| `businessdayconventions` | not started |  | 1 cases |
-| `calendars` | partial | TestSuite/CalendarsTests.cs | 49 of 81 cases; not ported: testIntradayAddHolidays (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); not yet: testRussia, testSouthKoreanSettlement, testKoreaStockExchange, testTaiwanCalendar, testThailandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testRomaniaCalendars, testMexicoInaugurationDay, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit |
+| `businessdayconventions` | ported | TestSuite/BusinessDayConventionsTests.cs | 1 of 1 cases |
+| `calendars` | ported | TestSuite/CalendarsTests.cs | 80 of 81 cases; not ported: testIntradayAddHolidays (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); moved: testSouthKoreanSettlement line 2146 to Divergences/SouthKoreaElection2025Tests.cs; testKoreaStockExchange line 2843 to Divergences/SouthKoreaElection2025Tests.cs; testMalta line 4173 to Divergences/MaltaWeekendTests.cs; testSerbia line 4301 to Divergences/SerbiaEasterTests.cs |
 | `callablebonds` | ported | TestSuite/CallableBondsTests.cs | 14 of 14 cases; replaced: testObservability by Vectors/Experimental/CallableBonds/CallableBondVectorTests.cs |
 | `capfloor` | ported | TestSuite/CapFloorTests.cs | 10 of 10 cases |
 | `capflooredcoupon` | ported | TestSuite/CapFlooredCouponTests.cs | 2 of 2 cases |
@@ -2203,7 +2203,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `period` | ported | TestSuite/PeriodTests.cs | 9 of 9 cases |
 | `perpetualfutures` | not started |  | 1 cases |
 | `piecewiseblackvariancesurface` | not started |  | 20 cases |
-| `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 31 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency, testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency, testGlobalBootstrapVariables, testPiecewiseSpreadYieldCurve, testSwapHelpersWithOnceFrequency |
+| `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 32 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency, testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency, testGlobalBootstrapVariables, testPiecewiseSpreadYieldCurve |
 | `piecewisezerospreadedtermstructure` | not started |  | 10 cases |
 | `preconditions` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `prices` | not started |  | 6 cases |
@@ -2227,7 +2227,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `squarerootclvmodel` | not started |  | 3 cases |
 | `stats` | not started |  | 4 cases |
 | `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |
-| `swap` | partial | TestSuite/SwapTests.cs | 13 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs; not yet: testFixedTenorInferenceWithTerminationDate, testSpotDateUsesFixingCalendar |
+| `swap` | partial | TestSuite/SwapTests.cs | 14 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs; not yet: testFixedTenorInferenceWithTerminationDate |
 | `swapforwardmappings` | not started |  | 3 cases |
 | `swaption` | ported | TestSuite/SwaptionTests.cs | 13 of 13 cases; replaced: testBlackEngineCaching by Vectors/Instruments/SwaptionVectorTests.cs |
 | `swaptionvolatilitycube` | ported | TestSuite/SwaptionVolatilityCubeTests.cs | 17 of 17 cases; replaced: testObservability by Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs; testZabrObservability by Vectors/TermStructures/ZabrSwaptionVolatilityCubeVectorTests.cs |

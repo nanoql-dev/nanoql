@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/swap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testFixedTenorInferenceWithTerminationDate, which waits for batch 2's Bbsw; testSpotDateUsesFixingCalendar, which waits for batch 2's Taiwan calendar
+// Partial: testFixedTenorInferenceWithTerminationDate, which waits for batch 2's Bbsw
 // Replaced: testNotifications (Vectors/Instruments/VanillaSwapVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -307,6 +307,62 @@ public class SwapTests
             .WithFixedRate(0.03)
             .ToVanillaSwap(context);
         Assert.True(swap3.StartDate() != default);
+    }
+
+    // Adapted: the curve linked to a handle (line 574) and the index built on the handle after it (line 582) become
+    // the index built on the curve, and the evaluation date (line 590) is the context's.
+    [Fact]
+    public void TestSpotDateUsesFixingCalendar()
+    {
+        // Testing that MakeVanillaSwap derives the spot date on the index fixing calendar...
+
+        // Regression test for issue #2546: when the index fixing calendar and the
+        // float/payment calendar disagree (a non-deliverable IRS with a local
+        // fixing calendar and a joint payment calendar), the spot date used to be
+        // pre-adjusted on the payment calendar but then advanced by valueDate on
+        // the fixing calendar, producing a start date one business day late.
+
+        // 19 January 2026 is the third Monday of January (Martin Luther King's
+        // birthday): a US Federal Reserve holiday but a Taiwan business day, so
+        // the fixing calendar and the joint payment calendar diverge here.
+        Date today = new(19, January, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        YieldTermStructure yts = FlatForward.Create(0, new NullCalendar(), 0.03, new Actual365Fixed(), context);
+
+        Calendar fixingCalendar = new Taiwan();
+        Calendar paymentCalendar = new JointCalendar(new Taiwan(), new UnitedStates(UnitedStatesMarket.FederalReserve));
+
+        Natural fixingDays = 2;
+        var index = new IborIndex(
+            "Taibor3M", 3 * TimeUnit.Months, fixingDays, new TWDCurrency(), fixingCalendar,
+            BusinessDayConvention.ModifiedFollowing, true, new Actual365Fixed(), yts);
+
+        // The correct spot date is defined entirely by the index, i.e. the eval
+        // date adjusted and advanced on the fixing calendar.
+        Date refDate = fixingCalendar.Adjust(today);
+        Date expectedStart = index.ValueDate(refDate);
+
+        VanillaSwap swap = new MakeVanillaSwap(1 * TimeUnit.Years, index)
+            .WithFixedRate(0.03)
+            .WithFixedLegTenor(1 * TimeUnit.Years)
+            .WithFixedLegDayCount(new Actual365Fixed())
+            .WithFloatingLegCalendar(paymentCalendar)
+            .WithFixedLegCalendar(paymentCalendar)
+            .ToVanillaSwap(context);
+
+        Assert.True(
+            swap.StartDate() == expectedStart,
+            "MakeVanillaSwap spot date should be derived on the index fixing calendar.\n"
+            + $"    expected: {expectedStart}\n"
+            + $"    obtained: {swap.StartDate()}");
+
+        // Sanity check: the buggy path pre-adjusted on the joint calendar, which
+        // would have rolled 19 January forward to 20 January before the 2-day
+        // fixing advance, landing one business day late.
+        Date buggyRef = paymentCalendar.Adjust(today);
+        Date buggyStart = index.ValueDate(buggyRef);
+        Assert.True(buggyStart != expectedStart);
     }
 
     // Adapted: the evaluation date (line 627) is the context's.
