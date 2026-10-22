@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/daycounters.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testActualActualOutOfScheduleRange
 // Not ported: testIntraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); testYearFractionToDateForLinearDayCounter (QL_HIGH_RESOLUTION_DATE, which the default build leaves out)
 
 using NanoQL.Numerics;
@@ -958,6 +957,45 @@ public class DayCountersTests
                 new Date(8, January, 2027),
                 new Date(8, January, 2025),
                 new Date(8, January, 2027)));
+    }
+
+    // Adapted: the evaluation date the case sets and restores (lines 1127-1128 and 1155) is never read: the schedule
+    // and the year fraction take their dates.
+    [Fact]
+    public void TestActualActualOutOfScheduleRange()
+    {
+        // Testing usage of actual/actual out of schedule...
+        var today = new Date(10, November, 2020);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        var effectiveDate = new Date(21, May, 2019);
+        var terminationDate = new Date(21, May, 2029);
+        var tenor = new Period(1, TimeUnit.Years);
+        Calendar calendar = new China(ChinaMarket.IB);
+        BusinessDayConvention convention = BusinessDayConvention.Unadjusted;
+        BusinessDayConvention terminationDateConvention = convention;
+        DateGenerationRule rule = DateGenerationRule.Backward;
+        bool endOfMonth = false;
+
+        var schedule = new Schedule(
+            effectiveDate, terminationDate, tenor, calendar, convention, terminationDateConvention, rule, endOfMonth,
+            context);
+        DayCounter dayCounter = new ActualActual(ActualActualConvention.Bond, schedule);
+        bool raised = false;
+
+        try
+        {
+            dayCounter.YearFraction(today, today + new Period(9, TimeUnit.Years));
+        }
+        catch (Exception e) when (e is ArgumentException or NanoQLException)
+        {
+            raised = true;
+        }
+
+        if (!raised)
+        {
+            Assert.Fail("Exception expected but did not happen!");
+        }
     }
 
     [Fact]

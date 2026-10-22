@@ -126,7 +126,6 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for B5.3's `SequenceStatistics`.
 - `tests/NanoQL.Tests/TestSuite/CalendarsTests.cs`: the cases for calendars not yet ported.
 - `tests/NanoQL.Tests/TestSuite/CreditDefaultSwapTests.cs`: `testCachedValue`'s integral-engine checks, which wait for B6.2's `IntegralCdsEngine`.
-- `tests/NanoQL.Tests/TestSuite/DayCountersTests.cs`: `testActualActualOutOfScheduleRange`, which waits for batch 2's China calendar.
 - `tests/NanoQL.Tests/TestSuite/DigitalOptionTests.cs`: the American digital cases, which wait for B4.5's `AnalyticDigitalAmericanEngine`; `testMCCashAtHit`, which waits for B4.4's `MCDigitalEngine`.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, Student t and stochastic-collocation cases, whose distributions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/DividendOptionTests.cs`: the cash-dividend engine's cases, which wait for B4.5's `CashDividendEuropeanEngine`.

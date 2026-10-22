@@ -146,7 +146,8 @@ def ql_units(ql_root):
 
 
 def ql_read(ql_root, rel):
-    with open(os.path.join(ql_root, rel), encoding="utf-8", errors="replace") as f:
+    """A QuantLib file's text, without the byte-order mark some open with, which would hide their first comment."""
+    with open(os.path.join(ql_root, rel), encoding="utf-8-sig", errors="replace") as f:
         return f.read()
 
 

@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 833 | 101 |
-| partial | 31 | 32 |
-| ported | 397 | 49 |
+| not started | 814 | 101 |
+| partial | 31 | 31 |
+| ported | 416 | 50 |
 | replaced | 20 | 6 |
 | total | 1,456 | 194 |
 
@@ -1964,29 +1964,29 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `argentina` | not started |  | no nanoql type: Argentina, ArgentinaMarket |
-| `australia` | not started |  | no nanoql type: Australia, AustraliaMarket |
-| `austria` | not started |  | no nanoql type: Austria, AustriaMarket |
+| `argentina` | ported | Time/Calendars/Argentina.cs, Time/Calendars/ArgentinaMarket.cs |  |
+| `australia` | ported | Time/Calendars/Australia.cs, Time/Calendars/AustraliaMarket.cs |  |
+| `austria` | ported | Time/Calendars/Austria.cs, Time/Calendars/AustriaMarket.cs |  |
 | `bespokecalendar` | ported | Time/Calendars/BespokeCalendar.cs |  |
-| `botswana` | not started |  | no nanoql type: Botswana |
+| `botswana` | ported | Time/Calendars/Botswana.cs |  |
 | `brazil` | ported | Time/Calendars/Brazil.cs, Time/Calendars/BrazilMarket.cs |  |
 | `canada` | ported | Time/Calendars/Canada.cs, Time/Calendars/CanadaMarket.cs |  |
-| `chile` | not started |  | no nanoql type: Chile, ChileMarket |
-| `china` | not started |  | no nanoql type: China, ChinaMarket |
-| `croatia` | not started |  | no nanoql type: Croatia, CroatiaMarket |
-| `czechrepublic` | not started |  | no nanoql type: CzechRepublic, CzechRepublicMarket |
-| `denmark` | not started |  | no nanoql type: Denmark |
-| `finland` | not started |  | no nanoql type: Finland |
-| `france` | not started |  | no nanoql type: France, FranceMarket |
-| `germany` | not started |  | no nanoql type: Germany, GermanyMarket |
-| `hongkong` | not started |  | no nanoql type: HongKong, HongKongMarket |
-| `hungary` | not started |  | no nanoql type: Hungary |
-| `iceland` | not started |  | no nanoql type: Iceland, IcelandMarket |
-| `india` | not started |  | no nanoql type: India, IndiaMarket |
-| `indonesia` | not started |  | no nanoql type: Indonesia, IndonesiaMarket |
+| `chile` | ported | Time/Calendars/Chile.cs, Time/Calendars/ChileMarket.cs |  |
+| `china` | ported | Time/Calendars/China.cs, Time/Calendars/ChinaMarket.cs |  |
+| `croatia` | ported | Time/Calendars/Croatia.cs, Time/Calendars/CroatiaMarket.cs |  |
+| `czechrepublic` | ported | Time/Calendars/CzechRepublic.cs, Time/Calendars/CzechRepublicMarket.cs |  |
+| `denmark` | ported | Time/Calendars/Denmark.cs |  |
+| `finland` | ported | Time/Calendars/Finland.cs |  |
+| `france` | ported | Time/Calendars/France.cs, Time/Calendars/FranceMarket.cs |  |
+| `germany` | ported | Time/Calendars/Germany.cs, Time/Calendars/GermanyMarket.cs |  |
+| `hongkong` | ported | Time/Calendars/HongKong.cs, Time/Calendars/HongKongMarket.cs |  |
+| `hungary` | ported | Time/Calendars/Hungary.cs |  |
+| `iceland` | ported | Time/Calendars/Iceland.cs, Time/Calendars/IcelandMarket.cs |  |
+| `india` | ported | Time/Calendars/India.cs, Time/Calendars/IndiaMarket.cs |  |
+| `indonesia` | ported | Time/Calendars/Indonesia.cs, Time/Calendars/IndonesiaMarket.cs |  |
 | `islamicholidays` | not started |  |  |
-| `israel` | not started |  | no nanoql type: Israel, IsraelMarket |
-| `italy` | not started |  | no nanoql type: Italy, ItalyMarket |
+| `israel` | ported | Time/Calendars/Israel.cs, Time/Calendars/IsraelMarket.cs |  |
+| `italy` | ported | Time/Calendars/Italy.cs, Time/Calendars/ItalyMarket.cs |  |
 | `japan` | ported | Time/Calendars/Japan.cs |  |
 | `jointcalendar` | ported | Time/Calendars/JointCalendar.cs, Time/Calendars/JointCalendarRule.cs |  |
 | `malaysia` | not started |  | no nanoql type: Malaysia, MalaysiaMarket |
@@ -2083,7 +2083,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bonds` | ported | TestSuite/BondsTests.cs | 22 of 22 cases |
 | `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
 | `businessdayconventions` | not started |  | 1 cases |
-| `calendars` | partial | TestSuite/CalendarsTests.cs | 22 of 81 cases; not ported: testIntradayAddHolidays (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); not yet: testGermanyFrankfurt, testGermanyEurex, testGermanyXetra, testGermanySettlementCalendar, testGermanyEuwaxCalendar, testItaly, testRussia, testDenmark, testSouthKoreanSettlement, testKoreaStockExchange, testHongKong, testArgentinaCalendar, testIndonesiaCalendar, testTaiwanCalendar, testThailandCalendar, testBotswanaCalendar, testCzechRepublicCalendar, testFinlandCalendar, testHungaryCalendar, testIcelandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testAustriaCalendars, testFranceCalendars, testRomaniaCalendars, testAustraliaCalendars, testChileCalendar, testChinaSSE, testChinaIB, testMexicoInaugurationDay, testTASECalendar, testSHIRCalendar, testTelborCalendar, testDayLists, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testCroatia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit, testIndia |
+| `calendars` | partial | TestSuite/CalendarsTests.cs | 49 of 81 cases; not ported: testIntradayAddHolidays (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); not yet: testRussia, testSouthKoreanSettlement, testKoreaStockExchange, testTaiwanCalendar, testThailandCalendar, testNorwayCalendar, testPolandCalendars, testSlovakiaCalendar, testSouthAfricaCalendar, testSwedenCalendar, testUkraineCalendar, testSingaporeCalendar, testRomaniaCalendars, testMexicoInaugurationDay, testMalta, testMontenegro, testNorthMacedonia, testNorthMacedoniaRamazanBajram, testNorthMacedoniaKurbanBajram, testSerbia, testSaudiArabiaFoundingDayAndEidHolidays, testSlovenia, testMalaysia, testMalaysiaVariableHolidays, testMalaysiaFixedHolidaysOutsideTabulatedRange, testPhilippines, testPhilippinesTransferredHolidays, testPhilippinesFixedHolidaysOutsideTabulatedRange, testUzbekistan, testUzbekistanRamazonHayit, testUzbekistanQurbonHayit |
 | `callablebonds` | ported | TestSuite/CallableBondsTests.cs | 14 of 14 cases; replaced: testObservability by Vectors/Experimental/CallableBonds/CallableBondVectorTests.cs |
 | `capfloor` | ported | TestSuite/CapFloorTests.cs | 10 of 10 cases |
 | `capflooredcoupon` | ported | TestSuite/CapFlooredCouponTests.cs | 2 of 2 cases |
@@ -2110,7 +2110,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `currency` | ported | TestSuite/CurrencyTests.cs | 1 of 1 cases |
 | `curvestates` | not started |  | 3 cases |
 | `dates` | ported | TestSuite/DatesTests.cs | 14 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; parseDates by Conventions/DateParserFormatTests.cs; not ported: intraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out) |
-| `daycounters` | partial | TestSuite/DayCountersTests.cs | 19 of 22 cases; not ported: testIntraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); testYearFractionToDateForLinearDayCounter (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); not yet: testActualActualOutOfScheduleRange |
+| `daycounters` | ported | TestSuite/DayCountersTests.cs | 20 of 22 cases; not ported: testIntraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); testYearFractionToDateForLinearDayCounter (QL_HIGH_RESOLUTION_DATE, which the default build leaves out) |
 | `defaultprobabilitycurves` | ported | TestSuite/DefaultProbabilityCurvesTests.cs | 10 of 10 cases |
 | `digitalcoupon` | not started |  | 8 cases |
 | `digitaloption` | partial | TestSuite/DigitalOptionTests.cs | 3 of 10 cases; not yet: testCashAtHitOrNothingAmericanValues, testAssetAtHitOrNothingAmericanValues, testCashAtExpiryOrNothingAmericanValues, testAssetAtExpiryOrNothingAmericanValues, testCashAtHitOrNothingAmericanGreeks, testCashAtHitOrNothingAmericanLowVolatility, testMCCashAtHit |

@@ -1001,9 +1001,8 @@ public class BondsTests
         CheckExCouponCases(bond, leg, dc, comp, freq, cases, [1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6]);
     }
 
-    // Adapted: NullCalendar in place of Australia (line 1366), which waits for batch 2; it is only the bond's payment
-    // calendar, under unadjusted payments, so the case's values are unchanged. No evaluation date is read, every call
-    // taking an explicit settlement date; the context is the test runner's.
+    // Adapted: no evaluation date is read, every call taking an explicit settlement date; the context is the test
+    // runner's.
     [Fact]
     public void TestExCouponAustralianBond()
     {
@@ -1056,7 +1055,7 @@ public class BondsTests
         // Mod duration : 2.317320093
         // Convexity : 0.06684074058
         // PV 0.01 : 0.02385310264
-        Calendar calendar = new NullCalendar();
+        Calendar calendar = new Australia();
 
         Natural settlementDays = 3;
 

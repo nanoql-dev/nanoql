@@ -91,6 +91,14 @@ public abstract class Calendar : IEquatable<Calendar>
     /// <returns><see langword="true"/> for a weekend day.</returns>
     public abstract bool IsWeekend(Weekday w);
 
+    /// <summary>
+    /// Whether the date falls on the market's weekend as it stood on that date: <see cref="IsWeekend"/> of its weekday,
+    /// unless the weekend changed on a date, where the calendar overrides this.
+    /// </summary>
+    /// <param name="d">The date.</param>
+    /// <returns><see langword="true"/> for a weekend day.</returns>
+    internal virtual bool IsWeekendOn(Date d) => IsWeekend(d.Weekday);
+
     /// <summary>Whether, in the given market, the date is on or before the month's first business day.</summary>
     /// <param name="d">The date.</param>
     /// <returns><see langword="true"/> on or before the first business day.</returns>
@@ -167,8 +175,16 @@ public abstract class Calendar : IEquatable<Calendar>
     /// <param name="includeWeekEnds">Whether weekend days are listed too.</param>
     /// <returns>The holidays, in order.</returns>
     /// <remarks>
+    /// <para>
     /// The list stops at <paramref name="to"/>, where QuantLib's loop steps one day past it (<c>calendar.cpp:281</c>)
     /// and so throws when <paramref name="to"/> is <see cref="Date.MaxDate"/>: a documented divergence.
+    /// </para>
+    /// <para>
+    /// Without weekends, it leaves out the days that are weekend days on their own date. QuantLib reads the weekend as
+    /// <see cref="IsWeekend"/> answers it, today's, so for a market whose weekend changed on a date (the Tel Aviv stock
+    /// exchange's in 2026, Tadawul's in 2013) its list holds every old-weekend day before the change: a documented
+    /// divergence. Every other calendar's list is QuantLib's.
+    /// </para>
     /// </remarks>
     public ImmutableArray<Date> HolidayList(Date from, Date to, bool includeWeekEnds = false)
     {
@@ -177,7 +193,7 @@ public abstract class Calendar : IEquatable<Calendar>
         var result = ImmutableArray.CreateBuilder<Date>();
         for (Date d = from; d <= to; ++d)
         {
-            if (IsHoliday(d) && (includeWeekEnds || !IsWeekend(d.Weekday)))
+            if (IsHoliday(d) && (includeWeekEnds || !IsWeekendOn(d)))
             {
                 result.Add(d);
             }

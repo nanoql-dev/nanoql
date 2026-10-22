@@ -651,6 +651,9 @@ UBLAS_PROBE = "src/NanoQL/Boost/Numeric/Ublas/SelfTestMatrixSparseProbe.cs"
 # A committed table that tools/tables/sobolrsg.py generates (6).
 TABLE_FILE = "src/NanoQL/Numerics/RandomNumbers/SobolRsg/Initializers.bin"
 DATES_TESTS = "tests/NanoQL.Tests/TestSuite/DatesTests.cs"
+# A port of QuantLib files that open with a byte-order mark, and its QuantLib copyright line.
+BOM_PORT = "src/NanoQL/Time/Calendars/Croatia.cs"
+BOM_COPYRIGHT = "// SPDX-FileCopyrightText: Copyright (C) 2026 SoftSolution srl\n"
 # A ported test class with both a // Partial: line and a // Replaced: line.
 LDS_TESTS = "tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs"
 # A ported test class with a // Not ported: line, and the line.
@@ -857,6 +860,8 @@ def perturbations(ql_root, boost_root, tmp):
                          probe_text(ql_root, ("test-suite/dates.cpp",), "NanoQL.Tests.TestSuite", "SelfTestWrongTests"))),
         ("a missing copyright line", "copyright", "copyright lines differ",
          lambda r: edit(r, PROBE, first_copyright + "\n", "")),
+        ("a missing copyright line of files that open with a byte-order mark", "copyright",
+         "Croatia.cs: QuantLib copyright lines differ", lambda r: edit(r, BOM_PORT, BOM_COPYRIGHT, "")),
         ("a missing nanoql line", "copyright", "The nanoql Authors' line",
          lambda r: edit(r, PROBE, "// SPDX-FileCopyrightText: 2026 The nanoql Authors\n", "")),
         ("a bare SPDX expression", "copyright", "expected Apache-2.0 AND BSD-3-Clause",

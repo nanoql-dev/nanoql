@@ -276,6 +276,17 @@ Facts:
 - `ANullHelperAmongACurvesInstrumentsIsRefused`
 - `ANullHelperAmongAGlobalBootstrapsAdditionalHelpersIsRefused`
 
+## BotswanaTuesdayProvisoTests
+
+[`Divergences/BotswanaTuesdayProvisoTests.cs`](../tests/NanoQL.Tests/Divergences/BotswanaTuesdayProvisoTests.cs)
+
+Botswana's Tuesday proviso. QuantLib's header quotes the Public Holidays Act: "if 2nd January, 1st October or Boxing Day falls on a Monday, the following Tuesday shall be observed as a public holiday" (`botswana.hpp`), and its code observes that Tuesday for January 2nd alone (`botswana.cpp`, `d == 3 && w == Tuesday` in January): Tuesday December 27th after a Monday Boxing Day, and Tuesday October 2nd after a Monday October 1st, are business days in QuantLib in every such year from 1901 to 2199. nanoql observes them by the January branch's own expression; QuantLib's January 2nd branch is asserted beside them.
+
+Facts:
+
+- `TheTuesdayAfterAMondayBoxingDayIsAHoliday`
+- `TheTuesdayAfterAMondayFirstOfOctoberIsAHoliday`
+
 ## BuilderTests
 
 [`Divergences/BuilderTests.cs`](../tests/NanoQL.Tests/Divergences/BuilderTests.cs)
@@ -998,6 +1009,16 @@ Facts:
 - `AnExpiredIndexedFraCarriesItsFixingsAmount`
 - `AnExpiredParFraHasNeitherAmountNorRate`
 
+## FranceMoveableFeastTests
+
+[`Divergences/FranceMoveableFeastTests.cs`](../tests/NanoQL.Tests/Divergences/FranceMoveableFeastTests.cs)
+
+France's Ascension and Whit Monday. QuantLib 1.44 holds them on May 10th and May 21st (`france.cpp:60-63`), right only when Easter Monday is April 2nd; QuantLib's master moves them with Easter, Easter Monday plus 38 and 49 days (#2893, `16414224f`), with five new test lines, which nanoql takes ahead of the pin, as R8 directs. The lines below are upstream's; QuantLib 1.44's answers are recorded beside them.
+
+Facts:
+
+- `AscensionAndWhitMondayFollowEaster`
+
 ## FuturesNullMaturityTests
 
 [`Divergences/FuturesNullMaturityTests.cs`](../tests/NanoQL.Tests/Divergences/FuturesNullMaturityTests.cs)
@@ -1199,6 +1220,17 @@ The ISDA engine's protection leg on curves that end before the maturity. QuantLi
 Facts:
 
 - `TheProtectionRunsToTheMaturity`
+
+## IsraelRangeEndTests
+
+[`Divergences/IsraelRangeEndTests.cs`](../tests/NanoQL.Tests/Divergences/IsraelRangeEndTests.cs)
+
+Israel's three markets at the ends of Date's range. Their rules read a neighbouring day by date arithmetic, up to 21 days back (Simchat Torah through Sukkot, Yom Kippur and the New Year) and one day ahead (the eves) (`israel.cpp:374-383`), so QuantLib's `isBusinessDay` throws "Date's serial number (...) outside allowed range" on the dates of January 1st to 21st, 1901, that no earlier rule settles (15 of them for the Tel Aviv stock exchange and SHIR, 14 for Telbor), and on December 31st, 2199. nanoql reads the neighbour by serial number, in no table there (the tables hold 2000 to 2050), so the rule reads false and the answer is QuantLib's weekend and fixed-date rules, as on the dates just inside the range.
+
+Facts:
+
+- `TheFirstThreeWeeksOf1901Answer`
+- `TheLastDayOf2199Answers`
 
 ## LaggedYoYRateBranchTests
 
@@ -2046,6 +2078,17 @@ The replicating variance-swap engine on structures dated differently. QuantLib's
 Facts:
 
 - `TheVarianceIsPerYearOfTheSwapsTime`
+
+## WeekendOnDateHolidayListTests
+
+[`Divergences/WeekendOnDateHolidayListTests.cs`](../tests/NanoQL.Tests/Divergences/WeekendOnDateHolidayListTests.cs)
+
+A holiday list without weekends for a market whose weekend changed on a date. The Tel Aviv stock exchange kept Friday and Saturday until January 4th, 2026 (`israel.cpp:436-446`), while `isWeekend(Weekday)` answers today's weekend, Saturday and Sunday, so QuantLib's `holidayList(..., includeWeekEnds = false)` (`calendar.cpp:277-286`) holds every Friday before 2026; QuantLib's own TASE test says "using checkHolidays with includeWeekEnds = false doesn't work in this case" and filters the list by each date's weekend instead (`test-suite/calendars.cpp:3699-3722`). nanoql's list leaves out the days that are weekend days on their own date, which equals that test's filtered list; a joint calendar combines its components' weekends on the date as its weekend combines theirs. `IsWeekend(Weekday)` keeps QuantLib's answer.
+
+Facts:
+
+- `TheTelAvivListsAreQuantLibsTestsFilteredLists`
+- `AJointCalendarCombinesItsComponentsWeekendsOnTheDate`
 
 ## WeightedIndexNullComponentTests
 

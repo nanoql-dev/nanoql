@@ -120,6 +120,36 @@ public sealed class JointCalendar : Calendar
         }
     }
 
+    // The components' weekends on the date, combined as IsWeekend combines their weekdays'.
+    internal override bool IsWeekendOn(Date d)
+    {
+        switch (rule)
+        {
+            case JointCalendarRule.JoinHolidays:
+                foreach (Calendar c in calendars)
+                {
+                    if (c.IsWeekendOn(d))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            case JointCalendarRule.JoinBusinessDays:
+                foreach (Calendar c in calendars)
+                {
+                    if (!c.IsWeekendOn(d))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            default:
+                throw new NanoQLException("unknown joint calendar rule");
+        }
+    }
+
     /// <summary>
     /// Whether the calendar has the same name and the same added and removed holidays as another, which must be a joint
     /// calendar with the same rule and the same component calendars, in order, each compared the same way.
