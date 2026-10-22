@@ -134,6 +134,7 @@ public class FxResetCashFlowsVectorTests
             built.Select(x => (Func<object?>)(() => x is null ? null : x.Nominal(context))).ToArray());
         check.Output(c, "nominals", Each(x => x.Nominal(context)));
         check.Output(c, "rates", Each(x => x.Rate(context)));
+        check.Output(c, "indexFixings", Each(x => x.IndexFixing(context)));
         check.Output(c, "amounts", Each(x => x.Amount(context)));
         check.Output(
             c,

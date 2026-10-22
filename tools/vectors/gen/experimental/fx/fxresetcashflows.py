@@ -9,20 +9,20 @@
   triangulation through GBP), a missing past fixing (refused), today's fixing stored, missing (forecast) and missing
   where the context enforces today's fixings (refused), and future resets projected from the spot, quoted either way,
   with and without a spot settlement date, and the refusal of a zero spot that the pricer inverts;
-- FxResetCoupon: its nominal (refused before a pricer is set), rate, amount, accrued amount and reset dates, over Ibor
-  coupons, one of them seasoned (reading a stored fixing and a past FX fixing), and its refusal of a zero underlying
-  nominal;
+- FxResetCoupon: its nominal (refused before a pricer is set), rate, index fixing, amount, accrued amount and reset
+  dates, over Ibor coupons, one of them seasoned (reading a stored fixing and a past FX fixing), and its refusal of a
+  zero underlying nominal;
 - FxResetNotionalExchange: its amount with a previous reset, a current one or both (refused before a pricer is set),
   and its refusal of neither;
 - setFxResetPricer on a leg of coupons, exchanges and a plain cash flow, which it leaves alone.
 Left out (the S-rx plan's SRXR3 (xiii)): today's non-positive fixing, which QuantLib forecasts over and nanoql refuses
 (tests/NanoQL.Tests/Divergences/FxResetTodaysFixingTests.cs).
 
-Each case's inputs hold its settings (with the exchange rates its fixings are) and "kind" with the kind's spec:
-"reset" {"fixingDate", "valueDate"} gives "build" or the two dates; "convention" {"fixingDays", "calendar",
-"valueDate", "fixingDate"} gives "reset" (its two dates) and "valueDate", each refused where QuantLib refuses;
-"rates" {"pricer", "resets"} gives "fxRates"; "coupons" {"pricer", "coupons"} gives per coupon whether it builds, its
-nominal without a pricer, nominal, rate, amount, accrued amount at "accrualDate", constant-leg notional and reset dates;
+Each case's inputs hold its settings (with the exchange rates its fixings are) and "kind" with the kind's spec: "reset"
+{"fixingDate", "valueDate"} gives "build" or the two dates; "convention" {"fixingDays", "calendar", "valueDate",
+"fixingDate"} gives "reset" (its two dates) and "valueDate", each refused where QuantLib refuses; "rates" {"pricer",
+"resets"} gives "fxRates"; "coupons" {"pricer", "coupons"} gives per coupon whether it builds, its nominal without a
+pricer, nominal, rate, index fixing, amount, accrued amount at "accrualDate", constant-leg notional and reset dates;
 "exchanges" {"pricer", "exchanges"} gives per exchange whether it builds, its amount without a pricer and its amount;
 "leg" {"pricer", "coupons", "exchanges", "plainFlows"} gives the leg's dates and amounts after setFxResetPricer. A
 pricer is {"constantLegCurrency", "resettableLegCurrency", "constantLegCurve", "resettableLegCurve", "spotFx",
@@ -124,7 +124,7 @@ def coupon_outputs(spec, p):
     cpn.setFxResetPricer(p)
     accrual = cpn.accrualStartDate() + 20
     out.update({"nominal": xcs.fvf.ibc.scaled(cpn.nominal, SCALE), "rate": v.attempt(cpn.rate),
-                "amount": xcs.fvf.ibc.scaled(cpn.amount, SCALE),
+                "indexFixing": v.attempt(cpn.indexFixing), "amount": xcs.fvf.ibc.scaled(cpn.amount, SCALE),
                 "accruedAmount": xcs.fvf.ibc.scaled(lambda: cpn.accruedAmount(accrual), SCALE),
                 "accrualDate": accrual.serialNumber(), "constantLegNotional": cpn.constantLegNotional(),
                 "fxResetDate": cpn.fxResetDate().serialNumber(),
