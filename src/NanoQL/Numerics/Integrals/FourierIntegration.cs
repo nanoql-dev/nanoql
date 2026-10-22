@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/math/integrals/fourierintegration.hpp ql/math/integrals/fourierintegration.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: gaussKronrod (B3.4's Kronrod rules); discreteSimpson and discreteTrapezoid (B4.2's discrete integrals); tanhSinh (B4.5); expSinh (B6.2)
+// Partial: gaussKronrod (S-cms's Kronrod rules); discreteSimpson and discreteTrapezoid (S-van's discrete integrals); tanhSinh (S-van); expSinh (S-core)
 
 namespace NanoQL.Numerics;
 
@@ -183,7 +183,7 @@ public sealed class FourierIntegration
     /// <param name="f">The integrand.</param>
     /// <param name="maxBound">For an adaptive integrator, the range's bound, or <see langword="null"/> (or a bound
     /// returning <see langword="null"/>, QuantLib's <c>Null</c>) for the mapped range.</param>
-    /// <param name="scaling">The scaling of QuantLib's exp-sinh integration, which waits for B6.2.</param>
+    /// <param name="scaling">The scaling of QuantLib's exp-sinh integration, which waits for S-core.</param>
     /// <returns>The integral.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="f"/> is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The integrator doesn't reach its accuracy.</exception>
@@ -205,7 +205,7 @@ public sealed class FourierIntegration
     /// <param name="f">The integrand.</param>
     /// <param name="maxBound">For an adaptive integrator, the range's bound, or <see langword="null"/> (or a bound
     /// returning <see langword="null"/>, QuantLib's <c>Null</c>) for the mapped range.</param>
-    /// <param name="scaling">The scaling of QuantLib's exp-sinh integration, which waits for B6.2.</param>
+    /// <param name="scaling">The scaling of QuantLib's exp-sinh integration, which waits for S-core.</param>
     /// <returns>The integral and the number of evaluations: the quadrature's order, or the integrator's
     /// count.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="f"/> is <see langword="null"/>.</exception>

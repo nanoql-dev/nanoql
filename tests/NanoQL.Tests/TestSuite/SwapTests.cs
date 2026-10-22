@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/swap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testFixedTenorInferenceWithTerminationDate, which waits for batch 2's Bbsw
 // Replaced: testNotifications (Vectors/Instruments/VanillaSwapVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -253,6 +252,140 @@ public class SwapTests
         Assert.True(
             swap.FloatingSchedule.EndDate() == new Date(21, September, 2016),
             $"Wrong End Date {swap.FloatingSchedule.EndDate()}");
+    }
+
+    // Adapted: the curve linked to a handle (line 391) and the indexes built on the handle after it (lines 393-394)
+    // become the indexes built on the curve, and the evaluation date (line 388) is the context's.
+    [Fact]
+    public void TestFixedTenorInferenceWithTerminationDate()
+    {
+        // Testing MakeVanillaSwap fixed-tenor inference with explicit termination date...
+
+        Date today = new(15, January, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        YieldTermStructure yts = FlatForward.Create(0, new NullCalendar(), 0.03, new Actual365Fixed(), context);
+
+        var gbpIndex = new GBPLibor(6 * TimeUnit.Months, yts);
+        var audIndex = new Bbsw(6 * TimeUnit.Months, yts);
+
+        Date startDate = new(19, January, 2026);
+
+        // GBP 10Y: should infer Semiannual (6M) fixed tenor
+        Date endDate10Y = startDate + (10 * TimeUnit.Years);
+        VanillaSwap gbp10Y = new MakeVanillaSwap(10 * TimeUnit.Years, gbpIndex)
+            .WithFixedRate(0.03)
+            .WithEffectiveDate(startDate)
+            .WithTerminationDate(endDate10Y)
+            .ToVanillaSwap(context);
+        int gbp10YPeriods = gbp10Y.FixedSchedule.Size - 1;
+        if (gbp10YPeriods != 20)
+        {
+            Assert.Fail($"GBP 10Y swap via withTerminationDate: expected 20 fixed periods (Semiannual), got {gbp10YPeriods}");
+        }
+
+        // GBP 6M: should infer Annual (1Y) fixed tenor
+        Date endDate6M = startDate + (6 * TimeUnit.Months);
+        VanillaSwap gbp6M = new MakeVanillaSwap(6 * TimeUnit.Months, gbpIndex)
+            .WithFixedRate(0.03)
+            .WithEffectiveDate(startDate)
+            .WithTerminationDate(endDate6M)
+            .ToVanillaSwap(context);
+        int gbp6MPeriods = gbp6M.FixedSchedule.Size - 1;
+        if (gbp6MPeriods != 1)
+        {
+            Assert.Fail($"GBP 6M swap via withTerminationDate: expected 1 fixed period (Annual), got {gbp6MPeriods}");
+        }
+
+        // AUD 5Y: should infer Semiannual (6M) fixed tenor
+        Date endDate5Y = startDate + (5 * TimeUnit.Years);
+        VanillaSwap aud5Y = new MakeVanillaSwap(5 * TimeUnit.Years, audIndex)
+            .WithFixedRate(0.03)
+            .WithEffectiveDate(startDate)
+            .WithTerminationDate(endDate5Y)
+            .ToVanillaSwap(context);
+        int aud5YPeriods = aud5Y.FixedSchedule.Size - 1;
+        if (aud5YPeriods != 10)
+        {
+            Assert.Fail($"AUD 5Y swap via withTerminationDate: expected 10 fixed periods (Semiannual), got {aud5YPeriods}");
+        }
+
+        // AUD 2Y: should infer Quarterly (3M) fixed tenor
+        Date endDate2Y = startDate + (2 * TimeUnit.Years);
+        VanillaSwap aud2Y = new MakeVanillaSwap(2 * TimeUnit.Years, audIndex)
+            .WithFixedRate(0.03)
+            .WithEffectiveDate(startDate)
+            .WithTerminationDate(endDate2Y)
+            .ToVanillaSwap(context);
+        int aud2YPeriods = aud2Y.FixedSchedule.Size - 1;
+        if (aud2YPeriods != 8)
+        {
+            Assert.Fail($"AUD 2Y swap via withTerminationDate: expected 8 fixed periods (Quarterly), got {aud2YPeriods}");
+        }
+
+        // AUD 4Y (boundary): should infer Semiannual (6M) fixed tenor
+        Date endDate4Y = startDate + (4 * TimeUnit.Years);
+        VanillaSwap aud4Y = new MakeVanillaSwap(4 * TimeUnit.Years, audIndex)
+            .WithFixedRate(0.03)
+            .WithEffectiveDate(startDate)
+            .WithTerminationDate(endDate4Y)
+            .ToVanillaSwap(context);
+        int aud4YPeriods = aud4Y.FixedSchedule.Size - 1;
+        if (aud4YPeriods != 8)
+        {
+            Assert.Fail($"AUD 4Y swap via withTerminationDate: expected 8 fixed periods (Semiannual), got {aud4YPeriods}");
+        }
+
+        // AUD 3Y: should infer Quarterly (3M) fixed tenor
+        Date endDate3Y = startDate + (3 * TimeUnit.Years);
+        VanillaSwap aud3Y = new MakeVanillaSwap(3 * TimeUnit.Years, audIndex)
+            .WithFixedRate(0.03)
+            .WithEffectiveDate(startDate)
+            .WithTerminationDate(endDate3Y)
+            .ToVanillaSwap(context);
+        int aud3YPeriods = aud3Y.FixedSchedule.Size - 1;
+        if (aud3YPeriods != 12)
+        {
+            Assert.Fail($"AUD 3Y swap via withTerminationDate: expected 12 fixed periods (Quarterly), got {aud3YPeriods}");
+        }
+
+        // GBP 10Y without withEffectiveDate (settlement-derived start date)
+        Date endDateSettlement = today + (10 * TimeUnit.Years);
+        VanillaSwap gbpNoEffDate = new MakeVanillaSwap(10 * TimeUnit.Years, gbpIndex)
+            .WithFixedRate(0.03)
+            .WithTerminationDate(endDateSettlement)
+            .ToVanillaSwap(context);
+        int gbpNoEffPeriods = gbpNoEffDate.FixedSchedule.Size - 1;
+        if (gbpNoEffPeriods != 20)
+        {
+            Assert.Fail($"GBP 10Y without withEffectiveDate: expected 20 fixed periods (Semiannual), got {gbpNoEffPeriods}");
+        }
+
+        // withTerminationDate clears the constructor tenor, so the
+        // date-based inference should use the 10Y span, not the 6M arg
+        VanillaSwap gbpMismatch = new MakeVanillaSwap(6 * TimeUnit.Months, gbpIndex)
+            .WithFixedRate(0.03)
+            .WithEffectiveDate(startDate)
+            .WithTerminationDate(endDate10Y)
+            .ToVanillaSwap(context);
+        int mismatchPeriods = gbpMismatch.FixedSchedule.Size - 1;
+        if (mismatchPeriods != 20)
+        {
+            Assert.Fail($"GBP 10Y dates with 6M constructor tenor: expected 20 fixed periods (Semiannual), got {mismatchPeriods}");
+        }
+
+        // Explicit withFixedLegTenor should always take precedence
+        VanillaSwap gbpOverride = new MakeVanillaSwap(10 * TimeUnit.Years, gbpIndex)
+            .WithFixedRate(0.03)
+            .WithEffectiveDate(startDate)
+            .WithTerminationDate(endDate10Y)
+            .WithFixedLegTenor(3 * TimeUnit.Months)
+            .ToVanillaSwap(context);
+        int overridePeriods = gbpOverride.FixedSchedule.Size - 1;
+        if (overridePeriods != 40)
+        {
+            Assert.Fail($"GBP 10Y with explicit 3M fixed tenor: expected 40 fixed periods (Quarterly), got {overridePeriods}");
+        }
     }
 
     // Adapted: the curve linked to a handle (line 515) and the index built on the handle after it (line 517) become

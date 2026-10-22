@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/gaussianquadratures.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial (B6.2); testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes (B7.3)
+// Partial: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial (S-core); testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes (S-xrt)
 
 using NanoQL.Numerics;
 

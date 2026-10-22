@@ -15,7 +15,7 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An extension point, as in QuantLib: B4.1's local-volatility surface that doesn't refuse derives from it.
+/// An extension point, as in QuantLib: S-van's local-volatility surface that doesn't refuse derives from it.
 /// QuantLib marks the class as untested and probably unreliable.
 /// </para>
 /// <para>

@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/credit/piecewisedefaultcurve.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the constructor on a one-factor affine model, which waits for B7.2's AffineHazardRate traits, the only traits whose curve takes a model
+// Partial: the constructor on a one-factor affine model, which waits for S-xcr's AffineHazardRate traits, the only traits whose curve takes a model
 
 using System.Collections.Immutable;
 using NanoQL.Numerics;
@@ -35,7 +35,7 @@ namespace NanoQL.TermStructures;
 /// </para>
 /// <para>
 /// QuantLib's settlement-days constructors are <see cref="Create"/> (D15). Its constructor on a one-factor affine model
-/// waits for B7.2's affine hazard-rate traits, the only traits whose curve takes a model. A curve is always built
+/// waits for S-xcr's affine hazard-rate traits, the only traits whose curve takes a model. A curve is always built
 /// afresh, as the piecewise yield curve is. Unsealed for its named class, which adds constructors only.
 /// </para>
 /// </remarks>

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/brownianbridge.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testPathGeneration, which waits for B5.3's SequenceStatistics
+// Partial: testPathGeneration, which waits for S-mmp's SequenceStatistics
 
 using System.Globalization;
 using NanoQL.Methods;

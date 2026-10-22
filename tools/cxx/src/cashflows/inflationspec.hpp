@@ -52,6 +52,8 @@ namespace harness::cashflows {
         bool enableExtrapolation = false;
     };
     InflationCurveSpec inflationCurve(const json::value& v);  // a curve spec, or null for an empty handle
+    // A year-on-year curve's handle, empty for a null spec; a zero-inflation curve is the harness's refusal.
+    QuantLib::Handle<QuantLib::YoYInflationTermStructure> makeYoYCurve(const InflationCurveSpec& s);
 
     struct InflationIndexSpec {
         std::string type;  // UKRPI, YYUKRPI or YoYRatio

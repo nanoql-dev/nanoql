@@ -461,6 +461,35 @@ Facts:
 
 - `ANullUnderlyingIsRefused`
 
+## CdiCloneTests
+
+[`Divergences/CdiCloneTests.cs`](../tests/NanoQL.Tests/Divergences/CdiCloneTests.cs)
+
+`Cdi`'s clone. QuantLib's `Cdi` overrides `forecastFixing` (`cdi.cpp:20-33`) but not `clone`, so `clone(h)`, "a copy of itself linked to a different forwarding curve" (`iborindex.hpp:60-62`), is a plain `OvernightIndex` of the same name, forecasting by the generic formula: on a flat 10.75% Business/252 curve its fixing for 28 March 2024 is 0.10752293232819721 against `Cdi`'s 0.11349086074650594, and an OIS helper bootstrapping a CDI curve clones its index. nanoql's `Cdi.Clone` returns a `Cdi`. QuantLib's check: `Cdi`'s own forecast on the new curve [executed on the wheel].
+
+Facts:
+
+- `TheClonesForecastIsANewCdisOnItsCurve`
+- `TheCloneIsACdi`
+
+## CdiCompoundingTests
+
+[`Divergences/CdiCompoundingTests.cs`](../tests/NanoQL.Tests/Divergences/CdiCompoundingTests.cs)
+
+CDI's annual fixings in the overnight coupons. `Cdi` forecasts an annually compounded rate on Business/252 (`cdi.cpp:20-33`), CDI's quoting convention, and its published fixings are annual rates, while QuantLib's overnight pricers grow every fixing as a simple rate, `1 + r·τ` (`overnightindexedcouponpricer.cpp:118-126`), and sum `r·τ` in the averaging ones. A coupon's amount then depends on its route: on a flat 10% curve a coupon locked out for 2 or 5 days moves off the curve's telescopic amount by +37.986528 and +94.968959 on 1,000,000, where a generic index's doesn't; a seasoned coupon's past grows by 1.0083664854 where CDI's convention gives 1.0079741404; and the arithmetic pricer sums the annual rates as simple ones. nanoql's compounding pricers grow a fixing by the index's `OvernightIndex.GrowthFactor`, and its averaging pricers sum the index's `OvernightIndex.SimpleAccrual`: for `Cdi` `(1 + r)^τ` and `(1 + r)^τ − 1`, CDI's daily factor as B3's DI factor states it, and by default `1 + r·τ` and `r·τ`, so every other index keeps QuantLib's bits. The Black pricers' forward parts compare a daily cap's or floor's strike with a simple rate estimated from the curve; a strike quoted in CDI's annual convention, which caps the past fixings as quoted, is compared as its simple equivalent, where QuantLib compares it as quoted, about 47bp too high at 10%. QuantLib's checks: its own telescopic amount; `InterestRate(r, Business252, Compounded, Annual)`'s compound factor, over the past and, for the Black pricers' past parts, on the capped fixing; a generic index fed the simple-equivalent fixings `((1 + r)^τ − 1)/τ`, in the arithmetic pricer, and at the simple-equivalent strike, in the Black pricers' forward parts [executed on the wheel]. QuantLib's amounts are recorded beside nanoql's.
+
+Facts:
+
+- `ALockedOutCouponIsTheCurvesTelescopicAmount`
+- `ASeasonedCouponGrowsItsPastAtTheAnnualRate`
+- `TheArithmeticPricerSumsTheSimpleEquivalentFixings`
+- `TheBlackCompoundingPricersPastPartGrowsTheCappedFixingsAtTheAnnualRate`
+- `TheBlackAveragingPricersPastPartSumsTheCappedFixingsDailyGrowth`
+- `TheBlackCompoundingPricersForwardPartReadsTheStrikesSimpleEquivalent`
+- `TheBlackAveragingPricersForwardPartReadsTheStrikesSimpleEquivalent`
+- `TheBlackCompoundingPricersForwardPartReadsTheSmileAtTheQuotedStrike`
+- `TheBlackAveragingPricersForwardPartReadsTheSmileAtTheQuotedStrike`
+
 ## CdsConventionalSpreadNullTests
 
 [`Divergences/CdsConventionalSpreadNullTests.cs`](../tests/NanoQL.Tests/Divergences/CdsConventionalSpreadNullTests.cs)

@@ -182,7 +182,7 @@ public class ArithmeticAveragedOvernightIndexedCouponPricer : OvernightIndexedCo
             double span = date >= interestDates[i + 1]
                 ? dt[i]
                 : index.DayCounter.YearFraction(interestDates[i], date);
-            accumulatedRate += pastFixing * span;
+            accumulatedRate += index.SimpleAccrual(pastFixing, span);
             ++i;
         }
 
@@ -193,7 +193,7 @@ public class ArithmeticAveragedOvernightIndexedCouponPricer : OvernightIndexedCo
             double span = date >= interestDates[i + 1]
                 ? dt[i]
                 : index.DayCounter.YearFraction(interestDates[i], date);
-            accumulatedRate += todaysFixing * span;
+            accumulatedRate += index.SimpleAccrual(todaysFixing, span);
             ++i;
         }
 
@@ -234,7 +234,7 @@ public class ArithmeticAveragedOvernightIndexedCouponPricer : OvernightIndexedCo
                 double convAdj = Math.Exp(
                     0.5 * Math.Pow(vol, 2.0) / Math.Pow(mrs, 3.0) * (Math.Exp(2 * mrs * ti1) - 1)
                     * (Math.Exp(-mrs * ti2) - Math.Exp(-mrs * te)) * (Math.Exp(-mrs * ti2) - Math.Exp(-mrs * ti1)));
-                accumulatedRate += (convAdj * (1 + (forecastFixing * dt[i]))) - 1;
+                accumulatedRate += (convAdj * index.GrowthFactor(forecastFixing, dt[i])) - 1;
                 ++i;
             }
         }

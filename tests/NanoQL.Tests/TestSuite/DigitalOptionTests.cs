@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/digitaloption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCashAtHitOrNothingAmericanValues, testAssetAtHitOrNothingAmericanValues, testCashAtExpiryOrNothingAmericanValues, testAssetAtExpiryOrNothingAmericanValues, testCashAtHitOrNothingAmericanGreeks and testCashAtHitOrNothingAmericanLowVolatility, which wait for B4.5's AnalyticDigitalAmericanEngine; testMCCashAtHit, which waits for B4.4's MCDigitalEngine
+// Partial: testCashAtHitOrNothingAmericanValues, testAssetAtHitOrNothingAmericanValues, testCashAtExpiryOrNothingAmericanValues, testAssetAtExpiryOrNothingAmericanValues, testCashAtHitOrNothingAmericanGreeks and testCashAtHitOrNothingAmericanLowVolatility, which wait for S-van's AnalyticDigitalAmericanEngine; testMCCashAtHit, which waits for S-van's MCDigitalEngine
 
 using NanoQL.Instruments;
 using NanoQL.PricingEngines;

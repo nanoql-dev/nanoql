@@ -13,14 +13,19 @@ namespace NanoQL.Tests.Vectors;
 /// The inflation index vectors, <c>tests/vectors/indexes/inflationindex.json</c>: the zero-inflation and year-on-year
 /// indexes' inspectors; fixings written through <see cref="IndexFixings.AddFixing"/>, on every day of their inflation
 /// period, and the store read back whole; reads, forecasts and clones; and <see cref="CPI"/>'s lagged observations.
+/// The inflation presets' vector classes read their files through <see cref="Check"/>.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class InflationIndexVectorTests
 {
     [Fact]
-    public void InflationIndexVector()
+    public void InflationIndexVector() => Check("indexes/inflationindex");
+
+    /// <summary>Checks every case of a vector file in this file's form.</summary>
+    /// <param name="path">The vector file's path under <c>tests/vectors</c>, without its extension.</param>
+    internal static void Check(string path)
     {
-        var file = VectorFile.Load("indexes/inflationindex");
+        var file = VectorFile.Load(path);
         var check = new VectorAssert(file);
         foreach (VectorCase c in file.Cases)
         {

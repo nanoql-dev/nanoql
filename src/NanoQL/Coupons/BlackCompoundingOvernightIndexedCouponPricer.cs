@@ -117,6 +117,16 @@ public sealed class BlackCompoundingOvernightIndexedCouponPricer : CompoundingOv
     internal static double CappedFlooredRate(double r, OptionType optionType, double k) =>
         optionType == OptionType.Call ? (k < r ? k : r) : (r < k ? k : r);
 
+    // The strike of the forward part's option, which the Black averaging pricer shares, in the terms of the rate it is
+    // compared with, a simple rate estimated from the curve: the index's accrual of the strike over a fixing's span,
+    // per unit of span. An index accruing simply keeps the strike as quoted, so its bits stand; Cdi's annual strike,
+    // which caps its past fixings as quoted, becomes its simple equivalent, as the generic index's would be.
+    internal static double ForwardStrike(OvernightIndex index, double strike, double span)
+    {
+        double accrual = index.SimpleAccrual(strike, span);
+        return accrual == strike * span ? strike : accrual / span;
+    }
+
     private static NanoQLException NotProvided(string member, FloatingRateCoupon coupon, EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(coupon);
@@ -261,8 +271,8 @@ public sealed class BlackCompoundingOvernightIndexedCouponPricer : CompoundingOv
                 pastFixing += coupon.Spread;
             }
 
-            compoundFactor *= 1.0 + (CappedFlooredRate(pastFixing, optionType, absStrike) * dt[i]);
-            compoundFactorRaw *= 1.0 + (pastFixing * dt[i]);
+            compoundFactor *= index.GrowthFactor(CappedFlooredRate(pastFixing, optionType, absStrike), dt[i]);
+            compoundFactorRaw *= index.GrowthFactor(pastFixing, dt[i]);
             ++i;
         }
 
@@ -277,8 +287,8 @@ public sealed class BlackCompoundingOvernightIndexedCouponPricer : CompoundingOv
                 pastFixing += coupon.Spread;
             }
 
-            compoundFactor *= 1.0 + (CappedFlooredRate(pastFixing, optionType, absStrike) * dt[i]);
-            compoundFactorRaw *= 1.0 + (pastFixing * dt[i]);
+            compoundFactor *= index.GrowthFactor(CappedFlooredRate(pastFixing, optionType, absStrike), dt[i]);
+            compoundFactorRaw *= index.GrowthFactor(pastFixing, dt[i]);
             ++i;
         }
 
@@ -312,13 +322,16 @@ public sealed class BlackCompoundingOvernightIndexedCouponPricer : CompoundingOv
             // when it is empty.
             OptionletVolatilityStructure vol = CapletVolatility
                 ?? throw new NanoQLException("empty Handle cannot be dereferenced");
+            double strike = ForwardStrike(index, effStrike, dt[i]);
             double midPoint = (vol.TimeFromReference(dates[i]) + vol.TimeFromReference(dates[nCutoff])) / 2.0;
+            // the volatility at the strike as quoted, the surface's axis; the Black formula at the strike in the
+            // estimate's terms
             double stdDev = vol.Volatility(midPoint, effStrike) * Math.Sqrt(midPoint);
             double shift = vol.Displacement;
             bool shiftedLn = vol.VolatilityType == VolatilityType.ShiftedLognormal;
             double cfValue = shiftedLn
-                ? BlackFormulaFunctions.BlackFormula(optionType, effStrike, averageRate, stdDev, 1.0, shift)
-                : BlackFormulaFunctions.BachelierBlackFormula(optionType, effStrike, averageRate, stdDev, 1.0);
+                ? BlackFormulaFunctions.BlackFormula(optionType, strike, averageRate, stdDev, 1.0, shift)
+                : BlackFormulaFunctions.BachelierBlackFormula(optionType, strike, averageRate, stdDev, 1.0);
             double effectiveTime = vol.TimeFromReference(fixingDates[^1]);
             effectiveVolatility = stdDev / Math.Sqrt(effectiveTime);
 

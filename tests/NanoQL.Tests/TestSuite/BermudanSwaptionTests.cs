@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/bermudanswaption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCachedValues' finite-difference checks (lines 171-175, 184-188 and 198-203), which wait for B3.2's FdHullWhiteSwaptionEngine; testCachedG2Values, which waits for B3.1's G2 and B3.2's FdG2SwaptionEngine; testTreeEngineTimeSnapping, which waits for B3.2's FdHullWhiteSwaptionEngine; testBermudanOISSwaptionWithHW and testBermudanOISSwaptionPreservesFeatures, which wait for B3.2's FdHullWhiteSwaptionEngine; testBermudanOISSwaptionWithG2, which waits for B3.1's G2 and B3.2's FdG2SwaptionEngine
+// Partial: testCachedValues' finite-difference checks (lines 171-175, 184-188 and 198-203), which wait for S-sr's FdHullWhiteSwaptionEngine; testCachedG2Values, which waits for S-sr's G2 and S-sr's FdG2SwaptionEngine; testTreeEngineTimeSnapping, which waits for S-sr's FdHullWhiteSwaptionEngine; testBermudanOISSwaptionWithHW and testBermudanOISSwaptionPreservesFeatures, which wait for S-sr's FdHullWhiteSwaptionEngine; testBermudanOISSwaptionWithG2, which waits for S-sr's G2 and S-sr's FdG2SwaptionEngine
 
 using NanoQL.Coupons;
 using NanoQL.Indexes;

@@ -7,7 +7,7 @@
 
 namespace NanoQL.Time;
 
-/// <summary>The Russian calendar.</summary>
+/// <summary>The Russian calendars.</summary>
 /// <remarks>
 /// <para>
 /// Public holidays (see http://www.cbr.ru/eng/:):

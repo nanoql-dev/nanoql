@@ -995,9 +995,9 @@ public class SwaptionTests
     private static string Show(IReadOnlyList<Real> values, int n) =>
         n + 1 < values.Count ? $"{values[n]} then {values[n + 1]}" : string.Empty;
 
-    // The fixture without its overnight index (Eonia on a zero-spreaded curve, which wait for batch 2 and S-bond) and
-    // makeOISwaption, which only the cases on the partial line use. QuantLib's makeSwaption sets a Black engine on a
-    // volatility quote with the SwapRate model; nanoql's swaption holds no engine, so the cases call it (Price).
+    // The fixture, with its overnight index (Eonia on a zero-spreaded curve) and makeOISwaption. QuantLib's makeSwaption
+    // sets a Black engine on a volatility quote with the SwapRate model; nanoql's swaption holds no engine, so the cases
+    // call it (Price).
     private sealed class CommonVars
     {
         // The fixture on today's date, or on the given dates, as the cases that set them after the fixture.

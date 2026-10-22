@@ -265,8 +265,9 @@ public sealed class BlackAveragingOvernightIndexedCouponPricer : ArithmeticAvera
                 pastFixing += coupon.Spread;
             }
 
-            accumulatedRate += BlackCompoundingOvernightIndexedCouponPricer.CappedFlooredRate(pastFixing, optionType, absStrike) * dt[i];
-            accumulatedRateRaw += pastFixing * dt[i];
+            accumulatedRate += index.SimpleAccrual(
+                BlackCompoundingOvernightIndexedCouponPricer.CappedFlooredRate(pastFixing, optionType, absStrike), dt[i]);
+            accumulatedRateRaw += index.SimpleAccrual(pastFixing, dt[i]);
             ++i;
         }
 
@@ -281,8 +282,9 @@ public sealed class BlackAveragingOvernightIndexedCouponPricer : ArithmeticAvera
                 pastFixing += coupon.Spread;
             }
 
-            accumulatedRate += BlackCompoundingOvernightIndexedCouponPricer.CappedFlooredRate(pastFixing, optionType, absStrike) * dt[i];
-            accumulatedRateRaw += pastFixing * dt[i];
+            accumulatedRate += index.SimpleAccrual(
+                BlackCompoundingOvernightIndexedCouponPricer.CappedFlooredRate(pastFixing, optionType, absStrike), dt[i]);
+            accumulatedRateRaw += index.SimpleAccrual(pastFixing, dt[i]);
             ++i;
         }
 
@@ -316,13 +318,16 @@ public sealed class BlackAveragingOvernightIndexedCouponPricer : ArithmeticAvera
             // when it is empty.
             OptionletVolatilityStructure vol = CapletVolatility
                 ?? throw new NanoQLException("empty Handle cannot be dereferenced");
+            double strike = BlackCompoundingOvernightIndexedCouponPricer.ForwardStrike(index, effStrike, dt[i]);
             double midPoint = (vol.TimeFromReference(dates[i]) + vol.TimeFromReference(dates[nCutoff])) / 2.0;
+            // the volatility at the strike as quoted, the surface's axis; the Black formula at the strike in the
+            // estimate's terms
             double stdDev = vol.Volatility(midPoint, effStrike) * Math.Sqrt(midPoint);
             double shift = vol.Displacement;
             bool shiftedLn = vol.VolatilityType == VolatilityType.ShiftedLognormal;
             double cfValue = shiftedLn
-                ? BlackFormulaFunctions.BlackFormula(optionType, effStrike, averageRate, stdDev, 1.0, shift)
-                : BlackFormulaFunctions.BachelierBlackFormula(optionType, effStrike, averageRate, stdDev, 1.0);
+                ? BlackFormulaFunctions.BlackFormula(optionType, strike, averageRate, stdDev, 1.0, shift)
+                : BlackFormulaFunctions.BachelierBlackFormula(optionType, strike, averageRate, stdDev, 1.0);
 
             double effectiveTime = vol.TimeFromReference(fixingDates[^1]);
             effectiveVolatility = stdDev / Math.Sqrt(effectiveTime);

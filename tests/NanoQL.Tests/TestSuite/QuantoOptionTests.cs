@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/quantooption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testValues, testGreeks, testForwardValues, testForwardGreeks, testForwardPerformanceValues, testBarrierValues, testPDEOptionValues (B4.8's quanto engine); testAmericanQuantoOption (B4.3's Heston engine); testDoubleBarrierValues (B7.6's quanto double-barrier option)
+// Partial: testValues, testGreeks, testForwardValues, testForwardGreeks, testForwardPerformanceValues, testPDEOptionValues (S-exo's quanto engine); testBarrierValues (S-bar's quanto barrier option); testAmericanQuantoOption (S-hes's Heston engine); testDoubleBarrierValues (S-xeq's quanto double-barrier option)
 
 using NanoQL.Methods;
 using NanoQL.Numerics;

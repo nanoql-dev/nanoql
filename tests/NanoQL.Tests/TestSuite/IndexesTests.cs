@@ -3,10 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/indexes.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCustomIborIndex (CustomIborIndex, BespokeCalendar); testCdiIndex (Cdi, Brazil, Business252); testShirIndex (Shir, Israel, ILSCurrency)
 // Replaced: testFixingObservability (Vectors/Indexes/BMAIndexVectorTests.cs)
 
+using NanoQL.Currencies;
 using NanoQL.Indexes;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.TestSuite;
@@ -97,5 +98,91 @@ public class IndexesTests
                 + $"\n  maturity date for 6-days index: {maturity6d}"
                 + $"\n  maturity date for 7-days index: {maturity7d}");
         }
+    }
+
+    // Adapted: nanoql's calendars are immutable, so each addHoliday (lines 155-165) builds the calendar it names from the
+    // last; QuantLib's empty Currency() (line 168) is null.
+    [Fact]
+    public void TestCustomIborIndex()
+    {
+        // Testing CustomIborIndex...
+
+        Calendar fixCal = new BespokeCalendar("Fixings").AddHoliday(new Date(8, Month.January, 2025));
+
+        Calendar valCal = new BespokeCalendar("Value").AddHoliday(new Date(21, Month.January, 2025));
+
+        Calendar matCal = new BespokeCalendar("Maturity")
+            .AddHoliday(new Date(7, Month.January, 2025))
+            .AddHoliday(new Date(15, Month.January, 2025))
+            .AddHoliday(new Date(23, Month.April, 2025))
+            .AddHoliday(new Date(30, Month.April, 2025));
+
+        var ibor = new CustomIborIndex(
+            "Custom Ibor", 3 * TimeUnit.Months, 2, null, fixCal, valCal, matCal,
+            BusinessDayConvention.ModifiedFollowing, true, new Actual360());
+        IborIndex iborClone = ibor.Clone(null);
+
+        foreach (IborIndex index in (IborIndex[])[ibor, iborClone])
+        {
+            var asCustom = Assert.IsType<CustomIborIndex>(index);
+            Assert.Equal(fixCal, index.FixingCalendar);
+            Assert.Equal(valCal, asCustom.ValueCalendar);
+            Assert.Equal(matCal, asCustom.MaturityCalendar);
+
+            ArgumentException e = Assert.Throws<ArgumentException>(
+                () => index.ValueDate(new Date(8, Month.January, 2025)));
+            Assert.StartsWith("Fixing date January 8th, 2025 is not valid", e.Message, StringComparison.Ordinal);
+
+            Assert.Equal(new Date(9, Month.January, 2025), index.ValueDate(new Date(7, Month.January, 2025)));
+            Assert.Equal(new Date(16, Month.January, 2025), index.ValueDate(new Date(13, Month.January, 2025)));
+            Assert.Equal(new Date(23, Month.January, 2025), index.ValueDate(new Date(20, Month.January, 2025)));
+
+            Assert.Equal(new Date(20, Month.January, 2025), index.FixingDate(new Date(23, Month.January, 2025)));
+            Assert.Equal(new Date(14, Month.January, 2025), index.FixingDate(new Date(16, Month.January, 2025)));
+            Assert.Equal(new Date(7, Month.January, 2025), index.FixingDate(new Date(10, Month.January, 2025)));
+
+            Assert.Equal(new Date(24, Month.April, 2025), index.MaturityDate(new Date(23, Month.January, 2025)));
+            Assert.Equal(new Date(29, Month.April, 2025), index.MaturityDate(new Date(30, Month.January, 2025)));
+            Assert.Equal(new Date(31, Month.May, 2025), index.MaturityDate(new Date(28, Month.February, 2025)));
+        }
+    }
+
+    // Adapted: QuantLib's evaluation date (line 208), the system date in its runner, is Date.TodaysDate(), the
+    // context's.
+    [Fact]
+    public void TestCdiIndex()
+    {
+        // Testing Brazil CDI forecastFixing...
+        Date today = Date.TodaysDate();
+        var context = new EvaluationContext { EvaluationDate = today };
+        double flatRate = 0.05;
+        YieldTermStructure ts = new FlatForward(today, flatRate, new Business252());
+
+        var cdi = new Cdi(ts);
+        Date testFixingDate = new Brazil(BrazilMarket.Settlement).Advance(today, new Period(1, TimeUnit.Months));
+        double forecast = cdi.ForecastFixing(testFixingDate, context);
+
+        double discountStart = ts.Discount(testFixingDate);
+        double discountEnd = ts.Discount(
+            new Brazil(BrazilMarket.Settlement).Advance(testFixingDate, new Period(1, TimeUnit.Days)));
+
+        double approx = Math.Pow(discountStart / discountEnd, 252.0) - 1.0;
+        Assert.True(Math.Abs(0.05127 - forecast) < 1e-5, "discrepancy in fixing forecast computation\n");
+        Assert.True(
+            Math.Abs(approx - forecast) < 1e-6, "discrepancy in fixing forecast computation with approximation\n");
+    }
+
+    [Fact]
+    public void TestShirIndex()
+    {
+        // Testing Shir index...
+
+        var shir = new Shir();
+
+        Assert.Equal("Shir", shir.FamilyName);
+        Assert.Equal(0, shir.FixingDays);
+        Assert.True(shir.Currency == new ILSCurrency());
+        Assert.True(shir.FixingCalendar == new Israel(IsraelMarket.SHIR));
+        Assert.True(shir.DayCounter == new Actual365Fixed());
     }
 }

@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/volatility/zabrsmilesection.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the local-volatility and full finite-difference kernels (the ZabrLocalVolatility and ZabrFullFd tags, with their strike grid, call prices and price spline, the members strikes_, callPrices_, callPriceFct_, a_ and b_ that only they use), which wait for B3.3 with ZabrModel's fdPrice and fullFdPrice
+// Partial: the local-volatility and full finite-difference kernels (the ZabrLocalVolatility and ZabrFullFd tags, with their strike grid, call prices and price spline, the members strikes_, callPrices_, callPriceFct_, a_ and b_ that only they use), which wait for S-g1d with ZabrModel's fdPrice and fullFdPrice
 
 using NanoQL.Numerics;
 using NanoQL.Time;

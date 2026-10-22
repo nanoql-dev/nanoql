@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/ode.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testMatrixExponential and testMatrixExponentialOfZero, which wait for B6.2's Expm
+// Partial: testMatrixExponential and testMatrixExponentialOfZero, which wait for S-core's Expm
 
 using System.Collections.Immutable;
 using System.Numerics;

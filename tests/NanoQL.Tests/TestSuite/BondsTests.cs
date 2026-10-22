@@ -1463,9 +1463,7 @@ public class BondsTests
         }
     }
 
-    // Adapted: Euribor 3M on TARGET in place of AUDLibor 3M on Australia (lines 1846 and 1860), which wait for batch
-    // 2; on TARGET the fixing dates are the same, Friday 21 and Monday 24 June 2024. The evaluation date the case sets
-    // (line 1842) is the context the bonds' coupons are built with.
+    // Adapted: the evaluation date the case sets (line 1842) is the context the bonds' coupons are built with.
     [Fact]
     public void TestFixingConvention()
     {
@@ -1478,7 +1476,7 @@ public class BondsTests
         var today = new Date(1, January, 2024);
         var context = new EvaluationContext { EvaluationDate = today };
 
-        Calendar calendar = new TARGET();
+        Calendar calendar = new Australia();
         Natural settlementDays = 0;
         Real faceAmount = 100.0;
 
@@ -1488,7 +1486,7 @@ public class BondsTests
             context);
 
         var curve = new FlatForward(today, 0.05, new Actual365Fixed());
-        var index = new Euribor3M(curve);
+        var index = new AUDLibor(3 * TimeUnit.Months, curve);
 
         // Default (Preceding) convention
         var bondPreceding = new FloatingRateBond(

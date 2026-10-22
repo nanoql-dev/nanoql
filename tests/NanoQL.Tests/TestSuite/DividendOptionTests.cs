@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/dividendoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCashDividendEuropeanEngine, testCashDividendEuropeanEngineWithManyDividends, testCashDividendEuropeanEngineWithSingleDividends and testZeroStrikeCallWithCashDividends, which wait for B4.5's CashDividendEuropeanEngine
+// Partial: testCashDividendEuropeanEngine, testCashDividendEuropeanEngineWithManyDividends, testCashDividendEuropeanEngineWithSingleDividends and testZeroStrikeCallWithCashDividends, which wait for S-exo's CashDividendEuropeanEngine
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;

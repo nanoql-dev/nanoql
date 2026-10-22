@@ -29,8 +29,11 @@ index's addFixing in that order, which the test repeats through IndexFixings.Add
 a preset with its "curve"; {"type": "ZeroInflationIndex" or "YoYInflationIndex", "familyName", "region",
 "revised", "frequency", "availabilityLag", "currency", "curve"}, the region {"type": "CustomRegion", "name", "code"}
 or {"type"} naming a preset region, the availability lag [length, units] and the currency its code; or {"type":
-"YoYRatio", "underlying", "curve"}. A curve is a spec of inflationtermstructure.py or null. The wheel's indexes are
-the C++ classes' proxies. Read back by tests/NanoQL.Tests/Vectors/Indexes/InflationIndexVectorTests.cs."""
+"YoYRatio", "underlying", "curve"}. A preset taking arguments before its curve (AUCPI) has them in its spec too
+("frequency", "revised"). A curve is a spec of inflationtermstructure.py or null. The wheel's indexes are the C++
+classes' proxies. Read back by tests/NanoQL.Tests/Vectors/Indexes/InflationIndexVectorTests.cs. The inflation presets'
+generators (tools/vectors/gen/indexes/inflation/) write their cases through the case families here, each on its own
+table, their presets added to PRESETS of their own load of this module."""
 import importlib.util
 import os
 import sys
@@ -57,8 +60,8 @@ REGIONS = {"UKRegion": lambda: ql.UKRPI().region(), "EURegion": lambda: ql.EUHIC
            "USRegion": lambda: ql.USCPI().region()}
 
 
-def preset(name, curve=None):
-    return {"type": name, "curve": curve}
+def preset(name, curve=None, **args):
+    return {"type": name, **args, "curve": curve}
 
 
 def custom(kind, family, region, revised, frequency, lag, currency, curve=None):
@@ -90,7 +93,7 @@ def make_index(spec):
         h = ql.ZeroInflationTermStructureHandle(its.make_curve(curve)) if curve else ql.ZeroInflationTermStructureHandle()
     t = spec["type"]
     if t in PRESETS:
-        return PRESETS[t](h)
+        return PRESETS[t](*[spec[k] for k in ("frequency", "revised") if k in spec], h)
     if t == "YoYRatio":
         return ql.YoYInflationIndex(make_index(spec["underlying"]), h)
     cls = ql.YoYInflationIndex if t == "YoYInflationIndex" else ql.ZeroInflationIndex
@@ -135,9 +138,9 @@ def series(index):
     return v.enc(list(ts.dates())), list(ts.values())
 
 
-def inspector_cases():
+def inspector_cases(indexes=INDEXES):
     out = []
-    for k, spec in enumerate(INDEXES):
+    for k, spec in enumerate(indexes):
         with v.case_settings(ql.Date(15, ql.June, 2024)) as st:
             index = make_index(spec)
             lag = index.availabilityLag()
@@ -191,9 +194,9 @@ STORES = [
 ]
 
 
-def store_cases():
+def store_cases(stores=STORES):
     out = []
-    for k, (label, evaluation_date, spec, fixings, adds, refused) in enumerate(STORES):
+    for k, (label, evaluation_date, spec, fixings, adds, refused) in enumerate(stores):
         with v.case_settings(evaluation_date) as st:
             index = make_index(spec)
             apply(index, fixings)
@@ -233,9 +236,9 @@ READS = [
 ]
 
 
-def read_cases():
+def read_cases(reads=READS):
     out = []
-    for k, (label, evaluation_date, spec, fixings) in enumerate(READS):
+    for k, (label, evaluation_date, spec, fixings) in enumerate(reads):
         with v.case_settings(evaluation_date) as st:
             index = make_index(spec)
             apply(store_owner(index, spec), fixings)
@@ -279,9 +282,9 @@ FORECASTS = [
 ]
 
 
-def forecast_cases():
+def forecast_cases(forecasts=FORECASTS):
     out = []
-    for k, (label, evaluation_date, spec, fixings, clone_curve) in enumerate(FORECASTS):
+    for k, (label, evaluation_date, spec, fixings, clone_curve) in enumerate(forecasts):
         with v.case_settings(evaluation_date) as st:
             index = make_index(spec)
             apply(store_owner(index, spec), fixings)
@@ -318,9 +321,9 @@ LAGGED = [
 INTERPOLATIONS = [ql.CPI.Flat, ql.CPI.Linear]
 
 
-def lagged_cases():
+def lagged_cases(lagged=LAGGED):
     out = []
-    for k, (label, evaluation_date, spec, fixings, lags) in enumerate(LAGGED):
+    for k, (label, evaluation_date, spec, fixings, lags) in enumerate(lagged):
         with v.case_settings(evaluation_date) as st:
             index = make_index(spec)
             apply(store_owner(index, spec), fixings)

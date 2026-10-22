@@ -14,7 +14,8 @@ among them, which isn't a valid fixing date. A refused value is {"throws": true}
 Each case's inputs hold the preset's class ("preset"), its tenor ([length, units]), its form ("forwarding" or
 "forwarding, discounting") and its curves ("forwarding", "discounting"), flat forward specs of
 indexes/interestrateindex.py, null for QuantLib's empty handle. Read back by
-tests/NanoQL.Tests/Vectors/Indexes/Swap/EuriborSwapVectorTests.cs."""
+tests/NanoQL.Tests/Vectors/Indexes/Swap/EuriborSwapVectorTests.cs. The LIBOR swap presets' generators in this folder
+write their cases through preset_cases."""
 import importlib.util
 import os
 import sys
@@ -45,19 +46,21 @@ FORWARDING = irx.curve_spec(TODAY, 0.029, irx.A365, ql.Continuous, ql.Annual)
 DISCOUNTING = irx.curve_spec(TODAY, 0.024, irx.A360, ql.Simple, ql.Annual)
 
 
-def specs():
+def specs(presets, empty_at):
+    """Each preset at each tenor, alternating the two forms; the preset and tenor index empty_at on the empty
+    discounting handle."""
     out = []
-    for preset in PRESETS:
+    for preset in presets:
         for k, tenor in enumerate(TENORS):
             form = "forwarding" if k % 2 == 0 else "forwarding, discounting"
-            discounting = None if (form == "forwarding" or (preset == "EuriborSwapIfrFix" and k == 5)) else DISCOUNTING
+            discounting = None if (form == "forwarding" or (preset, k) == empty_at) else DISCOUNTING
             out.append({"preset": preset, "tenor": [tenor[0], int(tenor[1])], "form": form,
                         "forwarding": FORWARDING, "discounting": discounting})
     return out
 
 
-def make(spec):
-    cls = PRESETS[spec["preset"]]
+def make(spec, presets):
+    cls = presets[spec["preset"]]
     tenor = ql.Period(*spec["tenor"])
     if spec["form"] == "forwarding":
         return cls(tenor, irx.handle(spec["forwarding"]))
@@ -72,12 +75,13 @@ def empty(handle):
     return False
 
 
-def cases():
+def preset_cases(presets, empty_at):
+    """The cases of a family's presets ({name: class}), on specs' tenors and forms."""
     out = []
-    for spec in specs():
+    for spec in specs(presets, empty_at):
         with v.case_settings(TODAY) as st:
             try:
-                idx = make(spec)
+                idx = make(spec, presets)
             except RuntimeError:
                 expected = {"built": dict(v.THROWS)}
             else:
@@ -97,6 +101,11 @@ def cases():
             tenor = f"{spec['tenor'][0]}{'DWMY'[spec['tenor'][1]]}"
             out.append({"name": f"{spec['preset']} {tenor} ({spec['form']})",
                         "inputs": {"settings": st, **spec, "dates": v.enc(DATES)}, "expected": expected})
+    return out
+
+
+def cases():
+    out = preset_cases(PRESETS, ("EuriborSwapIfrFix", 5))
     check_rows(out)
     return out
 

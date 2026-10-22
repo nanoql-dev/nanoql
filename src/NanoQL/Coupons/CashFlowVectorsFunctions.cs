@@ -11,7 +11,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/cashflowvectors.hpp ql/cashflows/cashflowvectors.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: FloatingDigitalLeg, which waits for B3.4 with the digital coupons
+// Partial: FloatingDigitalLeg, which waits for S-cms with the digital coupons
 
 using System.Collections.Immutable;
 using NanoQL.Indexes;

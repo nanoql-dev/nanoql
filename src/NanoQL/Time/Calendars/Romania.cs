@@ -8,7 +8,7 @@
 
 namespace NanoQL.Time;
 
-/// <summary>The Romanian calendar.</summary>
+/// <summary>The Romanian calendars.</summary>
 /// <remarks>
 /// <para>
 /// Public holidays:

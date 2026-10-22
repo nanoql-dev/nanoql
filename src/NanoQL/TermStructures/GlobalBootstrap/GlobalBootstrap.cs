@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/globalbootstrap.hpp ql/termstructures/globalbootstrap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: AdditionalBootstrapVariables, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for B6.2 with SimpleQuoteVariables and its user
+// Partial: AdditionalBootstrapVariables, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for S-core with SimpleQuoteVariables and its user
 
 using System.Collections.Immutable;
 using NanoQL.Numerics;

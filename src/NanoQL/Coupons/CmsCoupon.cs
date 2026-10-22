@@ -19,7 +19,7 @@ namespace NanoQL.Coupons;
 /// </para>
 /// <para>
 /// Its rate needs a CMS coupon pricer, which QuantLib's <c>CmsCouponPricer</c> family gives and which waits for batch 3
-/// (B3.3): until then <see cref="CouponPricerFunctions"/> refuses every pricer for it, as QuantLib's visitor refuses a
+/// (S-cms): until then <see cref="CouponPricerFunctions"/> refuses every pricer for it, as QuantLib's visitor refuses a
 /// pricer that isn't a <c>CmsCouponPricer</c>, and its rate refuses with QuantLib's "pricer not set".
 /// </para>
 /// </remarks>

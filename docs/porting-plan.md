@@ -11,8 +11,8 @@ Every documented divergence from QuantLib, with the tests that assert it, is in 
 
 ## All of QuantLib, in batches
 
-At the tag, QuantLib holds 1,456 units (an `.hpp`/`.cpp` pair under `ql/`) and 193,721 code lines. nanoql ports 1,264
-units and 188,546 code lines, 35,011 of them experimental. The rest is deprecated, legacy, include-only, C++ platform
+At the tag, QuantLib holds 1,456 units (an `.hpp`/`.cpp` pair under `ql/`) and 193,721 code lines. nanoql ports 1,261
+units and 188,425 code lines, 35,011 of them experimental. The rest is deprecated, legacy, include-only, C++ platform
 code, or plumbing that nanoql's design replaces (playbook §6).
 
 The port proceeds bottom-up: a slot comes after the slots whose types it uses. Each unit belongs to the first slot
@@ -21,15 +21,15 @@ the rest are checked through QuantLib's own test cases, the classes that use the
 
 | Batch | Content | Units | Code lines | Share | Oracle |
 |---:|---|---:|---:|---:|---:|
-| 1 | Rates, bonds, inflation-linked bonds, equity, FX and credit default swaps: the first milestone | 379 | 65,232 | 35% | 72% |
-| 2 | Conventions breadth | 106 | 8,541 | 5% | 93% |
-| 3 | Rates and bonds beyond vanilla | 137 | 25,032 | 13% | 49% |
-| 4 | Equity and FX beyond vanilla | 227 | 34,535 | 18% | 61% |
-| 5 | Market models | 118 | 15,618 | 8% | 12% |
-| 6 | Core remainder | 103 | 9,601 | 5% | 37% |
+| 1 | Rates, bonds, inflation-linked bonds, equity, FX and credit default swaps: the first milestone | 413 | 69,083 | 37% | 72% |
+| 2 | Conventions breadth | 96 | 7,906 | 4% | 95% |
+| 3 | Rates and bonds beyond vanilla | 133 | 24,025 | 13% | 52% |
+| 4 | Equity and FX beyond vanilla | 226 | 34,420 | 18% | 60% |
+| 5 | Market models | 120 | 15,764 | 8% | 12% |
+| 6 | Core remainder | 79 | 7,240 | 4% | 31% |
 | 7 | Experimental remainder | 194 | 29,987 | 16% | 10% |
 
-- **v0.1** is batches 1–6, all of QuantLib's non-experimental code: 1,070 units and 158,559 code lines. Batch 7 joins
+- **v0.1** is batches 1–6, all of QuantLib's non-experimental code: 1,067 units and 158,438 code lines. Batch 7 joins
   it if it is ready, marked `[Experimental]`.
 - **QuantLib's test suite:** 182 test files to port, 98,709 code lines. Most test files span batches, so each slot
   ports the test cases for its own units.
@@ -61,16 +61,30 @@ In this order:
 
 ## Later batches
 
-| Batch | Content |
-|---:|---|
-| 2 | Conventions breadth: the remaining calendars, day counters and currencies; the Ibor, overnight, swap and inflation indexes. |
-| 3 | Rates and bonds beyond vanilla: short-rate models with their tree, finite-difference and Gaussian1d engines; Bermudan swaptions; CMS, digital and range-accrual coupons; inflation caps, floors and year-on-year swaps; the remaining yield-curve and volatility structures. |
-| 4 | Equity and FX beyond vanilla: Asian, barrier, basket, cliquet, lookback, compound, chooser and quanto options; the remaining vanilla engines; Bates and the other equity models. |
-| 5 | The LIBOR market-model framework. |
-| 6 | Core remainder: what no product above reaches, mostly the rest of the finite-difference framework, optimisers, random-number generators, interpolations, matrix utilities, quotes and copulas. |
-| S-conv | Conventions as data: XML round-tripping of convention values, a resolver, and QuantLib's presets as generated XML records checked against the coded ones. It ports no QuantLib units, and starts the extensions layer. |
-| S-qlnet | QLNet's additions: mortgage-backed securities with prepayment, and accounting amortised cost, checked against QLNet with QLNet's notices kept. |
-| 7 | Experimental remainder: credit portfolios and CDOs, experimental maths, commodities, volatility models, barrier engines, finite differences and inflation. Marked `[Experimental]`. |
+In this order, each slot a family of units with the test cases that complete in it; a slot's own plan may pull or
+cut units:
+
+| Slot | Batch | Content | Units | Code lines |
+|---|---:|---|---:|---:|
+| S-cal | 2 | Calendars, day counters, currencies and indexes | 96 | 7,906 |
+| S-sr | 3 | Short-rate models with their tree, analytic, finite-difference and Monte Carlo engines; convertible bonds; curves beyond vanilla | 66 | 7,739 |
+| S-g1d | 3 | Gaussian1d models and engines, nonstandard and float-float swaptions; smile sections and volatility structures | 34 | 8,084 |
+| S-cms | 3 | CMS pricers and the CMS market; digital, range-accrual and multiple-resets coupons; swaps, bonds and futures beyond vanilla | 33 | 8,202 |
+| S-van | 4 | Vanilla engines: American approximations, finite differences and Monte Carlo; local volatility and volatility surfaces | 63 | 9,367 |
+| S-hes | 4 | Heston's extensions: Bates, time-dependent, rough, stochastic-local and Heston-Hull-White; GJR-GARCH | 47 | 8,287 |
+| S-exo | 4 | Basket, spread and other exotic options | 63 | 8,221 |
+| S-bar | 4 | Barrier, lookback and Asian options; volatility estimators | 53 | 8,545 |
+| S-mm | 5 | Market models: curve states, drifts, correlations, Brownian generators, models, evolvers and calibrations | 55 | 7,793 |
+| S-mmp | 5 | Market models: products, callability, accounting engines and pathwise Greeks | 65 | 7,971 |
+| S-core | 6 | The core remainder: optimisers, random numbers, copulas, statistics, quotes, integrals, interpolations, matrix utilities and the finite-difference remainder | 79 | 7,240 |
+| S-conv | — | Conventions as data: XML round-tripping of convention values, a resolver, and QuantLib's presets as generated XML records checked against the coded ones. It ports no QuantLib units, and starts the extensions layer. | — | — |
+| S-qlnet | — | QLNet's additions: mortgage-backed securities with prepayment, and accounting amortised cost, checked against QLNet with QLNet's notices kept. | — | — |
+| S-xcr | 7 | Experimental credit: latent and loss models, baskets, CDOs, n-th to default, CDS options; cat bonds | 55 | 9,685 |
+| S-xeq | 7 | Experimental equity, FX and energy: double barriers, exotics, variance gamma, path engines; volatility surfaces; energy finite differences | 72 | 10,107 |
+| S-xrt | 7 | Experimental rates, inflation, commodities and maths | 67 | 10,195 |
+
+Batch 7's slots are marked `[Experimental]`. If batch 7 is ready for v0.1 it runs after batch 6 and before S-conv;
+otherwise after v0.1's release.
 
 After batch 6 (and batch 7 if it is ready), the release steps, which port nothing. Nothing ships before v0.1, the first
 public release.
@@ -86,22 +100,22 @@ public release.
 Files that port only part of their QuantLib file, each with a `// Partial:` line naming what is left (playbook §1).
 The licensing gate checks that this list and the files match.
 
-- `src/NanoQL/Coupons/CashFlowVectorsFunctions.cs`: `FloatingDigitalLeg`, which waits for B3.4 with the digital coupons.
-- `src/NanoQL/Coupons/CouponPricer/CouponPricerFunctions.cs`: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for batch 3; the CMS pricer bases, and the CMS cases' test for a CMS coupon pricer, which wait for B3.3.
-- `src/NanoQL/Coupons/YoYInflationLeg.cs`: `withCaps` and `withFloors`, which build capped and floored coupons and wait for B3.4's `CappedFlooredYoYInflationCoupon`.
+- `src/NanoQL/Coupons/CashFlowVectorsFunctions.cs`: `FloatingDigitalLeg`, which waits for S-cms with the digital coupons.
+- `src/NanoQL/Coupons/CouponPricer/CouponPricerFunctions.cs`: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for batch 3; the CMS pricer bases, and the CMS cases' test for a CMS coupon pricer, which wait for S-cms.
+- `src/NanoQL/Coupons/YoYInflationLeg.cs`: `withCaps` and `withFloors`, which build capped and floored coupons and wait for S-cms's `CappedFlooredYoYInflationCoupon`.
 - `src/NanoQL/Experimental/CallableBonds/CallableBondVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(dc, bdc)`, which no QuantLib 1.44 class uses and which waits for its first user.
-- `src/NanoQL/Instruments/FloatFloatSwap.cs`: the swap-spread legs, QuantLib's `CmsSpreadLeg` on a `SwapSpreadIndex`, which wait for batch 3's CMS spread coupons (B3.4).
+- `src/NanoQL/Instruments/FloatFloatSwap.cs`: the swap-spread legs, QuantLib's `CmsSpreadLeg` on a `SwapSpreadIndex`, which wait for S-cms's `CmsSpreadLeg` and S-g1d's `SwapSpreadIndex`.
 - `src/NanoQL/Methods/FiniteDifferences/StepCondition.cs`: `NullCondition`, which no QuantLib 1.44 class or test uses and which waits for its first user.
-- `src/NanoQL/Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs`: `FdmLogBasketInnerValue`, which waits for B4.5 with the basket option's payoff.
-- `src/NanoQL/Models/ShortRate/OneFactorModel/OneFactorModelShortRateTree.cs`: the constructor fitting the tree to a term structure numerically, with its solver helper, which waits for B3.1's `ExtendedCoxIngersollRoss`, its only user.
-- `src/NanoQL/Numerics/Integrals/FourierIntegration.cs`: the Gauss-Kronrod, discrete Simpson and trapezoid, tanh-sinh and exp-sinh algorithms, which wait for their integrators: B3.4's Kronrod rules, B4.2's discrete integrals, B4.5's tanh-sinh and B6.2's exp-sinh.
-- `src/NanoQL/Numerics/Integrals/Integrator.cs`: `absoluteError` and `integrationSuccess`, which wait for B3.3's CMS pricer, their first caller, on B3.4's Kronrod rules: no integrator S-eq ports computes an error.
-- `src/NanoQL/Processes/HestonProcess/HestonProcess.cs`: `pdf`, the Fokker-Planck density, which waits for B3.1's `SegmentIntegral` and Boost's non-central chi-squared density.
+- `src/NanoQL/Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs`: `FdmLogBasketInnerValue`, which waits for S-exo with the basket option's payoff.
+- `src/NanoQL/Models/ShortRate/OneFactorModel/OneFactorModelShortRateTree.cs`: the constructor fitting the tree to a term structure numerically, with its solver helper, which waits for S-sr's `ExtendedCoxIngersollRoss`, its only user.
+- `src/NanoQL/Numerics/Integrals/FourierIntegration.cs`: the Gauss-Kronrod, discrete Simpson and trapezoid, tanh-sinh and exp-sinh algorithms, which wait for their integrators: S-cms's Kronrod rules, S-van's discrete integrals and tanh-sinh, and S-core's exp-sinh.
+- `src/NanoQL/Numerics/Integrals/Integrator.cs`: `absoluteError` and `integrationSuccess`, which wait for S-cms's CMS pricer, their first caller, on its Kronrod rules: no integrator S-eq ports computes an error.
+- `src/NanoQL/Processes/HestonProcess/HestonProcess.cs`: `pdf`, the Fokker-Planck density, which waits for S-sr's `SegmentIntegral` and Boost's non-central chi-squared density.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
-- `src/NanoQL/TermStructures/Credit/DefaultDensityStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the default density, which waits for S-eq's `GaussChebyshevIntegration` and B7.2, its only users.
-- `src/NanoQL/TermStructures/Credit/HazardRateStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-eq's `GaussChebyshevIntegration` and B7.2, its only users.
-- `src/NanoQL/TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseDefaultCurve{TTraits,TInterpolator,TBootstrap}.cs`: the constructor on a one-factor affine model, which waits for B7.2's `AffineHazardRate` traits, the only traits whose curve takes a model.
-- `src/NanoQL/TermStructures/GlobalBootstrap/GlobalBootstrap.cs`: `AdditionalBootstrapVariables`, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for B6.2 with `SimpleQuoteVariables` and its user.
+- `src/NanoQL/TermStructures/Credit/DefaultDensityStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the default density, which waits for S-xcr's curves, its only users.
+- `src/NanoQL/TermStructures/Credit/HazardRateStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-xcr's curves, its only users.
+- `src/NanoQL/TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseDefaultCurve{TTraits,TInterpolator,TBootstrap}.cs`: the constructor on a one-factor affine model, which waits for S-xcr's `AffineHazardRate` traits, the only traits whose curve takes a model.
+- `src/NanoQL/TermStructures/GlobalBootstrap/GlobalBootstrap.cs`: `AdditionalBootstrapVariables`, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for S-core with `SimpleQuoteVariables` and its user.
 - `src/NanoQL/TermStructures/Volatility/CapFloor/CapFloorTermVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: no QuantLib class calls it.
 - `src/NanoQL/TermStructures/Volatility/EquityFX/BlackVolTermStructure/BlackVarianceTermStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead.
 - `src/NanoQL/TermStructures/Volatility/EquityFX/BlackVolTermStructure/BlackVolTermStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead.
@@ -109,10 +123,10 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/TermStructures/Volatility/EquityFX/LocalVolTermStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead, as `LocalVolCurve` and `LocalVolSurface` do.
 - `src/NanoQL/TermStructures/Volatility/Optionlet/OptionletStripper1.cs`: `capletVols()`, a matrix QuantLib allocates and never writes, not ported.
 - `src/NanoQL/TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its only QuantLib user, the spreaded optionlet volatility, passes its base's reference date to the reference-date constructor.
-- `src/NanoQL/TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/XabrSwaptionVolatilityCube{TModel}.cs`: the recalibration members (`recalibration`, `updateAfterRecalibration` and `sabrCalibrationSection`), which change a calibrated cube and wait for B3.3's `CmsMarketCalibration`, their only user.
+- `src/NanoQL/TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/XabrSwaptionVolatilityCube{TModel}.cs`: the recalibration members (`recalibration`, `updateAfterRecalibration` and `sabrCalibrationSection`), which change a calibrated cube and wait for S-cms's `CmsMarketCalibration`, their only user.
 - `src/NanoQL/TermStructures/Volatility/Swaption/SwaptionVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its only QuantLib user, the spreaded swaption volatility, passes its base's reference date to the reference-date constructor.
-- `src/NanoQL/TermStructures/Volatility/ZabrModel.cs`: `fdPrice` (both forms) and `fullFdPrice`, the local-volatility and full finite-difference prices, which wait for B3.3 with the finite-difference units they price on (S-eq's meshers, layout and backward solver, S-rx's Dirichlet boundary, B3.3's glued mesher and its Dupire and ZABR operators).
-- `src/NanoQL/TermStructures/Volatility/ZabrSmileSection/ZabrSmileSection{TEvaluation}.cs`: the local-volatility and full finite-difference kernels (the `ZabrLocalVolatility` and `ZabrFullFd` tags, with their strike grid, call prices and price spline), which wait for B3.3 with `ZabrModel`'s `fdPrice` and `fullFdPrice`.
+- `src/NanoQL/TermStructures/Volatility/ZabrModel.cs`: `fdPrice` (both forms) and `fullFdPrice`, the local-volatility and full finite-difference prices, which wait for S-g1d with the finite-difference units they price on (S-eq's meshers, layout and backward solver, S-rx's Dirichlet boundary, S-g1d's glued mesher and its Dupire and ZABR operators).
+- `src/NanoQL/TermStructures/Volatility/ZabrSmileSection/ZabrSmileSection{TEvaluation}.cs`: the local-volatility and full finite-difference kernels (the `ZabrLocalVolatility` and `ZabrFullFd` tags, with their strike grid, call prices and price spline), which wait for S-g1d with `ZabrModel`'s `fdPrice` and `fullFdPrice`.
 - `src/NanoQL/TermStructures/VolatilityTermStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead, as the local volatility structures do.
 - `src/NanoQL/TermStructures/Yield/ZeroYieldStructure.cs`: the constructor taking a day counter only.
 - `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only.
@@ -120,36 +134,33 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/DayCounters/YearFractionToDateFunctions.cs`: `roundToDayStart`, which waits for S-exo's spread option tests, its only callers.
 - `src/NanoQL/Utilities/DataParsers/DateParser.cs`: `parseFormatted`, not ported: a `DateOnly`'s `ParseExact` does its job.
-- `tests/NanoQL.Tests/TestSuite/AmericanOptionTests.cs`: the Barone-Adesi-Whaley, Bjerksund-Stensland, Ju and QD-plus cases, which wait for B4.5's analytic and QD engines; the shout cases, which wait for B4.3's shout engine; and `testQdPlusBoundaryConvergence` and `testQdAmericanEngines`, which wait for B4.7's Halley solver.
-- `tests/NanoQL.Tests/TestSuite/BarrierOptionTests.cs`: `testHaugValues`' binomial checks, which wait for B4.6's `BinomialBarrierEngine`; `testBabsiriValues`' and `testBeagleholeValues`' Monte Carlo checks, which wait for B4.6's `MCBarrierEngine`; `testDividendBarrierOption`'s and `testDividendBarrierOptionWithDividendsPastMaturity`'s Heston checks, which wait for batch 4's `FdHestonBarrierEngine`; `testLocalVolAndHestonComparison`, which waits for batch 4's local volatility and Heston barrier engines; and the four perturbative cases, which wait for batch 4's `PerturbativeBarrierOptionEngine`.
-- `tests/NanoQL.Tests/TestSuite/BermudanSwaptionTests.cs`: `testCachedValues`' finite-difference checks, which wait for B3.2's `FdHullWhiteSwaptionEngine`; `testCachedG2Values`, which waits for B3.1's `G2` and B3.2's `FdG2SwaptionEngine`; `testTreeEngineTimeSnapping`, which waits for B3.2's `FdHullWhiteSwaptionEngine`; `testBermudanOISSwaptionWithHW` and `testBermudanOISSwaptionPreservesFeatures`, which wait for B3.2's `FdHullWhiteSwaptionEngine`; and `testBermudanOISSwaptionWithG2`, which waits for B3.1's `G2` and B3.2's `FdG2SwaptionEngine`.
-- `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for B5.3's `SequenceStatistics`.
-- `tests/NanoQL.Tests/TestSuite/CreditDefaultSwapTests.cs`: `testCachedValue`'s integral-engine checks, which wait for B6.2's `IntegralCdsEngine`.
-- `tests/NanoQL.Tests/TestSuite/DigitalOptionTests.cs`: the American digital cases, which wait for B4.5's `AnalyticDigitalAmericanEngine`; `testMCCashAtHit`, which waits for B4.4's `MCDigitalEngine`.
+- `tests/NanoQL.Tests/TestSuite/AmericanOptionTests.cs`: the Barone-Adesi-Whaley, Bjerksund-Stensland, Ju and QD-plus cases, which wait for S-van's analytic and QD engines; the shout cases, which wait for S-van's shout engine; and `testQdPlusBoundaryConvergence` and `testQdAmericanEngines`, which wait for S-exo's Halley solver.
+- `tests/NanoQL.Tests/TestSuite/BarrierOptionTests.cs`: `testHaugValues`' binomial checks, which wait for S-bar's `BinomialBarrierEngine`; `testBabsiriValues`' and `testBeagleholeValues`' Monte Carlo checks, which wait for S-bar's `MCBarrierEngine`; `testDividendBarrierOption`'s and `testDividendBarrierOptionWithDividendsPastMaturity`'s Heston checks, which wait for batch 4's `FdHestonBarrierEngine`; `testLocalVolAndHestonComparison`, which waits for batch 4's local volatility and Heston barrier engines; and the four perturbative cases, which wait for S-xeq's `PerturbativeBarrierOptionEngine`.
+- `tests/NanoQL.Tests/TestSuite/BermudanSwaptionTests.cs`: `testCachedValues`' finite-difference checks, which wait for S-sr's `FdHullWhiteSwaptionEngine`; `testCachedG2Values`, which waits for S-sr's `G2` and S-sr's `FdG2SwaptionEngine`; `testTreeEngineTimeSnapping`, which waits for S-sr's `FdHullWhiteSwaptionEngine`; `testBermudanOISSwaptionWithHW` and `testBermudanOISSwaptionPreservesFeatures`, which wait for S-sr's `FdHullWhiteSwaptionEngine`; and `testBermudanOISSwaptionWithG2`, which waits for S-sr's `G2` and S-sr's `FdG2SwaptionEngine`.
+- `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for S-mmp's `SequenceStatistics`.
+- `tests/NanoQL.Tests/TestSuite/CreditDefaultSwapTests.cs`: `testCachedValue`'s integral-engine checks, which wait for S-core's `IntegralCdsEngine`.
+- `tests/NanoQL.Tests/TestSuite/DigitalOptionTests.cs`: the American digital cases, which wait for S-van's `AnalyticDigitalAmericanEngine`; `testMCCashAtHit`, which waits for S-van's `MCDigitalEngine`.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, Student t and stochastic-collocation cases, whose distributions aren't ported yet.
-- `tests/NanoQL.Tests/TestSuite/DividendOptionTests.cs`: the cash-dividend engine's cases, which wait for B4.5's `CashDividendEuropeanEngine`.
-- `tests/NanoQL.Tests/TestSuite/EuropeanOptionTests.cs`: `testIntegralEngines` (B4.5), `testMcEngines` and `testQmcEngines` (B4.4), `testFFTEngines` (B7.6) and `testFdEnginesWithNonStrikedPayoff` (B4.3).
-- `tests/NanoQL.Tests/TestSuite/FdmLinearOpTests.cs`: the uniform-grid mesher, derivative-map, triple-band solve, Heston and iterative-solver cases, which wait for B6.2; and `testFdmMesherIntegral`, which waits for B4.2.
-- `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testMomentBasedGaussianPolynomial` and `testGaussLaguerreCosinePolynomial`, which wait for B6.2; `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for B7.3.
-- `tests/NanoQL.Tests/TestSuite/HestonModelTests.cs`: the COS, expansion, exponential-fitting, PDF and time-dependent engines' cases (B4.5), the finite-difference Heston cases (B4.3), `testMcVsCached` (B4.4), `testFdBarrierVsCached` (B4.6), `testAllIntegrationMethods` and `testCosHestonCumulants` (B6.2), `testAndersenPiterbargControlVariateIntegrand` (B4.8), `testAndersenPiterbargConvergence` (B4.2), and the Heston Black-volatility surface's cases (B4.1).
-- `tests/NanoQL.Tests/TestSuite/IndexesTests.cs`: the custom-index, CDI and SHIR cases, which wait for batch 2's indexes and calendars.
-- `tests/NanoQL.Tests/TestSuite/InflationTests.cs`: `testZeroIndex`'s UK HICP and quarterly AU CPI checks, which wait for batch 2's `UKHICP` and `AUCPI`.
-- `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: the cases on B3.3's `AbcdSquared` (`testSegment`, with B3.1's `SegmentIntegral`, and the trapezoid, midpoint, Simpson, Gauss-Lobatto and Gauss-Legendre integrator cases); the Gauss-Kronrod cases (B3.4); the discrete cases (B4.2); `testTanhSinh` (B4.5); `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (B6.2); and `testPiecewiseIntegral` (B7.3).
+- `tests/NanoQL.Tests/TestSuite/DividendOptionTests.cs`: the cash-dividend engine's cases, which wait for S-exo's `CashDividendEuropeanEngine`.
+- `tests/NanoQL.Tests/TestSuite/EuropeanOptionTests.cs`: `testIntegralEngines`, `testMcEngines` and `testQmcEngines` (S-van), `testFFTEngines` (S-xeq) and `testFdEnginesWithNonStrikedPayoff` (S-hes and S-van).
+- `tests/NanoQL.Tests/TestSuite/FdmLinearOpTests.cs`: the uniform-grid mesher, derivative-map, triple-band solve, Heston and iterative-solver cases, which wait for S-core; `testFdmHestonHullWhiteOp`, which waits for S-exo; and `testFdmMesherIntegral`, which waits for S-hes.
+- `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testMomentBasedGaussianPolynomial` and `testGaussLaguerreCosinePolynomial`, which wait for S-core; `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
+- `tests/NanoQL.Tests/TestSuite/HestonModelTests.cs`: the COS, expansion, exponential-fitting, PDF and time-dependent engines' cases, the finite-difference Heston cases, `testMcVsCached` and the Heston Black-volatility surface's cases (S-hes), `testFdBarrierVsCached` (S-bar), `testAllIntegrationMethods` and `testCosHestonCumulants` (S-core), `testAndersenPiterbargControlVariateIntegrand` (S-exo), and `testAndersenPiterbargConvergence` (S-van).
+- `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: the cases on S-g1d's `AbcdSquared` (`testSegment`, with S-sr's `SegmentIntegral`, and the trapezoid, midpoint, Simpson, Gauss-Lobatto and Gauss-Legendre integrator cases); the Gauss-Kronrod cases (S-cms); the discrete cases and `testTanhSinh` (S-van); `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (S-core); and `testPiecewiseIntegral` (S-xrt).
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (Lagrange, Chebyshev, multi-dimensional splines, no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace, B-splines, flat extrapolation).
 - `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice, Faure and Burley 2020 cases and the discrepancy cases, whose generators and statistics aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the cases needing matrix utilities not yet ported (decompositions, square roots, projections, Moore-Penrose).
-- `tests/NanoQL.Tests/TestSuite/NthOrderDerivativeOpTests.cs`: every case but `testSparseMatrixApply`, which wait for B6.2's `NthOrderDerivativeOp`.
-- `tests/NanoQL.Tests/TestSuite/OdeTests.cs`: `testMatrixExponential` and `testMatrixExponentialOfZero`, which wait for B6.2's `Expm`.
+- `tests/NanoQL.Tests/TestSuite/NthOrderDerivativeOpTests.cs`: every case but `testSparseMatrixApply`, which wait for S-core's `NthOrderDerivativeOp`.
+- `tests/NanoQL.Tests/TestSuite/OdeTests.cs`: `testMatrixExponential` and `testMatrixExponentialOfZero`, which wait for S-core's `Expm`.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing, L-BFGS-B, differential evolution and CMA-ES cases, whose optimizers aren't ported yet.
-- `tests/NanoQL.Tests/TestSuite/OvernightIndexedSwapTests.cs`: `testMakeOisEndOfMonthRegression2453`, which waits for batch 2's `Aonia`; `testNonstandardSwapConversionPreservesObservationConventions`, which waits for B3.2's `NonstandardSwap`; and `testMakeOISDefaultSettlementDays`' lines for the indexes of batch 2 (AONIA, SARON, NZOCR, DESTR, SWESTR, KOFR).
-- `tests/NanoQL.Tests/TestSuite/PathGeneratorTests.cs`: `testMultiPathGenerator`, which waits for `MultiPathGenerator` (B3.2).
-- `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: `testDefaultInstantiation`'s ConvexMonotone curve (B6.2); `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (B6.2); `testConvexMonotoneForwardConsistency`, `testLocalBootstrapConsistency` and `testGlobalBootstrapVariables` (B6.2); and `testPiecewiseSpreadYieldCurve` (B3.5).
-- `tests/NanoQL.Tests/TestSuite/QuantoOptionTests.cs`: the analytic and forward cases, the barrier case and `testPDEOptionValues`, which wait for B4.8's quanto engines; `testAmericanQuantoOption`, which waits for B4.3's Heston engine; and `testDoubleBarrierValues`, which waits for B7.6's quanto double-barrier option.
+- `tests/NanoQL.Tests/TestSuite/OvernightIndexedSwapTests.cs`: `testNonstandardSwapConversionPreservesObservationConventions`, which waits for S-g1d's `NonstandardSwap`.
+- `tests/NanoQL.Tests/TestSuite/PathGeneratorTests.cs`: `testMultiPathGenerator`, which waits for `MultiPathGenerator` (S-sr).
+- `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: `testDefaultInstantiation`'s ConvexMonotone curve (S-core); `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (S-core); `testConvexMonotoneForwardConsistency`, `testLocalBootstrapConsistency` and `testGlobalBootstrapVariables` (S-core); and `testPiecewiseSpreadYieldCurve` (S-sr).
+- `tests/NanoQL.Tests/TestSuite/QuantoOptionTests.cs`: the analytic and forward cases and `testPDEOptionValues`, which wait for S-exo's quanto engines; the barrier case, which waits for S-bar's quanto barrier option; `testAmericanQuantoOption`, which waits for S-hes's Heston engine; and `testDoubleBarrierValues`, which waits for S-xeq's quanto double-barrier option.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
-- `tests/NanoQL.Tests/TestSuite/ShortRateModelsTests.cs`: `testSwaps`, which waits for B3.4's `TreeVanillaSwapEngine`; and the two extended Cox-Ingersoll-Ross cases, which wait for B3.1's `ExtendedCoxIngersollRoss`.
+- `tests/NanoQL.Tests/TestSuite/ShortRateModelsTests.cs`: `testSwaps`, which waits for S-sr's `TreeVanillaSwapEngine`; and the two extended Cox-Ingersoll-Ross cases, which wait for S-sr's `ExtendedCoxIngersollRoss`.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant, Newton, Ridder and Halley cases, whose solvers aren't ported yet.
-- `tests/NanoQL.Tests/TestSuite/SwapTests.cs`: `testFixedTenorInferenceWithTerminationDate`, which waits for batch 2's `Bbsw`.
 - `tests/NanoQL.Tests/TestSuite/TermStructuresTests.cs`: the cases needing curves not yet ported.
-- `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, B4.2).
-- `tests/NanoQL.Tests/TestSuite/VarianceSwapsTests.cs`: `testMCVarianceSwap`, which waits for B4.8's `MCVarianceSwapEngine`.
-- `tests/NanoQL.Tests/TestSuite/ZabrTests.cs`: `testConsistency`'s local-volatility and full finite-difference sections and checks, which wait for B3.3 with `ZabrModel`'s `fdPrice` and `fullFdPrice`.
+- `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, S-bar).
+- `tests/NanoQL.Tests/TestSuite/VarianceSwapsTests.cs`: `testMCVarianceSwap`, which waits for S-exo's `MCVarianceSwapEngine`.
+- `tests/NanoQL.Tests/TestSuite/ZabrTests.cs`: `testConsistency`'s local-volatility and full finite-difference sections and checks, which wait for S-g1d with `ZabrModel`'s `fdPrice` and `fullFdPrice`.

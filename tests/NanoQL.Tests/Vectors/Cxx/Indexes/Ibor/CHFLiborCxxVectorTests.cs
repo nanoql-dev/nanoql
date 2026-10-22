@@ -1,0 +1,29 @@
+// SPDX-FileCopyrightText: 2026 The nanoql Authors
+// SPDX-License-Identifier: Apache-2.0
+
+using NanoQL.Indexes;
+using NanoQL.Tests.Harness;
+
+namespace NanoQL.Tests.Vectors;
+
+/// <summary>
+/// The C++ harness's CHF LIBOR vectors, <c>tests/vectors/cxx/indexes/ibor/chflibor.json</c>:
+/// <see cref="DailyTenorCHFLibor"/>, which the wheel doesn't bind, at 0, 1 and 2 settlement days: the names,
+/// conventions, fixing calendar and dates, and the forecasts on two curves.
+/// </summary>
+[Trait("Oracle", "QuantLib")]
+public class CHFLiborCxxVectorTests
+{
+    [Fact]
+    public void CHFLiborCxxVector()
+    {
+        var file = VectorFile.Load("cxx/indexes/ibor/chflibor");
+        var check = new VectorAssert(file);
+        foreach (VectorCase c in file.Cases)
+        {
+            PresetInputs.Check(check, c);
+        }
+
+        check.Complete();
+    }
+}

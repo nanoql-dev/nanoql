@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/yoyinflationcoupon.hpp ql/cashflows/yoyinflationcoupon.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: withCaps and withFloors, which build capped and floored coupons and wait for B3.4's CappedFlooredYoYInflationCoupon
+// Partial: withCaps and withFloors, which build capped and floored coupons and wait for S-cms's CappedFlooredYoYInflationCoupon
 
 using System.Collections.Immutable;
 using NanoQL.Indexes;

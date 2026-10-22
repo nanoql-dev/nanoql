@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/credit/hazardratestructure.hpp ql/termstructures/credit/hazardratestructure.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-eq's GaussChebyshevIntegration and B7.2, its only users
+// Partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-xcr's curves, its only users
 
 using NanoQL.Time;
 
@@ -21,10 +21,10 @@ namespace NanoQL.TermStructures;
 /// <para>
 /// An extension point. QuantLib's default survival probability integrates the hazard rate numerically, with a 48-point
 /// Gauss-Chebyshev rule, and warns that it "might be inefficient and inaccurate": that rule integrates a constant over
-/// [-1, 1] to 2.000357018144566, a relative error of 1.785e-4. It waits for the quadrature (S-eq) and for B7.2's
-/// curves, its only users; here <see cref="DefaultProbabilityTermStructure.SurvivalProbabilityImpl"/> stays abstract,
-/// and every curve of this slot implements it exactly. QuantLib's default hazard rate refuses ("hazardRateImpl() must
-/// be implemented by a class derived from HazardRateStructure"); here it is abstract.
+/// [-1, 1] to 2.000357018144566, a relative error of 1.785e-4. It waits for S-xcr's curves, its only users; here
+/// <see cref="DefaultProbabilityTermStructure.SurvivalProbabilityImpl"/> stays abstract, and every curve of this slot
+/// implements it exactly. QuantLib's default hazard rate refuses ("hazardRateImpl() must be implemented by a class
+/// derived from HazardRateStructure"); here it is abstract.
 /// </para>
 /// </remarks>
 public abstract class HazardRateStructure : DefaultProbabilityTermStructure

@@ -27,6 +27,7 @@
 #include <ql/time/calendar.hpp>
 #include <ql/time/timeunit.hpp>
 
+#include <functional>
 #include <string>
 
 namespace harness::indexes {
@@ -68,6 +69,17 @@ namespace harness::indexes {
     // The call.
     QuantLib::ext::shared_ptr<QuantLib::Index> makeIndex(const IndexSpec& s);
     QuantLib::ext::shared_ptr<QuantLib::IborIndex> makeIborIndex(const IndexSpec& s);
+
+    // A preset's case, as tools/vectors/gen/indexes/ibor/euribor.py's index_forecast_case writes it, for the Ibor
+    // presets the wheel doesn't bind (indexes/ibor/chflibor.cpp, eurlibor.cpp). The check reads the dates (serials)
+    // and the forecast curves, tools/vectors/gen/processes/blackscholesprocess.py's specs: {"type": "FlatForward",
+    // "referenceDate", "forward", "dayCounter"} or {"type": "ZeroCurve", "dates", "rates", "dayCounter"}, QuantLib's
+    // linear zero curve. The call builds the preset on QuantLib's empty handle for its inspectors and its fixing, value
+    // and maturity dates at each date, then on each curve for its fixings there ("forecast", one array per curve),
+    // each {"throws": true} where QuantLib refuses it.
+    using IborPreset = std::function<QuantLib::ext::shared_ptr<QuantLib::IborIndex>(
+        const QuantLib::Handle<QuantLib::YieldTermStructure>&)>;
+    Call presetCase(IborPreset make, const json::value& dates, const json::value& curves);
 
 }
 

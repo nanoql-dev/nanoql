@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/methods/finitedifferences/utilities/fdminnervaluecalculator.hpp ql/methods/finitedifferences/utilities/fdminnervaluecalculator.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: FdmLogBasketInnerValue, which waits for B4.5 with the basket option's payoff
+// Partial: FdmLogBasketInnerValue, which waits for S-exo with the basket option's payoff
 
 namespace NanoQL.Methods;
 

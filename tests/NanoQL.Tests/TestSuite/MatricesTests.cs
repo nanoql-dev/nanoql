@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/matrices.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testEigenvectors, testCholeskyDecomposition, testCholeskySolverFor, testCholeskySolverForIncomplete, testHouseholderTransformation, testHouseholderReflection (B4.7's matrix utilities); testSqrt, testHighamSqrt, testSVD, testPrincipalMatrixSqrt (B4.1); testOrthogonalProjection (B5.2); testQRDecomposition, testQRSolve (B6.2); testMoorePenroseInverse (B7.3)
+// Partial: testEigenvectors, testCholeskyDecomposition, testCholeskySolverFor, testCholeskySolverForIncomplete, testSqrt, testHighamSqrt, testPrincipalMatrixSqrt (S-sr's matrix utilities); testHouseholderTransformation, testHouseholderReflection (S-exo's Householder transformation); testSVD (S-van); testOrthogonalProjection (S-mm); testQRDecomposition, testQRSolve (S-core); testMoorePenroseInverse (S-xrt)
 // Moved: testSparseMatrixMemory line 755 (Divergences/SparseMatrixProductTests.cs)
 
 using NanoQL.Numerics;

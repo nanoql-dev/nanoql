@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+"""Vectors for QuantLib's SARON, the Swiss average rate overnight (ql/indexes/ibor/saron.hpp): Saron, one case, as
+tools/vectors/gen/indexes/ibor/euribor.py writes them, with its DATES and index_forecast_case: the name, conventions and
+fixing calendar, the fixing, value and maturity dates, and the forecasts on its two curves. The wheel's classes are
+QuantLib-SWIG's proxies of the C++ classes of those names, their constructors QuantLib's. Read back by
+tests/NanoQL.Tests/Vectors/Indexes/Ibor/SaronVectorTests.cs."""
+import importlib.util
+import os
+import sys
+
+_dir = os.path.dirname(os.path.abspath(__file__))
+while not os.path.isfile(os.path.join(_dir, "vectors.py")):
+    _dir = os.path.dirname(_dir)
+sys.path.insert(0, _dir)
+
+import QuantLib as ql  # noqa: E402
+
+import vectors as v  # noqa: E402
+
+_spec = importlib.util.spec_from_file_location("wheel_euribor",
+                                               os.path.join(v.GEN_ROOT, "indexes", "ibor", "euribor.py"))
+eur = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(eur)
+
+
+def cases():
+    return [
+        eur.index_forecast_case({"type": "Saron"}, lambda h: ql.Saron(h)),
+    ]
+
+
+if __name__ == "__main__":
+    v.main(__file__, "ql/indexes/ibor/saron.hpp", cases)

@@ -44,6 +44,32 @@ public class OvernightIndex : IborIndex
     {
     }
 
+    /// <summary>The factor a fixing grows a unit by over a span: <c>1 + fixing × span</c>, a simple rate's.</summary>
+    /// <param name="fixing">The fixing, as the index quotes it.</param>
+    /// <param name="span">The span, as a year fraction on the index's day counter.</param>
+    /// <returns>The growth factor.</returns>
+    /// <remarks>
+    /// An extension point: an index whose fixings are quoted on another convention states its growth, as
+    /// <see cref="Cdi"/>'s annually compounded rate does. QuantLib's overnight coupon pricers grow every fixing as a
+    /// simple rate; nanoql's compounding pricers read this factor, which by default is their expression, and the
+    /// averaging pricers read <see cref="SimpleAccrual"/>, which an index overriding this factor overrides too.
+    /// </remarks>
+    public virtual double GrowthFactor(double fixing, double span) => 1.0 + (fixing * span);
+
+    /// <summary>The interest a fixing accrues per unit over a span: <c>fixing × span</c>, a simple rate's.</summary>
+    /// <param name="fixing">The fixing, as the index quotes it.</param>
+    /// <param name="span">The span, as a year fraction on the index's day counter.</param>
+    /// <returns>The accrual.</returns>
+    /// <remarks>
+    /// The averaging pricers' term, the extension point beside <see cref="GrowthFactor"/>: an index whose fixings
+    /// grow on another convention overrides both, its accrual its growth factor less one, as <see cref="Cdi"/> does.
+    /// QuantLib's averaging pricers sum <c>fixing × span</c>; nanoql's read this accrual, which by default is their
+    /// expression, so an index keeps QuantLib's bits. The Black pricers' forward parts read it too, to compare a daily
+    /// cap's or floor's strike, as its accrual per unit of span, with the simple rate they estimate from the curve,
+    /// reading the volatility at the strike as quoted; an index accruing simply keeps its strike as quoted.
+    /// </remarks>
+    public virtual double SimpleAccrual(double fixing, double span) => fixing * span;
+
     /// <summary>A copy of the index on another forwarding curve: a plain <see cref="OvernightIndex"/>, as in QuantLib.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <returns>The copy.</returns>

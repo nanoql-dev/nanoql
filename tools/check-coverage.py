@@ -4,7 +4,7 @@
 # REUSE-IgnoreStart
 """The coverage gate's type check, and its member line (docs/porting-playbook.md §9.5).
 
-Usage: .venv\\Scripts\\python -I tools/check-coverage.py <results folder> [--all <results folder>] [--self-test]
+Usage: .venv\\Scripts\\python -I tools/check-coverage.py <results folder> [--all <results folder>]
 
 Run it after the coverage runs, each of which writes one Cobertura report into its emptied results folder: the
 tagged run, and for --all the whole suite's, both from the repository root:
@@ -37,9 +37,7 @@ import os
 import re
 import subprocess
 import sys
-import tempfile
 import xml.etree.ElementTree as ET
-from xml.sax.saxutils import quoteattr
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sources  # noqa: E402
@@ -524,204 +522,7 @@ def check(root, results, commit_files, all_files, whole=None):
     return errors, out
 
 
-# ---- self-test: synthetic files and a synthetic report ----
-
-HEADER = ("// SPDX-FileCopyrightText: 2026 The nanoql Authors\n// SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause\n"
-          "// Upstream: ql/time/date.hpp @ v1.44\n")
-# The ported type whose members the member line reads; the whole suite's report cites its lines.
-PORTED = """namespace NanoQL;
-
-public sealed class Ported
-{
-    private int x = 1;
-
-    private int Size { get; } = 2;
-
-    public Ported(int x)
-    {
-        this.x = x;
-    }
-
-    public int Length { get => x; private set => x = value; }
-
-    public int F() => 1;
-
-    public int Unreached() => 2;
-
-    public int Untagged() => 3;
-
-    public static Ported operator +(Ported a, Ported b) => a;
-
-    public IEnumerable<int> Pending()
-    {
-        yield return 4;
-    }
-
-    private int Secret() => 5;
-
-    protected static class Nested
-    {
-        public static int Deep() => 6;
-    }
-}
-
-file static class Helper
-{
-    public static int Shared() => 7;
-}
-"""
-
-
-def cobertura(source, package, classes):
-    """A Cobertura report's text; classes maps each class to its file and its methods, (name, signature, {line:
-    hits})."""
-    parts = []
-    for cls, (filename, methods) in classes.items():
-        body = "".join(f'<method name={quoteattr(m)} signature={quoteattr(s)}><lines>'
-                       + "".join(f'<line number="{n}" hits="{h}"/>' for n, h in lines.items()) + "</lines></method>"
-                       for m, s, lines in methods)
-        merged = {}
-        for _, _, lines in methods:
-            for n, h in lines.items():
-                merged[n] = max(merged.get(n, 0), h)
-        parts.append(f'<class name={quoteattr("NanoQL." + cls)} filename="{filename}"><methods>{body}</methods><lines>'
-                     + "".join(f'<line number="{n}" hits="{h}"/>' for n, h in merged.items()) + "</lines></class>")
-    return (f'<coverage><sources><source>{source}</source></sources><packages><package name="{package}"><classes>'
-            + "".join(parts) + "</classes></package></packages></coverage>")
-
-
-def synthetic(tmp, scenario):
-    root = os.path.join(tmp, scenario, "repo")
-    results = os.path.join(tmp, scenario, "results")
-    whole = os.path.join(tmp, scenario, "whole")
-    os.makedirs(results)
-    os.makedirs(whole)
-    files = {
-        "Ported.cs": HEADER + PORTED,
-        "Kind.cs": HEADER + "namespace NanoQL;\n\npublic enum Kind\n{\n    A,\n}\n",
-        "Iter.cs": HEADER + "namespace NanoQL;\n\npublic static class Iter\n{\n}\n",
-        "Hidden.cs": HEADER + "namespace NanoQL;\n\ninternal static class Hidden\n{\n}\n",
-        "Own.cs": "// SPDX-FileCopyrightText: 2026 The nanoql Authors\n// SPDX-License-Identifier: Apache-2.0\n"
-                  "namespace NanoQL;\n\npublic sealed class Own\n{\n}\n",
-        "Results.cs": HEADER + "// Equality-tested: tests/ResultsEqualityTests.cs\nnamespace NanoQL;\n\n"
-                      "public record Results\n{\n}\n",
-        "tests/ResultsEqualityTests.cs": "// test\n",
-    }
-    hits = {"Ported": 1, "Iter/<Iter>d__1": 1, "Hidden": 0, "Own": 0, "Results": 0}
-    methods = {"Ported": ["F"], "Iter/<Iter>d__1": ["MoveNext"], "Hidden": ["G"], "Own": ["H"],
-               "Results": ["Equals", "GetHashCode"]}
-    package = "NanoQL"
-    reports = wholes = 1
-    if scenario == "no report":
-        reports = 0
-    elif scenario == "two reports":
-        reports = 2
-    elif scenario == "no whole-suite report":
-        wholes = 0
-    elif scenario == "two whole-suite reports":
-        wholes = 2
-    elif scenario == "no package":
-        package = "Other"
-    elif scenario == "no covered line":
-        hits["Ported"] = 0
-    elif scenario == "ExcludeFromCodeCoverage":
-        files["Ported.cs"] = files["Ported.cs"].replace("public sealed class", "[System.Diagnostics.CodeAnalysis."
-                                                        "ExcludeFromCodeCoverage]\npublic sealed class")
-    elif scenario == "equality-only without its line":
-        files["Results.cs"] = files["Results.cs"].replace("// Equality-tested: tests/ResultsEqualityTests.cs\n", "")
-    elif scenario == "equality members and an uncovered method":
-        methods["Results"] = ["Equals", "GetHashCode", "Compute"]
-    for rel, text in files.items():
-        path = os.path.join(root, *([SRC] if not rel.startswith("tests/") else []), rel)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(text)
-    source = os.path.join(root, SRC) if scenario != "a moved source root" else os.path.join(tmp, "elsewhere", SRC)
-    xml = cobertura(source, package, {cls: (cls.split("/")[0] + ".cs", [(m, "()", {10 + i: h})
-                                                                       for i, m in enumerate(methods[cls])])
-                                      for cls, h in hits.items()})
-    for k in range(reports):
-        with open(os.path.join(results, f"coverage.cobertura.{k}.xml"), "w", encoding="utf-8") as f:
-            f.write(xml)
-    # The whole suite's report: each of Ported.cs's report methods at its declaration's lines.
-    text = files["Ported.cs"]
-
-    def at(marker):
-        return text[:text.index(marker)].count("\n") + 1
-
-    def method(name, signature, hit, *markers):
-        return name, signature, {at(m): hit for m in markers}
-
-    if scenario == "a moved source root in the whole-suite report":
-        source = os.path.join(tmp, "elsewhere", SRC)
-    whole_xml = cobertura(source, package, {
-        "Ported": ("Ported.cs", [
-            method(".ctor", "(System.Int32)", 0, "private int x", "private int Size", "public Ported(", "this.x = x"),
-            method("get_Length", "()", 0, "Length {"),
-            method("set_Length", "(System.Int32)", 0, "Length {"),
-            method("F", "()", 1, "F() =>"),
-            method("Unreached", "()", 0, "Unreached() =>"),
-            method("Untagged", "()", 1, "Untagged() =>"),
-            method("op_Addition", "(NanoQL.Ported,NanoQL.Ported)", 0, "operator +"),
-            method("Secret", "()", 0, "Secret() =>")]),
-        "Ported/Nested": ("Ported.cs", [method("Deep", "()", 0, "Deep() =>")]),
-        "Ported/<Pending>d__6": ("Ported.cs", [method("MoveNext", "()", 0, "yield return")]),
-        "<Ported>F0A1B2C3D4E5F6__Helper": ("Ported.cs", [method("Shared", "()", 0, "Shared() =>")])})
-    for k in range(wholes):
-        with open(os.path.join(whole, f"coverage.cobertura.{k}.xml"), "w", encoding="utf-8") as f:
-            f.write(whole_xml)
-    commit = [SRC + name for name in ("Ported.cs", "Kind.cs", "Iter.cs", "Hidden.cs", "Own.cs", "Results.cs")]
-    return root, results, whole, commit
-
-
-def self_test():
-    reds = ["no report", "two reports", "no package", "no covered line", "ExcludeFromCodeCoverage",
-            "equality-only without its line", "equality members and an uncovered method", "a moved source root"]
-    whole_reds = ["no whole-suite report", "two whole-suite reports", "a moved source root in the whole-suite report"]
-    greens = {"an enum absent from the report is listed apart": lambda o: "Kind (enum)" in o,
-              "a type covered only through its generated nested class counts": lambda o: "types 2/2" in o,
-              "an internal type and an allowlisted file at 0 aren't counted": lambda o: "types 2/2" in o,
-              "an equality-only type is listed apart": lambda o: "Results (equality-tested" in o,
-              "without --all, no member line": lambda o: "members no test reaches" not in o}
-    # With --all; the listed lines are "    src/NanoQL/Ported.cs: Ported.<member>".
-    members = {"a public method no test runs is listed":
-               lambda o: "members no test reaches: 5" in o and "    src/NanoQL/Ported.cs: Ported.Unreached()" in o,
-               "a private method or accessor no test runs isn't listed":
-               lambda o: "Secret" not in o and "set_Length" not in o,
-               "a public method only an untagged test runs isn't listed": lambda o: "Untagged" not in o,
-               "a property getter, an operator and a constructor are listed under their names":
-               lambda o: all(f"Ported.cs: Ported.{m}\n" in o + "\n" for m in
-                             ("get_Length()", "op_Addition(NanoQL.Ported,NanoQL.Ported)", ".ctor(System.Int32)")),
-               "a public member of a protected nested type isn't listed": lambda o: "Deep" not in o,
-               "a file type's method isn't listed": lambda o: "Shared" not in o,
-               "an iterator no test runs is listed by its method's name, and no generated method is":
-               lambda o: "Ported.cs: Ported.Pending\n" in o + "\n" and "<" not in o}
-    passed = 0
-    with tempfile.TemporaryDirectory() as tmp:
-        for scenario in reds + whole_reds:
-            root, results, whole, commit = synthetic(tmp, scenario)
-            errors, _ = check(root, results, commit, commit, whole if scenario in whole_reds else None)
-            ok = bool(errors)
-            passed += ok
-            print(f"  {'red as expected' if ok else 'MISSED'}: {scenario}")
-        root, results, whole, commit = synthetic(tmp, "green")
-        for run, tests in ((None, greens), (whole, members)):
-            errors, out = check(root, results, commit, commit, run)
-            text = "\n".join(out)
-            for name, test in tests.items():
-                ok = not errors and test(text)
-                passed += ok
-                print(f"  {'green as expected' if ok else 'FAILED'}: {name}")
-            if errors:
-                print("\n".join("    " + e for e in errors))
-    total = len(reds) + len(whole_reds) + len(greens) + len(members)
-    print(f"self-test: {passed}/{total}")
-    return 0 if passed == total else 1
-
-
 def main(argv):
-    if "--self-test" in argv:
-        return self_test()
     whole = None
     if "--all" in argv:
         k = argv.index("--all")

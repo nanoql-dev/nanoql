@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's CmsLeg and its coupons (ql/cashflows/cmscoupon.hpp, capflooredcoupon.hpp), the legs' structure
-only: their rates wait for batch 3's CMS coupon pricers (B3.3), so each rate and amount is QuantLib's refusal "pricer
+only: their rates wait for batch 3's CMS coupon pricers (S-cms), so each rate and amount is QuantLib's refusal "pricer
 not set". Legs on 10Y and 2Y EUR swap indexes over Euribor 6M and 3M, on the evaluation date 15 January 2025: plain,
 with gearings and spreads per coupon, a single gearing, a payment day counter, convention and fixing days, caps and
 floors (capped and floored CMS coupons), in arrears, amortizing nominals, a zero gearing, which QuantLib's leg builds as

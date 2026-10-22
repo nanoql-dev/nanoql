@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/barrieroption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testHaugValues' binomial checks, which wait for B4.6's BinomialBarrierEngine; testBabsiriValues' and testBeagleholeValues' Monte Carlo checks, which wait for B4.6's MCBarrierEngine; testDividendBarrierOption's and testDividendBarrierOptionWithDividendsPastMaturity's Heston checks, which wait for batch 4's FdHestonBarrierEngine; testLocalVolAndHestonComparison, which waits for batch 4's local volatility and Heston barrier engines; testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast and testPerturbativeOrder2FullResolution, which wait for batch 4's PerturbativeBarrierOptionEngine
+// Partial: testHaugValues' binomial checks, which wait for S-bar's BinomialBarrierEngine; testBabsiriValues' and testBeagleholeValues' Monte Carlo checks, which wait for S-bar's MCBarrierEngine; testDividendBarrierOption's and testDividendBarrierOptionWithDividendsPastMaturity's Heston checks, which wait for batch 4's FdHestonBarrierEngine; testLocalVolAndHestonComparison, which waits for batch 4's local volatility and Heston barrier engines; testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast and testPerturbativeOrder2FullResolution, which wait for S-xeq's PerturbativeBarrierOptionEngine
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -424,7 +424,7 @@ public class BarrierOptionTests
                     barrierOption, RunnerContext, stochProcess, tGrid: 200, xGrid: 400));
             }
 
-            // the binomial engines' checks wait for B4.6's BinomialBarrierEngine
+            // the binomial engines' checks wait for S-bar's BinomialBarrierEngine
         }
 
         foreach (NewBarrierOptionData value in values)
@@ -493,7 +493,7 @@ public class BarrierOptionTests
                 $"{BarrierTypeFunctions.ToString(value.Type)} barrier {value.Barrier}, volatility {value.Volatility}: "
                 + $"expected {expected}, calculated {calculated}, error {error}");
 
-            // the Monte Carlo check waits for B4.6's MCBarrierEngine
+            // the Monte Carlo check waits for S-bar's MCBarrierEngine
         }
     }
 
@@ -546,7 +546,7 @@ public class BarrierOptionTests
                 $"{BarrierTypeFunctions.ToString(value.Type)} barrier {value.Barrier}: expected {expected}, "
                 + $"calculated {calculated}, error {error}");
 
-            // the Monte Carlo check waits for B4.6's MCBarrierEngine
+            // the Monte Carlo check waits for S-bar's MCBarrierEngine
         }
     }
 

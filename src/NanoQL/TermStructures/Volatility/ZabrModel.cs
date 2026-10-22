@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/volatility/zabr.hpp ql/termstructures/volatility/zabr.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: fdPrice (both forms) and fullFdPrice, the local-volatility and full finite-difference prices, which wait for B3.3 with the finite-difference units they price on (S-eq's meshers, layout and backward solver, S-rx's Dirichlet boundary, B3.3's glued mesher and its Dupire and ZABR operators)
+// Partial: fdPrice (both forms) and fullFdPrice, the local-volatility and full finite-difference prices, which wait for S-g1d with the finite-difference units they price on (S-eq's meshers, layout and backward solver, S-rx's Dirichlet boundary, S-g1d's glued mesher and its Dupire and ZABR operators)
 
 using System.Collections.Immutable;
 using System.Globalization;

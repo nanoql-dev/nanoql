@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Vectors;
 /// (gearings and spreads, a payment day counter, convention and fixing days, caps and floors, in arrears, amortizing
 /// nominals, a zero gearing's fixed coupon, ex-coupon dates, a fixing convention and zero payments), through each
 /// setter's one-value and list forms, each coupon's rate and amount refused without a pricer, as QuantLib's are, until
-/// batch 3's CMS coupon pricers (B3.3).
+/// batch 3's CMS coupon pricers (S-cms).
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class CmsCouponVectorTests

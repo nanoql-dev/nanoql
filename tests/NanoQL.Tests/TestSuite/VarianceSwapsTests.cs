@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/varianceswaps.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testMCVarianceSwap, which waits for B4.8's MCVarianceSwapEngine
+// Partial: testMCVarianceSwap, which waits for S-exo's MCVarianceSwapEngine
 
 using NanoQL.Instruments;
 using NanoQL.Numerics;

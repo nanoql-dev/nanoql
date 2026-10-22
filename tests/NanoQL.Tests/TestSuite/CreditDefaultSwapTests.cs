@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/creditdefaultswap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCachedValue's integral-engine checks (lines 119-165), which wait for B6.2's IntegralCdsEngine
+// Partial: testCachedValue's integral-engine checks (lines 119-165), which wait for S-core's IntegralCdsEngine
 
 using NanoQL.Coupons;
 using NanoQL.Currencies;

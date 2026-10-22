@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/integrals.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSegment (B3.1's SegmentIntegral, B3.3's AbcdSquared); testTrapezoid, testMidPointTrapezoid, testSimpson, testGaussLobatto, testGaussLegendreIntegrator (B3.3's AbcdSquared); testGaussKronrodAdaptive, testGaussKronrodNonAdaptive (B3.4); testTanhSinh (B4.5); testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (B6.2); testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator (B4.2); testPiecewiseIntegral (B7.3)
+// Partial: testSegment (S-sr's SegmentIntegral, S-g1d's AbcdSquared); testTrapezoid, testMidPointTrapezoid, testSimpson, testGaussLobatto, testGaussLegendreIntegrator (S-g1d's AbcdSquared); testGaussKronrodAdaptive, testGaussKronrodNonAdaptive (S-cms); testTanhSinh (S-van); testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (S-core); testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator (S-van); testPiecewiseIntegral (S-xrt)
 
 using System.Numerics;
 using NanoQL.Numerics;

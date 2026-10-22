@@ -16,7 +16,7 @@ namespace NanoQL.Coupons;
 /// <summary>A CMS coupon with a cap, a floor or both on its rate: a <see cref="CappedFlooredCoupon"/> over a
 /// <see cref="CmsCoupon"/> it builds.</summary>
 /// <remarks>
-/// It is built with no pricer, as QuantLib's is. Its rate needs a CMS coupon pricer, which waits for batch 3 (B3.3);
+/// It is built with no pricer, as QuantLib's is. Its rate needs a CMS coupon pricer, which waits for batch 3 (S-cms);
 /// until then <see cref="CouponPricerFunctions"/> refuses every pricer for it, as QuantLib's visitor refuses a pricer
 /// that isn't a <c>CmsCouponPricer</c>.
 /// </remarks>

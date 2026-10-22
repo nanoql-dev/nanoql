@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/inflation.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testZeroIndex's UK HICP and quarterly AU CPI checks, which wait for batch 2's UKHICP and AUCPI
 // Replaced: testNotifications (Vectors/Coupons/IndexedCashFlowVectorTests.cs)
 // Not ported: testCpiAsIndexInterpolation (CPI::AsIndex, deprecated in QuantLib 1.43, D5)
 
@@ -29,8 +28,7 @@ public class InflationTests
 {
     private static readonly Period Months1 = new(1, TimeUnit.Months);
 
-    // Adapted: the UK HICP check (lines 248-257) and the quarterly AU CPI check (lines 309-317) wait for batch 2's
-    // UKHICP and AUCPI; the fixings go into the case's evaluation context.
+    // Adapted: the fixings go into the case's evaluation context.
     [Fact]
     public void TestZeroIndex()
     {
@@ -52,6 +50,16 @@ public class InflationTests
             || !(ukrpi.AvailabilityLag == Months1))
         {
             Assert.Fail($"wrong UK RPI data ({ukrpi.Name}, {ukrpi.Frequency}, {ukrpi.Revised}, {ukrpi.AvailabilityLag})");
+        }
+
+        var ukhicp = new UKHICP();
+        if (ukhicp.Name != "UK HICP"
+            || ukhicp.Frequency != Frequency.Monthly
+            || ukhicp.Revised
+            || !(ukhicp.AvailabilityLag == Months1))
+        {
+            Assert.Fail(
+                $"wrong UK HICP data ({ukhicp.Name}, {ukhicp.Frequency}, {ukhicp.Revised}, , {ukhicp.AvailabilityLag})");
         }
 
         // Retrieval test.
@@ -107,6 +115,17 @@ public class InflationTests
                     }
                 }
             }
+        }
+
+        var aucpi = new AUCPI(Frequency.Quarterly, false);
+        context = AddFixing(context, aucpi, new Date(15, December, 2007), 100.0);
+
+        var expected = new Date(1, October, 2007);
+        if (aucpi.LastFixingDate(context) != expected)
+        {
+            Assert.Fail(
+                $"Wrong last fixing date for quarterly AU CPI\n    calculated: {aucpi.LastFixingDate(context)}"
+                + $"\n    expected:   {expected}");
         }
     }
 

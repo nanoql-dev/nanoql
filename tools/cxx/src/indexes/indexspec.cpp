@@ -5,6 +5,7 @@
 
 #include <ql/currency.hpp>
 #include <ql/termstructures/yield/flatforward.hpp>
+#include <ql/termstructures/yield/zerocurve.hpp>
 #include <ql/time/calendars/nullcalendar.hpp>
 #include <ql/time/calendars/target.hpp>
 #include <ql/time/calendars/unitedkingdom.hpp>
@@ -13,6 +14,7 @@
 
 #include <initializer_list>
 #include <utility>
+#include <vector>
 
 using namespace QuantLib;
 
@@ -65,6 +67,58 @@ namespace harness::indexes {
             if (n == Null<Integer>() || n < 0)
                 throw InvalidParams("expected a Natural, got " + json::serialize(v));
             return static_cast<Natural>(n);
+        }
+
+        // presetCase's forecast curve: a flat forward's reference date and rate, or a zero curve's nodes.
+        struct ForecastCurveSpec {
+            bool zero = false;
+            std::vector<DateSpec> dates;
+            std::vector<Real> rates;
+            DayCounterSpec dayCounter;
+        };
+
+        ForecastCurveSpec forecastCurve(const json::value& v) {
+            const json::object& o = object(v, "a forecast curve");
+            ForecastCurveSpec s;
+            const std::string type = text(key(o, "type", "a forecast curve"));
+            if (type == "FlatForward") {
+                onlyKeys(o, {"type", "referenceDate", "forward", "dayCounter"}, type);
+                s.dates.push_back(date(key(o, "referenceDate", type)));
+                s.rates.push_back(real(key(o, "forward", type)));
+            } else if (type == "ZeroCurve") {
+                onlyKeys(o, {"type", "dates", "rates", "dayCounter"}, type);
+                const json::value& dates = key(o, "dates", type);
+                if (!dates.is_array())
+                    throw InvalidParams("expected the curve's dates as an array, got " + json::serialize(dates));
+                for (const json::value& d : dates.get_array())
+                    s.dates.push_back(date(d));
+                s.rates = reals(key(o, "rates", type));
+                s.zero = true;
+            } else {
+                throw InvalidParams("unknown forecast curve " + type);
+            }
+            s.dayCounter = dayCounter(key(o, "dayCounter", type));
+            return s;
+        }
+
+        Handle<YieldTermStructure> makeForecastCurve(const ForecastCurveSpec& s) {
+            if (!s.zero)
+                return Handle<YieldTermStructure>(
+                    ext::make_shared<FlatForward>(makeDate(s.dates[0]), s.rates[0], makeDayCounter(s.dayCounter)));
+            std::vector<Date> dates;
+            for (const DateSpec& d : s.dates)
+                dates.push_back(makeDate(d));
+            return Handle<YieldTermStructure>(
+                ext::make_shared<ZeroCurve>(dates, s.rates, makeDayCounter(s.dayCounter)));
+        }
+
+        template <class F>
+        json::value attempted(F f) {
+            try {
+                return f();
+            } catch (const Error&) {
+                return json::object{{"throws", true}};
+            }
         }
 
     }
@@ -174,6 +228,54 @@ namespace harness::indexes {
         if (s.type == "NoNativeFixingsIndex")
             return ext::make_shared<NoNativeFixingsIndex>(s.name);
         return makeIborIndex(s);
+    }
+
+    Call presetCase(IborPreset make, const json::value& dates, const json::value& curves) {
+        if (!dates.is_array())
+            throw InvalidParams("expected an array of dates, got " + json::serialize(dates));
+        std::vector<DateSpec> days;
+        for (const json::value& d : dates.get_array())
+            days.push_back(date(d));
+        if (!curves.is_array())
+            throw InvalidParams("expected an array of forecast curves, got " + json::serialize(curves));
+        std::vector<ForecastCurveSpec> forecastCurves;
+        for (const json::value& c : curves.get_array())
+            forecastCurves.push_back(forecastCurve(c));
+        return [make = std::move(make), days, forecastCurves] {
+            ext::shared_ptr<IborIndex> index = make(Handle<YieldTermStructure>());
+            json::array fixingDates, valueDates, maturityDates;
+            for (const DateSpec& d : days) {
+                Date day = makeDate(d);
+                fixingDates.push_back(attempted([&] { return result(index->fixingDate(day)); }));
+                valueDates.push_back(attempted([&] { return result(index->valueDate(day)); }));
+                maturityDates.push_back(attempted([&] { return result(index->maturityDate(day)); }));
+            }
+            json::array forecasts;
+            for (const ForecastCurveSpec& c : forecastCurves) {
+                ext::shared_ptr<IborIndex> onCurve = make(makeForecastCurve(c));
+                json::array fixings;
+                for (const DateSpec& d : days) {
+                    Date day = makeDate(d);
+                    fixings.push_back(attempted([&] { return json::value(onCurve->fixing(day)); }));
+                }
+                forecasts.push_back(std::move(fixings));
+            }
+            Period tenor = index->tenor();
+            return json::value(json::object{
+                {"name", index->name()},
+                {"familyName", index->familyName()},
+                {"tenor", json::array{tenor.length(), static_cast<int>(tenor.units())}},
+                {"fixingDays", index->fixingDays()},
+                {"currency", index->currency().code()},
+                {"fixingCalendar", index->fixingCalendar().name()},
+                {"dayCounter", index->dayCounter().name()},
+                {"businessDayConvention", static_cast<int>(index->businessDayConvention())},
+                {"endOfMonth", index->endOfMonth()},
+                {"fixingDate", std::move(fixingDates)},
+                {"valueDate", std::move(valueDates)},
+                {"maturityDate", std::move(maturityDates)},
+                {"forecast", std::move(forecasts)}});
+        };
     }
 
 }

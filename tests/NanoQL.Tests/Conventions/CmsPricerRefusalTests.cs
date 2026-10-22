@@ -11,9 +11,9 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// CMS coupons before batch 3's CMS coupon pricers (B3.3). QuantLib's pricer visitor gives a CMS coupon, capped or not,
+/// CMS coupons before batch 3's CMS coupon pricers (S-cms). QuantLib's pricer visitor gives a CMS coupon, capped or not,
 /// only a <c>CmsCouponPricer</c> and refuses any other pricer with "pricer not compatible with CMS coupon"
-/// (<c>couponpricer.cpp:376-382</c>, <c>:392-398</c>); no pricer that exists before B3.3 is one, so every pricer is
+/// (<c>couponpricer.cpp:376-382</c>, <c>:392-398</c>); no pricer that exists before S-cms is one, so every pricer is
 /// refused, with QuantLib's text, and a CMS coupon without a pricer refuses its rate with QuantLib's "pricer not set".
 /// </summary>
 public class CmsPricerRefusalTests

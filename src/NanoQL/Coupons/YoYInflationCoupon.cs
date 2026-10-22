@@ -12,7 +12,7 @@ namespace NanoQL.Coupons;
 /// <summary>A coupon paying a year-on-year inflation rate, with a gearing and a spread.</summary>
 /// <remarks>
 /// The fixing is the index's year-on-year rate observed on the accrual end with the lag, flat or interpolated
-/// (<see cref="CPI.LaggedYoYRate"/>). It accepts a <see cref="YoYInflationCouponPricer"/>. An extension point: B3.4's
+/// (<see cref="CPI.LaggedYoYRate"/>). It accepts a <see cref="YoYInflationCouponPricer"/>. An extension point: S-cms's
 /// capped and floored coupon derives from it.
 /// </remarks>
 public class YoYInflationCoupon : InflationCoupon

@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/volatility/swaption/sabrswaptionvolatilitycube.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: recalibration (three overloads), updateAfterRecalibration and sabrCalibrationSection, which change a calibrated cube and wait for B3.3's CmsMarketCalibration, their only user
+// Partial: recalibration (three overloads), updateAfterRecalibration and sabrCalibrationSection, which change a calibrated cube and wait for S-cms's CmsMarketCalibration, their only user
 
 using System.Collections.Immutable;
 using System.Globalization;

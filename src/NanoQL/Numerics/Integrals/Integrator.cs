@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/math/integrals/integral.hpp ql/math/integrals/integral.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: absoluteError and integrationSuccess, which wait for B3.3: no integrator S-eq ports computes an error, so QuantLib's absoluteError reads an uninitialized member after each of them; B3.3's CMS pricer is their first caller, on B3.4's Kronrod rules (integrationSuccess also compares the evaluation count with maxEvaluations, which the trapezoid family uses as an iteration bound)
+// Partial: absoluteError and integrationSuccess, which wait for S-cms: no integrator S-eq ports computes an error, so QuantLib's absoluteError reads an uninitialized member after each of them; S-cms's CMS pricer is their first caller, on its Kronrod rules (integrationSuccess also compares the evaluation count with maxEvaluations, which the trapezoid family uses as an iteration bound)
 
 using System.Globalization;
 

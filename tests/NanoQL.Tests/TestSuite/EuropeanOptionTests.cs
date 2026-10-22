@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/europeanoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testIntegralEngines, which waits for B4.5's IntegralEngine; testMcEngines and testQmcEngines, which wait for B4.4's MCEuropeanEngine; testFFTEngines, which waits for B7.6's FFTVanillaEngine; testFdEnginesWithNonStrikedPayoff, which waits for B4.3's FdHestonVanillaEngine and FdCIRVanillaEngine
+// Partial: testIntegralEngines, which waits for S-van's IntegralEngine; testMcEngines and testQmcEngines, which wait for S-van's MCEuropeanEngine; testFFTEngines, which waits for S-xeq's FFTVanillaEngine; testFdEnginesWithNonStrikedPayoff, which waits for S-hes's FdHestonVanillaEngine and S-van's FdCIRVanillaEngine
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/processes/hestonprocess.hpp ql/processes/hestonprocess.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: pdf, the Fokker-Planck density, which waits for B3.1's SegmentIntegral and Boost's non-central chi-squared density
+// Partial: pdf, the Fokker-Planck density, which waits for S-sr's SegmentIntegral and Boost's non-central chi-squared density
 
 using System.Numerics;
 using NanoQL.Numerics;

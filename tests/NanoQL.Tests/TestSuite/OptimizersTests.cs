@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/optimizers.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination (B7.3's hybrid simulated annealing); testLBFGSB, testLBFGSBActiveBounds, testLBFGSBCoverage, testDifferentialEvolution, testCMAES (B6.1's optimizers)
+// Partial: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination (S-xrt's hybrid simulated annealing); testLBFGSB, testLBFGSBActiveBounds, testLBFGSBCoverage, testDifferentialEvolution, testCMAES (S-core's optimizers)
 
 using NanoQL.Numerics;
 
@@ -44,7 +44,7 @@ public class OptimizersTests
     }
 
     // Adapted: setup's methods (lines 314-317) are simplex, levenbergMarquardt and levenbergMarquardt2, the methods
-    // ported, without conjugateGradient, bfgs and lbfgsb (B4.2's and B6.1's methods, not ported yet), whose
+    // ported, without conjugateGradient, bfgs and lbfgsb (S-sr's and S-core's methods, not ported yet), whose
     // makeOptimizationMethod cases (lines 238-251) are dropped too. The problem (lines 342-343) is a ProblemState, the
     // working type with QuantLib's Problem API, so the loop calls setCurrentValue, minimize and values on it as
     // QuantLib's does.

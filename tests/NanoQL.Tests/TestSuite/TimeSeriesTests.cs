@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/timeseries.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testIntervalPrice, which waits for IntervalPrice (ql/prices, B4.2)
+// Partial: testIntervalPrice, which waits for IntervalPrice (ql/prices, S-bar)
 
 using NanoQL.Time;
 using static NanoQL.Time.Month;

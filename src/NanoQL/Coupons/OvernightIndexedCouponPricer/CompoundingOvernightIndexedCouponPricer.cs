@@ -187,7 +187,7 @@ public class CompoundingOvernightIndexedCouponPricer : OvernightIndexedCouponPri
             double span = applyObservationShift || date >= interestDates[idx + 1]
                 ? dt[idx]
                 : dc.YearFraction(interestDates[idx], date);
-            double gf = 1.0 + (fixing * span);
+            double gf = index.GrowthFactor(fixing, span);
             double gfSpread = compoundSpreadDaily ? gf + (couponSpread * span) : gf;
             return (gf, gfSpread);
         }

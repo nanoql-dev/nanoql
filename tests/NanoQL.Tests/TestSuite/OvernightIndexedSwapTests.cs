@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/overnightindexedswap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testMakeOisEndOfMonthRegression2453, which waits for batch 2's Aonia; testNonstandardSwapConversionPreservesObservationConventions, which waits for B3.2's NonstandardSwap; and testMakeOISDefaultSettlementDays' lines for AONIA, SARON, NZOCR, DESTR, SWESTR and KOFR, which wait for batch 2's indexes
+// Partial: testNonstandardSwapConversionPreservesObservationConventions, which waits for S-g1d's NonstandardSwap
 // Replaced: testNotifications (Vectors/Instruments/OvernightIndexedSwapVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -633,8 +633,7 @@ public class OvernightIndexedSwapTests
         Assert.Equal(nominal / 2, ois4.OvernightNominals[3]);
     }
 
-    // Adapted: the evaluation dates (lines 965 and 1014) are two contexts; the indexes of batch 2 (AONIA, SARON,
-    // NZOCR, DESTR, SWESTR, KOFR) are left out of both loops (lines 968-985).
+    // Adapted: the evaluation dates (lines 965 and 1014) are two contexts.
     [Fact]
     public void TestMakeOISDefaultSettlementDays()
     {
@@ -657,7 +656,13 @@ public class OvernightIndexedSwapTests
             ("ESTR", new Estr()),
             ("FedFunds", new FedFunds()),
             ("SOFR", new Sofr()),
+            ("AONIA", new Aonia()),
             ("TONAR", new Tonar()),
+            ("SARON", new Saron()),
+            ("NZOCR", new Nzocr()),
+            ("DESTR", new Destr()),
+            ("SWESTR", new Swestr()),
+            ("KOFR", new Kofr()),
         ];
 
         // Test default settlement days
@@ -718,6 +723,29 @@ public class OvernightIndexedSwapTests
             Date expected = new(13, May, 2025); // Tuesday: T+2 from the actual trade date
             Assert.Equal(expected, swap.StartDate());
         }
+    }
+
+    // Adapted: the evaluation date (line 1046) is the context's, and the index's curve (line 1049) is QuantLib's
+    // flatRate on it.
+    [Fact]
+    public void TestMakeOisEndOfMonthRegression2453()
+    {
+        /* See https://github.com/lballabio/QuantLib/issues/2453. Before the fix, the swap will roll
+         * backwards from 18 December 2028 (instead of 17 December 2028) and create a front stub. */
+
+        // Testing end-of-month regression in MakeOIS...
+
+        Date today = new(16, December, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        var aonia = new Aonia(FlatForward.Create(0, new NullCalendar(), 0.03, new Actual365Fixed(), context));
+        OvernightIndexedSwap swap = new MakeOIS(3 * TimeUnit.Years, aonia)
+            .WithSettlementDays(1)
+            .WithEndOfMonth(true)
+            .ToOvernightIndexedSwap(context);
+
+        Assert.Equal(new Date(17, December, 2025), swap.OvernightSchedule[0]);
+        Assert.Equal(new Date(17, December, 2026), swap.OvernightSchedule[1]);
     }
 
     // Adapted: the curve linked to a handle (line 1127) and the index built on the handle after it (line 1129) become

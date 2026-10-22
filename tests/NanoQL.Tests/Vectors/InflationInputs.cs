@@ -101,6 +101,19 @@ internal static class InflationInputs
             "YYUSCPI" => new YYUSCPI(YoYCurveOf(curve)),
             "YYEUHICP" => new YYEUHICP(YoYCurveOf(curve)),
             "YYEUHICPXT" => new YYEUHICPXT(YoYCurveOf(curve)),
+            "AUCPI" => new AUCPI(
+                (Frequency)spec.GetProperty("frequency").GetInt32(),
+                spec.GetProperty("revised").GetBoolean(),
+                ZeroCurveOf(curve)),
+            "YYAUCPI" => new YYAUCPI(
+                (Frequency)spec.GetProperty("frequency").GetInt32(),
+                spec.GetProperty("revised").GetBoolean(),
+                YoYCurveOf(curve)),
+            "FRHICP" => new FRHICP(ZeroCurveOf(curve)),
+            "YYFRHICP" => new YYFRHICP(YoYCurveOf(curve)),
+            "UKHICP" => new UKHICP(ZeroCurveOf(curve)),
+            "ZACPI" => new ZACPI(ZeroCurveOf(curve)),
+            "YYZACPI" => new YYZACPI(YoYCurveOf(curve)),
             "ZeroInflationIndex" => new ZeroInflationIndex(
                 spec.GetProperty("familyName").GetString()!,
                 RegionOf(spec.GetProperty("region")),

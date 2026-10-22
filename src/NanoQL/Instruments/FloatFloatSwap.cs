@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/instruments/floatfloatswap.hpp ql/instruments/floatfloatswap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for batch 3's CMS spread coupons (B3.4)
+// Partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for S-cms's CmsSpreadLeg and S-g1d's SwapSpreadIndex
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -25,7 +25,7 @@ namespace NanoQL.Instruments;
 /// <para>
 /// The constructors build the legs, as QuantLib's do: an Ibor leg with the index's default pricer, which reads the
 /// context's at-par switch, so they take the context; a CMS leg without a pricer, whose CMS coupon pricers wait for
-/// batch 3 (B3.3). A zero gearing becomes QuantLib's machine epsilon, so that the legs are built of floating coupons.
+/// batch 3 (S-cms). A zero gearing becomes QuantLib's machine epsilon, so that the legs are built of floating coupons.
 /// The first leg is paid by a payer swap. An engine's results are a <see cref="FloatFloatSwapResults"/>, whose fair
 /// spreads <see cref="FetchResults"/> derives from the legs' BPS when the engine gives none. QuantLib's
 /// <c>setupArguments</c> isn't ported: nanoql's engines read the legs.

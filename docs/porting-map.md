@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 791 | 100 |
-| partial | 31 | 30 |
-| ported | 439 | 52 |
+| not started | 752 | 100 |
+| partial | 31 | 28 |
+| ported | 478 | 54 |
 | replaced | 20 | 6 |
 | total | 1,456 | 194 |
 
@@ -88,11 +88,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `capflooredcoupon` | ported | Coupons/CapFlooredCoupon/CappedFlooredCmsCoupon.cs, Coupons/CapFlooredCoupon/CappedFlooredCoupon.cs, Coupons/CapFlooredCoupon/CappedFlooredIborCoupon.cs |  |
 | `capflooredinflationcoupon` | not started |  | no nanoql type: CappedFlooredYoYInflationCoupon |
 | `cashflows` | ported | Coupons/CashFlows.cs |  |
-| `cashflowvectors` | partial | Coupons/CashFlowVectorsFunctions.cs | partial: FloatingDigitalLeg, which waits for B3.4 with the digital coupons |
+| `cashflowvectors` | partial | Coupons/CashFlowVectorsFunctions.cs | partial: FloatingDigitalLeg, which waits for S-cms with the digital coupons |
 | `cmscoupon` | ported | Coupons/CmsCoupon.cs, Coupons/CmsLeg.cs |  |
 | `conundrumpricer` | not started |  | no nanoql type: VanillaOptionPricer, MarketQuotedOptionPricer, GFunction, GFunctionFactory, GFunctionFactoryYieldCurveModel, HaganPricer, NumericHaganPricer, NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand, AnalyticHaganPricer |
 | `coupon` | ported | Coupons/Coupon.cs |  |
-| `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for batch 3; the CMS pricer bases CmsCouponPricer and MeanRevertingPricer, and the CMS cases' test for a CmsCouponPricer, which wait for B3.3; no nanoql type: CmsCouponPricer, MeanRevertingPricer |
+| `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for batch 3; the CMS pricer bases CmsCouponPricer and MeanRevertingPricer, and the CMS cases' test for a CmsCouponPricer, which wait for S-cms; no nanoql type: CmsCouponPricer, MeanRevertingPricer |
 | `cpicoupon` | ported | Coupons/CPICoupon/CPICashFlow.cs, Coupons/CPICoupon/CPICoupon.cs, Coupons/CPICoupon/CPILeg.cs |  |
 | `cpicouponpricer` | ported | Coupons/CPICouponPricer.cs |  |
 | `digitalcmscoupon` | not started |  | no nanoql type: DigitalCmsCoupon, DigitalCmsLeg |
@@ -117,7 +117,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `simplecashflow` | ported | Coupons/SimpleCashFlow/AmortizingPayment.cs, Coupons/SimpleCashFlow/Redemption.cs, Coupons/SimpleCashFlow/SimpleCashFlow.cs |  |
 | `stubiborcoupon` | ported | Coupons/StubIborCoupon/StubIborCoupon.cs, Coupons/StubIborCoupon/StubIborCouponWeightedIndex.cs, Coupons/StubIborCoupon/StubIndexSelection.cs, Coupons/StubIborCoupon/StubIndexSelectionConvention.cs |  |
 | `timebasket` | not started |  | no nanoql type: TimeBasket |
-| `yoyinflationcoupon` | partial | Coupons/YoYInflationCoupon.cs, Coupons/YoYInflationLeg.cs | partial: withCaps and withFloors, which build capped and floored coupons and wait for B3.4's CappedFlooredYoYInflationCoupon |
+| `yoyinflationcoupon` | partial | Coupons/YoYInflationCoupon.cs, Coupons/YoYInflationLeg.cs | partial: withCaps and withFloors, which build capped and floored coupons and wait for S-cms's CappedFlooredYoYInflationCoupon |
 | `zeroinflationcashflow` | ported | Coupons/ZeroInflationCashFlow.cs |  |
 
 ### `ql/currencies/`
@@ -543,75 +543,75 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `aonia` | not started |  | no nanoql type: Aonia |
-| `audlibor` | not started |  | no nanoql type: AUDLibor |
-| `bbsw` | not started |  | no nanoql type: Bbsw, Bbsw1M, Bbsw2M, Bbsw3M, Bbsw4M, Bbsw5M, Bbsw6M |
-| `bibor` | not started |  | no nanoql type: Bibor, BiborSW, Bibor1M, Bibor2M, Bibor3M, Bibor6M, Bibor1Y |
+| `aonia` | ported | Indexes/Ibor/Aonia.cs |  |
+| `audlibor` | ported | Indexes/Ibor/AUDLibor.cs |  |
+| `bbsw` | ported | Indexes/Ibor/Bbsw/Bbsw.cs, Indexes/Ibor/Bbsw/Bbsw1M.cs, Indexes/Ibor/Bbsw/Bbsw2M.cs, Indexes/Ibor/Bbsw/Bbsw3M.cs, Indexes/Ibor/Bbsw/Bbsw4M.cs, Indexes/Ibor/Bbsw/Bbsw5M.cs, Indexes/Ibor/Bbsw/Bbsw6M.cs |  |
+| `bibor` | ported | Indexes/Ibor/Bibor/Bibor.cs, Indexes/Ibor/Bibor/Bibor1M.cs, Indexes/Ibor/Bibor/Bibor1Y.cs, Indexes/Ibor/Bibor/Bibor2M.cs, Indexes/Ibor/Bibor/Bibor3M.cs, Indexes/Ibor/Bibor/Bibor6M.cs, Indexes/Ibor/Bibor/BiborSW.cs |  |
 | `bkbm` | ported | Indexes/Ibor/Bkbm/Bkbm.cs, Indexes/Ibor/Bkbm/Bkbm1M.cs, Indexes/Ibor/Bkbm/Bkbm2M.cs, Indexes/Ibor/Bkbm/Bkbm3M.cs, Indexes/Ibor/Bkbm/Bkbm4M.cs, Indexes/Ibor/Bkbm/Bkbm5M.cs, Indexes/Ibor/Bkbm/Bkbm6M.cs |  |
-| `cadlibor` | not started |  | no nanoql type: CADLibor, CADLiborON |
-| `cdi` | not started |  | no nanoql type: Cdi |
-| `cdor` | not started |  | no nanoql type: Cdor |
-| `chflibor` | not started |  | no nanoql type: CHFLibor, DailyTenorCHFLibor |
+| `cadlibor` | ported | Indexes/Ibor/CADLibor/CADLibor.cs, Indexes/Ibor/CADLibor/CADLiborON.cs |  |
+| `cdi` | ported | Indexes/Ibor/Cdi.cs |  |
+| `cdor` | ported | Indexes/Ibor/Cdor.cs |  |
+| `chflibor` | ported | Indexes/Ibor/CHFLibor/CHFLibor.cs, Indexes/Ibor/CHFLibor/DailyTenorCHFLibor.cs |  |
 | `corra` | ported | Indexes/Ibor/Corra.cs |  |
-| `custom` | not started |  | no nanoql type: CustomIborIndex |
-| `destr` | not started |  | no nanoql type: Destr |
-| `dkklibor` | not started |  | no nanoql type: DKKLibor |
+| `custom` | ported | Indexes/Ibor/CustomIborIndex.cs |  |
+| `destr` | ported | Indexes/Ibor/Destr.cs |  |
+| `dkklibor` | ported | Indexes/Ibor/DKKLibor.cs |  |
 | `eonia` | ported | Indexes/Ibor/Eonia.cs |  |
 | `estr` | ported | Indexes/Ibor/Estr.cs |  |
 | `euribor` | ported | Indexes/Ibor/Euribor/Euribor.cs, Indexes/Ibor/Euribor/Euribor1M.cs, Indexes/Ibor/Euribor/Euribor1W.cs, Indexes/Ibor/Euribor/Euribor1Y.cs, Indexes/Ibor/Euribor/Euribor365.cs, Indexes/Ibor/Euribor/Euribor3M.cs, Indexes/Ibor/Euribor/Euribor6M.cs, Indexes/Ibor/Euribor/EuriborConventions.cs |  |
-| `eurlibor` | not started |  | no nanoql type: EURLibor, DailyTenorEURLibor, EURLiborON, EURLibor1M, EURLibor3M, EURLibor6M, EURLibor1Y |
+| `eurlibor` | ported | Indexes/Ibor/EURLibor/DailyTenorEURLibor.cs, Indexes/Ibor/EURLibor/EURLibor.cs, Indexes/Ibor/EURLibor/EURLibor1M.cs, Indexes/Ibor/EURLibor/EURLibor1Y.cs, Indexes/Ibor/EURLibor/EURLibor3M.cs, Indexes/Ibor/EURLibor/EURLibor6M.cs, Indexes/Ibor/EURLibor/EURLiborConventions.cs, Indexes/Ibor/EURLibor/EURLiborON.cs |  |
 | `fedfunds` | ported | Indexes/Ibor/FedFunds.cs |  |
 | `gbplibor` | ported | Indexes/Ibor/GBPLibor/DailyTenorGBPLibor.cs, Indexes/Ibor/GBPLibor/GBPLibor.cs, Indexes/Ibor/GBPLibor/GBPLiborON.cs |  |
-| `jibar` | not started |  | no nanoql type: Jibar |
+| `jibar` | ported | Indexes/Ibor/Jibar.cs |  |
 | `jpylibor` | ported | Indexes/Ibor/DailyTenorJPYLibor.cs, Indexes/Ibor/JPYLibor.cs |  |
-| `kofr` | not started |  | no nanoql type: Kofr |
+| `kofr` | ported | Indexes/Ibor/Kofr.cs |  |
 | `libor` | ported | Indexes/Ibor/Libor/DailyTenorLibor.cs, Indexes/Ibor/Libor/Libor.cs, Indexes/Ibor/Libor/LiborConventions.cs |  |
-| `mosprime` | not started |  | no nanoql type: Mosprime |
-| `nibor` | not started |  | no nanoql type: Nibor |
-| `nzdlibor` | not started |  | no nanoql type: NZDLibor |
-| `nzocr` | not started |  | no nanoql type: Nzocr |
-| `pribor` | not started |  | no nanoql type: Pribor |
-| `robor` | not started |  | no nanoql type: Robor |
-| `saron` | not started |  | no nanoql type: Saron |
-| `seklibor` | not started |  | no nanoql type: SEKLibor |
-| `shibor` | not started |  | no nanoql type: Shibor |
-| `shir` | not started |  | no nanoql type: Shir |
+| `mosprime` | ported | Indexes/Ibor/Mosprime.cs |  |
+| `nibor` | ported | Indexes/Ibor/Nibor.cs |  |
+| `nzdlibor` | ported | Indexes/Ibor/NZDLibor.cs |  |
+| `nzocr` | ported | Indexes/Ibor/Nzocr.cs |  |
+| `pribor` | ported | Indexes/Ibor/Pribor.cs |  |
+| `robor` | ported | Indexes/Ibor/Robor.cs |  |
+| `saron` | ported | Indexes/Ibor/Saron.cs |  |
+| `seklibor` | ported | Indexes/Ibor/SEKLibor.cs |  |
+| `shibor` | ported | Indexes/Ibor/Shibor.cs |  |
+| `shir` | ported | Indexes/Ibor/Shir.cs |  |
 | `sofr` | ported | Indexes/Ibor/Sofr.cs |  |
 | `sonia` | ported | Indexes/Ibor/Sonia.cs |  |
-| `swestr` | not started |  | no nanoql type: Swestr |
-| `thbfix` | not started |  | no nanoql type: THBFIX |
+| `swestr` | ported | Indexes/Ibor/Swestr.cs |  |
+| `thbfix` | ported | Indexes/Ibor/THBFIX.cs |  |
 | `tibor` | ported | Indexes/Ibor/Tibor.cs |  |
 | `tonar` | ported | Indexes/Ibor/Tonar.cs |  |
-| `trlibor` | not started |  | no nanoql type: TRLibor |
+| `trlibor` | ported | Indexes/Ibor/TRLibor.cs |  |
 | `usdlibor` | ported | Indexes/Ibor/USDLibor/DailyTenorUSDLibor.cs, Indexes/Ibor/USDLibor/USDLibor.cs, Indexes/Ibor/USDLibor/USDLiborON.cs |  |
-| `wibor` | not started |  | no nanoql type: Wibor |
-| `zaronia` | not started |  | no nanoql type: Zaronia |
-| `zibor` | not started |  | no nanoql type: Zibor |
+| `wibor` | ported | Indexes/Ibor/Wibor.cs |  |
+| `zaronia` | ported | Indexes/Ibor/Zaronia.cs |  |
+| `zibor` | ported | Indexes/Ibor/Zibor.cs |  |
 
 ### `ql/indexes/inflation/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `aucpi` | not started |  | no nanoql type: AUCPI, YYAUCPI |
+| `aucpi` | ported | Indexes/Inflation/AUCPI/AUCPI.cs, Indexes/Inflation/AUCPI/YYAUCPI.cs |  |
 | `euhicp` | ported | Indexes/Inflation/EUHICP/EUHICP.cs, Indexes/Inflation/EUHICP/EUHICPXT.cs, Indexes/Inflation/EUHICP/YYEUHICP.cs, Indexes/Inflation/EUHICP/YYEUHICPXT.cs |  |
-| `frhicp` | not started |  | no nanoql type: FRHICP, YYFRHICP |
-| `ukhicp` | not started |  | no nanoql type: UKHICP |
+| `frhicp` | ported | Indexes/Inflation/FRHICP/FRHICP.cs, Indexes/Inflation/FRHICP/YYFRHICP.cs |  |
+| `ukhicp` | ported | Indexes/Inflation/UKHICP.cs |  |
 | `ukrpi` | ported | Indexes/Inflation/UKRPI/UKRPI.cs, Indexes/Inflation/UKRPI/YYUKRPI.cs |  |
 | `uscpi` | ported | Indexes/Inflation/USCPI/USCPI.cs, Indexes/Inflation/USCPI/YYUSCPI.cs |  |
-| `zacpi` | not started |  | no nanoql type: ZACPI, YYZACPI |
+| `zacpi` | ported | Indexes/Inflation/ZACPI/YYZACPI.cs, Indexes/Inflation/ZACPI/ZACPI.cs |  |
 
 ### `ql/indexes/swap/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `chfliborswap` | not started |  | no nanoql type: ChfLiborSwapIsdaFix |
+| `chfliborswap` | ported | Indexes/Swap/ChfLiborSwapIsdaFix.cs |  |
 | `euriborswap` | ported | Indexes/Swap/EuriborSwap/EuriborSwapIfrFix.cs, Indexes/Swap/EuriborSwap/EuriborSwapIsdaFixA.cs, Indexes/Swap/EuriborSwap/EuriborSwapIsdaFixB.cs |  |
-| `eurliborswap` | not started |  | no nanoql type: EurLiborSwapIsdaFixA, EurLiborSwapIsdaFixB, EurLiborSwapIfrFix |
-| `gbpliborswap` | not started |  | no nanoql type: GbpLiborSwapIsdaFix |
-| `jpyliborswap` | not started |  | no nanoql type: JpyLiborSwapIsdaFixAm, JpyLiborSwapIsdaFixPm |
-| `usdliborswap` | not started |  | no nanoql type: UsdLiborSwapIsdaFixAm, UsdLiborSwapIsdaFixPm |
+| `eurliborswap` | ported | Indexes/Swap/EURLiborSwap/EurLiborSwapIfrFix.cs, Indexes/Swap/EURLiborSwap/EurLiborSwapIsdaFixA.cs, Indexes/Swap/EURLiborSwap/EurLiborSwapIsdaFixB.cs |  |
+| `gbpliborswap` | ported | Indexes/Swap/GbpLiborSwapIsdaFix.cs |  |
+| `jpyliborswap` | ported | Indexes/Swap/JPYLiborSwap/JpyLiborSwapIsdaFixAm.cs, Indexes/Swap/JPYLiborSwap/JpyLiborSwapIsdaFixPm.cs |  |
+| `usdliborswap` | ported | Indexes/Swap/USDLiborSwap/UsdLiborSwapIsdaFixAm.cs, Indexes/Swap/USDLiborSwap/UsdLiborSwapIsdaFixPm.cs |  |
 
 ### `ql/instruments/`
 
@@ -647,7 +647,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `equitytotalreturnswap` | not started |  | no nanoql type: EquityTotalReturnSwap |
 | `europeanoption` | ported | Instruments/EuropeanOption.cs |  |
 | `fixedvsfloatingswap` | ported | Instruments/FixedVsFloatingSwap.cs, Instruments/FixedVsFloatingSwapArguments.cs, Instruments/FixedVsFloatingSwapResults.cs |  |
-| `floatfloatswap` | partial | Instruments/FloatFloatSwap.cs, Instruments/FloatFloatSwapResults.cs | partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for batch 3's CMS spread coupons (B3.4) |
+| `floatfloatswap` | partial | Instruments/FloatFloatSwap.cs, Instruments/FloatFloatSwapResults.cs | partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for S-cms's CmsSpreadLeg and S-g1d's SwapSpreadIndex |
 | `floatfloatswaption` | not started |  | no nanoql type: FloatFloatSwaption |
 | `forward` | not started |  | no nanoql type: Forward, ForwardTypePayoff |
 | `forwardrateagreement` | ported | Instruments/ForwardRateAgreement.cs, Instruments/ForwardRateAgreementResults.cs |  |
@@ -817,12 +817,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `exponentialintegrals` | ported | Numerics/Integrals/ExponentialIntegralsFunctions.cs |  |
 | `expsinhintegral` | not started |  | no nanoql type: ExpSinhIntegral |
 | `filonintegral` | not started |  | no nanoql type: FilonIntegral, FilonIntegralType |
-| `fourierintegration` | partial | Numerics/Integrals/FourierIntegration.cs | partial: gaussKronrod (B3.4's Kronrod rules); discreteSimpson and discreteTrapezoid (B4.2's discrete integrals); tanhSinh (B4.5); expSinh (B6.2) |
+| `fourierintegration` | partial | Numerics/Integrals/FourierIntegration.cs | partial: gaussKronrod (S-cms's Kronrod rules); discreteSimpson and discreteTrapezoid (S-van's discrete integrals); tanhSinh (S-van); expSinh (S-core) |
 | `gaussianorthogonalpolynomial` | ported | Numerics/Integrals/GaussianOrthogonalPolynomial/GaussChebyshev2ndPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussChebyshevPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussGegenbauerPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussHermitePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussHyperbolicPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussJacobiPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussLaguerrePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussLegendrePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussianOrthogonalPolynomial.cs |  |
 | `gaussianquadratures` | ported | Numerics/Integrals/GaussianQuadratures/GaussChebyshev2ndIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshev2ndIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshevIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshevIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussGegenbauerIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussHermiteIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussHyperbolicIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussJacobiIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLaguerreIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLegendreIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLegendreIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussianQuadrature.cs, Numerics/Integrals/GaussianQuadratures/GaussianQuadratureIntegrator.cs, Numerics/Integrals/GaussianQuadratures/MultiDimGaussianIntegration.cs, Numerics/Integrals/GaussianQuadratures/TabulatedGaussLegendre.cs |  |
 | `gausslaguerrecosinepolynomial` | not started |  | no nanoql type: GaussLaguerreTrigonometricBase, GaussLaguerreCosinePolynomial, GaussLaguerreSinePolynomial |
 | `gausslobattointegral` | ported | Numerics/Integrals/GaussLobattoIntegral.cs |  |
-| `integral` | partial | Numerics/Integrals/IntegrationResult.cs, Numerics/Integrals/Integrator.cs | partial: absoluteError and integrationSuccess, which wait for B3.3: no integrator S-eq ports computes an error, so QuantLib's absoluteError reads an uninitialized member after each of them; B3.3's CMS pricer is their first caller, on B3.4's Kronrod rules (integrationSuccess also compares the evaluation count with maxEvaluations, which the trapezoid family uses as an iteration bound) |
+| `integral` | partial | Numerics/Integrals/IntegrationResult.cs, Numerics/Integrals/Integrator.cs | partial: absoluteError and integrationSuccess, which wait for S-cms: no integrator S-eq ports computes an error, so QuantLib's absoluteError reads an uninitialized member after each of them; S-cms's CMS pricer is their first caller, on its Kronrod rules (integrationSuccess also compares the evaluation count with maxEvaluations, which the trapezoid family uses as an iteration bound) |
 | `kronrodintegral` | not started |  | no nanoql type: GaussKronrodNonAdaptive, GaussKronrodAdaptive |
 | `momentbasedgaussianpolynomial` | not started |  | no nanoql type: MomentBasedGaussianPolynomial |
 | `segmentintegral` | not started |  | no nanoql type: SegmentIntegral |
@@ -1130,7 +1130,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmescrowedloginnervaluecalculator` | ported | Methods/FiniteDifferences/Utilities/FdmEscrowedLogInnerValueCalculator.cs |  |
 | `fdmhestongreensfct` | not started |  | no nanoql type: FdmHestonGreensFct, FdmHestonGreensFctAlgorithm |
 | `fdmindicesonboundary` | ported | Methods/FiniteDifferences/Utilities/FdmIndicesOnBoundary.cs |  |
-| `fdminnervaluecalculator` | partial | Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmCellAveragingInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmLogInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmZeroInnerValue.cs | partial: FdmLogBasketInnerValue, which waits for B4.5 with the basket option's payoff; no nanoql type: FdmLogBasketInnerValue |
+| `fdminnervaluecalculator` | partial | Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmCellAveragingInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmLogInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmZeroInnerValue.cs | partial: FdmLogBasketInnerValue, which waits for S-exo with the basket option's payoff; no nanoql type: FdmLogBasketInnerValue |
 | `fdmmesherintegral` | not started |  | no nanoql type: FdmMesherIntegral |
 | `fdmquantohelper` | ported | Methods/FiniteDifferences/Utilities/FdmQuantoHelper.cs |  |
 | `fdmshoutloginnervaluecalculator` | not started |  | no nanoql type: FdmShoutLogInnerValueCalculator |
@@ -1729,7 +1729,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `gjrgarchprocess` | not started |  | no nanoql type: GJRGARCHProcess, GJRGARCHProcessDiscretization |
 | `gsrprocess` | not started |  | no nanoql type: GsrProcess |
 | `gsrprocesscore` | not started |  |  |
-| `hestonprocess` | partial | Processes/HestonProcess/HestonProcess.cs, Processes/HestonProcess/HestonProcessDiscretization.cs | partial: pdf, the Fokker-Planck density, which waits for B3.1's SegmentIntegral and Boost's non-central chi-squared density |
+| `hestonprocess` | partial | Processes/HestonProcess/HestonProcess.cs, Processes/HestonProcess/HestonProcessDiscretization.cs | partial: pdf, the Fokker-Planck density, which waits for S-sr's SegmentIntegral and Boost's non-central chi-squared density |
 | `hestonslvprocess` | not started |  | no nanoql type: HestonSLVProcess |
 | `hullwhiteprocess` | not started |  | no nanoql type: HullWhiteProcess, HullWhiteForwardProcess |
 | `hybridhestonhullwhiteprocess` | not started |  | no nanoql type: HybridHestonHullWhiteProcess, HybridHestonHullWhiteProcessDiscretization |
@@ -1765,7 +1765,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bootstraperror` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `bootstraphelper` | ported | TermStructures/BootstrapHelper/BootstrapHelperExtensions.cs, TermStructures/BootstrapHelper/BootstrapHelperFunctions.cs, TermStructures/BootstrapHelper/BootstrapHelper{TTermStructure}.cs, TermStructures/BootstrapHelper/IBootstrapHelper.cs, TermStructures/BootstrapHelper/PillarChoice.cs, TermStructures/BootstrapHelper/RelativeDateBootstrapHelper{TTermStructure}.cs |  |
 | `defaulttermstructure` | ported | TermStructures/DefaultProbabilityTermStructure.cs |  |
-| `globalbootstrap` | partial | TermStructures/GlobalBootstrap/GlobalBootstrap.cs, TermStructures/GlobalBootstrap/IMultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrapContributor.cs | partial: AdditionalBootstrapVariables, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for B6.2 with SimpleQuoteVariables and its user; no nanoql type: AdditionalBootstrapVariables |
+| `globalbootstrap` | partial | TermStructures/GlobalBootstrap/GlobalBootstrap.cs, TermStructures/GlobalBootstrap/IMultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrapContributor.cs | partial: AdditionalBootstrapVariables, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for S-core with SimpleQuoteVariables and its user; no nanoql type: AdditionalBootstrapVariables |
 | `globalbootstrapvars` | not started |  | no nanoql type: SimpleQuoteVariables |
 | `inflationtermstructure` | ported | TermStructures/InflationTermStructure/InflationTermStructure.cs, TermStructures/InflationTermStructure/InflationTermStructureExtensions.cs, TermStructures/InflationTermStructure/InflationTermStructureFunctions.cs, TermStructures/InflationTermStructure/YoYInflationTermStructure.cs, TermStructures/InflationTermStructure/ZeroInflationTermStructure.cs |  |
 | `interpolatedcurve` | ported | TermStructures/IInterpolatedCurve{TTraits,TInterpolator}.cs, TermStructures/InterpolatedCurve{TInterpolator}.cs |  |
@@ -1780,14 +1780,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `defaultdensitystructure` | partial | TermStructures/Credit/DefaultDensityStructure.cs | partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the default density, which waits for S-eq's GaussChebyshevIntegration and B7.2, its only users |
+| `defaultdensitystructure` | partial | TermStructures/Credit/DefaultDensityStructure.cs | partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the default density, which waits for S-xcr's curves, its only users |
 | `defaultprobabilityhelpers` | ported | TermStructures/Credit/DefaultProbabilityHelpers/CdsHelper.cs, TermStructures/Credit/DefaultProbabilityHelpers/DefaultProbabilityHelperExtensions.cs, TermStructures/Credit/DefaultProbabilityHelpers/SpreadCdsHelper.cs, TermStructures/Credit/DefaultProbabilityHelpers/UpfrontCdsHelper.cs | no nanoql type: DefaultProbabilityHelper, RelativeDateDefaultProbabilityHelper |
 | `flathazardrate` | ported | TermStructures/Credit/FlatHazardRate.cs |  |
-| `hazardratestructure` | partial | TermStructures/Credit/HazardRateStructure.cs | partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-eq's GaussChebyshevIntegration and B7.2, its only users |
+| `hazardratestructure` | partial | TermStructures/Credit/HazardRateStructure.cs | partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-xcr's curves, its only users |
 | `interpolateddefaultdensitycurve` | ported | TermStructures/Credit/InterpolatedDefaultDensityCurve/DefaultDensityCurve.cs, TermStructures/Credit/InterpolatedDefaultDensityCurve/InterpolatedDefaultDensityCurve{TInterpolator}.cs |  |
 | `interpolatedhazardratecurve` | ported | TermStructures/Credit/InterpolatedHazardRateCurve/HazardRateCurve.cs, TermStructures/Credit/InterpolatedHazardRateCurve/InterpolatedHazardRateCurve{TInterpolator}.cs |  |
 | `interpolatedsurvivalprobabilitycurve` | ported | TermStructures/Credit/InterpolatedSurvivalProbabilityCurve/InterpolatedSurvivalProbabilityCurve{TInterpolator}.cs, TermStructures/Credit/InterpolatedSurvivalProbabilityCurve/SurvivalProbabilityCurve.cs |  |
-| `piecewisedefaultcurve` | partial | TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseDefaultCurve{TTraits,TInterpolator,TBootstrap}.cs, TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseFlatHazardRate.cs | partial: the constructor on a one-factor affine model, which waits for B7.2's AffineHazardRate traits, the only traits whose curve takes a model |
+| `piecewisedefaultcurve` | partial | TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseDefaultCurve{TTraits,TInterpolator,TBootstrap}.cs, TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseFlatHazardRate.cs | partial: the constructor on a one-factor affine model, which waits for S-xcr's AffineHazardRate traits, the only traits whose curve takes a model |
 | `probabilitytraits` | ported | TermStructures/Credit/ProbabilityTraits/DefaultDensity.cs, TermStructures/Credit/ProbabilityTraits/HazardRate.cs, TermStructures/Credit/ProbabilityTraits/IDefaultProbabilityTraits.cs, TermStructures/Credit/ProbabilityTraits/ProbabilityTraitsDetail.cs, TermStructures/Credit/ProbabilityTraits/SurvivalProbability.cs | no nanoql type: SurvivalProbabilityCurve, HazardRateCurve, DefaultDensityCurve |
 | `survivalprobabilitystructure` | ported | TermStructures/Credit/SurvivalProbabilityStructure.cs |  |
 
@@ -1824,9 +1824,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `smilesectionutils` | not started |  | no nanoql type: SmileSectionUtils |
 | `spreadedsmilesection` | ported | TermStructures/Volatility/SpreadedSmileSection.cs |  |
 | `volatilitytype` | ported | TermStructures/Volatility/VolatilityType.cs |  |
-| `zabr` | partial | TermStructures/Volatility/ZabrModel.cs | partial: fdPrice (both forms) and fullFdPrice, the local-volatility and full finite-difference prices, which wait for B3.3 with the finite-difference units they price on (S-eq's meshers, layout and backward solver, S-rx's Dirichlet boundary, B3.3's glued mesher and its Dupire and ZABR operators) |
+| `zabr` | partial | TermStructures/Volatility/ZabrModel.cs | partial: fdPrice (both forms) and fullFdPrice, the local-volatility and full finite-difference prices, which wait for S-g1d with the finite-difference units they price on (S-eq's meshers, layout and backward solver, S-rx's Dirichlet boundary, S-g1d's glued mesher and its Dupire and ZABR operators) |
 | `zabrinterpolatedsmilesection` | not started |  | no nanoql type: ZabrInterpolatedSmileSection |
-| `zabrsmilesection` | partial | TermStructures/Volatility/ZabrSmileSection/IZabrEvaluation.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityLognormal.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityLognormalSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityNormal.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityNormalSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrSmileSection{TEvaluation}.cs | partial: the local-volatility and full finite-difference kernels (the ZabrLocalVolatility and ZabrFullFd tags, with their strike grid, call prices and price spline, the members strikes_, callPrices_, callPriceFct_, a_ and b_ that only they use), which wait for B3.3 with ZabrModel's fdPrice and fullFdPrice; no nanoql type: ZabrLocalVolatility, ZabrFullFd |
+| `zabrsmilesection` | partial | TermStructures/Volatility/ZabrSmileSection/IZabrEvaluation.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityLognormal.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityLognormalSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityNormal.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityNormalSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrSmileSection{TEvaluation}.cs | partial: the local-volatility and full finite-difference kernels (the ZabrLocalVolatility and ZabrFullFd tags, with their strike grid, call prices and price spline, the members strikes_, callPrices_, callPriceFct_, a_ and b_ that only they use), which wait for S-g1d with ZabrModel's fdPrice and fullFdPrice; no nanoql type: ZabrLocalVolatility, ZabrFullFd |
 
 ### `ql/termstructures/volatility/capfloor/`
 
@@ -1897,7 +1897,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `cmsmarketcalibration` | not started |  | no nanoql type: CmsMarketCalibration, CmsMarketCalibrationCalibrationType |
 | `gaussian1dswaptionvolatility` | not started |  | no nanoql type: Gaussian1dSwaptionVolatility |
 | `interpolatedswaptionvolatilitycube` | ported | TermStructures/Volatility/Swaption/InterpolatedSwaptionVolatilityCube.cs |  |
-| `sabrswaptionvolatilitycube` | partial | TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/IXabrCubeModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SabrSwaptionVolatilityCube.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SwaptionVolCubeSabrModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/XabrSwaptionVolatilityCube{TModel}.cs | partial: recalibration (three overloads), updateAfterRecalibration and sabrCalibrationSection, which change a calibrated cube and wait for B3.3's CmsMarketCalibration, their only user; no nanoql type: XabrModelTraits |
+| `sabrswaptionvolatilitycube` | partial | TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/IXabrCubeModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SabrSwaptionVolatilityCube.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SwaptionVolCubeSabrModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/XabrSwaptionVolatilityCube{TModel}.cs | partial: recalibration (three overloads), updateAfterRecalibration and sabrCalibrationSection, which change a calibrated cube and wait for S-cms's CmsMarketCalibration, their only user; no nanoql type: XabrModelTraits |
 | `spreadedswaptionvol` | ported | TermStructures/Volatility/Swaption/SpreadedSwaptionVolatility.cs |  |
 | `swaptionconstantvol` | ported | TermStructures/Volatility/Swaption/ConstantSwaptionVolatility.cs |  |
 | `swaptionvolcube` | ported | TermStructures/Volatility/Swaption/SwaptionVolatilityCube.cs |  |
@@ -2148,7 +2148,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `hestonslvmodel` | not started |  | 19 cases |
 | `himalayaoption` | not started |  | 1 cases |
 | `hybridhestonhullwhiteprocess` | not started |  | 13 cases |
-| `indexes` | partial | TestSuite/IndexesTests.cs | 3 of 6 cases; replaced: testFixingObservability by Vectors/Indexes/BMAIndexVectorTests.cs; not yet: testCustomIborIndex, testCdiIndex, testShirIndex |
+| `indexes` | ported | TestSuite/IndexesTests.cs | 6 of 6 cases; replaced: testFixingObservability by Vectors/Indexes/BMAIndexVectorTests.cs |
 | `inflation` | ported | TestSuite/InflationTests.cs | 27 of 28 cases; replaced: testNotifications by Vectors/Coupons/IndexedCashFlowVectorTests.cs; not ported: testCpiAsIndexInterpolation (CPI::AsIndex, deprecated in QuantLib 1.43, D5) |
 | `inflationcapfloor` | ported | TestSuite/InflationCapFloorTests.cs | 4 of 4 cases; replaced: testVolatilityQuoteObservability by Conventions/YoYInflationCapFloorQuoteTests.cs |
 | `inflationcapflooredcoupon` | not started |  | 2 cases |
@@ -2195,7 +2195,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `optionletstripper` | ported | TestSuite/OptionletStripperTests.cs | 19 of 19 cases |
 | `overnightindexedcoupon` | ported | TestSuite/OvernightIndexedCouponTests.cs | 45 of 45 cases; moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 to Divergences/TelescopicValueDatesTests.cs; testOvernightLegNPV line 1033 to Divergences/TelescopicValueDatesTests.cs |
 | `overnightindexedfundingratehelper` | not started |  | 3 cases |
-| `overnightindexedswap` | partial | TestSuite/OvernightIndexedSwapTests.cs | 23 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs; not yet: testMakeOisEndOfMonthRegression2453, testNonstandardSwapConversionPreservesObservationConventions |
+| `overnightindexedswap` | partial | TestSuite/OvernightIndexedSwapTests.cs | 24 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs; not yet: testNonstandardSwapConversionPreservesObservationConventions |
 | `pagodaoption` | not started |  | 1 cases |
 | `paralleltestrunner` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `partialtimebarrieroption` | not started |  | 3 cases |
@@ -2227,7 +2227,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `squarerootclvmodel` | not started |  | 3 cases |
 | `stats` | not started |  | 4 cases |
 | `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |
-| `swap` | partial | TestSuite/SwapTests.cs | 14 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs; not yet: testFixedTenorInferenceWithTerminationDate |
+| `swap` | ported | TestSuite/SwapTests.cs | 15 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs |
 | `swapforwardmappings` | not started |  | 3 cases |
 | `swaption` | ported | TestSuite/SwaptionTests.cs | 13 of 13 cases; replaced: testBlackEngineCaching by Vectors/Instruments/SwaptionVectorTests.cs |
 | `swaptionvolatilitycube` | ported | TestSuite/SwaptionVolatilityCubeTests.cs | 17 of 17 cases; replaced: testObservability by Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs; testZabrObservability by Vectors/TermStructures/ZabrSwaptionVolatilityCubeVectorTests.cs |

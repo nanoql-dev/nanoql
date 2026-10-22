@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/shortratemodels.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSwaps, which waits for B3.4's TreeVanillaSwapEngine; testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks and testExtendedCoxIngersollRossDiscountFactor, which wait for B3.1's ExtendedCoxIngersollRoss
+// Partial: testSwaps, which waits for S-sr's TreeVanillaSwapEngine; testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks and testExtendedCoxIngersollRossDiscountFactor, which wait for S-sr's ExtendedCoxIngersollRoss
 // Replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks (Conventions/ModelRebuildTests.cs)
 
 using NanoQL.Indexes;

@@ -73,6 +73,43 @@ def index_case(spec, make):
                 "maturityDate": [v.attempt(lambda d=d: idx.maturityDate(d)) for d in DATES]}}
 
 
+def _bsp():
+    """processes/blackscholesprocess.py, loaded on first use: its curve specs and the wheel's curves from them."""
+    import importlib.util
+    bsp_spec = importlib.util.spec_from_file_location(
+        "wheel_bsp", os.path.join(v.GEN_ROOT, "processes", "blackscholesprocess.py"))
+    bsp = importlib.util.module_from_spec(bsp_spec)
+    bsp_spec.loader.exec_module(bsp)
+    return bsp
+
+
+def forecast_curves():
+    """The two forwarding curves dated TODAY that index_forecast_case reads, as processes/blackscholesprocess.py's
+    specs: a flat forward at 3% and a linear zero curve from 2% to 4% over ten years. The harness's generators for the
+    presets the wheel doesn't bind (tools/vectors/gen/cxx/indexes/ibor/) read them too."""
+    bsp = _bsp()
+    return [bsp.flat_spec(TODAY, 0.03),
+            bsp.zero_spec(TODAY, [0, 365, 730, 1826, 3652], [0.02, 0.025, 0.03, 0.035, 0.04])]
+
+
+def index_forecast_case(spec, make):
+    """index_case's outputs for make(empty handle), with the forecast fixing at DATES on forecast_curves(), each the
+    preset make(handle) builds on it ("curves" in the inputs; "forecast" in the outputs, one list per curve). A fixing
+    before TODAY reads the stored fixings, which are empty, {"throws": true}; so does a date that isn't a fixing
+    date."""
+    bsp = _bsp()
+    case = index_case(spec, lambda: make(ql.YieldTermStructureHandle()))
+    curves = forecast_curves()
+    forecasts = []
+    for c in curves:
+        v.settings(TODAY)
+        idx = make(ql.YieldTermStructureHandle(bsp.curve(c)))
+        forecasts.append([v.attempt(lambda d=d: idx.fixing(d)) for d in DATES])
+    case["inputs"]["curves"] = curves
+    case["expected"]["forecast"] = forecasts
+    return case
+
+
 def refused_case(label, spec, make):
     """A construction QuantLib refuses: its name's {"throws": true}."""
     return {"name": label, "inputs": {"settings": v.settings(TODAY), "index": spec},

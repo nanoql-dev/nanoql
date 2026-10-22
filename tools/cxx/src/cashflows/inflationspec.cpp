@@ -102,6 +102,8 @@ namespace harness::cashflows {
         return s;
     }
 
+    Handle<YoYInflationTermStructure> makeYoYCurve(const InflationCurveSpec& s) { return yoyHandle(s); }
+
     InflationIndexSpec inflationIndex(const json::value& v) {
         const std::string what = "an inflation index";
         const json::object& o = object(v, what);

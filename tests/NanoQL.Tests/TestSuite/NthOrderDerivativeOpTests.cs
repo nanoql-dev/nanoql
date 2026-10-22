@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/nthorderderivativeop.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testFirstOrder2PointsApply, testFirstOrder3PointsOnUniformGrid, testFirstOrder5PointsOnUniformGrid, testFirstOrder2PointsOnUniformGrid, testFirstOrder4PointsOnUniformGrid, testFirstOrder2PointsOn2DimUniformGrid, testSecondOrder3PointsNonUniformGrid, testSecondOrder4PointsNonUniformGrid, testThirdOrder4PointsUniformGrid, testHigherOrderHestonOptionPricing, testHigherOrderAndRichardsonExtrapolation, testCompareFirstDerivativeOpNonUniformGrid, testCompareFirstDerivativeOp2dUniformGrid, testMixedSecondOrder9PointsOnUniformGrid (B6.2)
+// Partial: testFirstOrder2PointsApply, testFirstOrder3PointsOnUniformGrid, testFirstOrder5PointsOnUniformGrid, testFirstOrder2PointsOnUniformGrid, testFirstOrder4PointsOnUniformGrid, testFirstOrder2PointsOn2DimUniformGrid, testSecondOrder3PointsNonUniformGrid, testSecondOrder4PointsNonUniformGrid, testThirdOrder4PointsUniformGrid, testHigherOrderHestonOptionPricing, testHigherOrderAndRichardsonExtrapolation, testCompareFirstDerivativeOpNonUniformGrid, testCompareFirstDerivativeOp2dUniformGrid, testMixedSecondOrder9PointsOnUniformGrid (S-core)
 
 using NanoQL.Numerics;
 

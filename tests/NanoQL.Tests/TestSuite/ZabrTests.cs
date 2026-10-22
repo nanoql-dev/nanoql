@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/zabr.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testConsistency's local-volatility and full finite-difference sections and checks (lines 54-55, 59-61, 68-69 and 80-89), which wait for B3.3 with ZabrModel's fdPrice and fullFdPrice
+// Partial: testConsistency's local-volatility and full finite-difference sections and checks (lines 54-55, 59-61, 68-69 and 80-89), which wait for S-g1d with ZabrModel's fdPrice and fullFdPrice
 
 using NanoQL.TermStructures;
 
