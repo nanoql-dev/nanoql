@@ -23,6 +23,15 @@ part, nanoql's hasn't, MX3). Then the static convexityBias at fifteen points (a 
 QuantLib's own branch, and T equal to t among them) and its five refusals, with NaN inputs; and the constructor's
 refusals of a zero or negative reversion or volatility, and a NaN one ("<value>: invalid value").
 
+Left out where nanoql's forms, QuantLib's master's B (#2882) and the members written in its cancellation-free forms
+(the S-sr plan's SSR3 and SSR6 (iii)), move the outputs beyond the tolerance: the three models at a = 1e-9 and 1.4e-8
+and the two setParams cases to a = 1e-9, generated and left out (QuantLib 1.44's forms there take the a = 0 limit or
+cancel); the convexity bias at a = 1e-9, which cancels in 1.44's (1 - exp(-a*x))/a; and, in the two setParams cases to
+a negative sigma, the option of maturity 1e-17, whose variance 1.44's 1 - exp(-2*a*T) rounds to 0, so its price is the
+intrinsic 0 where nanoql's variance is T and the negative sigma meets blackFormula's refusal. Their checks are
+QuantLib's closed forms at ordinary a and its second routes at small a
+(tests/NanoQL.Tests/Divergences/SmallReversionTests.cs). Elsewhere the forms move the last bits only.
+
 The wheel's calls, by QuantLib-SWIG's shortratemodels.i: ql.HullWhite(YieldTermStructureHandle, a, sigma), params(),
 termStructure() (a handle, whose discount(t) is the curve's), discount(t), discountBond(now, maturity, rate) and
 (now, maturity, Array), discountBondOption(type, strike, maturity, bondMaturity), setParams(Array) and the static
@@ -119,8 +128,7 @@ SET_PARAMS = [
 
 CONVEXITY = [(95.0, 1.0, 1.25, 0.01, 0.1), (95.0, 1.0, 1.25, 0.01, 0.0), (95.0, 1.0, 1.0, 0.01, 0.1),
              (98.5, 0.25, 0.5, 0.012, 0.03), (100.0, 0.0, 0.25, 0.01, 0.1), (0.0, 2.0, 2.25, 0.02, 0.5),
-             (97.0, 5.0, 5.25, 0.0, 0.1), (96.0, 3.0, 3.25, 0.015, 1e-17), (96.0, 3.0, 3.25, 0.015, 1e-9),
-             (99.0, 10.0, 10.5, 0.008, 2.0), (101.0, 1.5, 1.75, 0.01, 0.05), (95.0, 1.0, 1.0 + 1e-17, 0.01, 0.1),
+             (97.0, 5.0, 5.25, 0.0, 0.1), (96.0, 3.0, 3.25, 0.015, 1e-17), (99.0, 10.0, 10.5, 0.008, 2.0), (101.0, 1.5, 1.75, 0.01, 0.05), (95.0, 1.0, 1.0 + 1e-17, 0.01, 0.1),
              (90.0, 0.5, 4.0, 0.03, 0.2), (95.0, 20.0, 20.25, 0.01, 0.01), (94.0, 7.0, 7.25, 0.02, 0.0)]
 CONVEXITY_REFUSALS = [(-1.0, 1.0, 1.25, 0.01, 0.1), (math.nan, 1.0, 1.25, 0.01, 0.1), (95.0, -0.5, 1.25, 0.01, 0.1),
                       (95.0, math.nan, 1.25, 0.01, 0.1), (95.0, 1.0, 0.5, 0.01, 0.1), (95.0, 1.0, math.nan, 0.01, 0.1),
@@ -146,16 +154,23 @@ def make_model(spec):
     return ql.HullWhite(ql.YieldTermStructureHandle(curve), spec["a"], spec["sigma"]), (curve, keep)
 
 
-def affine_outputs(m):
+# The models and setParams cases SSR3's forms move beyond the tolerance, generated and left out; and the option
+# left out of the setParams cases to a negative sigma.
+LEFT_OUT = {2, 5, 13}
+LEFT_OUT_SET_PARAMS = {"to a = 1e-9"}
+NEGATIVE_SIGMA_OPTIONS = [o for o in OPTIONS if o[2] != 1e-17]
+
+
+def affine_outputs(m, options=OPTIONS):
     return {"discount": [v.attempt(lambda t=t: m.discount(t)) for t in TIMES],
             "discountBond": v.enc([m.discountBond(now, t, r) for now, t, r in BOND_POINTS]),
             "discountBondFactors": v.enc([m.discountBond(now, t, ql.Array([r])) for now, t, r in BOND_POINTS]),
             "discountBondTwoFactors": v.enc([m.discountBond(now, t, ql.Array([r, 9.0])) for now, t, r in BOND_POINTS]),
-            "discountBondOption": [v.attempt(lambda o=o: m.discountBondOption(*o)) for o in OPTIONS]}
+            "discountBondOption": [v.attempt(lambda o=o: m.discountBondOption(*o)) for o in options]}
 
 
-def points():
-    return {"times": TIMES, "bondPoints": BOND_POINTS, "options": OPTIONS}
+def points(options=OPTIONS):
+    return {"times": TIMES, "bondPoints": BOND_POINTS, "options": options}
 
 
 def cases():
@@ -167,12 +182,15 @@ def cases():
             expected = {"params": v.enc(list(m.params())),
                         "termStructureDiscount": [ts.discount(t) for t in CURVE_TIMES]}
             expected.update(affine_outputs(m))
+            if k in LEFT_OUT:
+                continue
             out.append({"name": f"model {k}",
                         "inputs": dict({"settings": st, "kind": "model", "model": spec, "curveTimes": CURVE_TIMES},
                                        **points()),
                         "expected": expected})
     for base in (0, 10):
         for name, params in SET_PARAMS:
+            options = NEGATIVE_SIGMA_OPTIONS if name == "to a negative sigma" else OPTIONS
             with v.case_settings(TODAY) as st:
                 m, _ = make_model(MODELS[base])
                 expected = {"paramsBefore": v.enc(list(m.params()))}
@@ -183,10 +201,12 @@ def cases():
                 else:
                     expected["setParams"] = True
                     expected["params"] = v.enc(list(m.params()))
-                    expected.update(affine_outputs(m))
+                    expected.update(affine_outputs(m, options))
+                if name in LEFT_OUT_SET_PARAMS:
+                    continue
                 out.append({"name": f"model {base}: setParams {name}",
                             "inputs": dict({"settings": st, "kind": "setParams", "model": MODELS[base],
-                                            "params": v.enc(params)}, **points()),
+                                            "params": v.enc(params)}, **points(options)),
                             "expected": expected})
     st = v.settings(TODAY)
     out.append({"name": "convexityBias",

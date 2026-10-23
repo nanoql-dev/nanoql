@@ -18,6 +18,12 @@ namespace NanoQL.Models;
 /// <c>a()</c> and <c>b()</c> share their names with the affine <c>A(t, T)</c> and <c>B(t, T)</c>, so all four are
 /// methods.
 /// </para>
+/// <para>
+/// A(t, T), B(t, T) and the bond option's variance are QuantLib's master's forms after the pin (#2882, the S-sr plan's
+/// SSR3), free of cancellation at small a and exact in the limit a → 0, where QuantLib 1.44 cuts to the a = 0 forms
+/// below a = √ε and cancels above it. They read <c>std::expm1</c> (nanoql's own), so their last bits differ from 1.44's
+/// at every a.
+/// </para>
 /// <para>An extension point, as in QuantLib: Hull-White derives from it.</para>
 /// </remarks>
 public class Vasicek : OneFactorAffineModel
@@ -73,18 +79,15 @@ public class Vasicek : OneFactorAffineModel
     public override double DiscountBondOption(OptionType type, double strike, double maturity, double bondMaturity)
     {
         double v;
-        double a = A();
         if (Math.Abs(maturity) < NumericLimits.QL_EPSILON)
         {
             v = 0.0;
         }
-        else if (a < Math.Sqrt(NumericLimits.QL_EPSILON))
-        {
-            v = Sigma * B(maturity, bondMaturity) * Math.Sqrt(maturity);
-        }
         else
         {
-            v = Sigma * B(maturity, bondMaturity) * Math.Sqrt(0.5 * (1.0 - Math.Exp(-2.0 * a * maturity)) / a);
+            // 0.5*(1 - exp(-2*a*maturity))/a
+            double variance = maturity * OneMinusExpOverX(2.0 * A() * maturity);
+            v = Sigma * B(maturity, bondMaturity) * Math.Sqrt(variance);
         }
 
         double f = DiscountBond(0.0, bondMaturity, R0);
@@ -99,37 +102,73 @@ public class Vasicek : OneFactorAffineModel
     /// <returns>A(t, T).</returns>
     protected override double A(double t, double T)
     {
-        double a = A();
-        if (a < Math.Sqrt(NumericLimits.QL_EPSILON))
-        {
-            double sigma2 = Sigma * Sigma;
-            double tau = T - t;
-            return Math.Exp((-0.5 * Lambda * Sigma * tau * tau) + (sigma2 * tau * tau * tau / 6.0));
-        }
-        else
-        {
-            double sigma2 = Sigma * Sigma;
-            double bt = B(t, T);
-            return Math.Exp(((B() + (Lambda * Sigma / a) - (0.5 * sigma2 / (a * a))) * (bt - (T - t)))
-                            - (0.25 * sigma2 * bt * bt / a));
-        }
+        // A(t,T) = exp((b + lambda*sigma/a - sigma^2/(2a^2))*(B - tau)
+        //               - sigma^2*B^2/(4a))
+        // rewritten as exp(-(a*b + lambda*sigma)*tau^2*phi(a*tau)
+        //                  + sigma^2*tau^3*h(a*tau)/4),
+        // which is free of cancellation and has the correct limit
+        // for a -> 0.
+        double tau = T - t;
+        double sigma2 = Sigma * Sigma;
+        (double phi, double h) = PhiAndH(A() * tau);
+        return Math.Exp((-((A() * B()) + (Lambda * Sigma)) * tau * tau * phi) + (0.25 * sigma2 * tau * tau * tau * h));
     }
 
-    /// <summary>The affine discount bond's B(t, T): (1 − exp(−a(T − t)))/a, or T − t for a near 0.</summary>
+    /// <summary>The affine discount bond's B(t, T): (1 − exp(−a(T − t)))/a, written as τ·(1 − e^(−aτ))/(aτ), τ = T − t.</summary>
     /// <param name="t">The time.</param>
     /// <param name="T">The bond's maturity.</param>
     /// <returns>B(t, T).</returns>
     protected override double B(double t, double T)
     {
-        double a = A();
-        if (a < Math.Sqrt(NumericLimits.QL_EPSILON))
+        double tau = T - t;
+        return tau * OneMinusExpOverX(A() * tau);
+    }
+
+    /// <summary>(1 − exp(−x))/x, accurate for small x as well, and 1 at 0: QuantLib's master's <c>oneMinusExpOverX</c>.</summary>
+    /// <param name="x">The argument.</param>
+    /// <returns>(1 − exp(−x))/x.</returns>
+    private protected static double OneMinusExpOverX(double x) => x == 0.0 ? 1.0 : -Expm1Functions.StdExpm1(-x) / x;
+
+    // The two functions
+    //   phi(x) = (exp(-x) - 1 + x)/x^2
+    //   h(x)   = (4 exp(-x) - exp(-2x) - 3 + 2x)/x^3
+    // appear in the exponent of A. Their closed forms cancel
+    // catastrophically for small x, so we use the Taylor series
+    //   phi(x) = sum_k (k+3) p_k
+    //   h(x)   = sum_k (2^(k+3) - 4) p_k
+    // with p_k = (-x)^k/(k+3)!, which converges quickly and
+    // without significant cancellation for |x| < 1.
+    private static (double Phi, double H) PhiAndH(double x)
+    {
+        double phi, h;
+        if (Math.Abs(x) < 1.0)
         {
-            return T - t;
+            double p = 1.0 / 6.0;
+            double twoPower = 8.0;
+            phi = h = 0.0;
+            for (int k = 0; k < 40; ++k)
+            {
+                double hTerm = (twoPower - 4.0) * p;
+                phi += (k + 3.0) * p;
+                h += hTerm;
+                if (Math.Abs(hTerm) <= NumericLimits.QL_EPSILON * Math.Abs(h))
+                {
+                    break;
+                }
+
+                p *= -x / (k + 4.0);
+                twoPower *= 2.0;
+            }
         }
         else
         {
-            return (1.0 - Math.Exp(-a * (T - t))) / a;
+            double e1 = Expm1Functions.StdExpm1(-x);
+            double e2 = Expm1Functions.StdExpm1(-2.0 * x);
+            phi = (e1 + x) / (x * x);
+            h = ((4.0 * e1) - e2 + (2.0 * x)) / (x * x * x);
         }
+
+        return (phi, h);
     }
 
     // The short-rate dynamics: r = x + b, the state variable an Ornstein-Uhlenbeck process.

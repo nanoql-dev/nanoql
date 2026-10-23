@@ -24,7 +24,10 @@ namespace NanoQL.Instruments;
 /// derived swap's <c>setupFloatingArguments</c> do (<c>fixedvsfloatingswap.cpp:108-140</c>,
 /// <c>vanillaswap.cpp:60-80</c>, <c>overnightindexedswap.cpp:188-213</c>, which read the same members of their
 /// floating coupons). A floating coupon whose amount can't be computed, as one whose fixing is missing, has a null
-/// amount, as QuantLib's <c>try</c> leaves <c>Null&lt;Real&gt;()</c>. Only the members those engines read are kept.
+/// amount, as QuantLib's <c>try</c> leaves <c>Null&lt;Real&gt;()</c>. Only the members those engines read are kept,
+/// with two QuantLib's arguments don't carry: the fixed coupons' accrual periods, which G2's analytic swaption reads
+/// for its coupons (the S-sr plan's SSR6 (xiii)), and the floating coupons' fixing dates, by which a discretized swap
+/// knows a coupon (SSR6 (xvi)).
 /// </remarks>
 internal sealed class FixedVsFloatingSwapArguments
 {
@@ -47,11 +50,17 @@ internal sealed class FixedVsFloatingSwapArguments
     /// <summary>Gets the fixed coupons' amounts.</summary>
     public required ImmutableArray<double> FixedCoupons { get; init; }
 
+    /// <summary>Gets the fixed coupons' accrual periods.</summary>
+    public required ImmutableArray<double> FixedAccrualTimes { get; init; }
+
     /// <summary>Gets the floating coupons' accrual start dates.</summary>
     public required ImmutableArray<Date> FloatingResetDates { get; init; }
 
     /// <summary>Gets the floating coupons' payment dates.</summary>
     public required ImmutableArray<Date> FloatingPayDates { get; init; }
+
+    /// <summary>Gets the floating coupons' fixing dates.</summary>
+    public required ImmutableArray<Date> FloatingFixingDates { get; init; }
 
     /// <summary>Gets the floating coupons' accrual periods.</summary>
     public required ImmutableArray<double> FloatingAccrualTimes { get; init; }
@@ -73,18 +82,21 @@ internal sealed class FixedVsFloatingSwapArguments
         var fixedResetDates = new Date[n];
         var fixedPayDates = new Date[n];
         var fixedAmounts = new double[n];
+        var fixedAccrualTimes = new double[n];
         for (int i = 0; i < n; ++i)
         {
             var coupon = (FixedRateCoupon)fixedCoupons[i];
             fixedPayDates[i] = coupon.Date;
             fixedResetDates[i] = coupon.AccrualStartDate;
             fixedAmounts[i] = coupon.Amount(context);
+            fixedAccrualTimes[i] = coupon.AccrualPeriod();
         }
 
         ImmutableArray<CashFlow> floatingCoupons = swap.FloatingLeg;
         int m = floatingCoupons.Length;
         var floatingResetDates = new Date[m];
         var floatingPayDates = new Date[m];
+        var floatingFixingDates = new Date[m];
         var floatingAccrualTimes = new double[m];
         var floatingSpreads = new double[m];
         var floatingAmounts = new double?[m];
@@ -93,6 +105,7 @@ internal sealed class FixedVsFloatingSwapArguments
             var coupon = (FloatingRateCoupon)floatingCoupons[i];
             floatingResetDates[i] = coupon.AccrualStartDate;
             floatingPayDates[i] = coupon.Date;
+            floatingFixingDates[i] = coupon.FixingDate();
             floatingAccrualTimes[i] = coupon.AccrualPeriod();
             floatingSpreads[i] = coupon.Spread;
             try
@@ -112,8 +125,10 @@ internal sealed class FixedVsFloatingSwapArguments
             FixedResetDates = [.. fixedResetDates],
             FixedPayDates = [.. fixedPayDates],
             FixedCoupons = [.. fixedAmounts],
+            FixedAccrualTimes = [.. fixedAccrualTimes],
             FloatingResetDates = [.. floatingResetDates],
             FloatingPayDates = [.. floatingPayDates],
+            FloatingFixingDates = [.. floatingFixingDates],
             FloatingAccrualTimes = [.. floatingAccrualTimes],
             FloatingSpreads = [.. floatingSpreads],
             FloatingCoupons = [.. floatingAmounts],

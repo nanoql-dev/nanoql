@@ -306,6 +306,21 @@ def engine_outputs(bond, scale):
             "dirtyPrice": v.attempt(bond.dirtyPrice)}
 
 
+# The effective convexity's recorded tolerance: a second difference of tree prices over bump^2, which amplifies the
+# prices' last-bit moves by about 1/bump^2; the Ornstein-Uhlenbeck variance's cancellation-free form, nanoql's by the
+# user's ruling of 2026-10-22 (the S-sr plan's SSR3 class), moves it by up to 8.2e-9 relative.
+CONVEXITY_TOLERANCE = 1e-7
+
+
+CONVEXITY_REASON = ("a second difference of tree prices over bump^2, which the Ornstein-Uhlenbeck variance's "
+                    "cancellation-free form moves by up to 8.2e-9 relative")
+
+
+def convexity(x):
+    return ({"value": x, "tolerance": CONVEXITY_TOLERANCE, "reason": CONVEXITY_REASON} if isinstance(x, float)
+            else x)
+
+
 def oas_spec(curve, dc, compounding, frequency, clean_price, settlement=None, spread=0.01, bump=2e-4,
              accuracy=1.0e-10, max_iterations=100, guess=0.0):
     return {"curve": curve, "dayCounter": dc, "compounding": compounding, "frequency": frequency,
@@ -325,7 +340,7 @@ def oas_outputs(bond, spec):
             "OASAtCleanPrice": v.attempt(lambda: bond.OAS(bond.cleanPrice(), h, dc, comp, freq)),
             "cleanPriceOAS": v.attempt(lambda: bond.cleanPriceOAS(s, h, dc, comp, freq, settlement)),
             "effectiveDuration": v.attempt(lambda: bond.effectiveDuration(s, h, dc, comp, freq, bump)),
-            "effectiveConvexity": v.attempt(lambda: bond.effectiveConvexity(s, h, dc, comp, freq, bump))}
+            "effectiveConvexity": convexity(v.attempt(lambda: bond.effectiveConvexity(s, h, dc, comp, freq, bump)))}
 
 
 def implied_spec(curve, targets, accuracy=1e-8, max_evaluations=200, min_vol=1e-4, max_vol=1.0):

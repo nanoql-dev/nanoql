@@ -33,7 +33,11 @@ public class StochasticProcessVectorTests
             check.Output(c, "size", multi.Size);
             check.Output(c, "factors", multi.Factors);
             check.Output(c, "initialValues", multi.InitialValues());
-            check.Output(c, "evolve", points.Select(q => (object?)p.Evolve(q[0], q[1], q[2], q[3])).ToArray());
+            if (c.Expected.TryGetProperty("evolve", out _))
+            {
+                check.Output(c, "evolve", points.Select(q => (object?)p.Evolve(q[0], q[1], q[2], q[3])).ToArray());
+            }
+
             check.Output(c, "apply", points.Select(q => (object?)p.Apply(q[1], q[4])).ToArray());
             check.Output(c, "driftArray", points.Select(q => (object?)multi.Drift(q[0], Single(q[1]))).ToArray());
             check.Output(c, "diffusionArray", points.Select(q => (object?)Rows(multi.Diffusion(q[0], Single(q[1])))).ToArray());
@@ -41,18 +45,23 @@ public class StochasticProcessVectorTests
                 c,
                 "expectationArray",
                 points.Select(q => (object?)multi.Expectation(q[0], Single(q[1]), q[2])).ToArray());
-            check.Output(
-                c,
-                "stdDeviationArray",
-                points.Select(q => (object?)Rows(multi.StdDeviation(q[0], Single(q[1]), q[2]))).ToArray());
-            check.Output(
-                c,
-                "covarianceArray",
-                points.Select(q => (object?)Rows(multi.Covariance(q[0], Single(q[1]), q[2]))).ToArray());
-            check.Output(
-                c,
-                "evolveArray",
-                points.Select(q => (object?)multi.Evolve(q[0], Single(q[1]), q[2], Single(q[3]))).ToArray());
+
+            // stochasticprocess.py leaves the outputs that read the variance out at speed 1e-9.
+            if (c.Expected.TryGetProperty("stdDeviationArray", out _))
+            {
+                check.Output(
+                    c,
+                    "stdDeviationArray",
+                    points.Select(q => (object?)Rows(multi.StdDeviation(q[0], Single(q[1]), q[2]))).ToArray());
+                check.Output(
+                    c,
+                    "covarianceArray",
+                    points.Select(q => (object?)Rows(multi.Covariance(q[0], Single(q[1]), q[2]))).ToArray());
+                check.Output(
+                    c,
+                    "evolveArray",
+                    points.Select(q => (object?)multi.Evolve(q[0], Single(q[1]), q[2], Single(q[3]))).ToArray());
+            }
         }
 
         check.Complete();

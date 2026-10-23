@@ -26,6 +26,12 @@ namespace NanoQL.Models;
 /// model with another base class implements <see cref="ICalibratedModel"/> over its own, through this class's internal
 /// helpers.
 /// </para>
+/// <para>
+/// A model whose parameters are constrained together, beyond each argument's own constraint, gives that constraint
+/// through <see cref="ParametersConstraint"/>, which <see cref="Constraint"/> composes with the arguments', as
+/// QuantLib's <c>CompositeConstraint</c> composes two: the Cox-Ingersoll-Ross models' Feller condition, tested at each
+/// parameter vector's own values (the S-sr plan's SSR7), where QuantLib's tests σ against the constructor's.
+/// </para>
 /// </remarks>
 public abstract class CalibratedModel : ICalibratedModel
 {
@@ -53,7 +59,8 @@ public abstract class CalibratedModel : ICalibratedModel
     public ImmutableArray<Parameter> Arguments => arguments;
 
     /// <inheritdoc/>
-    public Constraint Constraint => constraint;
+    /// <remarks>The arguments' constraints, composed with <see cref="ParametersConstraint"/>'s where the model gives one.</remarks>
+    public Constraint Constraint => ParametersConstraint() is { } parameters ? new CompositeConstraint(constraint, parameters) : constraint;
 
     /// <inheritdoc/>
     public Vector Params() => FlattenParams(arguments);
@@ -135,6 +142,14 @@ public abstract class CalibratedModel : ICalibratedModel
 
         return result.MoveToImmutable();
     }
+
+    /// <summary>
+    /// A constraint on the whole parameter vector, beyond each argument's own, which <see cref="Constraint"/> composes
+    /// with the arguments'; <see langword="null"/>, the default, for none.
+    /// </summary>
+    /// <returns>The constraint, or <see langword="null"/>.</returns>
+    /// <remarks>It may read the model's construction-time options, never its current parameters, which the vector it tests gives.</remarks>
+    protected virtual Constraint? ParametersConstraint() => null;
 
     /// <summary>
     /// Derives from the arguments whatever else the model computes, after its constructor sets them and on the copy

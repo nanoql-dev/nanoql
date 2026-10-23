@@ -7,10 +7,10 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/shortratemodels.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSwaps, which waits for S-sr's TreeVanillaSwapEngine; testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks and testExtendedCoxIngersollRossDiscountFactor, which wait for S-sr's ExtendedCoxIngersollRoss
-// Replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks (Conventions/ModelRebuildTests.cs)
+// Replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks (Conventions/ModelRebuildTests.cs); testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks (Conventions/ModelRebuildTests.cs)
 
 using NanoQL.Indexes;
+using NanoQL.Instruments;
 using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
@@ -219,6 +219,99 @@ public class ShortRateModelsTests
         CheckCachedCalibration(calibration.Model, swaptions, context, cachedA, cachedSigma, tolerance, ecType);
     }
 
+    // Adapted: the evaluation date the case reads (line 335) is the test runner's, the context's; the fixing added to the
+    // index (line 384) goes into the context's fixings, which every later swap reads, as QuantLib's index's history.
+    [Fact]
+    public void TestSwaps()
+    {
+        // Testing Hull-White swap pricing against known values...
+
+        Date today = Date.TodaysDate();
+        Calendar calendar = new TARGET();
+        today = calendar.Adjust(today);
+        var context = new EvaluationContext { EvaluationDate = today };
+        bool usingAtParCoupons = context.UseAtParCoupons;
+
+        Date settlement = calendar.Advance(today, 2, TimeUnit.Days);
+
+        Date[] dates =
+        [
+            settlement,
+            calendar.Advance(settlement, 1, TimeUnit.Weeks),
+            calendar.Advance(settlement, 1, TimeUnit.Months),
+            calendar.Advance(settlement, 3, TimeUnit.Months),
+            calendar.Advance(settlement, 6, TimeUnit.Months),
+            calendar.Advance(settlement, 9, TimeUnit.Months),
+            calendar.Advance(settlement, 1, TimeUnit.Years),
+            calendar.Advance(settlement, 2, TimeUnit.Years),
+            calendar.Advance(settlement, 3, TimeUnit.Years),
+            calendar.Advance(settlement, 5, TimeUnit.Years),
+            calendar.Advance(settlement, 10, TimeUnit.Years),
+            calendar.Advance(settlement, 15, TimeUnit.Years),
+        ];
+        DiscountFactor[] discounts =
+        [
+            1.0,
+            0.999258,
+            0.996704,
+            0.990809,
+            0.981798,
+            0.972570,
+            0.963430,
+            0.929532,
+            0.889267,
+            0.803693,
+            0.596903,
+            0.433022,
+        ];
+
+        YieldTermStructure termStructure = new DiscountCurve(dates, discounts, new Actual365Fixed());
+
+        var model = new HullWhite(termStructure);
+
+        Integer[] start = [-3, 0, 3];
+        Integer[] length = [2, 5, 10];
+        Rate[] rates = [0.02, 0.04, 0.06];
+        IborIndex euribor = new Euribor6M(termStructure);
+
+        Real tolerance = usingAtParCoupons ? 1.0e-8 : 4.0e-3;
+
+        for (int i = 0; i < start.Length; i++)
+        {
+            Date startDate = calendar.Advance(settlement, start[i], TimeUnit.Months);
+            if (startDate < today)
+            {
+                Date fixingDate = calendar.Advance(startDate, -2, TimeUnit.Days);
+                context = context with { Fixings = context.Fixings.AddFixing(euribor, fixingDate, 0.03) };
+            }
+
+            for (int j = 0; j < length.Length; j++)
+            {
+                Date maturity = calendar.Advance(startDate, length[i], TimeUnit.Years);
+                var fixedSchedule = new Schedule(
+                    startDate, maturity, new Period(Frequency.Annual), calendar, BusinessDayConvention.Unadjusted,
+                    BusinessDayConvention.Unadjusted, DateGenerationRule.Forward, false, context);
+                var floatSchedule = new Schedule(
+                    startDate, maturity, new Period(Frequency.Semiannual), calendar, BusinessDayConvention.Following,
+                    BusinessDayConvention.Following, DateGenerationRule.Forward, false, context);
+                foreach (Rate rate in rates)
+                {
+                    var swap = new VanillaSwap(
+                        SwapType.Payer, 1000000.0, fixedSchedule, rate, new Thirty360(Thirty360Convention.BondBasis),
+                        floatSchedule, euribor, 0.0, new Actual360(), context);
+                    Real expected = DiscountingSwapEngine.Calculate(swap, context, termStructure).NPV!.Value;
+                    Real calculated = TreeVanillaSwapEngine.Calculate(swap, context, model, 120).NPV!.Value;
+
+                    Real error = Math.Abs((expected - calculated) / expected);
+                    Assert.False(
+                        error > tolerance,
+                        $"Failed to reproduce swap NPV:\n    calculated: {calculated:F9}\n    expected:   {expected:F9}"
+                        + $"\n    rel. error: {error:E}");
+                }
+            }
+        }
+    }
+
     [Fact]
     public void TestFuturesConvexityBias()
     {
@@ -248,6 +341,34 @@ public class ShortRateModelsTests
                 $"Failed to reproduce convexity bias:\ncalculated: {calculatedForward}\n  expected: {expectedForward}"
                 + $"\n     error: {error:E}\n tolerance: {tolerance:E}");
         }
+    }
+
+    // Adapted: the evaluation date the case reads (line 464) is the test runner's.
+    [Fact]
+    public void TestExtendedCoxIngersollRossDiscountFactor()
+    {
+        // Testing zero-bond pricing for extended CIR model...
+
+        Date today = Date.TodaysDate();
+
+        const Rate rate = 0.1;
+        YieldTermStructure rTS = new FlatForward(today, rate, new Actual365Fixed());
+
+        const double now = 1.5;
+        const double maturity = 2.5;
+
+        var cirModel = new ExtendedCoxIngersollRoss(rTS, rate, 1.0, 1e-4, rate);
+
+        Real expected = rTS.Discount(maturity) / rTS.Discount(now);
+        Real calculated = cirModel.DiscountBond(now, maturity, rate);
+
+        const Real tol = 1e-6;
+        Real diff = Math.Abs(expected - calculated);
+
+        Assert.False(
+            diff > tol,
+            $"Failed to reproduce zero bound price:\n  calculated: {calculated}\n  expected  : {expected}"
+            + $"\n  difference: {diff:E}\n  tolerance : {tol:E}");
     }
 
     [Fact]

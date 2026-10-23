@@ -79,6 +79,41 @@ internal static class ModelInputs
     }
 
     /// <summary>
+    /// The G2 model a spec describes, <c>{"type": "G2", "curve", "a", "sigma", "b", "eta", "rho", "params"}</c>, with
+    /// its parameters set when the spec gives them.
+    /// </summary>
+    /// <param name="spec">The spec.</param>
+    /// <param name="context">The case's context, which a bootstrapped curve is built in.</param>
+    /// <returns>The model.</returns>
+    public static G2 G2Of(JsonElement spec, EvaluationContext? context = null)
+    {
+        var model = new G2(
+            CurveOf(spec.GetProperty("curve"), context),
+            Number(spec.GetProperty("a")),
+            Number(spec.GetProperty("sigma")),
+            Number(spec.GetProperty("b")),
+            Number(spec.GetProperty("eta")),
+            Number(spec.GetProperty("rho")));
+        JsonElement parameters = spec.GetProperty("params");
+        return parameters.ValueKind == JsonValueKind.Null ? model : model.SetParams(VectorOf(parameters));
+    }
+
+    /// <summary>
+    /// The Black-Karasinski model a spec describes, <c>{"type": "BlackKarasinski", "curve", "a", "sigma", "params"}</c>,
+    /// with its parameters set when the spec gives them.
+    /// </summary>
+    /// <param name="spec">The spec.</param>
+    /// <param name="context">The case's context, which a bootstrapped curve is built in.</param>
+    /// <returns>The model.</returns>
+    public static BlackKarasinski BlackKarasinskiOf(JsonElement spec, EvaluationContext? context = null)
+    {
+        var model = new BlackKarasinski(
+            CurveOf(spec.GetProperty("curve"), context), Number(spec.GetProperty("a")), Number(spec.GetProperty("sigma")));
+        JsonElement parameters = spec.GetProperty("params");
+        return parameters.ValueKind == JsonValueKind.Null ? model : model.SetParams(VectorOf(parameters));
+    }
+
+    /// <summary>
     /// The lattice a spec describes: the model's tree on the grid, with the spread when the spec gives one.
     /// </summary>
     /// <param name="spec">The spec.</param>

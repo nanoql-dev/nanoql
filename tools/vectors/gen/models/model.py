@@ -22,6 +22,16 @@ the calibrated parameters and at two others ("value", "values"). The refusals an
 fixed-parameter specs of the wrong size, and both at once; every parameter fixed; a helper with no engine; value() at
 no parameters, too few and too many; and value() with no helpers, which is 0.
 
+The calibrations' outputs pass the master plan's S7R6 filter, which this generator first predated: each case is refit
+with every nonzero real input of its helpers and its model one ulp up, then down, and an output is written only where both
+refits leave it within 1e-12 x max(|a|, |b|, 1), an integer or an end criterion only where they leave it equal; each
+list element is its own output, named with its index ("params[0]", "calibrationErrors[3]"). On QuantLib 1.44 the
+filter keeps 166 of the 930 outputs: a calibration ends within its optimizer's tolerance, which a one-ulp move of the
+market moves. One stable output moves under nanoql's forms, QuantLib's master's (the S-sr plan's SSR3), beyond the
+tolerance and is left out (MOVED_BY_SSR3); the classes those forms move are documented divergences
+(tests/NanoQL.Tests/Divergences/CalibrationSmallReversionTests.cs). The generator prints "dropped n of m outputs" per
+calibration and for the file.
+
 A case's inputs hold the helpers (swaptionhelper.py's specs, each priced by a JamshidianSwaptionEngine on the model,
 with the helper's term structure given for a Vasicek), the model ({"type": "HullWhite", "termStructure", "a",
 "sigma"} or {"type": "Vasicek", "r0", "a", "b", "sigma", "lambda"}), the method ({"type": "LevenbergMarquardt",
@@ -30,7 +40,9 @@ with the helper's term structure given for a Vasicek), the model ({"type": "Hull
 fixed parameters, omitted where QuantLib's default is taken. The wheel can't build QuantLib's empty Constraint(), so a
 case that passes weights or fixed parameters passes NoConstraint() before them, which gives the default's parameters,
 and its inputs record it. Read back by tests/NanoQL.Tests/Vectors/Models/ModelVectorTests.cs."""
+import copy
 import importlib.util
+import math
 import os
 import sys
 
@@ -90,6 +102,14 @@ EC_SIMPLEX = {"maxIterations": 400, "maxStationaryStateIterations": 100, "rootEp
               "gradientNormEpsilon": 1e-8}
 
 
+# The S7R6 filter: a calibrated output is kept only where every move of its inputs leaves it within this.
+STABLE = 1e-12
+
+# The one output the filter keeps that nanoql's forms, QuantLib's master's (the S-sr plan's SSR3), move beyond the
+# tolerance: a count of function evaluations, the optimizer taking one more step.
+MOVED_BY_SSR3 = {("2002 / weights", "functionEvaluation")}
+
+
 def hull_white_spec(ts, a=0.1, sigma=0.01):
     return {"type": "HullWhite", "termStructure": ts, "a": a, "sigma": sigma}
 
@@ -98,9 +118,21 @@ def vasicek_spec(r0=0.03, a=0.1, b=0.05, sigma=0.01, lam=0.0):
     return {"type": "Vasicek", "r0": r0, "a": a, "b": b, "sigma": sigma, "lambda": lam}
 
 
+# The models on a curve of their own, whose Jamshidian engine reads it; the others are given the helper's.
+ON_CURVE = ("HullWhite", "ExtendedCoxIngersollRoss")
+
+
 def make_model(spec):
+    """The wheel's model; the Cox-Ingersoll-Ross models are those of models/shortrate/onefactormodels/
+    coxingersollross.py and extendedcoxingersollross.py, which calibrate through this file's machinery, with the
+    Feller constraint (the wheel binds no other)."""
     if spec["type"] == "HullWhite":
         return ql.HullWhite(irx.handle(spec["termStructure"]), spec["a"], spec["sigma"])
+    if spec["type"] == "CoxIngersollRoss":
+        return ql.CoxIngersollRoss(spec["r0"], spec["theta"], spec["k"], spec["sigma"])
+    if spec["type"] == "ExtendedCoxIngersollRoss":
+        return ql.ExtendedCoxIngersollRoss(irx.handle(spec["termStructure"]), spec["theta"], spec["k"],
+                                           spec["sigma"], spec["x0"])
     return ql.Vasicek(spec["r0"], spec["a"], spec["b"], spec["sigma"], spec["lambda"])
 
 
@@ -132,7 +164,7 @@ def priced_helpers(specs, model, model_spec, engine=True):
     for spec in specs:
         h = swh.make_helper(spec)
         if engine:
-            if model_spec["type"] == "HullWhite":
+            if model_spec["type"] in ON_CURVE:
                 h.setPricingEngine(ql.JamshidianSwaptionEngine(model))
             else:
                 h.setPricingEngine(ql.JamshidianSwaptionEngine(model, irx.handle(spec["termStructure"])))
@@ -215,30 +247,77 @@ def calibrate(model, helpers, method_spec, criteria_spec, constraint, weights, f
     model.calibrate(*args)
 
 
-def calibration_case(name, set_name, model_spec, method, criteria, constraint, weights, fix):
-    today, specs = HELPER_SETS[set_name]
-    if model_spec["type"] == "HullWhite":
-        model_spec = dict(model_spec, termStructure=specs[0]["termStructure"])
+def calibrated(today, specs, model_spec, method, criteria, constraint, weights, fix):
+    """The case's settings, its outputs, each list element its own, and the two other parameter sets value() reads."""
     with v.case_settings(today, use_at_par_coupons=True) as st:
         model = make_model(model_spec)
         helpers = priced_helpers(specs, model, model_spec)
         calibrate(model, helpers, method, criteria, constraint, weights, fix)
         params = list(model.params())
-        expected = {"params": params, "endCriteria": int(model.endCriteria()),
-                    "problemValues": list(model.problemValues()), "functionEvaluation": model.functionEvaluation(),
-                    "calibrationErrors": [h.calibrationError() for h in helpers]}
         others = [[x * 1.1 for x in params], [x * 0.9 for x in params]]
-        expected["value"] = model.value(ql.Array(params), helpers)
-        expected["values"] = [model.value(ql.Array(p), helpers) for p in others]
-        inputs = {"settings": st, "helpers": specs, "model": model_spec, "method": method, "endCriteria": criteria,
-                  "valueParams": others}
-        if constraint is not None:
-            inputs["constraint"] = constraint
-        if weights is not None:
-            inputs["weights"] = weights
-        if fix is not None:
-            inputs["fixParameters"] = fix
-        return {"name": name, "inputs": inputs, "expected": expected}
+        outputs = {"endCriteria": int(model.endCriteria()), "functionEvaluation": model.functionEvaluation(),
+                   "value": model.value(ql.Array(params), helpers)}
+        for key, values in (("params", params), ("problemValues", list(model.problemValues())),
+                            ("calibrationErrors", [h.calibrationError() for h in helpers]),
+                            ("values", [model.value(ql.Array(p), helpers) for p in others])):
+            outputs.update({f"{key}[{i}]": x for i, x in enumerate(values)})
+        return st, outputs, others
+
+
+def moved(x, direction):
+    """A spec with every nonzero real one ulp toward direction; zeros (a displacement, a spread, which a move would
+    make negative or denormal), integers, booleans and strings (dates, enums) kept."""
+    if isinstance(x, dict):
+        return {k: moved(e, direction) for k, e in x.items()}
+    if isinstance(x, list):
+        return [moved(e, direction) for e in x]
+    if isinstance(x, float) and x != 0.0:
+        return math.nextafter(x, direction)
+    return x
+
+
+def stable(base, refit):
+    if isinstance(base, int) or isinstance(refit, int):
+        return base == refit
+    return abs(base - refit) <= STABLE * max(abs(base), abs(refit), 1.0)
+
+
+class Dropped:
+    """The filter's counts, per calibration and for the file."""
+
+    def __init__(self):
+        self.dropped = 0
+        self.outputs = 0
+
+    def case(self, name, dropped, outputs):
+        self.dropped += dropped
+        self.outputs += outputs
+        print(f"{name}: dropped {dropped} of {outputs} outputs")
+
+    def file(self, label):
+        print(f"{label}: dropped {self.dropped} of {self.outputs} outputs")
+
+
+def calibration_case(dropped, name, set_name, model_spec, method, criteria, constraint, weights, fix):
+    """The case, its outputs passed through S7R6's filter, and all of them for check_rows."""
+    today, specs = HELPER_SETS[set_name]
+    if model_spec["type"] in ON_CURVE:
+        model_spec = dict(model_spec, termStructure=specs[0]["termStructure"])
+    st, outputs, others = calibrated(today, specs, model_spec, method, criteria, constraint, weights, fix)
+    refits = [calibrated(today, moved(copy.deepcopy(specs), d), moved(copy.deepcopy(model_spec), d), method, criteria,
+                         constraint, weights, fix)[1] for d in (math.inf, -math.inf)]
+    kept = {k: x for k, x in outputs.items()
+            if all(stable(x, r[k]) for r in refits) and (name, k) not in MOVED_BY_SSR3}
+    dropped.case(name, len(outputs) - len(kept), len(outputs))
+    inputs = {"settings": st, "helpers": specs, "model": model_spec, "method": method, "endCriteria": criteria,
+              "valueParams": others}
+    if constraint is not None:
+        inputs["constraint"] = constraint
+    if weights is not None:
+        inputs["weights"] = weights
+    if fix is not None:
+        inputs["fixParameters"] = fix
+    return {"name": name, "inputs": inputs, "expected": v.enc(kept)}, outputs
 
 
 def refusal_cases():
@@ -281,20 +360,22 @@ def refusal_cases():
 
 
 def cases():
-    out = [calibration_case(*row) for row in calibrations()]
-    out += refusal_cases()
-    check_rows(out)
+    dropped = Dropped()
+    rows = [calibration_case(dropped, *row) for row in calibrations()]
+    dropped.file("models/model")
+    out = [case for case, _ in rows] + refusal_cases()
+    check_rows(out, {case["name"]: outputs for case, outputs in rows})
     return out
 
 
-def check_rows(out):
+def check_rows(out, outputs):
     by_name = {c["name"]: c["expected"] for c in out}
     # QuantLib's counts on its cached cases include the evaluation of the problem values.
-    assert by_name["testCachedHullWhite"]["functionEvaluation"] == 24, by_name["testCachedHullWhite"]
-    assert by_name["testCachedHullWhiteFixedReversion"]["functionEvaluation"] == 7
-    assert by_name["testCachedHullWhiteFixedReversion"]["params"][0] == 0.05
+    assert outputs["testCachedHullWhite"]["functionEvaluation"] == 24, outputs["testCachedHullWhite"]
+    assert outputs["testCachedHullWhiteFixedReversion"]["functionEvaluation"] == 7
+    assert outputs["testCachedHullWhiteFixedReversion"]["params[0]"] == 0.05
     # NoConstraint added to the model's own changes nothing.
-    assert by_name["2002 / NoConstraint"]["params"] == by_name["testCachedHullWhite"]["params"]
+    assert all(outputs["2002 / NoConstraint"][k] == outputs["testCachedHullWhite"][k] for k in ("params[0]", "params[1]"))
     assert by_name["value with no helpers"]["value"] == 0.0
     for name, e in by_name.items():
         if name.startswith("refused / "):

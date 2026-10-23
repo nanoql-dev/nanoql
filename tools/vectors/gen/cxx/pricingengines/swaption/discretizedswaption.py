@@ -22,6 +22,11 @@ first exercise time at or after the reference date ("swaptionValues", "swaptionP
 ("swaptionValuesAtZero", "swaptionPresentValueAtZero"); the same at 0 on a Vasicek tree ("vasicekPresentValueAtZero");
 and the swap's values and present value when initialized at its last time on the Hull-White tree on TimeGrid(its
 times, 30) and rolled back to 0 ("swapValuesAtZero", "swapPresentValueAtZero"). Amounts are compared at the nominal.
+The swap's two are generated and left out where its first floating coupon pays on the evaluation date: its second
+starts that day and fixed two business days before, and nanoql's swap, by its public constructor, knows a floating
+coupon by its fixing date (the S-sr plan's SSR6 (xvi); tests/NanoQL.Tests/Divergences/TreeKnownCouponTests.cs), so it
+reads that coupon's amount, whose fixing the case doesn't store, where QuantLib's forecasts it on the tree. The
+swaption's swap keeps QuantLib's rule.
 
 Each case's inputs hold the swaption (the harness's spec, tools/cxx/src/instruments/swaptionspec.hpp), the reference
 date and day counter, the models, the grids' times (the harness's mandatory times) and steps, and the rollbacks'
@@ -154,7 +159,9 @@ def case(H, name, spec, frame, settings):
         expected["vasicekPresentValueAtZero"] = rollback(
             "DiscretizedSwaption::rollback", VASICEK, swaption_times, last, 0.0)[1]
         values, pv = rollback("DiscretizedSwap::rollback", HULL_WHITE, swap_times, swap_from, 0.0)
-        expected["swapValuesAtZero"], expected["swapPresentValueAtZero"] = values, pv
+        SWAP_PV[name] = pv
+        if not name.startswith("started swap paying today"):
+            expected["swapValuesAtZero"], expected["swapPresentValueAtZero"] = values, pv
         return {"name": name,
                 "inputs": {"settings": st, "swaption": spec, "referenceDate": v.enc(reference), "dayCounter": dc,
                            "hullWhite": HULL_WHITE, "vasicek": VASICEK, "steps": STEPS,
@@ -183,14 +190,19 @@ def cases():
         return out
 
 
+# Each case's QuantLib swap value at 0, written or not, for check_rows.
+SWAP_PV = {}
+
+
 def check_rows(out):
     by_name = {c["name"]: c["expected"] for c in out}
     for c in out[-2:]:
         assert c["expected"]["presentValue"] == v.THROWS, c["name"]
-    # Today's known coupon changes the swap's value at 0, not its times.
+    # Today's known coupon changes QuantLib's swap's value at 0, not its times (that value is left out of the file).
     a = by_name["started swap paying today / 1"]
     b = by_name["started swap paying today, today's cash flows / 1"]
-    assert a["swapTimes"] == b["swapTimes"] and a["swapPresentValueAtZero"] != b["swapPresentValueAtZero"]
+    assert a["swapTimes"] == b["swapTimes"]
+    assert SWAP_PV["started swap paying today / 1"] != SWAP_PV["started swap paying today, today's cash flows / 1"]
     # Snapping within the week changes the swaption's times, not those of the swap built from the swap itself.
     moved, plain = by_name["Bermudan moved 3 days / 1"], by_name["Bermudan / 1 / A365"]
     assert moved["swaptionTimes"] != plain["swaptionTimes"] and moved["swapTimes"] == plain["swapTimes"]

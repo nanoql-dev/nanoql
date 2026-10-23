@@ -1,17 +1,20 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's JamshidianSwaptionEngine (ql/pricingengines/swaption/jamshidianswaptionengine.hpp): 84
-European swaptions on the evaluation date 15 January 2025, each priced on four Hull-White and three Vasicek models,
+European swaptions on the evaluation date 15 January 2025, each priced on three Hull-White and two Vasicek models,
 and 12 refusals.
 
 The swaptions are those of instruments/swaption.py's kind: payers and receivers from 1M to 10Y options on 1Y to 15Y
 Euribor 6M and 3M swaps, struck from 1% to 6%, at nominals of 1 to 10 million, with annual and semiannual fixed legs,
 swaps starting two business days after the exercise (the start delay Hull-White's five-argument bond option accounts
 for) or on it, and overnight-indexed swaps, which the engine prices on their fixed leg. The Hull-White models are on
-the discount curve (a flat 2.7%), with reversions from 1e-9 (below the formulas' sqrt(QL_EPSILON), which take their
-limits) to 0.3; the Vasicek models, which have no curve of their own, price with the discount curve given to the
+the discount curve (a flat 2.7%), with reversions from 0.05 to 0.3; the Vasicek models, which have no curve of their own, price with the discount curve given to the
 engine, which fixes the reference date and day counter of the times. A Hull-White engine given another curve ignores
 it: the model's own gives the times.
+
+A Hull-White and a Vasicek model at a = 1e-9, below the formulas' sqrt(QL_EPSILON), where QuantLib 1.44's forms take
+their a = 0 limits and drop terms of order a*tau, are left out: nanoql's forms are QuantLib's master's (#2882, the S-sr
+plan's SSR3), which move those prices beyond the tolerance (tests/NanoQL.Tests/Divergences/SmallReversionTests.cs).
 
 The refusals: a cash swaption settled at the par yield curve; a Bermudan exercise ("exotic swaptions"); a floating
 spread; nominals that aren't constant; a Vasicek model with no curve; and each one checked first when several fail.
@@ -53,11 +56,9 @@ D, M, Y = ql.Days, ql.Months, ql.Years
 DISCOUNT = swp.DISCOUNT
 OTHER_CURVE = fvf.curve(0.05)
 
-HULL_WHITE = [{"a": 0.05, "sigma": 0.01}, {"a": 0.1, "sigma": 0.005}, {"a": 1e-9, "sigma": 0.008},
-              {"a": 0.3, "sigma": 0.02}]
+HULL_WHITE = [{"a": 0.05, "sigma": 0.01}, {"a": 0.1, "sigma": 0.005}, {"a": 0.3, "sigma": 0.02}]
 VASICEK = [{"r0": 0.03, "a": 0.08, "b": 0.035, "sigma": 0.009, "lambda": 0.0},
-           {"r0": 0.02, "a": 0.2, "b": 0.04, "sigma": 0.012, "lambda": 0.1},
-           {"r0": 0.027, "a": 1e-9, "b": 0.03, "sigma": 0.007, "lambda": 0.0}]
+           {"r0": 0.02, "a": 0.2, "b": 0.04, "sigma": 0.012, "lambda": 0.1}]
 
 
 def hull_white(curve, spec):

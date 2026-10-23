@@ -7,6 +7,9 @@ the multi-dimensional interface's size, factors (the base's default, size()) and
 stdDeviation times dw, through apply) and apply(x0, dx); and the multi-dimensional forms StochasticProcess1D
 implements through the 1-D members on arrays of size 1: drift(t0, x), diffusion(t0, x), expectation(t0, x, dt),
 stdDeviation(t0, x, dt), covariance(t0, x, dt) and evolve(t0, x, dt, dw). A 1 x 1 matrix is written as its rows.
+Left out: the outputs that read the variance of the processes at speed 1e-9, below the square root of machine epsilon,
+where QuantLib's variance takes its a = 0 limit and nanoql's is the cancellation-free form, by the user's ruling of
+2026-10-22 (the S-sr plan's SSR3 class; tests/NanoQL.Tests/Divergences/OrnsteinUhlenbeckVarianceTests.cs).
 
 The wheel's calls, by QuantLib-SWIG's stochasticprocess.i: the process is ql.OrnsteinUhlenbeckProcess(speed, vol,
 x0, level). Its proxy class declares the 1-D members, which hide the base's array forms of the same names, so those
@@ -33,6 +36,10 @@ SP = ql.StochasticProcess
 
 def rows(m):
     return [[m[i][j] for j in range(m.columns())] for i in range(m.rows())]
+
+
+# The outputs that read the variance, left out at speed 1e-9.
+VARIANCE_OUTPUTS = ("evolve", "stdDeviationArray", "covarianceArray", "evolveArray")
 
 
 def cases():
@@ -66,6 +73,9 @@ def cases():
                                             for t0, x, dt, _, _ in points],
                         "evolveArray": [list(SP.evolve(p, t0, ql.Array([x]), dt, ql.Array([dw])))
                                         for t0, x, dt, dw, _ in points]}})
+        if speed == 1e-9:
+            for m in VARIANCE_OUTPUTS:
+                out[-1]["expected"].pop(m)
     return out
 
 

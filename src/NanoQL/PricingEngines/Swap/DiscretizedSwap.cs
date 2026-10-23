@@ -25,6 +25,15 @@ namespace NanoQL.PricingEngines;
 /// refused there. The coupons' times are the given day counter's year fractions from the reference date.
 /// </para>
 /// <para>
+/// <b>A floating coupon known by its fixing date</b> (the S-sr plan's SSR6 (xvi)): the public constructor, a swap's own
+/// value as the tree swap engine prices it, knows a floating coupon whose fixing date is on or before the reference
+/// date, adding its amount at its payment time, where QuantLib knows it by its accrual start (its reset date,
+/// <c>vanillaswap.cpp:67</c>; <c>discretizedswap.cpp:84-87</c>), so between its fixing and its start the tree forecasts
+/// a coupon whose fixing the discounting engine reads (<c>Divergences/TreeKnownCouponTests.cs</c>). The internal
+/// constructor, which the discretized swaption calls, keeps QuantLib's rule, so a swaption exercised in that window
+/// takes its floating leg at par, QuantLib's convention.
+/// </para>
+/// <para>
 /// <b>Its discount bond.</b> QuantLib's swap builds a discount bond for each coupon it adds, initializes it at the
 /// payment time and rolls it back to the swap's time. This swap keeps one bond, re-initialized for each coupon (a
 /// discount bond has no adjustments, so the adjustment times its memo keeps skip nothing), whose buffers its
@@ -46,7 +55,10 @@ public sealed class DiscretizedSwap : DiscretizedAsset
     private readonly bool[] floatingResetTimeIsInPast;
     private readonly DiscretizedDiscountBond bond = new();
 
-    /// <summary>Initializes a new instance of the <see cref="DiscretizedSwap"/> class, every coupon added in the pre-adjustment.</summary>
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DiscretizedSwap"/> class, every coupon added in the pre-adjustment,
+    /// a floating one fixed on or before the reference date known by its amount.
+    /// </summary>
     /// <param name="swap">The swap.</param>
     /// <param name="referenceDate">The date of time 0.</param>
     /// <param name="dayCounter">The day counter of the times.</param>
@@ -57,7 +69,7 @@ public sealed class DiscretizedSwap : DiscretizedAsset
     /// <exception cref="ArgumentNullException">The swap, the day counter or the context is null.</exception>
     /// <exception cref="ArgumentException"><paramref name="referenceDate"/> is <see langword="default"/>.</exception>
     public DiscretizedSwap(FixedVsFloatingSwap swap, Date referenceDate, DayCounter dayCounter, EvaluationContext context)
-        : this(Arguments(swap, referenceDate, dayCounter, context), referenceDate, dayCounter, default, default, context)
+        : this(Arguments(swap, referenceDate, dayCounter, context), referenceDate, dayCounter, default, default, context, true)
     {
     }
 
@@ -71,6 +83,10 @@ public sealed class DiscretizedSwap : DiscretizedAsset
     /// <param name="fixedCouponAdjustments">Each fixed coupon's adjustment; <see langword="default"/> for all pre.</param>
     /// <param name="floatingCouponAdjustments">Each floating coupon's adjustment; <see langword="default"/> for all pre.</param>
     /// <param name="context">The evaluation context, whose <see cref="EvaluationContext.IncludeTodaysCashFlows"/> it reads.</param>
+    /// <param name="knownByFixingDate">
+    /// Whether a floating coupon is known by its fixing date, on or before the reference date; otherwise, as QuantLib's,
+    /// by its accrual start before it.
+    /// </param>
     /// <exception cref="NanoQLException">The adjustments aren't one per coupon.</exception>
     internal DiscretizedSwap(
         FixedVsFloatingSwapArguments arguments,
@@ -78,7 +94,8 @@ public sealed class DiscretizedSwap : DiscretizedAsset
         DayCounter dayCounter,
         ImmutableArray<CouponAdjustment> fixedCouponAdjustments,
         ImmutableArray<CouponAdjustment> floatingCouponAdjustments,
-        EvaluationContext context)
+        EvaluationContext context,
+        bool knownByFixingDate)
     {
         this.arguments = arguments;
         this.fixedCouponAdjustments = fixedCouponAdjustments.IsDefault
@@ -129,7 +146,9 @@ public sealed class DiscretizedSwap : DiscretizedAsset
         {
             double resetTime = dayCounter.YearFraction(referenceDate, arguments.FloatingResetDates[i]);
             double payTime = dayCounter.YearFraction(referenceDate, arguments.FloatingPayDates[i]);
-            bool resetIsInPast = IsResetTimeInPast(resetTime, payTime, includeTodaysCashFlows);
+            bool resetIsInPast = knownByFixingDate
+                ? IsFixed(dayCounter.YearFraction(referenceDate, arguments.FloatingFixingDates[i]), payTime, includeTodaysCashFlows)
+                : IsResetTimeInPast(resetTime, payTime, includeTodaysCashFlows);
 
             floatingResetTimes[i] = resetTime;
             floatingPayTimes[i] = payTime;
@@ -216,7 +235,7 @@ public sealed class DiscretizedSwap : DiscretizedAsset
         for (int i = 0; i < floatingResetTimes.Length; i++)
         {
             double t = floatingResetTimes[i];
-            if (floatingCouponAdjustments[i] == CouponAdjustment.Pre && t >= 0.0 && IsOnTime(t))
+            if (floatingCouponAdjustments[i] == CouponAdjustment.Pre && !floatingResetTimeIsInPast[i] && t >= 0.0 && IsOnTime(t))
             {
                 AddFloatingCoupon(i);
             }
@@ -244,7 +263,7 @@ public sealed class DiscretizedSwap : DiscretizedAsset
         for (int i = 0; i < floatingResetTimes.Length; i++)
         {
             double t = floatingResetTimes[i];
-            if (floatingCouponAdjustments[i] == CouponAdjustment.Post && t >= 0.0 && IsOnTime(t))
+            if (floatingCouponAdjustments[i] == CouponAdjustment.Post && !floatingResetTimeIsInPast[i] && t >= 0.0 && IsOnTime(t))
             {
                 AddFloatingCoupon(i);
             }
@@ -296,6 +315,10 @@ public sealed class DiscretizedSwap : DiscretizedAsset
 
     private static bool IsResetTimeInPast(double resetTime, double payTime, bool includeTodaysCashFlows) =>
         resetTime < 0.0 && (payTime > 0.0 || (includeTodaysCashFlows && payTime == 0.0));
+
+    // SSR6 (xvi): a floating coupon fixed on or before the reference date, whose payment isn't past.
+    private static bool IsFixed(double fixingTime, double payTime, bool includeTodaysCashFlows) =>
+        fixingTime <= 0.0 && (payTime > 0.0 || (includeTodaysCashFlows && payTime == 0.0));
 
     // The public constructor's arguments, checked in its parameters' order.
     private static FixedVsFloatingSwapArguments Arguments(

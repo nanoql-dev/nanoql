@@ -201,6 +201,16 @@ Facts:
 
 - `ANullPayoffIsRefusedBeforeItIsRead`
 
+## BlackKarasinskiTreeFittingTests
+
+[`Divergences/BlackKarasinskiTreeFittingTests.cs`](../tests/NanoQL.Tests/Divergences/BlackKarasinskiTreeFittingTests.cs)
+
+Black-Karasinski's trees on one model (the S-sr plan's SSR6 (i)): QuantLib's `BlackKarasinski::tree` writes the model's one fitting parameter `phi_` (`blackkarasinski.cpp:64`, `:79-81`), so building a second tree on another grid rewrites the first's fitting: on the wheel, a grid engine's swaption prices 0.007381712297374245 alone and 0.007381283310851051 once a second grid engine has built its tree on the same model. nanoql's tree owns its fitting, as S-bond's Hull-White tree does, so a lattice prices the same whatever is built after it. QuantLib's check: a fresh model's tree on the first grid, 0.007381712297374245.
+
+Facts:
+
+- `ATreeKeepsItsFittingWhenAnotherIsBuilt`
+
 ## BlackVarianceEmptyRefusalTests
 
 [`Divergences/BlackVarianceEmptyRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/BlackVarianceEmptyRefusalTests.cs)
@@ -370,6 +380,17 @@ Facts:
 
 - `ANullHelperIsRefused`
 
+## CalibrationSmallReversionTests
+
+[`Divergences/CalibrationSmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/CalibrationSmallReversionTests.cs)
+
+Hull-White calibrations that reach small mean reversion (the S-sr plan's SSR3, and the user's ruling of 2026-10-22 on its premise): QuantLib 1.44's Vasicek B and A cut to their a = 0 forms below √ε and cancel above it (`vasicek.cpp:36-58`), and nanoql's are QuantLib's master's, free of the cancellation (#2882). Where a calibration's optimum lies near a = 0, QuantLib's optimizer reads the cancelling forms: its calibrated parameters and the cost it reports there are 1.44's arithmetic, not the model's, and a start that 1.44's cancellation turns away from a = 0 reaches the boundary there instead. The calibrations are `models/model.json`'s, on their inputs; that file keeps the outputs S7R6's filter finds stable. QuantLib's check: its cost where its forms hold, at an ordinary reversion, equal to nanoql's within the tolerance, and its own interior minimum, which nanoql's cost has too.
+
+Facts:
+
+- `ACalibrationAtSmallReversionReportsTheCostOfItsParameters`
+- `AFarStartReachesTheBoundaryMinimum`
+
 ## CallabilityTypeAfterSettledCallabilityTests
 
 [`Divergences/CallabilityTypeAfterSettledCallabilityTests.cs`](../tests/NanoQL.Tests/Divergences/CallabilityTypeAfterSettledCallabilityTests.cs)
@@ -450,6 +471,32 @@ A cap/floor term-volatility surface on an empty matrix. QuantLib's constructors 
 Facts:
 
 - `AnEmptyMatrixReachesQuantLibsChecks`
+
+## CapletFixingExpiryTests
+
+[`Divergences/CapletFixingExpiryTests.cs`](../tests/NanoQL.Tests/Divergences/CapletFixingExpiryTests.cs)
+
+A caplet's expiry on the analytic and tree cap engines (the S-sr plan's B1-1, ruled by the user on 2026-10-22): QuantLib's analytic engine values a caplet still to be fixed as a bond option expiring at its accrual start (`analyticcapfloorengine.cpp:94-112`) and its tree exercises it there (`discretizedcapfloor.cpp:53-55`), where the instrument fixes its rate, QuantLib's Monte Carlo engine reads it and its Black engine takes the volatility, at the fixing date, so a caplet with a fixing lag is priced on the variance to its start. On the wheel, a 1-year semiannual cap at 4% on Euribor 6M from six months after the spot date, two fixing days, notional 1,000,000, on Hull-White (0.1, 0.01) on a flat 4% Actual/365 (Fixed) curve on 15 January 2025, the analytic engine prices 3,024.081283636271 and the tree (200 steps) 3,019.994708839063; QuantLib's own five-argument bond option (`hullwhite.cpp:108-131`), the option at the fixing on the bond from the start, which its Jamshidian engine uses, gives 3,005.838255466084. nanoql's tree values each caplet still to be fixed before its start at its fixing, on every model, from its two discount bonds rolled back there, and its analytic engine on Hull-White takes the five-argument option; Vasicek's, CIR's and G2's analytic options keep QuantLib's expiry at the start, since QuantLib has no such option for them. A caplet fixed on its start is QuantLib's on both engines. QuantLib's check: its five-argument bond option, its Monte Carlo engine, and the tree converging to both.
+
+Facts:
+
+- `TheHullWhiteAnalyticOptionExpiresAtTheFixing`
+- `TheTreeConvergesToTheFixingValue`
+- `TheMonteCarloEngineAgreesWithTheFixingValue`
+- `OnVasicekTheAnalyticOptionKeepsQuantLibsExpiry`
+
+## CapletInArrearsTests
+
+[`Divergences/CapletInArrearsTests.cs`](../tests/NanoQL.Tests/Divergences/CapletInArrearsTests.cs)
+
+An in-arrears caplet on the short-rate cap engines (the S-sr plan's B2-1, ruled by the user on 2026-10-22, under R8 as amended that day): QuantLib's analytic and tree engines value a caplet still to be fixed at its start on its accrual period, reading neither its later fixing nor its index's own period (`analyticcapfloorengine.cpp:94-112`, `discretizedcapfloor.cpp:53-55`), so they price an in-arrears cap as the cap in advance; its Monte Carlo engine forecasts the rate from the bond to the coupon's start, before the fixing (`mchullwhiteengine.cpp:80-90`). On the wheel, a 1-year semiannual cap at 4% on Euribor 6M in arrears, from six months after the spot date, two fixing days, notional 1,000,000, its coupons on a Black pricer at 20%, on Hull-White (0.1, 0.01) on a flat 4% Actual/365 (Fixed) curve on 15 January 2025: the analytic engine 3,024.081283636271 and the tree (200 steps) 3,019.994708839063, the in-advance cap's prices; QuantLib's Monte Carlo route (the port's before the fix, which reproduces it on its vectors) 4,063.1343135221905 ± 6.317811808654881 (200,000 antithetic samples, seed 42). No QuantLib route prices it, so the check is independent: each caplet's value at its fixing is a one-dimensional Gaussian integral under the fixing's forward measure, 3,885.098792896677 by quadrature to about 1e-15 (the S-sr run's `b21_integral.py`). nanoql's trees value an in-arrears caplet at its fixing on every model from three bonds, to its payment and to its index period's start and end; its Monte Carlo engine forecasts on the index's period and values the payment at the fixing; its analytic engine refuses it.
+
+Facts:
+
+- `TheTreeConvergesToTheGaussianIntegral`
+- `TheMonteCarloEngineAgreesWithTheGaussianIntegral`
+- `AtZeroVolatilityTheValueIsTheDeterministicPayoff`
+- `TheAnalyticEngineRefusesIt`
 
 ## CappedFlooredCouponNullUnderlyingTests
 
@@ -545,6 +592,40 @@ Facts:
 - `ASeriesStoppedUnconvergedInTheLargeDfWindowIsRefused`
 - `ASubnormalPoissonWeightIsRefused`
 - `AZeroPoissonWeightIsRefused`
+
+## CirFellerConstraintTests
+
+[`Divergences/CirFellerConstraintTests.cs`](../tests/NanoQL.Tests/Divergences/CirFellerConstraintTests.cs)
+
+The Cox-Ingersoll-Ross model's Feller constraint (the S-sr plan's SSR7, K1): QuantLib's is σ's own `VolatilityConstraint`, built at the constructor's k and θ (`coxingersollross.cpp:26-40`, `:52`), so a calibration that moves k or θ tests σ against values the model no longer has, and can end outside the Feller region: on the wheel, from (r0, θ, k, σ) = (0.03, 0.035, 0.3, 0.05), Levenberg-Marquardt on the six swaption helpers of `tools/vectors/gen/models/model.py`'s 2025 set ends at θ = 536.3132523984605, k = 5.407661646569119e-07, σ = 0.033099933008455235, r0 = 0.02927429342689504, where σ² = 1.10e-3 exceeds 2kθ = 5.80e-4. nanoql tests σ² < 2kθ on each trial vector's own k and θ, through the model's parameter constraint. QuantLib's check: the test equals QuantLib's constraint built at each vector's k and θ; and a calibration with k and θ fixed, where the two tests agree at every trial, is QuantLib's to the last bit.
+
+Facts:
+
+- `TheTestIsQuantLibsConstraintAtEachVectorsSpeedAndLevel`
+- `ACalibrationWithTheSpeedAndLevelFixedIsQuantLibs`
+- `AFreeCalibrationStaysInTheFellerRegion`
+
+## CirProcessMomentsTests
+
+[`Divergences/CirProcessMomentsTests.cs`](../tests/NanoQL.Tests/Divergences/CirProcessMomentsTests.cs)
+
+The Cox-Ingersoll-Ross process's moments (the S-sr plan's SSR7, K2): QuantLib's `variance` (`coxingersollrossprocess.cpp:32-38`) reads the constructor's x0 where the step's state is given, and its level term, θσ²(1 − e^(−kΔt))²/k, is twice that of its own `evolve`'s s2 (`coxingersollrossprocess.hpp:117-118`); its `diffusion` is the constant σ (`:94-96`), where the header's SDE is dr = k(θ − r)dt + σ√r dW. On the C++ harness, with k = 0.3, σ = 0.1, x0 = 0.04, θ = 0.05 and Δt = 0.25, the variance is 9.808235281791348e-05 at the states 0.01, 0.04 and 0.1 alike, and the diffusion 0.1. nanoql's variance is evolve's s2 at the state, written with (1 − e^(−kΔt))/k as Δt(1 − e^(−x))/x, x = kΔt, the cancellation-free form of the Ornstein-Uhlenbeck ruling, and its diffusion σ√x. QuantLib's check: its own evolve formula, and the header's SDE.
+
+Facts:
+
+- `TheVarianceIsEvolvesS2AtTheState`
+- `TheDiffusionIsTheSdes`
+
+## CirTreeConvergenceTests
+
+[`Divergences/CirTreeConvergenceTests.cs`](../tests/NanoQL.Tests/Divergences/CirTreeConvergenceTests.cs)
+
+The Cox-Ingersoll-Ross trees (the S-sr plan's SSR7, K2): since 1.23 QuantLib's tree reads the model's dynamics, `CoxIngersollRossProcess` on the short rate itself (`coxingersollross.cpp:126-131`), whose variance depends on the state, but the trinomial tree spaces its nodes by the process's standard deviation at its initial value, so its prices stall away from the model's own analytic ones: on the wheel, a 3-year semiannual cap at 4% on Euribor 6M from six months after 15 January 2025, its caplets fixed on their starts, notional 1,000,000, on a flat 4% curve, prices 19,590.94789923626, 19,596.379468056322 and 19,571.725938834417 on CIR (r0 = θ = 0.04, k = 0.3, σ = 0.1) with 50, 200 and 800 steps, 2.3% above the analytic engine's 19,147.73327146658; and 20,232.01252305427, 20,225.765498780183 and 20,193.198962616287 on extended CIR (θ = 0.04, k = 0.3, σ = 0.1, x0 = 0.04), 2.8% above 19,674.220099061884. nanoql's trees are QuantLib's before 1.23, on y = √r, whose diffusion σ/2 is constant, the short rate y², the extended model's shift fitted numerically on the tree. QuantLib's check: its own analytic engine, which the trees converge to at first order. The caplets are fixed on their starts, where the analytic engine's option, which on CIR keeps QuantLib's expiry at the start, and the tree's, at the fixing (the plan's B1-1), expire alike; QuantLib's engines don't read a caplet's fixing lag, so its prices are those of the two fixing days.
+
+Facts:
+
+- `TheCoxIngersollRossTreeConvergesToTheAnalyticPrice`
+- `TheExtendedCoxIngersollRossTreeConvergesToTheAnalyticPrice`
 
 ## CouponPricerSettingTests
 
@@ -1038,6 +1119,16 @@ Facts:
 
 - `ThePrimitivePastTheLastNodeGrowsAtTheValueThere`
 
+## ForwardMeasureTimeUnsetTests
+
+[`Divergences/ForwardMeasureTimeUnsetTests.cs`](../tests/NanoQL.Tests/Divergences/ForwardMeasureTimeUnsetTests.cs)
+
+A forward-measure process built without its forward measure time (the S-sr plan's SSD6): QuantLib's default constructors leave `T_` uninitialized (`forwardmeasureprocess.hpp:42`, `:46`, `:60`, `:64`), so the forward Hull-White and G2 processes' drift and expectation read an indeterminate value, undefined behaviour (master plan §2.2's undefined-path row). nanoql's refuse with "forward measure time not set" until `WithForwardMeasureTime` gives one.
+
+Facts:
+
+- `AnUnsetForwardMeasureTimeIsRefused`
+
 ## ForwardRateAgreementExpiredTests
 
 [`Divergences/ForwardRateAgreementExpiredTests.cs`](../tests/NanoQL.Tests/Divergences/ForwardRateAgreementExpiredTests.cs)
@@ -1079,6 +1170,40 @@ Facts:
 
 - `TodaysNonPositiveFixingIsRefused`
 - `ATriangulatedPairsMissingFixingIsForecast`
+
+## G2AnalyticSwaptionCouponTests
+
+[`Divergences/G2AnalyticSwaptionCouponTests.cs`](../tests/NanoQL.Tests/Divergences/G2AnalyticSwaptionCouponTests.cs)
+
+G2's analytic swaption engine's coupons (the S-sr plan's SSR6 (xiii), round 1's O1-1): QuantLib's pricing function takes each fixed coupon as the rate times the difference of its payment times on the curve's day counter (`g2.cpp:161-162`), whatever the fixed leg's day counter, so a leg on another prices coupons it doesn't pay: on the wheel, a 1Y into 5Y payer at 3% on Euribor 6M, exercised on the swap's start as the engine assumes (`g2swaptionengine.hpp:36-37`), notional 1,000,000, on G2 (0.07, 0.011, 0.3, 0.008, −0.6) on a flat 2.7% Actual/365 (Fixed) curve that discounts and forecasts, prices 8,570.124924904925 on an Actual/360 fixed leg and on a 30/360 one alike; the same Actual/360 coupons restated on the curve's day counter (the rate times 365/360) price 7,909.079470896306, and QuantLib's finite-difference engine (200 × 150 × 150) prices the Actual/360 leg 7,906.788499287265; on the 30/360 leg the finite-difference engine reads 8,593.472518199607 (100 × 100 × 100) and 8,595.225571597253 (200 × 150 × 150), its tree 8,580.247796560228 (100 steps). nanoql's coupons are the corrected rate times the fixed coupons' accrual periods. QuantLib's check: its own analytic engine on the restated leg; its finite-difference engine on the 30/360 leg, within its grid; and a zero fixed rate, whose only coupon is the notional, 122,984.01710640144 on every day counter.
+
+Facts:
+
+- `AnActual360LegIsItsCouponsRestatedOnTheCurvesDayCounter`
+- `AThirty360LegIsQuantLibsFiniteDifferencePrice`
+- `AZeroFixedRateIsQuantLibsOnEveryDayCounter`
+
+## G2CancellationTests
+
+[`Divergences/G2CancellationTests.cs`](../tests/NanoQL.Tests/Divergences/G2CancellationTests.cs)
+
+The G2 model at small mean reversion (the S-sr plan's SSR3): QuantLib 1.44's `V` (`g2.cpp:89-100`) sums O(a²t³) differences of O(1/a) terms, so its zero bond's error grows like 1/a³: on the wheel, 0.8997958885633307 at a = 1e-9, 58,421.40718574682 at 1e-7 and 0.8800439590760323 at 1e-4 (against 0.88003659…, 0.88003659… and 0.88004395350237115). nanoql's are QuantLib's master's forms (#2885, `81fac76b8`): the three terms through one function of at and bt, its series below aτ + bτ = 2, and B with expm1. QuantLib's check: upstream's new test line, `testG2DiscountBondForSmallMeanReversion`, against its 60-digit references at upstream's tolerance; and, at a = 1e-4, QuantLib's own formulas evaluated in 60 digits.
+
+Facts:
+
+- `TheZeroBondNearZeroReversion`
+- `TheZeroBondAtSmallReversionAgainstQuantLibsFormulasInSixtyDigits`
+
+## G2ProcessCorrelationBoundTests
+
+[`Divergences/G2ProcessCorrelationBoundTests.cs`](../tests/NanoQL.Tests/Divergences/G2ProcessCorrelationBoundTests.cs)
+
+The G2 process's conditional correlation (the S-sr plan's SSR6 (xix), round 1's O1-13): QuantLib's step correlation is ρ times the ratio of the factors' kernels (`g2process.cpp:100-111`, `:223-234`), which at a = b and ρ = 1 rounds just above 1, so the standard deviation's √(1 − ρ²) is NaN: on the wheel, the half-year step's [1][1] at a = b = 0.1, σ = η = 0.01, ρ = 1 is NaN, its [1][0] 0.006897919322666819. At a zero step the ratio is 0/0, NaN, and so are the standard deviation's second row and the covariance's terms that read it. nanoql's correlation is ρ·f((a+b)Δt)/√(f(2aΔt)f(2bΔt)), f(x) = (1 − e^(−x))/x, held in [−1, 1] and ρ itself at a = b, its limit at Δt = 0. QuantLib's check: the bound, and the step's limit.
+
+Facts:
+
+- `ThePerfectlyCorrelatedStepIsBounded`
+- `TheZeroStepIsItsLimit`
 
 ## GaussianQuadratureRefusalTests
 
@@ -1134,6 +1259,29 @@ Facts:
 - `TheModelsTimeRunsFromTheEarliestCurveDate`
 - `TheHelpersMaturityRunsFromTheEarlierCurveDate`
 - `TheOptimalAlphasDateFormReadsTheEnginesTime`
+
+## HullWhiteForwardProcessSmallReversionTests
+
+[`Divergences/HullWhiteForwardProcessSmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/HullWhiteForwardProcessSmallReversionTests.cs)
+
+The forward Hull-White process at small mean reversion (the S-sr plan's SSR6 (ii), round 1's O1-6): QuantLib's `M_T` (`hullwhiteprocess.cpp:134-146`), σ²/a²[(1 − e^(−u)) − ½(e^(−v) − e^(−v−2u))], cuts at QL_EPSILON and above it cancels two terms of order σ²(t − s)/a: on the wheel, on a flat 4% curve with σ = 0.01, M_T(0, 0.5, 10) is 0.005551115122216288 at a = 1e-9, 0 at 1e-12 and 5,551,115,123.125778 at 1e-15, against its limit σ²(t − s)[(T − t) + ½(t − s)] = 4.875e-4, so the half-year expectation from 0.04 is −5,551,115,123.085763 at 1e-15; its drift is NaN at a = 0; and the Monte Carlo cap engine that reads it prices a 5-year cap on Euribor 6M at 3% (notional 1,000,000, on a flat 2.7% discount curve) 13,362.29 ± 129.78 at a = 1e-9, 10,000 antithetic samples, seed 42, on the harness, against the analytic engine's 19,600.69. nanoql's M_T is σ²(t − s)f(u)[(T − t)f(v) + ½e^(−v)(t − s)f(u)], f(x) = (1 − e^(−x))/x, every term positive. QuantLib's check: the limit; QuantLib's closed form at ordinary a, 3.0368938327613056e-4 at a = 0.1, within the tolerance; and the analytic engine for the Monte Carlo one.
+
+Facts:
+
+- `M_TAtSmallReversionIsItsLimit`
+- `TheDriftAtZeroReversionIsItsLimit`
+- `TheMonteCarloCapAtSmallReversionIsTheAnalyticOnes`
+
+## HullWhiteProcessSmallReversionTests
+
+[`Divergences/HullWhiteProcessSmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/HullWhiteProcessSmallReversionTests.cs)
+
+The Hull-White process at small mean reversion (the S-sr plan's SSR6 (ii)): QuantLib's drift's σ²/(2a)(1 − e^(−2at)) (`hullwhiteprocess.cpp:39`) has no a → 0 branch, so at a = 0, which the constructor accepts, the drift is NaN, and below it cancels: on the wheel, on a flat 4% curve with σ = 0.01, the drift at (1, 0.04) is NaN at a = 0 and 9.99982319171977e-05 at a = 1e-12, −1.8e-5 relative off its limit σ²t + f′(t), 1.00000444e-4, and the one-year expectation 0.04004999779003289 at 1e-12 against QuantLib's own a = 0 expectation, 0.04005000000218044 (its variance 0.0001 at both). nanoql writes the term σ²t·(1 − e^(−x))/x, x = 2at. QuantLib's check: the limit, σ²t + f′(t) with f′ QuantLib's difference quotient of the curve's forward over 1e-4 (`:40-44`), and QuantLib's own a = 0 expectation and variance.
+
+Facts:
+
+- `TheDriftAtZeroReversionIsItsLimit`
+- `TheProcessAtSmallReversionIsItsLimit`
 
 ## IborNegativeCountTests
 
@@ -1346,6 +1494,16 @@ Facts:
 - `FridaysAreBusinessDaysAndSundaysWeekendDays`
 - `TestMaltasListOnFridaysAndSundays`
 
+## McHullWhiteCollarTests
+
+[`Divergences/McHullWhiteCollarTests.cs`](../tests/NanoQL.Tests/Divergences/McHullWhiteCollarTests.cs)
+
+The Monte Carlo Hull-White cap engine on a collar: QuantLib's path pricer reads the cap rates only for a cap (`mchullwhiteengine.cpp:54`, `:94-99`), so it prices a collar as its floor alone, long: on the C++ harness, a 3-year collar at 3.5% / 2.5% on Euribor 6M from the spot date, notional 1,000,000, on Hull-White (0.05, 0.01) on a flat 2.7% curve, 2,000 samples, seed 42, prices 8,734.001429909456, its floor's price, where its cap prices 3,713.709005573455. nanoql prices the collar as its cap less its floor, as the analytic and tree engines do. QuantLib's check: its own cap and floor on the same paths.
+
+Facts:
+
+- `TheCollarIsItsCapLessItsFloor`
+
 ## McSimulationUndefinedTests
 
 [`Divergences/McSimulationUndefinedTests.cs`](../tests/NanoQL.Tests/Divergences/McSimulationUndefinedTests.cs)
@@ -1457,6 +1615,17 @@ A stripper's implied volatilities on a second strip. QuantLib's `OptionletStripp
 Facts:
 
 - `EveryStripGivesQuantLibsFirstStrip`
+
+## OrnsteinUhlenbeckVarianceTests
+
+[`Divergences/OrnsteinUhlenbeckVarianceTests.cs`](../tests/NanoQL.Tests/Divergences/OrnsteinUhlenbeckVarianceTests.cs)
+
+The Ornstein-Uhlenbeck variance at small speed (the S-sr plan's SSR3 class, by the user's ruling of 2026-10-22): QuantLib's `variance` (`ornsteinuhlenbeckprocess.cpp:34-42`) is σ²Δt below |a| = √ε, dropping the terms of order aΔt, and above it σ²(1 − e^(−2aΔt))/(2a), whose 1 − e^(−2aΔt) cancels: 8.3e-8 relative at a = 1.5e-8 and Δt = 0.01, 1.4e-8 below the cut at a = 1.4e-8 and Δt = 1. nanoql's is σ²Δt·(1 − e^(−x))/x, x = 2aΔt, the cancellation-free form of QuantLib's master's kernels. QuantLib's check: its own closed form at ordinary speed and its own limit at a = 0; at small speed, the series σ²Δt(1 − aΔt + ⅔(aΔt)²), exact there to well below the tolerance.
+
+Facts:
+
+- `TheVarianceAtSmallSpeedIsItsSeries`
+- `TheVarianceAtOrdinarySpeedAndAtZeroIsQuantLibs`
 
 ## OvernightCompoundedSpreadForecastTests
 
@@ -1848,6 +2017,18 @@ Facts:
 - `ABondLengthThatIsNotPositiveIsRefused`
 - `AFrequencyOfNoPeriodIsRefused`
 
+## SmallReversionTests
+
+[`Divergences/SmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/SmallReversionTests.cs)
+
+The short-rate models' other members at small mean reversion (the S-sr plan's SSR6 (iii), SSR3's sweep). G2's swaption pricing function (`g2.cpp:119-160`) cancels in its mux and sigmax: on the wheel, a one-period payer swaption, which is (1 + Kτ) puts on its bond struck at 1/(1 + Kτ), prices 0.0038981761747141413 at a = b = 1e-4 against that bond option's 0.003898173326452401, 0.00017515607132449288 at 1e-6 against 0.003898519697671894, and at 1e-7 refuses "root not bracketed". Hull-White's `convexityBias` (`hullwhite.cpp:150`) cuts (1 − e^(−ax))/a at QL_EPSILON and cancels above it: 7.593680693951388e-05 at a = 1e-10, 7.594298930423405e-05 at 1e-12 and 7.801188790257374e-05 at 1e-14, against its own a = 0 value 7.593678809059146e-05. G2's bond option reads `sigmaP` (`g2.cpp:59-87`), which cancels likewise: 0.013016600554919378 at a = b = 1e-12 against 0.01301666498797277 at 1e-8. nanoql's are written in SSR3's cancellation-free forms. QuantLib's check: its second routes, the bond option for the swaption and the a = 0 branch for the bias, and, for the bond option, Black's formula on the a → 0 limit of sigmaP, (s − t)√(t(σ² + η² + 2ρση)) at a = b.
+
+Facts:
+
+- `G2sOnePeriodSwaptionIsItsBondOption`
+- `HullWhitesConvexityBiasAtSmallReversionIsItsLimit`
+- `G2sBondOptionAtSmallReversionIsBlacksOnTheLimit`
+
 ## SmileSectionFieldsTests
 
 [`Divergences/SmileSectionFieldsTests.cs`](../tests/NanoQL.Tests/Divergences/SmileSectionFieldsTests.cs)
@@ -2168,6 +2349,30 @@ Facts:
 
 - `TheMidPointRuleStartsFromTheMidPoint`
 
+## TreeCapFloorSeasonedTests
+
+[`Divergences/TreeCapFloorSeasonedTests.cs`](../tests/NanoQL.Tests/Divergences/TreeCapFloorSeasonedTests.cs)
+
+The tree cap engine on a seasoned cap (the S-sr plan's SSR6 (iv)): QuantLib's `DiscretizedCapFloor::mandatoryTimes` keeps the started caplets' negative start times (`discretizedcapfloor.cpp:46-51`), where the discretized swap's filters `t >= 0`, so the grid refuses them and the engine prices nothing: on the wheel, a 3-year semiannual cap at 3% on Euribor 6M, started on 15 July 2024, its fixings stored at 3.5% and 3.25%, notional 1,000,000, on Hull-White (0.05, 0.01) on a flat 3% curve on 15 January 2025, refuses "negative times not allowed" on the tree, where the analytic engine prices it 8,985.844563131719. nanoql keeps the non-negative times, as the discretized swap does, and pays a caplet fixed on or before the reference date its known amount. QuantLib's check: the analytic engine's price, which the tree converges to; both value a caplet still to be fixed at its fixing (the plan's B1-1, `CapletFixingExpiryTests`), where QuantLib's analytic price with those caplets on its five-argument bond option at their fixings is 8,956.86225257607 on the wheel.
+
+Facts:
+
+- `TheSeasonedCapConvergesToTheAnalyticPrice`
+- `ASeasonedCapInArrearsConvergesToItsGaussianIntegral`
+
+## TreeKnownCouponTests
+
+[`Divergences/TreeKnownCouponTests.cs`](../tests/NanoQL.Tests/Divergences/TreeKnownCouponTests.cs)
+
+A coupon between its fixing and its start on the trees (the S-sr plan's SSR6 (iv) widened, round 1's O1-4, and (xvi)). QuantLib's discretized cap knows a caplet by its start: it values the caplet as an option on its bond whenever the start is on the grid (`discretizedcapfloor.cpp:55`) and reads the fixing only when the start is past (`:91`); its discretized swap likewise knows a floating coupon by its reset, the accrual start (`discretizedswap.cpp:28-33`, `:81-90`). So between a coupon's fixing and its start the trees ignore the fixing. nanoql knows a caplet, and a swap's coupon behind the tree swap engine and `DiscretizedSwap`'s public constructor, by its fixing date, and pays its amount; the tree swaption keeps QuantLib's start-date rule, its par convention at exercise. QuantLib's check: the analytic cap engine and the discounting swap engine, which the trees then converge to or equal; and QuantLib's own tree swaption.
+
+Facts:
+
+- `ACapAfterItsFirstFixingIsTheAnalyticEngines`
+- `ASwapAfterItsFirstFixingIsTheDiscountingEngines`
+- `TheTreeSwaptionKeepsQuantLibsStartDateRule`
+- `DiscretizedSwapsPublicConstructorKnowsACouponByItsFixingDate`
+
 ## TreeSwaptionEngineExerciseTimeTests
 
 [`Divergences/TreeSwaptionEngineExerciseTimeTests.cs`](../tests/NanoQL.Tests/Divergences/TreeSwaptionEngineExerciseTimeTests.cs)
@@ -2248,6 +2453,17 @@ The replicating variance-swap engine on structures dated differently. QuantLib's
 Facts:
 
 - `TheVarianceIsPerYearOfTheSwapsTime`
+
+## VasicekCancellationTests
+
+[`Divergences/VasicekCancellationTests.cs`](../tests/NanoQL.Tests/Divergences/VasicekCancellationTests.cs)
+
+The Vasicek model at small mean reversion (the S-sr plan's SSR3): QuantLib 1.44's A and B cut to their a = 0 forms below √ε, dropping terms of order a·τ, and above it subtract O(1/a) terms (`vasicek.cpp:36-58`), so its zero bond is anywhere between 4.6e-163 and 9.1e131 for a between 1.5e-8 and 1e-7 (the wheel, below) and still off by 5.4e-4 at 1e-6. nanoql's are QuantLib's master's forms (#2882, `da854f617`): B as τ·(1 − e^(−aτ))/(aτ) and the exponent of A by the φ and h series below aτ = 1, the bond option's variance likewise. QuantLib's check: upstream's new test lines, `testVasicekDiscountFactorJustAboveSmallMeanReversionCutoff` and `testVasicekDiscountBondOptionForSmallMeanReversion`, against 60-digit references at upstream's tolerances.
+
+Facts:
+
+- `TheZeroBondJustAboveTheCutoff`
+- `TheBondOptionAtSmallReversion`
 
 ## WeekendOnDateHolidayListTests
 

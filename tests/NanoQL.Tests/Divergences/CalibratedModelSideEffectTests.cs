@@ -6,6 +6,7 @@ using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
+using NanoQL.Tests.Harness;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Divergences;
@@ -61,13 +62,14 @@ public class CalibratedModelSideEffectTests
                 .SetPricingEngine<HullWhite>((s, c, m) => JamshidianSwaptionEngine.Calculate(s, c, m)));
         }
 
+        // The wheel's values, within the tolerance: Hull-White's B is QuantLib's master's form (the S-sr plan's SSR3).
         var first = (SwaptionHelper)helpers[0];
-        Assert.Equal(0.013060880278853937, first.ModelValue(model, context));
+        Assert.True(Tolerance.Within(0.013060880278853937, first.ModelValue(model, context)));
 
         // QuantLib's value, which leaves the wheel's model at [0.05, 0.01] and its first helper's model value at
         // 0.01497978949485756
-        Assert.Equal(1.5826408331265667, model.Value(new Vector([0.05, 0.01]), helpers, context));
+        Assert.True(Tolerance.Within(1.5826408331265667, model.Value(new Vector([0.05, 0.01]), helpers, context)));
         Assert.Equal((double[])[0.1, 0.01], model.Params());
-        Assert.Equal(0.013060880278853937, first.ModelValue(model, context));
+        Assert.True(Tolerance.Within(0.013060880278853937, first.ModelValue(model, context)));
     }
 }

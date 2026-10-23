@@ -31,6 +31,12 @@ namespace NanoQL.Models;
 /// Its constructor computes the curve's instantaneous forward rate at 0 and then its zero rate at 0, as QuantLib's does,
 /// so the curve's refusals come in QuantLib's order; the second is the initial short rate.
 /// </para>
+/// <para>
+/// B(t, T) is Vasicek's, in QuantLib's master's form after the pin (#2882); the members QuantLib 1.44 cuts at small
+/// α, the bond options, the analytical fitting parameter and the convexity bias, are written in the same
+/// cancellation-free forms, exact in the limit α → 0 (the S-sr plan's SSR3 and SSR6 (iii)), so their last bits differ
+/// from 1.44's at every α (<c>Divergences/SmallReversionTests.cs</c>).
+/// </para>
 /// </remarks>
 public sealed class HullWhite : Vasicek, ITermStructureConsistentModel
 {
@@ -93,7 +99,8 @@ public sealed class HullWhite : Vasicek, ITermStructureConsistentModel
             throw new ArgumentException($"negative a ({Show(a)}) not allowed", nameof(a));
         }
 
-        double Temp(double x) => a < NumericLimits.QL_EPSILON ? x : (1.0 - Math.Exp(-a * x)) / a;
+        // (1 - exp(-a*x))/a, in Vasicek's cancellation-free form
+        double Temp(double x) => x * OneMinusExpOverX(a * x);
 
         double deltaT = T - t;
         double tempDeltaT = Temp(deltaT);
@@ -170,16 +177,9 @@ public sealed class HullWhite : Vasicek, ITermStructureConsistentModel
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="type"/> isn't a member of its type.</exception>
     public override double DiscountBondOption(OptionType type, double strike, double maturity, double bondMaturity)
     {
-        double a = A();
-        double v;
-        if (a < Math.Sqrt(NumericLimits.QL_EPSILON))
-        {
-            v = Sigma * B(maturity, bondMaturity) * Math.Sqrt(maturity);
-        }
-        else
-        {
-            v = Sigma * B(maturity, bondMaturity) * Math.Sqrt(0.5 * (1.0 - Math.Exp(-2.0 * a * maturity)) / a);
-        }
+        // 0.5*(1 - exp(-2*a*maturity))/a
+        double variance = maturity * OneMinusExpOverX(2.0 * A() * maturity);
+        double v = Sigma * B(maturity, bondMaturity) * Math.Sqrt(variance);
 
         double f = TermStructure.Discount(bondMaturity);
         double k = TermStructure.Discount(maturity) * strike;
@@ -198,25 +198,15 @@ public sealed class HullWhite : Vasicek, ITermStructureConsistentModel
     public override double DiscountBondOption(
         OptionType type, double strike, double maturity, double bondStart, double bondMaturity)
     {
+        // QuantLib's c/(2a^3), c = exp(-2a(U-T)) - exp(-2aU) - 2[exp(-a(U+S-2T)) - exp(-a(U+S))] + exp(-2a(S-T))
+        // - exp(-2aS) with T the maturity, U the bond's start and S its maturity, is the product
+        // [(exp(-aU) - exp(-aS))/a]^2 (exp(2aT) - 1)/(2a) = B(U,S)^2 exp(-2a(U-T)) T (1 - exp(-2aT))/(2aT), free of
+        // its cancellation at small a and exact in the limit; QuantLib floors c at 0 (std::max(c, 0.0), which keeps
+        // a NaN), so the last factor is floored likewise.
         double a = A();
-        double v;
-        if (a < Math.Sqrt(NumericLimits.QL_EPSILON))
-        {
-            v = Sigma * B(bondStart, bondMaturity) * Math.Sqrt(maturity);
-        }
-        else
-        {
-            double c = Math.Exp(-2.0 * a * (bondStart - maturity))
-                - Math.Exp(-2.0 * a * bondStart)
-                - (2.0 * (Math.Exp(-a * (bondStart + bondMaturity - (2.0 * maturity)))
-                          - Math.Exp(-a * (bondStart + bondMaturity))))
-                + Math.Exp(-2.0 * a * (bondMaturity - maturity))
-                - Math.Exp(-2.0 * a * bondMaturity);
-
-            // The above should always be positive, but due to numerical errors it can be a very small negative
-            // number. We floor it at 0 to avoid NaNs (std::max(c, 0.0), which keeps a NaN c).
-            v = Sigma / (a * Math.Sqrt(2.0 * a)) * Math.Sqrt(c < 0.0 ? 0.0 : c);
-        }
+        double variance = maturity * OneMinusExpOverX(2.0 * a * maturity);
+        double v = Sigma * B(bondStart, bondMaturity) * Math.Exp(-a * (bondStart - maturity))
+            * Math.Sqrt(variance < 0.0 ? 0.0 : variance);
 
         double f = TermStructure.Discount(bondMaturity);
         double k = TermStructure.Discount(bondStart) * strike;
@@ -240,7 +230,8 @@ public sealed class HullWhite : Vasicek, ITermStructureConsistentModel
     {
         double discount1 = TermStructure.Discount(t);
         double discount2 = TermStructure.Discount(T);
-        double forward = TermStructure.ForwardRate(t, t, Compounding.Continuous, Frequency.NoFrequency).Rate;
+        // ForwardRate(t, t, Continuous)'s rate without its InterestRate, so a Monte Carlo path's bonds allocate nothing
+        double forward = TermStructure.ContinuousForwardRate(t, t);
         double temp = Sigma * B(t, T);
         double value = (B(t, T) * forward) - (0.25 * temp * temp * B(0.0, 2.0 * t));
         return Math.Exp(value) * discount2 / discount1;
@@ -272,7 +263,7 @@ public sealed class HullWhite : Vasicek, ITermStructureConsistentModel
             public override double Value(ImmutableArray<double> parameters, double t)
             {
                 double forwardRate = termStructure.ForwardRate(t, t, Compounding.Continuous, Frequency.NoFrequency).Rate;
-                double temp = a < Math.Sqrt(NumericLimits.QL_EPSILON) ? sigma * t : sigma * (1.0 - Math.Exp(-a * t)) / a;
+                double temp = sigma * t * OneMinusExpOverX(a * t);
                 return forwardRate + (0.5 * temp * temp);
             }
         }

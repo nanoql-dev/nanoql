@@ -6,6 +6,7 @@ using NanoQL.Experimental;
 using NanoQL.Instruments;
 using NanoQL.Models;
 using NanoQL.TermStructures;
+using NanoQL.Tests.Harness;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Divergences;
@@ -98,8 +99,9 @@ public class CallabilityTypeAfterSettledCallabilityTests
                     + $"expected {expected}");
             }
 
-            // QuantLib 1.44's reading moves it
-            Assert.Equal(quantLib144[type].Without, expected);
+            // QuantLib 1.44's reading moves it; the price without it is QuantLib's within the tolerance, the tree's
+            // Ornstein-Uhlenbeck variance in its cancellation-free form (the S-sr plan's SSR3 class)
+            Assert.True(Tolerance.Within(quantLib144[type].Without, expected), $"{expected}");
             if (calculated == quantLib144[type].WithSettled)
             {
                 errors.Add($"QuantLib 1.44's price, {calculated}, for later {(type == CallabilityType.Call ? "calls" : "puts")}");

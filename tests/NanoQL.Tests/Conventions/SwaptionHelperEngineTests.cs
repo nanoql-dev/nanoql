@@ -5,6 +5,7 @@ using NanoQL.Indexes;
 using NanoQL.Models;
 using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
+using NanoQL.Tests.Harness;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Conventions;
@@ -37,7 +38,8 @@ public class SwaptionHelperEngineTests
 
         SwaptionHelper priced = helper.SetPricingEngine<HullWhite>((s, c, m) => JamshidianSwaptionEngine.Calculate(s, c, m));
         Assert.NotSame(helper, priced);
-        Assert.Equal(0.013060880278853937, priced.ModelValue(hullWhite, context));
+        // The wheel's value, within the tolerance: Hull-White's B is QuantLib's master's form (the S-sr plan's SSR3).
+        Assert.True(Tolerance.Within(0.013060880278853937, priced.ModelValue(hullWhite, context)));
         Assert.Throws<InvalidCastException>(() => priced.ModelValue(vasicek, context));
         Assert.Throws<InvalidCastException>(() => priced.CalibrationError(vasicek, context));
 

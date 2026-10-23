@@ -7,10 +7,18 @@
 // Upstream: ql/processes/ornsteinuhlenbeckprocess.hpp ql/processes/ornsteinuhlenbeckprocess.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
+using NanoQL.Numerics;
+
 namespace NanoQL.Processes;
 
 /// <summary>The Ornstein-Uhlenbeck process, governed by dx = a (r − x_t) dt + σ dW_t.</summary>
-/// <remarks>Its expectation, standard deviation and variance are exact, with the algebraic limit for a small speed.</remarks>
+/// <remarks>
+/// Its expectation, standard deviation and variance are exact. The variance, σ² (1 − e^(−2aΔt))/2a, is written as
+/// σ²Δt·(1 − e^(−x))/x, x = 2aΔt, in the cancellation-free form of QuantLib's master's mean-reversion kernels (the S-sr
+/// plan's SSR3 class, by the user's ruling of 2026-10-22), exact in the limit a → 0: a divergence, QuantLib cutting to
+/// σ²Δt below |a| = √ε and cancelling just above it, off by up to 8.3e-8 relative at a = 1.5e-8, so the last bits
+/// differ from QuantLib's at every speed (<c>Divergences/OrnsteinUhlenbeckVarianceTests.cs</c>).
+/// </remarks>
 public sealed class OrnsteinUhlenbeckProcess : StochasticProcess1D
 {
     private readonly double x0;
@@ -75,8 +83,7 @@ public sealed class OrnsteinUhlenbeckProcess : StochasticProcess1D
     public override double StdDeviation(double t0, double x0, double dt) => Math.Sqrt(Variance(t0, x0, dt));
 
     /// <summary>
-    /// The variance after Δt, σ² (1 − e^(−2a Δt)) / 2a; σ² Δt, its algebraic limit, when |a| is below the square root
-    /// of machine epsilon.
+    /// The variance after Δt, σ² (1 − e^(−2a Δt)) / 2a, as σ²Δt·(1 − e^(−x))/x, x = 2aΔt; σ² Δt, its limit, where x is 0.
     /// </summary>
     /// <param name="t0">The start of the interval, which the variance doesn't depend on.</param>
     /// <param name="x0">The state at its start, which the variance doesn't depend on.</param>
@@ -84,12 +91,9 @@ public sealed class OrnsteinUhlenbeckProcess : StochasticProcess1D
     /// <returns>The variance.</returns>
     public override double Variance(double t0, double x0, double dt)
     {
-        if (Math.Abs(speed) < Math.Sqrt(NumericLimits.QL_EPSILON))
-        {
-            // algebraic limit for small speed
-            return volatility * volatility * dt;
-        }
-
-        return 0.5 * volatility * volatility / speed * (1.0 - Math.Exp(-2.0 * speed * dt));
+        // QuantLib's 0.5*sigma^2/a*(1 - exp(-2*a*dt)), and its algebraic limit sigma^2*dt below |a| = sqrt(QL_EPSILON),
+        // without the cancellation (1 - exp(-x))/x suffers as x -> 0
+        double x = 2.0 * speed * dt;
+        return volatility * volatility * dt * (x == 0.0 ? 1.0 : -Expm1Functions.StdExpm1(-x) / x);
     }
 }

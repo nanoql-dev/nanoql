@@ -66,9 +66,14 @@ public class DiscretizedSwaptionCxxVectorTests
                 "vasicekPresentValueAtZero",
                 Rollback(Swaption(), vasicek.Tree(new TimeGrid(swaptionTimes, steps)), from, 0.0).PresentValue);
 
-            (values, presentValue) = Rollback(Swap(), hullWhite.Tree(new TimeGrid(swapTimes, steps)), c.Double("swapFrom"), 0.0);
-            check.Output(c, "swapValuesAtZero", values);
-            check.Output(c, "swapPresentValueAtZero", presentValue);
+            // discretizedswaption.py leaves these out where the swap's first floating coupon pays on the evaluation date
+            // (the fixing-date rule, SSR6 (xvi)).
+            if (c.Expected.TryGetProperty("swapValuesAtZero", out _))
+            {
+                (values, presentValue) = Rollback(Swap(), hullWhite.Tree(new TimeGrid(swapTimes, steps)), c.Double("swapFrom"), 0.0);
+                check.Output(c, "swapValuesAtZero", values);
+                check.Output(c, "swapPresentValueAtZero", presentValue);
+            }
         }
 
         check.Complete();

@@ -7,6 +7,11 @@ level), and at 20 points (t, x, dt) its five overridden members of the process i
 expectation(t, x, dt), stdDeviation(t, x, dt) and variance(t, x, dt). Then the constructor's refusal of a negative and
 of a NaN volatility.
 
+Left out: the standard deviation and the variance of the two processes at the square root of machine epsilon and just
+below it, where QuantLib's variance cuts to sigma^2*dt or cancels, and nanoql's is the cancellation-free
+sigma^2*dt*(1 - exp(-x))/x, x = 2a*dt, by the user's ruling of 2026-10-22 (the S-sr plan's SSR3 class;
+tests/NanoQL.Tests/Divergences/OrnsteinUhlenbeckVarianceTests.cs). Elsewhere the form moves the last bits only.
+
 The wheel's calls, by QuantLib-SWIG's stochasticprocess.i: ql.OrnsteinUhlenbeckProcess(speed, vol, x0, level) is the
 constructor, with QuantLib's defaults for x0 and level where the case leaves them out; speed, volatility and level
 are its members, and x0, drift, diffusion, expectation, stdDeviation and variance those StochasticProcess1D
@@ -44,6 +49,11 @@ PROCESSES = [
 ]
 
 
+# The processes whose variance the cancellation-free form moves beyond the tolerance, and the outputs that read it.
+LEFT_OUT = {5, 6}
+VARIANCE_OUTPUTS = ("stdDeviation", "variance")
+
+
 def build(speed, vol, x0, level):
     args = [speed, vol] + ([x0] if x0 is not None else []) + ([level] if level is not None else [])
     return ql.OrnsteinUhlenbeckProcess(*args)
@@ -77,6 +87,9 @@ def cases():
                         "expectation": [p.expectation(t, x, dt) for t, x, dt in points],
                         "stdDeviation": [p.stdDeviation(t, x, dt) for t, x, dt in points],
                         "variance": [p.variance(t, x, dt) for t, x, dt in points]}})
+        if k in LEFT_OUT:
+            for m in VARIANCE_OUTPUTS:
+                out[-1]["expected"].pop(m)
     for name, vol in (("negative volatility", -0.01), ("NaN volatility", math.nan)):
         out.append({"name": name,
                     "inputs": {"settings": st, "speed": 0.1, "volatility": v.enc(vol)},

@@ -45,8 +45,13 @@ public class OrnsteinUhlenbeckProcessVectorTests
             check.Output(c, "drift", points.Select(q => (object?)p.Drift(q[0], q[1])).ToArray());
             check.Output(c, "diffusion", points.Select(q => (object?)p.Diffusion(q[0], q[1])).ToArray());
             check.Output(c, "expectation", points.Select(q => (object?)p.Expectation(q[0], q[1], q[2])).ToArray());
-            check.Output(c, "stdDeviation", points.Select(q => (object?)p.StdDeviation(q[0], q[1], q[2])).ToArray());
-            check.Output(c, "variance", points.Select(q => (object?)p.Variance(q[0], q[1], q[2])).ToArray());
+
+            // ornsteinuhlenbeckprocess.py leaves these out at the square root of machine epsilon and below it.
+            if (c.Expected.TryGetProperty("variance", out _))
+            {
+                check.Output(c, "stdDeviation", points.Select(q => (object?)p.StdDeviation(q[0], q[1], q[2])).ToArray());
+                check.Output(c, "variance", points.Select(q => (object?)p.Variance(q[0], q[1], q[2])).ToArray());
+            }
         }
 
         check.Complete();

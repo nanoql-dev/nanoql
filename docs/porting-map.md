@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 731 | 98 |
-| partial | 31 | 28 |
-| ported | 498 | 56 |
+| not started | 713 | 97 |
+| partial | 30 | 27 |
+| ported | 517 | 58 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -825,7 +825,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `integral` | partial | Numerics/Integrals/IntegrationResult.cs, Numerics/Integrals/Integrator.cs | partial: absoluteError and integrationSuccess, which wait for S-cms: no integrator S-eq ports computes an error, so QuantLib's absoluteError reads an uninitialized member after each of them; S-cms's CMS pricer is their first caller, on its Kronrod rules (integrationSuccess also compares the evaluation count with maxEvaluations, which the trapezoid family uses as an iteration bound) |
 | `kronrodintegral` | not started |  | no nanoql type: GaussKronrodNonAdaptive, GaussKronrodAdaptive |
 | `momentbasedgaussianpolynomial` | not started |  | no nanoql type: MomentBasedGaussianPolynomial |
-| `segmentintegral` | not started |  | no nanoql type: SegmentIntegral |
+| `segmentintegral` | ported | Numerics/Integrals/SegmentIntegral.cs |  |
 | `simpsonintegral` | ported | Numerics/Integrals/SimpsonIntegral.cs |  |
 | `tanhsinhintegral` | not started |  | no nanoql type: TanhSinhIntegral |
 | `trapezoidintegral` | ported | Numerics/Integrals/TrapezoidIntegral/Default.cs, Numerics/Integrals/TrapezoidIntegral/ITrapezoidIntegrationPolicy.cs, Numerics/Integrals/TrapezoidIntegral/MidPoint.cs, Numerics/Integrals/TrapezoidIntegral/TrapezoidIntegral{TIntegrationPolicy}.cs |  |
@@ -1151,7 +1151,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bsmlattice` | ported | Methods/Lattices/BlackScholesLattice{T}.cs |  |
 | `lattice` | ported | Methods/Lattices/TreeLattice.cs |  |
 | `lattice1d` | ported | Methods/Lattices/TreeLattice1D.cs |  |
-| `lattice2d` | not started |  | no nanoql type: TreeLattice2D |
+| `lattice2d` | ported | Methods/Lattices/TreeLattice2D.cs |  |
 | `tflattice` | not started |  | no nanoql type: TsiveriotisFernandesLattice |
 | `tree` | ported | Methods/Lattices/Tree.cs |  |
 | `trinomialtree` | ported | Methods/Lattices/TrinomialTree.cs | no nanoql type: TrinomialTreeBranches |
@@ -1401,15 +1401,15 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `onefactormodel` | partial | Models/ShortRate/OneFactorModel/OneFactorAffineModel.cs, Models/ShortRate/OneFactorModel/OneFactorModel.cs, Models/ShortRate/OneFactorModel/OneFactorModelShortRateDynamics.cs, Models/ShortRate/OneFactorModel/OneFactorModelShortRateTree.cs | partial: the constructor fitting the tree to a term structure numerically, with its solver helper, which waits for batch 3's extended Cox-Ingersoll-Ross model, its only user |
-| `twofactormodel` | not started |  | no nanoql type: TwoFactorModel, TwoFactorModelShortRateDynamics, TwoFactorModelShortRateTree |
+| `onefactormodel` | ported | Models/ShortRate/OneFactorModel/OneFactorAffineModel.cs, Models/ShortRate/OneFactorModel/OneFactorModel.cs, Models/ShortRate/OneFactorModel/OneFactorModelShortRateDynamics.cs, Models/ShortRate/OneFactorModel/OneFactorModelShortRateTree.cs |  |
+| `twofactormodel` | ported | Models/ShortRate/TwoFactorModel/TwoFactorModel.cs, Models/ShortRate/TwoFactorModel/TwoFactorModelShortRateDynamics.cs, Models/ShortRate/TwoFactorModel/TwoFactorModelShortRateTree.cs |  |
 
 ### `ql/models/shortrate/calibrationhelpers/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `caphelper` | not started |  | no nanoql type: CapHelper |
+| `caphelper` | ported | Models/ShortRate/CalibrationHelpers/CapHelper.cs |  |
 | `swaptionhelper` | ported | Models/ShortRate/CalibrationHelpers/SwaptionHelper.cs |  |
 
 ### `ql/models/shortrate/onefactormodels/`
@@ -1417,9 +1417,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `blackkarasinski` | not started |  | no nanoql type: BlackKarasinski, BlackKarasinskiDynamics |
-| `coxingersollross` | not started |  | no nanoql type: CoxIngersollRoss, CoxIngersollRossDynamics |
-| `extendedcoxingersollross` | not started |  | no nanoql type: ExtendedCoxIngersollRoss, ExtendedCoxIngersollRossDynamics, ExtendedCoxIngersollRossFittingParameter |
+| `blackkarasinski` | ported | Models/ShortRate/OneFactorModels/BlackKarasinski.cs | no nanoql type: BlackKarasinskiDynamics |
+| `coxingersollross` | ported | Models/ShortRate/OneFactorModels/CoxIngersollRoss.cs | no nanoql type: CoxIngersollRossDynamics |
+| `extendedcoxingersollross` | ported | Models/ShortRate/OneFactorModels/ExtendedCoxIngersollRoss.cs | no nanoql type: ExtendedCoxIngersollRossDynamics, ExtendedCoxIngersollRossFittingParameter |
 | `gaussian1dmodel` | not started |  | no nanoql type: Gaussian1dModel |
 | `gsr` | not started |  | no nanoql type: Gsr |
 | `hullwhite` | ported | Models/ShortRate/OneFactorModels/HullWhite.cs | no nanoql type: HullWhiteDynamics, HullWhiteFittingParameter |
@@ -1431,7 +1431,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `g2` | not started |  | no nanoql type: G2, G2Dynamics, G2FittingParameter |
+| `g2` | ported | Models/ShortRate/TwoFactorModels/G2.cs, Models/ShortRate/TwoFactorModels/G2Functions.cs | no nanoql type: G2Dynamics, G2FittingParameter |
 
 ### `ql/models/volatility/`
 
@@ -1549,13 +1549,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `analyticcapfloorengine` | not started |  | no nanoql type: AnalyticCapFloorEngine |
+| `analyticcapfloorengine` | ported | PricingEngines/CapFloor/AnalyticCapFloorEngine.cs |  |
 | `bacheliercapfloorengine` | ported | PricingEngines/CapFloor/BachelierCapFloorEngine.cs |  |
 | `blackcapfloorengine` | ported | PricingEngines/CapFloor/BlackCapFloorEngine.cs |  |
-| `discretizedcapfloor` | not started |  | no nanoql type: DiscretizedCapFloor |
+| `discretizedcapfloor` | ported | PricingEngines/CapFloor/DiscretizedCapFloor.cs |  |
 | `gaussian1dcapfloorengine` | not started |  | no nanoql type: Gaussian1dCapFloorEngine |
-| `mchullwhiteengine` | not started |  | no nanoql type: MCHullWhiteCapFloorEngine, MakeMCHullWhiteCapFloorEngine |
-| `treecapfloorengine` | not started |  | no nanoql type: TreeCapFloorEngine |
+| `mchullwhiteengine` | ported | PricingEngines/CapFloor/MCHullWhiteEngine/HullWhiteCapFloorPricer.cs, PricingEngines/CapFloor/MCHullWhiteEngine/MCHullWhiteCapFloorEngine.cs, PricingEngines/CapFloor/MCHullWhiteEngine/MakeMCHullWhiteCapFloorEngine{TRng,TStats}.cs |  |
+| `treecapfloorengine` | ported | PricingEngines/CapFloor/TreeCapFloorEngine.cs |  |
 
 ### `ql/pricingengines/cliquet/`
 
@@ -1644,7 +1644,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `discountingconstnotionalcrosscurrencyswapengine` | ported | PricingEngines/Swap/DiscountingConstNotionalCrossCurrencySwapEngine.cs |  |
 | `discountingswapengine` | ported | PricingEngines/Swap/DiscountingSwapEngine.cs |  |
 | `discretizedswap` | ported | PricingEngines/Swap/DiscretizedSwap.cs |  |
-| `treeswapengine` | not started |  | no nanoql type: TreeVanillaSwapEngine |
+| `treeswapengine` | ported | PricingEngines/Swap/TreeVanillaSwapEngine.cs |  |
 
 ### `ql/pricingengines/swaption/`
 
@@ -1656,7 +1656,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `discretizedswaption` | ported | PricingEngines/Swaption/DiscretizedSwaption.cs |  |
 | `fdg2swaptionengine` | not started |  | no nanoql type: FdG2SwaptionEngine |
 | `fdhullwhiteswaptionengine` | not started |  | no nanoql type: FdHullWhiteSwaptionEngine |
-| `g2swaptionengine` | not started |  | no nanoql type: G2SwaptionEngine |
+| `g2swaptionengine` | ported | PricingEngines/Swaption/G2SwaptionEngine.cs |  |
 | `gaussian1dfloatfloatswaptionengine` | not started |  | no nanoql type: Gaussian1dFloatFloatSwaptionEngine, Gaussian1dFloatFloatSwaptionEngineProbabilities |
 | `gaussian1djamshidianswaptionengine` | not started |  | no nanoql type: Gaussian1dJamshidianSwaptionEngine |
 | `gaussian1dnonstandardswaptionengine` | not started |  | no nanoql type: Gaussian1dNonstandardSwaptionEngine, Gaussian1dNonstandardSwaptionEngineProbabilities |
@@ -1720,18 +1720,18 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `batesprocess` | not started |  | no nanoql type: BatesProcess |
 | `blackscholesprocess` | ported | Processes/BlackScholesProcess/BlackProcess.cs, Processes/BlackScholesProcess/BlackScholesMertonProcess.cs, Processes/BlackScholesProcess/BlackScholesProcess.cs, Processes/BlackScholesProcess/GarmanKohlagenProcess.cs, Processes/BlackScholesProcess/GeneralizedBlackScholesProcess.cs |  |
-| `coxingersollrossprocess` | not started |  | no nanoql type: CoxIngersollRossProcess |
+| `coxingersollrossprocess` | ported | Processes/CoxIngersollRossProcess.cs |  |
 | `endeulerdiscretization` | not started |  | no nanoql type: EndEulerDiscretization |
 | `eulerdiscretization` | ported | Processes/EulerDiscretization.cs |  |
-| `forwardmeasureprocess` | not started |  | no nanoql type: ForwardMeasureProcess, ForwardMeasureProcess1D |
-| `g2process` | not started |  | no nanoql type: G2Process, G2ForwardProcess |
+| `forwardmeasureprocess` | ported | Processes/ForwardMeasureProcess/ForwardMeasureProcess.cs, Processes/ForwardMeasureProcess/ForwardMeasureProcess1D.cs |  |
+| `g2process` | ported | Processes/G2Process/G2ForwardProcess.cs, Processes/G2Process/G2Process.cs |  |
 | `geometricbrownianprocess` | ported | Processes/GeometricBrownianMotionProcess.cs |  |
 | `gjrgarchprocess` | not started |  | no nanoql type: GJRGARCHProcess, GJRGARCHProcessDiscretization |
 | `gsrprocess` | not started |  | no nanoql type: GsrProcess |
 | `gsrprocesscore` | not started |  |  |
-| `hestonprocess` | partial | Processes/HestonProcess/HestonProcess.cs, Processes/HestonProcess/HestonProcessDiscretization.cs | partial: pdf, the Fokker-Planck density, which waits for S-sr's SegmentIntegral and Boost's non-central chi-squared density |
+| `hestonprocess` | partial | Processes/HestonProcess/HestonProcess.cs, Processes/HestonProcess/HestonProcessDiscretization.cs | partial: pdf, the Fokker-Planck density, which waits for Boost's non-central chi-squared density, which S-van ports |
 | `hestonslvprocess` | not started |  | no nanoql type: HestonSLVProcess |
-| `hullwhiteprocess` | not started |  | no nanoql type: HullWhiteProcess, HullWhiteForwardProcess |
+| `hullwhiteprocess` | ported | Processes/HullWhiteProcess/HullWhiteForwardProcess.cs, Processes/HullWhiteProcess/HullWhiteProcess.cs, Processes/HullWhiteProcess/HullWhiteProcessFunctions.cs |  |
 | `hybridhestonhullwhiteprocess` | not started |  | no nanoql type: HybridHestonHullWhiteProcess, HybridHestonHullWhiteProcessDiscretization |
 | `jointstochasticprocess` | not started |  | no nanoql type: JointStochasticProcess |
 | `merton76process` | not started |  | no nanoql type: Merton76Process |
@@ -2139,7 +2139,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `forwardrateagreement` | ported | TestSuite/ForwardRateAgreementTests.cs | 1 of 1 cases |
 | `functions` | ported | TestSuite/FunctionsTests.cs | 9 of 9 cases |
 | `fxforward` | ported | TestSuite/FxForwardTests.cs | 13 of 13 cases |
-| `g2process` | not started |  | 8 cases |
+| `g2process` | ported | TestSuite/G2ProcessTests.cs | 8 of 8 cases; replaced: testG2ProcessObservesTermStructure by Conventions/ModelRebuildTests.cs |
 | `garch` | not started |  | 2 cases |
 | `gaussianquadratures` | partial | TestSuite/GaussianQuadraturesTests.cs | 8 of 12 cases; not yet: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial, testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes |
 | `gjrgarchmodel` | not started |  | 2 cases |
@@ -2220,7 +2220,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rounding` | ported | TestSuite/RoundingTests.cs | 5 of 5 cases |
 | `schedule` | ported | TestSuite/ScheduleTests.cs | 28 of 28 cases |
 | `settings` | not ported: tests Settings, which EvaluationContext replaces |  |  |
-| `shortratemodels` | partial | TestSuite/ShortRateModelsTests.cs | 6 of 9 cases; replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks by Conventions/ModelRebuildTests.cs; not yet: testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks, testSwaps, testExtendedCoxIngersollRossDiscountFactor |
+| `shortratemodels` | ported | TestSuite/ShortRateModelsTests.cs | 9 of 9 cases; replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks by Conventions/ModelRebuildTests.cs; testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks by Conventions/ModelRebuildTests.cs |
 | `sofrfutures` | not started |  | 6 cases |
 | `softbarrieroption` | not started |  | 1 cases |
 | `solvers` | partial | TestSuite/SolversTests.cs | 3 of 9 cases; not yet: testBisection, testFalsePosition, testNewton, testRidder, testSecant, testHalley |

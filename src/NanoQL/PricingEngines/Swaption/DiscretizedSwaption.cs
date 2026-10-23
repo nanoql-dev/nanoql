@@ -95,7 +95,7 @@ public sealed class DiscretizedSwaption : DiscretizedOption
         double lastPayment = lastFixedPayment < lastFloatingPayment ? lastFloatingPayment : lastFixedPayment;
 
         var underlying = new DiscretizedSwap(
-            snappedArgs, referenceDate, dayCounter, fixedCouponAdjustments, floatingCouponAdjustments, context);
+            snappedArgs, referenceDate, dayCounter, fixedCouponAdjustments, floatingCouponAdjustments, context, false);
         return new Parts(underlying, exercise.Type, exerciseTimes, lastPayment);
     }
 

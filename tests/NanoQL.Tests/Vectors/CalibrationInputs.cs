@@ -112,6 +112,33 @@ internal static class CalibrationInputs
         };
     }
 
+    /// <summary>
+    /// The cap helper a spec describes (<c>tools/vectors/gen/models/shortrate/calibrationhelpers/caphelper.py</c>'s
+    /// <c>{"length", "volatility", "index", "fixedLegFrequency", "fixedLegDayCounter", "includeFirstSwaplet",
+    /// "termStructure", "errorType", "type", "shift"}</c>), with no pricing engine.
+    /// </summary>
+    /// <param name="spec">The spec.</param>
+    /// <param name="context">The case's evaluation context, which the helper is built under.</param>
+    /// <returns>The helper.</returns>
+    public static CapHelper CapHelperOf(JsonElement spec, EvaluationContext context) => new(
+        SwapInputs.PeriodOf(spec.GetProperty("length")),
+        IndexInputs.Real(spec.GetProperty("volatility")),
+        SwapInputs.IndexOf(spec.GetProperty("index")),
+        (Frequency)spec.GetProperty("fixedLegFrequency").GetInt32(),
+        CashFlowInputs.DayCounterOf(spec.GetProperty("fixedLegDayCounter")),
+        spec.GetProperty("includeFirstSwaplet").GetBoolean(),
+        IndexInputs.CurveOf(spec.GetProperty("termStructure"))!,
+        context,
+        (BlackCalibrationHelperCalibrationErrorType)spec.GetProperty("errorType").GetInt32(),
+        (VolatilityType)spec.GetProperty("type").GetInt32(),
+        IndexInputs.Real(spec.GetProperty("shift")));
+
+    /// <summary>A cap helper priced by the analytic cap/floor engine on the affine model it is given.</summary>
+    /// <param name="helper">The helper.</param>
+    /// <returns>The helper's copy with the engine.</returns>
+    public static CapHelper WithAnalytic(CapHelper helper) =>
+        helper.SetPricingEngine<OneFactorAffineModel>((cap, c, m) => AnalyticCapFloorEngine.Calculate(cap, c, m));
+
     /// <summary>A helper priced by the Jamshidian engine on the model it is given.</summary>
     /// <param name="helper">The helper.</param>
     /// <param name="termStructure">The engine's term structure, for a model with no curve of its own, or null.</param>
@@ -138,13 +165,28 @@ internal static class CalibrationInputs
         IndexInputs.Real(spec.GetProperty("sigma")),
         IndexInputs.Real(spec.GetProperty("lambda")));
 
-    /// <summary>The model a spec describes: a Hull-White or a Vasicek.</summary>
+    /// <summary>
+    /// The model a spec describes: a Hull-White, a Vasicek, a Cox-Ingersoll-Ross (<c>{"r0", "theta", "k",
+    /// "sigma"}</c>) or an extended Cox-Ingersoll-Ross (<c>{"termStructure", "theta", "k", "sigma", "x0"}</c>), the
+    /// last two with the Feller constraint, the only one the wheel builds.
+    /// </summary>
     /// <param name="spec">The spec, with its <c>"type"</c>.</param>
     /// <returns>The model.</returns>
     public static OneFactorAffineModel ModelOf(JsonElement spec) => spec.GetProperty("type").GetString() switch
     {
         "HullWhite" => HullWhiteOf(spec),
         "Vasicek" => VasicekOf(spec),
+        "CoxIngersollRoss" => new CoxIngersollRoss(
+            IndexInputs.Real(spec.GetProperty("r0")),
+            IndexInputs.Real(spec.GetProperty("theta")),
+            IndexInputs.Real(spec.GetProperty("k")),
+            IndexInputs.Real(spec.GetProperty("sigma"))),
+        "ExtendedCoxIngersollRoss" => new ExtendedCoxIngersollRoss(
+            CashFlowInputs.CurveOf(spec.GetProperty("termStructure")),
+            IndexInputs.Real(spec.GetProperty("theta")),
+            IndexInputs.Real(spec.GetProperty("k")),
+            IndexInputs.Real(spec.GetProperty("sigma")),
+            IndexInputs.Real(spec.GetProperty("x0"))),
         string type => throw new InvalidOperationException($"unknown model '{type}'"),
         null => throw new InvalidOperationException("a model without a type"),
     };
