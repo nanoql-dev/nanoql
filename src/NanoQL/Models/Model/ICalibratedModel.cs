@@ -29,6 +29,17 @@ public interface ICalibratedModel
     /// <summary>Gets the constraint the model imposes on its parameters: each argument's own, on its slice.</summary>
     Constraint Constraint { get; }
 
+    /// <summary>
+    /// Gets the parameters a calibration fixes when its caller fixes none: one flag per parameter, or empty, the
+    /// default, for all free.
+    /// </summary>
+    /// <remarks>
+    /// QuantLib's models that override <c>calibrate</c> to fix parameters by default implement it: the
+    /// Markov-functional model fixes its first volatility, since its prices don't depend on the volatilities' level.
+    /// Every other model keeps the empty default, QuantLib's (the S-g1d plan's G1R2 (ii)).
+    /// </remarks>
+    ImmutableArray<bool> DefaultFixParameters => [];
+
     /// <summary>The parameters calibration works on: every argument's parameters, in order.</summary>
     /// <returns>A new vector holding them.</returns>
     Vector Params();

@@ -1140,6 +1140,17 @@ Facts:
 
 - `ANullDecoratedInterpolationIsRefused`
 
+## FlatPayoffExtrapolationTests
+
+[`Divergences/FlatPayoffExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/FlatPayoffExtrapolationTests.cs)
+
+Flat payoff extrapolation's right tail (the S-g1d plan's G1R6 (xxi)): with `flatPayoffExtrapolation`, QuantLib's Gaussian1d engines integrate past the grid's last node the constant `p[n − 2]`, the second-last node's value (the swaption engine `gaussian1dswaptionengine.cpp:166-171`, the nonstandard, float-float and cap/floor engines, `Gaussian1dModel::zerobondOption` and the Markov-functional model alike), where the left tail takes `p[0]`, its boundary node. On the wheel, a 5Y into 10Y payer at 2% on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12 standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168; a put struck at 0.8 on the 10-year bond from the same exercise, on the model's `zerobondOption`, 0.07911771510819356 against 0.08048473087856346. nanoql takes `p[n − 1]`. For a payoff that increases past the grid, the fixed tail lies between QuantLib's and the true one, the one assertion the two values can't both pass. No QuantLib case sets the flag. QuantLib's check: the same engine on the widened grid.
+
+Facts:
+
+- `TheSwaptionEnginesRightTailTakesTheLastNode`
+- `TheZerobondOptionsRightTailTakesTheLastNode`
+
 ## FloatFloatSwapOneDateScheduleTests
 
 [`Divergences/FloatFloatSwapOneDateScheduleTests.cs`](../tests/NanoQL.Tests/Divergences/FloatFloatSwapOneDateScheduleTests.cs)
@@ -1291,6 +1302,40 @@ Facts:
 - `ThePerfectlyCorrelatedStepIsBounded`
 - `TheZeroStepIsItsLimit`
 
+## Gaussian1dForwardRateEndDateTests
+
+[`Divergences/Gaussian1dForwardRateEndDateTests.cs`](../tests/NanoQL.Tests/Divergences/Gaussian1dForwardRateEndDateTests.cs)
+
+The forward rate's end date (QuantLib's #2848, taken ahead of the pin; the S-g1d plan's G1R5 (i)): QuantLib 1.44's `Gaussian1dModel::forwardRate` ends the period by advancing the value date by the index's tenor on its fixing calendar (`gaussian1dmodel.cpp:44-46`); QuantLib's master after the pin ends it at the index's `maturityDate`, which an index of its own overrides. For EURLibor 6M fixed on 20 February 2025, the value date is 24 February and the plain advance 26 August, where its maturity date is 25 August: on the wheel, a GSR model on a flat 3% curve (a = σ = 0.01) gives 0.029812686783318977 at y = 0.4. nanoql's check: the model's own zero bonds over the period to the maturity date.
+
+Facts:
+
+- `ThePeriodEndsAtTheIndexsMaturityDate`
+
+## Gaussian1dMismatchedTimesTests
+
+[`Divergences/Gaussian1dMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/Gaussian1dMismatchedTimesTests.cs)
+
+The Gaussian1d model and engines on curves on another clock (the S-g1d plan's G1R6 (xvi); master plan §2.2's mismatched-dates row): QuantLib reads a discount or forwarding curve at the model curve's times, so a curve on another day counter with the same discount factors by date moves a price. On the wheel, on a GSR model (a = σ = 0.01) on a flat 3% Actual/365 (Fixed) curve, a 5Y into 10Y payer at 3% is worth 0.07095344971961592 with a 2% discount curve on Actual/360, where the same curve restated on Actual/365 (Fixed) gives 0.07076745548830388; with the index forecast on a 3.1% Actual/360 curve, 0.06649840575430056 against 0.06817679085140739 restated. On a model curve on 30/360 dated the 30th, a time doesn't tell the 30th of a 31-day month from the 31st: from 30 June 2025, a Bermudan exercised on 30 January 2026, 30 July 2026 and 30 March 2027 into a 5-year payer at 3%, with a 2.5% Actual/365 (Fixed) discount curve, is worth 0.029341545499651206, against 0.02934088072814103 on the curve restated on 30/360 at every date the engine reads; its Digital probability of the exercise on the 30th (the C++ harness) 0.00013119665716211765 against 0.00013119666147197958, and a zero-bond option expiring on 30 January 2026 0.014136151799917162 against 0.014102533018978234. nanoql reads each curve at the instant QuantLib's argument denotes: by the date QuantLib derives a time from (an exercise, a fixing, an option's expiry), where a read by the time would take the 31st; and the numeraire time, which has no date and whose factor cancels, at the instant it denotes on the model's clock. QuantLib's check: its engine on the market restated on the model curve's clock.
+
+Facts:
+
+- `ADiscountCurveOnAnotherDayCounterIsReadByDate`
+- `AForwardingCurveOnAnotherDayCounterIsReadByDate`
+- `AnExerciseOnThe30thOfA31DayMonthIsReadByDate`
+- `TheDigitalProbabilitiesReadTheExerciseByDate`
+- `AZerobondOptionExpiringOnThe30thIsReadByDate`
+
+## Gaussian1dNumeraireExtrapolationTests
+
+[`Divergences/Gaussian1dNumeraireExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/Gaussian1dNumeraireExtrapolationTests.cs)
+
+The numeraire's read of a given curve (the S-g1d plan's G1R6 (i)): GSR's numeraire at t = 0 reads a curve it is given at the numeraire time without extrapolation (`gsr.cpp:216-220`), where it reads its own with it, so on a 30-year curve QuantLib's `numeraire(0, 0, yts)` throws "time (60) is past max curve time (30.0192)", and so does every Gaussian1d engine given that discount curve. nanoql reads it with extrapolation. QuantLib's check: its own route, the model built on that curve, whose numeraire at 0 is 0.1319979111949979, and at (1.5, 0.3) 0.1358278427215987, the value QuantLib's given-curve read gives there too.
+
+Facts:
+
+- `AGivenCurveIsReadWithExtrapolation`
+
 ## GaussianQuadratureRefusalTests
 
 [`Divergences/GaussianQuadratureRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/GaussianQuadratureRefusalTests.cs)
@@ -1322,6 +1367,51 @@ The tree engine's spread on a lattice reused across calls. QuantLib's time-grid 
 Facts:
 
 - `ASharedLatticeKeepsNoSpreadAcrossCalls`
+
+## GsrForwardMeasureTimeTests
+
+[`Divergences/GsrForwardMeasureTimeTests.cs`](../tests/NanoQL.Tests/Divergences/GsrForwardMeasureTimeTests.cs)
+
+GSR's forward measure time (QuantLib's #2842, taken ahead of the pin; the S-g1d plan's G1R5 (ii)): QuantLib 1.44's `GsrProcess::setForwardMeasureTime` moves the process's time and leaves its core's (`gsrprocess.hpp:85-88`), so a process on step times 1 and 2, volatilities 0.01, 0.012 and 0.009 and reversion 0.03, built at T = 10 and moved to 20, still gives the expectation E(x(1.5) | x(0) = 0) of T = 10, −0.001238869348433307, where a process built at 20 gives −0.002344324730472735, and its drift at (1, 0) mixes the two times, −0.0010387193164901856 against −0.001988418783549303; and it accepts a time below the last step time (1.5). QuantLib's master after the pin moves the core with the process and refuses such a time with its text, "forward measure time (1.5) must be greater than or equal to the last vol/reversion pillar time (2)", as nanoql's `WithForwardMeasureTime` and `Gsr.WithNumeraireTime` do. QuantLib's check: its process built at the new time.
+
+Facts:
+
+- `TheCopyMovesTheCoresTime`
+- `ATimeBelowTheLastStepTimeIsRefused`
+
+## GsrIterativeWeightsTests
+
+[`Divergences/GsrIterativeWeightsTests.cs`](../tests/NanoQL.Tests/Divergences/GsrIterativeWeightsTests.cs)
+
+GSR's iterative calibrations with weights (the S-g1d plan's G1R6 (xiv)): QuantLib's `calibrateVolatilitiesIterative` passes the whole weight vector to each one-helper step (`gsr.hpp:116-120`), so every weight vector of more than one weight is refused: "mismatch between number of instruments (1) and weights (3)". nanoql weights each step by its own helper's weight. QuantLib's check: its one-helper calibration with that weight, step by step, which on the wheel ends at the parameters (0.02, 0.006141458164186859, 0.005500939169047698, 0.004884008618675642), its last step's end criterion 3 (stationary function) after 12 evaluations.
+
+Facts:
+
+- `EachStepIsWeightedByItsOwnHelpersWeight`
+
+## GsrSmallReversionTests
+
+[`Divergences/GsrSmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/GsrSmallReversionTests.cs)
+
+GSR's process core at small reversions (the S-g1d plan's G1R4 (i)): QuantLib switches to its zero-reversion formulas below |a| < 1e-4 (`gsrprocesscore.cpp:72-75`), so its outputs jump at the cut, and just above it its two terms over a² cancel to second order. On the wheel, a European 5Y into 10Y payer at 3% on a flat 3% curve with σ = 0.01 is worth 0.06892731403656928 at a = 1e-4·(1 − 1e-6) and 0.068867423550291 at a = 1e-4·(1 + 1e-6), a jump of 8.7e-4. nanoql computes each term below |a| < 1e-2 in a form continuous in a (`expm1` and φ₂(u) = (eᵘ − 1 − u)/u²), QuantLib's zero-reversion formulas at a = 0 exactly, and QuantLib's formulas and bits at and above 1e-2. QuantLib's checks: its own formulas at the switch, which the forms meet at the process's members, on a process with step dates as without: the measured gaps, 1.3e-12 on one piece and 2e-12 on the stepped process here, are the switch's own step of a acting on the expectation's cancelling parts; each side, at its own reversion, is within about 2e-13 of exact; and its own zero-reversion formulas, the forms' limit, which the process meets as a → 0, each term moving in proportion to a. A price answers a change of its inputs at the 1e-12 level by about as much on this swaption, and by up to 2e-9 on 10-year expiries, on either side of the switch, through the engine's grid and spline, so the price fact at the switch (1.1e-12 measured) checks the engine at one point on each side, not the formulas. nanoql's prices here differ from QuantLib's in their last places only by the C runtime's `erf` (the plan's G1R3): with it, QuantLib's bits at a = 0 and a = 1e-2.
+
+Facts:
+
+- `TheFormsMeetQuantLibsFormulasAtTheSwitch`
+- `TheSteppedProcessMeetsQuantLibsFormulasAtTheSwitchAndTheLimit`
+- `PricesAreContinuousAcrossQuantLibsCut`
+- `TheProcessIsSmoothAcrossQuantLibsCut`
+- `TheZeroReversionIsTheFormsLimit`
+
+## GsrWithParamsTests
+
+[`Divergences/GsrWithParamsTests.cs`](../tests/NanoQL.Tests/Divergences/GsrWithParamsTests.cs)
+
+GSR's parameters set on a built model: QuantLib's `Gsr::generateArguments` flushes the process core, which recomputes its zero-reversion flags from the core's old reversions, before it sets the new ones (`gsr.hpp:144-149`, `gsrprocesscore.cpp:68-75`, `:41-49`), so after `setParams` the flags lag one parameter set, and a calibration prices each trial point with the previous point's flags wherever the two straddle QuantLib's cut. On the wheel, a European 5Y into 10Y payer at 3% on a flat 3% curve with σ = 0.01, on a model built at a = 0 and set to a = 0.05, is worth 0.06892731403656928, a = 0's price, where the model built at a = 0.05 gives 0.04929346290668454; set from 0.05 to 0, NaN. nanoql's `WithParams` builds a new core from the new reversions. QuantLib's check: the model built at the same parameters, which QuantLib's own second `setParams` with the same values gives too. nanoql's prices here differ from QuantLib's in their last places only by the C runtime's `erf` (the S-g1d plan's G1R3).
+
+Facts:
+
+- `ParametersSetOnAModelGiveTheModelBuiltAtThem`
 
 ## HestonForwardByDateTests
 
@@ -1541,6 +1631,28 @@ Facts:
 
 - `TheFirstThreeWeeksOf1901Answer`
 - `TheLastDayOf2199Answers`
+
+## JamshidianBracketTests
+
+[`Divergences/JamshidianBracketTests.cs`](../tests/NanoQL.Tests/Divergences/JamshidianBracketTests.cs)
+
+The Gaussian1d Jamshidian engine's bracket (the S-g1d plan's G1R6 (xviii)): QuantLib solves for y* on the fixed bracket [−8, 8] (`gaussian1djamshidianswaptionengine.cpp:142-147`) and refuses short-dated swaptions away from the money: on the wheel, on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, a 1-day payer on a 5-year swap at 1% throws "root not bracketed: f[-8,8] -> [7.575587e-02,1.111667e-01]", as does a 1-day receiver at 6% and a 1-month receiver at 6% ("[-2.604803e-01,-2.535408e-02]"), which Hull-White's Jamshidian engine on the equal constant-parameter model prices at 0.09363555834330271, 0.13506769382915945 and 0.13466680676149342. nanoql's bracket is QuantLib's first and is doubled only where it doesn't bracket the root, so where QuantLib brackets, its solver's call and path are QuantLib's. QuantLib's checks: Hull-White's Jamshidian engine and QuantLib's own values where it prices.
+
+Facts:
+
+- `ShortDatedSwaptionsAwayFromTheMoneyArePriced`
+- `WhereQuantLibBracketsItsPathStands`
+
+## JamshidianNoFixedCouponTests
+
+[`Divergences/JamshidianNoFixedCouponTests.cs`](../tests/NanoQL.Tests/Divergences/JamshidianNoFixedCouponTests.cs)
+
+The Gaussian1d Jamshidian engine with no fixed coupon after the exercise (the S-g1d plan's G1R6 (xviii)): QuantLib reads `fixedResetDates[startIndex]` past the vector's end as the coupon bond's value date (`gaussian1djamshidianswaptionengine.cpp:84-87`, `:104`, `:107`, `:139`, `:159`, `:163`), undefined behaviour: on the wheel, a 2-year payer at 3% (annual fixed and 6-month floating coupons) on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, exercised 13 months out, throws "negative time (-3.73411e+06) given", and a different refusal each run. nanoql takes the first floating reset on or after the exercise as the value date at every one of those reads, the start of the coupons QuantLib's Gaussian1d swaption engine exercises into, which values the swaption at 0.014428105830926762 (13 months) and 0.014437260795231834 (18 months); with no coupon after the exercise (20 months), the swaption is worth 0, that engine's convention. QuantLib's check: its Gaussian1d swaption engine on the same swaption and model, to the two engines' integration error.
+
+Facts:
+
+- `ASwaptionWithNoFixedCouponAfterItsExerciseIsPricedOnItsFloatingResets`
+- `WithNoCouponAfterItsExerciseTheSwaptionIsWorthNothing`
 
 ## LaggedYoYRateBranchTests
 

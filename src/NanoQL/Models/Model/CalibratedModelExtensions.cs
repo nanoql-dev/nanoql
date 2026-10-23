@@ -45,7 +45,8 @@ public static class CalibratedModelExtensions
     /// </param>
     /// <param name="weights">One weight per helper; empty, the default, for all 1.</param>
     /// <param name="fixParameters">
-    /// Whether each of the model's parameters is fixed at its value; empty, the default, for all free.
+    /// Whether each of the model's parameters is fixed at its value; empty, the default, for the model's
+    /// <see cref="ICalibratedModel.DefaultFixParameters"/>, all free unless the model fixes some.
     /// </param>
     /// <returns>The calibrated model, the end criterion, the problem values and the number of function evaluations.</returns>
     /// <exception cref="ArgumentNullException">An argument but the constraint is null.</exception>
@@ -101,6 +102,12 @@ public static class CalibratedModelExtensions
         }
 
         ImmutableArray<double> w = weights.IsEmpty ? ImmutableArray.CreateRange(Enumerable.Repeat(1.0, instruments.Length)) : [.. weights];
+
+        // A model that overrides QuantLib's calibrate to fix parameters by default gives them (G1R2 (ii)).
+        if (fixParameters.IsEmpty)
+        {
+            fixParameters = model.DefaultFixParameters.AsSpan();
+        }
 
         Vector prms = model.Params();
         if (!(fixParameters.IsEmpty || fixParameters.Length == prms.Size))

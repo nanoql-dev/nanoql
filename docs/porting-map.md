@@ -19,10 +19,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
-| not ported | 175 | 6 |
-| not started | 684 | 93 |
-| partial | 30 | 25 |
-| ported | 546 | 64 |
+| not ported | 175 | 8 |
+| not started | 678 | 90 |
+| partial | 30 | 26 |
+| ported | 552 | 64 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -1420,8 +1420,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackkarasinski` | ported | Models/ShortRate/OneFactorModels/BlackKarasinski.cs | no nanoql type: BlackKarasinskiDynamics |
 | `coxingersollross` | ported | Models/ShortRate/OneFactorModels/CoxIngersollRoss.cs | no nanoql type: CoxIngersollRossDynamics |
 | `extendedcoxingersollross` | ported | Models/ShortRate/OneFactorModels/ExtendedCoxIngersollRoss.cs | no nanoql type: ExtendedCoxIngersollRossDynamics, ExtendedCoxIngersollRossFittingParameter |
-| `gaussian1dmodel` | not started |  | no nanoql type: Gaussian1dModel |
-| `gsr` | not started |  | no nanoql type: Gsr |
+| `gaussian1dmodel` | ported | Models/ShortRate/OneFactorModels/Gaussian1dMemo.cs, Models/ShortRate/OneFactorModels/Gaussian1dModel.cs |  |
+| `gsr` | ported | Models/ShortRate/OneFactorModels/Gsr.cs |  |
 | `hullwhite` | ported | Models/ShortRate/OneFactorModels/HullWhite.cs | no nanoql type: HullWhiteDynamics, HullWhiteFittingParameter |
 | `markovfunctional` | not started |  | no nanoql type: MarkovFunctional, MarkovFunctionalCustomSmileSection, MarkovFunctionalCustomSmileFactory, MarkovFunctionalModelSettings, MarkovFunctionalModelSettingsAdjustments, MarkovFunctionalCalibrationPoint, MarkovFunctionalModelOutputs |
 | `vasicek` | ported | Models/ShortRate/OneFactorModels/Vasicek.cs | no nanoql type: VasicekDynamics |
@@ -1658,9 +1658,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdhullwhiteswaptionengine` | ported | PricingEngines/Swaption/FdHullWhiteSwaptionEngine.cs |  |
 | `g2swaptionengine` | ported | PricingEngines/Swaption/G2SwaptionEngine.cs |  |
 | `gaussian1dfloatfloatswaptionengine` | not started |  | no nanoql type: Gaussian1dFloatFloatSwaptionEngine, Gaussian1dFloatFloatSwaptionEngineProbabilities |
-| `gaussian1djamshidianswaptionengine` | not started |  | no nanoql type: Gaussian1dJamshidianSwaptionEngine |
+| `gaussian1djamshidianswaptionengine` | ported | PricingEngines/Swaption/Gaussian1dJamshidianSwaptionEngine.cs |  |
 | `gaussian1dnonstandardswaptionengine` | not started |  | no nanoql type: Gaussian1dNonstandardSwaptionEngine, Gaussian1dNonstandardSwaptionEngineProbabilities |
-| `gaussian1dswaptionengine` | not started |  | no nanoql type: Gaussian1dSwaptionEngine, Gaussian1dSwaptionEngineProbabilities |
+| `gaussian1dswaptionengine` | ported | PricingEngines/Swaption/Gaussian1dSwaptionEngine.cs, PricingEngines/Swaption/Gaussian1dSwaptionEngineProbabilities.cs |  |
 | `jamshidianswaptionengine` | ported | PricingEngines/Swaption/JamshidianSwaptionEngine.cs |  |
 | `treeswaptionengine` | ported | PricingEngines/Swaption/TreeSwaptionEngine.cs |  |
 
@@ -1727,8 +1727,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `g2process` | ported | Processes/G2Process/G2ForwardProcess.cs, Processes/G2Process/G2Process.cs |  |
 | `geometricbrownianprocess` | ported | Processes/GeometricBrownianMotionProcess.cs |  |
 | `gjrgarchprocess` | not started |  | no nanoql type: GJRGARCHProcess, GJRGARCHProcessDiscretization |
-| `gsrprocess` | not started |  | no nanoql type: GsrProcess |
-| `gsrprocesscore` | not started |  |  |
+| `gsrprocess` | ported | Processes/GsrProcess.cs |  |
+| `gsrprocesscore` | ported | Processes/GsrProcessCore.cs, Processes/GsrProcessCoreMemo.cs |  |
 | `hestonprocess` | partial | Processes/HestonProcess/HestonProcess.cs, Processes/HestonProcess/HestonProcessDiscretization.cs | partial: pdf, the Fokker-Planck density, which waits for Boost's non-central chi-squared density, which S-van ports |
 | `hestonslvprocess` | not started |  | no nanoql type: HestonSLVProcess |
 | `hullwhiteprocess` | ported | Processes/HullWhiteProcess/HullWhiteForwardProcess.cs, Processes/HullWhiteProcess/HullWhiteProcess.cs, Processes/HullWhiteProcess/HullWhiteProcessFunctions.cs |  |
@@ -2143,7 +2143,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `garch` | not started |  | 2 cases |
 | `gaussianquadratures` | partial | TestSuite/GaussianQuadraturesTests.cs | 8 of 12 cases; not yet: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial, testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes |
 | `gjrgarchmodel` | not started |  | 2 cases |
-| `gsr` | not started |  | 13 cases |
+| `gsr` | partial | TestSuite/GsrTests.cs | 11 of 13 cases; not yet: testGsrModel, testSofrSwaptionPaymentLag |
 | `hestonmodel` | partial | TestSuite/HestonModelTests.cs | 7 of 39 cases; not yet: testDAXCalibration, testAnalyticVsBlack, testMcVsCached, testFdBarrierVsCached, testFdVanillaVsCached, testFdVanillaWithDividendsVsCached, testFdAmerican, testKahlJaeckelCase, testMultipleStrikesEngine, testAnalyticPiecewiseTimeDependent, testDAXCalibrationOfTimeDependentModel, testAlanLewisReferencePrices, testExpansionOnAlanLewisReference, testExpansionOnFordeReference, testAllIntegrationMethods, testCosHestonCumulants, testCosHestonEngine, testCosHestonEngineTruncation, testCharacteristicFct, testAndersenPiterbargPricing, testAndersenPiterbargControlVariateIntegrand, testAndersenPiterbargConvergence, testPiecewiseTimeDependentChFvsHestonChF, testPiecewiseTimeDependentComparison, testPiecewiseTimeDependentChFAsymtotic, testSmallSigmaExpansion4ExpFitting, testExponentialFitting4StrikesAndMaturities, testAsymptoticControlVariate, testLocalVolFromHestonModel, testOptimalAlphaKmin, testHestonBlackVolSurfaceAtmLevel, testAnalyticPDFHestonEngine |
 | `hestonslvmodel` | not started |  | 19 cases |
 | `himalayaoption` | not started |  | 1 cases |
@@ -2163,8 +2163,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `interpolations` | partial | TestSuite/InterpolationsTests.cs | 24 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testMultiSpline, testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation, testFlatExtrapolation |
 | `jumpdiffusion` | not started |  | 2 cases |
 | `lazyobject` | not ported: tests LazyObject, which is replaced |  |  |
-| `libormarketmodel` | not started |  | 4 cases |
-| `libormarketmodelprocess` | not started |  | 3 cases |
+| `libormarketmodel` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
+| `libormarketmodelprocess` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
 | `linearleastsquaresregression` | not started |  | 3 cases |
 | `lookbackoptions` | not started |  | 5 cases |
 | `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 6 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy, testSobolBurleySkipping, testBurley2020SobolRsgOutputBounds |
