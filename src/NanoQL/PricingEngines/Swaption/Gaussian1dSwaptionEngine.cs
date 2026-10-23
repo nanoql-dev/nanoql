@@ -94,20 +94,23 @@ public static class Gaussian1dSwaptionEngine
     }
 
     // The integral over the grid of the spline of the values at the next exercise: QuantLib's inner loop, which it
-    // writes out for the price and for each probability.
+    // writes out for the price and for each probability; the nonstandard engine's multiplies each term by its spread's
+    // discount.
     internal static double Rollback(
         Vector z,
         double[] p,
         CubicInterpolation payoff1,
         bool extrapolatePayoff,
         bool flatPayoffExtrapolation,
-        OptionType type)
+        OptionType type,
+        double zSpreadDf = 1.0)
     {
         double price = 0.0;
         for (int i = 0; i < z.Size - 1; i++)
         {
             price += Gaussian1dModel.GaussianShiftedPolynomialIntegral(
-                0.0, payoff1.CCoefficients()[i], payoff1.BCoefficients()[i], payoff1.ACoefficients()[i], p[i], z[i], z[i], z[i + 1]);
+                0.0, payoff1.CCoefficients()[i], payoff1.BCoefficients()[i], payoff1.ACoefficients()[i], p[i], z[i], z[i], z[i + 1])
+                * zSpreadDf;
         }
 
         if (extrapolatePayoff)
@@ -115,8 +118,9 @@ public static class Gaussian1dSwaptionEngine
             if (flatPayoffExtrapolation)
             {
                 // the right tail at the last node's value, where QuantLib's takes the second-last's (G1R6 (xxi))
-                price += Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[z.Size - 1], z[z.Size - 2], z[z.Size - 1], 100.0);
-                price += Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[0], z[0], -100.0, z[0]);
+                price += Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[z.Size - 1], z[z.Size - 2], z[z.Size - 1], 100.0)
+                    * zSpreadDf;
+                price += Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[0], z[0], -100.0, z[0]) * zSpreadDf;
             }
             else
             {
@@ -130,13 +134,14 @@ public static class Gaussian1dSwaptionEngine
                         p[z.Size - 2],
                         z[z.Size - 2],
                         z[z.Size - 1],
-                        100.0);
+                        100.0) * zSpreadDf;
                 }
 
                 if (type == OptionType.Put)
                 {
                     price += Gaussian1dModel.GaussianShiftedPolynomialIntegral(
-                        0.0, payoff1.CCoefficients()[0], payoff1.BCoefficients()[0], payoff1.ACoefficients()[0], p[0], z[0], -100.0, z[0]);
+                        0.0, payoff1.CCoefficients()[0], payoff1.BCoefficients()[0], payoff1.ACoefficients()[0], p[0], z[0], -100.0, z[0])
+                        * zSpreadDf;
                 }
             }
         }

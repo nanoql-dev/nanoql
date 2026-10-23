@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/markovfunctional.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testVanillaEngines (S-g1d's Gaussian1dCapFloorEngine)
 
 using NanoQL.Indexes;
 using NanoQL.Instruments;
@@ -422,6 +421,81 @@ public class MarkovFunctionalTests
     // the helpers are built; each model calibrates its numeraire when it is built, and Calibrate returns the calibrated
     // model, which the secondary instruments are priced on, where QuantLib's engine holds the model calibrate changed.
     // As in QuantLib, the secondary set's mismatches are reported, not failed.
+    [Fact]
+    public void TestVanillaEngines()
+    {
+        const Real tol1 = 0.0001; // 1bp tolerance for model engine call put premia
+                                  // vs. black premia
+        // note that we use the real market conventions here (i.e. 2 fixing days),
+        // different from the calibration approach where 0 fixing days must be used.
+        // therefore higher errors compared to the calibration results are expected.
+
+        // Testing Markov functional vanilla engines...
+        var referenceDate = new Date(14, November, 2012);
+        var context = new EvaluationContext { EvaluationDate = referenceDate };
+
+        YieldTermStructure flatYts = FlatYts(context);
+        YieldTermStructure md0Yts = Md0Yts(context);
+        SwaptionVolatilityStructure flatSwaptionVts = FlatSwaptionVts(context);
+        SwaptionVolatilityStructure md0SwaptionVts = Md0SwaptionVts(md0Yts, context);
+        OptionletVolatilityStructure flatOptionletVts = FlatOptionletVts(context);
+        OptionletVolatilityStructure md0OptionletVts = Md0OptionletVts(md0Yts, context);
+
+        SwapIndex swapIndexBase = new EuriborSwapIsdaFixA(new Period(1, TimeUnit.Years));
+
+        Date[] volStepDates = [];
+        Real[] vols = [1.0];
+
+        // use a grid with few points for the check here
+        Real[] money = [0.1, 0.25, 0.50, 0.75, 1.0, 1.25, 1.50, 2.0, 5.0];
+
+        MarkovFunctionalModelSettings Settings(int gaussHermitePoints) => new MarkovFunctionalModelSettings()
+            .WithYGridPoints(64)
+            .WithYStdDevs(7.0)
+            .WithGaussHermitePoints(gaussHermitePoints)
+            .WithDigitalGap(1e-5)
+            .WithMarketRateAccuracy(1e-7)
+            .WithLowerRateBound(0.0)
+            .WithUpperRateBound(2.0)
+            .WithSmileMoneynessCheckpoints(money);
+
+        // Calibration Basket 1 / flat yts, vts
+        IborIndex iborIndex1 = new Euribor(new Period(6, TimeUnit.Months), flatYts);
+        var mf1 = new MarkovFunctional(
+            flatYts, 0.01, volStepDates, vols, flatSwaptionVts, ExpiriesCalBasket1(referenceDate), TenorsCalBasket1(), swapIndexBase, context, Settings(32));
+        MarkovFunctionalModelOutputs outputs1 = mf1.ModelOutputs(context);
+        CheckSwaptions(
+            outputs1, iborIndex1, mf1, context, s => BlackSwaptionEngine.Calculate(s, context, flatYts, flatSwaptionVts).NPV!.Value, false, tol1,
+            "Basket 1 / flat termstructures");
+
+        // Calibration Basket 2 / flat yts, vts
+        IborIndex iborIndex2 = new Euribor(new Period(6, TimeUnit.Months), flatYts);
+        var mf2 = new MarkovFunctional(flatYts, 0.01, volStepDates, vols, flatOptionletVts, ExpiriesCalBasket2(referenceDate), iborIndex2, context, Settings(16));
+        _ = mf2.ModelOutputs(context);
+        CheckCapFloors(
+            [0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.10], iborIndex2, mf2, context,
+            c => BlackCapFloorEngine.Calculate(c, context, flatYts, flatOptionletVts).NPV!.Value, tol1, "Basket 2 / flat termstructures");
+
+        // Calibration Basket 1 / real yts, vts
+        IborIndex iborIndex3 = new Euribor(new Period(6, TimeUnit.Months), md0Yts);
+        var mf3 = new MarkovFunctional(
+            md0Yts, 0.01, volStepDates, vols, md0SwaptionVts, ExpiriesCalBasket1(referenceDate), TenorsCalBasket1(), swapIndexBase, context, Settings(32));
+        MarkovFunctionalModelOutputs outputs3 = mf3.ModelOutputs(context);
+        CheckSwaptions(
+            outputs3, iborIndex3, mf3, context, s => BlackSwaptionEngine.Calculate(s, context, md0Yts, md0SwaptionVts).NPV!.Value, true, tol1,
+            "Basket 1 / real termstructures");
+
+        // Calibration Basket 2 / real yts, vts
+        IborIndex iborIndex4 = new Euribor(new Period(6, TimeUnit.Months), md0Yts);
+        var mf4 = new MarkovFunctional(md0Yts, 0.01, volStepDates, vols, md0OptionletVts, ExpiriesCalBasket2(referenceDate), iborIndex4, context, Settings(32));
+        _ = mf4.ModelOutputs(context);
+
+        // the strike 0.10 excluded, as QuantLib's: the caplet stripper fails for it
+        CheckCapFloors(
+            [0.01, 0.02, 0.03, 0.04, 0.05, 0.06], iborIndex4, mf4, context,
+            c => BlackCapFloorEngine.Calculate(c, context, md0Yts, md0OptionletVts).NPV!.Value, tol1, "Basket 2 / real termstructures");
+    }
+
     [Fact]
     public void TestCalibrationTwoInstrumentSets()
     {
@@ -890,6 +964,71 @@ public class MarkovFunctionalTests
         [.. Enumerable.Range(1, 9).Select(i => new TARGET().Advance(referenceDate, i, TimeUnit.Years))];
 
     internal static Period[] TenorsCalBasket3() => [.. Enumerable.Range(1, 9).Select(i => new Period(10 - i, TimeUnit.Years))];
+
+    // testVanillaEngines' swaption loops: the model's call and put premia at each output strike against Black's, the
+    // smile's correction taken off on real term structures.
+    private static void CheckSwaptions(
+        MarkovFunctionalModelOutputs outputs,
+        IborIndex iborIndex,
+        MarkovFunctional model,
+        EvaluationContext context,
+        Func<Swaption, Real> black,
+        bool smileCorrection,
+        Real tol1,
+        string name)
+    {
+        for (int i = 0; i < outputs.Expiries.Length; i++)
+        {
+            for (int j = 0; j < outputs.SmileStrikes[0].Length; j++)
+            {
+                VanillaSwap underlyingCall = new MakeVanillaSwap(outputs.Tenors[i], iborIndex)
+                    .WithFixedRate(outputs.SmileStrikes[i][j])
+                    .WithEffectiveDate(new TARGET().Advance(outputs.Expiries[i], 2, TimeUnit.Days))
+                    .ReceiveFixed(false)
+                    .ToVanillaSwap(context);
+                VanillaSwap underlyingPut = new MakeVanillaSwap(outputs.Tenors[i], iborIndex)
+                    .WithFixedRate(outputs.SmileStrikes[i][j])
+                    .WithEffectiveDate(new TARGET().Advance(outputs.Expiries[i], 2, TimeUnit.Days))
+                    .ReceiveFixed(true)
+                    .ToVanillaSwap(context);
+                var exercise = new EuropeanExercise(outputs.Expiries[i]);
+                var swaptionC = new Swaption(underlyingCall, exercise);
+                var swaptionP = new Swaption(underlyingPut, exercise);
+                Real blackPriceCall = black(swaptionC);
+                Real blackPricePut = black(swaptionP);
+                Real mfPriceCall = Gaussian1dSwaptionEngine.Calculate(swaptionC, context, model, 64, 7.0).NPV!.Value;
+                Real mfPricePut = Gaussian1dSwaptionEngine.Calculate(swaptionP, context, model, 64, 7.0).NPV!.Value;
+
+                // we can not expect to match the black scholes price where the smile is adjusted
+                Real smileCorrectionCall = smileCorrection ? outputs.MarketCallPremium[i][j] - outputs.MarketRawCallPremium[i][j] : 0.0;
+                Real smileCorrectionPut = smileCorrection ? outputs.MarketPutPremium[i][j] - outputs.MarketRawPutPremium[i][j] : 0.0;
+                Assert.True(
+                    Math.Abs(blackPriceCall - mfPriceCall + smileCorrectionCall) <= tol1,
+                    $"{name}: Call premium market ({blackPriceCall}) does not match model premium ({mfPriceCall})");
+                Assert.True(
+                    Math.Abs(blackPricePut - mfPricePut + smileCorrectionPut) <= tol1,
+                    $"{name}: Put premium market ({blackPricePut}) does not match model premium ({mfPricePut})");
+            }
+        }
+    }
+
+    // testVanillaEngines' cap/floor loops: 5-year caps and floors at each strike, the model's premium against Black's.
+    private static void CheckCapFloors(
+        Real[] strikes, IborIndex iborIndex, MarkovFunctional model, EvaluationContext context, Func<CapFloor, Real> black, Real tol1, string name)
+    {
+        foreach (CapFloorType type in new[] { CapFloorType.Cap, CapFloorType.Floor })
+        {
+            foreach (Real strike in strikes)
+            {
+                CapFloor capFloor = new MakeCapFloor(type, new Period(5, TimeUnit.Years), iborIndex).WithStrike(strike).ToCapFloor(context);
+                Real blackPrice = black(capFloor);
+                Real mfPrice = Gaussian1dCapFloorEngine.Calculate(capFloor, context, model, 64, 7.0).NPV!.Value;
+                Assert.True(
+                    Math.Abs(blackPrice - mfPrice) <= tol1,
+                    $"{name}: Cap/Floor premium market ({blackPrice}) does not match model premium ({mfPrice})");
+            }
+        }
+    }
 
     private static Real[] ImpliedStdDevs(Real atm, Real[] strikes, Real[] prices)
     {

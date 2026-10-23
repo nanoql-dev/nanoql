@@ -324,6 +324,30 @@ public sealed class Gsr : Gaussian1dModel, ICalibratedModel
     internal override double StateStdDeviation(double t0, double x0, double dt, Gaussian1dMemo memo) =>
         process.StdDeviation(t0, x0, dt, memo.For(process.Core));
 
+    internal override double? StateBondSensitivity(double t, double T, Gaussian1dMemo memo) => process.G(t, T, memo.For(process.Core));
+
+    // Σᵢⱼ cᵢcⱼ Cov(x(tᵢ), x(tⱼ) | x(t0)) in O(n): Cov(x(tᵢ), x(tⱼ)) = V(tᵢ)·β(tᵢ, tⱼ) for tᵢ ≤ tⱼ, V the variance from
+    // t0 and β the expectation's slope in its start, a product over the steps, so Sⱼ = Σᵢ₍ᵢ₋ⱼ₎ cᵢV(tᵢ)β(tᵢ, tⱼ) runs as
+    // Sⱼ₊₁ = (Sⱼ + cⱼV(tⱼ))·β(tⱼ, tⱼ₊₁) (the S-g1d plan's G1R6 (xx)).
+    internal override double? CompoundingLogVariance(double t0, ReadOnlySpan<double> times, ReadOnlySpan<double> coefficients, Gaussian1dMemo memo)
+    {
+        GsrProcessCoreMemo m = memo.For(process.Core);
+        double total = 0.0, s = 0.0;
+        for (int j = 0; j < times.Length; j++)
+        {
+            double v = process.Variance(t0, 0.0, times[j] - t0, m);
+            total += coefficients[j] * ((coefficients[j] * v) + (2.0 * s));
+            if (j + 1 < times.Length)
+            {
+                double dt = times[j + 1] - times[j];
+                double beta = process.Expectation(times[j], 1.0, dt, m) - process.Expectation(times[j], 0.0, dt, m);
+                s = (s + (coefficients[j] * v)) * beta;
+            }
+        }
+
+        return total;
+    }
+
     /// <inheritdoc/>
     protected override double NumeraireImpl(double t, double y, YieldTermStructure? yts) => NumeraireCore(t, null, y, yts, new Gaussian1dMemo());
 

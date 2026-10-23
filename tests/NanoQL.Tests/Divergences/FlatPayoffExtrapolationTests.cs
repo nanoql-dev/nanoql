@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Immutable;
+using NanoQL.Coupons;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Models;
@@ -16,20 +17,23 @@ namespace NanoQL.Tests.Divergences;
 /// Flat payoff extrapolation's right tail (the S-g1d plan's G1R6 (xxi)): with <c>flatPayoffExtrapolation</c>,
 /// QuantLib's Gaussian1d engines integrate past the grid's last node the constant <c>p[n − 2]</c>, the second-last
 /// node's value (the swaption engine <c>gaussian1dswaptionengine.cpp:166-171</c>, the nonstandard, float-float and
-/// cap/floor engines,
-/// <c>Gaussian1dModel::zerobondOption</c> and the Markov-functional model alike), where the left tail takes
+/// cap/floor engines, <c>Gaussian1dModel::zerobondOption</c> and the Markov-functional model alike), where the left
+/// tail takes
 /// <c>p[0]</c>, its boundary node. On the wheel, a 5Y into 10Y payer at 2% on a GSR model (a = 0.02, σ = 0.01) on a
 /// flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12
-/// standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168; a put struck at 0.8 on
-/// the 10-year bond from the same exercise, on the model's <c>zerobondOption</c>, 0.07911771510819356 against
-/// 0.08048473087856346; on the harness, the Markov-functional model's own premium of its first calibration point's call
-/// at 4.57%, calibrated to five CMS 10y swaptions at 20% on 32 points a side, on 3 standard deviations 0.0004285947663144643
-/// and on 7 0.0004751894691285253. nanoql takes <c>p[n − 1]</c>. For a payoff that increases past the grid, the fixed tail lies
-/// between QuantLib's and the true one, the one assertion the two values can't both pass. No QuantLib case sets the
-/// flag. QuantLib's check: the same engine on the widened grid. The Markov-functional model's calibration reads the
-/// tail too (<c>markovfunctional.cpp:516-519</c>), seen alone in its puts, whose payoff vanishes past the grid: on 2
-/// standard deviations, QuantLib's puts on 32 points move as the grid refines, its second-last node meeting the last,
-/// and nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from 2.3% to 15%, by up to fifteen times.
+/// standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168, and so on the nonstandard
+/// engine; a 5-year cap at 2% on Euribor 6M from the same start, 0.060558824087763516 against 0.06245438129328943; a
+/// put struck at 0.8 on the 10-year bond from the same exercise, on the model's <c>zerobondOption</c>,
+/// 0.07911771510819356 against 0.08048473087856346; on the harness, the Markov-functional model's own premium of its
+/// first calibration point's call at 4.57%, calibrated to five CMS 10y swaptions at 20% on 32 points a side, on 3
+/// standard deviations 0.0004285947663144643 and on 7 0.0004751894691285253. nanoql takes <c>p[n − 1]</c>. For a payoff
+/// that increases past the grid, the fixed tail lies between QuantLib's and the true one, the one assertion the two
+/// values can't both pass; the nonstandard and cap/floor facts ask a tenth of the way from QuantLib's at least, since
+/// QuantLib's own tail ties its value only within <c>erf</c>'s last bits (G1R3). No QuantLib case sets the flag.
+/// QuantLib's check: the same engine on the widened grid. The Markov-functional model's calibration reads the tail too
+/// (<c>markovfunctional.cpp:516-519</c>), seen alone in its puts, whose payoff vanishes past the grid: on 2 standard
+/// deviations, QuantLib's puts on 32 points move as the grid refines, its second-last node meeting the last, and
+/// nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from 2.3% to 15%, by up to fifteen times.
 /// QuantLib's check: its own section on the refined grid.
 /// </summary>
 public class FlatPayoffExtrapolationTests
@@ -48,6 +52,54 @@ public class FlatPayoffExtrapolationTests
         double widened = Gaussian1dSwaptionEngine.Calculate(swaption, Context, model, 256, 12.0, true, true).NPV!.Value;
         Assert.True(Math.Abs((widened / 0.10415806152703168) - 1.0) <= 1e-12, $"{widened}");
         Assert.True(0.102661800916881 < flat && flat < widened, $"{flat} against QuantLib's 0.102661800916881 and the widened grid's {widened}");
+    }
+
+    [Fact]
+    public void TheNonstandardEnginesRightTailTakesTheLastNode()
+    {
+        Gsr model = Gaussian1dInputs.Constant(Curve, 0.02, 0.01);
+        Date exercise = new TARGET().Advance(Today, 5, TimeUnit.Years);
+        var swaption = new NonstandardSwaption(
+            new Swaption(Gaussian1dInputs.SwapOf(new Euribor6M(Curve), exercise, 10, 0.02, SwapType.Payer, Context), new EuropeanExercise(exercise)), Context);
+        double flat = Gaussian1dNonstandardSwaptionEngine.Calculate(swaption, Context, model, 16, 3.0, true, true).NPV!.Value;
+        double widened = Gaussian1dNonstandardSwaptionEngine.Calculate(swaption, Context, model, 256, 12.0, true, true).NPV!.Value;
+        Assert.True(Math.Abs((widened / 0.10415806152703168) - 1.0) <= 1e-12, $"{widened}");
+
+        // a tenth of the way from QuantLib's at least, which QuantLib's own tail ties within erf's last bits
+        Assert.True(
+            flat - 0.102661800916881 > 0.1 * (widened - 0.102661800916881) && flat < widened,
+            $"{flat} against QuantLib's 0.102661800916881 and the widened grid's {widened}");
+    }
+
+    [Fact]
+    public void TheCapFloorEnginesRightTailTakesTheLastNode()
+    {
+        Gsr model = Gaussian1dInputs.Constant(Curve, 0.02, 0.01);
+        var calendar = new TARGET();
+        Date start = calendar.Advance(calendar.Advance(Today, 5, TimeUnit.Years), 2, TimeUnit.Days);
+        var schedule = new Schedule(
+            start,
+            start + new Period(5, TimeUnit.Years),
+            new Period(6, TimeUnit.Months),
+            calendar,
+            BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing,
+            DateGenerationRule.Forward,
+            false,
+            Context);
+        var cap = new Cap(new IborLeg(schedule, new Euribor6M(Curve)).WithNotionals(1.0).WithPaymentDayCounter(new Actual360()).ToLeg(Context), [0.02]);
+
+        // calls, whose payoff increases with the state
+        double flat = Gaussian1dCapFloorEngine.Calculate(cap, Context, model, 16, 3.0, true, true).NPV!.Value;
+        double widened = Gaussian1dCapFloorEngine.Calculate(cap, Context, model, 256, 12.0, true, true).NPV!.Value;
+
+        // QuantLib's to 6.0e-12, its bits on the C runtime's erf (G1R3)
+        Assert.True(Math.Abs((widened / 0.06245438129328943) - 1.0) <= 1e-11, $"{widened}");
+
+        // a tenth of the way from QuantLib's at least, which QuantLib's own tail ties within erf's last bits
+        Assert.True(
+            flat - 0.060558824087763516 > 0.1 * (widened - 0.060558824087763516) && flat < widened,
+            $"{flat} against QuantLib's 0.060558824087763516 and the widened grid's {widened}");
     }
 
     [Fact]

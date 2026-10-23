@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/gsr.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testGsrModel, testSofrSwaptionPaymentLag (S-g1d's NonstandardSwaption and Gaussian1dNonstandardSwaptionEngine)
 
 using NanoQL.Coupons;
 using NanoQL.Indexes;
@@ -128,6 +127,116 @@ public class GsrTests
         _ = p.WithForwardMeasureTime(10.0);
 
         // add more test cases here ...
+    }
+
+    [Fact]
+    public void TestGsrModel()
+    {
+        // Testing GSR model...
+
+        Date refDate = Date.TodaysDate();
+        var context = new EvaluationContext { EvaluationDate = refDate };
+
+        Real modelvol = 0.01;
+        Real reversion = 0.01;
+
+        var stepDates = new List<Date>(); // no step dates
+        var vols = new List<Real> { modelvol };
+        var reversions = new List<Real> { reversion };
+
+        // artificial step dates (should yield the same result)
+        var stepDates1 = new List<Date>();
+        for (int i = 1; i < 60; i++)
+        {
+            stepDates1.Add(refDate + (i * 6 * TimeUnit.Months));
+        }
+
+        var vols1 = Enumerable.Repeat(modelvol, stepDates1.Count + 1).ToList();
+        var reversions1 = Enumerable.Repeat(reversion, stepDates1.Count + 1).ToList();
+
+        YieldTermStructure yts = FlatForward.Create(0, new TARGET(), 0.03, new Actual365Fixed(), context);
+        var model = new Gsr(yts, stepDates, vols, reversions, 50.0);
+        var model2 = new Gsr(yts, stepDates1, vols1, reversions1, 50.0);
+        var hw = new HullWhite(yts, reversion, modelvol);
+
+        // test zerobond prices against existing HullWhite model
+        // technically we test two representations of the same constant reversion
+        // and volatility structure,
+        // namely with and without step dates
+
+        Real tol0 = 1E-8;
+
+        Real w, t, xw;
+
+        w = 0.1;
+        do
+        {
+            t = w + 0.1;
+            do
+            {
+                xw = -0.10;
+                do
+                {
+                    Real yw = (xw - model.StateProcess().Expectation(0.0, 0.0, w)) / model.StateProcess().StdDeviation(0.0, 0.0, w);
+                    Real rw = xw + 0.03; // instantaneous forward is 0.03
+                    Real gsrVal = model.Zerobond(t, w, yw);
+                    Real gsr2Val = model2.Zerobond(t, w, yw);
+                    Real hwVal = hw.DiscountBond(w, t, rw);
+                    Assert.True(
+                        Math.Abs(gsrVal - hwVal) <= tol0,
+                        $"Zerobond P({w},{t} | x={xw} / y={yw}) is different in HullWhite ({hwVal}) and Gsr ({gsrVal})");
+                    Assert.True(
+                        Math.Abs(gsr2Val - hwVal) <= tol0,
+                        $"Zerobond P({w},{t} | x={xw} / y={yw}) is different in HullWhite ({hwVal}) and Gsr2 ({gsr2Val})");
+                    xw += 0.01;
+                }
+                while (xw <= 0.10);
+
+                t += 2.5;
+            }
+            while (t <= 50.0);
+
+            w += 5.0;
+        }
+        while (w <= 50.0);
+
+        // test standard, nonstandard and jamshidian engine against existing Hull
+        // White Jamshidian engine
+
+        Date expiry = new TARGET().Advance(refDate, 5 * TimeUnit.Years);
+        Period tenor = 10 * TimeUnit.Years;
+        var swpIdx = new EuriborSwapIsdaFixA(tenor, yts);
+        Real forward = swpIdx.Fixing(expiry, context);
+
+        _ = swpIdx.UnderlyingSwap(expiry, context); // QuantLib's underlying, unused
+        VanillaSwap underlyingFixed = new MakeVanillaSwap(10 * TimeUnit.Years, swpIdx.IborIndex)
+            .WithFixedRate(forward)
+            .WithEffectiveDate(swpIdx.ValueDate(expiry))
+            .WithFixedLegCalendar(swpIdx.FixingCalendar)
+            .WithFixedLegDayCount(swpIdx.DayCounter)
+            .WithFixedLegTenor(swpIdx.FixedLegTenor)
+            .WithFixedLegConvention(swpIdx.FixedLegConvention)
+            .WithFixedLegTerminationDateConvention(swpIdx.FixedLegConvention)
+            .ToVanillaSwap(context);
+        var exercise = new EuropeanExercise(expiry);
+        var stdswaption = new Swaption(underlyingFixed, exercise);
+        var nonstdswaption = new NonstandardSwaption(stdswaption, context);
+
+        Real hwJamNpv = JamshidianSwaptionEngine.Calculate(stdswaption, context, hw, yts).NPV!.Value;
+
+        Real gsrNonStdNpv = Gaussian1dNonstandardSwaptionEngine.Calculate(nonstdswaption, context, model, 64, 7.0, true, false).NPV!.Value;
+        Real gsrStdNpv = Gaussian1dSwaptionEngine.Calculate(stdswaption, context, model, 64, 7.0, true, false).NPV!.Value;
+        Real gsrJamNpv = Gaussian1dJamshidianSwaptionEngine.Calculate(stdswaption, context, model).NPV!.Value;
+
+        Assert.True(
+            Math.Abs(hwJamNpv - gsrNonStdNpv) <= 0.00005,
+            $"Jamshidian HW NPV ({hwJamNpv}) deviates from Gaussian1dNonstandardSwaptionEngine NPV ({gsrNonStdNpv})");
+        Assert.True(
+            Math.Abs(hwJamNpv - gsrStdNpv) <= 0.00005,
+            $"Jamshidian HW NPV ({hwJamNpv}) deviates from Gaussian1dSwaptionEngine NPV ({gsrStdNpv})");
+        Assert.True(
+            Math.Abs(hwJamNpv - gsrJamNpv) <= 0.00005,
+            $"Jamshidian HW NPV ({hwJamNpv}) deviates from Gaussian1dJamshidianEngine NPV ({gsrJamNpv})");
     }
 
     [Fact]
@@ -447,6 +556,129 @@ public class GsrTests
             Math.Abs(value - reference) < 1.0e-10,
             $"Gaussian1d price for IborCoupons on SOFR ({value}) does not match the equivalent one-day Ibor index price ({reference}), diff {value - reference}");
     }
+
+    [Fact]
+    public void TestSofrSwaptionPaymentLag()
+    {
+        // Testing Gaussian1d engines with SOFR payment lag...
+
+        Date today = new(30, June, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+        var dc = new Actual365Fixed();
+
+        var curveDates = new List<Date> { today };
+        var zeroRates = new List<Rate> { 0.025 };
+        for (int i = 1; i <= 12; ++i)
+        {
+            curveDates.Add(today + (i * TimeUnit.Years));
+            zeroRates.Add(0.025 + (0.01 * (1.0 - Math.Exp(-(Real)i / 3.0))));
+        }
+
+        YieldTermStructure curve = new InterpolatedZeroCurve<Linear>(curveDates, zeroRates, dc);
+
+        var sofr = new Sofr(curve);
+        Calendar calendar = sofr.FixingCalendar;
+        Date expiry = calendar.Adjust(today + (3 * TimeUnit.Years));
+        Date start = calendar.Advance(expiry, 2 * TimeUnit.Days);
+        Date end = calendar.Advance(start, 5 * TimeUnit.Years);
+        var schedule = new Schedule(
+            start, end, 1 * TimeUnit.Years, calendar, BusinessDayConvention.ModifiedFollowing, BusinessDayConvention.ModifiedFollowing, DateGenerationRule.Forward, false, context);
+
+        var probe = new OvernightIndexedSwap(SwapType.Payer, 1.0, schedule, 0.0, dc, sofr, 0.0, 2, BusinessDayConvention.Following, calendar);
+        Rate fairRate = DiscountingSwapEngine.Calculate(probe, context, curve).FairRate!.Value;
+        var swap = new OvernightIndexedSwap(SwapType.Payer, 1.0, schedule, fairRate, dc, sofr, 0.0, 2, BusinessDayConvention.Following, calendar);
+        Real swapNpv = DiscountingSwapEngine.Calculate(swap, context, curve).NPV!.Value;
+        CheckSmall(swapNpv, 1.0e-12);
+
+        foreach (CashFlow cashflow in swap.OvernightLeg)
+        {
+            var coupon = cashflow as OvernightIndexedCoupon;
+            Assert.NotNull(coupon);
+            Date expectedPayment = calendar.Advance(coupon.AccrualEndDate, 2 * TimeUnit.Days, BusinessDayConvention.Following);
+            Assert.Equal(expectedPayment, coupon.Date);
+            Assert.True(coupon.Date > coupon.AccrualEndDate);
+        }
+
+        Real reversion = 0.03, sigma = 0.008;
+        var gsr = new Gsr(curve, [], [sigma], reversion, 12.0);
+        var exercise = new EuropeanExercise(expiry);
+        var swaption = new Swaption(swap, exercise);
+
+        Real gaussian = Gaussian1dSwaptionEngine.Calculate(swaption, context, gsr, 128, 8.0).NPV!.Value;
+        Real gaussianJamshidian = Gaussian1dJamshidianSwaptionEngine.Calculate(swaption, context, gsr).NPV!.Value;
+
+        CheckClose(gaussianJamshidian, gaussian, 0.2);
+
+        // Conversion to a NonstandardSwap must preserve the payment lag, and the
+        // nonstandard Gaussian engine must reproduce the standard engine.
+        var nonstandardSwap = new NonstandardSwap(swap, context);
+        Assert.Equal(2, nonstandardSwap.PaymentLag);
+        CheckSmall(DiscountingSwapEngine.Calculate(nonstandardSwap, context, curve).NPV!.Value - swapNpv, 1.0e-12);
+        var nonstandardSwaption = new NonstandardSwaption(nonstandardSwap, exercise);
+        CheckClose(
+            Gaussian1dNonstandardSwaptionEngine.Calculate(nonstandardSwaption, context, gsr, 128, 8.0, true, false, null, curve).NPV!.Value,
+            gaussian,
+            0.2);
+
+        // Exercise the same path with variable notionals and margins.
+        int coupons = schedule.Size - 1;
+        var fixedNominals = new Real[coupons];
+        var floatingNominals = new Real[coupons];
+        Real[] fixedRates = [.. Enumerable.Repeat(fairRate, coupons)];
+        Real[] gearings = [.. Enumerable.Repeat(1.0, coupons)];
+        var spreads = new Spread[coupons];
+        for (int i = 0; i < coupons; ++i)
+        {
+            fixedNominals[i] = 1.0 - (0.05 * i);
+            floatingNominals[i] = 1.0 - (0.04 * i);
+            spreads[i] = 0.0001 * i;
+        }
+
+        var variableSwap = new NonstandardSwap(
+            SwapType.Payer, fixedNominals, floatingNominals, schedule, fixedRates, dc, schedule, sofr, gearings, spreads, dc, context, false, false,
+            BusinessDayConvention.Following, 2, calendar);
+        Assert.True(double.IsFinite(DiscountingSwapEngine.Calculate(variableSwap, context, curve).NPV!.Value));
+        foreach (CashFlow cashflow in variableSwap.FloatingLeg)
+        {
+            var coupon = cashflow as OvernightIndexedCoupon;
+            Assert.NotNull(coupon);
+            Assert.Equal(calendar.Advance(coupon.AccrualEndDate, 2 * TimeUnit.Days, BusinessDayConvention.Following), coupon.Date);
+        }
+
+        var variableSwaption = new NonstandardSwaption(variableSwap, exercise);
+        Real payerValue = Gaussian1dNonstandardSwaptionEngine.Calculate(variableSwaption, context, gsr, 128, 8.0, true, false, null, curve).NPV!.Value;
+        Assert.True(double.IsFinite(payerValue));
+        Assert.True(payerValue >= 0.0);
+
+        Real[] scaledFixedNominals = [.. fixedNominals.Select(n => n * 2.0)];
+        Real[] scaledFloatingNominals = [.. floatingNominals.Select(n => n * 2.0)];
+        var scaledSwap = new NonstandardSwap(
+            SwapType.Payer, scaledFixedNominals, scaledFloatingNominals, schedule, fixedRates, dc, schedule, sofr, gearings, spreads, dc, context, false,
+            false, BusinessDayConvention.Following, 2, calendar);
+        var scaledSwaption = new NonstandardSwaption(scaledSwap, exercise);
+
+        // Exact notional homogeneity provides a reference value while retaining
+        // the variable-notional, variable-margin and payment-lag path. The two
+        // prices come from separate integrations, so the check is relative but not
+        // at roundoff level (BOOST_CHECK_CLOSE takes a percentage).
+        CheckClose(
+            Gaussian1dNonstandardSwaptionEngine.Calculate(scaledSwaption, context, gsr, 128, 8.0, true, false, null, curve).NPV!.Value,
+            2.0 * payerValue,
+            1.0e-6);
+    }
+
+    // QL_CHECK_CLOSE, Boost's BOOST_CHECK_CLOSE: |a - b| within the tolerance, in percent, of both values.
+    private static void CheckClose(Real a, Real b, Real tolerancePercent)
+    {
+        Real diff = Math.Abs(a - b);
+        Assert.True(
+            diff <= tolerancePercent / 100.0 * Math.Abs(a) && diff <= tolerancePercent / 100.0 * Math.Abs(b),
+            $"difference between {a} and {b} exceeds {tolerancePercent}%");
+    }
+
+    // QL_CHECK_SMALL, Boost's BOOST_CHECK_SMALL: |value| within the tolerance.
+    private static void CheckSmall(Real value, Real tolerance) =>
+        Assert.True(Math.Abs(value) <= tolerance, $"{value} is not small, tolerance {tolerance}");
 
     private static (Swaption Swaption, OvernightIndexedSwap Swap) MakeObservationConventionSwaption(
         Schedule schedule,

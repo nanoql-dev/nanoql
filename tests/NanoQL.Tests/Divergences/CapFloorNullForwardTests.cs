@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using NanoQL.Coupons;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
+using NanoQL.Models;
 using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
 using NanoQL.Time;
@@ -17,8 +18,10 @@ namespace NanoQL.Tests.Divergences;
 /// and the Black and Bachelier engines price every caplet paid after the curve's reference date
 /// (<c>blackcapfloorengine.cpp:93-100</c>, <c>bacheliercapfloorengine.cpp:78-86</c>), so on a curve dated before the
 /// evaluation date they price that caplet on the sentinel, 3.4028234663852886e+38: the wheel's NPV of this 1Y cap is
-/// 1.7146697606502935e+38, its first caplet's, on both engines. nanoql's forward is a <c>double?</c>, null there, and the
-/// engines refuse a priced caplet without one, with <see cref="NanoQLException"/>. On a curve dated on the evaluation
+/// 1.7146697606502935e+38, its first caplet's, on both engines; the Gaussian1d engine, whose caplets fixed by the model
+/// curve's reference date take the known payoff (<c>gaussian1dcapfloorengine.cpp:63-66</c>), 1.720316308005896e+38 on a
+/// GSR model (a = σ = 0.01) on the same curve. nanoql's forward is a <c>double?</c>, null there, and the engines refuse
+/// a priced caplet without one, with <see cref="NanoQLException"/>. On a curve dated on the evaluation
 /// date the caplet is skipped and both price it as QuantLib does: 0.010031644352251482, its ATM forward null where
 /// QuantLib's is the sentinel.
 /// </summary>
@@ -66,6 +69,11 @@ public class CapFloorNullForwardTests
             "no forward for a caplet paid before the evaluation date",
             Assert.Throws<NanoQLException>(() => BachelierCapFloorEngine.Calculate(cap, context, curve, 0.01)).Message);
         Assert.Throws<NanoQLException>(() => cap.ImpliedVolatility(0.01, curve, 0.2, context));
+
+        // QuantLib's Gaussian1d value: 1.720316308005896e+38.
+        Assert.Equal(
+            "no forward for a caplet paid before the evaluation date",
+            Assert.Throws<NanoQLException>(() => Gaussian1dCapFloorEngine.Calculate(cap, context, new Gsr(curve, [], [0.01], 0.01))).Message);
 
         // On a curve dated today the caplet is skipped, as in QuantLib.
         var todays = new FlatForward(today, 0.04, dc);

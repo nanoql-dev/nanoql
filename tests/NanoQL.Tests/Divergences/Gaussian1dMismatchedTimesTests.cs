@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Immutable;
+using NanoQL.Coupons;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Models;
@@ -27,7 +28,14 @@ namespace NanoQL.Tests.Divergences;
 /// 0.014136151799917162 against 0.014102533018978234. nanoql reads each curve at the instant QuantLib's argument
 /// denotes: by the date QuantLib derives a time from (an exercise, a fixing, an option's expiry), where a read by the
 /// time would take the 31st; and the numeraire time, which has no date and whose factor cancels, at the instant it
-/// denotes on the model's clock. QuantLib's check: its engine on the market restated on the model curve's clock.
+/// denotes on the model's clock. The nonstandard engine reads alike: on the same swaptions as nonstandard swaptions,
+/// QuantLib's same numbers. So does the cap/floor engine at a caplet's fixing: a caplet at 3% on 1,000,000 of Euribor
+/// 6M fixing in two years, forecast on the 3.1% Actual/360 curve, is worth 2693.625283396357 against 2793.958767701246
+/// restated; on the 30/360 market, one fixing on 30 January 2026 with the discount curve 1528.9285427087634, where
+/// QuantLib's swaption engine gives the one-period swaption into the same coupon 1509.9042444210352 and, on the market
+/// restated, 1509.8482273231564, the strike's leg read on the discount curve too (G1R6 (ii)). QuantLib's check: its
+/// engine on the market restated on the model curve's clock; for a caplet with a discount curve, its swaption engine
+/// on the one-period swaption.
 /// </summary>
 public class Gaussian1dMismatchedTimesTests
 {
@@ -104,7 +112,74 @@ public class Gaussian1dMismatchedTimesTests
         Assert.True(Math.Abs((price / 0.014136151799917162) - 1.0) > 1e-3);
     }
 
+    [Fact]
+    public void TheNonstandardEnginesDiscountCurveOnAnotherDayCounterIsReadByDate()
+    {
+        Gsr model = Gaussian1dInputs.Constant(ModelCurve, 0.01, 0.01);
+        var swaption = new NonstandardSwaption(
+            new Swaption(Gaussian1dInputs.SwapOf(new Euribor6M(ModelCurve), Exercise, 10, 0.03, SwapType.Payer, Context), new EuropeanExercise(Exercise)), Context);
+        YieldTermStructure discount360 = new FlatForward(Today, 0.02 * 360.0 / 365.0, new Actual360());
+        double price = Gaussian1dNonstandardSwaptionEngine.Calculate(swaption, Context, model, discountCurve: discount360).NPV!.Value;
+        Assert.True(Math.Abs((price / 0.07076745548830388) - 1.0) <= 1e-12, $"{price}");
+        Assert.True(Math.Abs((price / 0.07095344971961592) - 1.0) > 1e-3);
+    }
+
+    [Fact]
+    public void TheNonstandardEnginesDigitalProbabilitiesReadTheExerciseByDate()
+    {
+        InstrumentResults results = Gaussian1dNonstandardSwaptionEngine.Calculate(
+            new NonstandardSwaption(Bermudan30(), Context30),
+            Context30,
+            Model30(),
+            discountCurve: Discount365,
+            probabilities: Gaussian1dNonstandardSwaptionEngineProbabilities.Digital);
+        double[] restated = [0.00013119666147197958, 0.44411124920974154, 0.2487328850267858, 0.30978785594136143];
+        ImmutableArray<double> probabilities = results.Result<ImmutableArray<double>>("probabilities");
+        Assert.True(Math.Abs((results.NPV!.Value / 0.02934088072814103) - 1.0) <= 1e-12, $"{results.NPV}");
+        Assert.Equal(restated.Length, probabilities.Length);
+
+        // The exercise on 30 January 2026: the restated market's, where QuantLib's reads the 31st's
+        // (0.00013119665716211765); the later ones, as the swaption engine's, to rounding.
+        Assert.True(Math.Abs(probabilities[0] - restated[0]) <= 1e-13, $"{probabilities[0]}");
+        Assert.True(Math.Abs(probabilities[0] - 0.00013119665716211765) > 4e-12, $"{probabilities[0]}");
+        for (int i = 1; i < restated.Length; i++)
+        {
+            Assert.True(Math.Abs(probabilities[i] - restated[i]) <= 2e-11, $"{i}: {probabilities[i]}");
+        }
+    }
+
+    [Fact]
+    public void ACapletsForwardingCurveOnAnotherDayCounterIsReadByDate()
+    {
+        YieldTermStructure forward360 = new FlatForward(Today, 0.031 * 360.0 / 365.0, new Actual360());
+        Cap caplet = Caplet(new Euribor6M(forward360), new TARGET().Advance(Today, 2, TimeUnit.Years), Context);
+        double price = Gaussian1dCapFloorEngine.Calculate(caplet, Context, Gaussian1dInputs.Constant(ModelCurve, 0.01, 0.01)).NPV!.Value;
+        Assert.True(Math.Abs((price / 2793.958767701246) - 1.0) <= 1e-12, $"{price}");
+        Assert.True(Math.Abs((price / 2693.625283396357) - 1.0) > 1e-2);
+    }
+
+    [Fact]
+    public void ACapletFixingOnThe30thIsReadByDate()
+    {
+        Cap caplet = Caplet(new Euribor6M(ModelCurve30), new Date(30, Month.January, 2026), Context30);
+        double price = Gaussian1dCapFloorEngine.Calculate(caplet, Context30, Model30(), discountCurve: Discount365).NPV!.Value;
+        Assert.True(Math.Abs((price / 1509.8482273231564) - 1.0) <= 1e-12, $"{price}");
+        Assert.True(Math.Abs((price / 1509.9042444210352) - 1.0) > 1e-5);
+        Assert.True(Math.Abs((price / 1528.9285427087634) - 1.0) > 1e-2);
+    }
+
     private static Gsr Model30() => Gaussian1dInputs.Constant(ModelCurve30, 0.01, 0.01);
+
+    // A caplet at 3% on 1,000,000 of the index fixing on the date, its accrual on Actual/360.
+    private static Cap Caplet(IborIndex index, Date fixing, EvaluationContext context)
+    {
+        Date start = index.ValueDate(fixing);
+        ImmutableArray<CashFlow> leg = new IborLeg(new Schedule([start, index.MaturityDate(start)], new TARGET()), index)
+            .WithNotionals(1e6)
+            .WithPaymentDayCounter(new Actual360())
+            .ToLeg(context);
+        return new Cap(leg, [0.03]);
+    }
 
     private static Swaption Bermudan30()
     {

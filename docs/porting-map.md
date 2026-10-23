@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 670 | 89 |
-| partial | 30 | 27 |
-| ported | 560 | 64 |
+| not started | 664 | 89 |
+| partial | 30 | 24 |
+| ported | 566 | 67 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -65,7 +65,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `qldefines` | not ported: C++ platform header |  |  |
 | `quantlib` | not ported: C++ platform header |  |  |
 | `quote` | replaced: double |  |  |
-| `rebatedexercise` | not started |  | no nanoql type: RebatedExercise |
+| `rebatedexercise` | ported | RebatedExercise.cs |  |
 | `settings` | replaced: EvaluationContext | EvaluationContext.cs |  |
 | `shared_ptr` | not ported: C++ platform header |  |  |
 | `stochasticprocess` | ported | StochasticProcess/StochasticProcess.cs, StochasticProcess/StochasticProcess1D.cs, StochasticProcess/StochasticProcess1DDiscretization.cs, StochasticProcess/StochasticProcessDiscretization.cs |  |
@@ -669,8 +669,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `margrabeoption` | not started |  | no nanoql type: MargrabeOption, MargrabeOptionResults |
 | `multiassetoption` | not started |  | no nanoql type: MultiAssetOption, MultiAssetOptionResults |
 | `multipleresetsswap` | not started |  | no nanoql type: MultipleResetsSwap |
-| `nonstandardswap` | not started |  | no nanoql type: NonstandardSwap, NonstandardSwapResults |
-| `nonstandardswaption` | not started |  | no nanoql type: NonstandardSwaption |
+| `nonstandardswap` | ported | Instruments/NonstandardSwap.cs, Instruments/NonstandardSwapArguments.cs | no nanoql type: NonstandardSwapResults |
+| `nonstandardswaption` | ported | Instruments/NonstandardSwaption.cs |  |
 | `oneassetoption` | ported | Instruments/OneAssetOption.cs, Instruments/OneAssetOptionResults.cs |  |
 | `overnightindexedswap` | ported | Instruments/OvernightIndexedSwap.cs, Instruments/OvernightIndexedSwapResults.cs |  |
 | `overnightindexfuture` | not started |  | no nanoql type: OvernightIndexFuture |
@@ -1553,7 +1553,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bacheliercapfloorengine` | ported | PricingEngines/CapFloor/BachelierCapFloorEngine.cs |  |
 | `blackcapfloorengine` | ported | PricingEngines/CapFloor/BlackCapFloorEngine.cs |  |
 | `discretizedcapfloor` | ported | PricingEngines/CapFloor/DiscretizedCapFloor.cs |  |
-| `gaussian1dcapfloorengine` | not started |  | no nanoql type: Gaussian1dCapFloorEngine |
+| `gaussian1dcapfloorengine` | ported | PricingEngines/CapFloor/Gaussian1dCapFloorEngine.cs |  |
 | `mchullwhiteengine` | ported | PricingEngines/CapFloor/MCHullWhiteEngine/HullWhiteCapFloorPricer.cs, PricingEngines/CapFloor/MCHullWhiteEngine/MCHullWhiteCapFloorEngine.cs, PricingEngines/CapFloor/MCHullWhiteEngine/MakeMCHullWhiteCapFloorEngine{TRng,TStats}.cs |  |
 | `treecapfloorengine` | ported | PricingEngines/CapFloor/TreeCapFloorEngine.cs |  |
 
@@ -1651,7 +1651,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `basketgeneratingengine` | not started |  | no nanoql type: BasketGeneratingEngine, BasketGeneratingEngineCalibrationBasketType |
+| `basketgeneratingengine` | ported | PricingEngines/Swaption/BasketGeneratingEngine/BasketGeneratingEngine.cs, PricingEngines/Swaption/BasketGeneratingEngine/BasketGeneratingEngineCalibrationBasketType.cs, PricingEngines/Swaption/BasketGeneratingEngine/IBasketGeneratingUnderlying.cs |  |
 | `blackswaptionengine` | ported | PricingEngines/Swaption/BlackSwaptionEngine/BachelierSpec.cs, PricingEngines/Swaption/BlackSwaptionEngine/BachelierSwaptionEngine.cs, PricingEngines/Swaption/BlackSwaptionEngine/Black76Spec.cs, PricingEngines/Swaption/BlackSwaptionEngine/BlackStyleSwaptionEngine{TSpec}.cs, PricingEngines/Swaption/BlackSwaptionEngine/BlackSwaptionEngine.cs, PricingEngines/Swaption/BlackSwaptionEngine/CashAnnuityModel.cs, PricingEngines/Swaption/BlackSwaptionEngine/IBlackStyleSwaptionSpec.cs |  |
 | `discretizedswaption` | ported | PricingEngines/Swaption/DiscretizedSwaption.cs |  |
 | `fdg2swaptionengine` | ported | PricingEngines/Swaption/FdG2SwaptionEngine.cs |  |
@@ -1659,7 +1659,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `g2swaptionengine` | ported | PricingEngines/Swaption/G2SwaptionEngine.cs |  |
 | `gaussian1dfloatfloatswaptionengine` | not started |  | no nanoql type: Gaussian1dFloatFloatSwaptionEngine, Gaussian1dFloatFloatSwaptionEngineProbabilities |
 | `gaussian1djamshidianswaptionengine` | ported | PricingEngines/Swaption/Gaussian1dJamshidianSwaptionEngine.cs |  |
-| `gaussian1dnonstandardswaptionengine` | not started |  | no nanoql type: Gaussian1dNonstandardSwaptionEngine, Gaussian1dNonstandardSwaptionEngineProbabilities |
+| `gaussian1dnonstandardswaptionengine` | ported | PricingEngines/Swaption/Gaussian1dNonstandardSwaptionEngine.cs, PricingEngines/Swaption/Gaussian1dNonstandardSwaptionEngineProbabilities.cs |  |
 | `gaussian1dswaptionengine` | ported | PricingEngines/Swaption/Gaussian1dSwaptionEngine.cs, PricingEngines/Swaption/Gaussian1dSwaptionEngineProbabilities.cs |  |
 | `jamshidianswaptionengine` | ported | PricingEngines/Swaption/JamshidianSwaptionEngine.cs |  |
 | `treeswaptionengine` | ported | PricingEngines/Swaption/TreeSwaptionEngine.cs |  |
@@ -2143,7 +2143,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `garch` | not started |  | 2 cases |
 | `gaussianquadratures` | partial | TestSuite/GaussianQuadraturesTests.cs | 8 of 12 cases; not yet: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial, testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes |
 | `gjrgarchmodel` | not started |  | 2 cases |
-| `gsr` | partial | TestSuite/GsrTests.cs | 11 of 13 cases; not yet: testGsrModel, testSofrSwaptionPaymentLag |
+| `gsr` | ported | TestSuite/GsrTests.cs | 13 of 13 cases |
 | `hestonmodel` | partial | TestSuite/HestonModelTests.cs | 7 of 39 cases; not yet: testDAXCalibration, testAnalyticVsBlack, testMcVsCached, testFdBarrierVsCached, testFdVanillaVsCached, testFdVanillaWithDividendsVsCached, testFdAmerican, testKahlJaeckelCase, testMultipleStrikesEngine, testAnalyticPiecewiseTimeDependent, testDAXCalibrationOfTimeDependentModel, testAlanLewisReferencePrices, testExpansionOnAlanLewisReference, testExpansionOnFordeReference, testAllIntegrationMethods, testCosHestonCumulants, testCosHestonEngine, testCosHestonEngineTruncation, testCharacteristicFct, testAndersenPiterbargPricing, testAndersenPiterbargControlVariateIntegrand, testAndersenPiterbargConvergence, testPiecewiseTimeDependentChFvsHestonChF, testPiecewiseTimeDependentComparison, testPiecewiseTimeDependentChFAsymtotic, testSmallSigmaExpansion4ExpFitting, testExponentialFitting4StrikesAndMaturities, testAsymptoticControlVariate, testLocalVolFromHestonModel, testOptimalAlphaKmin, testHestonBlackVolSurfaceAtmLevel, testAnalyticPDFHestonEngine |
 | `hestonslvmodel` | not started |  | 19 cases |
 | `himalayaoption` | not started |  | 1 cases |
@@ -2175,7 +2175,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `marketmodel_smmcapletalphacalibration` | not started |  | 1 cases |
 | `marketmodel_smmcapletcalibration` | not started |  | 1 cases |
 | `marketmodel_smmcaplethomocalibration` | not started |  | 3 cases |
-| `markovfunctional` | partial | TestSuite/MarkovFunctionalTests.cs | 6 of 7 cases; not yet: testVanillaEngines |
+| `markovfunctional` | ported | TestSuite/MarkovFunctionalTests.cs | 7 of 7 cases |
 | `matrices` | partial | TestSuite/MatricesTests.cs | 13 of 20 cases; not yet: testSVD, testQRDecomposition, testQRSolve, testOrthogonalProjection, testMoorePenroseInverse, testHouseholderTransformation, testHouseholderReflection; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
 | `mclongstaffschwartzengine` | not started |  | 2 cases |
 | `mersennetwister` | ported | TestSuite/MersenneTwisterTests.cs | 1 of 1 cases |
@@ -2195,7 +2195,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `optionletstripper` | ported | TestSuite/OptionletStripperTests.cs | 19 of 19 cases |
 | `overnightindexedcoupon` | ported | TestSuite/OvernightIndexedCouponTests.cs | 45 of 45 cases; moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 to Divergences/TelescopicValueDatesTests.cs; testOvernightLegNPV line 1033 to Divergences/TelescopicValueDatesTests.cs |
 | `overnightindexedfundingratehelper` | not started |  | 3 cases |
-| `overnightindexedswap` | partial | TestSuite/OvernightIndexedSwapTests.cs | 24 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs; not yet: testNonstandardSwapConversionPreservesObservationConventions |
+| `overnightindexedswap` | ported | TestSuite/OvernightIndexedSwapTests.cs | 25 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs |
 | `pagodaoption` | not started |  | 1 cases |
 | `paralleltestrunner` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `partialtimebarrieroption` | not started |  | 3 cases |

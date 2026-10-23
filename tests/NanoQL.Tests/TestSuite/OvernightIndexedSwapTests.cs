@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/overnightindexedswap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testNonstandardSwapConversionPreservesObservationConventions, which waits for S-g1d's NonstandardSwap
 // Replaced: testNotifications (Vectors/Instruments/OvernightIndexedSwapVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -750,6 +749,55 @@ public class OvernightIndexedSwapTests
 
     // Adapted: the curve linked to a handle (line 1127) and the index built on the handle after it (line 1129) become
     // the index built on the curve, and the evaluation date (line 1124) is the context's.
+    [Fact]
+    public void TestNonstandardSwapConversionPreservesObservationConventions()
+    {
+        // Testing preservation of overnight conventions when converting to NonstandardSwap...
+
+        Date today = new(30, Month.June, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+        YieldTermStructure curve = new FlatForward(today, 0.03, new Actual360());
+        var sofr = new Sofr(curve);
+        Calendar calendar = sofr.FixingCalendar;
+        Date start = calendar.Advance(today, 1 * TimeUnit.Years);
+        Date end = calendar.Advance(start, 2 * TimeUnit.Years);
+        var schedule = new Schedule(
+            start, end, 6 * TimeUnit.Months, calendar, BusinessDayConvention.ModifiedFollowing, BusinessDayConvention.ModifiedFollowing,
+            DateGenerationRule.Forward, false, context);
+
+        var source = new OvernightIndexedSwap(
+            SwapType.Payer, 1.0, schedule, 0.03, new Actual360(), sofr, 0.0, 2, BusinessDayConvention.Following, calendar, true,
+            RateAveragingType.Compound, 5, 2, true);
+        var converted = new NonstandardSwap(source, context);
+        var sourceCoupon = source.OvernightLeg[0] as OvernightIndexedCoupon;
+        var convertedCoupon = converted.FloatingLeg[0] as OvernightIndexedCoupon;
+
+        Assert.NotNull(sourceCoupon);
+        Assert.NotNull(convertedCoupon);
+        Assert.Equal(sourceCoupon.FixingDays, convertedCoupon.FixingDays);
+        Assert.Equal(sourceCoupon.LockoutDays, convertedCoupon.LockoutDays);
+        Assert.Equal(sourceCoupon.ApplyObservationShift, convertedCoupon.ApplyObservationShift);
+        Assert.Equal(sourceCoupon.ValueDates(), convertedCoupon.ValueDates());
+        Assert.Equal(sourceCoupon.FixingDates(), convertedCoupon.FixingDates());
+
+        var simpleSource = new OvernightIndexedSwap(
+            SwapType.Payer, 1.0, schedule, 0.03, new Actual360(), sofr, 0.0, 2, BusinessDayConvention.Following, calendar, false,
+            RateAveragingType.Simple);
+        var simpleConverted = new NonstandardSwap(simpleSource, context);
+        var simpleConvertedCoupon = simpleConverted.FloatingLeg[0] as OvernightIndexedCoupon;
+        Assert.NotNull(simpleConvertedCoupon);
+        Assert.Equal(RateAveragingType.Simple, simpleConvertedCoupon.AveragingMethod);
+
+        Assert.True(
+            Math.Abs(DiscountingSwapEngine.Calculate(converted, context, curve).NPV!.Value - DiscountingSwapEngine.Calculate(source, context, curve).NPV!.Value)
+            <= 1.0e-12);
+        Assert.True(
+            Math.Abs(
+                DiscountingSwapEngine.Calculate(simpleConverted, context, curve).NPV!.Value
+                - DiscountingSwapEngine.Calculate(simpleSource, context, curve).NPV!.Value)
+            <= 1.0e-12);
+    }
+
     [Fact]
     public void TestSettlementDaysEffectiveDateConflict()
     {

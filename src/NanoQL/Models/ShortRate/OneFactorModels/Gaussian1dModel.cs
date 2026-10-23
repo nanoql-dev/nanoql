@@ -587,6 +587,14 @@ public abstract class Gaussian1dModel : ITermStructureConsistentModel
 
     internal virtual double StateStdDeviation(double t0, double x0, double dt, Gaussian1dMemo memo) => StateProcess().StdDeviation(t0, x0, dt);
 
+    // The sensitivity of the log of the bond from t to T to the model's state at t, for a model with a short rate,
+    // GSR's G(t, T); null for one without, the Markov-functional model (the S-g1d plan's G1R6 (xx)).
+    internal virtual double? StateBondSensitivity(double t, double T, Gaussian1dMemo memo) => null;
+
+    // The variance of Σᵢ cᵢ·x(tᵢ) given the state at t0, the times sorted from t0: Σᵢⱼ cᵢcⱼ Cov(x(tᵢ), x(tⱼ) | x(t0));
+    // null for a model without a short rate (G1R6 (xx)).
+    internal virtual double? CompoundingLogVariance(double t0, ReadOnlySpan<double> times, ReadOnlySpan<double> coefficients, Gaussian1dMemo memo) => null;
+
     // A schedule's calendar, QuantLib's empty one where it has none.
     internal static Calendar CalendarOf(Schedule schedule) => schedule.Calendar ?? EmptyCalendar.Instance;
 }
