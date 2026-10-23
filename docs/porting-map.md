@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 664 | 89 |
-| partial | 30 | 24 |
-| ported | 566 | 67 |
+| not started | 650 | 89 |
+| partial | 28 | 24 |
+| ported | 582 | 67 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -241,7 +241,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `proxyibor` | not started |  | no nanoql type: ProxyIbor |
 | `quantocouponpricer` | not started |  | no nanoql type: BlackIborQuantoCouponPricer |
 | `strippedcapflooredcoupon` | not started |  | no nanoql type: StrippedCappedFlooredCoupon, StrippedCappedFlooredCouponLeg |
-| `swapspreadindex` | not started |  | no nanoql type: SwapSpreadIndex |
+| `swapspreadindex` | ported | Experimental/Coupons/SwapSpreadIndex.cs |  |
 
 ### `ql/experimental/credit/`
 
@@ -316,7 +316,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `dynprogvppintrinsicvalueengine` | not started |  | no nanoql type: DynProgVPPIntrinsicValueEngine |
 | `fdextoujumpvanillaengine` | not started |  | no nanoql type: FdExtOUJumpVanillaEngine |
 | `fdklugeextouspreadengine` | not started |  | no nanoql type: FdKlugeExtOUSpreadEngine |
-| `fdmdupire1dop` | not started |  | no nanoql type: FdmDupire1dOp |
+| `fdmdupire1dop` | ported | Experimental/FiniteDifferences/FdmDupire1dOp.cs |  |
 | `fdmexpextouinnervaluecalculator` | not started |  | no nanoql type: FdmExpExtOUInnerValueCalculator |
 | `fdmextendedornsteinuhlenbeckop` | not started |  | no nanoql type: FdmExtendedOrnsteinUhlenbeckOp |
 | `fdmextoujumpmodelinnervalue` | not started |  | no nanoql type: FdmExtOUJumpModelInnerValue |
@@ -330,12 +330,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmvppstartlimitstepcondition` | not started |  | no nanoql type: FdmVPPStartLimitStepCondition |
 | `fdmvppstepcondition` | not started |  | no nanoql type: FdmVPPStepConditionParams, FdmVPPStepConditionMesher, FdmVPPStepCondition |
 | `fdmvppstepconditionfactory` | not started |  | no nanoql type: FdmVPPStepConditionFactory |
-| `fdmzabrop` | not started |  | no nanoql type: FdmZabrUnderlyingPart, FdmZabrVolatilityPart, FdmZabrOp |
+| `fdmzabrop` | ported | Experimental/FiniteDifferences/FdmZabrOp/FdmZabrOp.cs, Experimental/FiniteDifferences/FdmZabrOp/FdmZabrUnderlyingPart.cs, Experimental/FiniteDifferences/FdmZabrOp/FdmZabrVolatilityPart.cs |  |
 | `fdornsteinuhlenbeckvanillaengine` | not started |  | no nanoql type: FdOrnsteinUhlenbeckVanillaEngine |
 | `fdsimpleextoujumpswingengine` | not started |  | no nanoql type: FdSimpleExtOUJumpSwingEngine |
 | `fdsimpleextoustorageengine` | not started |  | no nanoql type: FdSimpleExtOUStorageEngine |
 | `fdsimpleklugeextouvppengine` | not started |  | no nanoql type: FdSimpleKlugeExtOUVPPEngine |
-| `glued1dmesher` | not started |  | no nanoql type: Glued1dMesher |
+| `glued1dmesher` | ported | Experimental/FiniteDifferences/Glued1dMesher.cs |  |
 | `vanillavppoption` | not started |  | no nanoql type: VanillaVPPOption |
 
 ### `ql/experimental/forward/`
@@ -647,8 +647,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `equitytotalreturnswap` | not started |  | no nanoql type: EquityTotalReturnSwap |
 | `europeanoption` | ported | Instruments/EuropeanOption.cs |  |
 | `fixedvsfloatingswap` | ported | Instruments/FixedVsFloatingSwap.cs, Instruments/FixedVsFloatingSwapArguments.cs, Instruments/FixedVsFloatingSwapResults.cs |  |
-| `floatfloatswap` | partial | Instruments/FloatFloatSwap.cs, Instruments/FloatFloatSwapResults.cs | partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for S-cms's CmsSpreadLeg and S-g1d's SwapSpreadIndex |
-| `floatfloatswaption` | not started |  | no nanoql type: FloatFloatSwaption |
+| `floatfloatswap` | partial | Instruments/FloatFloatSwap.cs, Instruments/FloatFloatSwapArguments.cs, Instruments/FloatFloatSwapResults.cs | partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for S-cms's CmsSpreadLeg |
+| `floatfloatswaption` | ported | Instruments/FloatFloatSwaption.cs |  |
 | `forward` | not started |  | no nanoql type: Forward, ForwardTypePayoff |
 | `forwardrateagreement` | ported | Instruments/ForwardRateAgreement.cs, Instruments/ForwardRateAgreementResults.cs |  |
 | `forwardvanillaoption` | not started |  | no nanoql type: ForwardOptionArguments, ForwardVanillaOption |
@@ -746,7 +746,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `abcdmathfunction` | not started |  | no nanoql type: AbcdMathFunction |
+| `abcdmathfunction` | ported | Numerics/AbcdMathFunction.cs |  |
 | `all` | not ported: include-only header |  |  |
 | `array` | ported | Numerics/ArrayFunctions.cs, Numerics/Vector.cs |  |
 | `autocovariance` | not started |  |  |
@@ -835,7 +835,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `abcdinterpolation` | not started |  | no nanoql type: AbcdInterpolation, Abcd |
+| `abcdinterpolation` | ported | Numerics/Interpolations/Abcd.cs, Numerics/Interpolations/AbcdInterpolation.cs |  |
 | `all` | not ported: include-only header |  |  |
 | `backwardflatinterpolation` | ported | Numerics/Interpolations/BackwardFlat.cs, Numerics/Interpolations/BackwardFlatInterpolation.cs |  |
 | `backwardflatlinearinterpolation` | ported | Numerics/Interpolations/BackwardflatLinear.cs, Numerics/Interpolations/BackwardflatLinearInterpolation.cs |  |
@@ -1657,7 +1657,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdg2swaptionengine` | ported | PricingEngines/Swaption/FdG2SwaptionEngine.cs |  |
 | `fdhullwhiteswaptionengine` | ported | PricingEngines/Swaption/FdHullWhiteSwaptionEngine.cs |  |
 | `g2swaptionengine` | ported | PricingEngines/Swaption/G2SwaptionEngine.cs |  |
-| `gaussian1dfloatfloatswaptionengine` | not started |  | no nanoql type: Gaussian1dFloatFloatSwaptionEngine, Gaussian1dFloatFloatSwaptionEngineProbabilities |
+| `gaussian1dfloatfloatswaptionengine` | ported | PricingEngines/Swaption/Gaussian1dFloatFloatSwaptionEngine.cs, PricingEngines/Swaption/Gaussian1dFloatFloatSwaptionEngineProbabilities.cs |  |
 | `gaussian1djamshidianswaptionengine` | ported | PricingEngines/Swaption/Gaussian1dJamshidianSwaptionEngine.cs |  |
 | `gaussian1dnonstandardswaptionengine` | ported | PricingEngines/Swaption/Gaussian1dNonstandardSwaptionEngine.cs, PricingEngines/Swaption/Gaussian1dNonstandardSwaptionEngineProbabilities.cs |  |
 | `gaussian1dswaptionengine` | ported | PricingEngines/Swaption/Gaussian1dSwaptionEngine.cs, PricingEngines/Swaption/Gaussian1dSwaptionEngineProbabilities.cs |  |
@@ -1808,13 +1808,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `abcd` | not started |  | no nanoql type: AbcdFunction, AbcdSquared |
-| `abcdcalibration` | not started |  | no nanoql type: AbcdCalibration |
+| `abcd` | ported | TermStructures/Volatility/Abcd/AbcdFunction.cs, TermStructures/Volatility/Abcd/AbcdFunctions.cs, TermStructures/Volatility/Abcd/AbcdSquared.cs |  |
+| `abcdcalibration` | ported | TermStructures/Volatility/AbcdCalibration.cs |  |
 | `all` | not ported: include-only header |  |  |
 | `atmadjustedsmilesection` | ported | TermStructures/Volatility/AtmAdjustedSmileSection.cs |  |
 | `atmsmilesection` | ported | TermStructures/Volatility/AtmSmileSection.cs |  |
 | `flatsmilesection` | ported | TermStructures/Volatility/FlatSmileSection.cs |  |
-| `gaussian1dsmilesection` | not started |  | no nanoql type: Gaussian1dSmileSection |
+| `gaussian1dsmilesection` | ported | TermStructures/Volatility/Gaussian1dSmileSection.cs |  |
 | `interpolatedsmilesection` | ported | TermStructures/Volatility/InterpolatedSmileSection/CubicInterpolatedSmileSection.cs, TermStructures/Volatility/InterpolatedSmileSection/InterpolatedSmileSection{TInterpolator}.cs, TermStructures/Volatility/InterpolatedSmileSection/LinearInterpolatedSmileSection.cs, TermStructures/Volatility/InterpolatedSmileSection/MonotonicCubicInterpolatedSmileSection.cs, TermStructures/Volatility/InterpolatedSmileSection/SplineCubicInterpolatedSmileSection.cs |  |
 | `kahalesmilesection` | ported | TermStructures/Volatility/KahaleSmileSection.cs | no nanoql type: KahaleSmileSectionCFunction, KahaleSmileSectionAHelper, KahaleSmileSectionSHelper, KahaleSmileSectionSHelper1 |
 | `sabr` | ported | TermStructures/Volatility/SabrFunctions.cs |  |
@@ -1824,9 +1824,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `smilesectionutils` | ported | TermStructures/Volatility/SmileSectionUtils.cs |  |
 | `spreadedsmilesection` | ported | TermStructures/Volatility/SpreadedSmileSection.cs |  |
 | `volatilitytype` | ported | TermStructures/Volatility/VolatilityType.cs |  |
-| `zabr` | partial | TermStructures/Volatility/ZabrModel.cs | partial: fdPrice (both forms) and fullFdPrice, the local-volatility and full finite-difference prices, which wait for S-g1d with the finite-difference units they price on (S-eq's meshers, layout and backward solver, S-rx's Dirichlet boundary, S-g1d's glued mesher and its Dupire and ZABR operators) |
-| `zabrinterpolatedsmilesection` | not started |  | no nanoql type: ZabrInterpolatedSmileSection |
-| `zabrsmilesection` | partial | TermStructures/Volatility/ZabrSmileSection/IZabrEvaluation.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityLognormal.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityLognormalSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityNormal.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityNormalSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrSmileSection{TEvaluation}.cs | partial: the local-volatility and full finite-difference kernels (the ZabrLocalVolatility and ZabrFullFd tags, with their strike grid, call prices and price spline, the members strikes_, callPrices_, callPriceFct_, a_ and b_ that only they use), which wait for S-g1d with ZabrModel's fdPrice and fullFdPrice; no nanoql type: ZabrLocalVolatility, ZabrFullFd |
+| `zabr` | ported | TermStructures/Volatility/ZabrModel.cs |  |
+| `zabrinterpolatedsmilesection` | ported | TermStructures/Volatility/ZabrInterpolatedSmileSection/ZabrFullFdInterpolatedSmileSection.cs, TermStructures/Volatility/ZabrInterpolatedSmileSection/ZabrInterpolatedSmileSection{TEvaluation}.cs, TermStructures/Volatility/ZabrInterpolatedSmileSection/ZabrLocalVolatilityInterpolatedSmileSection.cs, TermStructures/Volatility/ZabrInterpolatedSmileSection/ZabrShortMaturityLognormalInterpolatedSmileSection.cs, TermStructures/Volatility/ZabrInterpolatedSmileSection/ZabrShortMaturityNormalInterpolatedSmileSection.cs |  |
+| `zabrsmilesection` | ported | TermStructures/Volatility/ZabrSmileSection/IZabrEvaluation.cs, TermStructures/Volatility/ZabrSmileSection/ZabrFullFd.cs, TermStructures/Volatility/ZabrSmileSection/ZabrFullFdSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrLocalVolatility.cs, TermStructures/Volatility/ZabrSmileSection/ZabrLocalVolatilitySmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityLognormal.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityLognormalSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityNormal.cs, TermStructures/Volatility/ZabrSmileSection/ZabrShortMaturityNormalSmileSection.cs, TermStructures/Volatility/ZabrSmileSection/ZabrSmileSection{TEvaluation}.cs |  |
 
 ### `ql/termstructures/volatility/capfloor/`
 
@@ -1877,7 +1877,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `capletvariancecurve` | not started |  | no nanoql type: CapletVarianceCurve |
+| `capletvariancecurve` | ported | TermStructures/Volatility/Optionlet/CapletVarianceCurve.cs |  |
 | `constantoptionletvol` | ported | TermStructures/Volatility/Optionlet/ConstantOptionletVolatility.cs |  |
 | `optionletstripper` | ported | TermStructures/Volatility/Optionlet/OptionletStripper.cs |  |
 | `optionletstripper1` | partial | TermStructures/Volatility/Optionlet/OptionletStripper1.cs | partial: capletVols(), a matrix QuantLib never writes, not ported |
@@ -1895,7 +1895,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `cmsmarket` | not started |  | no nanoql type: CmsMarket |
 | `cmsmarketcalibration` | not started |  | no nanoql type: CmsMarketCalibration, CmsMarketCalibrationCalibrationType |
-| `gaussian1dswaptionvolatility` | not started |  | no nanoql type: Gaussian1dSwaptionVolatility |
+| `gaussian1dswaptionvolatility` | ported | TermStructures/Volatility/Swaption/Gaussian1dSwaptionVolatility.cs |  |
 | `interpolatedswaptionvolatilitycube` | ported | TermStructures/Volatility/Swaption/InterpolatedSwaptionVolatilityCube.cs |  |
 | `sabrswaptionvolatilitycube` | partial | TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/IXabrCubeModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SabrSwaptionVolatilityCube.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SwaptionVolCubeSabrModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/XabrSwaptionVolatilityCube{TModel}.cs | partial: recalibration (three overloads), updateAfterRecalibration and sabrCalibrationSection, which change a calibrated cube and wait for S-cms's CmsMarketCalibration, their only user; no nanoql type: XabrModelTraits |
 | `spreadedswaptionvol` | ported | TermStructures/Volatility/Swaption/SpreadedSwaptionVolatility.cs |  |
@@ -2157,7 +2157,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcpiswap` | ported | TestSuite/CPISwapTests.cs | 5 of 5 cases |
 | `inflationvolatility` | not started |  | 3 cases |
 | `instruments` | not started |  | 2 cases |
-| `integrals` | partial | TestSuite/IntegralsTests.cs | 5 of 21 cases; not yet: testSegment, testTrapezoid, testMidPointTrapezoid, testSimpson, testGaussKronrodAdaptive, testGaussLobatto, testTanhSinh, testExpSinh, testGaussLegendreIntegrator, testGaussKronrodNonAdaptive, testTwoDimensionalIntegration, testFolinIntegration, testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator, testPiecewiseIntegral |
+| `integrals` | partial | TestSuite/IntegralsTests.cs | 11 of 21 cases; not yet: testGaussKronrodAdaptive, testTanhSinh, testExpSinh, testGaussKronrodNonAdaptive, testTwoDimensionalIntegration, testFolinIntegration, testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator, testPiecewiseIntegral |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
 | `interpolations` | partial | TestSuite/InterpolationsTests.cs | 25 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testMultiSpline, testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation |

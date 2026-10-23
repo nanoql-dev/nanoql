@@ -11,6 +11,8 @@
 //     ZabrModel::normalVolatility(vector)         (model, strikes)
 //     ZabrModel::localVolatility(Real)            (model, f)
 //     ZabrModel::localVolatility(vector)          (model, f)
+//     ZabrModel::fdPrice(Real)                    (model, strike)    a real: a call by the Dupire equation
+//     ZabrModel::fdPrice(vector)                  (model, strikes)   a list of reals
 //
 // The vector forms refuse an empty list as the harness's own failure: QuantLib reads its first element. The inspectors
 // are {"forward", "expiryTime", "alpha", "beta", "nu", "rho", "gamma"}, nu the model's transformed one.
@@ -107,6 +109,8 @@ namespace harness {
              [](const Args& a) { return vector(a, &ZabrModel::normalVolatility); }},
             {"ZabrModel::localVolatility(Real)", [](const Args& a) { return scalar(a, &ZabrModel::localVolatility); }},
             {"ZabrModel::localVolatility(vector)", [](const Args& a) { return vector(a, &ZabrModel::localVolatility); }},
+            {"ZabrModel::fdPrice(Real)", [](const Args& a) { return scalar(a, &ZabrModel::fdPrice); }},
+            {"ZabrModel::fdPrice(vector)", [](const Args& a) { return vector(a, &ZabrModel::fdPrice); }},
         });
 
     }

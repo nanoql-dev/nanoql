@@ -22,19 +22,20 @@ namespace NanoQL.Tests.Divergences;
 /// <c>p[0]</c>, its boundary node. On the wheel, a 5Y into 10Y payer at 2% on a GSR model (a = 0.02, σ = 0.01) on a
 /// flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12
 /// standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168, and so on the nonstandard
-/// engine; a 5-year cap at 2% on Euribor 6M from the same start, 0.060558824087763516 against 0.06245438129328943; a
-/// put struck at 0.8 on the 10-year bond from the same exercise, on the model's <c>zerobondOption</c>,
-/// 0.07911771510819356 against 0.08048473087856346; on the harness, the Markov-functional model's own premium of its
-/// first calibration point's call at 4.57%, calibrated to five CMS 10y swaptions at 20% on 32 points a side, on 3
-/// standard deviations 0.0004285947663144643 and on 7 0.0004751894691285253. nanoql takes <c>p[n − 1]</c>. For a payoff
-/// that increases past the grid, the fixed tail lies between QuantLib's and the true one, the one assertion the two
-/// values can't both pass; the nonstandard and cap/floor facts ask a tenth of the way from QuantLib's at least, since
-/// QuantLib's own tail ties its value only within <c>erf</c>'s last bits (G1R3). No QuantLib case sets the flag.
-/// QuantLib's check: the same engine on the widened grid. The Markov-functional model's calibration reads the tail too
-/// (<c>markovfunctional.cpp:516-519</c>), seen alone in its puts, whose payoff vanishes past the grid: on 2 standard
-/// deviations, QuantLib's puts on 32 points move as the grid refines, its second-last node meeting the last, and
-/// nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from 2.3% to 15%, by up to fifteen times.
-/// QuantLib's check: its own section on the refined grid.
+/// engine; on the float-float engine, the same payer with its first leg fixed in all but name (a zero gearing on
+/// Euribor 1Y), 0.10173470853181348 against 0.10416117493270043; a 5-year cap at 2% on Euribor 6M from the same start,
+/// 0.060558824087763516 against 0.06245438129328943; a put struck at 0.8 on the 10-year bond from the same exercise, on
+/// the model's <c>zerobondOption</c>, 0.07911771510819356 against 0.08048473087856346; on the harness, the
+/// Markov-functional model's own premium of its first calibration point's call at 4.57%, calibrated to five CMS 10y
+/// swaptions at 20% on 32 points a side, on 3 standard deviations 0.0004285947663144643 and on 7 0.0004751894691285253.
+/// nanoql takes <c>p[n − 1]</c>. For a payoff that increases past the grid, the fixed tail lies between QuantLib's and
+/// the true one, the one assertion the two values can't both pass; the nonstandard and cap/floor facts ask a tenth of
+/// the way from QuantLib's at least, since QuantLib's own tail ties its value only within <c>erf</c>'s last bits
+/// (G1R3). No QuantLib case sets the flag. QuantLib's check: the same engine on the widened grid. The Markov-functional
+/// model's calibration reads the tail too (<c>markovfunctional.cpp:516-519</c>), seen alone in its puts, whose payoff
+/// vanishes past the grid: on 2 standard deviations, QuantLib's puts on 32 points move as the grid refines, its
+/// second-last node meeting the last, and nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from
+/// 2.3% to 15%, by up to fifteen times. QuantLib's check: its own section on the refined grid.
 /// </summary>
 public class FlatPayoffExtrapolationTests
 {
@@ -69,6 +70,54 @@ public class FlatPayoffExtrapolationTests
         Assert.True(
             flat - 0.102661800916881 > 0.1 * (widened - 0.102661800916881) && flat < widened,
             $"{flat} against QuantLib's 0.102661800916881 and the widened grid's {widened}");
+    }
+
+    [Fact]
+    public void TheFloatFloatEnginesRightTailTakesTheLastNode()
+    {
+        Gsr model = Gaussian1dInputs.Constant(Curve, 0.02, 0.01);
+        var calendar = new TARGET();
+        Date exercise = calendar.Advance(Today, 5, TimeUnit.Years);
+        Date start = calendar.Advance(exercise, 2, TimeUnit.Days);
+        Schedule Schedule(int months) => new(
+            start,
+            calendar.Advance(start, 10, TimeUnit.Years),
+            new Period(months, TimeUnit.Months),
+            calendar,
+            BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing,
+            DateGenerationRule.Backward,
+            false,
+            Context);
+        Schedule yearly = Schedule(12), semiannual = Schedule(6);
+
+        // the payer at 2%, its first leg fixed in all but name: a zero gearing on Euribor 1Y, 30/360
+        var swap = new FloatFloatSwap(
+            SwapType.Payer,
+            Enumerable.Repeat(1.0, yearly.Size - 1),
+            Enumerable.Repeat(1.0, semiannual.Size - 1),
+            yearly,
+            new Euribor1Y(Curve),
+            new Thirty360(Thirty360Convention.BondBasis),
+            semiannual,
+            new Euribor6M(Curve),
+            new Actual360(),
+            Context,
+            gearing1: new double[yearly.Size - 1],
+            spread1: Enumerable.Repeat(0.02, yearly.Size - 1),
+            paymentConvention1: BusinessDayConvention.Following,
+            paymentConvention2: BusinessDayConvention.Following);
+        var swaption = new FloatFloatSwaption(swap, new EuropeanExercise(exercise));
+        double flat = Gaussian1dFloatFloatSwaptionEngine.Calculate(swaption, Context, model, 16, 3.0, true, true).NPV!.Value;
+        double widened = Gaussian1dFloatFloatSwaptionEngine.Calculate(swaption, Context, model, 256, 12.0, true, true).NPV!.Value;
+
+        // the wheel's 0.10416117493270043, to erf's last bits (G1R3)
+        Assert.True(Math.Abs((widened / 0.10416117493270043) - 1.0) <= 1e-11, $"{widened}");
+
+        // a tenth of the way from QuantLib's at least, which QuantLib's own tail ties within erf's last bits
+        Assert.True(
+            flat - 0.10173470853181348 > 0.1 * (widened - 0.10173470853181348) && flat < widened,
+            $"{flat} against QuantLib's 0.10173470853181348 and the widened grid's {widened}");
     }
 
     [Fact]

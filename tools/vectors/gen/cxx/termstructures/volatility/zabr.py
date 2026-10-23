@@ -9,13 +9,17 @@ integrated by AdaptiveRungeKutta), γ 0 among them, β 0, 1 and near 1, ν 0, ρ
 ascending, or not positive where β is 1.
 
 Each "model" case's inputs hold the model's spec ("model": {"expiryTime", "forward", "alpha", "beta", "nu", "rho",
-"gamma"}), the strikes of the vector forms ("strikes", strictly ascending, negative ones among them where β is below
-1) and the scalar forms' strikes ("points": 0, a negative strike, the forward and a strike beside it, where QuantLib
+"gamma"}), the strikes of the vector forms ("strikes", strictly ascending, negative ones among them where β is below 1)
+and the scalar forms' strikes ("points": 0, a negative strike, the forward and a strike beside it, where QuantLib
 refuses some for β = 1); its outputs are the inspectors (nu the model's transformed one), "lognormalVolatility",
 "normalVolatility" and "localVolatility" over the strikes, and "lognormalVolatilityAt", "normalVolatilityAt" and
-"localVolatilityAt" at the points, each {"throws": true} where QuantLib refuses it. A "refusal" case holds the
-refused call. The vector forms aren't given an empty vector, whose first element QuantLib reads (nanoql refuses it, a
-documented divergence). tests/NanoQL.Tests/Vectors/Cxx/TermStructures/ZabrCxxVectorTests.cs reads the file back."""
+"localVolatilityAt" at the points, and the call prices by finite differences on the Dupire equation, "fdPrice" over the
+strikes' positive ones ("fdStrikes": QuantLib's grid starts at half the first) and "fdPriceAt" at the points, each
+{"throws": true} where QuantLib refuses it. Left out: fullFdPrice, the two-dimensional equation's price, whose solve
+stops at a relative 1e-8 and so fails the stability filter (the S7 plan's S7R6) at every strike
+tools/vectors/gen/termstructures/volatility/zabrsmilesection.py tries. A "refusal" case holds the refused call. The
+vector forms aren't given an empty vector, whose first element QuantLib reads (nanoql refuses it, a documented
+divergence). tests/NanoQL.Tests/Vectors/Cxx/TermStructures/ZabrCxxVectorTests.cs reads the file back."""
 import os
 import sys
 
@@ -114,12 +118,13 @@ def cases():
             inspectors = H.call("ZabrModel::ZabrModel", m)
             expected = {name: inspectors[name] for name in
                         ("forward", "expiryTime", "alpha", "beta", "nu", "rho", "gamma")}
-            for kind in ("lognormalVolatility", "normalVolatility", "localVolatility"):
-                expected[kind] = call(f"ZabrModel::{kind}(vector)", m, ks)
+            fd_ks = [k for k in ks if k > 0.0]
+            for kind in ("lognormalVolatility", "normalVolatility", "localVolatility", "fdPrice"):
+                expected[kind] = call(f"ZabrModel::{kind}(vector)", m, fd_ks if kind == "fdPrice" else ks)
                 expected[kind + "At"] = [call(f"ZabrModel::{kind}(Real)", m, p) for p in ps]
             out.append({"name": f"model {k} / {m}",
                         "inputs": {"settings": st, "kind": "model", "model": v.enc(m), "strikes": ks,
-                                   "points": v.enc(ps)},
+                                   "fdStrikes": fd_ks, "points": v.enc(ps)},
                         "expected": v.enc(expected)})
         for label, m in REFUSALS:
             out.append({"name": f"refused / {label}",

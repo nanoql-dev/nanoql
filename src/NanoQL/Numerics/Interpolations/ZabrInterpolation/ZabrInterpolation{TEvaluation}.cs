@@ -14,8 +14,8 @@ namespace NanoQL.Numerics;
 /// The ZABR smile fitted to discrete volatilities: ZABR's five parameters fitted to the lognormal volatilities at the
 /// strikes, interpolated by the volatility of the ZABR smile section at the fitted parameters.
 /// </summary>
-/// <typeparam name="TEvaluation">The section's kernel: <see cref="ZabrShortMaturityLognormal"/> or
-/// <see cref="ZabrShortMaturityNormal"/>.</typeparam>
+/// <typeparam name="TEvaluation">The section's kernel: <see cref="ZabrShortMaturityLognormal"/>,
+/// <see cref="ZabrShortMaturityNormal"/>, <see cref="ZabrLocalVolatility"/> or <see cref="ZabrFullFd"/>.</typeparam>
 /// <remarks>
 /// <para>
 /// The fit is <see cref="SABRInterpolation"/>'s, XABR's, over ZABR's parameters: it runs when the interpolation is

@@ -10,7 +10,8 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The ZABR smile section vectors, <c>tests/vectors/termstructures/volatility/zabrsmilesection.json</c>: on
-/// <see cref="ZabrShortMaturityLognormalSmileSection"/> and <see cref="ZabrShortMaturityNormalSmileSection"/>, by
+/// <see cref="ZabrShortMaturityLognormalSmileSection"/>, <see cref="ZabrShortMaturityNormalSmileSection"/>,
+/// <see cref="ZabrLocalVolatilitySmileSection"/> and <see cref="ZabrFullFdSmileSection"/>, by
 /// exercise time and by date from the evaluation context (<c>Create</c>), the inspectors, and at 12 strikes the
 /// variance, volatility, option and digital prices, vega, density and converted normal volatility of
 /// <see cref="SmileSection"/>; and the sections QuantLib refuses to build.
@@ -60,6 +61,8 @@ public class ZabrSmileSectionVectorTests
             {
                 "ShortMaturityLognormal" => new ZabrShortMaturityLognormalSmileSection(t, forward, parameters, moneyness, fdRefinement),
                 "ShortMaturityNormal" => new ZabrShortMaturityNormalSmileSection(t, forward, parameters, moneyness, fdRefinement),
+                "LocalVolatility" => new ZabrLocalVolatilitySmileSection(t, forward, parameters, moneyness, fdRefinement),
+                "FullFd" => new ZabrFullFdSmileSection(t, forward, parameters, moneyness, fdRefinement),
                 _ => throw new InvalidOperationException($"unknown ZABR kernel '{kernel}'"),
             };
         }
@@ -71,6 +74,10 @@ public class ZabrSmileSectionVectorTests
             "ShortMaturityLognormal" => ZabrShortMaturityLognormalSmileSection.Create(
                 d, forward, parameters, context, dc, moneyness, fdRefinement),
             "ShortMaturityNormal" => ZabrShortMaturityNormalSmileSection.Create(
+                d, forward, parameters, context, dc, moneyness, fdRefinement),
+            "LocalVolatility" => ZabrLocalVolatilitySmileSection.Create(
+                d, forward, parameters, context, dc, moneyness, fdRefinement),
+            "FullFd" => ZabrFullFdSmileSection.Create(
                 d, forward, parameters, context, dc, moneyness, fdRefinement),
             _ => throw new InvalidOperationException($"unknown ZABR kernel '{kernel}'"),
         };

@@ -4,7 +4,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using NanoQL.Coupons;
-using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.PricingEngines;
 using NanoQL.Tests.Harness;
@@ -30,29 +29,7 @@ public class FloatFloatSwapVectorTests
         {
             EvaluationContext context = c.Context();
             JsonElement spec = c.Input("swap");
-            FloatFloatSwap Build() => new(
-                (SwapType)spec.GetProperty("type").GetInt32(),
-                Reals(spec.GetProperty("nominal1")),
-                Reals(spec.GetProperty("nominal2")),
-                SwapInputs.ScheduleOf(spec.GetProperty("schedule1"), context),
-                IndexOf(spec.GetProperty("index1")),
-                CashFlowInputs.DayCounterOf(spec.GetProperty("dayCount1")),
-                SwapInputs.ScheduleOf(spec.GetProperty("schedule2"), context),
-                IndexOf(spec.GetProperty("index2")),
-                CashFlowInputs.DayCounterOf(spec.GetProperty("dayCount2")),
-                context,
-                spec.GetProperty("intermediateCapitalExchange").GetBoolean(),
-                spec.GetProperty("finalCapitalExchange").GetBoolean(),
-                Reals(spec.GetProperty("gearing1")),
-                Reals(spec.GetProperty("spread1")),
-                NullableReals(spec.GetProperty("cappedRate1")),
-                NullableReals(spec.GetProperty("flooredRate1")),
-                Reals(spec.GetProperty("gearing2")),
-                Reals(spec.GetProperty("spread2")),
-                NullableReals(spec.GetProperty("cappedRate2")),
-                NullableReals(spec.GetProperty("flooredRate2")),
-                (BusinessDayConvention)spec.GetProperty("paymentConvention1").GetInt32(),
-                (BusinessDayConvention)spec.GetProperty("paymentConvention2").GetInt32());
+            FloatFloatSwap Build() => FloatFloatInputs.SwapOf(spec, context);
 
             if (c.Expected.TryGetProperty("build", out _))
             {
@@ -92,14 +69,4 @@ public class FloatFloatSwapVectorTests
         check.Output(c, prefix + "Floating", leg.Select(cf => cf is FloatingRateCoupon).ToArray());
         check.Output(c, prefix + "Amounts", leg.Select(cf => (Func<object?>)(() => cf.Amount(context))).ToArray());
     }
-
-    private static InterestRateIndex IndexOf(JsonElement spec) =>
-        spec.TryGetProperty("ibor", out JsonElement ibor)
-            ? SwapInputs.IndexOf(ibor)
-            : SwapIndexInputs.SwapIndexOf(spec.GetProperty("swap"));
-
-    private static double[] Reals(JsonElement e) => [.. e.EnumerateArray().Select(x => x.GetDouble())];
-
-    private static double?[] NullableReals(JsonElement e) =>
-        [.. e.EnumerateArray().Select(x => x.ValueKind == JsonValueKind.Null ? (double?)null : x.GetDouble())];
 }

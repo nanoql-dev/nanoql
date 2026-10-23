@@ -10,9 +10,9 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The C++ harness's ZABR model vectors, <c>tests/vectors/cxx/termstructures/volatility/zabr.json</c>:
-/// <see cref="ZabrModel"/>'s inspectors and its lognormal, normal and local volatilities in their vector and scalar
-/// forms, for models with γ at and away from 1; and QuantLib's refusals of the model's arguments and of the vector
-/// members' strikes.
+/// <see cref="ZabrModel"/>'s inspectors, its lognormal, normal and local volatilities and its call prices by finite
+/// differences on the Dupire equation in their vector and scalar forms, for models with γ at and away from 1; and
+/// QuantLib's refusals of the model's arguments and of the vector members' strikes.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class ZabrCxxVectorTests
@@ -75,6 +75,8 @@ public class ZabrCxxVectorTests
         check.Output(c, "lognormalVolatilityAt", AtPoints(points, model.LognormalVolatility));
         check.Output(c, "normalVolatilityAt", AtPoints(points, model.NormalVolatility));
         check.Output(c, "localVolatilityAt", AtPoints(points, model.LocalVolatility));
+        check.Output(c, "fdPrice", () => model.FdPrice(Numbers(c.Input("fdStrikes"))));
+        check.Output(c, "fdPriceAt", AtPoints(points, model.FdPrice));
     }
 
     // Each value computed when compared, so that a throw is checked.

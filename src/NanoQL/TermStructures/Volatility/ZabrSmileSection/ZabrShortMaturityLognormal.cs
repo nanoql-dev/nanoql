@@ -26,4 +26,7 @@ public readonly struct ZabrShortMaturityLognormal : IZabrEvaluation
         strike = 1E-6 < strike ? strike : 1E-6;
         return section.Model.LognormalVolatility(strike);
     }
+
+    /// <inheritdoc/>
+    static double[]? IZabrEvaluation.CallPrices(ZabrModel model, ReadOnlySpan<double> strikes) => null;
 }

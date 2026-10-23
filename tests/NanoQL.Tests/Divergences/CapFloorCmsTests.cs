@@ -3,6 +3,7 @@
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Models;
@@ -26,7 +27,13 @@ namespace NanoQL.Tests.Divergences;
 /// 7470.393687093831 against 8282.86559093049. nanoql prices a CMS coupon on the model's swap rate at its fixing, the
 /// float-float engine's estimate, within 8.0e-9 of that route on the engines' default grid (64 points a side, 7
 /// standard deviations), where each route moves by up to 1.1e-3 as the grid refines, as an Ibor caplet does (the
-/// payoff's kink). QuantLib's check: that engine on the one-coupon swaption.
+/// payoff's kink). QuantLib's check: that engine on the one-coupon swaption. A CMS spread caplet alike: on the 10-year
+/// rate less half the 2-year's, the float-float engine estimates its coupon by the geared spread of the model's two
+/// swap rates (<c>:465-480</c>, <c>:543-558</c>); at 1.5% in a year 2101.104009657879, at 1%, 1.5% and 2% in two years
+/// 6129.950526822571, 2916.7134855385843 and 1027.7328956208546, at 1.5% in five years 4399.2812060734495, where
+/// QuantLib's cap engine, on the period's simple forward, gives 14629.465167876351, 19008.050510174733,
+/// 14876.81979668136, 11120.554478976486 and 15437.407755498794, its coupon on a <c>LognormalCmsSpreadPricer</c>;
+/// nanoql's within 2e-8 of the float-float route.
 /// </summary>
 public class CapFloorCmsTests
 {
@@ -62,6 +69,40 @@ public class CapFloorCmsTests
             double price = Gaussian1dCapFloorEngine.Calculate(new Cap(leg, [strike]), context, model).NPV!.Value;
             Assert.True(Math.Abs((price / floatFloat) - 1.0) <= 2e-8, $"{years}Y at {strike}: {price} against the float-float route's {floatFloat}");
             Assert.True(Math.Abs((price / quantLib) - 1.0) > 5e-2, $"{years}Y at {strike}: {price}");
+        }
+    }
+
+    [Fact]
+    public void ACmsSpreadCapletReadsTheModelsTwoSwapRates()
+    {
+        var today = new Date(15, Month.January, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+        YieldTermStructure curve = new FlatForward(today, 0.03, new Actual365Fixed());
+        var index = new SwapSpreadIndex(
+            "CmsSpread",
+            new EuriborSwapIsdaFixA(new Period(10, TimeUnit.Years), curve, curve),
+            new EuriborSwapIsdaFixA(new Period(2, TimeUnit.Years), curve, curve),
+            1.0,
+            -0.5);
+        Gsr model = Gaussian1dInputs.Constant(curve, 0.01, 0.01);
+        var calendar = new TARGET();
+        (int Years, double Strike, double FloatFloat, double QuantLib)[] cases =
+        [
+            (1, 0.015, 2101.104009657879, 14629.465167876351),
+            (2, 0.01, 6129.950526822571, 19008.050510174733),
+            (2, 0.015, 2916.7134855385843, 14876.81979668136),
+            (2, 0.02, 1027.7328956208546, 11120.554478976486),
+            (5, 0.015, 4399.2812060734495, 15437.407755498794),
+        ];
+        foreach ((int years, double strike, double floatFloat, double quantLib) in cases)
+        {
+            Date start = calendar.Advance(calendar.Advance(today, years, TimeUnit.Years), 2, TimeUnit.Days);
+            Date end = calendar.Advance(start, 1, TimeUnit.Years);
+            var coupon = new FloatingRateCoupon(
+                calendar.Adjust(end, BusinessDayConvention.ModifiedFollowing), 1e6, start, end, 2, index, dayCounter: new Actual360(), pricer: new IndexFixingPricer());
+            double price = Gaussian1dCapFloorEngine.Calculate(new Cap([coupon], [strike]), context, model).NPV!.Value;
+            Assert.True(Math.Abs((price / floatFloat) - 1.0) <= 2e-8, $"{years}Y at {strike}: {price} against the float-float route's {floatFloat}");
+            Assert.True(Math.Abs((price / quantLib) - 1.0) > 5e-1, $"{years}Y at {strike}: {price}");
         }
     }
 

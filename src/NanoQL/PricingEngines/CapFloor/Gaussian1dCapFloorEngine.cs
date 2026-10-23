@@ -6,6 +6,7 @@
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Models;
@@ -33,7 +34,8 @@ namespace NanoQL.PricingEngines;
 /// <c>:158-161</c>; (ii)); the at-the-money forwards are the coupons', where QuantLib's are left 0 ((iii)); a caplet
 /// fixed before today is the known payoff discounted to its payment, where QuantLib's is undiscounted ((iv)); a curve
 /// on another clock is read at a caplet's fixing date ((xvi)); a CMS coupon's rate is the model's swap rate at its
-/// fixing, the float-float engine's estimate, where QuantLib's prices the coupon period's simple forward ((xix)); flat
+/// fixing, and a CMS spread coupon's the geared spread of its two indexes' swap rates, the float-float engine's
+/// estimates, where QuantLib's prices the coupon period's simple forward ((xix)); flat
 /// payoff extrapolation's right tail reads the last node ((xxi)). And a compounded overnight coupon, which QuantLib
 /// prices on its last day's rate times the whole accrual ((xx)), is a Black call on its window's compounding factor on
 /// GSR: each daily factor is a zero bond affine in the state, so the factor is lognormal given the state at the
@@ -56,7 +58,8 @@ public static class Gaussian1dCapFloorEngine
     /// <param name="discountCurve">The discount curve; <see langword="null"/> for the model's.</param>
     /// <returns>The results: the NPV and the optionlets' prices and forwards.</returns>
     /// <exception cref="ArgumentNullException">The cap/floor, the context or the model is null.</exception>
-    /// <exception cref="NanoQLException">A coupon has a spread, or its index is neither an Ibor nor a swap index; or
+    /// <exception cref="NanoQLException">A coupon has a spread, or its index is neither an Ibor, a swap nor a swap
+    /// spread index; or
     /// a compounded overnight coupon is priced on a model that defines no short rate.</exception>
     public static InstrumentResults Calculate(
         CapFloor capFloor,
@@ -122,9 +125,9 @@ public static class Gaussian1dCapFloorEngine
             var overnight = capFloor.FloatingLeg[i] as OvernightIndexedCoupon;
 
             // QuantLib's simple forward of an index of another kind (G1R6 (xix)): refused
-            if (index is not (IborIndex or SwapIndex))
+            if (index is not (IborIndex or SwapIndex or SwapSpreadIndex))
             {
-                throw new NanoQLException($"Gaussian1dCapFloorEngine prices Ibor, overnight and CMS coupons only, not {index.Name}'s");
+                throw new NanoQLException($"Gaussian1dCapFloorEngine prices Ibor, overnight, CMS and CMS spread coupons only, not {index.Name}'s");
             }
 
             if (paymentDate > settlement)
@@ -229,6 +232,15 @@ public static class Gaussian1dCapFloorEngine
                     // the model's swap rate at the fixing, the float-float engine's estimate (G1R6 (xix))
                     floatingLegNpv = accrual * model.SwapRate(fixingDate, swapIndex.Tenor, context, fixingDate, y, swapIndex, memo)
                         * model.Zerobond(paymentDate, fixingDate, y, discountCurve, memo);
+                }
+                else if (index is SwapSpreadIndex spreadIndex)
+                {
+                    // the geared spread of the model's two swap rates at the fixing, the float-float engine's estimate
+                    double spreadRate = (spreadIndex.Gearing1
+                            * model.SwapRate(fixingDate, spreadIndex.SwapIndex1.Tenor, context, fixingDate, y, spreadIndex.SwapIndex1, memo))
+                        + (spreadIndex.Gearing2
+                            * model.SwapRate(fixingDate, spreadIndex.SwapIndex2.Tenor, context, fixingDate, y, spreadIndex.SwapIndex2, memo));
+                    floatingLegNpv = accrual * spreadRate * model.Zerobond(paymentDate, fixingDate, y, discountCurve, memo);
                 }
                 else
                 {

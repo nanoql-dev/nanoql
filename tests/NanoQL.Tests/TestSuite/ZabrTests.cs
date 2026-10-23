@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/zabr.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testConsistency's local-volatility and full finite-difference sections and checks (lines 54-55, 59-61, 68-69 and 80-89), which wait for S-g1d with ZabrModel's fdPrice and fullFdPrice
 
 using NanoQL.TermStructures;
 
@@ -13,8 +12,6 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class ZabrTests
 {
-    // Adapted: without the local-volatility and full finite-difference sections (lines 54-55 and 59-61) and their
-    // prices and checks (lines 68-69 and 80-89), which are on the partial line.
     [Fact]
     public void TestConsistency()
     {
@@ -35,12 +32,20 @@ public class ZabrTests
 
         var zabr1 = new ZabrSmileSection<ZabrShortMaturityNormal>(tau, forward, [alpha, beta, nu, rho, 1.0]);
 
+        var zabr2 = new ZabrSmileSection<ZabrLocalVolatility>(tau, forward, [alpha, beta, nu, rho, 1.0]);
+
+        // for full finite prices reduce the number of intermediate points here
+        // below the recommended value to speed up the test
+        var zabr3 = new ZabrSmileSection<ZabrFullFd>(tau, forward, [alpha, beta, nu, rho, 1.0], [], 2);
+
         Real k = 0.0001;
         while (k <= 0.70)
         {
             Real c0 = sabr.OptionPrice(k);
             Real z0 = zabr0.OptionPrice(k);
             Real z1 = zabr1.OptionPrice(k);
+            Real z2 = zabr2.OptionPrice(k);
+            Real z3 = zabr3.OptionPrice(k);
             if (Math.Abs(z0 - c0) > tol)
             {
                 Assert.Fail($"Zabr short maturity lognormal expansion price ({z0}) deviates from Sabr Hagan 2002 price by {z0 - c0}");
@@ -49,6 +54,16 @@ public class ZabrTests
             if (Math.Abs(z1 - c0) > tol)
             {
                 Assert.Fail($"Zabr short maturity normal expansion price ({z1}) deviates from Sabr Hagan 2002 price by {z1 - c0}");
+            }
+
+            if (Math.Abs(z2 - c0) > tol)
+            {
+                Assert.Fail($"Zabr local volatility price ({z2}) deviates from Sabr Hagan 2002 price by {z2 - c0}");
+            }
+
+            if (Math.Abs(z3 - c0) > tol)
+            {
+                Assert.Fail($"Zabr full finite difference price ({z3}) deviates from Sabr Hagan 2002 price by {z3 - c0}");
             }
 
             k += 0.0001;

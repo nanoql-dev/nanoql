@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/instruments/floatfloatswap.hpp ql/instruments/floatfloatswap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for S-cms's CmsSpreadLeg and S-g1d's SwapSpreadIndex
+// Partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for S-cms's CmsSpreadLeg
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;

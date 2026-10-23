@@ -13,8 +13,8 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// QuantLib's tags are empty structs that select the section's private overloads. Here each tag carries its kernel, in
-/// members internal to nanoql, so the tags are QuantLib's: <see cref="ZabrShortMaturityLognormal"/> and
-/// <see cref="ZabrShortMaturityNormal"/>; the local-volatility and full finite-difference tags come with their kernels.
+/// members internal to nanoql, so the tags are QuantLib's: <see cref="ZabrShortMaturityLognormal"/>,
+/// <see cref="ZabrShortMaturityNormal"/>, <see cref="ZabrLocalVolatility"/> and <see cref="ZabrFullFd"/>.
 /// </remarks>
 public interface IZabrEvaluation
 {
@@ -36,4 +36,11 @@ public interface IZabrEvaluation
     /// <returns>The volatility.</returns>
     internal static abstract double VolatilityImpl<TEvaluation>(ZabrSmileSection<TEvaluation> section, double strike)
         where TEvaluation : struct, IZabrEvaluation;
+
+    /// <summary>The kernel's call prices at the section's strike grid, QuantLib's <c>init2</c>; <see langword="null"/>
+    /// for a kernel that prices without one.</summary>
+    /// <param name="model">The section's model.</param>
+    /// <param name="strikes">The strike grid.</param>
+    /// <returns>The prices, one per strike, or <see langword="null"/>.</returns>
+    internal static abstract double[]? CallPrices(ZabrModel model, ReadOnlySpan<double> strikes);
 }

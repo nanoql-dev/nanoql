@@ -33,9 +33,17 @@ namespace NanoQL.Tests.Divergences;
 /// 6M fixing in two years, forecast on the 3.1% Actual/360 curve, is worth 2693.625283396357 against 2793.958767701246
 /// restated; on the 30/360 market, one fixing on 30 January 2026 with the discount curve 1528.9285427087634, where
 /// QuantLib's swaption engine gives the one-period swaption into the same coupon 1509.9042444210352 and, on the market
-/// restated, 1509.8482273231564, the strike's leg read on the discount curve too (G1R6 (ii)). QuantLib's check: its
-/// engine on the market restated on the model curve's clock; for a caplet with a discount curve, its swaption engine
-/// on the one-period swaption.
+/// restated, 1509.8482273231564, the strike's leg read on the discount curve too (G1R6 (ii)). So does the float-float
+/// engine, at its exercises and its fixing events: on the same swaptions as float-float swaptions, their first legs
+/// fixed at 3% in all but name (a zero gearing on Euribor 1Y, 30/360), QuantLib's engine gives 0.0709550276548306 on
+/// the Actual/360 discount curve against 0.07076902784741748 restated; on the 30/360 market, where Euribor 6M fixes on
+/// 30 July 2026, 0.029342639252770517 against 0.029341974297365136, and the Digital probability of the exercise on the
+/// 30th 0.00013119665716211765 against 0.00013119666147197958, the swaption engine's; with rebates of 0.005, 0.002 and
+/// 0.001 paid on the exercise dates, whose bond to their payment is 1 on any curve and in any state (so G1R6 (v)'s
+/// reading at y = 0 moves none), 0.030447425948888763 against 0.030446802464572535. QuantLib's check: its engine on
+/// the market restated on the model curve's clock (on the 30/360 market, a discount curve with a node at each date to
+/// 2031 whose 30/360 time is new, and at the numeraire's 60 years); for a caplet with a discount curve, its swaption
+/// engine on the one-period swaption.
 /// </summary>
 public class Gaussian1dMismatchedTimesTests
 {
@@ -168,7 +176,86 @@ public class Gaussian1dMismatchedTimesTests
         Assert.True(Math.Abs((price / 1528.9285427087634) - 1.0) > 1e-2);
     }
 
+    [Fact]
+    public void TheFloatFloatEnginesDiscountCurveOnAnotherDayCounterIsReadByDate()
+    {
+        Gsr model = Gaussian1dInputs.Constant(ModelCurve, 0.01, 0.01);
+        var swaption = new FloatFloatSwaption(FloatFloatSwapOf(ModelCurve, new TARGET().Advance(Exercise, 2, TimeUnit.Days), 10, Context), new EuropeanExercise(Exercise));
+        YieldTermStructure discount360 = new FlatForward(Today, 0.02 * 360.0 / 365.0, new Actual360());
+        double price = Gaussian1dFloatFloatSwaptionEngine.Calculate(swaption, Context, model, discountCurve: discount360).NPV!.Value;
+        Assert.True(Math.Abs((price / 0.07076902784741748) - 1.0) <= 1e-11, $"{price}");
+        Assert.True(Math.Abs((price / 0.0709550276548306) - 1.0) > 1e-3);
+    }
+
+    [Fact]
+    public void TheFloatFloatEnginesExercisesAndFixingsOnThe30thAreReadByDate()
+    {
+        var swaption = new FloatFloatSwaption(FloatFloatSwapOf(ModelCurve30, new Date(3, Month.February, 2026), 5, Context30), new BermudanExercise(Exercises30));
+        InstrumentResults results = Gaussian1dFloatFloatSwaptionEngine.Calculate(
+            swaption, Context30, Model30(), discountCurve: Discount365, probabilities: Gaussian1dFloatFloatSwaptionEngineProbabilities.Digital);
+        double[] restated = [0.00013119666147197958, 0.44411124920974154, 0.24872966048029543, 0.3097924921785468];
+        ImmutableArray<double> probabilities = results.Result<ImmutableArray<double>>("probabilities");
+        Assert.True(Math.Abs((results.NPV!.Value / 0.029341974297365136) - 1.0) <= 1e-12, $"{results.NPV}");
+        Assert.True(Math.Abs((results.NPV!.Value / 0.029342639252770517) - 1.0) > 1e-5);
+        Assert.Equal(restated.Length, probabilities.Length);
+
+        // The exercise on 30 January 2026: the restated market's, where QuantLib's reads the 31st's
+        // (0.00013119665716211765); the later ones, as the swaption engine's, to rounding.
+        Assert.True(Math.Abs(probabilities[0] - restated[0]) <= 1e-13, $"{probabilities[0]}");
+        Assert.True(Math.Abs(probabilities[0] - 0.00013119665716211765) > 4e-12, $"{probabilities[0]}");
+        for (int i = 1; i < restated.Length; i++)
+        {
+            Assert.True(Math.Abs(probabilities[i] - restated[i]) <= 2e-11, $"{i}: {probabilities[i]}");
+        }
+    }
+
+    [Fact]
+    public void TheFloatFloatEnginesRebatesOnThe30thAreReadByDate()
+    {
+        var exercise = new RebatedExercise(new BermudanExercise(Exercises30), [0.005, 0.002, 0.001], 0, new TARGET(), BusinessDayConvention.Following);
+        var swaption = new FloatFloatSwaption(FloatFloatSwapOf(ModelCurve30, new Date(3, Month.February, 2026), 5, Context30), exercise);
+        double price = Gaussian1dFloatFloatSwaptionEngine.Calculate(swaption, Context30, Model30(), discountCurve: Discount365).NPV!.Value;
+
+        // Each rebate paid on its exercise date, its bond 1, so the rebate's numeraire is the read the price holds.
+        Assert.Equal(Exercises30, Enumerable.Range(0, Exercises30.Length).Select(exercise.RebatePaymentDate));
+        Assert.True(Math.Abs((price / 0.030446802464572535) - 1.0) <= 1e-12, $"{price}");
+        Assert.True(Math.Abs((price / 0.030447425948888763) - 1.0) > 1e-5);
+    }
+
     private static Gsr Model30() => Gaussian1dInputs.Constant(ModelCurve30, 0.01, 0.01);
+
+    // A float-float payer of 1 from the start, its first leg fixed at 3% in all but name (a zero gearing on Euribor 1Y,
+    // yearly, 30/360) against Euribor 6M (Actual/360), both forecast on the curve.
+    private static FloatFloatSwap FloatFloatSwapOf(YieldTermStructure curve, Date start, int years, EvaluationContext context)
+    {
+        var calendar = new TARGET();
+        Schedule Schedule(int months) => new(
+            start,
+            calendar.Advance(start, years, TimeUnit.Years),
+            new Period(months, TimeUnit.Months),
+            calendar,
+            BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing,
+            DateGenerationRule.Backward,
+            false,
+            context);
+        Schedule yearly = Schedule(12), semiannual = Schedule(6);
+        return new FloatFloatSwap(
+            SwapType.Payer,
+            Enumerable.Repeat(1.0, yearly.Size - 1),
+            Enumerable.Repeat(1.0, semiannual.Size - 1),
+            yearly,
+            new Euribor1Y(curve),
+            new Thirty360(Thirty360Convention.BondBasis),
+            semiannual,
+            new Euribor6M(curve),
+            new Actual360(),
+            context,
+            gearing1: new double[yearly.Size - 1],
+            spread1: Enumerable.Repeat(0.03, yearly.Size - 1),
+            paymentConvention1: BusinessDayConvention.Following,
+            paymentConvention2: BusinessDayConvention.Following);
+    }
 
     // A caplet at 3% on 1,000,000 of the index fixing on the date, its accrual on Actual/360.
     private static Cap Caplet(IborIndex index, Date fixing, EvaluationContext context)

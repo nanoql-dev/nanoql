@@ -4,10 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/integrals.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSegment (S-g1d's AbcdSquared); testTrapezoid, testMidPointTrapezoid, testSimpson, testGaussLobatto, testGaussLegendreIntegrator (S-g1d's AbcdSquared); testGaussKronrodAdaptive, testGaussKronrodNonAdaptive (S-cms); testTanhSinh (S-van); testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (S-core); testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator (S-van); testPiecewiseIntegral (S-xrt)
+// Partial: testGaussKronrodAdaptive, testGaussKronrodNonAdaptive (S-cms); testTanhSinh (S-van); testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (S-core); testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator (S-van); testPiecewiseIntegral (S-xrt)
 
 using System.Numerics;
 using NanoQL.Numerics;
+using NanoQL.TermStructures;
 
 namespace NanoQL.Tests.TestSuite;
 
@@ -25,6 +26,64 @@ public class IntegralsTests
     private const double NormalMin = 2.2250738585072014e-308;
 
     private const double Tolerance = 1.0e-6;
+
+    [Fact]
+    public void TestSegment()
+    {
+        // Testing segment integration...
+
+        TestSeveral(new SegmentIntegral(10000));
+        TestDegeneratedDomain(new SegmentIntegral(10000));
+    }
+
+    [Fact]
+    public void TestTrapezoid()
+    {
+        // Testing trapezoid integration...
+
+        TestSeveral(new TrapezoidIntegral<Default>(Tolerance, 10000));
+        TestDegeneratedDomain(new TrapezoidIntegral<Default>(Tolerance, 10000));
+    }
+
+    [Fact]
+    public void TestMidPointTrapezoid()
+    {
+        // Testing mid-point trapezoid integration...
+
+        TestSeveral(new TrapezoidIntegral<MidPoint>(Tolerance, 10000));
+        TestDegeneratedDomain(new TrapezoidIntegral<MidPoint>(Tolerance, 10000));
+    }
+
+    [Fact]
+    public void TestSimpson()
+    {
+        // Testing Simpson integration...
+
+        TestSeveral(new SimpsonIntegral(Tolerance, 10000));
+        TestDegeneratedDomain(new SimpsonIntegral(Tolerance, 10000));
+    }
+
+    [Fact]
+    public void TestGaussLobatto()
+    {
+        // Testing adaptive Gauss-Lobatto integration...
+
+        int maxEvaluations = 1000;
+        TestSeveral(new GaussLobattoIntegral(maxEvaluations, Tolerance));
+
+        // on degenerated domain [1,1+macheps] an exception is thrown
+        // which is also ok, but not tested here
+    }
+
+    [Fact]
+    public void TestGaussLegendreIntegrator()
+    {
+        // Testing Gauss-Legendre integrator...
+
+        var integrator = new GaussLegendreIntegrator(64);
+        TestSeveral(integrator);
+        TestDegeneratedDomain(integrator);
+    }
 
     [Fact]
     public void TestGaussChebyshevIntegrator()
@@ -332,6 +391,25 @@ public class IntegralsTests
                 + $"    calculated: {calculated:G10}"
                 + $"    expected:   {expected:G10}");
         }
+    }
+
+    private static void TestSeveral(Integrator I)
+    {
+        TestSingle(I, "f(x) = 0", x => 0.0, 0.0, 1.0, 0.0);
+        TestSingle(I, "f(x) = 1", x => 1.0, 0.0, 1.0, 1.0);
+        TestSingle(I, "f(x) = x", x => x, 0.0, 1.0, 0.5);
+        TestSingle(I, "f(x) = x^2", x => x * x, 0.0, 1.0, 1.0 / 3.0);
+        TestSingle(I, "f(x) = sin(x)", Math.Sin, 0.0, M_PI, 2.0);
+        TestSingle(I, "f(x) = cos(x)", Math.Cos, 0.0, M_PI, 0.0);
+
+        TestSingle(I, "f(x) = Gaussian(x)", new NormalDistribution().Evaluate, -10.0, 10.0, 1.0);
+        TestSingle(
+            I,
+            "f(x) = Abcd2(x)",
+            new AbcdSquared(0.07, 0.07, 0.5, 0.1, 8.0, 10.0).Evaluate,
+            5.0,
+            6.0,
+            new AbcdFunction(0.07, 0.07, 0.5, 0.1).Covariance(5.0, 6.0, 8.0, 10.0));
     }
 
     private static void TestDegeneratedDomain(Integrator I) =>

@@ -88,8 +88,8 @@ internal static class ShortRateFdInputs
         return (model, mesher, desc);
     }
 
-    /// <summary>Checks an operator's outputs at each of the case's times: its size, apply, apply_mixed, each direction's
-    /// apply and splitting solutions, and the preconditioner.</summary>
+    /// <summary>Checks an operator's outputs at each of the case's times: its size, apply, apply_mixed where the case
+    /// has it, each direction's apply and splitting solutions, and the preconditioner.</summary>
     /// <param name="check">The file's checker.</param>
     /// <param name="c">The case.</param>
     /// <param name="op">The operator.</param>
@@ -119,7 +119,11 @@ internal static class ShortRateFdInputs
 
         check.Output(c, "size", op.Size);
         check.Output(c, "apply", apply);
-        check.Output(c, "applyMixed", applyMixed);
+        if (c.Expected.TryGetProperty("applyMixed", out _))
+        {
+            check.Output(c, "applyMixed", applyMixed);
+        }
+
         check.Output(c, "applyDirection", applyDirection);
         check.Output(c, "solveSplitting", solveSplitting);
         check.Output(c, "preconditioner", precondition);

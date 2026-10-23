@@ -10,6 +10,54 @@ Every documented divergence from QuantLib v1.44, one entry per test class under
 `tools/divergences.py`: regenerate it with `.venv\Scripts\python -I tools/divergences.py` rather than
 editing it by hand.
 
+## AbcdCalibrationFixedATests
+
+[`Divergences/AbcdCalibrationFixedATests.cs`](../tests/NanoQL.Tests/Divergences/AbcdCalibrationFixedATests.cs)
+
+The abcd calibration's fixed a: QuantLib's transformation gives a as a positive a + d less d (`abcdcalibration.cpp`'s `AbcdParametersTransformation`), so with a fixed and d free it fixes a + d, and the fit moves a. On set 1 with a fixed at −0.06, QuantLib returns a = −0.11449872096226477 and d = 0.22449872096226478, a + d held at 0.11 [the harness]. nanoql keeps a at −0.06, d above max(0, −a); the fit is valid, at a minimum of the cost over b, c and d (each gradient within the end criteria's tolerance), and a restart from a second guess reaches it too.
+
+Facts:
+
+- `AFixedAKeepsItsGuess`
+
+## AbcdCalibrationGuardTests
+
+[`Divergences/AbcdCalibrationGuardTests.cs`](../tests/NanoQL.Tests/Divergences/AbcdCalibrationGuardTests.cs)
+
+The abcd calibration's guard (the S-g1d plan's G1R6 (xxv)): QuantLib's transformation leaves b free, so its optimizer can step to a trial point the abcd function's validation refuses, and the fit throws. On set 6, a dip whose total variance grows, QuantLib refuses with "b (-0.374029) less than -0.267779: negative function value at stationary point 2.45429" [the harness]; nanoql's guard fits it validly, at a minimum (each parameter's gradient within the end criteria's tolerance) that a restart from a second guess reaches too. And on the sets QuantLib completes, 0, 1, 4 and 5, the guard never acts: their fits are QuantLib's bit for bit, set 1's among them although its gradient is above the tolerance.
+
+Facts:
+
+- `ADipQuantLibRefusesIsFittedAtAMinimum`
+- `TheFitsQuantLibCompletesKeepItsBits`
+
+## AbcdMaximumTests
+
+[`Divergences/AbcdMaximumTests.cs`](../tests/NanoQL.Tests/Divergences/AbcdMaximumTests.cs)
+
+The abcd function's maximum. Its location is QuantLib's master's (#2841, after the pin; the S-g1d plan's G1R5 (iii)): QuantLib 1.44 returns the stationary point 1/c − a/b whatever b's sign, a minimum when b < 0. Its value is the function at that location (G1R6 (ix)): QuantLib returns d whenever b = 0 or a ≤ 0. QuantLib's values are the wheel's; the check is QuantLib's own `operator()`.
+
+Facts:
+
+- `ANegativeBsStationaryPointIsAMinimum`
+- `TheMaximumValueIsTheFunctionAtItsLocation`
+
+## AbcdPrimitiveTests
+
+[`Divergences/AbcdPrimitiveTests.cs`](../tests/NanoQL.Tests/Divergences/AbcdPrimitiveTests.cs)
+
+The abcd function's primitive at a small c (the S-g1d plan's G1R6 (x)): QuantLib's closed form divides by powers of c and cancels, so the covariance of a = 0.1, b = 0.2, d = 0.15 over the first year for fixings at 2 and 3 years reads, on the wheel, 0.41570091639483625 at c = 1e-4, 0.4112554826093383 at 1e-5, 0.26249003480977007 at 1e-6 and −2220.182821037571 at 1e-7, where its Gauss-Lobatto integral is 0.4157007, 0.4158201, 0.4158320 and 0.41583320. nanoql switches to a cancellation-free series where QuantLib's form cancels; the check is the integral of the covariance's integrand, `AbcdSquared`, by Gauss-Lobatto, the `integrals` cases' route, and QuantLib's bits where it doesn't cancel.
+
+Facts:
+
+- `ASmallCsCovarianceIsItsIntegral`
+
+## AbcdTermStructures
+
+[`Divergences/AbcdTermStructures.cs`](../tests/NanoQL.Tests/Divergences/AbcdTermStructures.cs)
+
+The term structures of Black volatilities the abcd facts fit, the S-g1d plan's sets 0 to 6 over 0.5 to 20 years (`tools/vectors/gen/cxx/termstructures/volatility/abcdcalibration.py`'s): falling (0), rising (1), two whose total variance shrinks (2, 3), two dips whose total variance grows (4, 5), and a dip QuantLib refuses (6); and the cost's gradient a fit is checked by.
+
 ## AdaptiveRungeKuttaSizeTests
 
 [`Divergences/AdaptiveRungeKuttaSizeTests.cs`](../tests/NanoQL.Tests/Divergences/AdaptiveRungeKuttaSizeTests.cs)
@@ -459,11 +507,12 @@ Facts:
 
 [`Divergences/CapFloorCmsTests.cs`](../tests/NanoQL.Tests/Divergences/CapFloorCmsTests.cs)
 
-A CMS caplet on the Gaussian1d cap/floor engine (the S-g1d plan's G1R6 (xix)): QuantLib's engine tests only for an Ibor index (`gaussian1dcapfloorengine.cpp:47-48`) and otherwise prices the coupon period's simple forward (`:81-85`, `:153-157`), so a CMS caplet reads no swap rate. Its same-model route is the float-float swaption engine on a European exercise at the fixing into the CMS coupon against a fixed one, which estimates the coupon by the model's swap rate at its fixing (`gaussian1dfloatfloatswaptionengine.cpp:460-464`). On the wheel, on a GSR model (a = σ = 0.01) on a flat 3% curve, a one-year caplet on 1,000,000 of the 10-year EUR swap rate (ISDA fix A), fixing in one, two or five years, is worth, against the float-float route: at 3% in a year 3845.936360680116 against 4153.063226583255; at 2%, 3% and 4.5% in two years 11120.554478976486, 5251.888776300536 and 1001.0246098467576 against 11894.414352660851, 5692.585769904653 and 1092.524780338987; at 3% in five years 7470.393687093831 against 8282.86559093049. nanoql prices a CMS coupon on the model's swap rate at its fixing, the float-float engine's estimate, within 8.0e-9 of that route on the engines' default grid (64 points a side, 7 standard deviations), where each route moves by up to 1.1e-3 as the grid refines, as an Ibor caplet does (the payoff's kink). QuantLib's check: that engine on the one-coupon swaption.
+A CMS caplet on the Gaussian1d cap/floor engine (the S-g1d plan's G1R6 (xix)): QuantLib's engine tests only for an Ibor index (`gaussian1dcapfloorengine.cpp:47-48`) and otherwise prices the coupon period's simple forward (`:81-85`, `:153-157`), so a CMS caplet reads no swap rate. Its same-model route is the float-float swaption engine on a European exercise at the fixing into the CMS coupon against a fixed one, which estimates the coupon by the model's swap rate at its fixing (`gaussian1dfloatfloatswaptionengine.cpp:460-464`). On the wheel, on a GSR model (a = σ = 0.01) on a flat 3% curve, a one-year caplet on 1,000,000 of the 10-year EUR swap rate (ISDA fix A), fixing in one, two or five years, is worth, against the float-float route: at 3% in a year 3845.936360680116 against 4153.063226583255; at 2%, 3% and 4.5% in two years 11120.554478976486, 5251.888776300536 and 1001.0246098467576 against 11894.414352660851, 5692.585769904653 and 1092.524780338987; at 3% in five years 7470.393687093831 against 8282.86559093049. nanoql prices a CMS coupon on the model's swap rate at its fixing, the float-float engine's estimate, within 8.0e-9 of that route on the engines' default grid (64 points a side, 7 standard deviations), where each route moves by up to 1.1e-3 as the grid refines, as an Ibor caplet does (the payoff's kink). QuantLib's check: that engine on the one-coupon swaption. A CMS spread caplet alike: on the 10-year rate less half the 2-year's, the float-float engine estimates its coupon by the geared spread of the model's two swap rates (`:465-480`, `:543-558`); at 1.5% in a year 2101.104009657879, at 1%, 1.5% and 2% in two years 6129.950526822571, 2916.7134855385843 and 1027.7328956208546, at 1.5% in five years 4399.2812060734495, where QuantLib's cap engine, on the period's simple forward, gives 14629.465167876351, 19008.050510174733, 14876.81979668136, 11120.554478976486 and 15437.407755498794, its coupon on a `LognormalCmsSpreadPricer`; nanoql's within 2e-8 of the float-float route.
 
 Facts:
 
 - `ACmsCapletReadsTheModelsSwapRate`
+- `ACmsSpreadCapletReadsTheModelsTwoSwapRates`
 
 ## CapFloorEmptyLegTests
 
@@ -569,6 +618,16 @@ Facts:
 - `TheMonteCarloEngineAgreesWithTheGaussianIntegral`
 - `AtZeroVolatilityTheValueIsTheDeterministicPayoff`
 - `TheAnalyticEngineRefusesIt`
+
+## CapletVarianceCurveSmileTests
+
+[`Divergences/CapletVarianceCurveSmileTests.cs`](../tests/NanoQL.Tests/Divergences/CapletVarianceCurveSmileTests.cs)
+
+The caplet variance curve's smile sections (the S-g1d plan's G1R6 (xiii)): QuantLib's is a `FlatSmileSection(t, atmVol, dayCounter())` (`capletvariancecurve.hpp:86-91`), shifted lognormal with shift 0 whatever the curve's type and displacement, so a normal curve's section prices its normal volatility as a lognormal one. nanoql's section carries the curve's type and displacement; the check is the curve's own `CapletVarianceCurve.VolatilityType` and `CapletVarianceCurve.Displacement`.
+
+Facts:
+
+- `TheSectionsKeepTheCurvesTypeAndDisplacement`
 
 ## CappedFlooredCouponNullUnderlyingTests
 
@@ -1135,6 +1194,16 @@ Facts:
 
 - `EveryLineMovesAsTheOneDimensionalHandlerMovesIt`
 
+## FdmDupireApplyMixedTests
+
+[`Divergences/FdmDupireApplyMixedTests.cs`](../tests/NanoQL.Tests/Divergences/FdmDupireApplyMixedTests.cs)
+
+The Dupire operator's mixed term (the S-g1d plan's G1R6 (xi)): a one-direction operator has none, but QuantLib's `FdmDupire1dOp::apply_mixed` returns its input (on the wheel, [1, 2, 3, 4, 5] for [1, 2, 3, 4, 5]), which a scheme adding the mixed term would count twice. nanoql's gives zeros, as every other one-direction operator's does, QuantLib's `FdmBlackScholesOp`'s the check. ZABR's own price never reads it: Douglas runs on `apply`.
+
+Facts:
+
+- `TheMixedTermIsZero`
+
 ## FdmMismatchedTimesTests
 
 [`Divergences/FdmMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/FdmMismatchedTimesTests.cs)
@@ -1204,16 +1273,38 @@ Facts:
 
 [`Divergences/FlatPayoffExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/FlatPayoffExtrapolationTests.cs)
 
-Flat payoff extrapolation's right tail (the S-g1d plan's G1R6 (xxi)): with `flatPayoffExtrapolation`, QuantLib's Gaussian1d engines integrate past the grid's last node the constant `p[n − 2]`, the second-last node's value (the swaption engine `gaussian1dswaptionengine.cpp:166-171`, the nonstandard, float-float and cap/floor engines, `Gaussian1dModel::zerobondOption` and the Markov-functional model alike), where the left tail takes `p[0]`, its boundary node. On the wheel, a 5Y into 10Y payer at 2% on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12 standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168, and so on the nonstandard engine; a 5-year cap at 2% on Euribor 6M from the same start, 0.060558824087763516 against 0.06245438129328943; a put struck at 0.8 on the 10-year bond from the same exercise, on the model's `zerobondOption`, 0.07911771510819356 against 0.08048473087856346; on the harness, the Markov-functional model's own premium of its first calibration point's call at 4.57%, calibrated to five CMS 10y swaptions at 20% on 32 points a side, on 3 standard deviations 0.0004285947663144643 and on 7 0.0004751894691285253. nanoql takes `p[n − 1]`. For a payoff that increases past the grid, the fixed tail lies between QuantLib's and the true one, the one assertion the two values can't both pass; the nonstandard and cap/floor facts ask a tenth of the way from QuantLib's at least, since QuantLib's own tail ties its value only within `erf`'s last bits (G1R3). No QuantLib case sets the flag. QuantLib's check: the same engine on the widened grid. The Markov-functional model's calibration reads the tail too (`markovfunctional.cpp:516-519`), seen alone in its puts, whose payoff vanishes past the grid: on 2 standard deviations, QuantLib's puts on 32 points move as the grid refines, its second-last node meeting the last, and nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from 2.3% to 15%, by up to fifteen times. QuantLib's check: its own section on the refined grid.
+Flat payoff extrapolation's right tail (the S-g1d plan's G1R6 (xxi)): with `flatPayoffExtrapolation`, QuantLib's Gaussian1d engines integrate past the grid's last node the constant `p[n − 2]`, the second-last node's value (the swaption engine `gaussian1dswaptionengine.cpp:166-171`, the nonstandard, float-float and cap/floor engines, `Gaussian1dModel::zerobondOption` and the Markov-functional model alike), where the left tail takes `p[0]`, its boundary node. On the wheel, a 5Y into 10Y payer at 2% on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12 standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168, and so on the nonstandard engine; on the float-float engine, the same payer with its first leg fixed in all but name (a zero gearing on Euribor 1Y), 0.10173470853181348 against 0.10416117493270043; a 5-year cap at 2% on Euribor 6M from the same start, 0.060558824087763516 against 0.06245438129328943; a put struck at 0.8 on the 10-year bond from the same exercise, on the model's `zerobondOption`, 0.07911771510819356 against 0.08048473087856346; on the harness, the Markov-functional model's own premium of its first calibration point's call at 4.57%, calibrated to five CMS 10y swaptions at 20% on 32 points a side, on 3 standard deviations 0.0004285947663144643 and on 7 0.0004751894691285253. nanoql takes `p[n − 1]`. For a payoff that increases past the grid, the fixed tail lies between QuantLib's and the true one, the one assertion the two values can't both pass; the nonstandard and cap/floor facts ask a tenth of the way from QuantLib's at least, since QuantLib's own tail ties its value only within `erf`'s last bits (G1R3). No QuantLib case sets the flag. QuantLib's check: the same engine on the widened grid. The Markov-functional model's calibration reads the tail too (`markovfunctional.cpp:516-519`), seen alone in its puts, whose payoff vanishes past the grid: on 2 standard deviations, QuantLib's puts on 32 points move as the grid refines, its second-last node meeting the last, and nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from 2.3% to 15%, by up to fifteen times. QuantLib's check: its own section on the refined grid.
 
 Facts:
 
 - `TheSwaptionEnginesRightTailTakesTheLastNode`
 - `TheNonstandardEnginesRightTailTakesTheLastNode`
+- `TheFloatFloatEnginesRightTailTakesTheLastNode`
 - `TheCapFloorEnginesRightTailTakesTheLastNode`
 - `TheZerobondOptionsRightTailTakesTheLastNode`
 - `TheMarkovFunctionalModelsRightTailTakesTheLastNode`
 - `TheMarkovFunctionalCalibrationsRightTailTakesTheLastNode`
+
+## FloatFloatBasketRefusalTests
+
+[`Divergences/FloatFloatBasketRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/FloatFloatBasketRefusalTests.cs)
+
+The float-float engine's calibration basket refuses, with QuantLib's master's texts (#2845, after the pin; the S-g1d plan's G1R5 (iv)), the two expiries its initial guess can't be built at: master's `testGaussian1dFloatFloatSwaptionCalibrationInitialGuessBoundaries`, on its fixture (Euribor 6M and 3M, 100 a leg, a flat 5% from the settlement date, GSR σ = 0.01, a = 0.03), the evaluation date fixed at 15 January 2025. QuantLib 1.44 refuses both with a schedule's text instead: on the wheel, "effective date (October 21st, 2025) later than or equal to termination date (October 21st, 2025)" and "effective date (January 19th, 2027) later than or equal to termination date (January 19th, 2027)" (the first exercise a one-date Bermudan with a one-element rebate vector, the wheel binding no constructor with one rebate).
+
+Facts:
+
+- `AnExpiryAfterLeg1sLastResetIsRefused`
+- `Leg1NotionalsSummingToZeroAreRefused`
+
+## FloatFloatRebateTests
+
+[`Divergences/FloatFloatRebateTests.cs`](../tests/NanoQL.Tests/Divergences/FloatFloatRebateTests.cs)
+
+The float-float engine's rebate (the S-g1d plan's G1R6 (v)): QuantLib values it at y = 0 on the model curve, where the nonstandard engine values it on the grid from its payment date. On a Bermudan payer exercised yearly from a year out into a 5-year swap of 1,000,000, its first leg fixed at 3% in all but name (a zero gearing on Euribor 1Y, 30/360) against Euribor 6M, on GSR (a = 0.01, σ = 0.01) on a flat 2.7%, with rebates of 10,000, −5,000, 25,000 and 0 paid 252 TARGET days after each exercise, the rebates add 8481.523651884276 on the wheel's float-float engine and 8226.793645308986 on its nonstandard engine for the same swap and exercise, 3.1% apart. nanoql's float-float engine values the rebate as the nonstandard engine does; the check is that engine, the two engines' rebates within 1e-4.
+
+Facts:
+
+- `TheRebateIsValuedAsTheNonstandardEngineValuesIt`
 
 ## FloatFloatSwapOneDateScheduleTests
 
@@ -1410,7 +1501,7 @@ Facts:
 
 [`Divergences/Gaussian1dMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/Gaussian1dMismatchedTimesTests.cs)
 
-The Gaussian1d model and engines on curves on another clock (the S-g1d plan's G1R6 (xvi); master plan §2.2's mismatched-dates row): QuantLib reads a discount or forwarding curve at the model curve's times, so a curve on another day counter with the same discount factors by date moves a price. On the wheel, on a GSR model (a = σ = 0.01) on a flat 3% Actual/365 (Fixed) curve, a 5Y into 10Y payer at 3% is worth 0.07095344971961592 with a 2% discount curve on Actual/360, where the same curve restated on Actual/365 (Fixed) gives 0.07076745548830388; with the index forecast on a 3.1% Actual/360 curve, 0.06649840575430056 against 0.06817679085140739 restated. On a model curve on 30/360 dated the 30th, a time doesn't tell the 30th of a 31-day month from the 31st: from 30 June 2025, a Bermudan exercised on 30 January 2026, 30 July 2026 and 30 March 2027 into a 5-year payer at 3%, with a 2.5% Actual/365 (Fixed) discount curve, is worth 0.029341545499651206, against 0.02934088072814103 on the curve restated on 30/360 at every date the engine reads; its Digital probability of the exercise on the 30th (the C++ harness) 0.00013119665716211765 against 0.00013119666147197958, and a zero-bond option expiring on 30 January 2026 0.014136151799917162 against 0.014102533018978234. nanoql reads each curve at the instant QuantLib's argument denotes: by the date QuantLib derives a time from (an exercise, a fixing, an option's expiry), where a read by the time would take the 31st; and the numeraire time, which has no date and whose factor cancels, at the instant it denotes on the model's clock. The nonstandard engine reads alike: on the same swaptions as nonstandard swaptions, QuantLib's same numbers. So does the cap/floor engine at a caplet's fixing: a caplet at 3% on 1,000,000 of Euribor 6M fixing in two years, forecast on the 3.1% Actual/360 curve, is worth 2693.625283396357 against 2793.958767701246 restated; on the 30/360 market, one fixing on 30 January 2026 with the discount curve 1528.9285427087634, where QuantLib's swaption engine gives the one-period swaption into the same coupon 1509.9042444210352 and, on the market restated, 1509.8482273231564, the strike's leg read on the discount curve too (G1R6 (ii)). QuantLib's check: its engine on the market restated on the model curve's clock; for a caplet with a discount curve, its swaption engine on the one-period swaption.
+The Gaussian1d model and engines on curves on another clock (the S-g1d plan's G1R6 (xvi); master plan §2.2's mismatched-dates row): QuantLib reads a discount or forwarding curve at the model curve's times, so a curve on another day counter with the same discount factors by date moves a price. On the wheel, on a GSR model (a = σ = 0.01) on a flat 3% Actual/365 (Fixed) curve, a 5Y into 10Y payer at 3% is worth 0.07095344971961592 with a 2% discount curve on Actual/360, where the same curve restated on Actual/365 (Fixed) gives 0.07076745548830388; with the index forecast on a 3.1% Actual/360 curve, 0.06649840575430056 against 0.06817679085140739 restated. On a model curve on 30/360 dated the 30th, a time doesn't tell the 30th of a 31-day month from the 31st: from 30 June 2025, a Bermudan exercised on 30 January 2026, 30 July 2026 and 30 March 2027 into a 5-year payer at 3%, with a 2.5% Actual/365 (Fixed) discount curve, is worth 0.029341545499651206, against 0.02934088072814103 on the curve restated on 30/360 at every date the engine reads; its Digital probability of the exercise on the 30th (the C++ harness) 0.00013119665716211765 against 0.00013119666147197958, and a zero-bond option expiring on 30 January 2026 0.014136151799917162 against 0.014102533018978234. nanoql reads each curve at the instant QuantLib's argument denotes: by the date QuantLib derives a time from (an exercise, a fixing, an option's expiry), where a read by the time would take the 31st; and the numeraire time, which has no date and whose factor cancels, at the instant it denotes on the model's clock. The nonstandard engine reads alike: on the same swaptions as nonstandard swaptions, QuantLib's same numbers. So does the cap/floor engine at a caplet's fixing: a caplet at 3% on 1,000,000 of Euribor 6M fixing in two years, forecast on the 3.1% Actual/360 curve, is worth 2693.625283396357 against 2793.958767701246 restated; on the 30/360 market, one fixing on 30 January 2026 with the discount curve 1528.9285427087634, where QuantLib's swaption engine gives the one-period swaption into the same coupon 1509.9042444210352 and, on the market restated, 1509.8482273231564, the strike's leg read on the discount curve too (G1R6 (ii)). So does the float-float engine, at its exercises and its fixing events: on the same swaptions as float-float swaptions, their first legs fixed at 3% in all but name (a zero gearing on Euribor 1Y, 30/360), QuantLib's engine gives 0.0709550276548306 on the Actual/360 discount curve against 0.07076902784741748 restated; on the 30/360 market, where Euribor 6M fixes on 30 July 2026, 0.029342639252770517 against 0.029341974297365136, and the Digital probability of the exercise on the 30th 0.00013119665716211765 against 0.00013119666147197958, the swaption engine's; with rebates of 0.005, 0.002 and 0.001 paid on the exercise dates, whose bond to their payment is 1 on any curve and in any state (so G1R6 (v)'s reading at y = 0 moves none), 0.030447425948888763 against 0.030446802464572535. QuantLib's check: its engine on the market restated on the model curve's clock (on the 30/360 market, a discount curve with a node at each date to 2031 whose 30/360 time is new, and at the numeraire's 60 years); for a caplet with a discount curve, its swaption engine on the one-period swaption.
 
 Facts:
 
@@ -1423,6 +1514,9 @@ Facts:
 - `TheNonstandardEnginesDigitalProbabilitiesReadTheExerciseByDate`
 - `ACapletsForwardingCurveOnAnotherDayCounterIsReadByDate`
 - `ACapletFixingOnThe30thIsReadByDate`
+- `TheFloatFloatEnginesDiscountCurveOnAnotherDayCounterIsReadByDate`
+- `TheFloatFloatEnginesExercisesAndFixingsOnThe30thAreReadByDate`
+- `TheFloatFloatEnginesRebatesOnThe30thAreReadByDate`
 
 ## Gaussian1dNumeraireExtrapolationTests
 
@@ -1435,6 +1529,17 @@ Facts:
 - `AGivenCurveIsReadWithExtrapolation`
 - `TheMarkovFunctionalModelReadsAGivenCurveWithExtrapolation`
 - `TheMarkovFunctionalModelReadsItsOwnCurveWithExtrapolationInTheRatio`
+
+## Gaussian1dSmileSectionCapletTests
+
+[`Divergences/Gaussian1dSmileSectionCapletTests.cs`](../tests/NanoQL.Tests/Divergences/Gaussian1dSmileSectionCapletTests.cs)
+
+The Gaussian1d smile section on an Ibor index. Its caplet (the S-g1d plan's G1R6 (xxii)): QuantLib's starts on the fixing date (`gaussian1dsmilesection.cpp:61-62`, `:88-91`), so it fixes two business days before the date of the forward it is quoted against; nanoql's starts on the fixing's value date, so it fixes on the section's date. On a GSR model (a = 0.01, σ = 0.01) on a flat 2.7% and Euribor 6M fixing in a year, QuantLib's formula with its caplet (struck at the forward, which it would read) gives an at-the-money volatility of 0.3707922589726553, its caplet fixing on 13 January 2026; the caplet fixing on the section's date, 15 January, 0.37188265489834393, both on the wheel. And its constructor: QuantLib 1.44 refuses every Ibor section, with or without a forwarding curve, "cannot calculate ATM without a BlackCapFloorEngine or BachelierCapFloorEngine" [the harness], its `MakeCapFloor` without a strike asking for an engine that gives its curve; the annuity reads only the caplet's dates, so nanoql's builds it: its level on the index's curve or, without one, the model's, its prices on an index with a curve.
+
+Facts:
+
+- `TheAtmVolatilityIsTheCapletFixingOnTheSectionsDate`
+- `AnIborSectionIsBuilt`
 
 ## GaussianQuadratureRefusalTests
 

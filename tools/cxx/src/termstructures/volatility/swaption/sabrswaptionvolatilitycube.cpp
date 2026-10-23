@@ -344,7 +344,8 @@ namespace harness {
                  arity(a, 1);
                  CubeSpec s = cube(a[0]);
                  return [=] {
-                     const Period& p = makeCube(s)->maxSwapTenor();
+                     auto c = makeCube(s);
+                     const Period& p = c->maxSwapTenor();
                      json::array out;
                      out.emplace_back(static_cast<std::int64_t>(p.length()));
                      out.emplace_back(static_cast<std::int64_t>(p.units()));

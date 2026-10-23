@@ -23,7 +23,16 @@ public readonly struct ZabrShortMaturityNormal : IZabrEvaluation
             type, strike, section.Model.Forward, section.Model.NormalVolatility(strike) * Math.Sqrt(section.ExerciseTime), discount);
 
     /// <inheritdoc/>
-    static double IZabrEvaluation.VolatilityImpl<TEvaluation>(ZabrSmileSection<TEvaluation> section, double strike)
+    static double IZabrEvaluation.VolatilityImpl<TEvaluation>(ZabrSmileSection<TEvaluation> section, double strike) =>
+        ImpliedVolatility(section, strike);
+
+    /// <inheritdoc/>
+    static double[]? IZabrEvaluation.CallPrices(ZabrModel model, ReadOnlySpan<double> strikes) => null;
+
+    // The lognormal volatility implied from the section's own out-of-the-money price, the finite-difference kernels'
+    // too.
+    internal static double ImpliedVolatility<TEvaluation>(ZabrSmileSection<TEvaluation> section, double strike)
+        where TEvaluation : struct, IZabrEvaluation
     {
         double impliedVol = 0.0;
         try

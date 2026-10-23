@@ -4,10 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/volatility/zabr.hpp ql/termstructures/volatility/zabr.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: fdPrice (both forms) and fullFdPrice, the local-volatility and full finite-difference prices, which wait for S-g1d with the finite-difference units they price on (S-eq's meshers, layout and backward solver, S-rx's Dirichlet boundary, S-g1d's glued mesher and its Dupire and ZABR operators)
 
 using System.Collections.Immutable;
 using System.Globalization;
+using NanoQL.Experimental;
+using NanoQL.Methods;
 using NanoQL.Numerics;
 
 namespace NanoQL.TermStructures;
@@ -15,7 +16,8 @@ namespace NanoQL.TermStructures;
 /// <summary>
 /// The ZABR model (J. Andreasen and B. Huge, "ZABR - Expansions for the masses", 2011): SABR with the volatility's own
 /// volatility scaled by a power γ of the volatility. Its short-maturity lognormal and normal volatilities, and its
-/// local volatility.
+/// local volatility, and call prices by finite differences: on the Dupire equation in the strike under that local
+/// volatility, and on the model's full two-dimensional equation in the forward and the volatility.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -153,6 +155,168 @@ public sealed class ZabrModel
     {
         CheckNotEmpty(strikes, nameof(strikes));
         return [.. NormalVolatilities(strikes, nameof(strikes))];
+    }
+
+    /// <summary>A call's price at a strike, undiscounted, by finite differences on the Dupire equation in the strike
+    /// under the model's local volatility.</summary>
+    /// <param name="strike">The strike, inside the grid.</param>
+    /// <returns>The price.</returns>
+    /// <exception cref="NanoQLException">The strike is outside the grid, or the integration fails.</exception>
+    public double FdPrice(double strike) => FdPrices([strike])[0];
+
+    /// <summary>Calls' prices at strikes, undiscounted, by finite differences on the Dupire equation in the strike
+    /// under the model's local volatility, on one grid from the lowest strike's half to 1.5 times the
+    /// highest.</summary>
+    /// <param name="strikes">The strikes, the first the lowest and the last the highest.</param>
+    /// <returns>The prices, one per strike.</returns>
+    /// <exception cref="ArgumentException"><paramref name="strikes"/> is empty.</exception>
+    /// <exception cref="NanoQLException">A strike is outside the grid, or the integration fails.</exception>
+    public ImmutableArray<double> FdPrice(ReadOnlySpan<double> strikes)
+    {
+        CheckNotEmpty(strikes, nameof(strikes));
+        return [.. FdPrices(strikes)];
+    }
+
+    /// <summary>A call's price at a strike, undiscounted, by finite differences on the model's two-dimensional
+    /// equation in the forward and the volatility, on a grid glued from two meshers concentrated at the forward and the
+    /// strike.</summary>
+    /// <param name="strike">The strike, inside the grid.</param>
+    /// <returns>The price.</returns>
+    /// <exception cref="ArgumentException">The strike is outside the grid.</exception>
+    public double FullFdPrice(double strike)
+    {
+        // TODO what are good values here, still experimenting with them
+        double eps = 0.01;
+        double scaleFactor = 1.5;
+        double normInvEps = new InverseCumulativeNormal().Evaluate(1.0 - eps);
+        double alphaI = alpha * Math.Pow(forward, beta - 1.0);
+
+        // nu is already standardized within this class ...
+        double v0 = alpha * Math.Exp(-scaleFactor * normInvEps * Math.Sqrt(expiryTime) * nu);
+        double v1 = alpha * Math.Exp(scaleFactor * normInvEps * Math.Sqrt(expiryTime) * nu);
+        double f0 = forward * Math.Exp(-scaleFactor * normInvEps * Math.Sqrt(expiryTime) * alphaI);
+        double f1 = forward * Math.Exp(scaleFactor * normInvEps * Math.Sqrt(expiryTime) * alphaI);
+        v1 = Math.Min(v1, 2.0);
+        f0 = Math.Min(strike / 2.0, f0);
+        f1 = Math.Max(strike * 1.5, Math.Min(f1, Math.Max(2.0, strike * 1.5)));
+
+        const int sizef = 100;
+        const int sizev = 100;
+        int steps = (int)((24 * expiryTime) + 1);
+        const int dampingSteps = 5;
+        const double densityf = 0.1;
+        const double densityv = 0.1;
+
+        if (!(strike >= f0 && strike <= f1))
+        {
+            throw new ArgumentException(
+                $"strike ({Utilities.DataFormattersFunctions.General(strike)}) must be inside pde grid "
+                    + $"[{Utilities.DataFormattersFunctions.General(f0)};{Utilities.DataFormattersFunctions.General(f1)}]",
+                nameof(strike));
+        }
+
+        // Layout
+        var layout = new FdmLinearOpLayout([sizef, sizev]);
+
+        // Mesher
+        // two concentrating mesher around f and k to get the mesher for f
+        double x0 = Math.Min(forward, strike);
+        double x1 = Math.Max(forward, strike);
+        int sizefa = Math.Max(4, (int)Math.Ceiling((((x0 + x1) / 2.0) - f0) / (f1 - f0) * sizef));
+        int sizefb = sizef - sizefa + 1; // common point, so we can spend one more here
+        var mfa = new Concentrating1dMesher(f0, (x0 + x1) / 2.0, sizefa, (x0, densityf), true);
+        var mfb = new Concentrating1dMesher((x0 + x1) / 2.0, f1, sizefb, (x1, densityf), true);
+        var mf = new Glued1dMesher(mfa, mfb);
+
+        // Volatility mesher
+        var mv = new Concentrating1dMesher(v0, v1, sizev, (alpha, densityv), true);
+        var mesher = new FdmMesherComposite(layout, [mf, mv]);
+
+        // initial values
+        double[] rhs = new double[layout.Size];
+        var fs = new List<double>();
+        var vs = new List<double>();
+        FdmLinearOpIterator iter = layout.Begin();
+        for (int i = 0; i < layout.Size; ++i, iter.Increment())
+        {
+            double f = mesher.Location(iter, 0);
+            rhs[iter.Index] = Math.Max(f - strike, 0.0);
+            if (iter.Coordinates[1] == 0)
+            {
+                fs.Add(mesher.Location(iter, 0));
+            }
+
+            if (iter.Coordinates[0] == 0)
+            {
+                vs.Add(mesher.Location(iter, 1));
+            }
+        }
+
+        // Boundary conditions: none
+        var map = new FdmZabrOp(mesher, beta, nu, rho, gamma);
+        new FdmBackwardSolver(map, [], null, FdmSchemeDesc.Hundsdorfer()).Rollback(rhs, expiryTime, 0.0, steps, dampingSteps);
+
+        // the solution's rows by volatility, its columns by forward, as QuantLib's Matrix(f_.size(), v_.size()) holds
+        // them, its two sizes equal
+        var interpolation = new BicubicSpline([.. fs], [.. vs], new Matrix(vs.Count, fs.Count, rhs));
+        return interpolation.Evaluate(forward, alpha);
+    }
+
+    // fdPrice(strikes), zabr.cpp:120-200.
+    private double[] FdPrices(ReadOnlySpan<double> strikes)
+    {
+        // TODO check strikes to be increasing
+        // TODO put these parameters somewhere
+        double start = Math.Min(0.00001, strikes[0] * 0.5); // lowest strike for grid
+        double end = Math.Max(0.10, strikes[^1] * 1.5); // highest strike for grid
+        const int size = 500; // grid points
+        const double density = 0.1; // density for concentrating mesher
+        int steps = (int)Math.Ceiling(expiryTime * 24); // number of steps in dimension t
+        const int dampingSteps = 5; // thereof damping steps
+
+        // Layout
+        var layout = new FdmLinearOpLayout([size]);
+
+        // Mesher
+        var m1 = new Concentrating1dMesher(start, end, size, (forward, density), true);
+        var mesher = new FdmMesherComposite(layout, [m1]);
+
+        // Boundary conditions: none
+
+        // initial values
+        double[] rhs = new double[layout.Size];
+        FdmLinearOpIterator iter = layout.Begin();
+        for (int i = 0; i < layout.Size; ++i, iter.Increment())
+        {
+            double k = mesher.Location(iter, 0);
+            rhs[iter.Index] = Math.Max(forward - k, 0.0);
+        }
+
+        // local vols
+        Vector ks = mesher.Locations(0);
+        double[] locVol = LocalVolatilities(ks.AsSpan(), "strikes");
+
+        // solver
+        var map = new FdmDupire1dOp(mesher, new Vector(locVol));
+        new FdmBackwardSolver(map, [], null, FdmSchemeDesc.Douglas()).Rollback(rhs, expiryTime, 0.0, steps, dampingSteps);
+
+        // interpolate solution
+        var solution = new CubicInterpolation(
+            ks.AsSpan(),
+            rhs,
+            CubicInterpolationDerivativeApprox.Spline,
+            true,
+            CubicInterpolationBoundaryCondition.SecondDerivative,
+            0.0,
+            CubicInterpolationBoundaryCondition.SecondDerivative,
+            0.0);
+        double[] result = new double[strikes.Length];
+        for (int i = 0; i < strikes.Length; ++i)
+        {
+            result[i] = solution.Evaluate(strikes[i]);
+        }
+
+        return result;
     }
 
     private static string Show(double x) => x.ToString(CultureInfo.InvariantCulture);
