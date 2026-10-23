@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/piecewiseyieldcurve.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testDefaultInstantiation's ConvexMonotone curve (S-core); testConstructionWithExplicitBootstrap's LocalBootstrap curve (S-core); testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (S-core); testPiecewiseSpreadYieldCurve (S-sr)
+// Partial: testDefaultInstantiation's ConvexMonotone curve (S-core); testConstructionWithExplicitBootstrap's LocalBootstrap curve (S-core); testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (S-core)
 // Replaced: testObservability (Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs)
 
 using NanoQL.Coupons;
@@ -15,6 +15,7 @@ using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
 using NanoQL.Time;
+using NanoQL.Utilities;
 using static NanoQL.Time.Month;
 
 namespace NanoQL.Tests.TestSuite;
@@ -1171,6 +1172,15 @@ public class PiecewiseYieldCurveTests
         CheckClose(curve1.Discount(0.3), curve2.Discount(0.3), 1E-13);
     }
 
+    [Fact]
+    public void TestPiecewiseSpreadYieldCurve()
+    {
+        // Testing PiecewiseSpreadYieldCurve...
+
+        TestPiecewiseSpreadYieldCurveImpl<IterativeBootstrap>();
+        TestPiecewiseSpreadYieldCurveImpl<GlobalBootstrap>();
+    }
+
     // Adapted: the expected "1st iteration: failed at 1st alive instrument" from discount() (lines 2071-2072) comes
     // from the curve's construction, which bootstraps.
     [Fact]
@@ -2113,6 +2123,126 @@ public class PiecewiseYieldCurveTests
                 Math.Abs(expectedRate - estimatedRate) <= tolerance,
                 $"{when}:\n{SwapData[i].N} year(s) swap:\n    estimated rate: {estimatedRate}\n"
                 + $"    expected rate:  {expectedRate}");
+        }
+    }
+
+    private static void TestPiecewiseSpreadYieldCurveImpl<TBootstrap>()
+        where TBootstrap : struct, IBootstrap
+    {
+        // Use fixed evaluationDate to make the test stable. When usingAtParCoupons() == false the dates don't always
+        // align between the 3M and 6M indexes, but most of the test is still valid.
+        var vars = new CommonVars(new Date(23, Sep, 2019));
+        var dc = new Actual365Fixed();
+
+        // First, build the base curve. We can use any bootstrapping and interpolation.
+        YieldTermStructure baseCurve = new PiecewiseYieldCurve<Discount, LogLinear, IterativeBootstrap>(
+            vars.Settlement, vars.Instruments, dc, vars.Context, i: default(LogLinear)).EnableExtrapolation();
+
+        // Now build the curve with fewer benchmarks as a spread to the base.
+        Datum[] swapData =
+        [
+            new(1, TimeUnit.Years, 4.44),
+            new(3, TimeUnit.Years, 4.55),
+            new(6, TimeUnit.Years, 4.81),
+            new(9, TimeUnit.Years, 5.01),
+            new(15, TimeUnit.Years, 5.25),
+            new(30, TimeUnit.Years, 5.36),
+        ];
+
+        var helpers = new List<RateHelper>();
+        var euribor3m = new Euribor3M();
+        foreach (Datum datum in swapData)
+        {
+            helpers.Add(new SwapRateHelper(
+                datum.Rate / 100.0,
+                new Period(datum.N, datum.Units),
+                vars.Calendar,
+                vars.FixedLegFrequency,
+                vars.FixedLegConvention,
+                vars.FixedLegDayCounter,
+                euribor3m,
+                vars.Context));
+        }
+
+        // We rely on LogLinear interpolation to check the curve's shape.
+        PiecewiseSpreadYieldCurve<LogLinear, TBootstrap> curve =
+            new PiecewiseSpreadYieldCurve<LogLinear, TBootstrap>(baseCurve, helpers, vars.Context, default(LogLinear))
+                .EnableExtrapolation();
+
+        // Check that we reprice the swaps.
+        const Real tolerance = 1.0e-9;
+        euribor3m = new Euribor3M(curve);
+        foreach (Datum datum in swapData)
+        {
+            VanillaSwap swap = new MakeVanillaSwap(new Period(datum.N, datum.Units), euribor3m)
+                .WithFixedRate(0.0)
+                .WithEffectiveDate(vars.Settlement)
+                .WithFixedLegDayCount(vars.FixedLegDayCounter)
+                .WithFixedLegTenor(new Period(vars.FixedLegFrequency))
+                .WithFixedLegConvention(vars.FixedLegConvention)
+                .WithFixedLegTerminationDateConvention(vars.FixedLegConvention)
+                .ToVanillaSwap(vars.Context);
+
+            Rate expectedRate = datum.Rate / 100.0, estimatedRate = FairRate(swap, vars.Context, curve);
+            Spread error = Math.Abs(expectedRate - estimatedRate);
+            Assert.True(
+                error <= tolerance,
+                $"{datum.N} year(s) swap:\n"
+                + $"\n estimated rate: {DataFormattersFunctions.Rate(estimatedRate)}"
+                + $"\n expected rate:  {DataFormattersFunctions.Rate(expectedRate)}"
+                + $"\n error:          {DataFormattersFunctions.Rate(error)}"
+                + $"\n tolerance:      {DataFormattersFunctions.Rate(tolerance)}");
+        }
+
+        // Check that the curve has shape between pillars.
+        Date prev = vars.Settlement;
+        foreach (RateHelper helper in helpers)
+        {
+            Date pillar = helper.PillarDate!.Value;
+            Rate rate1 = curve.ForwardRate(prev, pillar, dc, Compounding.Continuous).Rate;
+            Rate rate2 = curve.ForwardRate(prev, prev + ((pillar - prev) / 2), dc, Compounding.Continuous).Rate;
+            Assert.True(Math.Abs(rate1 - rate2) > 1e-4, $"no shape between {prev} and {pillar}");
+            prev = pillar;
+        }
+
+        // Check that extrapolation preserves constant spread.
+        Date maxDate = curve.MaxDate;
+        Assert.Equal(baseCurve.MaxDate, maxDate);
+        Rate r1 = curve.ForwardRate(maxDate - new Period(1, TimeUnit.Years), maxDate, dc, Compounding.Continuous).Rate;
+        Rate r2 = curve.ForwardRate(maxDate, maxDate + new Period(1, TimeUnit.Years), dc, Compounding.Continuous).Rate;
+        Rate baseRate1 =
+            baseCurve.ForwardRate(maxDate - new Period(1, TimeUnit.Years), maxDate, dc, Compounding.Continuous).Rate;
+        Rate baseRate2 =
+            baseCurve.ForwardRate(maxDate, maxDate + new Period(1, TimeUnit.Years), dc, Compounding.Continuous).Rate;
+        CheckClose(r1 - baseRate1, r2 - baseRate2, 1e-9);
+
+        // Check accessors.
+        Assert.Equal(helpers.Count + 1, curve.Dates().Length);
+        Assert.Equal(helpers.Count + 1, curve.Times().Length);
+        Assert.Equal(helpers.Count + 1, curve.Data().Length);
+        var nodes = curve.Nodes();
+        Assert.Equal(helpers.Count + 1, nodes.Length);
+
+        Assert.Equal(vars.Settlement, curve.Dates()[0]);
+        Assert.Equal(0.0, curve.Times()[0]);
+        Assert.Equal(1.0, curve.Data()[0]);
+        Assert.True(nodes[0].Key == vars.Settlement && nodes[0].Value == 1.0);
+        for (int i = 0; i < helpers.Count; ++i)
+        {
+            Assert.Equal(helpers[i].PillarDate!.Value, curve.Dates()[i + 1]);
+            Assert.Equal(curve.TimeFromReference(helpers[i].PillarDate!.Value), curve.Times()[i + 1]);
+            Assert.True(nodes[i + 1].Key == curve.Dates()[i + 1] && nodes[i + 1].Value == curve.Data()[i + 1]);
+        }
+
+        // Check that we can rebuild the curve from raw data.
+        SpreadDiscountCurve rawCurve =
+            new SpreadDiscountCurve(curve.BaseCurve, curve.Dates(), curve.Data()).EnableExtrapolation();
+
+        int maxSwapYears = swapData[^1].N;
+        for (int i = 0; i < maxSwapYears + 3; ++i)
+        {
+            Date d = vars.Settlement + new Period(i, TimeUnit.Years);
+            CheckClose(curve.Discount(d), rawCurve.Discount(d), 1e-9);
         }
     }
 

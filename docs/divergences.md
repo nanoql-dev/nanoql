@@ -75,6 +75,16 @@ Facts:
 
 - `ANullBMAIndexIsRefusedWithQuantLibsText`
 
+## BSplineRepeatedKnotTests
+
+[`Divergences/BSplineRepeatedKnotTests.cs`](../tests/NanoQL.Tests/Divergences/BSplineRepeatedKnotTests.cs)
+
+Cubic B-splines on a repeated knot (the S-sr plan's SSR6 (vi)). QuantLib's recursion divides by a knot span that is zero on a repeated knot (`bspline.cpp:56-57`), giving NaN, so a cubic B-spline fit on the knots −30, −20, 0, 5, 10, 10, 15, 20, 25 and 30 throws "N_th cubic B-spline must be nonzero at t=0" on the wheel, where the knots 10 and 10.001 fit, the parameters 0.9, 0.8, 0.7, 0.6 and 0.5 discounting 0.9194765141427983 at t = 7. nanoql reads a term over a zero span as 0, the Cox–de Boor convention. QuantLib has no value on a repeated knot, so its check is its own values on knots a gap apart, which nanoql gives bit for bit, converging to the convention's as the gap closes.
+
+Facts:
+
+- `ARepeatedKnotIsTheLimitOfKnotsAGapApart`
+
 ## BarrierMismatchedTimesTests
 
 [`Divergences/BarrierMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/BarrierMismatchedTimesTests.cs)
@@ -639,6 +649,17 @@ Facts:
 - `TheCoxIngersollRossTreeConvergesToTheAnalyticPrice`
 - `TheExtendedCoxIngersollRossTreeConvergesToTheAnalyticPrice`
 
+## CompositeClockTests
+
+[`Divergences/CompositeClockTests.cs`](../tests/NanoQL.Tests/Divergences/CompositeClockTests.cs)
+
+The composite curve's second curve on another clock (the S-sr plan's SSR6 (xv)). QuantLib reads the second curve's zero rate at the composite's time (`compositezeroyieldstructure.hpp:136-137`), a time on the first curve's clock, which the second curve counts from its own reference date on its own day counter; QuantLib's case dates both curves 10 November 2017 on Actual/365 (Fixed) (`termstructures.cpp:542`). On the wheel, the difference of a 4%–5.5% zero curve and a 1%–3.5% one, both from 15 January 2025, gives the zero rate 0.025136986301369922 at a year with the second on Actual/360, where QuantLib's own composite over the second restated on Actual/365 (Fixed) gives 0.024722222222222062; with the second dated 30 days earlier, 0.020201342281879166 at five years, where the second implied at 15 January 2025 gives 0.01968474385438166. nanoql reads the second curve at the instant the composite's time denotes, its zero rate the one its discount there implies over that time. QuantLib's check: its own composite with the second curve restated on the first's reference date and day counter, at the restated curve's nodes.
+
+Facts:
+
+- `ASecondCurveOnAnotherDayCounterIsReadAtTheInstant`
+- `ASecondCurveDatedEarlierIsReadAtTheInstant`
+
 ## ConvertibleClockTests
 
 [`Divergences/ConvertibleClockTests.cs`](../tests/NanoQL.Tests/Divergences/ConvertibleClockTests.cs)
@@ -835,6 +856,17 @@ Facts:
 
 - `AnAtmQuoteHasNoDelta`
 
+## DerivedCurveExtrapolationTests
+
+[`Divergences/DerivedCurveExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/DerivedCurveExtrapolationTests.cs)
+
+Two derived curves drop the extrapolation flag (the S-sr plan's SSR6 (xxi), and its SSD20 for the piecewise spread curve). The spread discount curve reads its base without it (`spreaddiscountcurve.hpp:157`), and so does the ultimate-forward curve at its cut-off and before it (`ultimateforwardtermstructure.hpp:168`, `:173`), where the zero- and forward-spreaded, implied and composite curves pass it. On the wheel, asked for the discount at 11 years with extrapolation over a 2%–3% zero curve to 10 years from 15 January 2025 that doesn't extrapolate, the four siblings give 0.640328216626791 (both spreaded at 1%), 0.714823513455133 and 1.0, while the spread discount and ultimate-forward curves, and the piecewise spread curve bootstrapped over that base, throw "time (11.0055) is past max curve time (10.0055)". nanoql reads the base with extrapolation on, as the siblings do. QuantLib's check: the siblings' own reads, and the base's own extrapolated values.
+
+Facts:
+
+- `TheSpreadDiscountAndUltimateForwardCurvesExtrapolateTheirBase`
+- `ThePiecewiseSpreadCurveExtrapolatesItsBase`
+
 ## DiscretizedAssetStateTests
 
 [`Divergences/DiscretizedAssetStateTests.cs`](../tests/NanoQL.Tests/Divergences/DiscretizedAssetStateTests.cs)
@@ -987,6 +1019,16 @@ Facts:
 
 - `AnExpiredBondsSpreadFamilyIsRefused`
 
+## ExponentialSplinesFixedKappaTests
+
+[`Divergences/ExponentialSplinesFixedKappaTests.cs`](../tests/NanoQL.Tests/Divergences/ExponentialSplinesFixedKappaTests.cs)
+
+Exponential splines with a fixed κ (the S-sr plan's SSR6 (v)). QuantLib's discount function sums one term fewer than its size (`nonlinearfittingmethods.cpp:84`, `:91`), right when the last parameter is κ and wrong when κ is fixed: the last coefficient is dead. On the wheel, constrained at zero with nine coefficients and κ = 0.5, the coefficients 0.3, −0.2, 0.15, 0.1, −0.05, 0.08, 0.02 and −0.01 discount 0.4584577385303755 at t = 1, as they do with the last one 0.49, where the method with κ free gives 0.46441195516211947 and 0.1667011235749239. nanoql sums every coefficient when κ is fixed. QuantLib's check: its free-κ method's discount function at the same coefficients and κ.
+
+Facts:
+
+- `AFixedKappaDiscountsAsTheFreeMethodAtThatKappa`
+
 ## ExtrapolatorCopyTests
 
 [`Divergences/ExtrapolatorCopyTests.cs`](../tests/NanoQL.Tests/Divergences/ExtrapolatorCopyTests.cs)
@@ -1078,6 +1120,16 @@ Facts:
 - `FewerThanThreeParametersAreRefused`
 - `ThreeParametersAreRead`
 
+## FittedCurveRecalculationTests
+
+[`Divergences/FittedCurveRecalculationTests.cs`](../tests/NanoQL.Tests/Divergences/FittedCurveRecalculationTests.cs)
+
+The fitted curve's recalculation path (the S-sr plan's SSD22). A fitted curve is always built afresh, fitted from the given guess. QuantLib's curve is a lazy object whose fit ends by keeping its solution as its guess (`fittedbonddiscountcurve.cpp:294-295`), which its L2 penalty reads (`:331-332`), so a curve recalculated after a quote moves starts from, and is penalized towards, its previous fit, though its header says the penalty applies "starting from the initial guess" (`fittedbonddiscountcurve.hpp:182-184`). On the wheel, a Nelson-Siegel fit with L2 penalties of 0.5 over ten bonds, from 16 June 2025, recalculated after the sixth bond's price moves by 0.5, discounts 0.664584692842777 at ten years after 395 evaluations, where a fresh curve on the moved prices from the same guess discounts 0.6644661886683543 after 427. nanoql's curve on the moved prices is QuantLib's fresh curve.
+
+Facts:
+
+- `ACurveOnMovedPricesIsTheFreshFit`
+
 ## FlatExtrapolator2DNullTests
 
 [`Divergences/FlatExtrapolator2DNullTests.cs`](../tests/NanoQL.Tests/Divergences/FlatExtrapolator2DNullTests.cs)
@@ -1162,6 +1214,17 @@ Facts:
 
 - `AnExpiredIndexedFraCarriesItsFixingsAmount`
 - `AnExpiredParFraHasNeitherAmountNorRate`
+
+## ForwardSpreadFirstDateTests
+
+[`Divergences/ForwardSpreadFirstDateTests.cs`](../tests/NanoQL.Tests/Divergences/ForwardSpreadFirstDateTests.cs)
+
+The piecewise forward-spreaded curve before its first spread date (the S-sr plan's SSR6 (vii)). QuantLib's zero rate at a time adds the spread's integral over the time, which it takes from the interpolation's first time (`piecewiseforwardspreadedtermstructure.hpp:152-166`), leaving out the flat spread its own `calcSpread` applies before that time, and reading the interpolation extrapolated backwards before it. On the wheel, spreads of 2% and 3% 100 and 150 days after 15 January 2025 over a flat 2% Actual/365 (Fixed) curve, QuantLib's test set-up (`termstructures.cpp:325-370`), give the forward 4.4% at 120 days, but every discount past 100 days is e^(0.02·100/365) − 1 = 0.5494% too high, 0.99224937 at 120 days against 0.98682726; and QuantLib's own backward-flat case (`termstructures.cpp:508`), on a flat 2% Actual/360 base, gives the zero rate 2.3019% at 110 days, its spread's average 0.30%, where the forwards' average is 2.10%. nanoql integrates the spread from the reference date, flat before the first spread's time. QuantLib's check: its own curve with the first spread prepended at the reference date, whose integral starts at 0, gives nanoql's curve bit for bit on the case's set-up; the zero rate is the forwards' average.
+
+Facts:
+
+- `TheSpreadIsIntegratedFromTheReferenceDate`
+- `QuantLibsBackwardFlatZeroRateLeavesOutTheFlatSpread`
 
 ## FranceMoveableFeastTests
 
@@ -1315,6 +1378,21 @@ The Ibor coupons' fixing days are QuantLib's `Natural`, an unsigned type, which 
 Facts:
 
 - `NegativeFixingDaysAreRefused`
+
+## ImpliedTermStructureClockTests
+
+[`Divergences/ImpliedTermStructureClockTests.cs`](../tests/NanoQL.Tests/Divergences/ImpliedTermStructureClockTests.cs)
+
+The implied curve on a day counter whose year fractions don't add (the S-sr plan's SSR6 (viii)). QuantLib reads the original at the implied time plus the reference date's time on the original's clock (`impliedtermstructure.hpp:85-95`), where its own formula states the original's ratio P(d)/P(ref). On the wheel, a zero curve of 1%, 2%, 3% and 3.5% at 15 January 2016 and 1, 3 and 7 years later, implied at 31 March 2016, misses the ratio over every date of four years by up to 1.25e-4 relative on Thirty360 Bond Basis and USA, and 3.7e-3 on Actual/Actual ISMA without a schedule, and gives 30 and 31 March 2020, one time on Thirty360 from a month-end, one discount, 0.8779622361147446, where the ratios are 0.878051925283182 and 0.8779622361147446; on Actual/365 (Fixed) it holds within 2.2e-16. nanoql reads a date by date where QuantLib's sum and the date's own time on the original's clock differ by more than 1e-12 relative, so a date's discount, zero rate and forward hold the ratio, and keeps QuantLib's sum, and bits, elsewhere and for a time; a date before the implied reference date is refused first, with QuantLib's text. QuantLib's check: the original curve's discounts by date.
+
+Facts:
+
+- `ADiscountByDateIsTheOriginalsRatio`
+- `AZeroRateByDateIsTheOriginalsRatio`
+- `AForwardByDateIsTheOriginalsRatio`
+- `ATimeReadIsQuantLibsSum`
+- `AnAdditiveDayCounterKeepsQuantLibsBits`
+- `ADateBeforeTheReferenceDateIsRefused`
 
 ## IncrementalStatisticsLeadingZeroWeightTests
 
@@ -2114,6 +2192,17 @@ Facts:
 
 - `TheProductHasARowsLength`
 
+## SpreadFittingClockTests
+
+[`Divergences/SpreadFittingClockTests.cs`](../tests/NanoQL.Tests/Divergences/SpreadFittingClockTests.cs)
+
+The spread fitting method's discounting curve on another clock (the S-sr plan's SSR6 (xiv)). QuantLib's discount function reads the discounting curve at the fitted curve's time (`nonlinearfittingmethods.cpp:414-416`), which the discounting curve counts from its own reference date on its own day counter, rebased to the fitted curve's reference date. On the wheel, a curve fitted on 15 January 2025 over Nelson-Siegel parameters 0, 0, 0 and 0.5, whose factor is exactly 1, discounts 0.9810709211266746 at a year over a zero curve dated 30 days earlier, where QuantLib's own fit over that curve implied at the fitted curve's date gives 0.9790412094890624; over a flat 3% Actual/360 curve, 0.9704455335485082 where the curve restated on Actual/365 (Fixed) gives 0.9700412654712278. nanoql reads the discounting curve at the instant the fitted curve's time denotes. QuantLib's check: its own fitted curve over the discounting curve restated on the fitted curve's reference date and day counter.
+
+Facts:
+
+- `ADiscountingCurveDatedEarlierIsReadAtTheInstant`
+- `ADiscountingCurveOnAnotherDayCounterIsReadAtTheInstant`
+
 ## SpreadedSmileSectionTypeTests
 
 [`Divergences/SpreadedSmileSectionTypeTests.cs`](../tests/NanoQL.Tests/Divergences/SpreadedSmileSectionTypeTests.cs)
@@ -2448,6 +2537,16 @@ Facts:
 
 - `ATreesIndicesOutOfRangeAreRefused`
 - `StatePricesBeyondTheGridAreRefused`
+
+## UfrSmallAlphaTests
+
+[`Divergences/UfrSmallAlphaTests.cs`](../tests/NanoQL.Tests/Divergences/UfrSmallAlphaTests.cs)
+
+The ultimate-forward curve's kernel at small α (the S-sr plan's SSR6 (xviii)). QuantLib's B(x) = (1 − e^(−αx))/(αx) (`ultimateforwardtermstructure.hpp:169`) is unguarded: on the wheel, over a flat 3% Actual/365 (Fixed) curve from 15 January 2025 with an LLFR of 3%, a UFR of 4% and a 20-year first smoothing point, α = 0 refuses the 60-year zero rate with "positive compound factor required", α = 1e-12 gives 0.029999995243582964 against its limit 0.03, and α = 0.1 gives 0.035031562480595566. nanoql's kernel is −expm1(−αx)/(αx), and 1 at 0, as upstream's own `oneMinusExpOverX` after the pin. QuantLib's check: the limit, and its own values at ordinary α.
+
+Facts:
+
+- `ASmallAlphaGivesTheLimit`
 
 ## VannaVolgaMismatchedTimesTests
 

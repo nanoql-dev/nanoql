@@ -37,6 +37,13 @@ namespace NanoQL.TermStructures;
 /// only.
 /// </para>
 /// <para>
+/// A spread curve (<see cref="PiecewiseSpreadYieldCurve{TInterpolator, TBootstrap}"/>) is bootstrapped on a base curve:
+/// its nodes are the spread discount factors, its discount the base's times theirs and its maximum date the earlier of
+/// its own and the base's, QuantLib's <c>InterpolatedSpreadDiscountCurve</c>; it allows extrapolation when the base does,
+/// when it is built. The base is read with extrapolation on, as the other derived curves read their originals. Every
+/// other curve has no base.
+/// </para>
+/// <para>
 /// A curve is always built afresh: QuantLib's curve, recalculated after a quote or the evaluation date changed, starts
 /// from its previous state and, when its reference date is fixed, keeps its first evaluation date's pillars. Both are
 /// documented divergences.
@@ -49,6 +56,9 @@ public class PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap> : YieldTerm
 {
     // QuantLib's accuracy_, the bootstrap's default.
     private const double DefaultAccuracy = 1.0e-12;
+
+    // The base curve of a spread curve, null for every other curve.
+    private readonly YieldTermStructure? baseCurve;
 
     // Non-null only while the constructor bootstraps the curve; the frozen nodes are written once, by Freeze.
     private BootstrapState<YieldTermStructure>? state;
@@ -109,6 +119,33 @@ public class PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap> : YieldTerm
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PiecewiseYieldCurve{TTraits, TInterpolator, TBootstrap}"/> class
+    /// on a base curve, whose reference date, calendar, settlement days and day counter it takes, and bootstraps it:
+    /// for <see cref="PiecewiseSpreadYieldCurve{TInterpolator, TBootstrap}"/>.
+    /// </summary>
+    private protected PiecewiseYieldCurve(
+        YieldTermStructure baseCurve,
+        IEnumerable<BootstrapHelper<YieldTermStructure>> instruments,
+        EvaluationContext context,
+        TInterpolator i,
+        TBootstrap bootstrap)
+        : this(
+            null,
+            Base(baseCurve).ReferenceDate,
+            baseCurve.Calendar,
+            baseCurve.SettlementDays,
+            instruments,
+            baseCurve.DayCounter,
+            context,
+            null,
+            null,
+            i,
+            bootstrap,
+            baseCurve)
+    {
+    }
+
     // The constructors' work, and QuantLib's multiCurveBootstrapContributor(): a curve a multicurve builds (a parent
     // given) isn't bootstrapped here. Its bootstrap's contributor joins the multicurve's joint bootstrap, which sets it to
     // valid, freezing the curve, once the joint optimization has succeeded; only a bootstrap that can join one is given
@@ -124,9 +161,17 @@ public class PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap> : YieldTerm
         IEnumerable<double>? jumps,
         IEnumerable<Date>? jumpDates,
         TInterpolator i,
-        TBootstrap bootstrap)
+        TBootstrap bootstrap,
+        YieldTermStructure? baseCurve = null)
         : base(referenceDate, calendar, CheckArguments(context, instruments, dayCounter), settlementDays, jumps, jumpDates)
     {
+        this.baseCurve = baseCurve;
+        if (baseCurve is not null)
+        {
+            // a spread curve takes its base's extrapolation flag, as QuantLib's relative derived curves do
+            AllowsExtrapolation = baseCurve.AllowsExtrapolation;
+        }
+
         Interpolator = i;
         Bootstrap = bootstrap;
         BootstrapState<YieldTermStructure> s = new(this, instruments, DefaultAccuracy, context, nameof(instruments));
@@ -149,17 +194,35 @@ public class PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap> : YieldTerm
     public TBootstrap Bootstrap { get; }
 
     /// <inheritdoc/>
-    /// <remarks>The traits' rule: the latest date the helpers need, or the last node's (<see cref="IYieldTraits.MaxDate"/>).</remarks>
+    /// <remarks>
+    /// The traits' rule: the latest date the helpers need, or the last node's (<see cref="IYieldTraits.MaxDate"/>); a
+    /// spread curve's the earlier of that and its base's maximum date.
+    /// </remarks>
     /// <exception cref="NanoQLException">
     /// The curve is read from another curve's bootstrap before its own has set its nodes (a multicurve's guess function).
     /// </exception>
-    public sealed override Date MaxDate =>
-        state is { } s
-            ? TTraits.MaxDate(s.Dates.Length == 0 ? throw NotSetUp() : s.Dates, s.MaxDate)
-            : TTraits.MaxDate(dates.AsSpan(), curve!.MaxDate);
+    public sealed override Date MaxDate
+    {
+        get
+        {
+            Date own = state is { } s
+                ? TTraits.MaxDate(s.Dates.Length == 0 ? throw NotSetUp() : s.Dates, s.MaxDate)
+                : TTraits.MaxDate(dates.AsSpan(), curve!.MaxDate);
+            if (baseCurve is null)
+            {
+                return own;
+            }
+
+            Date baseMax = baseCurve.MaxDate;
+            return own < baseMax ? own : baseMax;
+        }
+    }
 
     /// <inheritdoc/>
     public sealed override double MaxTime => base.MaxTime;
+
+    // The base curve of a spread curve, null for every other curve.
+    private protected YieldTermStructure? SpreadBase => baseCurve;
 
     /// <inheritdoc/>
     public sealed override DayCounter DayCounter => base.DayCounter;
@@ -248,14 +311,27 @@ public class PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap> : YieldTerm
     }
 
     /// <inheritdoc/>
-    /// <remarks>The traits' formula (<see cref="IYieldTraits.DiscountImpl"/>), on the working state while the curve is built.</remarks>
+    /// <remarks>
+    /// The traits' formula (<see cref="IYieldTraits.DiscountImpl"/>), on the working state while the curve is built; a
+    /// spread curve's the base's discount times it.
+    /// </remarks>
     /// <exception cref="NanoQLException">
     /// The curve is read from another curve's bootstrap before its own has set its nodes (a multicurve's guess function).
     /// </exception>
-    protected sealed override double DiscountImpl(double t) =>
-        state is { } s
+    protected sealed override double DiscountImpl(double t)
+    {
+        double d = state is { } s
             ? TTraits.DiscountImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t)
             : TTraits.DiscountImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t);
+        return baseCurve is null ? d : baseCurve.Discount(t, true) * d;
+    }
+
+    // The base curve, refused when null before the base constructor reads it.
+    private static YieldTermStructure Base(YieldTermStructure baseCurve)
+    {
+        ArgumentNullException.ThrowIfNull(baseCurve);
+        return baseCurve;
+    }
 
     private static DayCounter CheckArguments(
         EvaluationContext context, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter)

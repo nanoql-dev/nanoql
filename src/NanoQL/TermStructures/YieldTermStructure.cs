@@ -94,7 +94,7 @@ public abstract class YieldTermStructure : TermStructure
     public double Discount(Date d, bool extrapolate = false)
     {
         Date.ThrowIfDefault(d, nameof(d));
-        return Discount(TimeFromReference(d), extrapolate);
+        return DiscountOn(d, extrapolate);
     }
 
     /// <summary>
@@ -158,7 +158,7 @@ public abstract class YieldTermStructure : TermStructure
             return InterestRate.ImpliedRate(compound0, resultDayCounter, comp, freq, Dt);
         }
 
-        double compound = 1.0 / Discount(t, extrapolate);
+        double compound = 1.0 / DiscountOn(d, extrapolate);
         return InterestRate.ImpliedRate(compound, resultDayCounter, comp, freq, ReferenceDate, d);
     }
 
@@ -383,6 +383,12 @@ public abstract class YieldTermStructure : TermStructure
 
         return Math.Log(compound) / (t2 - t1);
     }
+
+    // The discount factor at a date, which Discount(Date), ZeroRate(Date, …) and ForwardRate(Date, Date, …) read: the
+    // discount at the date's time, QuantLib's read. A curve whose times can't carry its dates reads them by date (the
+    // implied curve on a day counter whose year fractions don't add, the S-sr plan's SSR6 (viii)); every other curve
+    // keeps this read and its bits.
+    internal virtual double DiscountOn(Date d, bool extrapolate) => Discount(TimeFromReference(d), extrapolate);
 
     /// <summary>The dates of the discount-factor jumps, one per jump.</summary>
     /// <returns>The dates, empty for a curve without jumps.</returns>

@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (S-van); testMultiSpline (S-exo); testFlatExtrapolation (S-g1d); testBSplines (S-sr); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (S-core); testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
+// Partial: testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (S-van); testMultiSpline (S-exo); testFlatExtrapolation (S-g1d); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (S-core); testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
 // Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs); testBicubicUpdate (Conventions/InterpolationConstructionTests.cs)
 
 using NanoQL.Numerics;
@@ -1216,6 +1216,51 @@ public class InterpolationsTests
                 Assert.Fail(
                     $"failed to reproduce reference examples :\n    expected:   {expected[i]}\n    calculated: {vol}"
                     + $"\n    diff:       {diff}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestBSplines()
+    {
+        // Testing B-Splines...
+
+        // reference values have been generate with the R package splines2
+        // https://cran.r-project.org/web/packages/splines2/splines2.pdf
+        double[] knots = [-1.0, 0.5, 0.75, 1.2, 3.0, 4.0, 5.0];
+
+        const Natural p = 2;
+        var bspline = new BSpline(p, knots.Length - p - 2, knots);
+
+        (Natural Idx, Real X, Real Expected)[] referenceValues =
+        [
+            (0, -0.95, 9.5238095238e-04),
+            (0, -0.01, 0.37337142857),
+            (0, 0.49, 0.84575238095),
+            (0, 1.21, 0.0),
+            (1, 1.49, 0.562987654321),
+            (1, 1.59, 0.490888888889),
+            (2, 1.99, 0.62429409171),
+            (3, 1.19, 0.0),
+            (3, 1.99, 0.12382936508),
+            (3, 3.59, 0.765914285714),
+        ];
+
+        const Real tol = 1e-10;
+        foreach ((Natural idx, Real x, Real expected) in referenceValues)
+        {
+            Real calculated = bspline.Evaluate(idx, x);
+
+            if (double.IsNaN(calculated) || Math.Abs(calculated - expected) > tol)
+            {
+                Assert.Fail(
+                    "failed to reproduce the B-Spline value"
+                    + $"\n    i         : {idx}"
+                    + $"\n    x         : {x}"
+                    + $"\n    calculated: {calculated}"
+                    + $"\n    expected  : {expected}"
+                    + $"\n    difference: {Math.Abs(calculated - expected)}"
+                    + $"\n    tolerance : {tol}");
             }
         }
     }

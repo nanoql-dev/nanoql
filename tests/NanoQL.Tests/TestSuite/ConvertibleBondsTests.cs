@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/convertiblebonds.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBond, which waits for S-sr's ForwardSpreadedTermStructure
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Methods;
 using NanoQL.PricingEngines;
@@ -23,6 +23,116 @@ public class ConvertibleBondsTests
 {
     // The evaluation date QuantLib's test runner sets globally (playbook section 9.2).
     private static readonly Date RunnerDate = new(16, September, 2015);
+
+    // Adapted: CommonVars' relinkable handles are the curves, the volatility and the process themselves; the engines are
+    // the static BinomialConvertibleEngine.Calculate and DiscountingBondEngine.Calculate, and the floating-rate bond's
+    // coupon pricer is set on a copy of the bond.
+    [Fact]
+    public void TestBond()
+    {
+        // when deeply out-of-the-money, the value of the convertible bond should equal that of the underlying
+        // plain-vanilla bond.
+
+        // Testing out-of-the-money convertible bonds against vanilla bonds...
+
+        var vars = new CommonVars(RunnerDate);
+
+        vars.ConversionRatio = 1.0e-16;
+
+        Exercise euExercise = new EuropeanExercise(vars.MaturityDate);
+        Exercise amExercise = new AmericanExercise(vars.IssueDate, vars.MaturityDate);
+
+        int timeSteps = 1001;
+        BondResults Engine(ConvertibleBond b) =>
+            BinomialConvertibleEngine.Calculate<CoxRossRubinstein>(b, vars.Context, vars.Process, timeSteps, vars.CreditSpread);
+
+        YieldTermStructure discountCurve = new ForwardSpreadedTermStructure(vars.RiskFreeRate, vars.CreditSpread);
+        BondResults BondEngine(Bond b) => DiscountingBondEngine.Calculate(b, vars.Context, discountCurve);
+
+        // zero-coupon
+
+        Schedule schedule = new MakeSchedule().From(vars.IssueDate)
+                                              .To(vars.MaturityDate)
+                                              .WithFrequency(Frequency.Once)
+                                              .WithCalendar(vars.Calendar)
+                                              .Backwards()
+                                              .ToSchedule();
+
+        var euZero = new ConvertibleZeroCouponBond(
+            euExercise, vars.ConversionRatio, vars.NoCallability, vars.IssueDate, vars.SettlementDays, vars.DayCounter,
+            schedule, vars.Redemption);
+
+        var amZero = new ConvertibleZeroCouponBond(
+            amExercise, vars.ConversionRatio, vars.NoCallability, vars.IssueDate, vars.SettlementDays, vars.DayCounter,
+            schedule, vars.Redemption);
+
+        var zero = new ZeroCouponBond(
+            vars.SettlementDays, vars.Calendar, 100.0, vars.MaturityDate, BusinessDayConvention.Following, vars.Redemption,
+            vars.IssueDate);
+
+        double tolerance = 1.0e-2 * (vars.FaceAmount / 100.0);
+
+        CheckBond("zero-coupon", Engine(euZero).NPV!.Value, BondEngine(zero).SettlementValue!.Value, tolerance);
+        CheckBond("zero-coupon", Engine(amZero).NPV!.Value, BondEngine(zero).SettlementValue!.Value, tolerance);
+
+        // coupon
+
+        double[] coupons = [0.05];
+
+        schedule = new MakeSchedule().From(vars.IssueDate)
+                                     .To(vars.MaturityDate)
+                                     .WithFrequency(vars.Frequency)
+                                     .WithCalendar(vars.Calendar)
+                                     .Backwards()
+                                     .ToSchedule();
+
+        var euFixed = new ConvertibleFixedCouponBond(
+            euExercise, vars.ConversionRatio, vars.NoCallability, vars.IssueDate, vars.SettlementDays, coupons,
+            vars.DayCounter, schedule, vars.Redemption);
+
+        var amFixed = new ConvertibleFixedCouponBond(
+            amExercise, vars.ConversionRatio, vars.NoCallability, vars.IssueDate, vars.SettlementDays, coupons,
+            vars.DayCounter, schedule, vars.Redemption);
+
+        var fixedBond = new FixedRateBond(
+            vars.SettlementDays, vars.FaceAmount, schedule, coupons, vars.DayCounter, BusinessDayConvention.Following,
+            vars.Redemption, vars.IssueDate);
+
+        tolerance = 2.0e-2 * (vars.FaceAmount / 100.0);
+
+        CheckBond("fixed-coupon", Engine(euFixed).NPV!.Value, BondEngine(fixedBond).SettlementValue!.Value, tolerance);
+        CheckBond("fixed-coupon", Engine(amFixed).NPV!.Value, BondEngine(fixedBond).SettlementValue!.Value, tolerance);
+
+        // floating-rate
+
+        IborIndex index = new Euribor1Y(discountCurve);
+        double[] gearings = [1.0];
+        double[] spreads = [];
+
+        var euFloating = new ConvertibleFloatingRateBond(
+            euExercise, vars.ConversionRatio, vars.NoCallability, vars.IssueDate, vars.SettlementDays, index,
+            vars.FixingDays, spreads, vars.DayCounter, schedule, vars.Context, vars.Redemption);
+
+        var amFloating = new ConvertibleFloatingRateBond(
+            amExercise, vars.ConversionRatio, vars.NoCallability, vars.IssueDate, vars.SettlementDays, index,
+            vars.FixingDays, spreads, vars.DayCounter, schedule, vars.Context, vars.Redemption);
+
+        IborCouponPricer pricer = new BlackIborCouponPricer(vars.Context);
+
+        var floatSchedule = new Schedule(
+            vars.IssueDate, vars.MaturityDate, new Period(vars.Frequency), vars.Calendar, BusinessDayConvention.Following,
+            BusinessDayConvention.Following, DateGenerationRule.Backward, false, vars.Context);
+        var floating = new FloatingRateBond(
+            vars.SettlementDays, vars.FaceAmount, floatSchedule, index, vars.DayCounter, vars.Context,
+            BusinessDayConvention.Following, vars.FixingDays, gearings, spreads, [], [], false, vars.Redemption,
+            vars.IssueDate);
+        floating = CouponPricerFunctions.SetCouponPricer(floating, pricer);
+
+        tolerance = 2.0e-2 * (vars.FaceAmount / 100.0);
+
+        CheckBond("floating-rate", Engine(euFloating).NPV!.Value, BondEngine(floating).SettlementValue!.Value, tolerance);
+        CheckBond("floating-rate", Engine(amFloating).NPV!.Value, BondEngine(floating).SettlementValue!.Value, tolerance);
+    }
 
     // Adapted: CommonVars' relinkable handles are the curves, the volatility and the process themselves, and its credit
     // spread quote, relinked to 0 after the engine is built on it (line 318), is the number 0 the engine is given; the
@@ -184,6 +294,14 @@ public class ConvertibleBondsTests
             () => BinomialConvertibleEngine.Calculate<CoxRossRubinstein>(bond, context, process, 600, spread, noDividends));
     }
 
+    private static void CheckBond(string kind, double calculated, double expected, double tolerance)
+    {
+        double error = Math.Abs(calculated - expected);
+        Assert.True(
+            error <= tolerance,
+            $"failed to reproduce {kind} bond price:\n    calculated: {calculated}\n    expected:   {expected}\n    error:      {error}");
+    }
+
     private sealed class CommonVars
     {
         public CommonVars(Date today)
@@ -193,6 +311,7 @@ public class ConvertibleBondsTests
             Calendar = new TARGET();
 
             DayCounter = new Actual360();
+            Frequency = Frequency.Annual;
             SettlementDays = 3;
 
             int fixingDays = 2;
@@ -201,6 +320,7 @@ public class ConvertibleBondsTests
 
             // reset to avoid inconsistencies as the schedule is backwards
             IssueDate = Calendar.Advance(MaturityDate, -10, TimeUnit.Years);
+            FixingDays = Calendar.BusinessDaysBetween(today, IssueDate);
 
             double underlying = 50.0;
             YieldTermStructure dividendYield = new FlatForward(today, 0.02, DayCounter);
@@ -230,7 +350,11 @@ public class ConvertibleBondsTests
 
         public DayCounter DayCounter { get; }
 
+        public Frequency Frequency { get; }
+
         public int SettlementDays { get; set; }
+
+        public int FixingDays { get; }
 
         public YieldTermStructure RiskFreeRate { get; }
 
@@ -244,6 +368,6 @@ public class ConvertibleBondsTests
 
         public double Redemption { get; }
 
-        public double ConversionRatio { get; }
+        public double ConversionRatio { get; set; }
     }
 }
