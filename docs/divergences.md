@@ -65,6 +65,17 @@ Facts:
 - `APayoffDiscountCurveRunsOverItsOwnTime`
 - `EachEnginesThetaIsPerItsOwnDayCountersYear`
 
+## AtmAdjustedSmileSectionTests
+
+[`Divergences/AtmAdjustedSmileSectionTests.cs`](../tests/NanoQL.Tests/Divergences/AtmAdjustedSmileSectionTests.cs)
+
+The ATM-adjusted section's prices (the S-g1d plan's G1R6 (xxiii)): QuantLib's option price, digital, vega and density are the source's at the adjusted strike (`atmadjustedsmilesection.hpp:49-69`), priced on the source's forward, while the section's level is the given one and its volatility the source's recentred: without recentering every price ignores the level it reports, and with it the prices agree with the section's own level and volatility only under Bachelier's formula. On the harness, over a SABR smile at a forward of 2% shifted by 1% with an exercise time of 2, a section at a level of 2.5% prices a call at 1% at 0.010130320486628017, the source's, and recentred a call at 2.5% at 0.002100781256289137, the source's at 2%. nanoql prices on the section's own level and volatility, as AtmSmileSection does. QuantLib's check: its own SmileSection formulas on that level and volatility.
+
+Facts:
+
+- `ThePricesAreOnTheSectionsOwnLevel`
+- `TheRecentredPricesAreOnTheSectionsOwnLevel`
+
 ## BMANullIndexTests
 
 [`Divergences/BMANullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/BMANullIndexTests.cs)
@@ -749,6 +760,16 @@ Facts:
 - `TheBasisSwapsFairPaySpreadOnAZeroNotionalLegIsNull`
 - `TheFixedVsFloatingSwapsFairRateOnAZeroNotionalLegIsNull`
 
+## CubeAtmCloneTests
+
+[`Divergences/CubeAtmCloneTests.cs`](../tests/NanoQL.Tests/Divergences/CubeAtmCloneTests.cs)
+
+The cube's at-the-money strike (the S-g1d plan's G1R5 (v), #2849): QuantLib 1.44 builds a plain SwapIndex from the base index's conventions (`swaptionvolcube.cpp:89-145`), where its master, after the pin, clones the base to the tenor (`base->clone(swapTenor)`, merged as 87065c808), so a base index that overrides `clone` gives its own clone's fixing. For every swap index QuantLib defines the two agree, the overnight-indexed one included, since none overrides `clone(tenor)`; nanoql's cube clones the base, as the master. QuantLib's check: the master's code, and for QuantLib's indices 1.44's bits.
+
+Facts:
+
+- `TheAtmStrikeIsTheBaseIndexsClonesFixing`
+
 ## CubeAtmExtrapolationTests
 
 [`Divergences/CubeAtmExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/CubeAtmExtrapolationTests.cs)
@@ -1144,12 +1165,14 @@ Facts:
 
 [`Divergences/FlatPayoffExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/FlatPayoffExtrapolationTests.cs)
 
-Flat payoff extrapolation's right tail (the S-g1d plan's G1R6 (xxi)): with `flatPayoffExtrapolation`, QuantLib's Gaussian1d engines integrate past the grid's last node the constant `p[n − 2]`, the second-last node's value (the swaption engine `gaussian1dswaptionengine.cpp:166-171`, the nonstandard, float-float and cap/floor engines, `Gaussian1dModel::zerobondOption` and the Markov-functional model alike), where the left tail takes `p[0]`, its boundary node. On the wheel, a 5Y into 10Y payer at 2% on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12 standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168; a put struck at 0.8 on the 10-year bond from the same exercise, on the model's `zerobondOption`, 0.07911771510819356 against 0.08048473087856346. nanoql takes `p[n − 1]`. For a payoff that increases past the grid, the fixed tail lies between QuantLib's and the true one, the one assertion the two values can't both pass. No QuantLib case sets the flag. QuantLib's check: the same engine on the widened grid.
+Flat payoff extrapolation's right tail (the S-g1d plan's G1R6 (xxi)): with `flatPayoffExtrapolation`, QuantLib's Gaussian1d engines integrate past the grid's last node the constant `p[n − 2]`, the second-last node's value (the swaption engine `gaussian1dswaptionengine.cpp:166-171`, the nonstandard, float-float and cap/floor engines, `Gaussian1dModel::zerobondOption` and the Markov-functional model alike), where the left tail takes `p[0]`, its boundary node. On the wheel, a 5Y into 10Y payer at 2% on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12 standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168; a put struck at 0.8 on the 10-year bond from the same exercise, on the model's `zerobondOption`, 0.07911771510819356 against 0.08048473087856346; on the harness, the Markov-functional model's own premium of its first calibration point's call at 4.57%, calibrated to five CMS 10y swaptions at 20% on 32 points a side, on 3 standard deviations 0.0004285947663144643 and on 7 0.0004751894691285253. nanoql takes `p[n − 1]`. For a payoff that increases past the grid, the fixed tail lies between QuantLib's and the true one, the one assertion the two values can't both pass. No QuantLib case sets the flag. QuantLib's check: the same engine on the widened grid. The Markov-functional model's calibration reads the tail too (`markovfunctional.cpp:516-519`), seen alone in its puts, whose payoff vanishes past the grid: on 2 standard deviations, QuantLib's puts on 32 points move as the grid refines, its second-last node meeting the last, and nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from 2.3% to 15%, by up to fifteen times. QuantLib's check: its own section on the refined grid.
 
 Facts:
 
 - `TheSwaptionEnginesRightTailTakesTheLastNode`
 - `TheZerobondOptionsRightTailTakesTheLastNode`
+- `TheMarkovFunctionalModelsRightTailTakesTheLastNode`
+- `TheMarkovFunctionalCalibrationsRightTailTakesTheLastNode`
 
 ## FloatFloatSwapOneDateScheduleTests
 
@@ -1330,11 +1353,13 @@ Facts:
 
 [`Divergences/Gaussian1dNumeraireExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/Gaussian1dNumeraireExtrapolationTests.cs)
 
-The numeraire's read of a given curve (the S-g1d plan's G1R6 (i)): GSR's numeraire at t = 0 reads a curve it is given at the numeraire time without extrapolation (`gsr.cpp:216-220`), where it reads its own with it, so on a 30-year curve QuantLib's `numeraire(0, 0, yts)` throws "time (60) is past max curve time (30.0192)", and so does every Gaussian1d engine given that discount curve. nanoql reads it with extrapolation. QuantLib's check: its own route, the model built on that curve, whose numeraire at 0 is 0.1319979111949979, and at (1.5, 0.3) 0.1358278427215987, the value QuantLib's given-curve read gives there too.
+The numeraire's read of a given curve (the S-g1d plan's G1R6 (i)): GSR's numeraire at t = 0 reads a curve it is given at the numeraire time without extrapolation (`gsr.cpp:216-220`), where it reads its own with it, so on a 30-year curve QuantLib's `numeraire(0, 0, yts)` throws "time (60) is past max curve time (30.0192)", and so does every Gaussian1d engine given that discount curve. nanoql reads it with extrapolation. QuantLib's check: its own route, the model built on that curve, whose numeraire at 0 is 0.1319979111949979, and at (1.5, 0.3) 0.1358278427215987, the value QuantLib's given-curve read gives there too. The Markov-functional model's numeraire reads a given curve so too, at t = 0 and in the ratio past it (`markovfunctional.cpp:775-785`): on a 10-year curve its numeraire time of 15 years throws "time (15.0192) is past max curve time (10.0055)"; QuantLib's check, the same curve with its extrapolation enabled. In the ratio past t = 0 the model's own curve is read too, without extrapolation, where the calibration reads it with (`:783-785`, `:797-799`, against `:467-469`): a model on a 10-year curve calibrated to 1y to 5y into 10y swaptions, its numeraire time 15.02, refuses every read with a given curve, "time (15.01917808219178) is past max curve time (10.005479452054795)"; nanoql reads its own curve with extrapolation there. QuantLib's check: its own curve given, where the ratio is 1, the prices without one.
 
 Facts:
 
 - `AGivenCurveIsReadWithExtrapolation`
+- `TheMarkovFunctionalModelReadsAGivenCurveWithExtrapolation`
+- `TheMarkovFunctionalModelReadsItsOwnCurveWithExtrapolationInTheRatio`
 
 ## GaussianQuadratureRefusalTests
 
@@ -1654,6 +1679,58 @@ Facts:
 - `ASwaptionWithNoFixedCouponAfterItsExerciseIsPricedOnItsFloatingResets`
 - `WithNoCouponAfterItsExerciseTheSwaptionIsWorthNothing`
 
+## KahaleAtmLevelTests
+
+[`Divergences/KahaleAtmLevelTests.cs`](../tests/NanoQL.Tests/Divergences/KahaleAtmLevelTests.cs)
+
+Kahale's at-the-money level on a shifted source: QuantLib's section fits on the shifted forward and strikes and returns that forward as its level (`kahalesmilesection.hpp:142`, `.cpp:59`), so every member of the base that reads the level, the vega and the converted volatilities, reads the forward plus the shift. On the wheel, over a SABR smile at a forward of 1% shifted by 2% with an exercise time of 5, its level is 0.03, its vega at 0.5% 2.1203568910002753e-05 where the source's is 2.0058237006534898e-04, and its normal volatility at 0.5% 0.00972286988319294 where the source's is 0.0036525005165526547, at a strike where the section keeps the source's prices and volatilities. nanoql's level is the one given or the source's. QuantLib's check: the source section's own members wherever the section keeps its prices; at a shift of 0 the two levels are QuantLib's.
+
+Facts:
+
+- `TheLevelIsTheSourcesAndTheMembersReadingItTheSources`
+
+## KahaleEraseTests
+
+[`Divergences/KahaleEraseTests.cs`](../tests/NanoQL.Tests/Divergences/KahaleEraseTests.cs)
+
+Kahale's failed interpolation (the S-g1d plan's G1R6 (xv)): a segment that fails to fit erases the grid's next point and, in QuantLib, the function slot at the grid index after the segment's (`kahalesmilesection.cpp:163`), past the slots' end once the core's left index is 2 or more, undefined behaviour: on a harness section whose smile is 0.2 − k + 10k² at a level of 3% over a year, interpolated on the default grid, the core's left index is 7 and the C++ harness exits. nanoql erases the unfitted slot after the segment's own. QuantLib's check: its own section on the grid cut to start at the core, left index 1, where its erase is in range and every slot either erase removes is unfitted: from the core to the segment where nanoql's fit also refuses a cancelled function (KahaleSegmentFitTests), the prices agree bit for bit.
+
+Facts:
+
+- `ALeftIndexOfTwoOrMoreErasesTheSegmentsNextSlot`
+
+## KahaleLeftWingTests
+
+[`Divergences/KahaleLeftWingTests.cs`](../tests/NanoQL.Tests/Divergences/KahaleLeftWingTests.cs)
+
+Kahale's left wing on a shifted source (the S-g1d plan's G1R6 (xvii)): after fitting the wing, QuantLib's section checks a digital at (k₁ − shift)/2 (`kahalesmilesection.cpp:109-110`), k₁ the wing's shifted end, the midpoint of [0, k₁ − shift] where the wing spans [−shift, k₁ − shift]; once the core's left strike is negative unshifted the point lies in the core, the check fails and the core moves right, the wing replacing the source's prices below it. nanoql checks at the wing's midpoint, (k₁ − 2·shift)/2, QuantLib's expression at a shift of 0. QuantLib's check: its own section on the smile restated unshifted (the forward and the strikes plus the shift, no shift), whose prices at K + shift a shifted section's at K equal. On the wheel, over a SABR smile at a forward of 1% shifted by 3%, QuantLib's shifted section's call at -1% is 0.020066641655499824 where its section restated unshifted gives 0.02015567637929827 at 2%; with interpolation, on a SABR smile at an exercise time of 1 that QuantLib's interpolation fits soundly once restated unshifted, its shifted section's call at 0% is 0.010484248860552634 against 0.015632415044761726 at 3%.
+
+Facts:
+
+- `AShiftedSectionIsItsUnshiftedRestatement`
+- `AShiftedInterpolatedSectionIsItsUnshiftedRestatement`
+
+## KahaleSegmentFitTests
+
+[`Divergences/KahaleSegmentFitTests.cs`](../tests/NanoQL.Tests/Divergences/KahaleSegmentFitTests.cs)
+
+Kahale's interpolated segments: QuantLib's fit of a segment's function accepts any root of its solver (`kahalesmilesection.cpp:150-173`), even where the function's forward runs to 10¹⁴ and more, whose Black call and constant then cancel, so its prices there are the cancellation's. On the wheel, over an unshifted SABR smile at a forward of 4% with an exercise time of 5 (α 0.02, β 0.5, ν 0.3, ρ −0.2), QuantLib's interpolated section prices the call struck at 0.4%, a grid point, at 0.0361328125 where the source gives 0.0360042, and seven strikes from 0.46% to 1.46% below their intrinsic value, by up to 8.1e-4. nanoql solves such a segment again, and evaluates it, anchored at its left end's price, the Black call's change taken through complementary normal integrals, so no term cancels; a segment whose rounding is within 1e-8 of its ends' prices, relative, is QuantLib's, solved and evaluated as QuantLib's. QuantLib's checks: the source's prices at the core's grid points, which every segment reproduces, and QuantLib's own bits where its segments are sound, at any scale.
+
+Facts:
+
+- `ACancellingSegmentIsFittedWithoutTheCancellation`
+- `ASoundSegmentIsQuantLibsAtAnyScale`
+
+## KahaleShiftedPutTests
+
+[`Divergences/KahaleShiftedPutTests.cs`](../tests/NanoQL.Tests/Divergences/KahaleShiftedPutTests.cs)
+
+Kahale's shifted puts (the S-g1d plan's G1R6 (viii)): where its own functions price a strike below the forward, QuantLib's section implies the volatility from the put on the unshifted strike against the shifted forward (`kahalesmilesection.cpp:252-256`), so on a shifted source every such strike's volatility reads 0. On the wheel, over a SABR smile at a forward of 1% shifted by 2% with an exercise time of 5, the volatility at -1% is 0.0 plain and interpolated, and with interpolation at 0.5% too, where the section's own call prices are 0.0200181 and 0.0063525. nanoql implies it from the put on the shifted strike. QuantLib's check: the section's own call prices, which Black's formula on the shifted strike and forward at nanoql's volatility gives back, through put-call parity, within the volatility solve's accuracy.
+
+Facts:
+
+- `ThePutBranchsVolatilityGivesTheSectionsOwnPrices`
+
 ## LaggedYoYRateBranchTests
 
 [`Divergences/LaggedYoYRateBranchTests.cs`](../tests/NanoQL.Tests/Divergences/LaggedYoYRateBranchTests.cs)
@@ -1717,6 +1794,16 @@ Facts:
 - `FridaysAreBusinessDaysAndSundaysWeekendDays`
 - `TestMaltasListOnFridaysAndSundays`
 
+## MarkovFunctionalOutputsTests
+
+[`Divergences/MarkovFunctionalOutputsTests.cs`](../tests/NanoQL.Tests/Divergences/MarkovFunctionalOutputsTests.cs)
+
+The Markov-functional model's outputs after a recalculation (the S-g1d plan's G1R1 (v), round 1's O1-10): QuantLib's `modelOutputs` clears every output but the at-the-money levels and the annuities, which it appends to (`markovfunctional.cpp:618-648`), so its first call after a recalculation (a changed market or `forceArbitrageIndices`) returns them twice, the stale ones first [read]. nanoql computes the outputs per call: a copy calibrated again gives a fresh model's. QuantLib's check: its own first call on a fresh model.
+
+Facts:
+
+- `ARecalibratedCopysOutputsAreAFreshModels`
+
 ## McHullWhiteCollarTests
 
 [`Divergences/McHullWhiteCollarTests.cs`](../tests/NanoQL.Tests/Divergences/McHullWhiteCollarTests.cs)
@@ -1737,6 +1824,49 @@ Facts:
 
 - `ANaNErrorEstimateIsRefused`
 - `ANextBatchPastTheSamplesRangeIsRefused`
+
+## MfEndDateTests
+
+[`Divergences/MfEndDateTests.cs`](../tests/NanoQL.Tests/Divergences/MfEndDateTests.cs)
+
+The Markov-functional model's caplet end dates (the S-g1d plan's G1R5 (i), #2848's class): a caplet calibration point, and the outputs' forward rates and caplets, end at the value date advanced by the index's tenor on its fixing calendar (`markovfunctional.cpp:278`, `:949`, `:1109`), where the index's own end is its maturity date, which an index of its own may override. On the wheel, USD Libor 6M fixing on 9 April 2025 values on 11 April and matures on 14 October 2025, where the advance gives 13 October. nanoql ends each at the index's maturity date, as QuantLib's master computes the Gaussian1d forward rate after the pin. QuantLib's check: the index's own maturity date, and for an index whose maturity is the advance (Euribor), QuantLib's bits. The outputs' caplets read the end twice, the forward rate's and the caplet's (`:949`, `:1109`): a call struck at 0 pays the floating leg, so its price is P(0, t) − P(0, end) for any end the two share with the calibration point, QuantLib's own martingale identity, which nanoql's holds to 7e-8; QuantLib's end a day early at the forward's site moves it by 4e-5, at the caplet's by 5e-3.
+
+Facts:
+
+- `ACapletPointEndsAtItsIndexsMaturityDate`
+- `TheOutputsCapletsEndWhereTheCalibrationPointDoes`
+
+## MfSmallReversionTests
+
+[`Divergences/MfSmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/MfSmallReversionTests.cs)
+
+The Markov-functional state process at small reversions (the S-g1d plan's G1R4 (ii)): QuantLib's variance over a step, (e^{2au} − e^{2as})/(2a)·σ², cancels as a falls below 1e-2, and cuts to its zero formula only below its epsilon (`mfstateprocess.cpp:26-27`, `:81-84`, `:98-110`). On the harness, the variance over [0, 3] without step times at a volatility of 1 is 2.9976021664879227 at a = 1e-14 (−8.0e-4 from the limit, 3), 3.000044657142098 at 1e-12 (+1.5e-5) and 3.0000000927898895 at 1e-8. nanoql's is σ²e^{2as}·expm1(2a(u − s))/(2a) below 1e-2, its zero formula kept below QuantLib's epsilon, and QuantLib's form and bits from 1e-2. QuantLib's checks: its own form at the switch, which the expm1 form meets, and its own zero formula, the forms' limit, which the variance meets as a → 0 in proportion to a.
+
+Facts:
+
+- `TheVarianceMeetsQuantLibsFormAtTheSwitch`
+- `TheVarianceTendsToTheZeroReversion`
+
+## MfSmileFlagsTests
+
+[`Divergences/MfSmileFlagsTests.cs`](../tests/NanoQL.Tests/Divergences/MfSmileFlagsTests.cs)
+
+The Markov-functional model's smile pretreatments (the S-g1d plan's G1R6 (vii)): QuantLib's settings refuse only all three of Kahale's, SABR's and a custom smile, though the refusal's text says "Only one … can be specified" (`markovfunctional.hpp:162-167`), so on the wheel Kahale's smile with SABR's validates, and the model then pretreats with Kahale's and ignores SABR's. nanoql refuses any two, with QuantLib's text. QuantLib's check: its own text.
+
+Facts:
+
+- `AnyTwoSmilePretreatmentsAreRefused`
+
+## MfStateProcessSdeTests
+
+[`Divergences/MfStateProcessSdeTests.cs`](../tests/NanoQL.Tests/Divergences/MfStateProcessSdeTests.cs)
+
+The Markov-functional state process, dx = σ(t) e^{at} dW (the S-g1d plan's G1R6 (vi)): QuantLib's diffusion omits the factor e^{at} (`mfstateprocess.cpp:62-66`), and its variance without step times omits the volatility's square (`:80-84`). On the harness, at a = 0.05 and σ = 0.8 without steps, its diffusion at t = 2 is 0.8 and its variance over [0, 1] 1.0517091807564771, where the same process stepped once past the horizon gives 0.6730938756841454. nanoql's are its equation's. QuantLib's checks: its own stepped variance, of which the diffusion's square is the derivative and which the variance without steps equals with one step past the horizon. The Markov-functional model's prices don't move: they read the variance's ratios, which its level leaves.
+
+Facts:
+
+- `TheDiffusionIsTheEquations`
+- `TheVarianceWithoutStepsIsTheSteppedOne`
 
 ## MinimizeContinuationTests
 
@@ -2104,6 +2234,16 @@ Facts:
 
 - `ANonFiniteArgumentIsRefused`
 
+## SabrInterpolatedSmileSectionStrikesTests
+
+[`Divergences/SabrInterpolatedSmileSectionStrikesTests.cs`](../tests/NanoQL.Tests/Divergences/SabrInterpolatedSmileSectionStrikesTests.cs)
+
+The SABR-interpolated section's strikes: QuantLib reads a strike per volatility, past the strikes' end where there are fewer strikes than volatilities (`sabrinterpolatedsmilesection.cpp:111-119`), undefined behaviour. nanoql refuses fewer strikes than volatilities; more strikes are ignored past the volatilities, as QuantLib's.
+
+Facts:
+
+- `FewerStrikesThanVolatilitiesAreRefused`
+
 ## SabrSmileSectionParameterTests
 
 [`Divergences/SabrSmileSectionParameterTests.cs`](../tests/NanoQL.Tests/Divergences/SabrSmileSectionParameterTests.cs)
@@ -2261,6 +2401,16 @@ A smile section built by the parameterless constructor. QuantLib's `SmileSection
 Facts:
 
 - `AParameterlessSectionReadsDefinedFields`
+
+## SmileSectionUtilsShiftTests
+
+[`Divergences/SmileSectionUtilsShiftTests.cs`](../tests/NanoQL.Tests/Divergences/SmileSectionUtilsShiftTests.cs)
+
+The smile utilities' endpoints on a shifted section (the S-g1d plan's G1R6 (xii)): where a section's strike range is limited, QuantLib puts the range's ends in its grid with a moneyness of the shifted strike over the unshifted level (`smilesectionutils.cpp:100-101`, `:107-108`), where every other point's is over the shifted level. On the harness, over a section shifted by 1% at a level of 5% with strikes from 0 to 10%, its grid's ends read 0.2 and 2.2 where its own formula gives 1/6 and 11/6, and with a larger shift its grid comes out unsorted. nanoql divides by the shifted level. QuantLib's check: its own interior formula, (k + shift)/(f + shift).
+
+Facts:
+
+- `TheEndpointsTakeTheInteriorsMoneyness`
 
 ## SobolPeriodEndTests
 

@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (S-van); testMultiSpline (S-exo); testFlatExtrapolation (S-g1d); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (S-core); testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
+// Partial: testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (S-van); testMultiSpline (S-exo); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (S-core); testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
 // Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs); testBicubicUpdate (Conventions/InterpolationConstructionTests.cs)
 
 using NanoQL.Numerics;
@@ -1296,6 +1296,216 @@ public class InterpolationsTests
                     "failed to reproduce primitive on a piecewise constant interpolation for a single point "
                     + $"\n   x         : {i}\n   expected  : {expectedPrimitive}\n   calculated: {calculatedPrimitive}");
             }
+        }
+    }
+
+    // Adapted: without its update smoke test (lines 3172-3184): an interpolation is immutable and has no update().
+    [Fact]
+    public void TestFlatExtrapolation()
+    {
+        // Testing flat extrapolation of 1-D interpolation...
+        Real[] x = [0.0, 1.0, 2.0, 3.0, 4.0];
+        Real[] y = [5.0, 3.0, 4.0, 2.0, 1.0];
+        Size n = x.Length;
+
+        CubicInterpolation cubic = new CubicInterpolation(x, y, Spline, false, SecondDerivative, 0.0, SecondDerivative, 0.0)
+            .EnableExtrapolation();
+
+        var f = new FlatExtrapolator(cubic);
+
+        Real tolerance = 1.0e-12;
+
+        // extrapolation not allowed by default
+        Assert.Throws<NanoQLException>(() => f.Evaluate(-1.0));
+
+        f = f.EnableExtrapolation();
+
+        // in-range: must match underlying cubic at knots
+        for (Size i = 0; i < n; ++i)
+        {
+            Real calculated = f.Evaluate(x[i]);
+            Real expected = y[i];
+            if (Math.Abs(calculated - expected) > tolerance)
+            {
+                Assert.Fail(
+                    $"in-range mismatch at x={x[i]}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}"
+                    + $"\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // in-range at midpoints: must match underlying cubic
+        for (Size i = 0; i < n - 1; ++i)
+        {
+            Real mid = (x[i] + x[i + 1]) / 2.0;
+            Real calculated = f.Evaluate(mid);
+            Real expected = cubic.Evaluate(mid);
+            if (Math.Abs(calculated - expected) > tolerance)
+            {
+                Assert.Fail(
+                    $"in-range mismatch at midpoint x={mid}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}"
+                    + $"\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // below range: flat at y[0]
+        foreach (Real p in (Real[])[-2.0, -1.0, -0.01])
+        {
+            Real calculated = f.Evaluate(p);
+            Real expected = y[0];
+            if (Math.Abs(calculated - expected) > tolerance)
+            {
+                Assert.Fail(
+                    $"flat extrapolation below range failed at {p}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}"
+                    + $"\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // above range: flat at y[N-1]
+        foreach (Real p in (Real[])[4.01, 5.0, 10.0])
+        {
+            Real calculated = f.Evaluate(p);
+            Real expected = y[n - 1];
+            if (Math.Abs(calculated - expected) > tolerance)
+            {
+                Assert.Fail(
+                    $"flat extrapolation above range failed at {p}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}"
+                    + $"\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // derivative outside range is zero
+        Real calc = f.Derivative(-1.0);
+        if (Math.Abs(calc) > tolerance)
+        {
+            Assert.Fail($"derivative should be zero below range\n    calculated: {calc}");
+        }
+
+        calc = f.Derivative(5.0);
+        if (Math.Abs(calc) > tolerance)
+        {
+            Assert.Fail($"derivative should be zero above range\n    calculated: {calc}");
+        }
+
+        // second derivative outside range is zero
+        calc = f.SecondDerivative(-1.0);
+        if (Math.Abs(calc) > tolerance)
+        {
+            Assert.Fail($"second derivative should be zero below range\n    calculated: {calc}");
+        }
+
+        calc = f.SecondDerivative(5.0);
+        if (Math.Abs(calc) > tolerance)
+        {
+            Assert.Fail($"second derivative should be zero above range\n    calculated: {calc}");
+        }
+
+        // derivative inside range matches underlying
+        foreach (Real p in (Real[])[0.5, 1.5, 2.5, 3.5])
+        {
+            Real calculated = f.Derivative(p);
+            Real expected = cubic.Derivative(p);
+            if (Math.Abs(calculated - expected) > tolerance)
+            {
+                Assert.Fail(
+                    $"in-range derivative mismatch at x={p}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}"
+                    + $"\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // second derivative inside range matches underlying
+        foreach (Real p in (Real[])[0.5, 1.5, 2.5, 3.5])
+        {
+            Real calculated = f.SecondDerivative(p);
+            Real expected = cubic.SecondDerivative(p);
+            if (Math.Abs(calculated - expected) > tolerance)
+            {
+                Assert.Fail(
+                    $"in-range second derivative mismatch at x={p}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}"
+                    + $"\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // primitive below range
+        {
+            Real calculated = f.Primitive(-1.0);
+            Real expected = cubic.Primitive(x[0], true) + (y[0] * (-1.0 - x[0]));
+            if (Math.Abs(calculated - expected) > tolerance)
+            {
+                Assert.Fail(
+                    "primitive below range mismatch at x=-1.0"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}"
+                    + $"\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // primitive above range
+        {
+            Real calculated = f.Primitive(5.0);
+            Real expected = cubic.Primitive(x[n - 1], true) + (y[n - 1] * (5.0 - x[n - 1]));
+            if (Math.Abs(calculated - expected) > tolerance)
+            {
+                Assert.Fail(
+                    "primitive above range mismatch at x=5.0"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}"
+                    + $"\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // primitive inside range matches underlying
+        foreach (Real p in (Real[])[0.5, 1.5, 2.5, 3.5])
+        {
+            Real calculated = f.Primitive(p);
+            Real expected = cubic.Primitive(p);
+            if (Math.Abs(calculated - expected) > tolerance)
+            {
+                Assert.Fail(
+                    $"in-range primitive mismatch at x={p}"
+                    + $"\n    expected:   {expected:F6}\n    calculated: {calculated:F6}"
+                    + $"\n    error:      {Math.Abs(calculated - expected):E}");
+            }
+        }
+
+        // xValues and yValues accessors
+        var xs = f.XValues();
+        var ys = f.YValues();
+        if (xs.Length != n)
+        {
+            Assert.Fail($"xValues size mismatch\n    expected: {n}\n    got:      {xs.Length}");
+        }
+
+        if (ys.Length != n)
+        {
+            Assert.Fail($"yValues size mismatch\n    expected: {n}\n    got:      {ys.Length}");
+        }
+
+        for (Size i = 0; i < n; ++i)
+        {
+            if (Math.Abs(xs[i] - x[i]) > tolerance)
+            {
+                Assert.Fail($"xValues mismatch at index {i}\n    expected: {x[i]}\n    got:      {xs[i]}");
+            }
+
+            if (Math.Abs(ys[i] - y[i]) > tolerance)
+            {
+                Assert.Fail($"yValues mismatch at index {i}\n    expected: {y[i]}\n    got:      {ys[i]}");
+            }
+        }
+
+        // isInRange
+        if (!f.IsInRange(2.0))
+        {
+            Assert.Fail("isInRange should return true for x=2.0");
+        }
+
+        if (f.IsInRange(-1.0))
+        {
+            Assert.Fail("isInRange should return false for x=-1.0");
         }
     }
 

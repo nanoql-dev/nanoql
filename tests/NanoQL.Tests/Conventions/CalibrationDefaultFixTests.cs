@@ -17,7 +17,8 @@ namespace NanoQL.Tests.Conventions;
 /// The calibration's default fixed parameters (the S-g1d plan's G1R2 (ii); master plan §2.2's calibration row):
 /// <see cref="ICalibratedModel.DefaultFixParameters"/> is empty by default, QuantLib's, for every landed model; a model
 /// that gives one, as QuantLib's Markov-functional model overrides <c>calibrate</c> to fix its first volatility, has it
-/// read by <c>Calibrate</c> when the caller fixes nothing, and a caller's own flags win.
+/// read by <c>Calibrate</c> when the caller fixes nothing, and a caller's own flags win. The Markov-functional model
+/// gives its first volatility fixed.
 /// </summary>
 public class CalibrationDefaultFixTests
 {
@@ -33,6 +34,22 @@ public class CalibrationDefaultFixTests
             Gaussian1dInputs.Constant(Curve, 0.01, 0.01), new HestonModel(new HestonProcess(Curve, Curve, 100.0, 0.04, 1.5, 0.04, 0.3, -0.6)),
         ];
         Assert.All(models, m => Assert.True(m.DefaultFixParameters.IsEmpty, m.GetType().Name));
+    }
+
+    [Fact]
+    public void TheMarkovFunctionalModelFixesItsFirstVolatility()
+    {
+        var context = new EvaluationContext { EvaluationDate = Today };
+        var target = new TARGET();
+        Date[] steps = [.. new[] { 1, 2, 3 }.Select(i => target.Advance(Today, i, TimeUnit.Years))];
+        Date[] expiries = [.. Enumerable.Range(1, 5).Select(i => target.Advance(Today, i, TimeUnit.Years))];
+        var model = new MarkovFunctional(
+            Curve, 0.01, steps, [1.0, 1.0, 1.0, 1.0],
+            new ConstantSwaptionVolatility(Today, target, BusinessDayConvention.ModifiedFollowing, 0.2, new Actual365Fixed()), expiries,
+            [.. Enumerable.Repeat(new Period(10, TimeUnit.Years), 5)], new EuriborSwapIsdaFixA(new Period(1, TimeUnit.Years)), context,
+            new MarkovFunctionalModelSettings(32, 7.0, 16, 1e-5, 1e-7, 0.0, 2.0, MarkovFunctionalModelSettingsAdjustments.KahaleSmile));
+        Assert.Equal([true, false, false, false], model.DefaultFixParameters);
+        Assert.Equal(model.FixedFirstVolatility(), model.DefaultFixParameters);
     }
 
     [Fact]

@@ -88,4 +88,60 @@ internal static class Gaussian1dInputs
             false,
             discountCurve).NPV;
     }
+
+    /// <summary>
+    /// The Markov-functional model a spec describes, calibrated under the context: <c>{"curve", "reversion",
+    /// "volstepdates", "volatilities", "kind", "settings"}</c>, the kind <c>"swaption"</c> with <c>"swaptionVol"</c>,
+    /// <c>"expiries"</c>, <c>"tenors"</c> and <c>"swapIndexTenor"</c> (a EuriborSwapIsdaFixA without a curve), or
+    /// <c>"caplet"</c> with <c>"capletVol"</c>, <c>"expiries"</c> and <c>"iborIndex"</c>, as the C++ harness's
+    /// <c>models/shortrate/onefactormodels/markovfunctional.cpp</c> reads it; an optional
+    /// <c>"forcedArbitrageIndices"</c> is forced on the model once built.
+    /// </summary>
+    /// <param name="spec">The spec.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <returns>The model.</returns>
+    public static MarkovFunctional MarkovFunctionalOf(JsonElement spec, EvaluationContext context)
+    {
+        YieldTermStructure curve = CashFlowInputs.CurveOf(spec.GetProperty("curve"));
+        double reversion = IndexInputs.Real(spec.GetProperty("reversion"));
+        Date[] steps = [.. spec.GetProperty("volstepdates").EnumerateArray().Select(d => new Date(d.GetInt32()))];
+        double[] vols = VolatilityInputs.Reals(spec.GetProperty("volatilities"));
+        Date[] expiries = [.. spec.GetProperty("expiries").EnumerateArray().Select(d => new Date(d.GetInt32()))];
+        JsonElement s = spec.GetProperty("settings");
+        var settings = new MarkovFunctionalModelSettings(
+            s.GetProperty("yGridPoints").GetInt32(),
+            IndexInputs.Real(s.GetProperty("yStdDevs")),
+            s.GetProperty("gaussHermitePoints").GetInt32(),
+            IndexInputs.Real(s.GetProperty("digitalGap")),
+            IndexInputs.Real(s.GetProperty("marketRateAccuracy")),
+            IndexInputs.Real(s.GetProperty("lowerRateBound")),
+            IndexInputs.Real(s.GetProperty("upperRateBound")),
+            (MarkovFunctionalModelSettingsAdjustments)s.GetProperty("adjustments").GetInt32(),
+            VolatilityInputs.Reals(s.GetProperty("smileMoneynessCheckpoints")));
+        MarkovFunctional model = spec.GetProperty("kind").GetString() == "caplet"
+            ? new MarkovFunctional(
+                curve,
+                reversion,
+                steps,
+                vols,
+                VolatilityInputs.OptionletVolatilityOf(spec.GetProperty("capletVol"), context),
+                expiries,
+                IndexInputs.IborIndexOf(spec.GetProperty("iborIndex")),
+                context,
+                settings)
+            : new MarkovFunctional(
+                curve,
+                reversion,
+                steps,
+                vols,
+                VolatilityInputs.SwaptionVolatilityOf(spec.GetProperty("swaptionVol"), context),
+                expiries,
+                [.. spec.GetProperty("tenors").EnumerateArray().Select(VolatilityInputs.TenorOf)],
+                new Indexes.EuriborSwapIsdaFixA(VolatilityInputs.TenorOf(spec.GetProperty("swapIndexTenor"))),
+                context,
+                settings);
+        return spec.TryGetProperty("forcedArbitrageIndices", out JsonElement forced)
+            ? model.ForceArbitrageIndices([.. forced.EnumerateArray().Select(p => (p[0].GetInt32(), p[1].GetInt32()))], context)
+            : model;
+    }
 }

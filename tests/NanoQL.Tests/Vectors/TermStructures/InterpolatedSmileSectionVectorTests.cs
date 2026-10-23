@@ -66,7 +66,7 @@ public class InterpolatedSmileSectionVectorTests
     }
 
     // The section a spec describes, as the generator builds it.
-    private static SmileSection SectionOf(JsonElement spec, EvaluationContext context)
+    internal static SmileSection SectionOf(JsonElement spec, EvaluationContext context)
     {
         string type = spec.GetProperty("type").GetString()!;
         string form = spec.GetProperty("form").GetString()!;

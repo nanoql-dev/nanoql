@@ -530,21 +530,22 @@ public abstract class Gaussian1dModel : ITermStructureConsistentModel
     // A curve's discount factor at an instant of the model's clock: QuantLib's read at the model's time where the curve
     // shares its clock, or where none is given the model's own; otherwise by the date the time comes from, nothing
     // accrued before the curve's reference date, and for a time without a date, the numeraire time, at the instant the
-    // time denotes (the plan's G1R6 (xvi)). Always with extrapolation, as QuantLib reads its own curve, where it reads
-    // a given one at the numeraire time without it (G1R6 (i)).
-    internal double Discount(YieldTermStructure? yts, double time, Date? date)
+    // time denotes (the plan's G1R6 (xvi)). With extrapolation by default, as QuantLib reads its own curve, where it
+    // reads a given one at the numeraire time without it (G1R6 (i)); without it where QuantLib reads both curves
+    // without it (the Markov-functional model's ratios).
+    internal double Discount(YieldTermStructure? yts, double time, Date? date, bool extrapolate = true)
     {
         if (yts is null || yts.SharesTimes(TermStructure))
         {
-            return (yts ?? TermStructure).Discount(time, true);
+            return (yts ?? TermStructure).Discount(time, extrapolate);
         }
 
         if (date is Date d)
         {
-            return d < yts.ReferenceDate ? 1.0 : yts.DiscountOn(d, true);
+            return d < yts.ReferenceDate ? 1.0 : yts.DiscountOn(d, extrapolate);
         }
 
-        return yts.Discount(yts.AccrualTime(TermStructure, time), true);
+        return yts.Discount(yts.AccrualTime(TermStructure, time), extrapolate);
     }
 
     /// <summary>The numeraire at a time, for a value of the standardized state: the hook a derived model
@@ -587,5 +588,5 @@ public abstract class Gaussian1dModel : ITermStructureConsistentModel
     internal virtual double StateStdDeviation(double t0, double x0, double dt, Gaussian1dMemo memo) => StateProcess().StdDeviation(t0, x0, dt);
 
     // A schedule's calendar, QuantLib's empty one where it has none.
-    private static Calendar CalendarOf(Schedule schedule) => schedule.Calendar ?? EmptyCalendar.Instance;
+    internal static Calendar CalendarOf(Schedule schedule) => schedule.Calendar ?? EmptyCalendar.Instance;
 }

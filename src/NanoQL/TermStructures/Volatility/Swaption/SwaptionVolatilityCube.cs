@@ -216,7 +216,8 @@ public abstract class SwaptionVolatilityCube : SwaptionVolatilityDiscrete
         ArgumentNullException.ThrowIfNull(context);
         Date.ThrowIfDefault(optionDate, nameof(optionDate));
 
-        // QuantLib builds a plain SwapIndex of the family on the tenor, as clone(tenor) does.
+        // QuantLib's master clones the base to the tenor (#2849); 1.44 builds a plain SwapIndex of its conventions, the
+        // same fixing for every swap index QuantLib defines, none overriding clone(tenor).
         SwapIndex index = swapTenor > shortSwapIndexBase.Tenor ? swapIndexBase : shortSwapIndexBase;
         return index.Clone(swapTenor).Fixing(optionDate, context);
     }

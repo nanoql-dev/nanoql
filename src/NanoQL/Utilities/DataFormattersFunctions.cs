@@ -123,9 +123,9 @@ public static class DataFormattersFunctions
         _ => value?.ToString() ?? string.Empty,
     };
 
-    // A C++ stream's default floating-point output: %g with six significant digits. Also the element text of
-    // Vector's and Matrix's ToString, QuantLib's operator<< for Array and Matrix.
-    internal static string General(double x)
+    // A C++ stream's default floating-point output: %g with six significant digits, or the precision a stream was set
+    // to. Also the element text of Vector's and Matrix's ToString, QuantLib's operator<< for Array and Matrix.
+    internal static string General(double x, int precision = 6)
     {
         if (double.IsNaN(x))
         {
@@ -142,10 +142,10 @@ public static class DataFormattersFunctions
             return double.IsNegative(x) ? "-0" : "0";
         }
 
-        string scientific = x.ToString("E5", CultureInfo.InvariantCulture);
+        string scientific = x.ToString("E" + (precision - 1).ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
         int e = scientific.IndexOf('E', StringComparison.Ordinal);
         int exponent = int.Parse(scientific[(e + 1)..], NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
-        if (exponent < -4 || exponent >= 6)
+        if (exponent < -4 || exponent >= precision)
         {
             string sign = exponent < 0 ? "-" : "+";
             return string.Create(
@@ -153,7 +153,7 @@ public static class DataFormattersFunctions
                 $"{TrimZeros(scientific[..e])}e{sign}{Math.Abs(exponent):00}");
         }
 
-        return TrimZeros(x.ToString("F" + (5 - exponent).ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture));
+        return TrimZeros(x.ToString("F" + (precision - 1 - exponent).ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture));
     }
 
     // A C++ stream's std::scientific output at its default precision: %e, six digits after the point and an exponent of

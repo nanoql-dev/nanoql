@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Immutable;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Models;
@@ -21,9 +22,15 @@ namespace NanoQL.Tests.Divergences;
 /// flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12
 /// standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168; a put struck at 0.8 on
 /// the 10-year bond from the same exercise, on the model's <c>zerobondOption</c>, 0.07911771510819356 against
-/// 0.08048473087856346. nanoql takes <c>p[n − 1]</c>. For a payoff that increases past the grid, the fixed tail lies
+/// 0.08048473087856346; on the harness, the Markov-functional model's own premium of its first calibration point's call
+/// at 4.57%, calibrated to five CMS 10y swaptions at 20% on 32 points a side, on 3 standard deviations 0.0004285947663144643
+/// and on 7 0.0004751894691285253. nanoql takes <c>p[n − 1]</c>. For a payoff that increases past the grid, the fixed tail lies
 /// between QuantLib's and the true one, the one assertion the two values can't both pass. No QuantLib case sets the
-/// flag. QuantLib's check: the same engine on the widened grid.
+/// flag. QuantLib's check: the same engine on the widened grid. The Markov-functional model's calibration reads the
+/// tail too (<c>markovfunctional.cpp:516-519</c>), seen alone in its puts, whose payoff vanishes past the grid: on 2
+/// standard deviations, QuantLib's puts on 32 points move as the grid refines, its second-last node meeting the last,
+/// and nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from 2.3% to 15%, by up to fifteen times.
+/// QuantLib's check: its own section on the refined grid.
 /// </summary>
 public class FlatPayoffExtrapolationTests
 {
@@ -57,5 +64,62 @@ public class FlatPayoffExtrapolationTests
         double widened = model.ZerobondOption(OptionType.Put, expiry, valueDate, maturity, 0.8, null, 0.0, null, 12.0, 256, true, true);
         Assert.True(Math.Abs((widened / 0.08048473087856346) - 1.0) <= 1e-12, $"{widened}");
         Assert.True(0.07911771510819356 < flat && flat < widened, $"{flat} against QuantLib's 0.07911771510819356 and the widened grid's {widened}");
+    }
+
+    [Fact]
+    public void TheMarkovFunctionalModelsRightTailTakesTheLastNode()
+    {
+        var today = new Date(14, Month.November, 2012);
+        var context = new EvaluationContext { EvaluationDate = today };
+        YieldTermStructure curve = new FlatForward(today, 0.03, new Actual365Fixed());
+        SwaptionVolatilityStructure vol = new ConstantSwaptionVolatility(
+            today, new TARGET(), BusinessDayConvention.ModifiedFollowing, 0.20, new Actual365Fixed());
+        Date[] expiries = [.. Enumerable.Range(1, 5).Select(i => new TARGET().Advance(today, i, TimeUnit.Years))];
+        Period[] tenors = [.. Enumerable.Repeat(new Period(10, TimeUnit.Years), 5)];
+        double Premium(double stdDevs)
+        {
+            var settings = new MarkovFunctionalModelSettings(
+                32, stdDevs, 16, 1e-5, 1e-7, 0.0, 2.0,
+                MarkovFunctionalModelSettingsAdjustments.KahaleSmile | MarkovFunctionalModelSettingsAdjustments.SmileExponentialExtrapolation
+                    | MarkovFunctionalModelSettingsAdjustments.ExtrapolatePayoffFlat,
+                [0.1, 0.25, 0.50, 0.75, 1.0, 1.25, 1.50, 2.0, 5.0]);
+            var model = new MarkovFunctional(
+                curve, 0.01, [], [1.0], vol, expiries, tenors, new EuriborSwapIsdaFixA(new Period(1, TimeUnit.Years)), context, settings);
+            return model.ModelOutputs(context).ModelCallPremium[0][^3];
+        }
+
+        double narrow = Premium(3.0), wide = Premium(7.0);
+
+        // QuantLib's on 3 standard deviations, below; the widened grid's, above.
+        Assert.True(narrow > 0.0004285947663144643 && narrow < wide, $"{narrow}, {wide}");
+    }
+
+    [Fact]
+    public void TheMarkovFunctionalCalibrationsRightTailTakesTheLastNode()
+    {
+        var today = new Date(14, Month.November, 2012);
+        var context = new EvaluationContext { EvaluationDate = today };
+        YieldTermStructure curve = new FlatForward(today, 0.03, new Actual365Fixed());
+        SwaptionVolatilityStructure vol = new ConstantSwaptionVolatility(
+            today, new TARGET(), BusinessDayConvention.ModifiedFollowing, 0.20, new Actual365Fixed());
+        Date[] expiries = [.. Enumerable.Range(1, 5).Select(i => new TARGET().Advance(today, i, TimeUnit.Years))];
+        Period[] tenors = [.. Enumerable.Repeat(new Period(10, TimeUnit.Years), 5)];
+        var settings = new MarkovFunctionalModelSettings(
+            32, 2.0, 16, 1e-5, 1e-7, 0.0, 2.0,
+            MarkovFunctionalModelSettingsAdjustments.KahaleSmile | MarkovFunctionalModelSettingsAdjustments.SmileExponentialExtrapolation
+                | MarkovFunctionalModelSettingsAdjustments.ExtrapolatePayoffFlat,
+            [0.1, 0.25, 0.50, 0.75, 1.0, 1.25, 1.50, 2.0, 5.0]);
+        var model = new MarkovFunctional(
+            curve, 0.01, [], [1.0], vol, expiries, tenors, new EuriborSwapIsdaFixA(new Period(1, TimeUnit.Years)), context, settings);
+        ImmutableArray<double> puts = model.ModelOutputs(context).ModelPutPremium[0];
+
+        // QuantLib's on 32 and 512 points a side, on the harness, at the strikes from 2.3% to 15%.
+        double[] quantLib32 = [0.0010474974820009033, 0.019337673737027376, 0.0656798427107685, 0.1254774134150286, 0.25083895179032434, 1.0030081820420986];
+        double[] quantLib512 = [0.0010478321465105629, 0.019339380918539158, 0.06568407872628357, 0.12537621907131305, 0.2507400138220497, 1.002922782326594];
+        for (int i = 0; i < quantLib32.Length; i++)
+        {
+            double put = puts[i + 4];
+            Assert.True(Math.Abs(put - quantLib512[i]) < Math.Abs(quantLib32[i] - quantLib512[i]), $"{i + 4}: {put}");
+        }
     }
 }
