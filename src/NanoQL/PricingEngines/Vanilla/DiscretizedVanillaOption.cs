@@ -13,9 +13,17 @@ namespace NanoQL.PricingEngines;
 /// <summary>A vanilla option on a lattice: worth the larger of its rolled-back value and its payoff at each exercise
 /// time.</summary>
 /// <remarks>
+/// <para>
 /// A working type, as every discretized asset is. Its exercise reads the lattice's grid at each step through
 /// <see cref="Lattice.Grid(double, Span{double})"/> into a buffer it reserves at its widest step, where QuantLib's
 /// builds an array per step, so a rollback allocates nothing.
+/// </para>
+/// <para>
+/// <b>The American window</b> is bounded by its two times compared with <c>IsOnTime</c> as well, upstream's fix after
+/// v1.44 (#2878, the S-sr plan's SSR5): the grid's last time can be an ulp off the maturity the engine starts the asset
+/// at, where QuantLib 1.44's plain comparison skips the exercise at expiry, an American option then priced below the
+/// European one on the same tree, or rejects a window ending there (<c>Divergences/AmericanBoundsOnTimeTests.cs</c>).
+/// </para>
 /// </remarks>
 public sealed class DiscretizedVanillaOption : DiscretizedAsset
 {
@@ -81,7 +89,9 @@ public sealed class DiscretizedVanillaOption : DiscretizedAsset
         switch (exerciseType)
         {
             case ExerciseType.American:
-                if (now <= stoppingTimes[1] && now >= stoppingTimes[0])
+                // upstream's fix after v1.44 (#2878): both bounds also on time
+                if ((now <= stoppingTimes[1] || IsOnTime(stoppingTimes[1]))
+                    && (now >= stoppingTimes[0] || IsOnTime(stoppingTimes[0])))
                 {
                     ApplySpecificCondition();
                 }

@@ -13,16 +13,26 @@ namespace NanoQL.Methods;
 /// </summary>
 /// <typeparam name="T">The binomial tree.</typeparam>
 /// <remarks>
+/// <para>
 /// Immutable once built (S-bond's lattice rule). Its step back is QuantLib's, the tree's first-node probabilities
 /// applied to every node: <c>(pd·v[j] + pu·v[j + 1])·discount</c>.
+/// </para>
+/// <para>
+/// Unsealed, an extension point, as QuantLib's is: the Tsiveriotis-Fernandes lattice derives from it and reads the
+/// protected probabilities (the S-sr plan's SSD3).
+/// </para>
 /// </remarks>
-public sealed class BlackScholesLattice<T> : TreeLattice1D
+public class BlackScholesLattice<T> : TreeLattice1D
     where T : Tree
 {
+    /// <summary>QuantLib's <c>pd_</c>: the tree's first node's probability of its down branch.</summary>
+    protected readonly double pd;
+
+    /// <summary>QuantLib's <c>pu_</c>: the tree's first node's probability of its up branch.</summary>
+    protected readonly double pu;
+
     private readonly T tree;
     private readonly double discount;
-    private readonly double pd;
-    private readonly double pu;
 
     /// <summary>Initializes a new instance of the <see cref="BlackScholesLattice{T}"/> class.</summary>
     /// <param name="tree">The tree.</param>

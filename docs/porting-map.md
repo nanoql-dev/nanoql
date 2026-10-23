@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 6 |
-| not started | 713 | 97 |
+| not started | 697 | 96 |
 | partial | 30 | 27 |
-| ported | 517 | 58 |
+| ported | 533 | 59 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -709,7 +709,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `amortizingfloatingratebond` | not started |  | no nanoql type: AmortizingFloatingRateBond |
 | `btp` | not started |  | no nanoql type: CCTEU, BTP, RendistatoBasket, RendistatoCalculator, RendistatoEquivalentSwapLengthQuote, RendistatoEquivalentSwapSpreadQuote |
 | `cmsratebond` | not started |  | no nanoql type: CmsRateBond |
-| `convertiblebonds` | not started |  | no nanoql type: SoftCallability, ConvertibleBond, ConvertibleZeroCouponBond, ConvertibleFixedCouponBond, ConvertibleFloatingRateBond |
+| `convertiblebonds` | ported | Instruments/Bonds/ConvertibleBonds/ConvertibleBond.cs, Instruments/Bonds/ConvertibleBonds/ConvertibleBondArguments.cs, Instruments/Bonds/ConvertibleBonds/ConvertibleFixedCouponBond.cs, Instruments/Bonds/ConvertibleBonds/ConvertibleFloatingRateBond.cs, Instruments/Bonds/ConvertibleBonds/ConvertibleZeroCouponBond.cs, Instruments/Bonds/ConvertibleBonds/SoftCallability.cs |  |
 | `cpibond` | ported | Instruments/Bonds/CPIBond.cs |  |
 | `fixedratebond` | ported | Instruments/Bonds/FixedRateBond.cs |  |
 | `floatingratebond` | ported | Instruments/Bonds/FloatingRateBond.cs |  |
@@ -1024,7 +1024,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmhestonvariancemesher` | not started |  | no nanoql type: FdmHestonVarianceMesher, FdmHestonLocalVolatilityVarianceMesher |
 | `fdmmesher` | ported | Methods/FiniteDifferences/Meshers/FdmMesher.cs |  |
 | `fdmmeshercomposite` | ported | Methods/FiniteDifferences/Meshers/FdmMesherComposite.cs |  |
-| `fdmsimpleprocess1dmesher` | not started |  | no nanoql type: FdmSimpleProcess1dMesher |
+| `fdmsimpleprocess1dmesher` | ported | Methods/FiniteDifferences/Meshers/FdmSimpleProcess1dMesher.cs |  |
 | `predefined1dmesher` | not started |  | no nanoql type: Predefined1dMesher |
 | `uniform1dmesher` | ported | Methods/FiniteDifferences/Meshers/Uniform1dMesher.cs |  |
 | `uniformgridmesher` | not started |  | no nanoql type: UniformGridMesher |
@@ -1040,11 +1040,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmblackscholesop` | ported | Methods/FiniteDifferences/Operators/FdmBlackScholesOp.cs |  |
 | `fdmcevop` | not started |  | no nanoql type: FdmCEVOp |
 | `fdmcirop` | not started |  | no nanoql type: FdmCIREquityPart, FdmCIRRatesPart, FdmCIRMixedPart, FdmCIROp |
-| `fdmg2op` | not started |  | no nanoql type: FdmG2Op |
+| `fdmg2op` | ported | Methods/FiniteDifferences/Operators/FdmG2Op.cs |  |
 | `fdmhestonfwdop` | not started |  | no nanoql type: FdmHestonFwdOp |
 | `fdmhestonhullwhiteop` | not started |  | no nanoql type: FdmHestonHullWhiteEquityPart, FdmHestonHullWhiteOp |
 | `fdmhestonop` | not started |  | no nanoql type: FdmHestonEquityPart, FdmHestonVariancePart, FdmHestonOp |
-| `fdmhullwhiteop` | not started |  | no nanoql type: FdmHullWhiteOp |
+| `fdmhullwhiteop` | ported | Methods/FiniteDifferences/Operators/FdmHullWhiteOp.cs |  |
 | `fdmlinearop` | ported | Methods/FiniteDifferences/Operators/FdmLinearOp.cs |  |
 | `fdmlinearopcomposite` | ported | Methods/FiniteDifferences/Operators/FdmLinearOpComposite.cs |  |
 | `fdmlinearopiterator` | ported | Methods/FiniteDifferences/Operators/FdmLinearOpIterator.cs |  |
@@ -1056,11 +1056,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmwienerop` | not started |  | no nanoql type: FdmWienerOp |
 | `firstderivativeop` | ported | Methods/FiniteDifferences/Operators/FirstDerivativeOp.cs |  |
 | `modtriplebandlinearop` | not started |  | no nanoql type: ModTripleBandLinearOp |
-| `ninepointlinearop` | not started |  | no nanoql type: NinePointLinearOp |
+| `ninepointlinearop` | ported | Methods/FiniteDifferences/Operators/NinePointLinearOp.cs |  |
 | `nthorderderivativeop` | not started |  | no nanoql type: NthOrderDerivativeOp |
 | `numericaldifferentiation` | not started |  | no nanoql type: NumericalDifferentiation, NumericalDifferentiationScheme |
 | `secondderivativeop` | ported | Methods/FiniteDifferences/Operators/SecondDerivativeOp.cs |  |
-| `secondordermixedderivativeop` | not started |  | no nanoql type: SecondOrderMixedDerivativeOp |
+| `secondordermixedderivativeop` | ported | Methods/FiniteDifferences/Operators/SecondOrderMixedDerivativeOp.cs |  |
 | `triplebandlinearop` | ported | Methods/FiniteDifferences/Operators/TripleBandLinearOp.cs |  |
 
 ### `ql/methods/finitedifferences/schemes/`
@@ -1086,16 +1086,16 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `fdm1dimsolver` | ported | Methods/FiniteDifferences/Solvers/Fdm1DimSolver.cs |  |
 | `fdm2dblackscholessolver` | not started |  | no nanoql type: Fdm2dBlackScholesSolver |
-| `fdm2dimsolver` | not started |  | no nanoql type: Fdm2DimSolver |
+| `fdm2dimsolver` | ported | Methods/FiniteDifferences/Solvers/Fdm2DimSolver.cs |  |
 | `fdm3dimsolver` | not started |  | no nanoql type: Fdm3DimSolver |
 | `fdmbackwardsolver` | ported | Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmBackwardSolver.cs, Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmSchemeDesc.cs, Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmSchemeDescFdmSchemeType.cs |  |
 | `fdmbatessolver` | not started |  | no nanoql type: FdmBatesSolver |
 | `fdmblackscholessolver` | ported | Methods/FiniteDifferences/Solvers/FdmBlackScholesSolver.cs |  |
 | `fdmcirsolver` | not started |  | no nanoql type: FdmCIRSolver |
-| `fdmg2solver` | not started |  | no nanoql type: FdmG2Solver |
+| `fdmg2solver` | ported | Methods/FiniteDifferences/Solvers/FdmG2Solver.cs |  |
 | `fdmhestonhullwhitesolver` | not started |  | no nanoql type: FdmHestonHullWhiteSolver |
 | `fdmhestonsolver` | not started |  | no nanoql type: FdmHestonSolver |
-| `fdmhullwhitesolver` | not started |  | no nanoql type: FdmHullWhiteSolver |
+| `fdmhullwhitesolver` | ported | Methods/FiniteDifferences/Solvers/FdmHullWhiteSolver.cs |  |
 | `fdmndimsolver` | not started |  | no nanoql type: FdmNdimSolver |
 | `fdmsimple2dbssolver` | not started |  | no nanoql type: FdmSimple2dBSSolver |
 | `fdmsolverdesc` | ported | Methods/FiniteDifferences/Solvers/FdmSolverDesc.cs |  |
@@ -1121,8 +1121,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bsmrndcalculator` | not started |  | no nanoql type: BSMRNDCalculator |
 | `cevrndcalculator` | not started |  | no nanoql type: CEVRNDCalculator |
 | `escroweddividendadjustment` | ported | Methods/FiniteDifferences/Utilities/EscrowedDividendAdjustment.cs |  |
-| `fdmaffinemodelswapinnervalue` | not started |  | no nanoql type: FdmAffineModelSwapInnerValue |
-| `fdmaffinemodeltermstructure` | not started |  | no nanoql type: FdmAffineModelTermStructure |
+| `fdmaffinemodelswapinnervalue` | ported | Methods/FiniteDifferences/Utilities/FdmAffineModelSwapInnerValue/FdmAffineG2ModelSwapInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmAffineModelSwapInnerValue/FdmAffineHullWhiteModelSwapInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmAffineModelSwapInnerValue/FdmAffineModelSwapInnerValue{TModel}.cs |  |
+| `fdmaffinemodeltermstructure` | ported | Methods/FiniteDifferences/Utilities/FdmAffineModelTermStructure.cs |  |
 | `fdmboundaryconditionset` | ported | Methods/FiniteDifferences/Utilities/FdmBoundaryConditionSet.cs |  |
 | `fdmdirichletboundary` | ported | Methods/FiniteDifferences/Utilities/FdmDirichletBoundary.cs |  |
 | `fdmdiscountdirichletboundary` | not started |  | no nanoql type: FdmDiscountDirichletBoundary |
@@ -1152,7 +1152,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `lattice` | ported | Methods/Lattices/TreeLattice.cs |  |
 | `lattice1d` | ported | Methods/Lattices/TreeLattice1D.cs |  |
 | `lattice2d` | ported | Methods/Lattices/TreeLattice2D.cs |  |
-| `tflattice` | not started |  | no nanoql type: TsiveriotisFernandesLattice |
+| `tflattice` | ported | Methods/Lattices/TsiveriotisFernandesLattice{T}.cs |  |
 | `tree` | ported | Methods/Lattices/Tree.cs |  |
 | `trinomialtree` | ported | Methods/Lattices/TrinomialTree.cs | no nanoql type: TrinomialTreeBranches |
 
@@ -1538,10 +1538,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `binomialconvertibleengine` | not started |  | no nanoql type: BinomialConvertibleEngine |
+| `binomialconvertibleengine` | ported | PricingEngines/Bond/BinomialConvertibleEngine/BinomialCRRConvertibleEngine.cs, PricingEngines/Bond/BinomialConvertibleEngine/BinomialConvertibleEngine.cs, PricingEngines/Bond/BinomialConvertibleEngine/BinomialEQPConvertibleEngine.cs, PricingEngines/Bond/BinomialConvertibleEngine/BinomialJ4ConvertibleEngine.cs, PricingEngines/Bond/BinomialConvertibleEngine/BinomialJRConvertibleEngine.cs, PricingEngines/Bond/BinomialConvertibleEngine/BinomialLRConvertibleEngine.cs, PricingEngines/Bond/BinomialConvertibleEngine/BinomialTianConvertibleEngine.cs, PricingEngines/Bond/BinomialConvertibleEngine/BinomialTrigeorgisConvertibleEngine.cs |  |
 | `bondfunctions` | ported | PricingEngines/Bond/BondFunctions.cs |  |
 | `discountingbondengine` | ported | PricingEngines/Bond/DiscountingBondEngine.cs |  |
-| `discretizedconvertible` | not started |  | no nanoql type: DiscretizedConvertible |
+| `discretizedconvertible` | ported | PricingEngines/Bond/DiscretizedConvertible.cs |  |
 | `riskybondengine` | ported | PricingEngines/Bond/RiskyBondEngine.cs |  |
 
 ### `ql/pricingengines/capfloor/`
@@ -1654,8 +1654,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `basketgeneratingengine` | not started |  | no nanoql type: BasketGeneratingEngine, BasketGeneratingEngineCalibrationBasketType |
 | `blackswaptionengine` | ported | PricingEngines/Swaption/BlackSwaptionEngine/BachelierSpec.cs, PricingEngines/Swaption/BlackSwaptionEngine/BachelierSwaptionEngine.cs, PricingEngines/Swaption/BlackSwaptionEngine/Black76Spec.cs, PricingEngines/Swaption/BlackSwaptionEngine/BlackStyleSwaptionEngine{TSpec}.cs, PricingEngines/Swaption/BlackSwaptionEngine/BlackSwaptionEngine.cs, PricingEngines/Swaption/BlackSwaptionEngine/CashAnnuityModel.cs, PricingEngines/Swaption/BlackSwaptionEngine/IBlackStyleSwaptionSpec.cs |  |
 | `discretizedswaption` | ported | PricingEngines/Swaption/DiscretizedSwaption.cs |  |
-| `fdg2swaptionengine` | not started |  | no nanoql type: FdG2SwaptionEngine |
-| `fdhullwhiteswaptionengine` | not started |  | no nanoql type: FdHullWhiteSwaptionEngine |
+| `fdg2swaptionengine` | ported | PricingEngines/Swaption/FdG2SwaptionEngine.cs |  |
+| `fdhullwhiteswaptionengine` | ported | PricingEngines/Swaption/FdHullWhiteSwaptionEngine.cs |  |
 | `g2swaptionengine` | ported | PricingEngines/Swaption/G2SwaptionEngine.cs |  |
 | `gaussian1dfloatfloatswaptionengine` | not started |  | no nanoql type: Gaussian1dFloatFloatSwaptionEngine, Gaussian1dFloatFloatSwaptionEngineProbabilities |
 | `gaussian1djamshidianswaptionengine` | not started |  | no nanoql type: Gaussian1dJamshidianSwaptionEngine |
@@ -2073,7 +2073,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `basisswapratehelpers` | ported | TestSuite/BasisSwapRateHelpersTests.cs | 24 of 24 cases; moved: testOvernightIborAveragingAndTelescopicValueDates line 767 to Divergences/TelescopicValueDatesTests.cs; testOvernightOvernightTelescopicValueDatesWithSimpleAveraging line 920 to Divergences/TelescopicValueDatesTests.cs |
 | `basketoption` | not started |  | 25 cases |
 | `batesmodel` | not started |  | 4 cases |
-| `bermudanswaption` | partial | TestSuite/BermudanSwaptionTests.cs | 1 of 6 cases; not yet: testCachedG2Values, testTreeEngineTimeSnapping, testBermudanOISSwaptionWithHW, testBermudanOISSwaptionWithG2, testBermudanOISSwaptionPreservesFeatures |
+| `bermudanswaption` | ported | TestSuite/BermudanSwaptionTests.cs | 6 of 6 cases |
 | `binaryoption` | not started |  | 3 cases |
 | `blackcalculator` | ported | TestSuite/BlackCalculatorTests.cs | 6 of 6 cases |
 | `blackdeltacalculator` | ported | TestSuite/BlackDeltaCalculatorTests.cs | 4 of 4 cases |
@@ -2102,7 +2102,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `constnotionalcrosscurrencybasisswap` | ported | TestSuite/ConstNotionalCrossCurrencyBasisSwapTests.cs | 2 of 2 cases |
 | `constnotionalcrosscurrencyfixedvsfloatingswap` | ported | TestSuite/ConstNotionalCrossCurrencyFixedVsFloatingSwapTests.cs | 1 of 1 cases |
 | `constnotionalcrosscurrencyswap` | ported | TestSuite/ConstNotionalCrossCurrencySwapTests.cs | 3 of 3 cases |
-| `convertiblebonds` | not started |  | 4 cases |
+| `convertiblebonds` | partial | TestSuite/ConvertibleBondsTests.cs | 3 of 4 cases; not yet: testBond |
 | `copulas` | not started |  | 3 cases |
 | `covariance` | not started |  | 3 cases |
 | `creditdefaultswap` | ported | TestSuite/CreditDefaultSwapTests.cs | 10 of 10 cases |

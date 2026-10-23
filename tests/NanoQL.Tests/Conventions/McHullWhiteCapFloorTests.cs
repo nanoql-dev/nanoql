@@ -62,19 +62,21 @@ public class McHullWhiteCapFloorTests
                 return GC.GetAllocatedBytesForCurrentThread() - before;
             }
 
-            // up to five measurements, as AllocationAssert takes, the runtime allocating on the thread beside the loop
-            // at times
+            // 2,000 samples more allocate fewer than 2,000 bytes more, under a byte a sample, where one object a sample
+            // is 48,000 bytes or more: a calculation's own bytes vary by a few hundred from call to call under the
+            // suite's load, which an equality can't tell from a per-sample allocation; up to five measurements, as
+            // AllocationAssert takes, the runtime allocating on the thread beside the loop at times
             Allocated(1000);
             var measured = new List<(long, long)>();
-            bool equal = false;
-            for (int i = 0; i < 5 && !equal; i++)
+            bool bounded = false;
+            for (int i = 0; i < 5 && !bounded; i++)
             {
                 long few = Allocated(1000), many = Allocated(3000);
                 measured.Add((few, many));
-                equal = few == many;
+                bounded = many - few < 2000;
             }
 
-            Assert.True(equal, $"allocated (1,000 samples, 3,000 samples): {string.Join(", ", measured)} bytes");
+            Assert.True(bounded, $"allocated (1,000 samples, 3,000 samples): {string.Join(", ", measured)} bytes");
         }
     }
 

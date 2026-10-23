@@ -262,7 +262,9 @@ public sealed class HullWhite : Vasicek, ITermStructureConsistentModel
         {
             public override double Value(ImmutableArray<double> parameters, double t)
             {
-                double forwardRate = termStructure.ForwardRate(t, t, Compounding.Continuous, Frequency.NoFrequency).Rate;
+                // ForwardRate(t, t, Continuous)'s rate without its InterestRate, so a finite-difference step allocates
+                // nothing (the S-sr plan's SSD10)
+                double forwardRate = termStructure.ContinuousForwardRate(t, t);
                 double temp = sigma * t * OneMinusExpOverX(a * t);
                 return forwardRate + (0.5 * temp * temp);
             }

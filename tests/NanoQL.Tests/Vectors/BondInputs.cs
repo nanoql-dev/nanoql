@@ -364,7 +364,10 @@ internal static class BondInputs
     /// <returns>The values' functions.</returns>
     public static Func<object?>[] Each<TIn, TOut>(IEnumerable<TIn> xs, Func<TIn, TOut> f) => CouponInputs.Each(xs, f);
 
-    private static (Period Period, Calendar? Calendar, BusinessDayConvention Convention, bool EndOfMonth) ExCouponOf(
+    /// <summary>The ex-coupon period a spec describes, or none for null.</summary>
+    /// <param name="spec">The spec: <c>{"period", "calendar", "convention", "endOfMonth"}</c>, or null.</param>
+    /// <returns>The period, its calendar, its convention and its end-of-month rule.</returns>
+    public static (Period Period, Calendar? Calendar, BusinessDayConvention Convention, bool EndOfMonth) ExCouponOf(
         JsonElement spec)
     {
         if (spec.ValueKind == JsonValueKind.Null)

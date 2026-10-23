@@ -30,6 +30,18 @@ Facts:
 
 - `AnEmptyFactorVectorIsRefused`
 
+## AmericanBoundsOnTimeTests
+
+[`Divergences/AmericanBoundsOnTimeTests.cs`](../tests/NanoQL.Tests/Divergences/AmericanBoundsOnTimeTests.cs)
+
+The American window's bounds on the tree (upstream's fix after v1.44, #2878: `51c6263b7`, merged as `eaeac5651`; the S-sr plan's SSR5): `TimeGrid(T, N)` builds its last time as (T/N)·N, an ulp off T, the discretized assets snap their exercise times to the grid but start at the unsnapped maturity, and QuantLib 1.44's American branch compares the two with plain `<=` and `>=`; so where the last time rounds below T the exercise is never applied at expiry, and where it rounds above, a window ending at maturity is rejected. Upstream compares both bounds with `isOnTime`, as the European branch does, in `DiscretizedVanillaOption` and `DiscretizedConvertible`. On the wheel, at the upstream cases' market (21 September 2026, 91 days to expiry on Actual/365 (Fixed), spot 100, r = 5%, q = 0, σ = 15%), where the last time rounds below T at 51 steps and above it at 101: the CRR call struck at 85 at 51 steps, American 16.05280871761558 against European 16.074532566935556; exercisable only at maturity at 101 steps, American 0.0 against European 16.075288548193498; and the zero-coupon convertible (conversion ratio 2, redemption 100, no credit spread) at 51 steps, American at maturity 98.76131265936051 against European 200.00004055297964. nanoql takes upstream's fix; its cases are upstream's (`europeanoption.cpp`'s `testBinomialAmericanExerciseAtMaturity` and `testBinomialAmericanExerciseOnlyAtMaturity`, `convertiblebonds.cpp`'s `testBinomialConversionAtMaturity`), until the pin moves to a release that carries the fix.
+
+Facts:
+
+- `TheAmericanExerciseAtMaturityIsApplied`
+- `AnExerciseOnlyAtMaturityIsTheEuropean`
+- `TheConvertibleConvertsAtMaturity`
+
 ## AnalyticEuropeanVolatilityResultTests
 
 [`Divergences/AnalyticEuropeanVolatilityResultTests.cs`](../tests/NanoQL.Tests/Divergences/AnalyticEuropeanVolatilityResultTests.cs)
@@ -626,6 +638,17 @@ Facts:
 
 - `TheCoxIngersollRossTreeConvergesToTheAnalyticPrice`
 - `TheExtendedCoxIngersollRossTreeConvergesToTheAnalyticPrice`
+
+## ConvertibleClockTests
+
+[`Divergences/ConvertibleClockTests.cs`](../tests/NanoQL.Tests/Divergences/ConvertibleClockTests.cs)
+
+The binomial convertible engine's clock (the S-sr plan's SSR8, ruled by the user on 2026-10-22, (a)). QuantLib's engine flattens the volatility at the last exercise date on its own day counter, σ = blackVol(T), and its tree reads it over the risk-free curve's year fraction, so a volatility on another day counter integrates the wrong variance (`binomialconvertibleengine.hpp:80-125`): on the wheel, a 5-year zero-coupon convertible (conversion ratio 2, redemption 100, three settlement days) on a spot of 50, flat 5% and 2% curves on Actual/360 and a 15% volatility on Actual/365 (Fixed), from 15 January 2025, a credit spread of 0.5%, Cox-Ross-Rubinstein at 101 steps, prices 95.56792008293525, its price with the volatility read on Actual/360; on the market restated on one clock, the volatility 0.15·√(τ365/τ360) = 0.14896905994842624 on Actual/360, it prices 95.50250080004932. nanoql flattens a structure on another day counter or reference date from its variance or discount between the risk-free curve's reference date and the last exercise date, over that interval on the risk-free day counter. QuantLib's check: its own engine on the restated market. The engine's NPV stays QuantLib's, the bond's value at its settlement date, which its settlement value equals: a named departure from the playbook's lattice clock, which QuantLib's convertible cases assert (`convertiblebonds.cpp:170`, `:178`, `:218`, against the plain bond's settlement value); on the wheel, the deep out-of-the-money convertible (a conversion ratio of 1e-16, 1,001 steps) prices 75.69370775331546, within 3e-3 of the plain zero-coupon bond's settlement value on the spreaded curve, 75.69077550691921, and 0.06 above its NPV at the curve's date, 75.63297824267259.
+
+Facts:
+
+- `AVolatilityOnAnotherDayCounterIsFlattenedOnTheRiskFreeClock`
+- `TheNPVIsTheValueAtSettlement`
 
 ## CouponPricerSettingTests
 
@@ -1378,6 +1401,16 @@ Facts:
 
 - `AGuessShorterThanTheCurvesPillarsIsRefused`
 - `ALongerGuessUnderTheSimpleZeroTraitsIsRefused`
+
+## InnerValueProxyTests
+
+[`Divergences/InnerValueProxyTests.cs`](../tests/NanoQL.Tests/Divergences/InnerValueProxyTests.cs)
+
+The finite-difference inner value's curve (the S-sr plan's SSR4): QuantLib's `FdmAffineModelSwapInnerValue` links relinkable handles, at each point of the mesh, to a new `FdmAffineModelTermStructure` at the point's state, and its swap's floating coupons, cloned onto them, forecast on it (`fdmaffinemodelswapinnervalue.hpp`). nanoql has no relinkable handles: the inner value holds, for each exercise date, a private proxy curve pair whose state it sets at each point, its swap rebuilt on the index cloned onto the forwarding proxy. QuantLib's route, a fresh immutable `FdmAffineModelTermStructure` pair and a swap rebuilt on it for every point, gives the same value bit for bit, at five points of each of three exercise dates, on Hull-White discounting on a flat 2.7% curve and forwarding on a flat 3.1% one.
+
+Facts:
+
+- `TheProxyIsAFreshCurveAtEveryPoint`
 
 ## InterpolatedSmileSectionCountTests
 

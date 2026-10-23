@@ -67,10 +67,31 @@ internal static class FdInputs
                     QuantoOf(spec.GetProperty("quanto"), context),
                     Real(spec, "spotAdjustment"),
                     context);
+            case "SimpleProcess":
+                JsonElement point = spec.GetProperty("mandatoryPoint");
+                return new FdmSimpleProcess1dMesher(
+                    spec.GetProperty("size").GetInt32(),
+                    Process1dOf(spec.GetProperty("process"), context),
+                    Real(spec, "maturity"),
+                    spec.GetProperty("tAvgSteps").GetInt32(),
+                    Real(spec, "epsilon"),
+                    point.ValueKind == JsonValueKind.Null ? null : point.GetDouble());
             default:
                 throw new InvalidOperationException($"unknown mesher '{type}'");
         }
     }
+
+    /// <summary>
+    /// The 1-D process a spec of tools/vectors/gen/methods/finitedifferences/meshers/fdmsimpleprocess1dmesher.py
+    /// describes: an Ornstein-Uhlenbeck process, or a Black-Scholes process.
+    /// </summary>
+    /// <param name="spec">The spec.</param>
+    /// <param name="context">The case's evaluation context, which a Black-Scholes process reads.</param>
+    /// <returns>The process.</returns>
+    public static StochasticProcess1D Process1dOf(JsonElement spec, EvaluationContext context) =>
+        spec.GetProperty("type").GetString() == "OrnsteinUhlenbeckProcess"
+            ? new OrnsteinUhlenbeckProcess(Real(spec, "speed"), Real(spec, "volatility"), Real(spec, "x0"), Real(spec, "level"))
+            : ProcessOf(spec, context);
 
     /// <summary>
     /// The composite mesher a spec describes: its 1-D meshers, in their directions, on an explicit layout where the

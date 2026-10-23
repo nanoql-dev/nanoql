@@ -257,7 +257,9 @@ public sealed class G2 : TwoFactorModel, IAffineModel, ITermStructureConsistentM
         {
             public override double Value(ImmutableArray<double> parameters, double t)
             {
-                double forward = termStructure.ForwardRate(t, t, Compounding.Continuous, Frequency.NoFrequency).Rate;
+                // ForwardRate(t, t, Continuous)'s rate without its InterestRate, so a finite-difference step allocates
+                // nothing (the S-sr plan's SSD10)
+                double forward = termStructure.ContinuousForwardRate(t, t);
                 double temp1 = sigma * t * G2Functions.OneMinusExpOverX(a * t);
                 double temp2 = eta * t * G2Functions.OneMinusExpOverX(b * t);
                 double value = (0.5 * temp1 * temp1) + (0.5 * temp2 * temp2) + (rho * temp1 * temp2) + forward;

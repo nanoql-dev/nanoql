@@ -424,6 +424,25 @@ public class TripleBandLinearOp : FdmLinearOp
         }
     }
 
+    /// <summary>
+    /// Sets this operator, in place, to <paramref name="y"/> + diag(<paramref name="b"/>): QuantLib's
+    /// <c>axpyb(Array(), x, y, b)</c>, whose x it doesn't read, by the same arithmetic, so that a time step allocates
+    /// nothing.
+    /// </summary>
+    /// <param name="y">The operator added, of this one's size.</param>
+    /// <param name="b">The diagonal added: one value for all, or one per point.</param>
+    internal void SetSumWithDiagonal(TripleBandLinearOp y, ReadOnlySpan<double> b)
+    {
+        int size = N;
+        int binc = (b.Length > 1) ? 1 : 0;
+        for (int i = 0; i < size; ++i)
+        {
+            diag[i] = y.diag[i] + b[i * binc];
+            lower[i] = y.lower[i];
+            upper[i] = y.upper[i];
+        }
+    }
+
     // QuantLib's Thomas algorithm, the index the storage order (direction 0) or the reverse index
     private void Solve(ReadOnlySpan<double> r, double a, double b, Span<double> result, int[]? index)
     {
