@@ -156,7 +156,7 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
         // we could be more anticipatory if we know the right dt
         // for which the drift will be used
         double t1 = t + 0.0001;
-        return riskFreeRate.ForwardRate(t, t1, Compounding.Continuous, Frequency.NoFrequency, true).Rate
+        return riskFreeRate.ContinuousForwardRate(t, t1, true)
             - DividendRate(t, t1)
             - (0.5 * sigma * sigma);
     }
@@ -204,9 +204,7 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
         if (isStrikeIndependent && !forceDiscretization)
         {
             // exact value for curves
-            return x0 * Math.Exp(dt * (
-                riskFreeRate.ForwardRate(t0, t0 + dt, Compounding.Continuous, Frequency.NoFrequency, true).Rate
-                - DividendRate(t0, t0 + dt)));
+            return x0 * Math.Exp(dt * (riskFreeRate.ContinuousForwardRate(t0, t0 + dt, true) - DividendRate(t0, t0 + dt)));
         }
         else
         {
@@ -273,9 +271,8 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
         {
             // exact value for curves
             double var = Variance(t0, x0, dt);
-            double drift = ((riskFreeRate.ForwardRate(t0, t0 + dt, Compounding.Continuous, Frequency.NoFrequency, true).Rate
-                - DividendRate(t0, t0 + dt))
-                * dt) - (0.5 * var);
+            double drift = ((riskFreeRate.ContinuousForwardRate(t0, t0 + dt, true) - DividendRate(t0, t0 + dt)) * dt)
+                - (0.5 * var);
             return Apply(x0, (Math.Sqrt(var) * dw) + drift);
         }
         else
@@ -294,12 +291,21 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
         return riskFreeRate.DayCounter.YearFraction(riskFreeRate.ReferenceDate, date);
     }
 
+    // The process on an engine's clock (the S-van plan's VR1 (v)): its times, its Time(date)'s among them, on the
+    // clock's day counter from the clock's reference date, and each structure, the risk-free curve among them, read at
+    // the instants those times denote, accruing nothing before its own reference date (TermStructure.AccrualTime); the
+    // process itself where the clock shares the risk-free curve's times, so a market on that clock keeps QuantLib's
+    // bits. The Monte Carlo engines' paths run on FdmBlackScholesOp.Clock, whose origin is the earliest structure's
+    // reference date.
+    internal StochasticProcess1D OnClock(TermStructure clock) =>
+        clock.SharesTimes(riskFreeRate) ? this : new ClockedView(this, clock);
+
     // q over [t1, t2] on the risk-free curve's clock: QuantLib's read where the dividend curve shares its times;
     // otherwise at the instants they denote, nothing accruing before the curve's reference date (the user's rulings of
     // 2026-10-21 on the S-eq plan, C4-O2 and C4R2-O2; TermStructure.AccrualTime)
     private double DividendRate(double t1, double t2) =>
         dividendYield.SharesTimes(riskFreeRate)
-            ? dividendYield.ForwardRate(t1, t2, Compounding.Continuous, Frequency.NoFrequency, true).Rate
+            ? dividendYield.ContinuousForwardRate(t1, t2, true)
             : dividendYield.ContinuousForwardRateAt(riskFreeRate, t1, t2, true);
 
     // QuantLib's localVolatility(): the local volatility by the Black volatility's type, and whether it is
@@ -325,5 +331,87 @@ public class GeneralizedBlackScholesProcess : StochasticProcess1D
 
         // ok, so it's strike-dependent. Never mind.
         return (new LocalVolSurface(blackVolTS, riskFreeTS, dividendTS, x0), false);
+    }
+
+    // The process read on another clock than the risk-free curve's (OnClock): each member QuantLib's formula, with the
+    // rates, the variance and the local volatility read at the instants the clock's times denote.
+    private sealed class ClockedView : StochasticProcess1D
+    {
+        private readonly GeneralizedBlackScholesProcess p;
+        private readonly TermStructure clock;
+
+        public ClockedView(GeneralizedBlackScholesProcess p, TermStructure clock)
+            : base(p.Discretization1D())
+        {
+            this.p = p;
+            this.clock = clock;
+        }
+
+        public override double X0 => p.x0;
+
+        public override double Drift(double t, double x)
+        {
+            double sigma = Diffusion(t, x);
+            double t1 = t + 0.0001;
+            return p.riskFreeRate.ContinuousForwardRateAt(clock, t, t1, true)
+                - p.dividendYield.ContinuousForwardRateAt(clock, t, t1, true)
+                - (0.5 * sigma * sigma);
+        }
+
+        public override double Diffusion(double t, double x)
+        {
+            LocalVolTermStructure localVol = p.localVolatility;
+            if (localVol.SharesTimes(clock))
+            {
+                return localVol.LocalVol(t, x, true);
+            }
+
+            double scale = localVol.AccruedPerClockTime(clock, t, t);
+            return localVol.LocalVol(localVol.AccrualTime(clock, t), x, true) * Math.Sqrt(scale);
+        }
+
+        public override double Apply(double x0, double dx) => x0 * Math.Exp(dx);
+
+        public override double Expectation(double t0, double x0, double dt)
+        {
+            if (p.isStrikeIndependent && !p.forceDiscretization)
+            {
+                return x0 * Math.Exp(dt * (
+                    p.riskFreeRate.ContinuousForwardRateAt(clock, t0, t0 + dt, true)
+                    - p.dividendYield.ContinuousForwardRateAt(clock, t0, t0 + dt, true)));
+            }
+            else
+            {
+                throw new NanoQLException("not implemented");
+            }
+        }
+
+        public override double StdDeviation(double t0, double x0, double dt) =>
+            p.isStrikeIndependent && !p.forceDiscretization
+                ? Math.Sqrt(Variance(t0, x0, dt))
+                : Discretization1D().Diffusion(this, t0, x0, dt);
+
+        public override double Variance(double t0, double x0, double dt) =>
+            p.isStrikeIndependent && !p.forceDiscretization
+                ? p.blackVolatility.BlackForwardVarianceAt(clock, t0, t0 + dt, 0.01)
+                : Discretization1D().Variance(this, t0, x0, dt);
+
+        public override double Evolve(double t0, double x0, double dt, double dw)
+        {
+            if (p.isStrikeIndependent && !p.forceDiscretization)
+            {
+                double var = Variance(t0, x0, dt);
+                double drift = ((p.riskFreeRate.ContinuousForwardRateAt(clock, t0, t0 + dt, true)
+                    - p.dividendYield.ContinuousForwardRateAt(clock, t0, t0 + dt, true))
+                    * dt) - (0.5 * var);
+                return Apply(x0, (Math.Sqrt(var) * dw) + drift);
+            }
+            else
+            {
+                return Apply(x0, Discretization1D().Drift(this, t0, x0, dt) + (StdDeviation(t0, x0, dt) * dw));
+            }
+        }
+
+        public override double Time(Date date) => clock.TimeFromReference(date);
     }
 }

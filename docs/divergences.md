@@ -90,6 +90,52 @@ Facts:
 - `AnExerciseOnlyAtMaturityIsTheEuropean`
 - `TheConvertibleConvertsAtMaturity`
 
+## AmericanPayoffAtExpiryKnockedOutTests
+
+[`Divergences/AmericanPayoffAtExpiryKnockedOutTests.cs`](../tests/NanoQL.Tests/Divergences/AmericanPayoffAtExpiryKnockedOutTests.cs)
+
+The knock-out at expiry with the strike on the spot, under QuantLib's master's low-volatility fix (#2855, taken under R8 by the S-van plan's VR5 (i); this defect found by the S-van run). With the strike on the spot, the knock-out is already knocked out, and QuantLib sets both probabilities to 0 (`americanpayoffatexpiry.cpp:126-160`); #2855 then reads N(D₂) = 0 as an underflow and replaces it by e^(2μ ln(H/S))·N(D₂) = N(D₂) with a power of 1, so the knock-out prices −D·K·N(D₂): a call paying 10, S = H = 100, r 5%, vol 20%, one year, −4.19, where QuantLib 1.44 prices 0 [executed on the wheel and by hand: D₂ = −μσ = −0.15]. nanoql takes #2855's form only where N(D₂) is the formula's. QuantLib's check: its own 1.44 value, 0, a knocked-out option's.
+
+Facts:
+
+- `AKnockOutWithTheStrikeOnTheSpotIsWorthNothing`
+
+## AmericanPayoffAtHitNegativeRateTests
+
+[`Divergences/AmericanPayoffAtHitNegativeRateTests.cs`](../tests/NanoQL.Tests/Divergences/AmericanPayoffAtHitNegativeRateTests.cs)
+
+The American payoff at the hit under negative rates (the S-van plan's VR4 (i), master Revision 57, S-rx's (xv)). QuantLib's closed form takes λ = √(μ² − 2 ln D / σ²T) (`americanpayoffathit.cpp:75`, `:90`), the square root of a negative number where r < 0 and μ² < −2r/σ², so the value is NaN: at r −1%, q −1.5% and 20%, and at r −0.75%, q −0.4% and 8%, a down-and-in put at 90 and an up-and-in call at 110 paying 5 [executed on the wheel: `oracle_c1.py`]. nanoql's value there is the payoff's present value at the hit integrated over the first-passage density, which is QuantLib's closed form where λ is real; its Greeks are that integral's derivatives. QuantLib's checks: its closed form, the same quantity where it works (the integral here computed by the test); and its finite-difference barrier engine (400 × 800) where it doesn't: the cash at the hit is a knock-out's rebate on a payoff that pays nothing, within that engine's grid error. Near the spot, where the Greeks' integrals grow as 1/b and 1/b², the value and Greeks are checked against the integrals computed to 40 digits, independently of the quadrature.
+
+Facts:
+
+- `WhereLambdaIsRealTheFirstPassageIntegralIsQuantLibsClosedForm`
+- `WhereLambdaIsNotRealTheValueIsQuantLibsFiniteDifferenceRebate`
+- `NearTheSpotTheValueAndGreeksAreTheFirstPassageIntegralsToTheirPrecision`
+
+## AmericanPayoffZeroVarianceTests
+
+[`Divergences/AmericanPayoffZeroVarianceTests.cs`](../tests/NanoQL.Tests/Divergences/AmericanPayoffZeroVarianceTests.cs)
+
+The American digital payoffs below a variance of ε (the S-van plan's VR4 (ii), under R8). QuantLib divides by the variance there: the at-hit value is NaN out of the money (`americanpayoffathit.cpp:87-102`), and the at-expiry one takes the spot's side of the strike where the limit takes the forward's (`americanpayoffatexpiry.cpp:112-121`). On a cash of 10, S 100, q 0, r 5% and one year, QuantLib gives at σ = 0: at the hit at 102, NaN; at expiry at 102, 0; the knock-out at expiry at 102 (or 103), 9.512294245007139; and its own formula at σ = 1e-6 gives 9.80392156862745, 9.512294245007139 and 0 [executed on the wheel: `oracle_c1.py`]. nanoql's underlying follows its forward: paid at the hit when the forward path reaches the strike, at expiry if it did (knock-in) or didn't (knock-out). QuantLib's check: its own formula at σ = 1e-6, which nanoql's engine there computes.
+
+Facts:
+
+- `AtTheHitTheForwardPathIsPaidWhenItReachesTheStrike`
+- `AtExpiryTheForwardsSideOfTheStrikeCounts`
+- `TheKnockOutIsPaidWhereTheForwardNeverReachesTheStrike`
+- `TheGreeksAtTheHitAreTheLimitsDerivatives`
+
+## AnalyticDigitalAmericanMismatchedTimesTests
+
+[`Divergences/AnalyticDigitalAmericanMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/AnalyticDigitalAmericanMismatchedTimesTests.cs)
+
+The analytic digital American engine on structures dated differently (the mismatched-dates class of master Revision 58, the S-van plan's VR4). QuantLib's engine reads the dividend curve and the volatility at the exercise date through their own clocks (`analyticdigitalamericanengine.cpp:53-58`), so an expiry before a structure's reference date throws. nanoql reads each structure by date, nothing accrued before its own reference date. QuantLib's check: its engine on the market restated from the earliest date, every structure accruing from today exactly what the original accrues from its own date [executed on the wheel: `oracle_c1r1.py` in the run's scratchpad].
+
+Facts:
+
+- `LaterDatedStructuresAreReadFromTheirOwnDates`
+- `AnExpiryBeforeTheStructuresDatesAccruesNothingFromThem`
+
 ## AnalyticEuropeanVolatilityResultTests
 
 [`Divergences/AnalyticEuropeanVolatilityResultTests.cs`](../tests/NanoQL.Tests/Divergences/AnalyticEuropeanVolatilityResultTests.cs)
@@ -1150,6 +1196,16 @@ Facts:
 - `TheSpreadDiscountAndUltimateForwardCurvesExtrapolateTheirBase`
 - `ThePiecewiseSpreadCurveExtrapolatesItsBase`
 
+## DigitalAmericanKnockOutAtHitTests
+
+[`Divergences/DigitalAmericanKnockOutAtHitTests.cs`](../tests/NanoQL.Tests/Divergences/DigitalAmericanKnockOutAtHitTests.cs)
+
+The knock-out digital engine on a payoff at the hit (found by the S-van run, under R8). QuantLib's `AnalyticDigitalAmericanKOEngine` passes its `knock_in()` only to the at-expiry formula; on a payoff at the hit it prices the knock-in (`analyticdigitalamericanengine.cpp:60-77`), whose formula has no knock-out: on Haug's case 1 (a put at 100, S 105, r 10%, vol 20%, half a year, 15 at the hit) the knock-out engine gives the knock-in's 9.726393830820774 [executed on the wheel: `oracle_c1d.py`]. A knock-out pays at expiry if the strike was never reached, so nanoql refuses the payoff at the hit, a forced departure that refuses rather than return the other option's value.
+
+Facts:
+
+- `AKnockOutAtTheHitIsRefused`
+
 ## DigitalCouponExCouponTests
 
 [`Divergences/DigitalCouponExCouponTests.cs`](../tests/NanoQL.Tests/Divergences/DigitalCouponExCouponTests.cs)
@@ -2155,6 +2211,17 @@ Facts:
 - `AFixingTheRatioBranchDoesntReadChangesNothing`
 - `ALagShorterThanThePeriodForecastsThroughTheYoYCurve`
 
+## LeastSquaresStandardErrorTests
+
+[`Divergences/LeastSquaresStandardErrorTests.cs`](../tests/NanoQL.Tests/Divergences/LeastSquaresStandardErrorTests.cs)
+
+The least squares' standard errors (the S-van plan's VR4 (vi), under R8). QuantLib's `GeneralLinearLeastSquares` scales the modelling uncertainty by the residuals' standard deviation over n − 2 degrees of freedom whatever the basis' size (`generallinearleastsquares.hpp:142-147`): for a quadratic fitted to seven points, a multiplier of 0.20401 where R's `lm`, over n − p, gives 0.22809 [executed: `vanprobe` D2, the planner's]. nanoql's errors are R's: σ̂ √[(AᵀA)⁻¹]ⱼⱼ with σ̂² the residual sum of squares over n − p, p the coefficients estimated. QuantLib's checks: that closed form, its own modelling uncertainty times σ̂; and at p = 2, where n − 2 is R's, QuantLib's own errors.
+
+Facts:
+
+- `TheStandardErrorsTakeNMinusPDegreesOfFreedom`
+- `ForAStraightLineTheErrorsAreQuantLibs`
+
 ## LineSearchReturnTests
 
 [`Divergences/LineSearchReturnTests.cs`](../tests/NanoQL.Tests/Divergences/LineSearchReturnTests.cs)
@@ -2266,6 +2333,27 @@ Facts:
 - `OnAShiftedSectionTheBoundIsMinusShift`
 - `AForwardAtOrBelowMinusShiftIsRefused`
 
+## LongstaffSchwartzCalibrationSeedTests
+
+[`Divergences/LongstaffSchwartzCalibrationSeedTests.cs`](../tests/NanoQL.Tests/Divergences/LongstaffSchwartzCalibrationSeedTests.cs)
+
+The Longstaff-Schwartz calibration seed's default (the S-van plan's VR4 (v), under R8). QuantLib's documentation says the calibration seed is the pricing seed plus an offset, "to avoid identical paths in calibration and pricing" (`mclongstaffschwartzengine.hpp:63-71`), but its constructor tests `seedCalibration != Null<Real>()` on a `BigNatural` already narrowed from `Null<Size>()` (`:148`), so its default is always the narrowed null: 4294967295 through C++, 2147483647 (`nullInt()`) through the wheel. nanoql's default is the documented one, (seed + 1768237423) mod 2³². QuantLib's check: its engine with that seed passed explicitly, whose bits the fixed default reproduces; and QuantLib's default's bits through the narrowed null passed explicitly.
+
+Facts:
+
+- `TheDefaultCalibrationSeedIsTheDocumentedOne`
+
+## LongstaffSchwartzExerciseTimesTests
+
+[`Divergences/LongstaffSchwartzExerciseTimesTests.cs`](../tests/NanoQL.Tests/Divergences/LongstaffSchwartzExerciseTimesTests.cs)
+
+The Longstaff-Schwartz pricer's exercise times (the S-van plan's VR4 (xxiv), under R8). QuantLib's pricer exercises at every time of its grid (`longstaffschwartzpathpricer.hpp:111-133`, `:143-200`), while its engine adds steps between a Bermudan option's dates and never puts an American option's earliest date on the grid (`mclongstaffschwartzengine.hpp:218-225`): a Bermudan on more steps than dates, and an American option whose window opens later, price as an American exercisable throughout. nanoql's pricer exercises only at the grid's exercise times. QuantLib's checks: its finite-difference engine (800 × 800) on the Bermudan and the window, within the Monte Carlo error; and on one step per date, QuantLib's own bits [executed on the wheel: `oracle_c1.py`].
+
+Facts:
+
+- `ABermudanOrAWindowExercisesOnlyAtItsExerciseTimes`
+- `OnOneStepPerDateTheBitsAreQuantLibs`
+
 ## MakeSwaptionNullIndexTests
 
 [`Divergences/MakeSwaptionNullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/MakeSwaptionNullIndexTests.cs)
@@ -2297,6 +2385,37 @@ Facts:
 
 - `ARecalibratedCopysOutputsAreAFreshModels`
 
+## McDigitalSeed76Tests
+
+[`Divergences/McDigitalSeed76Tests.cs`](../tests/NanoQL.Tests/Divergences/McDigitalSeed76Tests.cs)
+
+The Monte Carlo digital engine at seed 76 (the S-van plan's VR4 (xxv), under R8). QuantLib's pricer draws the Brownian bridge's uniform numbers from `PseudoRandom::urng_type(76)` with the path generator's dimension (`mcdigitalengine.hpp:177-179`), so at the pricing seed 76 without antithetic variates each step's bridge draws the uniform number of the step's own increment: a down-and-in put at 80 (cash 10, S 100, r 5%, vol 25%, one year, 12 steps, 100,000 samples) prices 3.4762897047890697 ± 0.01477, 5.7 errors above QuantLib's analytic engine, 3.3915878484599937, where seed 77 gives 0.8 errors above [executed on the wheel: `oracle_c1b.py`]. nanoql's bridge takes the seed 77 at the pricing seed 76; every other seed keeps QuantLib's 76 and its bits. QuantLib's check: its analytic engine.
+
+Facts:
+
+- `AtSeed76TheBridgeDrawsItsOwnNumbers`
+
+## McDigitalStepVolatilityTests
+
+[`Divergences/McDigitalStepVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/McDigitalStepVolatilityTests.cs)
+
+The Monte Carlo digital engine's crossing volatility (the S-van plan's VR4 (iv), under R8, with an independent check). QuantLib's `DigitalPathPricer` reads the volatility of step i at the step's end time, `diffusion(timeGrid[i+1], S_i)`, under the comment "initial (timeGrid[i+1]) for the time being" (`mcdigitalengine.cpp:53-54`, `:80-82`), so on a time-dependent volatility each step's Brownian bridge reads the next step's. nanoql reads it at the step's start, (t_i, S_i). The check, QuantLib's having none: on a volatility constant within each grid step the bridge's crossing probability is exact, so the fixed engine on a coarse grid matches the same engine on a fine one within their errors, where QuantLib's is far off. The volatility: forward volatilities of 10%, 40%, 10% and 40% over four quarters of 91 days (a `BlackVarianceCurve`), an up-and-in call at 115 and a down-and-in put at 85 paying 10 at the hit; QuantLib's engine (seed 42, 100,000 samples) gives the call 7.362620907677973 on 4 steps against 6.395034183222466 on 64, the put 6.14377515430365 against 5.417421714551026 [executed on the wheel: `oracle_c1c.py`].
+
+Facts:
+
+- `OnAVolatilityConstantPerStepACoarseGridMatchesAFineOne`
+
+## McDigitalWindowTests
+
+[`Divergences/McDigitalWindowTests.cs`](../tests/NanoQL.Tests/Divergences/McDigitalWindowTests.cs)
+
+The Monte Carlo digital engine on an exercise window (the S-van plan's VR4 (iii), under R8). QuantLib's analytic engine refuses a window ("American option with window exercise not handled yet", `analyticdigitalamericanengine.cpp:41-43`), and its Monte Carlo engine prices from today: an up-and-in call at 110 paying 10 (S 100, r 5%, vol 25%, one year; 365 steps, 20,000 samples, seed 1) gives 7.164398475241645 with the window opening today and in 180 days alike [executed on the wheel: `oracle_c1.py`]. nanoql's engine puts the window's opening on the grid and counts crossings from it, a path already past the strike there paid then. QuantLib's check: its own closed form, the cash at the hit from the opening (`AmericanPayoffAtHit`), integrated over the lognormal density of the underlying at the opening and discounted to today.
+
+Facts:
+
+- `AWindowCountsCrossingsFromItsOpening`
+- `AWindowOpenTodayIsQuantLibs`
+
 ## McHullWhiteCollarTests
 
 [`Divergences/McHullWhiteCollarTests.cs`](../tests/NanoQL.Tests/Divergences/McHullWhiteCollarTests.cs)
@@ -2306,6 +2425,18 @@ The Monte Carlo Hull-White cap engine on a collar: QuantLib's path pricer reads 
 Facts:
 
 - `TheCollarIsItsCapLessItsFloor`
+
+## McMismatchedTimesTests
+
+[`Divergences/McMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/McMismatchedTimesTests.cs)
+
+The Monte Carlo vanilla engines on structures dated or counted differently (the S-van plan's VR1 (v), the mismatched-dates class of master Revision 58). QuantLib's engines run their paths on the process's times, the risk-free curve's from its reference date (`mcvanillaengine.hpp:152-163`, `mclongstaffschwartzengine.hpp:213-237`), and read the other structures at those times: a dividend curve or a volatility dated before the risk-free curve, or on another day counter, is read off its own clock. nanoql's engines run their paths from the earliest structure's reference date on the risk-free curve's day counter (`FdmBlackScholesOp.Clock`), each structure read at the instants the grid's times denote, nothing accruing before its own date, and the payoffs discounted there. QuantLib's check: its own engines on the market restated on one clock, from the same seeds, which the fixed engines on the original market reproduce to rounding [executed on the wheel: `oracle_c1.py`, `oracle_c1b.py` in the run's scratchpad].
+
+Facts:
+
+- `ARiskFreeCurveSettlingLaterIsReadFromItsDateOnTheEarliestClock`
+- `AVolatilityOnAnotherDayCounterIsReadAtItsOwnTimes`
+- `OnOneClockTheBitsAreQuantLibs`
 
 ## McSimulationUndefinedTests
 
@@ -3159,6 +3290,18 @@ A stripped optionlet's fixing times after the evaluation date moves. QuantLib's 
 Facts:
 
 - `TheTimesAreTheConstructionsAndTheAdapterIsTheContexts`
+
+## SvdNonFiniteRefusalTests
+
+[`Divergences/SvdNonFiniteRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/SvdNonFiniteRefusalTests.cs)
+
+The singular value decomposition of a non-finite matrix (the S-van plan's VR7). QuantLib's main loop has no test for too many iterations (`svd.cpp:276-280`, "Here is where a test for too many iterations would go"): on a 5 × 3 matrix with one NaN or one ∞ it runs past 20 seconds [executed: the planner's VP50]. And the American Monte Carlo engine accepts the second-kind Chebyshev basis, √w(x)Pₙ(x) with w = (1 − x)^½(1 + x)^½, NaN above 1: a call regresses its in-the-money paths, S/K > 1, so every regression meets NaN columns and QuantLib's engine hangs [executed by the plan's reviewer, round 1's p11]. nanoql refuses a non-finite entry on entry, naming it, and the engine's call reaches its caller refused, as raised. A finite matrix whose singular values lie past the range of doubles never ends either, in QuantLib and in the port of its arithmetic; nanoql refuses it at the main loop's first non-finite singular value or superdiagonal entry (the user's ruling of 2026-10-24, extending VR7), which none of 578 matrices QuantLib decomposes reaches [executed: a probe over entries from 1e290 to the limit, four shapes]. Each fact runs under a timeout, since without the refusal it doesn't return.
+
+Facts:
+
+- `ANonFiniteEntryIsRefusedNamingIt`
+- `AFiniteMatrixWhoseSingularValuesLeaveTheDoublesIsRefused`
+- `TheSecondKindChebyshevBasisOnACallIsRefusedThroughIt`
 
 ## SviFixedParameterTests
 

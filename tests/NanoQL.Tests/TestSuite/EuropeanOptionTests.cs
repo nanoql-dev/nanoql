@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/europeanoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testIntegralEngines, which waits for S-van's IntegralEngine; testMcEngines and testQmcEngines, which wait for S-van's MCEuropeanEngine; testFFTEngines, which waits for S-xeq's FFTVanillaEngine; testFdEnginesWithNonStrikedPayoff, which waits for S-hes's FdHestonVanillaEngine and S-van's FdCIRVanillaEngine
+// Partial: testIntegralEngines, which waits for S-van's IntegralEngine; testFFTEngines, which waits for S-xeq's FFTVanillaEngine; testFdEnginesWithNonStrikedPayoff, which waits for S-hes's FdHestonVanillaEngine and S-van's FdCIRVanillaEngine
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -755,6 +755,32 @@ public class EuropeanOptionTests
     }
 
     [Fact]
+    public void TestMcEngines()
+    {
+        // Testing Monte Carlo European engines against analytic results...
+
+        EngineType engine = EngineType.PseudoMonteCarlo;
+        Size steps = 0; // QuantLib's Null<Size>(), which the Monte Carlo engines don't read
+        Size samples = 40000;
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 0.01;
+        TestEngineConsistency(engine, steps, samples, relativeTol);
+    }
+
+    [Fact]
+    public void TestQmcEngines()
+    {
+        // Testing Quasi Monte Carlo European engines against analytic results...
+
+        EngineType engine = EngineType.QuasiMonteCarlo;
+        Size steps = 0; // QuantLib's Null<Size>(), which the Monte Carlo engines don't read
+        Size samples = 4095; // 2^12-1
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 0.01;
+        TestEngineConsistency(engine, steps, samples, relativeTol);
+    }
+
+    [Fact]
     public void TestLocalVolatility()
     {
         // Testing finite-differences with local volatility...
@@ -1208,7 +1234,7 @@ public class EuropeanOptionTests
         }
     }
 
-    // QuantLib's makeOption's engine, for the branches this slot ports.
+    // QuantLib's makeOption's engine, for the branches the slots so far port.
     private static Func<VanillaOption, EvaluationContext, OneAssetOptionResults> MakeEngine(
         EngineType engineType, GeneralizedBlackScholesProcess stochProcess, Size binomialSteps, Size samples) =>
         engineType switch
@@ -1224,6 +1250,17 @@ public class EuropeanOptionTests
             EngineType.JOSHI => (option, context) => BinomialJ4VanillaEngine.Calculate(option, context, stochProcess, binomialSteps),
             EngineType.FiniteDifferences => (option, context) =>
                 FdBlackScholesVanillaEngine.Calculate(option, context, stochProcess, tGrid: binomialSteps, xGrid: samples),
+            EngineType.PseudoMonteCarlo => new MakeMCEuropeanEngine<PseudoRandom, GeneralStatistics>(stochProcess, 42)
+                .WithSteps(1)
+                .WithSamples(samples)
+                .ToEngine(),
+
+            // QuantLib's builder's default seed, 0, draws a seed from the clock; a Sobol sequence reads its seed only
+            // past its tabulated dimensions (sobolrsg.cpp), so this one-dimensional sequence takes 1
+            EngineType.QuasiMonteCarlo => new MakeMCEuropeanEngine<LowDiscrepancy, GeneralStatistics>(stochProcess, 1)
+                .WithSteps(1)
+                .WithSamples(samples)
+                .ToEngine(),
             _ => throw new InvalidOperationException($"the {engineType} engine waits for its slot"),
         };
 

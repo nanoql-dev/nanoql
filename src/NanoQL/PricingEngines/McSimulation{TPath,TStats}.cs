@@ -142,12 +142,18 @@ public abstract class McSimulation<TPath, TStats>
     /// <param name="requiredSamples">The required number of samples, or <see langword="null"/>.</param>
     /// <param name="maxSamples">The most samples for a tolerance; <see cref="int.MaxValue"/>, QuantLib's null, for no
     /// limit but <see cref="Value"/>'s default, which it is.</param>
+    /// <param name="pathPricer">
+    /// The call's path pricer, or <see langword="null"/> for <see cref="PathPricer"/>'s: an engine that builds its
+    /// pricer earlier in the call (the Longstaff-Schwartz engine's, calibrated) passes it here, where QuantLib keeps it
+    /// in a member the hook returns.
+    /// </param>
     /// <returns>The model, its accumulator the samples'.</returns>
     /// <exception cref="NanoQLException">
     /// Neither a tolerance nor a number of samples is given; a control variate is used and the engine gives no
     /// control price or path pricer; or <see cref="Value"/> or <see cref="ValueWithSamples"/> refuses.
     /// </exception>
-    protected MonteCarloModel<TPath, TStats> Calculate(double? requiredTolerance, int? requiredSamples, int maxSamples)
+    protected MonteCarloModel<TPath, TStats> Calculate(
+        double? requiredTolerance, int? requiredSamples, int maxSamples, PathPricer<TPath>? pathPricer = null)
     {
         if (!(requiredTolerance is not null || requiredSamples is not null))
         {
@@ -168,14 +174,14 @@ public abstract class McSimulation<TPath, TStats>
 
             // QuantLib builds the model from make_shared's arguments, which MSVC evaluates right to left: the path
             // pricer, then the path generator.
-            PathPricer<TPath> pricer = PathPricer();
+            PathPricer<TPath> pricer = pathPricer ?? PathPricer();
             IPathGenerator<TPath> generator = PathGenerator();
             model = new MonteCarloModel<TPath, TStats>(
                 generator, pricer, new TStats(), AntitheticVariate, controlPP, controlVariateValue, controlPG);
         }
         else
         {
-            PathPricer<TPath> pricer = PathPricer();
+            PathPricer<TPath> pricer = pathPricer ?? PathPricer();
             IPathGenerator<TPath> generator = PathGenerator();
             model = new MonteCarloModel<TPath, TStats>(generator, pricer, new TStats(), AntitheticVariate);
         }

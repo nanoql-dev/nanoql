@@ -160,8 +160,8 @@ internal static class EquityInputs
     }
 
     /// <summary>
-    /// The exercise a spec describes: European at its date, American from the evaluation date to it, or Bermudan at its
-    /// dates.
+    /// The exercise a spec describes: European at its date, American to it from its <c>earliestDate</c> or else the
+    /// evaluation date (paid at expiry where its <c>payoffAtExpiry</c> says so), or Bermudan at its dates.
     /// </summary>
     /// <param name="spec">The spec.</param>
     /// <param name="context">The case's evaluation context.</param>
@@ -172,7 +172,10 @@ internal static class EquityInputs
         return spec.GetProperty("type").GetString() switch
         {
             "European" => new EuropeanExercise(date),
-            "American" => new AmericanExercise(context.EvaluationDate, date),
+            "American" => new AmericanExercise(
+                spec.TryGetProperty("earliestDate", out JsonElement earliest) ? DateOf(earliest) : context.EvaluationDate,
+                date,
+                spec.TryGetProperty("payoffAtExpiry", out JsonElement atExpiry) && atExpiry.GetBoolean()),
             "Bermudan" => new BermudanExercise(DatesOf(spec.GetProperty("dates"))),
             string s => throw new InvalidOperationException($"unknown exercise '{s}'"),
             null => throw new InvalidOperationException("no exercise type"),

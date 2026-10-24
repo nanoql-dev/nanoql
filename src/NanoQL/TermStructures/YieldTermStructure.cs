@@ -289,16 +289,17 @@ public abstract class YieldTermStructure : TermStructure
     /// </summary>
     /// <param name="t1">The start time.</param>
     /// <param name="t2">The end time, not before <paramref name="t1"/>.</param>
+    /// <param name="extrapolate">Whether to allow extrapolation, as QuantLib's <c>forwardRate</c> takes it.</param>
     /// <returns>The forward rate.</returns>
     /// <exception cref="ArgumentException">
     /// <paramref name="t2"/> is before <paramref name="t1"/>, the compound factor isn't positive, or the time isn't.
     /// </exception>
-    internal double ContinuousForwardRate(double t1, double t2)
+    internal double ContinuousForwardRate(double t1, double t2, bool extrapolate = false)
     {
         double compound;
         if (t2 == t1)
         {
-            CheckRange(t1, false);
+            CheckRange(t1, extrapolate);
             double shifted = t1 - (Dt / 2.0);
             t1 = shifted < 0.0 ? 0.0 : shifted;
             t2 = t1 + Dt;
@@ -312,7 +313,7 @@ public abstract class YieldTermStructure : TermStructure
                     string.Create(System.Globalization.CultureInfo.InvariantCulture, $"t1 ({t1}) >= t2 ({t2})"), nameof(t1));
             }
 
-            compound = Discount(t1, false) / Discount(t2, false);
+            compound = Discount(t1, extrapolate) / Discount(t2, extrapolate);
         }
 
         // InterestRate.ImpliedRate's checks and continuous branch
@@ -360,7 +361,7 @@ public abstract class YieldTermStructure : TermStructure
     {
         if (SharesTimes(clock))
         {
-            return ContinuousForwardRate(t1, t2);
+            return ContinuousForwardRate(t1, t2, extrapolate);
         }
 
         if (t2 == t1)

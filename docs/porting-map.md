@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 617 | 76 |
-| partial | 22 | 25 |
-| ported | 621 | 79 |
+| not started | 604 | 75 |
+| partial | 22 | 24 |
+| ported | 634 | 81 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -759,7 +759,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `factorial` | ported | Numerics/Factorial.cs |  |
 | `fastfouriertransform` | not started |  | no nanoql type: FastFourierTransform |
 | `functional` | ported | Numerics/FunctionalFunctions.cs |  |
-| `generallinearleastsquares` | not started |  | no nanoql type: GeneralLinearLeastSquares |
+| `generallinearleastsquares` | ported | Numerics/GeneralLinearLeastSquares.cs |  |
 | `incompletegamma` | ported | Numerics/IncompleteGammaFunctions.cs |  |
 | `interpolation` | ported | Numerics/IInterpolator.cs, Numerics/Interpolation.cs | no nanoql type: InterpolationImpl, InterpolationTemplateImpl |
 | `kernelfunctions` | not started |  | no nanoql type: KernelFunction, GaussianKernel |
@@ -877,7 +877,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `qrdecomposition` | not started |  |  |
 | `sparseilupreconditioner` | not started |  | no nanoql type: SparseILUPreconditioner |
 | `sparsematrix` | ported | Numerics/MatrixUtilities/SparseMatrix.cs, Numerics/MatrixUtilities/SparseMatrixFunctions.cs, Numerics/MatrixUtilities/SparseMatrixReference.cs |  |
-| `svd` | not started |  | no nanoql type: SVD |
+| `svd` | ported | Numerics/MatrixUtilities/SVD.cs |  |
 | `symmetricschurdecomposition` | ported | Numerics/MatrixUtilities/SymmetricSchurDecomposition.cs |  |
 | `tapcorrelations` | not started |  | no nanoql type: FrobeniusCostFunction |
 | `tqreigendecomposition` | ported | Numerics/MatrixUtilities/TqrEigenDecomposition/TqrEigenDecomposition.cs, Numerics/MatrixUtilities/TqrEigenDecomposition/TqrEigenDecompositionEigenVectorCalculation.cs, Numerics/MatrixUtilities/TqrEigenDecomposition/TqrEigenDecompositionShiftStrategy.cs |  |
@@ -1162,11 +1162,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `brownianbridge` | ported | Methods/MonteCarlo/BrownianBridge.cs |  |
-| `earlyexercisepathpricer` | not started |  | no nanoql type: EarlyExerciseTraits, EarlyExercisePathPricer |
+| `earlyexercisepathpricer` | ported | Methods/MonteCarlo/IEarlyExercisePathPricer{TPath,TState}.cs | no nanoql type: EarlyExerciseTraits, EarlyExercisePathPricer |
 | `exercisestrategy` | not started |  | no nanoql type: ExerciseStrategy |
 | `genericlsregression` | not started |  |  |
-| `longstaffschwartzpathpricer` | not started |  | no nanoql type: LongstaffSchwartzPathPricer |
-| `lsmbasissystem` | not started |  | no nanoql type: LsmBasisSystem, LsmBasisSystemPolynomialType |
+| `longstaffschwartzpathpricer` | ported | Methods/MonteCarlo/LongstaffSchwartzPathPricer{TPath,TState}.cs |  |
+| `lsmbasissystem` | ported | Methods/MonteCarlo/LsmBasisSystem.cs, Methods/MonteCarlo/LsmBasisSystemPolynomialType.cs |  |
 | `mctraits` | ported | Methods/MonteCarlo/McTraits/IMcTraits{TPath}.cs, Methods/MonteCarlo/McTraits/MultiVariate{TRng}.cs, Methods/MonteCarlo/McTraits/SingleVariate{TRng}.cs |  |
 | `montecarlomodel` | ported | Methods/MonteCarlo/IPathGenerator{TPath}.cs, Methods/MonteCarlo/MonteCarloModel{TPath,TStats}.cs |  |
 | `multipath` | ported | Methods/MonteCarlo/MultiPath.cs |  |
@@ -1459,8 +1459,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `americanpayoffatexpiry` | not started |  | no nanoql type: AmericanPayoffAtExpiry |
-| `americanpayoffathit` | not started |  | no nanoql type: AmericanPayoffAtHit |
+| `americanpayoffatexpiry` | ported | PricingEngines/AmericanPayoffAtExpiry.cs |  |
+| `americanpayoffathit` | ported | PricingEngines/AmericanPayoffAtHit.cs |  |
 | `bacheliercalculator` | not started |  | no nanoql type: BachelierCalculator |
 | `blackcalculator` | ported | PricingEngines/BlackCalculator.cs |  |
 | `blackdeltacalculator` | ported | PricingEngines/BlackDeltaCalculator.cs | no nanoql type: BlackDeltaPremiumAdjustedSolverClass, BlackDeltaPremiumAdjustedMaxStrikeClass |
@@ -1469,7 +1469,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `genericmodelengine` | replaced: static engines: the model is an engine argument |  |  |
 | `greeks` | ported | PricingEngines/GreeksFunctions.cs |  |
 | `latticeshortratemodelengine` | ported | PricingEngines/LatticeShortRateModelEngine.cs |  |
-| `mclongstaffschwartzengine` | not started |  | no nanoql type: MCLongstaffSchwartzEngine |
+| `mclongstaffschwartzengine` | ported | PricingEngines/MCLongstaffSchwartzEngine{TOption,TMc,TMcCalibration,TPath,TState,TStats}.cs |  |
 | `mcsimulation` | ported | PricingEngines/McSimulation{TPath,TStats}.cs |  |
 
 ### `ql/pricingengines/asian/`
@@ -1671,7 +1671,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `analyticbsmhullwhiteengine` | not started |  | no nanoql type: AnalyticBSMHullWhiteEngine |
 | `analyticcevengine` | not started |  | no nanoql type: CEVCalculator, AnalyticCEVEngine |
-| `analyticdigitalamericanengine` | not started |  | no nanoql type: AnalyticDigitalAmericanEngine, AnalyticDigitalAmericanKOEngine |
+| `analyticdigitalamericanengine` | ported | PricingEngines/Vanilla/AnalyticDigitalAmericanEngine.cs, PricingEngines/Vanilla/AnalyticDigitalAmericanKOEngine.cs |  |
 | `analyticdividendeuropeanengine` | ported | PricingEngines/Vanilla/AnalyticDividendEuropeanEngine.cs |  |
 | `analyticeuropeanengine` | ported | PricingEngines/Vanilla/AnalyticEuropeanEngine.cs |  |
 | `analyticeuropeanvasicekengine` | not started |  | no nanoql type: AnalyticBlackVasicekEngine |
@@ -1703,13 +1703,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `integralengine` | not started |  | no nanoql type: IntegralEngine |
 | `jumpdiffusionengine` | not started |  | no nanoql type: JumpDiffusionEngine |
 | `juquadraticengine` | not started |  | no nanoql type: JuQuadraticApproximationEngine |
-| `mcamericanengine` | not started |  | no nanoql type: MCAmericanEngine, AmericanPathPricer, MakeMCAmericanEngine |
-| `mcdigitalengine` | not started |  | no nanoql type: MCDigitalEngine, MakeMCDigitalEngine, DigitalPathPricer |
-| `mceuropeanengine` | not started |  | no nanoql type: MCEuropeanEngine, MakeMCEuropeanEngine, EuropeanPathPricer |
+| `mcamericanengine` | ported | PricingEngines/Vanilla/MCAmericanEngine/AmericanPathPricer.cs, PricingEngines/Vanilla/MCAmericanEngine/MCAmericanEngine.cs, PricingEngines/Vanilla/MCAmericanEngine/MakeMCAmericanEngine{TRng,TStats,TRngCalibration}.cs |  |
+| `mcdigitalengine` | ported | PricingEngines/Vanilla/MCDigitalEngine/DigitalPathPricer.cs, PricingEngines/Vanilla/MCDigitalEngine/MCDigitalEngine.cs, PricingEngines/Vanilla/MCDigitalEngine/MakeMCDigitalEngine{TRng,TStats}.cs |  |
+| `mceuropeanengine` | ported | PricingEngines/Vanilla/MCEuropeanEngine/EuropeanPathPricer.cs, PricingEngines/Vanilla/MCEuropeanEngine/MCEuropeanEngine.cs, PricingEngines/Vanilla/MCEuropeanEngine/MakeMCEuropeanEngine{TRng,TStats}.cs |  |
 | `mceuropeangjrgarchengine` | not started |  | no nanoql type: MCEuropeanGJRGARCHEngine, MakeMCEuropeanGJRGARCHEngine, EuropeanGJRGARCHPathPricer |
 | `mceuropeanhestonengine` | not started |  | no nanoql type: MCEuropeanHestonEngine, MakeMCEuropeanHestonEngine, EuropeanHestonPathPricer |
 | `mchestonhullwhiteengine` | not started |  | no nanoql type: MCHestonHullWhiteEngine, MakeMCHestonHullWhiteEngine, HestonHullWhitePathPricer |
-| `mcvanillaengine` | not started |  | no nanoql type: MCVanillaEngine |
+| `mcvanillaengine` | ported | PricingEngines/Vanilla/MCVanillaEngine{TMc,TPath,TStats}.cs |  |
 | `qdfpamericanengine` | not started |  | no nanoql type: QdFpIterationScheme, QdFpLegendreScheme, QdFpLegendreTanhSinhScheme, QdFpTanhSinhIterationScheme, QdFpAmericanEngine, QdFpAmericanEngineFixedPointEquation |
 | `qdplusamericanengine` | not started |  | no nanoql type: QdPlusAmericanEngine, QdPlusAmericanEngineSolverType |
 
@@ -2113,7 +2113,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `daycounters` | ported | TestSuite/DayCountersTests.cs | 20 of 22 cases; not ported: testIntraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); testYearFractionToDateForLinearDayCounter (QL_HIGH_RESOLUTION_DATE, which the default build leaves out) |
 | `defaultprobabilitycurves` | ported | TestSuite/DefaultProbabilityCurvesTests.cs | 10 of 10 cases |
 | `digitalcoupon` | ported | TestSuite/DigitalCouponTests.cs | 8 of 8 cases |
-| `digitaloption` | partial | TestSuite/DigitalOptionTests.cs | 3 of 10 cases; not yet: testCashAtHitOrNothingAmericanValues, testAssetAtHitOrNothingAmericanValues, testCashAtExpiryOrNothingAmericanValues, testAssetAtExpiryOrNothingAmericanValues, testCashAtHitOrNothingAmericanGreeks, testCashAtHitOrNothingAmericanLowVolatility, testMCCashAtHit |
+| `digitaloption` | ported | TestSuite/DigitalOptionTests.cs | 10 of 10 cases |
 | `distributions` | partial | TestSuite/DistributionsTests.cs | 13 of 21 cases; not yet: testBivariate, testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation |
 | `dividendoption` | partial | TestSuite/DividendOptionTests.cs | 13 of 18 cases; not yet: testEuropeanEndLimit, testCashDividendEuropeanEngine, testCashDividendEuropeanEngineWithManyDividends, testCashDividendEuropeanEngineWithSingleDividends, testZeroStrikeCallWithCashDividends |
 | `doublebarrieroption` | not started |  | 3 cases |
@@ -2121,7 +2121,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `equitycashflow` | ported | TestSuite/EquityCashFlowTests.cs | 8 of 8 cases |
 | `equityindex` | ported | TestSuite/EquityIndexTests.cs | 11 of 12 cases; not ported: testFixingObservability (observer notifications, which an immutable index has no use for, R1) |
 | `equitytotalreturnswap` | not started |  | 5 cases |
-| `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 22 of 27 cases; not yet: testIntegralEngines, testMcEngines, testQmcEngines, testFFTEngines, testFdEnginesWithNonStrikedPayoff |
+| `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 24 of 27 cases; not yet: testIntegralEngines, testFFTEngines, testFdEnginesWithNonStrikedPayoff |
 | `everestoption` | not started |  | 1 cases |
 | `exchangerate` | ported | TestSuite/ExchangeRateTests.cs | 5 of 5 cases |
 | `extendedblackvariancesurface` | not started |  | 1 cases |
@@ -2176,8 +2176,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `marketmodel_smmcapletcalibration` | not started |  | 1 cases |
 | `marketmodel_smmcaplethomocalibration` | not started |  | 3 cases |
 | `markovfunctional` | ported | TestSuite/MarkovFunctionalTests.cs | 7 of 7 cases |
-| `matrices` | partial | TestSuite/MatricesTests.cs | 13 of 20 cases; not yet: testSVD, testQRDecomposition, testQRSolve, testOrthogonalProjection, testMoorePenroseInverse, testHouseholderTransformation, testHouseholderReflection; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
-| `mclongstaffschwartzengine` | not started |  | 2 cases |
+| `matrices` | partial | TestSuite/MatricesTests.cs | 14 of 20 cases; not yet: testQRDecomposition, testQRSolve, testOrthogonalProjection, testMoorePenroseInverse, testHouseholderTransformation, testHouseholderReflection; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
+| `mclongstaffschwartzengine` | ported | TestSuite/McLongstaffSchwartzEngineTests.cs | 2 of 2 cases |
 | `mersennetwister` | ported | TestSuite/MersenneTwisterTests.cs | 1 of 1 cases |
 | `money` | ported | TestSuite/MoneyTests.cs | 4 of 4 cases |
 | `mtmcrosscurrencybasisswap` | ported | TestSuite/MtMCrossCurrencyBasisSwapTests.cs | 14 of 15 cases; not ported: testFxResetCouponUpdates (observer notifications and deepUpdate, which immutable cash flows have no use for, R1) |

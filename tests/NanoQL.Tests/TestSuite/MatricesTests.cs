@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/matrices.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testHouseholderTransformation, testHouseholderReflection (S-exo's Householder transformation); testSVD (S-van); testOrthogonalProjection (S-mm); testQRDecomposition, testQRSolve (S-core); testMoorePenroseInverse (S-xrt)
+// Partial: testHouseholderTransformation, testHouseholderReflection (S-exo's Householder transformation); testOrthogonalProjection (S-mm); testQRDecomposition, testQRSolve (S-core); testMoorePenroseInverse (S-xrt)
 // Moved: testSparseMatrixMemory line 755 (Divergences/SparseMatrixProductTests.cs)
 
 using NanoQL.Numerics;
@@ -27,6 +27,7 @@ public class MatricesTests
     // QuantLib's setup(), for the matrices the ported cases use; xUnit builds the class anew for each case, where
     // QuantLib's cases call setup() first. QuantLib's M1 = M2 = I = Matrix(N, N) assigns three copies.
     private readonly Matrix M1 = new(N, N), M2 = new(N, N), I = new(N, N);
+    private readonly Matrix M3 = new(3, 4), M4 = new(4, 3);
     private readonly Matrix M5 = new(4, 4, 0.0), M6 = new(4, 4, 0.0);
 
     // BOOST_CHECK_EQUAL and QL_CHECK_CLOSE record a failure and go on; the case fails at its end.
@@ -45,6 +46,15 @@ public class MatricesTests
         I[0, 0] = 1.0;  I[0, 1] = 0.0;  I[0, 2] = 0.0;
         I[1, 0] = 0.0;  I[1, 1] = 1.0;  I[1, 2] = 0.0;
         I[2, 0] = 0.0;  I[2, 1] = 0.0;  I[2, 2] = 1.0;
+
+        M3[0, 0] = 1; M3[0, 1] = 2; M3[0, 2] = 3; M3[0, 3] = 4;
+        M3[1, 0] = 2; M3[1, 1] = 0; M3[1, 2] = 2; M3[1, 3] = 1;
+        M3[2, 0] = 0; M3[2, 1] = 1; M3[2, 2] = 0; M3[2, 3] = 0;
+
+        M4[0, 0] = 1;  M4[0, 1] = 2;  M4[0, 2] = 400;
+        M4[1, 0] = 2;  M4[1, 1] = 0;  M4[1, 2] = 1;
+        M4[2, 0] = 30; M4[2, 1] = 2;  M4[2, 2] = 0;
+        M4[3, 0] = 2;  M4[3, 1] = 0;  M4[3, 2] = 1.05;
 
         // from Higham - nearest correlation matrix
         M5[0, 0] = 2;   M5[0, 1] = -1;  M5[0, 2] = 0.0; M5[0, 3] = 0.0;
@@ -444,6 +454,60 @@ public class MatricesTests
             Assert.Fail(
                 $"Higham matrix correction failed\noriginal matrix:\n{M5}pseudoSqrt:\n{tempSqrt}should be:\n{ansSqrt}"
                 + $"\nerror:     {error}\ntolerance: {tolerance}");
+        }
+    }
+
+    [Fact]
+    public void TestSVD()
+    {
+        // Testing singular value decomposition...
+
+        Real tol = 1.0e-12;
+        Matrix[] testMatrices = [M1, M2, M3, M4];
+
+        foreach (Matrix A in testMatrices)
+        {
+            // m >= n required (rows >= columns)
+            var svd = new SVD(A);
+
+            // U is m x n
+            Matrix U = svd.U();
+
+            // s is n long
+            Vector s = svd.SingularValues();
+
+            // S is n x n
+            Matrix S = svd.S();
+
+            // V is n x n
+            Matrix V = svd.V();
+
+            for (Size i = 0; i < S.Rows; i++)
+            {
+                if (S[i, i] != s[i])
+                {
+                    Assert.Fail("S not consistent with s");
+                }
+            }
+
+            // tests
+            Matrix U_Utranspose = Transpose(U) * U;
+            if (Norm(U_Utranspose - I) > tol)
+            {
+                Assert.Fail($"U not orthogonal (norm of U^T*U-I = {Norm(U_Utranspose - I)})");
+            }
+
+            Matrix V_Vtranspose = Transpose(V) * V;
+            if (Norm(V_Vtranspose - I) > tol)
+            {
+                Assert.Fail($"V not orthogonal (norm of V^T*V-I = {Norm(V_Vtranspose - I)})");
+            }
+
+            Matrix A_reconstructed = U * S * Transpose(V);
+            if (Norm(A_reconstructed - A) > tol)
+            {
+                Assert.Fail($"Product does not recover A: (norm of U*S*V^T-A = {Norm(A_reconstructed - A)})");
+            }
         }
     }
 
