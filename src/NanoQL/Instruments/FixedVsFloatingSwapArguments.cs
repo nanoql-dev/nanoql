@@ -25,9 +25,10 @@ namespace NanoQL.Instruments;
 /// <c>vanillaswap.cpp:60-80</c>, <c>overnightindexedswap.cpp:188-213</c>, which read the same members of their
 /// floating coupons). A floating coupon whose amount can't be computed, as one whose fixing is missing, has a null
 /// amount, as QuantLib's <c>try</c> leaves <c>Null&lt;Real&gt;()</c>. Only the members those engines read are kept,
-/// with two QuantLib's arguments don't carry: the fixed coupons' accrual periods, which G2's analytic swaption reads
-/// for its coupons (the S-sr plan's SSR6 (xiii)), and the floating coupons' fixing dates, by which a discretized swap
-/// knows a coupon (SSR6 (xvi)).
+/// with three QuantLib's arguments don't carry: the fixed coupons' accrual periods, which G2's analytic swaption reads
+/// for its coupons (the S-sr plan's SSR6 (xiii)); the floating coupons' fixing dates, by which a discretized swap
+/// knows a coupon (SSR6 (xvi)); and the floating coupons' accrual end dates, to which a discretized swap takes the
+/// forward of a coupon paid on another date (the S-cms plan's CMR4).
 /// </remarks>
 internal sealed class FixedVsFloatingSwapArguments
 {
@@ -61,6 +62,9 @@ internal sealed class FixedVsFloatingSwapArguments
 
     /// <summary>Gets the floating coupons' fixing dates.</summary>
     public required ImmutableArray<Date> FloatingFixingDates { get; init; }
+
+    /// <summary>Gets the floating coupons' accrual end dates.</summary>
+    public required ImmutableArray<Date> FloatingEndDates { get; init; }
 
     /// <summary>Gets the floating coupons' accrual periods.</summary>
     public required ImmutableArray<double> FloatingAccrualTimes { get; init; }
@@ -97,6 +101,7 @@ internal sealed class FixedVsFloatingSwapArguments
         var floatingResetDates = new Date[m];
         var floatingPayDates = new Date[m];
         var floatingFixingDates = new Date[m];
+        var floatingEndDates = new Date[m];
         var floatingAccrualTimes = new double[m];
         var floatingSpreads = new double[m];
         var floatingAmounts = new double?[m];
@@ -106,6 +111,7 @@ internal sealed class FixedVsFloatingSwapArguments
             floatingResetDates[i] = coupon.AccrualStartDate;
             floatingPayDates[i] = coupon.Date;
             floatingFixingDates[i] = coupon.FixingDate();
+            floatingEndDates[i] = coupon.AccrualEndDate;
             floatingAccrualTimes[i] = coupon.AccrualPeriod();
             floatingSpreads[i] = coupon.Spread;
             try
@@ -129,6 +135,7 @@ internal sealed class FixedVsFloatingSwapArguments
             FloatingResetDates = [.. floatingResetDates],
             FloatingPayDates = [.. floatingPayDates],
             FloatingFixingDates = [.. floatingFixingDates],
+            FloatingEndDates = [.. floatingEndDates],
             FloatingAccrualTimes = [.. floatingAccrualTimes],
             FloatingSpreads = [.. floatingSpreads],
             FloatingCoupons = [.. floatingAmounts],
@@ -155,4 +162,27 @@ internal sealed class FixedVsFloatingSwapArguments
 
         return swap.Nominal();
     }
+
+    /// <summary>A copy of the arguments with other payment dates.</summary>
+    /// <param name="fixedPayDates">The fixed coupons' payment dates.</param>
+    /// <param name="floatingPayDates">The floating coupons' payment dates.</param>
+    /// <returns>The copy.</returns>
+    internal FixedVsFloatingSwapArguments WithPayDates(
+        ImmutableArray<Date> fixedPayDates, ImmutableArray<Date> floatingPayDates) =>
+        new()
+        {
+            Type = Type,
+            Nominal = Nominal,
+            FixedResetDates = FixedResetDates,
+            FixedPayDates = fixedPayDates,
+            FixedCoupons = FixedCoupons,
+            FixedAccrualTimes = FixedAccrualTimes,
+            FloatingResetDates = FloatingResetDates,
+            FloatingPayDates = floatingPayDates,
+            FloatingFixingDates = FloatingFixingDates,
+            FloatingEndDates = FloatingEndDates,
+            FloatingAccrualTimes = FloatingAccrualTimes,
+            FloatingSpreads = FloatingSpreads,
+            FloatingCoupons = FloatingCoupons,
+        };
 }

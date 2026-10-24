@@ -3,6 +3,8 @@
 
 #include "instruments/payoffspec.hpp"
 
+#include <ql/instruments/forward.hpp>
+
 #include <initializer_list>
 #include <map>
 #include <string>
@@ -26,6 +28,7 @@ namespace harness::payoffs {
                 {"GapPayoff", {"optionType", "strike", "secondStrike"}},
                 {"SuperFundPayoff", {"strike", "secondStrike"}},
                 {"SuperSharePayoff", {"strike", "secondStrike", "cashPayoff"}},
+                {"ForwardTypePayoff", {"position", "strike"}},
             };
             return keys;
         }
@@ -47,7 +50,7 @@ namespace harness::payoffs {
         const json::value* type = o.if_contains("type");
         if (type == nullptr || !type->is_string())
             throw InvalidParams("a payoff spec needs a type: " + json::serialize(v));
-        PayoffSpec s{std::string(type->get_string()), Option::Call, 0.0, 0.0, 0.0};
+        PayoffSpec s{std::string(type->get_string()), Option::Call, 0.0, 0.0, 0.0, Position::Long};
         auto found = payoffKeys().find(s.type);
         if (found == payoffKeys().end())
             throw InvalidParams("unknown payoff " + s.type);
@@ -63,6 +66,8 @@ namespace harness::payoffs {
             std::string name(k);
             if (name == "optionType")
                 s.optionType = enumeration<Option::Type>(*x);
+            else if (name == "position")
+                s.position = enumeration<Position::Type>(*x);
             else if (name == "strike" || name == "moneyness")
                 s.strike = real(*x);
             else if (name == "secondStrike")
@@ -99,6 +104,8 @@ namespace harness::payoffs {
             return ext::make_shared<SuperFundPayoff>(s.strike, s.secondStrike);
         if (s.type == "SuperSharePayoff")
             return ext::make_shared<SuperSharePayoff>(s.strike, s.secondStrike, s.cashPayoff);
+        if (s.type == "ForwardTypePayoff")
+            return ext::make_shared<ForwardTypePayoff>(s.position, s.strike);
         throw InvalidParams("unknown payoff " + s.type);
     }
 

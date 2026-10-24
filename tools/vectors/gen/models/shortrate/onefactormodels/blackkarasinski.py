@@ -12,7 +12,8 @@ a started swap and an expired one among them, priced by TreeSwaptionEngine with 
 models, each engine building its tree at its calculation (QuantLib's steps constructor), so that the tree priced on
 is the last one fitted, where QuantLib's trees of one model share its fitting parameter (the S-sr plan's SSR6 (i):
 tests/NanoQL.Tests/Divergences/BlackKarasinskiTreeFittingTests.cs, where a tree built before another is priced on).
-Then the constructor's refusals of a zero, negative or NaN reversion or volatility ("<value>: invalid value").
+Four of the twelve are their unlagged twins, as that file prices them: their lagged swaps' values nanoql's
+discretized swaption moves (the S-cms plan's CMR4). Then the constructor's refusals of a zero, negative or NaN reversion or volatility ("<value>: invalid value").
 
 The wheel's calls, by QuantLib-SWIG's shortratemodels.i: ql.BlackKarasinski(YieldTermStructureHandle, a, sigma),
 params(), termStructure() and setParams(Array); ql.TreeSwaptionEngine(model, timeSteps). Each case's inputs hold its
@@ -125,11 +126,12 @@ def model_cases():
 
 
 def tree_cases():
-    rows = {name: (spec, settings) for name, spec, settings in tse.swaptions()}
+    # the tree swaption file's kept swaptions, a moved one's unlagged twin under its own name (CMR4)
+    rows = {name.removesuffix(" / unlagged"): (name, spec, settings) for name, spec, settings in tse.tree_rows()}
     out = []
     for k in TREE_MODELS:
-        for name in TREE_SWAPTIONS:
-            spec, settings = rows[name]
+        for base in TREE_SWAPTIONS:
+            name, spec, settings = rows[base]
             with v.case_settings(TODAY, **settings) as st:
                 scale = fvf.scale_of(spec["swap"])
                 swaption = tse.make_swaption(spec)

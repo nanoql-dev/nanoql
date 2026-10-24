@@ -13,7 +13,8 @@ namespace NanoQL.Tests.Vectors;
 /// default format, over strikes in each of its forms; <see cref="CashOrNothingPayoff.CashPayoff"/> and
 /// <see cref="GapPayoff.SecondStrike"/>; and every member of <see cref="NullPayoff"/>, <see cref="SuperFundPayoff"/>
 /// and <see cref="SuperSharePayoff"/>, which the wheel doesn't build as QuantLib declares them, their constructors'
-/// refusals among them. A payoff its constructor refuses gives a throw for each of its outputs.
+/// refusals among them; and <see cref="ForwardTypePayoff"/>'s, which the wheel doesn't wrap. A payoff its
+/// constructor refuses gives a throw for each of its outputs.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class PayoffsCxxVectorTests

@@ -37,7 +37,16 @@ helpers', and their harness counterparts, which import this file):
   "exCouponPeriod", "fixingConvention"}; {"type": "ZeroCouponBond", "settlementDays", "calendar", "faceAmount",
   "maturityDate", "paymentConvention", "redemption", "issueDate"}; or {"type": "AmortizingFixedRateBond",
   "settlementDays", "notionals", "schedule", "coupons", "accrualDayCounter", "paymentConvention", "issueDate",
-  "exCouponPeriod", "redemptions", "paymentLag"};
+  "exCouponPeriod", "redemptions", "paymentLag"}; {"type": "AmortizingFloatingRateBond", "settlementDays",
+  "notionals", "schedule", "index", "accrualDayCounter", "paymentConvention", "fixingDays", "gearings", "spreads",
+  "caps", "floors", "inArrears", "issueDate", "exCouponPeriod", "redemptions", "paymentLag"}; {"type": "CmsRateBond",
+  "settlementDays", "faceAmount", "schedule", "index", "paymentDayCounter", "paymentConvention", "fixingDays",
+  "gearings", "spreads", "caps", "floors", "inArrears", "redemption", "issueDate", "pricer"}; or {"type":
+  "AmortizingCmsRateBond", "settlementDays", "notionals", "schedule", "index", "paymentDayCounter",
+  "paymentConvention", "fixingDays", "gearings", "spreads", "caps", "floors", "inArrears", "issueDate", "pricer"}, a
+  CMS bond's index a spec of tools/vectors/gen/indexes/swapindex.py and its pricer the CMS coupons' (cmscoupon.py's:
+  Hagan's analytic pricer on the standard model with no mean reversion, on a constant volatility {"referenceDate",
+  "volatility"} on TARGET, Modified Following, Actual/365 (Fixed)), set on its coupons once built;
 - a leg is tools/vectors/gen/cashflows/cashflows.py's {"fixedRateLeg", "extraFlows"}, with an optional "coupons" of
   fixed-rate coupons given one by one ({"paymentDate", "nominal", "rate", "dayCounter", "accrualStartDate",
   "accrualEndDate", "refPeriodStart", "refPeriodEnd", "exCouponDate"}, a simple annual rate) between the two;
@@ -76,6 +85,7 @@ def _load(name, rel):
 
 cf = _load("wheel_cashflows", "cashflows/cashflows.py")
 irx = _load("wheel_interestrateindex", "indexes/interestrateindex.py")
+swi = _load("wheel_swapindex", "indexes/swapindex.py")
 
 D = ql.Date
 TARGET, NULL_CALENDAR, US_SETTLEMENT, UK_SETTLEMENT = cf.TARGET, cf.NULL_CALENDAR, cf.US_SETTLEMENT, cf.UK_SETTLEMENT
@@ -180,6 +190,37 @@ def amortizing_bond_spec(days, notionals, schedule, coupons, dc, convention=ql.F
             "redemptions": list(redemptions), "paymentLag": payment_lag}
 
 
+def amortizing_floating_bond_spec(days, notionals, schedule, index, dc, convention=ql.Following, fixing_days=None,
+                                  gearings=(1.0,), spreads=(0.0,), caps=(), floors=(), in_arrears=False, issue=None,
+                                  ex_coupon=None, redemptions=(100.0,), payment_lag=0):
+    return {"type": "AmortizingFloatingRateBond", "settlementDays": days, "notionals": list(notionals),
+            "schedule": schedule, "index": index, "accrualDayCounter": dc, "paymentConvention": int(convention),
+            "fixingDays": fixing_days, "gearings": list(gearings), "spreads": list(spreads), "caps": list(caps),
+            "floors": list(floors), "inArrears": in_arrears, "issueDate": v.enc(issue), "exCouponPeriod": ex_coupon,
+            "redemptions": list(redemptions), "paymentLag": payment_lag}
+
+
+def cms_pricer_spec(reference, volatility=0.20):
+    return {"referenceDate": v.enc(reference), "volatility": volatility}
+
+
+def cms_bond_spec(days, face, schedule, index, dc, pricer, convention=ql.Following, fixing_days=None,
+                  gearings=(1.0,), spreads=(0.0,), caps=(), floors=(), in_arrears=False, redemption=100.0,
+                  issue=None):
+    return {"type": "CmsRateBond", "settlementDays": days, "faceAmount": face, "schedule": schedule, "index": index,
+            "paymentDayCounter": dc, "paymentConvention": int(convention), "fixingDays": fixing_days,
+            "gearings": list(gearings), "spreads": list(spreads), "caps": list(caps), "floors": list(floors),
+            "inArrears": in_arrears, "redemption": redemption, "issueDate": v.enc(issue), "pricer": pricer}
+
+
+def amortizing_cms_bond_spec(days, notionals, schedule, index, dc, pricer, convention=ql.Following, fixing_days=None,
+                             gearings=(1.0,), spreads=(0.0,), caps=(), floors=(), in_arrears=False, issue=None):
+    return {"type": "AmortizingCmsRateBond", "settlementDays": days, "notionals": list(notionals),
+            "schedule": schedule, "index": index, "paymentDayCounter": dc, "paymentConvention": int(convention),
+            "fixingDays": fixing_days, "gearings": list(gearings), "spreads": list(spreads), "caps": list(caps),
+            "floors": list(floors), "inArrears": in_arrears, "issueDate": v.enc(issue), "pricer": pricer}
+
+
 # ---- the wheel's objects ----
 
 def make_schedule(spec):
@@ -264,7 +305,39 @@ def make_bond(spec):
         kw.update(ex_coupon_kw(spec["exCouponPeriod"]))
         return ql.AmortizingFixedRateBond(spec["settlementDays"], spec["notionals"], make_schedule(spec["schedule"]),
                                           spec["coupons"], day_counter(spec["accrualDayCounter"]), **kw)
+    if t == "AmortizingFloatingRateBond":
+        kw = {"paymentConvention": spec["paymentConvention"], "gearings": spec["gearings"],
+              "spreads": spec["spreads"], "caps": spec["caps"], "floors": spec["floors"],
+              "inArrears": spec["inArrears"], "issueDate": date_or_null(spec["issueDate"]),
+              "redemptions": spec["redemptions"], "paymentLag": spec["paymentLag"]}
+        if spec["fixingDays"] is not None:
+            kw["fixingDays"] = spec["fixingDays"]
+        kw.update(ex_coupon_kw(spec["exCouponPeriod"]))
+        return ql.AmortizingFloatingRateBond(spec["settlementDays"], spec["notionals"], make_schedule(spec["schedule"]),
+                                             irx.make_index(spec["index"]), day_counter(spec["accrualDayCounter"]),
+                                             **kw)
+    if t in ("CmsRateBond", "AmortizingCmsRateBond"):
+        # the wheel's CmsRateBond takes every argument by position, its fixing days Null<Natural>() for the index's
+        fixing_days = 2147483647 if spec["fixingDays"] is None else spec["fixingDays"]
+        args = (make_schedule(spec["schedule"]), swi.make_swap_index(spec["index"]),
+                day_counter(spec["paymentDayCounter"]), spec["paymentConvention"], fixing_days, spec["gearings"],
+                spec["spreads"], spec["caps"], spec["floors"], spec["inArrears"])
+        if t == "CmsRateBond":
+            bond = ql.CmsRateBond(spec["settlementDays"], spec["faceAmount"], *args, spec["redemption"],
+                                  date_or_null(spec["issueDate"]))
+        else:
+            bond = ql.AmortizingCmsRateBond(spec["settlementDays"], spec["notionals"], *args,
+                                            date_or_null(spec["issueDate"]))
+        ql.setCouponPricer(bond.cashflows(), make_cms_pricer(spec["pricer"]))
+        return bond
     raise ValueError(f"unknown bond {t}")
+
+
+def make_cms_pricer(spec):
+    vol = ql.ConstantSwaptionVolatility(ql.Date(spec["referenceDate"]), ql.TARGET(), ql.ModifiedFollowing,
+                                        spec["volatility"], ql.Actual365Fixed())
+    return ql.AnalyticHaganPricer(ql.SwaptionVolatilityStructureHandle(vol), ql.GFunctionFactory.Standard,
+                                  ql.QuoteHandle(ql.SimpleQuote(0.0)))
 
 
 def make_rate(spec):

@@ -15,8 +15,9 @@ parameters before and, after a call that succeeds, the parameters and the affine
 too many parameters, whose model the case doesn't read again. Then the tree: eighteen of
 tools/vectors/gen/pricingengines/swaption/treeswaptionengine.py's swaptions, European, Bermudan and American, a
 started swap and an expired one among them, priced by TreeSwaptionEngine on a G2 (a = 0.07, sigma = 0.011, b = 0.3,
-eta = 0.008, rho = -0.6) on that file's discount curve with 10 and 25 time steps; QuantLib's G2 tree is its only
-public route to TwoFactorModel's ShortRateTree and TreeLattice2D. Then the constructor's refusals of a reversion or
+eta = 0.008, rho = -0.6) on that file's discount curve with 10 and 25 time steps, seven of them their unlagged
+twins, as that file prices them, their lagged swaps' values nanoql's discretized swaption moves (the S-cms plan's
+CMR4); QuantLib's G2 tree is its only public route to TwoFactorModel's ShortRateTree and TreeLattice2D. Then the constructor's refusals of a reversion or
 volatility that is zero, negative or NaN, or a correlation outside [-1, 1] ("<value>: invalid value").
 
 The models at a = 1e-9, b = 1e-9 and a = 1e-4 are generated and left out: QuantLib 1.44's sigmaP and its V, A and B
@@ -191,8 +192,9 @@ def model_cases():
 
 def tree_cases():
     out = []
-    for name, spec, settings in tse.swaptions():
-        if name not in TREE_SWAPTIONS:
+    # the tree swaption file's kept swaptions, a moved one's unlagged twin under its own name (CMR4)
+    for name, spec, settings in tse.tree_rows():
+        if name.removesuffix(" / unlagged") not in TREE_SWAPTIONS:
             continue
         with v.case_settings(tse.TODAY, **settings) as st:
             scale = fvf.scale_of(spec["swap"])

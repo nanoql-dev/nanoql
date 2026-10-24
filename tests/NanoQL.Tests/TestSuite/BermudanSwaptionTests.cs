@@ -24,7 +24,12 @@ public class BermudanSwaptionTests
     // 76), is the curve itself, built first, with the index built on it, and its today and settlement dates (lines
     // 80-81, which read today's date) are the case's (lines 121 and 125); the evaluation date it sets (line 123) is the
     // context the swaps' Ibor legs and the engines read; the engines are the static DiscountingSwapEngine.Calculate,
-    // TreeSwaptionEngine.Calculate and FdHullWhiteSwaptionEngine.Calculate.
+    // TreeSwaptionEngine.Calculate and FdHullWhiteSwaptionEngine.Calculate. Restated (the S-cms plan's CMR4): the
+    // tree's cached values are QuantLib 1.25's (fd67ce0cc's parent), which nanoql's discretized swaption, paying on the
+    // swap's own dates and snapping no date after an exercise, gives; QuantLib 1.44's, its snapped swap's, are
+    // (42.2402, 12.9032, 2.49758) and (42.2460, 12.9069, 2.4985) on the coupons' starts, (42.1791, 12.7699, 2.4368) and
+    // (42.1849, 12.7736, 2.4379) ten days before (tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs). The
+    // finite-difference values are QuantLib's.
     [Fact]
     public void TestCachedValues()
     {
@@ -58,12 +63,12 @@ public class BermudanSwaptionTests
         Real itmValueFdm, atmValueFdm, otmValueFdm;
         if (!usingAtParCoupons)
         {
-            (itmValue, atmValue, otmValue) = (42.2402, 12.9032, 2.49758);
+            (itmValue, atmValue, otmValue) = (42.2413, 12.8789, 2.4759);
             (itmValueFdm, atmValueFdm, otmValueFdm) = (42.2111, 12.8879, 2.44443);
         }
         else
         {
-            (itmValue, atmValue, otmValue) = (42.2460, 12.9069, 2.4985);
+            (itmValue, atmValue, otmValue) = (42.2470, 12.8826, 2.4769);
             (itmValueFdm, atmValueFdm, otmValueFdm) = (42.2091, 12.8864, 2.4437);
         }
 
@@ -110,11 +115,11 @@ public class BermudanSwaptionTests
 
         if (!usingAtParCoupons)
         {
-            (itmValue, atmValue, otmValue) = (42.1791, 12.7699, 2.4368);
+            (itmValue, atmValue, otmValue) = (42.1917, 12.7788, 2.4388);
         }
         else
         {
-            (itmValue, atmValue, otmValue) = (42.1849, 12.7736, 2.4379);
+            (itmValue, atmValue, otmValue) = (42.1974, 12.7825, 2.4399);
         }
 
         swaption = new Swaption(itmSwap, exercise);
@@ -135,7 +140,9 @@ public class BermudanSwaptionTests
     }
 
     // Adapted: as testCachedValues; the engines are the static FdG2SwaptionEngine.Calculate and
-    // TreeSwaptionEngine.Calculate.
+    // TreeSwaptionEngine.Calculate. Restated as testCachedValues: the tree's cached values are QuantLib 1.25's;
+    // QuantLib 1.44's are (103.245, 54.6685, 20.1656, 5.43999, 1.12702) and (103.248, 54.6726, 20.1685, 5.44118,
+    // 1.12737).
     [Fact]
     public void TestCachedG2Values()
     {
@@ -169,12 +176,12 @@ public class BermudanSwaptionTests
         if (!usingAtParCoupons)
         {
             expectedFdm = [103.231, 54.6519, 20.0475, 5.26941, 1.07097];
-            expectedTree = [103.245, 54.6685, 20.1656, 5.43999, 1.12702];
+            expectedTree = [103.253, 54.6685, 20.1399, 5.40517, 1.10642];
         }
         else
         {
             expectedFdm = [103.227, 54.6502, 20.0469, 5.26924, 1.07093];
-            expectedTree = [103.248, 54.6726, 20.1685, 5.44118, 1.12737];
+            expectedTree = [103.256, 54.6726, 20.1429, 5.4064, 1.10677];
         }
 
         Real tol = 0.005;

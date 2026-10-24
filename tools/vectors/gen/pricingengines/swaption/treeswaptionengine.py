@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
-"""Vectors for QuantLib's TreeSwaptionEngine (ql/pricingengines/swaption/treeswaptionengine.hpp): 64 swaptions on
-the evaluation date 15 January 2025, each priced by six tree engines, and 8 refusals.
+"""Vectors for QuantLib's TreeSwaptionEngine (ql/pricingengines/swaption/treeswaptionengine.hpp): 62 swaptions on
+the evaluation date 15 January 2025, each priced by six tree engines (35 of the 64 below and 27 unlagged twins), and 8
+refusals.
 
 The swaptions are those of instruments/swaption.py's kind, on Euribor 6M swaps, with European, Bermudan and American
 exercises: Bermudan exercises at each fixed coupon's start, the same moved 10 days earlier (QuantLib's
@@ -24,6 +25,14 @@ steps between them); a time the snapping removes stays on the grid, which change
 build. The refusals: a cash swaption settled at the par yield curve, time steps of 0, a Vasicek with no curve, a grid
 that ends before the swap's last payment, and the started swap without its fixing ("current floating coupon not
 given"). An expired swaption is worth 0. Amounts are compared at the nominal.
+
+A swaption whose discretized swaption nanoql's fix moves (the S-cms plan's CMR4; snapping_moves) is left out: QuantLib
+snaps a swap date in the week after an exercise date back to it, so a swap starting on its usual two-day lag is valued
+from the exercise date, where nanoql values it from its own start; those swaptions are checked against Jamshidian's
+and the finite-difference engines (tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs). In each one's place
+is its unlagged twin, the same swaption on a swap starting on its exercise date, which nothing moves (" / unlagged");
+the Bermudans exercised 3 and 7 days before the coupons, whose twin, exercised on them, is already priced, get none:
+29 of the 64 swaptions are left out.
 
 Each case's inputs hold the swaption (instruments/swaption.py's spec), the discount curve and the grid. The wheel's
 TreeSwaptionEngine is the proxy of the C++ constructors, on a model and time steps or a TimeGrid. Read back by
@@ -102,18 +111,61 @@ def grid_times(swaption):
     return [t for t in times if t >= 0.0]
 
 
+def snapped(dates, exercise_dates, both_ways):
+    """A schedule's dates, the last apart, snapped to the exercise dates, each in turn against the dates earlier ones
+    snapped: within a week either way, QuantLib's (discretizedswaption.cpp:93-111), or, both_ways false, within the week
+    before only, nanoql's (the S-cms plan's CMR4)."""
+    out = list(dates)
+    for e in exercise_dates:
+        for j in range(len(out) - 1):
+            d = out[j]
+            if e != d and ((e - 7 <= d <= e) or (both_ways and e <= d <= e + 7)):
+                out[j] = e
+    return out
+
+
+def snapping_moves(swaption):
+    """Whether nanoql's discretized swaption differs from QuantLib's on a swaption (the S-cms plan's CMR4): QuantLib
+    snaps a schedule date in the week after an exercise date, where nanoql doesn't, or its snapped swap pays a coupon
+    on its schedule's date (discretizedswaption.cpp:113-119) where nanoql pays it on the swap's own payment date, a
+    snapped one on the swap's payment rule. Its expiry isn't read: an expired swaption's value is 0 either way."""
+    swap = swaption.underlying()
+    exercise_dates = list(swaption.exercise().dates())
+    lag, convention, payment_calendar = swap.paymentLag(), swap.paymentConvention(), swap.paymentCalendar()
+    for schedule, leg in ((swap.fixedSchedule(), swap.fixedLeg()), (swap.floatingSchedule(), swap.floatingLeg())):
+        dates = list(schedule.dates())
+        quantlib, nanoql = snapped(dates, exercise_dates, True), snapped(dates, exercise_dates, False)
+        if quantlib != nanoql:
+            return True
+        calendar = schedule.calendar() if payment_calendar.empty() else payment_calendar
+        for j, cf in enumerate(leg):
+            pay = (cf.date() if nanoql[j + 1] == dates[j + 1]
+                   else calendar.advance(nanoql[j + 1], lag, D, convention))
+            if pay != quantlib[j + 1]:
+                return True
+    return False
+
+
+def moved(spec, settings):
+    """Whether nanoql's fix moves a swaption's tree values: snapping_moves, unless it has expired."""
+    with v.case_settings(TODAY, **settings):
+        swaption = make_swaption(spec)
+        return not swaption.isExpired() and snapping_moves(swaption)
+
+
 def fixed_starts(spec):
     """The fixed coupons' start dates of a swaption's swap."""
     swap = fvf.make_swap(spec["swap"])
     return [ql.as_coupon(cf).accrualStartDate() for cf in swap.fixedLeg()]
 
 
-def swaptions():
-    """(name, swaption spec, settings) for the 64 swaptions."""
+def swaptions(lag=2):
+    """(name, swaption spec, settings) for the 64 swaptions, their swaps starting the lag's business days after the
+    first exercise."""
     out = []
     k = 0
     for exercise_tenor, length in (((1, Y), (5, Y)), ((2, Y), (3, Y)), ((6, M), (2, Y)), ((5, Y), (5, Y))):
-        exercise, start, maturity = swp.dates_of(ql.Period(*exercise_tenor), ql.Period(*length))
+        exercise, start, maturity = swp.dates_of(ql.Period(*exercise_tenor), ql.Period(*length), lag)
         atm = 0.031
         for swap_type in (swp.PAYER, swp.RECEIVER):
             for strike in (0.8 * atm, atm, 1.2 * atm):
@@ -125,7 +177,7 @@ def swaptions():
                 out.append((f"Bermudan / {tag}", swp.swaption_spec(swap, swp.bermudan(starts)), {}))
                 k += 1
     # 48 so far: the exercise dates moved, which snap the swap's dates when within a week.
-    exercise, start, maturity = swp.dates_of(ql.Period(1, Y), ql.Period(5, Y))
+    exercise, start, maturity = swp.dates_of(ql.Period(1, Y), ql.Period(5, Y), lag)
     swap = swp.vanilla(swp.PAYER, 1000.0, 0.05, start, maturity)
     starts = fixed_starts(swp.swaption_spec(swap, swp.european(exercise)))
     for shift in (-10, -3, 3, -7, 7):
@@ -142,12 +194,12 @@ def swaptions():
     for swap_type in (swp.PAYER, swp.RECEIVER):
         ois = swp.overnight(swap_type, 1e6, 0.03, start, start + ql.Period(3, Y))
         out.append((f"overnight-indexed European / {swap_type}", swp.swaption_spec(ois, swp.european(exercise)), {}))
-    e10, s10, m10 = swp.dates_of(ql.Period(10, Y), ql.Period(10, Y))
+    e10, s10, m10 = swp.dates_of(ql.Period(10, Y), ql.Period(10, Y), lag)
     out.append(("10Y on 10Y Bermudan", swp.swaption_spec(
         swp.vanilla(swp.PAYER, 1e6, 0.03, s10, m10),
         swp.bermudan(fixed_starts(swp.swaption_spec(swp.vanilla(swp.PAYER, 1e6, 0.03, s10, m10),
                                                     swp.european(e10))))), {}))
-    e1m, s1m, m1m = swp.dates_of(ql.Period(1, M), ql.Period(1, Y))
+    e1m, s1m, m1m = swp.dates_of(ql.Period(1, M), ql.Period(1, Y), lag)
     out.append(("1M on 1Y", swp.swaption_spec(swp.vanilla(swp.RECEIVER, 1e6, 0.031, s1m, m1m), swp.european(e1m)),
                 {}))
     # 60 so far: the started swap, and the expired swaption.
@@ -244,8 +296,21 @@ def refusal_cases():
     return out
 
 
+def tree_rows():
+    """(name, swaption spec, settings) for the swaptions whose tree values the file keeps: those nanoql's fix doesn't
+    move, and in each moved one's place its unlagged twin where nothing moves it."""
+    twins = {name: (spec, settings) for name, spec, settings in swaptions(0)}
+    out = []
+    for name, spec, settings in swaptions():
+        if not moved(spec, settings):
+            out.append((name, spec, settings))
+        elif not moved(*twins[name]):
+            out.append((name + " / unlagged", *twins[name]))
+    return out
+
+
 def cases():
-    out = [swaption_case(*row) for row in swaptions()]
+    out = [swaption_case(*row) for row in tree_rows()]
     out += refusal_cases()
     check_rows(out)
     return out

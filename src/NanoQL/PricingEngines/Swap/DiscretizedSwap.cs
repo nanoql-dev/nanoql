@@ -34,12 +34,22 @@ namespace NanoQL.PricingEngines;
 /// takes its floating leg at par, QuantLib's convention.
 /// </para>
 /// <para>
-/// <b>Its discount bond.</b> QuantLib's swap builds a discount bond for each coupon it adds, initializes it at the
+/// <b>A floating coupon paid after its accrual end</b> (the S-cms plan's CMR4): QuantLib values a floating coupon as a
+/// par floater to its payment date, the nominal times one less the bond from its payment time
+/// (<c>discretizedswap.cpp:199-218</c>), which overprices one paid on a lag or an adjusted date after its accrual end.
+/// Here such a coupon takes its forward over its own accrual period and is paid on its payment date: the nominal times
+/// the bond from its payment time over the bond from its accrual end, less the bond from its payment time, plus its
+/// spread; its accrual end is a mandatory time only there. With QuantLib's check, the finite-difference engine on a
+/// lagged swap (<c>Divergences/TreeSwaptionSnappingTests.cs</c>); a coupon paid on its accrual end keeps QuantLib's
+/// value.
+/// </para>
+/// <para>
+/// <b>Its discount bonds.</b> QuantLib's swap builds a discount bond for each coupon it adds, initializes it at the
 /// payment time and rolls it back to the swap's time. This swap keeps one bond, re-initialized for each coupon (a
-/// discount bond has no adjustments, so the adjustment times its memo keeps skip nothing), whose buffers its
-/// <see cref="Reset"/> reserves at the widest step of the swap's own rollback, from its initial step down to the
-/// grid's start: every coupon's bond starts at or before the swap's initial time and rolls back to the swap's time, so
-/// no coupon's bond allocates.
+/// discount bond has no adjustments, so the adjustment times its memo keeps skip nothing), and a second for the
+/// accrual ends, whose buffers its <see cref="Reset"/> reserves at the widest step of the swap's own rollback, from its
+/// initial step down to the grid's start: every coupon's bond starts at or before the swap's initial time and rolls
+/// back to the swap's time, so no coupon's bond allocates.
 /// </para>
 /// </remarks>
 public sealed class DiscretizedSwap : DiscretizedAsset
@@ -53,7 +63,9 @@ public sealed class DiscretizedSwap : DiscretizedAsset
     private readonly double[] floatingPayTimes;
     private readonly CouponAdjustment[] floatingCouponAdjustments;
     private readonly bool[] floatingResetTimeIsInPast;
+    private readonly double[] floatingEndTimes;
     private readonly DiscretizedDiscountBond bond = new();
+    private readonly DiscretizedDiscountBond endBond = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DiscretizedSwap"/> class, every coupon added in the pre-adjustment,
@@ -142,6 +154,7 @@ public sealed class DiscretizedSwap : DiscretizedAsset
         floatingResetTimes = new double[nrOfFloatingCoupons];
         floatingPayTimes = new double[nrOfFloatingCoupons];
         floatingResetTimeIsInPast = new bool[nrOfFloatingCoupons];
+        floatingEndTimes = new double[nrOfFloatingCoupons];
         for (int i = 0; i < nrOfFloatingCoupons; ++i)
         {
             double resetTime = dayCounter.YearFraction(referenceDate, arguments.FloatingResetDates[i]);
@@ -153,6 +166,7 @@ public sealed class DiscretizedSwap : DiscretizedAsset
             floatingResetTimes[i] = resetTime;
             floatingPayTimes[i] = payTime;
             floatingResetTimeIsInPast[i] = resetIsInPast;
+            floatingEndTimes[i] = dayCounter.YearFraction(referenceDate, arguments.FloatingEndDates[i]);
             if (resetIsInPast)
             {
                 this.floatingCouponAdjustments[i] = CouponAdjustment.Post;
@@ -161,7 +175,7 @@ public sealed class DiscretizedSwap : DiscretizedAsset
     }
 
     /// <summary>
-    /// Sets the values to 0 and adjusts them; on a tree lattice, it first reserves its discount bond's buffers at the
+    /// Sets the values to 0 and adjusts them; on a tree lattice, it first reserves its discount bonds' buffers at the
     /// widest step from the swap's time down to the grid's start.
     /// </summary>
     /// <param name="size">The number of values.</param>
@@ -182,13 +196,17 @@ public sealed class DiscretizedSwap : DiscretizedAsset
             }
 
             bond.ReserveCapacity(widest);
+            endBond.ReserveCapacity(widest);
         }
 
         ResetValues(size, 0.0);
         AdjustValues();
     }
 
-    /// <summary>The swap's mandatory times: the non-negative fixed reset, fixed payment, floating reset and floating payment times, in that order.</summary>
+    /// <summary>
+    /// The swap's mandatory times: the non-negative fixed reset, fixed payment, floating reset and floating payment
+    /// times, in that order, then each floating coupon's accrual end time where it isn't its payment time (CMR4).
+    /// </summary>
     /// <returns>The times, not guaranteed to be sorted.</returns>
     public override ImmutableArray<double> MandatoryTimes()
     {
@@ -220,6 +238,15 @@ public sealed class DiscretizedSwap : DiscretizedAsset
         foreach (double t in floatingPayTimes)
         {
             if (t >= 0.0)
+            {
+                times.Add(t);
+            }
+        }
+
+        for (int i = 0; i < floatingEndTimes.Length; i++)
+        {
+            double t = floatingEndTimes[i];
+            if (t >= 0.0 && t != floatingPayTimes[i])
             {
                 times.Add(t);
             }
@@ -361,11 +388,23 @@ public sealed class DiscretizedSwap : DiscretizedAsset
         double T = arguments.FloatingAccrualTimes[i];
         double spread = arguments.FloatingSpreads[i];
         double accruedSpread = nominal * T * spread;
+
+        // CMR4: a coupon paid after its accrual end takes its forward to its accrual end
+        bool toEnd = floatingEndTimes[i] != floatingPayTimes[i];
+        if (toEnd)
+        {
+            endBond.Initialize(Method!, floatingEndTimes[i]);
+            endBond.Rollback(Time);
+        }
+
         Span<double> values = Values;
         ReadOnlySpan<double> bondValues = bond.Values;
+        ReadOnlySpan<double> endValues = endBond.Values;
         for (int j = 0; j < values.Length; j++)
         {
-            double coupon = (nominal * (1.0 - bondValues[j])) + (accruedSpread * bondValues[j]);
+            double coupon = toEnd
+                ? (nominal * ((bondValues[j] / endValues[j]) - bondValues[j])) + (accruedSpread * bondValues[j])
+                : (nominal * (1.0 - bondValues[j])) + (accruedSpread * bondValues[j]);
             if (arguments.Type == SwapType.Payer)
             {
                 values[j] += coupon;

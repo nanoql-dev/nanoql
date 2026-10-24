@@ -1,7 +1,8 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's SwaptionHelper (ql/models/shortrate/calibrationhelpers/swaptionhelper.hpp), with its base
-BlackCalibrationHelper (ql/models/calibrationhelper.hpp): 57 helpers and 8 refusals, on two markets.
+BlackCalibrationHelper (ql/models/calibrationhelper.hpp): 57 helpers, 48 unlagged twins and 8 refusals, on two
+markets.
 
 The first market is QuantLib's test-suite's (test-suite/shortratemodels.cpp): the evaluation date 15 February 2002, a
 flat 4.875825% curve from the settlement date 19 February 2002 on Actual/365 (Fixed), Euribor 6M on it, and its
@@ -29,6 +30,15 @@ no engine, 0, since QuantLib's swaption reads its expiry before its engine. The 
 QuantLib refuses only in calibrationError), an unknown volatility type (in the market value), no engine (in the model
 value and the error), an implied volatility whose guess, the quote, is outside the bracket or whose target the bracket
 doesn't hold, and no term structure. Amounts are compared at the nominal.
+
+A helper's times are generated and left out where nanoql's fix moves its discretized swaption (the S-cms plan's
+CMR4; the tree swaption file's snapping_moves): QuantLib snaps a swap date in the week after the exercise back to it,
+as the index's fixing days put the swap's start, so the times hold the exercise date where nanoql's hold the start
+(tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs). Each such helper whose unlagged twin, the same helper on
+its index with no fixing days, nothing moves has that twin added (" / unlagged"), every output kept: 54 of the 57
+helpers' times are left out. The overnight-indexed ones, whose daily floating dates in the week after the exercise
+snap without a lag, and the exercise-date forms exercised on a Sunday (18 January 2026), whose swap starts the next
+business day without fixing days, get none.
 
 The at-par switch is set once for the run (at par, the wheel's default) and recorded in every case's settings, since
 the wheel's helper reads it whenever it recalculates (the plan's caveat 12); each case builds its own objects.
@@ -65,6 +75,7 @@ def _load(name, rel):
 
 
 fvf = _load("wheel_fixedvsfloatingswap", "instruments/fixedvsfloatingswap.py")
+tse = _load("wheel_treeswaptionengine", "pricingengines/swaption/treeswaptionengine.py")
 irx, ibc = fvf.irx, fvf.ibc
 
 D, W, M, Y = ql.Days, ql.Weeks, ql.Months, ql.Years
@@ -248,11 +259,36 @@ def priced_outputs(spec, helper):
     return out
 
 
+def today_of(spec):
+    return TODAY_2002 if spec["termStructure"] is CURVE_2002 else TODAY
+
+
+def times_move(spec):
+    """Whether nanoql's fix moves a helper's times (CMR4), its expiry unread: its times build the discretized
+    swaption whatever its expiry."""
+    with v.case_settings(today_of(spec), use_at_par_coupons=True):
+        return tse.snapping_moves(make_helper(spec).swaption())
+
+
+def unlagged(spec):
+    """A helper's twin on its Ibor index with no fixing days, so that its swap starts on its exercise date."""
+    index = spec["index"]
+    if index["type"] == "Euribor6M":
+        index = irx.ibor_spec("Euribor", (6, M), 0, TARGET, ql.ModifiedFollowing, True, A360, index["curve"])
+    elif index["type"] == "IborIndex":
+        index = dict(index, settlementDays=0)
+    else:
+        return None
+    return dict(spec, index=index)
+
+
 def helper_case(name, spec):
-    today = TODAY_2002 if spec["termStructure"] is CURVE_2002 else TODAY
+    today = today_of(spec)
     with v.case_settings(today, use_at_par_coupons=True) as st:
         helper = make_helper(spec)
         expected = priced_outputs(spec, helper)
+        if times_move(spec):
+            del expected["times"]
         if helper.swaption().isExpired():
             fresh = make_helper(spec)
             expected["modelValueNoEngine"] = v.amount(fresh.modelValue(), spec["nominal"])
@@ -310,7 +346,12 @@ def refusal_cases():
 
 
 def cases():
-    out = [helper_case(*row) for row in helpers()]
+    out = []
+    for name, spec in helpers():
+        out.append(helper_case(name, spec))
+        twin = unlagged(spec) if times_move(spec) else None
+        if twin is not None and not times_move(twin):
+            out.append(helper_case(name + " / unlagged", twin))
     out += refusal_cases()
     check_rows(out)
     return out

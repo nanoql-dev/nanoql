@@ -44,7 +44,11 @@ public class SwaptionHelperVectorTests
             check.Output(c, "underlyingType", helper.Underlying.Type);
             check.Output(c, "fixedDates", helper.Underlying.FixedSchedule.Dates.Select(d => (object?)d));
             check.Output(c, "floatingDates", helper.Underlying.FloatingSchedule.Dates.Select(d => (object?)d));
-            check.Output(c, "times", helper.Times(context));
+            // swaptionhelper.py leaves the times out where nanoql's fix moves them (the S-cms plan's CMR4).
+            if (c.Expected.TryGetProperty("times", out _))
+            {
+                check.Output(c, "times", helper.Times(context));
+            }
             check.Output(c, "blackPrice", ((double[])[0.5, 1.0, 2.0]).Select(f => (object?)helper.BlackPrice(f * volatility, context)));
 
             HullWhite hullWhite = CalibrationInputs.HullWhiteOf(c.Input("hullWhite"), termStructure);

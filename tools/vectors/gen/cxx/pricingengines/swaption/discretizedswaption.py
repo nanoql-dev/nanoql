@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for DiscretizedSwaption (ql/pricingengines/swaption/discretizedswaption.hpp, .cpp) and the discretized swap
 it builds (ql/pricingengines/swap/discretizedswap.hpp, .cpp), which no wheel class exposes, each output computed by the
-C++ harness (docs/porting-playbook.md §9.4): 30 swaptions and their swaps on the evaluation date 15 January 2025, and
-2 refusals.
+C++ harness (docs/porting-playbook.md §9.4): 30 swaptions and their swaps on the evaluation date 15 January 2025, 6
+unlagged twins, and 2 refusals.
 
 The swaptions are those of instruments/swaption.py's kind, on Euribor 6M and ESTR swaps: European and Bermudan
 exercises, the Bermudan dates at the fixed coupons' starts, and moved by 3 and 7 days either way (which snap the swap's
@@ -22,6 +22,14 @@ first exercise time at or after the reference date ("swaptionValues", "swaptionP
 ("swaptionValuesAtZero", "swaptionPresentValueAtZero"); the same at 0 on a Vasicek tree ("vasicekPresentValueAtZero");
 and the swap's values and present value when initialized at its last time on the Hull-White tree on TimeGrid(its
 times, 30) and rolled back to 0 ("swapValuesAtZero", "swapPresentValueAtZero"). Amounts are compared at the nominal.
+The swaption's six are generated and left out where nanoql's fix moves them (the S-cms plan's CMR4; the tree swaption
+file's snapping_moves): QuantLib snaps a swap date in the week after an exercise date back to it, and pays its snapped
+swap's coupons on the snapped schedule's dates, where nanoql snaps only the week before and pays on the swap's own
+dates (tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs); those swaptions' swap outputs stay. Each such
+swaption whose unlagged twin, its swap starting on its exercise date, nothing moves has that twin added
+(" / unlagged"), every output kept: the Europeans, plain and overnight-indexed; the Bermudans exercised before the
+coupons, and the overnight-indexed one, still snap without the lag, and get none. 14 of the 30 keep their swap's outputs
+only.
 The swap's two are generated and left out where its first floating coupon pays on the evaluation date: its second
 starts that day and fixed two business days before, and nanoql's swap, by its public constructor, knows a floating
 coupon by its fixing date (the S-sr plan's SSR6 (xvi); tests/NanoQL.Tests/Divergences/TreeKnownCouponTests.cs), so it
@@ -54,6 +62,7 @@ def _load(name, rel):
 
 
 swp = _load("wheel_swaption", "instruments/swaption.py")
+tse = _load("wheel_treeswaptionengine", "pricingengines/swaption/treeswaptionengine.py")
 fvf, irx = swp.fvf, swp.irx
 
 TODAY = swp.TODAY
@@ -95,10 +104,11 @@ def fixing_of(started):
     return {"Euribor6M Actual/360": [[v.enc(TARGET_CAL.advance(started, -2, D)), FIXINGS[started]]]}
 
 
-def swaptions():
-    """(name, swaption spec, frame, settings) for the 30 swaptions."""
+def swaptions(lag=2):
+    """(name, swaption spec, frame, settings) for the 30 swaptions, their swaps (but the started ones) starting the
+    lag's business days after the first exercise."""
     out = []
-    exercise, start, maturity = swp.dates_of(ql.Period(1, Y), ql.Period(4, Y))
+    exercise, start, maturity = swp.dates_of(ql.Period(1, Y), ql.Period(4, Y), lag)
     for swap_type in (swp.PAYER, swp.RECEIVER):
         swap = swp.vanilla(swap_type, 1e6, 0.03, start, maturity)
         starts = fixed_starts(swap)
@@ -132,7 +142,13 @@ def swaptions():
     return out
 
 
-def case(H, name, spec, frame, settings):
+def moved(spec):
+    """Whether nanoql's fix moves a swaption's discretized swaption (CMR4)."""
+    with v.case_settings(TODAY):
+        return tse.snapping_moves(swp.make_swaption(spec))
+
+
+def case(H, name, spec, frame, settings, swaption_outputs=True):
     reference, dc = FRAMES[frame]
     scale = fvf.scale_of(spec["swap"])
     with H.case_settings(v.enc(TODAY), **settings) as st:
@@ -158,6 +174,10 @@ def case(H, name, spec, frame, settings):
         expected["swaptionValuesAtZero"], expected["swaptionPresentValueAtZero"] = values, pv
         expected["vasicekPresentValueAtZero"] = rollback(
             "DiscretizedSwaption::rollback", VASICEK, swaption_times, last, 0.0)[1]
+        if not swaption_outputs:
+            for key in ("swaptionTimes", "swaptionValues", "swaptionPresentValue", "swaptionValuesAtZero",
+                        "swaptionPresentValueAtZero", "vasicekPresentValueAtZero"):
+                del expected[key]
         values, pv = rollback("DiscretizedSwap::rollback", HULL_WHITE, swap_times, swap_from, 0.0)
         SWAP_PV[name] = pv
         if not name.startswith("started swap paying today"):
@@ -182,7 +202,12 @@ def refusal(H, name, spec, method, settings):
 
 def cases():
     with cxx.connect() as H:
-        out = [case(H, *row) for row in swaptions()]
+        twins = {row[0]: row[1:] for row in swaptions(0)}
+        out = []
+        for name, spec, frame, settings in swaptions():
+            out.append(case(H, name, spec, frame, settings, not moved(spec)))
+            if moved(spec) and not moved(twins[name][0]):
+                out.append(case(H, name + " / unlagged", *twins[name]))
         started = swp.swaption_spec(started_swap(swp.PAYER, PAYS_LATER), started_exercise(PAYS_LATER))
         out.append(refusal(H, "started swap without its fixing", started, "DiscretizedSwap::rollback", {}))
         out.append(refusal(H, "started swaption without its fixing", started, "DiscretizedSwaption::rollback", {}))

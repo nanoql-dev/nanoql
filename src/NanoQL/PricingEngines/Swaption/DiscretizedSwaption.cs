@@ -16,12 +16,22 @@ namespace NanoQL.PricingEngines;
 /// <remarks>
 /// <para>
 /// A working type (<see cref="DiscretizedAsset"/>). Date adjustments can get the swap's times out of step with the
-/// exercise times, which could misprice the swaption, so the swap's schedule dates within a week of an exercise date
-/// (but the last) are snapped to it, for each exercise date in turn, a later one comparing against the dates earlier
-/// ones snapped; a coupon whose date is snapped forward, from the week before, is adjusted in the swap's
-/// post-adjustment. The underlying is a <see cref="VanillaSwap"/> on the snapped schedules, a
-/// <see cref="NullCalendar"/>'s, and on the swap's index (an overnight-indexed swap's index too), so its Ibor coupons
-/// read the context's at-par switch.
+/// exercise times, which could misprice the swaption, so the swap's schedule dates in the week before an exercise
+/// date (but the last) are snapped forward to it, for each exercise date in turn, a later one comparing against the
+/// dates earlier ones snapped; a coupon whose date is snapped is adjusted in the swap's post-adjustment. The underlying
+/// is a <see cref="VanillaSwap"/> on the snapped schedules, a <see cref="NullCalendar"/>'s, and on the swap's index (an
+/// overnight-indexed swap's index too), so its Ibor coupons read the context's at-par switch.
+/// </para>
+/// <para>
+/// <b>The snapping, fixed</b> (the S-cms plan's CMR4): QuantLib also snaps a date in the week after an exercise date
+/// back to it (<c>discretizedswaption.cpp:93-111</c>), so a swap starting on its usual two-day lag after the exercise
+/// is valued from the exercise date, its first coupon accruing days it doesn't; and its snapped swap pays every coupon
+/// on its <see cref="NullCalendar"/> schedule's dates (<c>:113-119</c>), without the swap's payment calendar,
+/// convention or lag. Here no date after an exercise date is snapped, and each coupon pays on the swap's own payment
+/// date, a snapped one on the swap's payment rule (its payment calendar, lag and convention) applied to its snapped
+/// date; with QuantLib's checks, Jamshidian's and the finite-difference engines and QuantLib 1.25's cached tree values
+/// (<c>Divergences/TreeSwaptionSnappingTests.cs</c>). A swap without a lag on business-day schedules keeps QuantLib's
+/// values wherever nothing snaps.
 /// </para>
 /// <para>
 /// Its <see cref="Reset"/> initializes the underlying at the last payment time on the swaption's lattice, then resets
@@ -112,29 +122,24 @@ public sealed class DiscretizedSwaption : DiscretizedOption
 
         foreach (Date exerciseDate in swaption.Exercise.Dates)
         {
+            // CMR4: QuantLib snaps a date within one week either side; a date after the exercise isn't snapped
             for (int j = 0; j < fixedDates.Length - 1; j++)
             {
                 Date unadjustedDate = fixedDates[j];
-                if (exerciseDate != unadjustedDate && WithinOneWeek(exerciseDate, unadjustedDate))
+                if (exerciseDate != unadjustedDate && WithinPreviousWeek(exerciseDate, unadjustedDate))
                 {
                     fixedDates[j] = exerciseDate;
-                    if (WithinPreviousWeek(exerciseDate, unadjustedDate))
-                    {
-                        fixedCouponAdjustments[j] = CouponAdjustment.Post;
-                    }
+                    fixedCouponAdjustments[j] = CouponAdjustment.Post;
                 }
             }
 
             for (int j = 0; j < floatDates.Length - 1; j++)
             {
                 Date unadjustedDate = floatDates[j];
-                if (exerciseDate != unadjustedDate && WithinOneWeek(exerciseDate, unadjustedDate))
+                if (exerciseDate != unadjustedDate && WithinPreviousWeek(exerciseDate, unadjustedDate))
                 {
                     floatDates[j] = exerciseDate;
-                    if (WithinPreviousWeek(exerciseDate, unadjustedDate))
-                    {
-                        floatingCouponAdjustments[j] = CouponAdjustment.Post;
-                    }
+                    floatingCouponAdjustments[j] = CouponAdjustment.Post;
                 }
             }
         }
@@ -155,16 +160,36 @@ public sealed class DiscretizedSwaption : DiscretizedOption
             context,
             swap.PaymentConvention);
 
-        // QuantLib's snapped swaption's arguments: the snapped swap's, with the swaption's exercise and settlement.
-        return (FixedVsFloatingSwapArguments.Of(snappedSwap, context), [.. fixedCouponAdjustments],
+        // QuantLib's snapped swaption's arguments: the snapped swap's, with the swaption's exercise and settlement;
+        // CMR4: each coupon paid on the swap's own payment date, a snapped one on the swap's rule from its snapped date
+        FixedVsFloatingSwapArguments snappedArgs = FixedVsFloatingSwapArguments.Of(snappedSwap, context);
+        FixedVsFloatingSwapArguments own = FixedVsFloatingSwapArguments.Of(swap, context);
+        Calendar fixedPaymentCalendar = swap.PaymentCalendar ?? swap.FixedSchedule.Calendar ?? EmptyCalendar.Instance;
+        Calendar floatingPaymentCalendar =
+            swap.PaymentCalendar ?? swap.FloatingSchedule.Calendar ?? EmptyCalendar.Instance;
+        var fixedPayDates = new Date[snappedArgs.FixedPayDates.Length];
+        for (int j = 0; j < fixedPayDates.Length; j++)
+        {
+            fixedPayDates[j] = fixedDates[j + 1] == swap.FixedSchedule.Dates[j + 1]
+                ? own.FixedPayDates[j]
+                : fixedPaymentCalendar.Advance(
+                    fixedDates[j + 1], swap.PaymentLag, TimeUnit.Days, swap.PaymentConvention);
+        }
+
+        var floatingPayDates = new Date[snappedArgs.FloatingPayDates.Length];
+        for (int j = 0; j < floatingPayDates.Length; j++)
+        {
+            floatingPayDates[j] = floatDates[j + 1] == swap.FloatingSchedule.Dates[j + 1]
+                ? own.FloatingPayDates[j]
+                : floatingPaymentCalendar.Advance(
+                    floatDates[j + 1], swap.PaymentLag, TimeUnit.Days, swap.PaymentConvention);
+        }
+
+        return (snappedArgs.WithPayDates([.. fixedPayDates], [.. floatingPayDates]), [.. fixedCouponAdjustments],
             [.. floatingCouponAdjustments]);
     }
 
     private static bool WithinPreviousWeek(Date d1, Date d2) => d2 >= d1 - 7 && d2 <= d1;
-
-    private static bool WithinNextWeek(Date d1, Date d2) => d2 >= d1 && d2 <= d1 + 7;
-
-    private static bool WithinOneWeek(Date d1, Date d2) => WithinPreviousWeek(d1, d2) || WithinNextWeek(d1, d2);
 
     private sealed record Parts(DiscretizedSwap Underlying, ExerciseType ExerciseType, double[] ExerciseTimes, double LastPayment);
 }

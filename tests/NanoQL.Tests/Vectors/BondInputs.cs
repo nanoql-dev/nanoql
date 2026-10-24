@@ -18,9 +18,11 @@ namespace NanoQL.Tests.Vectors;
 /// </summary>
 /// <remarks>
 /// A bond is <c>{"type": "Bond", ...}</c> or <c>"BondFaceAmount"</c> for QuantLib's two public constructors, or one of
-/// <c>"FixedRateBond"</c>, <c>"FloatingRateBond"</c>, <c>"ZeroCouponBond"</c> and <c>"AmortizingFixedRateBond"</c>,
-/// with QuantLib's arguments by name; a leg is <c>{"fixedRateLeg", "coupons", "extraFlows"}</c>, its flows in that
-/// order; a schedule is rule-based or <c>{"dates", "calendar", "convention"}</c>; an ex-coupon period null or
+/// <c>"FixedRateBond"</c>, <c>"FloatingRateBond"</c>, <c>"ZeroCouponBond"</c>, <c>"AmortizingFixedRateBond"</c>,
+/// <c>"AmortizingFloatingRateBond"</c>, <c>"CmsRateBond"</c> and <c>"AmortizingCmsRateBond"</c>, with QuantLib's
+/// arguments by name, a CMS bond's coupons priced by its <c>"pricer"</c> once built; a leg is <c>{"fixedRateLeg",
+/// "coupons", "extraFlows"}</c>, its flows in that order; a schedule is rule-based or <c>{"dates", "calendar",
+/// "convention"}</c>; an ex-coupon period null or
 /// <c>{"period", "calendar", "convention", "endOfMonth"}</c>; a rate <c>{"rate", "dayCounter", "compounding",
 /// "frequency"}</c>; a price <c>{"amount", "type"}</c>. A null calendar or day counter is QuantLib's empty one, but
 /// a schedule's calendar is never null: <see cref="Schedule"/> reads a null one as QuantLib's default.
@@ -128,10 +130,81 @@ internal static class BondInputs
                     spec.GetProperty("paymentLag").GetInt32());
             }
 
+            case "AmortizingFloatingRateBond":
+            {
+                (Period period, Calendar? calendar, BusinessDayConvention convention, bool eom) =
+                    ExCouponOf(spec.GetProperty("exCouponPeriod"));
+                return new AmortizingFloatingRateBond(
+                    settlementDays,
+                    Doubles(spec.GetProperty("notionals")),
+                    ScheduleOf(spec.GetProperty("schedule"), context),
+                    IndexInputs.IborIndexOf(spec.GetProperty("index")),
+                    DayCounterOf(spec.GetProperty("accrualDayCounter")),
+                    context,
+                    (BusinessDayConvention)spec.GetProperty("paymentConvention").GetInt32(),
+                    CouponInputs.NullableInt(spec.GetProperty("fixingDays")),
+                    Doubles(spec.GetProperty("gearings")),
+                    Doubles(spec.GetProperty("spreads")),
+                    NullableDoubles(spec.GetProperty("caps")),
+                    NullableDoubles(spec.GetProperty("floors")),
+                    spec.GetProperty("inArrears").GetBoolean(),
+                    CashFlowInputs.NullableDate(spec.GetProperty("issueDate")),
+                    period,
+                    calendar,
+                    convention,
+                    eom,
+                    Doubles(spec.GetProperty("redemptions")),
+                    spec.GetProperty("paymentLag").GetInt32());
+            }
+
+            case "CmsRateBond":
+                return CouponPricerFunctions.SetCouponPricer<Bond>(
+                    new CmsRateBond(
+                        settlementDays,
+                        IndexInputs.Real(spec.GetProperty("faceAmount")),
+                        ScheduleOf(spec.GetProperty("schedule"), context),
+                        SwapIndexInputs.SwapIndexOf(spec.GetProperty("index")),
+                        DayCounterOf(spec.GetProperty("paymentDayCounter")),
+                        (BusinessDayConvention)spec.GetProperty("paymentConvention").GetInt32(),
+                        CouponInputs.NullableInt(spec.GetProperty("fixingDays")),
+                        Doubles(spec.GetProperty("gearings")),
+                        Doubles(spec.GetProperty("spreads")),
+                        NullableDoubles(spec.GetProperty("caps")),
+                        NullableDoubles(spec.GetProperty("floors")),
+                        spec.GetProperty("inArrears").GetBoolean(),
+                        IndexInputs.Real(spec.GetProperty("redemption")),
+                        CashFlowInputs.NullableDate(spec.GetProperty("issueDate"))),
+                    CmsPricerOf(spec.GetProperty("pricer")));
+            case "AmortizingCmsRateBond":
+                return CouponPricerFunctions.SetCouponPricer<Bond>(
+                    new AmortizingCmsRateBond(
+                        settlementDays,
+                        Doubles(spec.GetProperty("notionals")),
+                        ScheduleOf(spec.GetProperty("schedule"), context),
+                        SwapIndexInputs.SwapIndexOf(spec.GetProperty("index")),
+                        DayCounterOf(spec.GetProperty("paymentDayCounter")),
+                        (BusinessDayConvention)spec.GetProperty("paymentConvention").GetInt32(),
+                        CouponInputs.NullableInt(spec.GetProperty("fixingDays")),
+                        Doubles(spec.GetProperty("gearings")),
+                        Doubles(spec.GetProperty("spreads")),
+                        NullableDoubles(spec.GetProperty("caps")),
+                        NullableDoubles(spec.GetProperty("floors")),
+                        spec.GetProperty("inArrears").GetBoolean(),
+                        CashFlowInputs.NullableDate(spec.GetProperty("issueDate"))),
+                    CmsPricerOf(spec.GetProperty("pricer")));
             default:
                 throw new InvalidOperationException($"unknown bond type '{type}'");
         }
     }
+
+    // bond.py's CMS pricer: Hagan's analytic pricer on the standard model, no mean reversion, on a constant volatility
+    // (TARGET, Modified Following, Actual/365 (Fixed)) fixed on its reference date.
+    private static AnalyticHaganPricer CmsPricerOf(JsonElement spec) => new(
+        new ConstantSwaptionVolatility(
+            new Date(spec.GetProperty("referenceDate").GetInt32()), new TARGET(), BusinessDayConvention.ModifiedFollowing,
+            spec.GetProperty("volatility").GetDouble(), new Actual365Fixed()),
+        GFunctionFactoryYieldCurveModel.Standard,
+        0.0);
 
     /// <summary>
     /// The leg a spec describes: the coupons of its <c>"fixedRateLeg"</c>, if any, then its <c>"coupons"</c> given one

@@ -319,6 +319,46 @@ public static class DiscountingSwapEngine
     }
 
     /// <summary>
+    /// Prices an asset swap, with its fair spread, clean price and repayment derived from the swap's results.
+    /// </summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="includeSettlementDateFlows">
+    /// Whether cash flows on the settlement date count; the context's
+    /// <see cref="EvaluationContext.IncludeReferenceDateEvents"/> when <see langword="null"/>.
+    /// </param>
+    /// <param name="settlementDate">The settlement date; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the NPV is given at; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <returns>The swap's results: the expired results when the swap has expired.</returns>
+    /// <remarks>QuantLib's engine fills the swap's results, from which the asset swap derives its fair values
+    /// (<see cref="AssetSwap.FetchResults"/>, the S-cms plan's CMD6).</remarks>
+    /// <exception cref="ArgumentException">
+    /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
+    /// </exception>
+    /// <exception cref="NanoQLException">A leg fails to price; the message names the leg.</exception>
+    public static AssetSwapResults Calculate(
+        AssetSwap swap,
+        EvaluationContext context,
+        YieldTermStructure discountCurve,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        CheckArguments(swap, context, discountCurve, settlementDate, npvDate);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        return swap.FetchResults(
+            Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate));
+    }
+
+    /// <summary>
     /// Prices a zero-coupon swap, with the fixed payment that zeroes it.
     /// </summary>
     /// <param name="swap">The swap.</param>

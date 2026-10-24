@@ -17,7 +17,8 @@ namespace NanoQL.Tests.Vectors;
 /// <c>"earliestDate"</c> for the constructor from the latest date only), <c>{"type": "BermudanExercise", "dates",
 /// "payoffAtExpiry"}</c> or <c>{"type": "EuropeanExercise", "date"}</c>. A payoff is <c>{"type", ...}</c> with its
 /// constructor's arguments: <c>"optionType"</c> (QuantLib's integer), <c>"strike"</c>, <c>"moneyness"</c>,
-/// <c>"secondStrike"</c> and <c>"cashPayoff"</c>, as the payoff takes them.
+/// <c>"secondStrike"</c> and <c>"cashPayoff"</c>, as the payoff takes them, and a forward's <c>"position"</c>
+/// (QuantLib's integer).
 /// </remarks>
 internal static class OptionInputs
 {
@@ -62,6 +63,8 @@ internal static class OptionInputs
             "GapPayoff" => new GapPayoff(Type(), Real("strike"), Real("secondStrike")),
             "SuperFundPayoff" => new SuperFundPayoff(Real("strike"), Real("secondStrike")),
             "SuperSharePayoff" => new SuperSharePayoff(Real("strike"), Real("secondStrike"), Real("cashPayoff")),
+            "ForwardTypePayoff" => new ForwardTypePayoff(
+                (PositionType)spec.GetProperty("position").GetInt32(), Real("strike")),
             string type => throw new InvalidOperationException($"unknown payoff {type}"),
             null => throw new InvalidOperationException("a payoff spec without a type"),
         };

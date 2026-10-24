@@ -113,6 +113,18 @@ Facts:
 - `APayoffDiscountCurveRunsOverItsOwnTime`
 - `EachEnginesThetaIsPerItsOwnDayCountersYear`
 
+## AssetSwapNonParRepaymentTests
+
+[`Divergences/AssetSwapNonParRepaymentTests.cs`](../tests/NanoQL.Tests/Divergences/AssetSwapNonParRepaymentTests.cs)
+
+The asset swap's final repayment (the S-cms plan's CMR5 (xix), (xx)): QuantLib pays a given non-par repayment as an amount (`assetswap.cpp:125-134`), while `fairNonParRepayment` reads it per 100 of the bond's notional (`:284-296`), and with none given it repays the bond's redemption but stores 100 (`:130`). On the wheel, a 7-year 4% bond issued 15 March 2024 on a flat 3% curve, swapped at its clean price on Euribor 6M on 23 October 2026: on a 1e6 face a given repayment of 100 pays 100, the NPV 876,253.3609798652 and the fair spread −0.21178102152342376 at par, where with none given both are 0; its fair repayment (QuantLib's formula on the wheel's results, which hide the member), 199.99 with 100 given and 100 with none, fed back leaves 876,165.7356437672 and 876,253.3609798652; on a face of 100 redeemed at 101 the fair repayment is 99.99999999999999, which fed back leaves 0.8763409950793744. nanoql pays a given repayment as that share of the notional, and with none given stores the redemption per 100 of notional, 101 here. QuantLib's check: its fair repayment fed back gives an NPV of 0 only on the consistent reading; on a face of 100 redeemed at 100 the two agree, and QuantLib's cases keep their bits.
+
+Facts:
+
+- `AGivenRepaymentIsPerHundredOfTheNotional`
+- `TheFairRepaymentFedBackIsAtPar`
+- `ARedemptionAboveParIsTheStoredRepayment`
+
 ## AtmAdjustedSmileSectionTests
 
 [`Divergences/AtmAdjustedSmileSectionTests.cs`](../tests/NanoQL.Tests/Divergences/AtmAdjustedSmileSectionTests.cs)
@@ -298,7 +310,7 @@ Facts:
 
 [`Divergences/BlackKarasinskiTreeFittingTests.cs`](../tests/NanoQL.Tests/Divergences/BlackKarasinskiTreeFittingTests.cs)
 
-Black-Karasinski's trees on one model (the S-sr plan's SSR6 (i)): QuantLib's `BlackKarasinski::tree` writes the model's one fitting parameter `phi_` (`blackkarasinski.cpp:64`, `:79-81`), so building a second tree on another grid rewrites the first's fitting: on the wheel, a grid engine's swaption prices 0.007381712297374245 alone and 0.007381283310851051 once a second grid engine has built its tree on the same model. nanoql's tree owns its fitting, as S-bond's Hull-White tree does, so a lattice prices the same whatever is built after it. QuantLib's check: a fresh model's tree on the first grid, 0.007381712297374245.
+Black-Karasinski's trees on one model (the S-sr plan's SSR6 (i)): QuantLib's `BlackKarasinski::tree` writes the model's one fitting parameter `phi_` (`blackkarasinski.cpp:64`, `:79-81`), so building a second tree on another grid rewrites the first's fitting: on the wheel, a grid engine's swaption, exercised on its swap's start date, which the discretized swaption's snapping leaves alone (the S-cms plan's CMR4), prices 0.007389451726576681 alone and 0.007389042124133561 once a second grid engine has built its tree on the same model. nanoql's tree owns its fitting, as S-bond's Hull-White tree does, so a lattice prices the same whatever is built after it. QuantLib's check: a fresh model's tree on the first grid, 0.007389451726576681.
 
 Facts:
 
@@ -356,6 +368,29 @@ Facts:
 
 - `ABondOnAnEmptyLegBuildsAndRefusesItsNotional`
 - `ANullCashFlowIsRefusedAtConstruction`
+
+## BondForwardIncomeTests
+
+[`Divergences/BondForwardIncomeTests.cs`](../tests/NanoQL.Tests/Divergences/BondForwardIncomeTests.cs)
+
+The bond forward's income (the S-cms plan's CMR5 (xxv)): QuantLib's `BondForward::spotIncome` sums the coupons' amounts, on the bond's face, paid between settlement and delivery (`bondforward.cpp:59-83`), while its spot value is the dirty price, per 100 (`:86-87`). On the wheel, on QuantLib's test-suite bond (2.5%, 15 August 2015 to 2046, annual on TARGET, Actual/Actual (ISDA)) and curve (flat 0.04977%) on 7 March 2022, the bond settling on the curve's reference date, where QuantLib's spot value is a reference-date value (C4's review, C4-O1, `BondForwardSpotDateTests`), delivering on 10 September 2022, after the August coupon: on a face of 100 the income is 2.492603415097658 and the forward value 158.4458479330134 (clean 158.2540671110956); on QuantLib's own face, 1e5, the income is 2,492.6034150976584 and the forward value −2,332.3067807511693. Before the coupon, on 10 March, the income is 0 and the forward value 160.89828121347867 on either face. A face of 100 isn't enough: an amortizing bond's dirty price is per 100 of its notional at settlement, so on a 4% bond of notionals 100, 75, 50 and 25 (2022 to 2032, annual on TARGET), 50 on 15 January 2025, delivering on 3 April 2025 after the March coupon and amortization, QuantLib's income is 26.872912556834198 and its forward value 81.3910471000986 on a flat 2.6% curve. nanoql's income is per 100 of the bond's notional at its settlement date, as the spot value is. QuantLib's check: its face-100 forward on the same bond, the forward being per 100; and its forward on the amortizing bond's notionals doubled, 100 at settlement, 54.3684086579997. The clean forward follows the forward's basis (C4's review, C4-O2): QuantLib's `cleanForwardPrice` subtracts the accrued amount at delivery per 100 of the notional at delivery (`bondforward.cpp:49-51`), so on a 4% bond of notionals 100, 100, 50 and 50 (15 July 2024 to 2028, annual, Actual/Actual (ISMA)) delivering on 15 October 2026, after its step to 50, on a flat 3% curve on 15 January 2025, its clean forward is 50.278704784168255 from a dirty one of 51.286923962250434; nanoql's takes the accrued amount per 100 of the notional at settlement, 50.78281437320934. QuantLib's check: its forward on a face-100 bullet, whose flows after delivery are twice the amortizing bond's, halved: 51.286923962250434 dirty and 50.78281437320934 clean.
+
+Facts:
+
+- `AfterACouponTheForwardIsPerHundred`
+- `BeforeACouponTheForwardIsQuantLibs`
+- `AnAmortizedBondsForwardIsPerHundredOfItsNotional`
+- `TheCleanForwardAcrossAStepIsOnTheForwardsBasis`
+
+## BondForwardSpotDateTests
+
+[`Divergences/BondForwardSpotDateTests.cs`](../tests/NanoQL.Tests/Divergences/BondForwardSpotDateTests.cs)
+
+The bond forward's spot value and its date (C4's review, C4-O1): QuantLib's forward value is the spot value less the income over the discount at delivery (`forward.cpp:61-65`), its spot the bond's dirty price, a value at the bond's settlement date (`bondforward.cpp:86-87`), its income and both discounts from the curve's reference date, so a bond that doesn't settle on that date gives a forward high by 1/P(ref, settlement). QuantLib's own `testThatForwardValueIsEqualToSpotValueIfNoIncome` asserts the identity the factor breaks, within 1e-2 on a 0.05% curve three days out. On the wheel, on a 5-year 4% bullet from 17 January 2025 (annual on TARGET, Actual/Actual (ISMA)) settling in 2 days, on a flat 3% curve on 15 January 2025, its dirty price is 104.35728008689668; QuantLib's forward delivering on its settlement date, the forward settling the same day, is 104.37443611832695, and 104.41733853717292 delivering on 22 January, no coupon between, 1/P(ref, settlement) = 1.0001643970733618 high. nanoql carries the spot back to the reference date on the forward's discount curve before the income is netted, so its forward is the dirty price grown from settlement. QuantLib's check, its own forwards on the same bullet settling on the reference date, where its spot is a reference-date value: 104.35728008689668 to 17 January, the 2-day bond's dirty price (the identity), and 104.40017545386986 to 22 January; nanoql's on the bond settling in 2 days give the same.
+
+Facts:
+
+- `TheSpotIsCarriedBackFromTheBondsSettlement`
 
 ## BondHelperArgumentTests
 
@@ -524,6 +559,16 @@ Facts:
 
 - `AnEmptyScheduleIsRefusedWithTheSchedulesOwnText`
 - `ANullCallabilityIsRefusedAtConstruction`
+
+## CallableSnapKeptTests
+
+[`Divergences/CallableSnapKeptTests.cs`](../tests/NanoQL.Tests/Divergences/CallableSnapKeptTests.cs)
+
+The callable bond tree's snap, kept (the S-cms plan's CMR4 (v), as ruled): QuantLib's discretized callable bond moves a call up to a week before a coupon onto the coupon, its price discounted forward (`discretizedcallablefixedratebond.cpp:59-101`, "To avoid mispricing, we snap exercise dates to the closest coupon date"). Against Jamshidian's decomposition of the issuer's call on Hull-White (0.1, 0.01) on a flat 4% curve, on a 10-year 5% bond callable at a clean 100 once, the snap adds about 0.0006 per day, 0.0046 per 100 at seven days (4.5e-5 relative): the closed form is 103.177955 a week before the fifth coupon, where the 500-step tree prices 103.18258278794376 on the wheel; 103.191502 on the coupon (the tree 103.19140397824488) and 103.176019 eight days before (103.17602442460134), beyond the week. A tree without the snap is within 1e-4 of the closed form, but QuantLib's `testUnexercisableCallability` (`callablebonds.cpp:673-735`) checks at 1e-10 that an unreachable call one to seven days before a coupon leaves the price alone, which only the snap achieves: without it the grid gains a time and the price moves 2.4e-3. nanoql keeps QuantLib's snap and its bits; QuantLib's own test stands in `TestSuite/CallableBondsTests.cs`.
+
+Facts:
+
+- `ACallInTheWeekBeforeACouponIsQuantLibsSnap`
 
 ## CapFloorCmsTests
 
@@ -2480,6 +2525,16 @@ Facts:
 - `ADailyCompoundedSpreadIsCompoundedOverTheForecastRange`
 - `TheOtherSpreadsKeepQuantLibsBits`
 
+## OvernightFutureTodayFixingTests
+
+[`Divergences/OvernightFutureTodayFixingTests.cs`](../tests/NanoQL.Tests/Divergences/OvernightFutureTodayFixingTests.cs)
+
+A compounded overnight-index future on its value date (the S-cms plan's CMR5 (xxi)): QuantLib's `compoundedRate` compounds the past fixings strictly before the evaluation date and forecasts from it, so on the value date today's published fixing is ignored, where the averaged future reads it (`overnightindexfuture.cpp`). On the wheel, a SOFR future from 23 October 2026 to 25 January 2027 on a flat 5% Actual/360 curve prices 94.96721860668744 compounded with or without a 7% fixing for today, where averaged it prices 94.99926113524772 without and 94.93546459731232 with it. nanoql's compounded future uses today's fixing once published. QuantLib's check: the same future the next business day (26 October), the value date's fixing then past, 94.90261063438486 compounded and 94.93546459731232 averaged.
+
+Facts:
+
+- `TodaysFixingIsUsedOnTheValueDate`
+
 ## OvernightIndexedCouponRefusalTests
 
 [`Divergences/OvernightIndexedCouponRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/OvernightIndexedCouponRefusalTests.cs)
@@ -2663,6 +2718,16 @@ Facts:
 
 - `AHelperGivenANullIndexIsRefused`
 - `AFuturesFraOrOisHelperGivenANullIndexIsRefused`
+
+## RendistatoUnsolvedSwapsTests
+
+[`Divergences/RendistatoUnsolvedSwapsTests.cs`](../tests/NanoQL.Tests/Divergences/RendistatoUnsolvedSwapsTests.cs)
+
+The Rendistato calculator's unsolved swaps (a run-found R8 defect in the S-cms plan's C4): QuantLib's calculator stops at the first swap whose duration exceeds the basket's (`btp.cpp`, `performCalculations`), so the later swaps' rates and durations stay `Null<Real>()` and their yields the solver's starting guess, `swapBondYields_(nSwaps_, 0.05)`: `swapYields()` reports a yield of 5% for a swap it never solved. On the harness, on three BTPs (3% 2029, 3.35% 2030, 3.1% 2031; outstandings 12, 18 and 6; clean prices 99.1, 101.4 and 99.8) on Euribor 6M on a flat 3.1% curve discounted on a flat 2.9% one on 15 January 2025, the basket's duration is 4.878701860912479, the sixth swap's 5.398671198108271, and swaps seven to fifteen have null rates and durations and yields of 0.05. nanoql's rates, yields and durations of the swaps it never solves are null alike. QuantLib's check: its own null rates and durations, which mark the same swaps.
+
+Facts:
+
+- `TheSwapsNeverSolvedHaveNoYield`
 
 ## ReplicatingVarianceSwapDividendTests
 
@@ -3303,6 +3368,19 @@ A swaption with no exercise time on or after the reference date, priced on a lat
 Facts:
 
 - `NoExerciseTimeOnOrAfterTheReferenceDateIsRefused`
+
+## TreeSwaptionSnappingTests
+
+[`Divergences/TreeSwaptionSnappingTests.cs`](../tests/NanoQL.Tests/Divergences/TreeSwaptionSnappingTests.cs)
+
+The tree swaption's snapping and payments (the S-cms plan's CMR4): QuantLib's discretized swaption snaps a swap date within a week of an exercise date to it, either way (`discretizedswaption.cpp:93-111`), so a swap starting on its usual two-day lag after the exercise is valued from the exercise date; it rebuilds the swap on its snapped schedules' dates with a `NullCalendar` (`:113-119`), so its coupons pay on those dates, without the swap's payment calendar, convention or lag; and its discretized swap values a floating coupon as a par floater to its payment date (`discretizedswap.cpp:199-218`). On Hull-White (0.1, 0.01) on a flat 4% curve, 800 steps: a European 5Y into 5Y payer on 1e6 at 4% errs against Jamshidian's engine by 50.521421552461106 on the lag and 13.786750153689354 without it (at 5%, 11.848729083691069 and −6.138422108044324); the Bermudan exercised two business days before each fixed reset, against the finite-difference engine (400 × 800), by 69.91132298134835 and 12.102443341802427; a Bermudan on an ESTR swap paying two days late, against the finite-difference engine (400 × 400), by 82.16860415945848 and 71.98241275852342 at 3.5% (64.7080268507616 and 60.15433851566377 at 4.5%) with and without the payment lag. QuantLib's tree swap engine, on a 5-year payer on 1e6 at 4% whose unadjusted floating dates fall three times on a weekend and pay the next business day, prices 3,947.8257420389527 against the discounting engine's 3,461.83299033012 (on the harness: the wheel has no tree swap engine). nanoql snaps no date after an exercise date (the week before still snaps, with #1327's post-adjustment, which fixed #1143), pays each coupon on the swap's own payment date, a snapped one on the swap's payment rule applied to its snapped date, and values a floating coupon paid after its accrual end as its forward over its own accrual period paid on its payment date; its tree swap is then within 1.34 of the discounting engine, at 50 steps as at 3,200, the model's adjustment for the payment delay (1.26) and the par coupons' fixing periods (0.08, its value when the same coupons pay on their accrual ends). QuantLib's checks: Jamshidian's and the finite-difference engines, within the tree's own error on the unlagged swap; the discounting engine; and QuantLib 1.25's cached tree values, which `TestSuite/BermudanSwaptionTests.cs` restates, with QuantLib's `testTreeEngineTimeSnapping` there within its 1.0.
+
+Facts:
+
+- `AEuropeanOnALaggedSwapErrsAsTheUnlaggedOne`
+- `ABermudanOnALaggedSwapErrsAsTheUnlaggedOne`
+- `ALaggedOvernightBermudanErrsAsTheUnlaggedOne`
+- `TheTreeSwapEngineTakesALateCouponsForwardOverItsAccrual`
 
 ## TridiagonalOperatorSizeOneTests
 

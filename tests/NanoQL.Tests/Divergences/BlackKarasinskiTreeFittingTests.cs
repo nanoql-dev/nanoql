@@ -15,10 +15,11 @@ namespace NanoQL.Tests.Divergences;
 /// <summary>
 /// Black-Karasinski's trees on one model (the S-sr plan's SSR6 (i)): QuantLib's <c>BlackKarasinski::tree</c> writes the
 /// model's one fitting parameter <c>phi_</c> (<c>blackkarasinski.cpp:64</c>, <c>:79-81</c>), so building a second tree
-/// on another grid rewrites the first's fitting: on the wheel, a grid engine's swaption prices 0.007381712297374245
-/// alone and 0.007381283310851051 once a second grid engine has built its tree on the same model. nanoql's tree owns its
-/// fitting, as S-bond's Hull-White tree does, so a lattice prices the same whatever is built after it. QuantLib's check:
-/// a fresh model's tree on the first grid, 0.007381712297374245.
+/// on another grid rewrites the first's fitting: on the wheel, a grid engine's swaption, exercised on its swap's start
+/// date, which the discretized swaption's snapping leaves alone (the S-cms plan's CMR4), prices 0.007389451726576681
+/// alone and 0.007389042124133561 once a second grid engine has built its tree on the same model. nanoql's tree owns
+/// its fitting, as S-bond's Hull-White tree does, so a lattice prices the same whatever is built after it. QuantLib's
+/// check: a fresh model's tree on the first grid, 0.007389451726576681.
 /// </summary>
 public class BlackKarasinskiTreeFittingTests
 {
@@ -37,17 +38,17 @@ public class BlackKarasinskiTreeFittingTests
         double after = TreeSwaptionEngine.Calculate(swaption, context, model, first).NPV!.Value;
 
         Assert.Equal(alone, after);
-        Assert.True(Tolerance.Within(0.007381712297374245, after), $"{after}");
+        Assert.True(Tolerance.Within(0.007389451726576681, after), $"{after}");
         Assert.NotEqual(after, TreeSwaptionEngine.Calculate(swaption, context, model, second).NPV!.Value);
     }
 
-    // A 1Y into 5Y payer at 4% on Euribor 6M, notional 1, and the year fractions on the curve of its exercise and its
-    // coupons' starts and payments.
+    // A 1Y into 5Y payer at 4% on Euribor 6M, notional 1, exercised on its swap's start, and the year fractions on the
+    // curve of its exercise and its coupons' starts and payments.
     private static (Swaption Swaption, double[] Times) Swaption(Date today, YieldTermStructure curve, EvaluationContext context)
     {
         var calendar = new TARGET();
-        Date exercise = calendar.Advance(today, new Period(1, TimeUnit.Years));
-        Date start = calendar.Advance(exercise, 2, TimeUnit.Days);
+        Date start = calendar.Advance(calendar.Advance(today, new Period(1, TimeUnit.Years)), 2, TimeUnit.Days);
+        Date exercise = start;
         var fixedSchedule = new Schedule(
             start, start + new Period(5, TimeUnit.Years), new Period(1, TimeUnit.Years), calendar, BusinessDayConvention.ModifiedFollowing,
             BusinessDayConvention.ModifiedFollowing, DateGenerationRule.Forward, false, context);

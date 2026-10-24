@@ -4,8 +4,9 @@
 // ql/payoff.hpp and ql/instruments/payoffs.hpp: the members the wheel doesn't expose (name, description,
 // CashOrNothingPayoff::cashPayoff, GapPayoff::secondStrike), and every member of the payoffs it doesn't build as
 // QuantLib declares them (NullPayoff and SuperFundPayoff, not wrapped; SuperSharePayoff, whose wrapped constructor
-// takes an option type where QuantLib's takes the strike). Each method builds its payoff from a spec of
-// instruments/payoffspec.hpp inside the call, so that a constructor's refusal is QuantLib's.
+// takes an option type where QuantLib's takes the strike), and ql/instruments/forward.hpp's ForwardTypePayoff, not
+// wrapped. Each method builds its payoff from a spec of instruments/payoffspec.hpp inside the call, so that a
+// constructor's refusal is QuantLib's.
 
 #include "convert.hpp"
 #include "instruments/payoffspec.hpp"

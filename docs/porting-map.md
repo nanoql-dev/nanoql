@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 627 | 79 |
+| not started | 617 | 76 |
 | partial | 22 | 25 |
-| ported | 611 | 76 |
+| ported | 621 | 79 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -619,14 +619,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `asianoption` | not started |  | no nanoql type: ContinuousAveragingAsianOption, DiscreteAveragingAsianOption |
-| `assetswap` | not started |  | no nanoql type: AssetSwap, AssetSwapResults |
+| `assetswap` | ported | Instruments/AssetSwap.cs, Instruments/AssetSwapResults.cs |  |
 | `averagetype` | not started |  | no nanoql type: AverageType |
 | `barrieroption` | ported | Instruments/BarrierOption.cs |  |
 | `barriertype` | ported | Instruments/BarrierType.cs, Instruments/BarrierTypeFunctions.cs |  |
 | `basketoption` | not started |  | no nanoql type: BasketPayoff, MinBasketPayoff, MaxBasketPayoff, AverageBasketPayoff, SpreadBasketPayoff, BasketOption |
 | `bmaswap` | ported | Instruments/BMASwap.cs, Instruments/BMASwapResults.cs |  |
 | `bond` | ported | Instruments/Bond/Bond.cs, Instruments/Bond/BondPrice.cs, Instruments/Bond/BondPriceType.cs, Instruments/Bond/BondResults.cs |  |
-| `bondforward` | not started |  | no nanoql type: BondForward |
+| `bondforward` | ported | Instruments/BondForward.cs |  |
 | `callabilityschedule` | ported | Instruments/CallabilitySchedule/Callability.cs, Instruments/CallabilitySchedule/CallabilityType.cs | no nanoql type: CallabilitySchedule |
 | `capfloor` | ported | Instruments/CapFloor/Cap.cs, Instruments/CapFloor/CapFloor.cs, Instruments/CapFloor/CapFloorArguments.cs, Instruments/CapFloor/CapFloorType.cs, Instruments/CapFloor/Collar.cs, Instruments/CapFloor/Floor.cs |  |
 | `claim` | ported | Instruments/Claim/Claim.cs, Instruments/Claim/FaceValueAccrualClaim.cs, Instruments/Claim/FaceValueClaim.cs |  |
@@ -637,7 +637,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `constnotionalcrosscurrencybasisswap` | ported | Instruments/ConstNotionalCrossCurrencyBasisSwap.cs, Instruments/ConstNotionalCrossCurrencyBasisSwapResults.cs |  |
 | `constnotionalcrosscurrencyfixedvsfloatingswap` | ported | Instruments/ConstNotionalCrossCurrencyFixedVsFloatingSwap.cs, Instruments/ConstNotionalCrossCurrencyFixedVsFloatingSwapResults.cs |  |
 | `constnotionalcrosscurrencyswap` | ported | Instruments/ConstNotionalCrossCurrencySwap.cs | no nanoql type: ConstNotionalCrossCurrencySwapResults |
-| `cpicapfloor` | not started |  | no nanoql type: CPICapFloor |
+| `cpicapfloor` | ported | Instruments/CPICapFloor.cs, Instruments/CPICapFloorArguments.cs |  |
 | `cpiswap` | ported | Instruments/CPISwap.cs, Instruments/CPISwapResults.cs |  |
 | `creditdefaultswap` | ported | Instruments/CreditDefaultSwap/CreditDefaultSwap.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapFunctions.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapPricingModel.cs, Instruments/CreditDefaultSwap/CreditDefaultSwapResults.cs |  |
 | `crosscurrencyswap` | ported | Instruments/CrossCurrencySwap.cs, Instruments/CrossCurrencySwapResults.cs |  |
@@ -649,7 +649,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fixedvsfloatingswap` | ported | Instruments/FixedVsFloatingSwap.cs, Instruments/FixedVsFloatingSwapArguments.cs, Instruments/FixedVsFloatingSwapResults.cs |  |
 | `floatfloatswap` | ported | Instruments/FloatFloatSwap.cs, Instruments/FloatFloatSwapArguments.cs, Instruments/FloatFloatSwapResults.cs |  |
 | `floatfloatswaption` | ported | Instruments/FloatFloatSwaption.cs |  |
-| `forward` | not started |  | no nanoql type: Forward, ForwardTypePayoff |
+| `forward` | ported | Instruments/Forward/Forward.cs, Instruments/Forward/ForwardResults.cs, Instruments/Forward/ForwardTypePayoff.cs |  |
 | `forwardrateagreement` | ported | Instruments/ForwardRateAgreement.cs, Instruments/ForwardRateAgreementResults.cs |  |
 | `forwardvanillaoption` | not started |  | no nanoql type: ForwardOptionArguments, ForwardVanillaOption |
 | `futures` | ported | Instruments/FuturesType.cs |  |
@@ -673,7 +673,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `nonstandardswaption` | ported | Instruments/NonstandardSwaption.cs |  |
 | `oneassetoption` | ported | Instruments/OneAssetOption.cs, Instruments/OneAssetOptionResults.cs |  |
 | `overnightindexedswap` | ported | Instruments/OvernightIndexedSwap.cs, Instruments/OvernightIndexedSwapResults.cs |  |
-| `overnightindexfuture` | not started |  | no nanoql type: OvernightIndexFuture |
+| `overnightindexfuture` | ported | Instruments/OvernightIndexFuture.cs |  |
 | `partialtimebarrieroption` | not started |  | no nanoql type: PartialBarrierRange, PartialTimeBarrierOption |
 | `payoffs` | ported | Instruments/Payoffs/AssetOrNothingPayoff.cs, Instruments/Payoffs/CashOrNothingPayoff.cs, Instruments/Payoffs/FloatingTypePayoff.cs, Instruments/Payoffs/GapPayoff.cs, Instruments/Payoffs/NullPayoff.cs, Instruments/Payoffs/PercentageStrikePayoff.cs, Instruments/Payoffs/PlainVanillaPayoff.cs, Instruments/Payoffs/StrikedTypePayoff.cs, Instruments/Payoffs/SuperFundPayoff.cs, Instruments/Payoffs/SuperSharePayoff.cs, Instruments/Payoffs/TypePayoff.cs |  |
 | `perpetualfutures` | not started |  | no nanoql type: PerpetualFutures, PerpetualFuturesPayoffType, PerpetualFuturesFundingType |
@@ -704,11 +704,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `amortizingcmsratebond` | not started |  | no nanoql type: AmortizingCmsRateBond |
+| `amortizingcmsratebond` | ported | Instruments/Bonds/AmortizingCmsRateBond.cs |  |
 | `amortizingfixedratebond` | ported | Instruments/Bonds/AmortizingFixedRateBond.cs, Instruments/Bonds/AmortizingFixedRateBondFunctions.cs |  |
-| `amortizingfloatingratebond` | not started |  | no nanoql type: AmortizingFloatingRateBond |
-| `btp` | not started |  | no nanoql type: CCTEU, BTP, RendistatoBasket, RendistatoCalculator, RendistatoEquivalentSwapLengthQuote, RendistatoEquivalentSwapSpreadQuote |
-| `cmsratebond` | not started |  | no nanoql type: CmsRateBond |
+| `amortizingfloatingratebond` | ported | Instruments/Bonds/AmortizingFloatingRateBond.cs |  |
+| `btp` | ported | Instruments/Bonds/BTP/BTP.cs, Instruments/Bonds/BTP/CCTEU.cs, Instruments/Bonds/BTP/RendistatoBasket.cs, Instruments/Bonds/BTP/RendistatoCalculator.cs, Instruments/Bonds/BTP/RendistatoEquivalentSwapLengthQuote.cs, Instruments/Bonds/BTP/RendistatoEquivalentSwapSpreadQuote.cs |  |
+| `cmsratebond` | ported | Instruments/Bonds/CmsRateBond.cs |  |
 | `convertiblebonds` | ported | Instruments/Bonds/ConvertibleBonds/ConvertibleBond.cs, Instruments/Bonds/ConvertibleBonds/ConvertibleBondArguments.cs, Instruments/Bonds/ConvertibleBonds/ConvertibleFixedCouponBond.cs, Instruments/Bonds/ConvertibleBonds/ConvertibleFloatingRateBond.cs, Instruments/Bonds/ConvertibleBonds/ConvertibleZeroCouponBond.cs, Instruments/Bonds/ConvertibleBonds/SoftCallability.cs |  |
 | `cpibond` | ported | Instruments/Bonds/CPIBond.cs |  |
 | `fixedratebond` | ported | Instruments/Bonds/FixedRateBond.cs |  |
@@ -1926,7 +1926,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `multipleresetsswaphelper` | ported | TermStructures/Yield/MultipleResetsSwapRateHelper.cs |  |
 | `nonlinearfittingmethods` | ported | TermStructures/Yield/NonlinearFittingMethods/CubicBSplinesFitting.cs, TermStructures/Yield/NonlinearFittingMethods/ExponentialSplinesFitting.cs, TermStructures/Yield/NonlinearFittingMethods/NaturalCubicFitting.cs, TermStructures/Yield/NonlinearFittingMethods/NelsonSiegelFitting.cs, TermStructures/Yield/NonlinearFittingMethods/SimplePolynomialFitting.cs, TermStructures/Yield/NonlinearFittingMethods/SpreadFittingMethod.cs, TermStructures/Yield/NonlinearFittingMethods/SvenssonFitting.cs |  |
 | `oisratehelper` | ported | TermStructures/Yield/OISRateHelper.cs |  |
-| `overnightindexfutureratehelper` | not started |  | no nanoql type: OvernightIndexFutureRateHelper, SofrFutureRateHelper |
+| `overnightindexfutureratehelper` | ported | TermStructures/Yield/OvernightIndexFutureRateHelper.cs, TermStructures/Yield/SofrFutureRateHelper.cs |  |
 | `piecewiseforwardspreadedtermstructure` | ported | TermStructures/Yield/InterpolatedPiecewiseForwardSpreadedTermStructure{TInterpolator}.cs |  |
 | `piecewisespreadyieldcurve` | ported | TermStructures/Yield/PiecewiseSpreadYieldCurve{TInterpolator,TBootstrap}.cs |  |
 | `piecewiseyieldcurve` | ported | TermStructures/Yield/PiecewiseYieldCurve/GlobalLinearSimpleZeroCurve.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseSplineCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearSimpleZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseYieldCurve{TTraits,TInterpolator,TBootstrap}.cs |  |
@@ -2065,7 +2065,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `andreasenhugevolatilityinterpl` | not started |  | 14 cases |
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
 | `asianoptions` | not started |  | 23 cases |
-| `assetswap` | not started |  | 9 cases |
+| `assetswap` | ported | TestSuite/AssetSwapTests.cs | 9 of 9 cases |
 | `autocovariances` | not started |  | 3 cases |
 | `bacheliercalculator` | not started |  | 8 cases |
 | `barrieroption` | partial | TestSuite/BarrierOptionTests.cs | 10 of 15 cases; not yet: testLocalVolAndHestonComparison, testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast, testPerturbativeOrder2FullResolution |
@@ -2079,7 +2079,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackdeltacalculator` | ported | TestSuite/BlackDeltaCalculatorTests.cs | 4 of 4 cases |
 | `blackformula` | ported | TestSuite/BlackFormulaTests.cs | 15 of 15 cases |
 | `blackvolsurfacedelta` | not started |  | 5 cases |
-| `bondforward` | not started |  | 3 cases |
+| `bondforward` | ported | TestSuite/BondForwardTests.cs | 3 of 3 cases |
 | `bonds` | ported | TestSuite/BondsTests.cs | 22 of 22 cases |
 | `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
 | `businessdayconventions` | ported | TestSuite/BusinessDayConventionsTests.cs | 1 of 1 cases |
@@ -2221,7 +2221,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `schedule` | ported | TestSuite/ScheduleTests.cs | 28 of 28 cases |
 | `settings` | not ported: tests Settings, which EvaluationContext replaces |  |  |
 | `shortratemodels` | ported | TestSuite/ShortRateModelsTests.cs | 9 of 9 cases; replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks by Conventions/ModelRebuildTests.cs; testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks by Conventions/ModelRebuildTests.cs |
-| `sofrfutures` | not started |  | 6 cases |
+| `sofrfutures` | ported | TestSuite/SofrFuturesTests.cs | 5 of 6 cases; not ported: testOvernightIndexFutureRateHelperNotification (observer notifications, which an immutable helper has no use for, R1) |
 | `softbarrieroption` | not started |  | 1 cases |
 | `solvers` | partial | TestSuite/SolversTests.cs | 4 of 9 cases; not yet: testBisection, testFalsePosition, testRidder, testSecant, testHalley |
 | `squarerootclvmodel` | not started |  | 3 cases |

@@ -46,25 +46,33 @@ public class DiscretizedSwaptionCxxVectorTests
                 continue;
             }
 
-            double[] swaptionTimes = [.. Swaption().MandatoryTimes()];
             double[] swapTimes = [.. Swap().MandatoryTimes()];
-            check.Output(c, "swaptionTimes", swaptionTimes);
             check.Output(c, "swapTimes", swapTimes);
 
-            Lattice hullWhiteTree = hullWhite.Tree(new TimeGrid(swaptionTimes, steps));
-            double from = c.Double("swaptionFrom");
-            (double[] values, double presentValue) = Rollback(Swaption(), hullWhiteTree, from, c.Double("swaptionTo"));
-            check.Output(c, "swaptionValues", values);
-            check.Output(c, "swaptionPresentValue", presentValue);
-            (values, presentValue) = Rollback(Swaption(), hullWhiteTree, from, 0.0);
-            check.Output(c, "swaptionValuesAtZero", values);
-            check.Output(c, "swaptionPresentValueAtZero", presentValue);
+            // discretizedswaption.py leaves the swaption's outputs out where nanoql's fix moves them (the S-cms plan's
+            // CMR4).
+            double[] values;
+            double presentValue;
+            if (c.Expected.TryGetProperty("swaptionTimes", out _))
+            {
+                double[] swaptionTimes = [.. Swaption().MandatoryTimes()];
+                check.Output(c, "swaptionTimes", swaptionTimes);
 
-            Vasicek vasicek = CalibrationInputs.VasicekOf(c.Input("vasicek"));
-            check.Output(
-                c,
-                "vasicekPresentValueAtZero",
-                Rollback(Swaption(), vasicek.Tree(new TimeGrid(swaptionTimes, steps)), from, 0.0).PresentValue);
+                Lattice hullWhiteTree = hullWhite.Tree(new TimeGrid(swaptionTimes, steps));
+                double from = c.Double("swaptionFrom");
+                (values, presentValue) = Rollback(Swaption(), hullWhiteTree, from, c.Double("swaptionTo"));
+                check.Output(c, "swaptionValues", values);
+                check.Output(c, "swaptionPresentValue", presentValue);
+                (values, presentValue) = Rollback(Swaption(), hullWhiteTree, from, 0.0);
+                check.Output(c, "swaptionValuesAtZero", values);
+                check.Output(c, "swaptionPresentValueAtZero", presentValue);
+
+                Vasicek vasicek = CalibrationInputs.VasicekOf(c.Input("vasicek"));
+                check.Output(
+                    c,
+                    "vasicekPresentValueAtZero",
+                    Rollback(Swaption(), vasicek.Tree(new TimeGrid(swaptionTimes, steps)), from, 0.0).PresentValue);
+            }
 
             // discretizedswaption.py leaves these out where the swap's first floating coupon pays on the evaluation date
             // (the fixing-date rule, SSR6 (xvi)).
