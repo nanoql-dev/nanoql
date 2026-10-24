@@ -6,9 +6,10 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/couponpricer.hpp ql/cashflows/couponpricer.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for S-cms's ports of those coupons
+// Partial: the visitor's cases for the range-accrual and multiple-resets coupons, which wait for S-cms's ports of those coupons
 
 using System.Collections.Immutable;
+using NanoQL.Experimental;
 using NanoQL.Instruments;
 
 namespace NanoQL.Coupons;
@@ -203,6 +204,26 @@ public static class CouponPricerFunctions
             ? c.SetPricer(pricer)
             : throw new ArgumentException("pricer not compatible with CMS coupon", nameof(pricer)),
 
+        // The CMS spread coupons (couponpricer.cpp:384-390, :400-406) take only a CmsSpreadCouponPricer.
+        CappedFlooredCmsSpreadCoupon c => pricer is CmsSpreadCouponPricer
+            ? c.SetPricer(pricer)
+            : throw new ArgumentException("pricer not compatible with CMS spread coupon", nameof(pricer)),
+        CmsSpreadCoupon c => pricer is CmsSpreadCouponPricer
+            ? c.SetPricer(pricer)
+            : throw new ArgumentException("pricer not compatible with CMS spread coupon", nameof(pricer)),
+
+        // The digital coupons (couponpricer.cpp:324-330, :408-422) take their underlying's pricer type; a digital
+        // coupon of another underlying is visited as a floating-rate coupon, as QuantLib's visitor has no case for it.
+        DigitalIborCoupon c => pricer is IborCouponPricer
+            ? c.SetPricer(pricer)
+            : throw new ArgumentException("pricer not compatible with Ibor coupon", nameof(pricer)),
+        DigitalCmsCoupon c => pricer is CmsCouponPricer
+            ? c.SetPricer(pricer)
+            : throw new ArgumentException("pricer not compatible with CMS coupon", nameof(pricer)),
+        DigitalCmsSpreadCoupon c => pricer is CmsSpreadCouponPricer
+            ? c.SetPricer(pricer)
+            : throw new ArgumentException("pricer not compatible with CMS spread coupon", nameof(pricer)),
+
         CappedFlooredCoupon c => VisitCappedFlooredCoupon(c, pricer),
         IborCoupon c => pricer is IborCouponPricer
             ? c.SetPricer(pricer)
@@ -251,6 +272,11 @@ public static class CouponPricerFunctions
         if (c.Underlying is CmsCoupon && pricer is not CmsCouponPricer)
         {
             throw new ArgumentException("pricer not compatible with CMS Coupon", nameof(pricer));
+        }
+
+        if (c.Underlying is CmsSpreadCoupon && pricer is not CmsSpreadCouponPricer)
+        {
+            throw new ArgumentException("pricer not compatible with CMS spread Coupon", nameof(pricer));
         }
 
         return c.SetPricer(pricer);

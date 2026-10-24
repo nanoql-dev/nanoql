@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/instruments/floatfloatswap.hpp ql/instruments/floatfloatswap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for S-cms's CmsSpreadLeg
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Numerics;
 using NanoQL.Time;
@@ -42,11 +42,11 @@ public sealed class FloatFloatSwap : Swap
     /// <param name="nominal1">The first leg's nominal.</param>
     /// <param name="nominal2">The second leg's nominal.</param>
     /// <param name="schedule1">The first leg's schedule.</param>
-    /// <param name="index1">The first leg's index: an Ibor or a swap index.</param>
+    /// <param name="index1">The first leg's index: an Ibor, a swap or a swap spread index.</param>
     /// <param name="dayCount1">The first leg's day counter; the index's when <see langword="null"/>, QuantLib's empty
     /// day counter.</param>
     /// <param name="schedule2">The second leg's schedule.</param>
-    /// <param name="index2">The second leg's index: an Ibor or a swap index.</param>
+    /// <param name="index2">The second leg's index: an Ibor, a swap or a swap spread index.</param>
     /// <param name="dayCount2">The second leg's day counter; the index's when <see langword="null"/>.</param>
     /// <param name="context">The evaluation context, whose at-par switch the Ibor legs read.</param>
     /// <param name="intermediateCapitalExchange">Whether the nominals' changes are exchanged.</param>
@@ -67,8 +67,8 @@ public sealed class FloatFloatSwap : Swap
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">The type or a payment convention isn't a member of its
     /// enum.</exception>
-    /// <exception cref="ArgumentException">A schedule is empty or has a single date; or an index is neither an Ibor nor
-    /// a swap index.</exception>
+    /// <exception cref="ArgumentException">A schedule is empty or has a single date; or an index is neither an Ibor, a
+    /// swap nor a swap spread index.</exception>
     public FloatFloatSwap(
         SwapType type,
         double nominal1,
@@ -123,11 +123,11 @@ public sealed class FloatFloatSwap : Swap
     /// <param name="nominal1">The first leg's nominals, one per coupon.</param>
     /// <param name="nominal2">The second leg's nominals, one per coupon.</param>
     /// <param name="schedule1">The first leg's schedule.</param>
-    /// <param name="index1">The first leg's index: an Ibor or a swap index.</param>
+    /// <param name="index1">The first leg's index: an Ibor, a swap or a swap spread index.</param>
     /// <param name="dayCount1">The first leg's day counter; the index's when <see langword="null"/>, QuantLib's empty
     /// day counter.</param>
     /// <param name="schedule2">The second leg's schedule.</param>
-    /// <param name="index2">The second leg's index: an Ibor or a swap index.</param>
+    /// <param name="index2">The second leg's index: an Ibor, a swap or a swap spread index.</param>
     /// <param name="dayCount2">The second leg's day counter; the index's when <see langword="null"/>.</param>
     /// <param name="context">The evaluation context, whose at-par switch the Ibor legs read.</param>
     /// <param name="intermediateCapitalExchange">Whether the nominals' changes are exchanged.</param>
@@ -152,8 +152,8 @@ public sealed class FloatFloatSwap : Swap
     /// <exception cref="ArgumentOutOfRangeException">The type or a payment convention isn't a member of its
     /// enum.</exception>
     /// <exception cref="ArgumentException">A sequence's size doesn't match its leg's coupons; a schedule has a single
-    /// date; a cap or floor sequence mixes null and given values; or an index is neither an Ibor nor a swap
-    /// index.</exception>
+    /// date; a cap or floor sequence mixes null and given values; or an index is neither an Ibor, a swap nor a swap
+    /// spread index.</exception>
     public FloatFloatSwap(
         SwapType type,
         IEnumerable<double> nominal1,
@@ -379,6 +379,21 @@ public sealed class FloatFloatSwap : Swap
             cms.IsInArrears,
             cms.ExCouponDate,
             cms.FixingConvention).SetPricer(cms.Pricer),
+        CmsSpreadCoupon spread => new CmsSpreadCoupon(
+            spread.Date,
+            spread.ContractNominal,
+            spread.AccrualStartDate,
+            spread.AccrualEndDate,
+            spread.FixingDays,
+            spread.SwapSpreadIndex,
+            spread.Gearing,
+            spread.Spread + shift,
+            spread.ReferencePeriodStart,
+            spread.ReferencePeriodEnd,
+            spread.DayCounter,
+            spread.IsInArrears,
+            spread.ExCouponDate,
+            spread.FixingConvention).SetPricer(spread.Pricer),
         _ => throw new NanoQLException("unexpected coupon on a float-float swap's leg"),
     };
 
@@ -667,6 +682,20 @@ public sealed class FloatFloatSwap : Swap
                     schedule2, cms2, nominal2, dayCount2, convention2, spread2, gearing2, cappedRate2, flooredRate2);
             }
 
+            if (index1 is SwapSpreadIndex cmsspread1)
+            {
+                leg1 = BuildCmsSpreadLeg(
+                    schedule1, cmsspread1, nominal1, dayCount1, convention1, spread1, gearing1, cappedRate1,
+                    flooredRate1);
+            }
+
+            if (index2 is SwapSpreadIndex cmsspread2)
+            {
+                leg2 = BuildCmsSpreadLeg(
+                    schedule2, cmsspread2, nominal2, dayCount2, convention2, spread2, gearing2, cappedRate2,
+                    flooredRate2);
+            }
+
             List<CashFlow> legs1 = [.. leg1];
             List<CashFlow> legs2 = [.. leg2];
             if (intermediateCapitalExchange)
@@ -793,7 +822,7 @@ public sealed class FloatFloatSwap : Swap
                 throw new ArgumentNullException(paramName, message);
             }
 
-            if (index is not (IborIndex or SwapIndex))
+            if (index is not (IborIndex or SwapIndex or SwapSpreadIndex))
             {
                 throw new ArgumentException(message, paramName);
             }
@@ -842,6 +871,36 @@ public sealed class FloatFloatSwap : Swap
             List<double?> floors)
         {
             CmsLeg leg = new CmsLeg(schedule, index)
+                .WithNotionals(nominals)
+                .WithPaymentDayCounter(dayCount)
+                .WithPaymentAdjustment(convention)
+                .WithSpreads(spreads)
+                .WithGearings(gearings);
+            if (caps[0] is not null)
+            {
+                leg = leg.WithCaps(caps);
+            }
+
+            if (floors[0] is not null)
+            {
+                leg = leg.WithFloors(floors);
+            }
+
+            return leg.ToLeg();
+        }
+
+        private static ImmutableArray<CashFlow> BuildCmsSpreadLeg(
+            Schedule schedule,
+            SwapSpreadIndex index,
+            List<double> nominals,
+            DayCounter? dayCount,
+            BusinessDayConvention convention,
+            List<double> spreads,
+            List<double> gearings,
+            List<double?> caps,
+            List<double?> floors)
+        {
+            CmsSpreadLeg leg = new CmsSpreadLeg(schedule, index)
                 .WithNotionals(nominals)
                 .WithPaymentDayCounter(dayCount)
                 .WithPaymentAdjustment(convention)

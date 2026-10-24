@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/cms.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCmsMarketCalibration, testSabrCubeRecalibrationInitializesLazily (S-cms's CmsMarket, CmsMarketCalibration and the cube's recalibration members)
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -278,6 +277,112 @@ public class CmsTests
         }
 
         Assert.True(failures.Count == 0, string.Join("\n", failures));
+    }
+
+    // Adapted: the market's quotes are their values; the market and the calibration take the context (QuantLib's
+    // global evaluation date), and each compute returns a results record whose result is QuantLib's return value and
+    // whose error is QuantLib's error(); each calibration starts from the cube it was given, where QuantLib's
+    // recalibrates the one cube in place, call after call, so its later calibrations start from the earlier ones'
+    // betas. QuantLib's assertions are on ranges and sizes, which hold either way.
+    [Fact]
+    public void TestCmsMarketCalibration()
+    {
+        // Testing CMS market calibration...
+
+        var vars = new CommonVars();
+        Period[] swapLengths = [1 * TimeUnit.Years, 5 * TimeUnit.Years, 10 * TimeUnit.Years, 20 * TimeUnit.Years];
+        var sabrCube = (XabrSwaptionVolatilityCube<SwaptionVolCubeSabrModel>)vars.SabrVolCube1;
+        Period calibrationTenor = sabrCube.SwapTenors[0];
+        SwapIndex[] swapIndexes = [new EuriborSwapIsdaFixA(calibrationTenor, vars.TermStructure)];
+        double[][] bidAskSpreads =
+        [
+            [0.01, 0.011],
+            [0.012, 0.013],
+            [0.014, 0.015],
+            [0.016, 0.017],
+        ];
+        CmsCouponPricer[] pricers = [vars.AnalyticPricers[0]];
+        var cmsMarket = new CmsMarket(
+            swapLengths, swapIndexes, vars.IborIndex, bidAskSpreads, pricers, vars.TermStructure, vars.Context);
+        var weights = new Matrix(4, 1, 1.0);
+        var endCriteria = new EndCriteria(20, 10, 1e-6, 1e-6, 1e-6);
+        OptimizationMethod method = new LevenbergMarquardt(1e-8, 1e-8, 1e-8);
+        OptimizationMethod simplex = new Simplex(0.1);
+
+        Assert.True(Math.Abs(CmsMarketCalibration.BetaTransformDirect(CmsMarketCalibration.BetaTransformInverse(0.5)) - 0.5) <= 1e-12 * 0.5 / 100);
+        Assert.Equal(0.000001, CmsMarketCalibration.BetaTransformDirect(20.0));
+        Assert.Equal(0.000001, CmsMarketCalibration.BetaTransformDirect(-20.0));
+        Assert.True(Math.Abs(CmsMarketCalibration.ReversionTransformDirect(CmsMarketCalibration.ReversionTransformInverse(0.01)) - 0.01) <= 1e-12 * 0.01 / 100);
+
+        foreach (CmsMarketCalibrationCalibrationType calibrationType in new[]
+        {
+            CmsMarketCalibrationCalibrationType.OnSpread,
+            CmsMarketCalibrationCalibrationType.OnPrice,
+            CmsMarketCalibrationCalibrationType.OnForwardCmsPrice,
+        })
+        {
+            var calibration = new CmsMarketCalibration(sabrCube, cmsMarket, weights, calibrationType);
+            var guess = new Vector(2);
+            guess[0] = 0.5;
+            guess[1] = 0.01;
+            CmsMarketCalibrationResults<Vector> result = calibration.Compute(endCriteria, method, guess, false, vars.Context);
+            Assert.Equal(2, result.Result.Size);
+            Assert.True(result.Result[0] > 0.0 && result.Result[0] < 1.0);
+            Assert.True(result.Result[1] >= 0.0);
+            Assert.True(double.IsFinite(result.Error));
+            Assert.True(result.Error < 1.0);
+        }
+
+        var fixedCalibration = new CmsMarketCalibration(sabrCube, cmsMarket, weights, CmsMarketCalibrationCalibrationType.OnSpread);
+        var fixedGuess = new Vector(2);
+        fixedGuess[0] = 0.5;
+        fixedGuess[1] = 0.01;
+        Vector fixedResult = fixedCalibration.Compute(endCriteria, method, fixedGuess, true, vars.Context).Result;
+        Assert.Equal(2, fixedResult.Size);
+        Assert.Equal(fixedGuess[1], fixedResult[1]);
+
+        var matrixGuess = new Matrix(4, 1, 0.5);
+        Matrix matrixResult = fixedCalibration.Compute(endCriteria, method, matrixGuess, true, vars.Context, 0.01).Result;
+        Assert.Equal(4, matrixResult.Rows);
+        Assert.Equal(2, matrixResult.Columns);
+        Assert.Equal(0.01, matrixResult[0, 1]);
+
+        Matrix freeMatrixResult = fixedCalibration.Compute(endCriteria, simplex, matrixGuess, false, vars.Context, 0.01).Result;
+        Assert.Equal(4, freeMatrixResult.Rows);
+        Assert.Equal(2, freeMatrixResult.Columns);
+
+        var parametricGuess = new Matrix(3, 1, 0.5);
+        parametricGuess[2, 0] = 0.1;
+        Matrix parametricResult = fixedCalibration.ComputeParametric(endCriteria, method, parametricGuess, true, vars.Context, 0.01).Result;
+        Assert.Equal(3, parametricResult.Rows);
+        Assert.Equal(2, parametricResult.Columns);
+        Assert.Equal(0.01, parametricResult[0, 1]);
+
+        Matrix freeParametricResult = fixedCalibration.ComputeParametric(endCriteria, method, parametricGuess, false, vars.Context, 0.01).Result;
+        Assert.Equal(3, freeParametricResult.Rows);
+        Assert.Equal(2, freeParametricResult.Columns);
+        Assert.True(freeParametricResult[0, 1] >= 0.0);
+
+        Assert.ThrowsAny<Exception>(() => new CmsMarketCalibration(sabrCube, cmsMarket, new Matrix(2, 1, 1.0), CmsMarketCalibrationCalibrationType.OnSpread));
+        Assert.ThrowsAny<Exception>(() => new CmsMarketCalibration(sabrCube, cmsMarket, new Matrix(1, 2, 1.0), CmsMarketCalibrationCalibrationType.OnSpread));
+        Assert.ThrowsAny<Exception>(() => fixedCalibration.Compute(endCriteria, method, new Vector(1, 0.5), false, vars.Context));
+        Assert.ThrowsAny<Exception>(() => fixedCalibration.Compute(endCriteria, method, new Matrix(5, 1, 0.5), true, vars.Context, 0.01));
+        Assert.ThrowsAny<Exception>(() => fixedCalibration.ComputeParametric(endCriteria, method, new Matrix(2, 1, 0.5), true, vars.Context, 0.01));
+    }
+
+    // Adapted: the cube calibrates at construction, so QuantLib's lazy initialization before a recalibration
+    // has nothing to defer; the recalibration returns a new cube and takes the context its at-the-money strikes read.
+    [Fact]
+    public void TestSabrCubeRecalibrationInitializesLazily()
+    {
+        // Testing lazy SABR cube initialization before recalibration...
+
+        var vars = new CommonVars();
+        var sabrCube = (XabrSwaptionVolatilityCube<SwaptionVolCubeSabrModel>)vars.SabrVolCube1;
+        double[] beta = [.. Enumerable.Repeat(0.5, sabrCube.OptionTenors.Length)];
+
+        Exception? e = Record.Exception(() => sabrCube.Recalibration(beta, sabrCube.SwapTenors[0], vars.Context));
+        Assert.Null(e);
     }
 
     private sealed class CommonVars

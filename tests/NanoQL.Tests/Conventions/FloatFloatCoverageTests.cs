@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Immutable;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Models;
@@ -18,7 +19,7 @@ namespace NanoQL.Tests.Conventions;
 /// hold on 1.44, on its fixture: Euribor 3M against 6M, 100 on each leg, a flat 5% from the settlement date, GSR (σ =
 /// 0.01, a = 0.03), exercises in two and three years. The evaluation date is fixed at 15 January 2025, where master's
 /// test runs on the day's; its values at 1e-10 (4.1503974670013793e-06 and the rest) are that day's, so they are left
-/// out, as are its spread index legs, which wait for S-cms's <c>CmsSpreadLeg</c>.
+/// out.
 /// </summary>
 public class FloatFloatCoverageTests
 {
@@ -66,13 +67,12 @@ public class FloatFloatCoverageTests
         var rebated = new RebatedExercise(Exercise, [100.0, 50.0], 2, Cal);
         Price(payer, rebated, Gaussian1dFloatFloatSwaptionEngineProbabilities.Naive, true, false, true);
         Price(Swap(SwapType.Payer, Index1, Index2, true, true), Exercise, Gaussian1dFloatFloatSwaptionEngineProbabilities.None, true, false, false);
-        Price(
-            Swap(SwapType.Payer, new EuriborSwapIsdaFixA(new Period(10, TimeUnit.Years), Curve), Index2, false, false),
-            Exercise,
-            Gaussian1dFloatFloatSwaptionEngineProbabilities.None,
-            false,
-            false,
-            false);
+        var cms5Y = new EuriborSwapIsdaFixA(new Period(5, TimeUnit.Years), Curve);
+        var cms10Y = new EuriborSwapIsdaFixA(new Period(10, TimeUnit.Years), Curve);
+        var spreadIndex = new SwapSpreadIndex("test cms spread", cms10Y, cms5Y);
+        Price(Swap(SwapType.Payer, cms10Y, Index2, false, false), Exercise, Gaussian1dFloatFloatSwaptionEngineProbabilities.None, false, false, false);
+        Price(Swap(SwapType.Receiver, spreadIndex, cms5Y, false, false), Exercise, Gaussian1dFloatFloatSwaptionEngineProbabilities.None, true, false, false);
+        Price(Swap(SwapType.Payer, Index1, spreadIndex, false, false), Exercise, Gaussian1dFloatFloatSwaptionEngineProbabilities.None, true, false, false);
 
         Assert.True(nonFlatCall > 0.0);
         Assert.True(receiverPrice > 0.0);

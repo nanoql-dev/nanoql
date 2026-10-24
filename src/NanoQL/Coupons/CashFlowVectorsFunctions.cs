@@ -11,7 +11,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/cashflowvectors.hpp ql/cashflows/cashflowvectors.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: FloatingDigitalLeg, which waits for S-cms with the digital coupons
 
 using System.Collections.Immutable;
 using NanoQL.Indexes;
@@ -139,6 +138,130 @@ public static class CashFlowVectorsFunctions
             exCouponAdjustment,
             exCouponEndOfMonth,
             fixingConvention,
+            stored: false,
+            out Exception? zeroGearingRefusal);
+        return zeroGearingRefusal is null ? leg : throw zeroGearingRefusal;
+    }
+
+    /// <summary>
+    /// A leg of digital floating-rate coupons, one per schedule period: QuantLib's <c>FloatingDigitalLeg</c> template,
+    /// with its coupon types given as the factories that build them. A period whose gearing is zero is a fixed-rate
+    /// coupon paying the spread; any other is a digital coupon built by <paramref name="digitalCoupon"/> on the
+    /// floating coupon <paramref name="floatingCoupon"/> builds.
+    /// </summary>
+    /// <remarks>
+    /// A per-period vector gives each period its element, the last element past its end, and the default when empty: a
+    /// nominal and a gearing of 1, the index's fixing days, a spread of 0, and no call or put strike or payoff. A
+    /// zero-gearing period's fixed coupon pays the spread, 0 by default, where QuantLib's defaults it to 1.0 there, so
+    /// that such a period of a leg without spreads pays 100% (R8, the S-cms plan's CMR5 (vii); QuantLib's
+    /// <c>FloatingLeg</c> on the same period pays 0). The floating coupons take no ex-coupon date and fix on the
+    /// preceding business day, as QuantLib's template builds them.
+    /// </remarks>
+    /// <typeparam name="TIndex">The index type.</typeparam>
+    /// <typeparam name="TCoupon">The floating coupon type.</typeparam>
+    /// <param name="floatingCoupon">The factory of the floating coupon, from QuantLib's constructor arguments: the
+    /// payment date, nominal, accrual start and end, fixing days, index, gearing, spread, reference period start and
+    /// end, payment day counter and in-arrears flag.</param>
+    /// <param name="digitalCoupon">The factory of the digital coupon on it, from QuantLib's constructor arguments: the
+    /// underlying, the call's strike, position, at-the-money flag and payoff, the put's, the replication and the naked
+    /// option flag.</param>
+    /// <param name="schedule">The schedule of accrual dates.</param>
+    /// <param name="nominals">The nominals.</param>
+    /// <param name="index">The index.</param>
+    /// <param name="paymentDayCounter">The accrual day counter, or <see langword="null"/>, QuantLib's empty day
+    /// counter, which leaves each floating coupon the index's; a period with a zero gearing then refuses the leg, once
+    /// every period is built.</param>
+    /// <param name="paymentAdj">The business-day convention of the payment dates.</param>
+    /// <param name="fixingDays">The fixing days, null elements taking the index's.</param>
+    /// <param name="gearings">The gearings.</param>
+    /// <param name="spreads">The spreads.</param>
+    /// <param name="isInArrears">Whether the coupons fix at the end of their periods.</param>
+    /// <param name="callStrikes">The call strikes, null elements for no call.</param>
+    /// <param name="callPosition">The calls' position.</param>
+    /// <param name="isCallAtmIncluded">Whether a fixed rate at a call's strike pays the call.</param>
+    /// <param name="callDigitalPayoffs">The calls' cash payoffs, null elements for asset-or-nothing calls.</param>
+    /// <param name="putStrikes">The put strikes, null elements for no put.</param>
+    /// <param name="putPosition">The puts' position.</param>
+    /// <param name="isPutAtmIncluded">Whether a fixed rate at a put's strike pays the put.</param>
+    /// <param name="putDigitalPayoffs">The puts' cash payoffs, null elements for asset-or-nothing puts.</param>
+    /// <param name="replication">The replication, or <see langword="null"/> for the digital coupon's default.</param>
+    /// <param name="nakedOption">Whether the coupons pay the options alone.</param>
+    /// <returns>The leg.</returns>
+    /// <exception cref="ArgumentException">No nominal is given; a nominal, gearing, spread or strike vector has more
+    /// elements than the schedule has periods; the schedule is empty; or a period has a zero gearing and no payment day
+    /// counter is given.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">A fixing-days element is negative, or a convention isn't a member
+    /// of its type.</exception>
+    public static ImmutableArray<CashFlow> FloatingDigitalLeg<TIndex, TCoupon>(
+        Func<Date, double, Date, Date, int?, TIndex, double, double, Date, Date, DayCounter?, bool, TCoupon> floatingCoupon,
+        Func<TCoupon, double?, PositionType, bool, double?, double?, PositionType, bool, double?, DigitalReplication?, bool,
+            CashFlow> digitalCoupon,
+        Schedule schedule,
+        IEnumerable<double> nominals,
+        TIndex index,
+        DayCounter? paymentDayCounter,
+        BusinessDayConvention paymentAdj,
+        IEnumerable<int?> fixingDays,
+        IEnumerable<double> gearings,
+        IEnumerable<double> spreads,
+        bool isInArrears,
+        IEnumerable<double?> callStrikes,
+        PositionType callPosition,
+        bool isCallAtmIncluded,
+        IEnumerable<double?> callDigitalPayoffs,
+        IEnumerable<double?> putStrikes,
+        PositionType putPosition,
+        bool isPutAtmIncluded,
+        IEnumerable<double?> putDigitalPayoffs,
+        DigitalReplication? replication,
+        bool nakedOption = false)
+        where TIndex : InterestRateIndex
+        where TCoupon : FloatingRateCoupon
+    {
+        ArgumentNullException.ThrowIfNull(floatingCoupon);
+        ArgumentNullException.ThrowIfNull(digitalCoupon);
+        ArgumentNullException.ThrowIfNull(schedule);
+        ArgumentNullException.ThrowIfNull(nominals);
+        ArgumentNullException.ThrowIfNull(index);
+        ArgumentNullException.ThrowIfNull(fixingDays);
+        ArgumentNullException.ThrowIfNull(gearings);
+        ArgumentNullException.ThrowIfNull(spreads);
+        ArgumentNullException.ThrowIfNull(callStrikes);
+        ArgumentNullException.ThrowIfNull(callDigitalPayoffs);
+        ArgumentNullException.ThrowIfNull(putStrikes);
+        ArgumentNullException.ThrowIfNull(putDigitalPayoffs);
+        ImmutableArray<int?> days = [.. fixingDays];
+        foreach (int? d in days)
+        {
+            if (d is int count)
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(count, nameof(fixingDays));
+            }
+        }
+
+        EnumArguments.Check(paymentAdj, nameof(paymentAdj));
+        ImmutableArray<CashFlow> leg = BuildDigital(
+            floatingCoupon,
+            digitalCoupon,
+            schedule,
+            [.. nominals],
+            index,
+            paymentDayCounter,
+            paymentAdj,
+            days,
+            [.. gearings],
+            [.. spreads],
+            isInArrears,
+            [.. callStrikes],
+            callPosition,
+            isCallAtmIncluded,
+            [.. callDigitalPayoffs],
+            [.. putStrikes],
+            putPosition,
+            isPutAtmIncluded,
+            [.. putDigitalPayoffs],
+            replication,
+            nakedOption,
             stored: false,
             out Exception? zeroGearingRefusal);
         return zeroGearingRefusal is null ? leg : throw zeroGearingRefusal;
@@ -364,6 +487,156 @@ public static class CashFlowVectorsFunctions
                         exCouponDate,
                         fixingConvention));
                 }
+            }
+        }
+
+        return leg.MoveToImmutable();
+    }
+
+    /// <summary>
+    /// The digital leg, from checked arguments, as <see cref="Build{TIndex}"/> builds a floating leg: the size checks
+    /// refuse with <see cref="ArgumentException"/> for a caller's arguments and with <see cref="NanoQLException"/> for
+    /// a builder's stored settings, and a zero-gearing period without a payment day counter is refused once the leg is
+    /// built, in <paramref name="zeroGearingRefusal"/>.
+    /// </summary>
+    internal static ImmutableArray<CashFlow> BuildDigital<TIndex, TCoupon>(
+        Func<Date, double, Date, Date, int?, TIndex, double, double, Date, Date, DayCounter?, bool, TCoupon> floatingCoupon,
+        Func<TCoupon, double?, PositionType, bool, double?, double?, PositionType, bool, double?, DigitalReplication?, bool,
+            CashFlow> digitalCoupon,
+        Schedule schedule,
+        ImmutableArray<double> nominals,
+        TIndex index,
+        DayCounter? paymentDayCounter,
+        BusinessDayConvention paymentAdj,
+        ImmutableArray<int?> fixingDays,
+        ImmutableArray<double> gearings,
+        ImmutableArray<double> spreads,
+        bool isInArrears,
+        ImmutableArray<double?> callStrikes,
+        PositionType callPosition,
+        bool isCallAtmIncluded,
+        ImmutableArray<double?> callDigitalPayoffs,
+        ImmutableArray<double?> putStrikes,
+        PositionType putPosition,
+        bool isPutAtmIncluded,
+        ImmutableArray<double?> putDigitalPayoffs,
+        DigitalReplication? replication,
+        bool nakedOption,
+        bool stored,
+        out Exception? zeroGearingRefusal)
+        where TIndex : InterestRateIndex
+        where TCoupon : FloatingRateCoupon
+    {
+        zeroGearingRefusal = null;
+
+        // QuantLib's period count is a Size, which wraps to its largest value for an empty schedule: every size check
+        // passes, and the schedule is refused after QuantLib's checks, before the leg reserves its coupons.
+        int n = schedule.Empty ? int.MaxValue : schedule.Size - 1;
+        if (nominals.IsEmpty)
+        {
+            throw Refused("no notional given", nameof(nominals), stored);
+        }
+
+        if (nominals.Length > n)
+        {
+            throw Refused($"too many nominals ({nominals.Length}), only {n} required", nameof(nominals), stored);
+        }
+
+        if (gearings.Length > n)
+        {
+            throw Refused($"too many gearings ({gearings.Length}), only {n} required", nameof(gearings), stored);
+        }
+
+        if (spreads.Length > n)
+        {
+            throw Refused($"too many spreads ({spreads.Length}), only {n} required", nameof(spreads), stored);
+        }
+
+        if (callStrikes.Length > n)
+        {
+            throw Refused($"too many call rates ({callStrikes.Length}), only {n} required", nameof(callStrikes), stored);
+        }
+
+        if (putStrikes.Length > n)
+        {
+            throw Refused($"too many put rates ({putStrikes.Length}), only {n} required", nameof(putStrikes), stored);
+        }
+
+        if (schedule.Empty)
+        {
+            throw Refused("empty schedule", nameof(schedule), stored);
+        }
+
+        ImmutableArray<CashFlow>.Builder leg = ImmutableArray.CreateBuilder<CashFlow>(n);
+
+        // the following is not always correct. QuantLib's empty calendar, null here, is used unchecked.
+        Calendar calendar = schedule.Calendar ?? EmptyCalendar.Instance;
+
+        for (int i = 0; i < n; ++i)
+        {
+            Date start = schedule.Date(i), refStart = start;
+            Date end = schedule.Date(i + 1), refEnd = end;
+            Date paymentDate = calendar.Adjust(end, paymentAdj);
+            if (i == 0 && schedule.HasIsRegular && schedule.HasTenor && !schedule.IsRegular(i + 1))
+            {
+                BusinessDayConvention bdc = schedule.BusinessDayConvention;
+                refStart = calendar.Adjust(end - schedule.Tenor(), bdc);
+            }
+
+            if (i == n - 1 && schedule.HasIsRegular && schedule.HasTenor && !schedule.IsRegular(i + 1))
+            {
+                BusinessDayConvention bdc = schedule.BusinessDayConvention;
+                refEnd = calendar.Adjust(start + schedule.Tenor(), bdc);
+            }
+
+            if (Get(gearings, i, 1.0) == 0.0)
+            {
+                // fixed coupon, at the spread (0 by default, where QuantLib's is 1.0: CMR5 (vii)); QuantLib builds it
+                // on an empty day counter and fails only when it is priced, so the leg is refused once it is built
+                if (paymentDayCounter is null)
+                {
+                    zeroGearingRefusal ??=
+                        Refused("no day counter implementation provided", nameof(paymentDayCounter), stored);
+                }
+
+                leg.Add(new FixedRateCoupon(
+                    paymentDate,
+                    Get(nominals, i, 1.0),
+                    Get(spreads, i, 0.0),
+                    paymentDayCounter ?? new Actual365Fixed(),
+                    start,
+                    end,
+                    refStart,
+                    refEnd));
+            }
+            else
+            {
+                // floating digital coupon
+                TCoupon underlying = floatingCoupon(
+                    paymentDate,
+                    Get(nominals, i, 1.0),
+                    start,
+                    end,
+                    Get(fixingDays, i, (int?)index.FixingDays),
+                    index,
+                    Get(gearings, i, 1.0),
+                    Get(spreads, i, 0.0),
+                    refStart,
+                    refEnd,
+                    paymentDayCounter,
+                    isInArrears);
+                leg.Add(digitalCoupon(
+                    underlying,
+                    Get(callStrikes, i, null),
+                    callPosition,
+                    isCallAtmIncluded,
+                    Get(callDigitalPayoffs, i, null),
+                    Get(putStrikes, i, null),
+                    putPosition,
+                    isPutAtmIncluded,
+                    Get(putDigitalPayoffs, i, null),
+                    replication,
+                    nakedOption));
             }
         }
 

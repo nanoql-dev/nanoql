@@ -282,6 +282,18 @@ Facts:
 
 - `ANullPayoffIsRefusedBeforeItIsRead`
 
+## BlackIborBelowShiftTests
+
+[`Divergences/BlackIborBelowShiftTests.cs`](../tests/NanoQL.Tests/Divergences/BlackIborBelowShiftTests.cs)
+
+The Black Ibor pricer's option struck below −shift on a lognormal volatility (the S-cms plan's CMR5 (xxiii), its Ibor part): QuantLib's `BlackIborCouponPricer::optionletRate` calls `blackFormula` at the effective strike (`couponpricer.cpp`), which refuses a strike below −shift ("strike + displacement (-0.005 + 0) must be non-negative"), so a capped or floored Ibor coupon struck there, and a digital Ibor coupon whose replication strikes reach there, refuse; at −shift itself the formula prices the intrinsic. As ruled: at or below −shift a caplet is the forward less the strike and a floorlet 0, the formula's limit there, on a forward above −shift; a forward at or below −shift reaches the formula and its refusal, as QuantLib's. QuantLib's check: its Black formula at −shift + 1e-12, and its digital coupon struck 1e-12 above its replication's reach (the wheel and the C++ harness).
+
+Facts:
+
+- `ACapAtOrBelowMinusShiftIsTheForwardsIntrinsic`
+- `ADigitalAtMinusShiftReplicatesToOne`
+- `AForwardAtOrBelowMinusShiftIsRefused`
+
 ## BlackKarasinskiTreeFittingTests
 
 [`Divergences/BlackKarasinskiTreeFittingTests.cs`](../tests/NanoQL.Tests/Divergences/BlackKarasinskiTreeFittingTests.cs)
@@ -758,6 +770,50 @@ Facts:
 - `TheCoxIngersollRossTreeConvergesToTheAnalyticPrice`
 - `TheExtendedCoxIngersollRossTreeConvergesToTheAnalyticPrice`
 
+## CmsCalibrationFixedReversionTests
+
+[`Divergences/CmsCalibrationFixedReversionTests.cs`](../tests/NanoQL.Tests/Divergences/CmsCalibrationFixedReversionTests.cs)
+
+A fixed reversion given to the CMS market calibration (the S-cms plan's CMR5 (xxvi)): QuantLib passes it through the transform's round trip, √(m²) = |m| (`cmsmarketcalibration.cpp:362-365` with `:188-191`; the matrix and parametric overloads `:430-433`, `:520-523`), and reports m (`:373-374`), so a negative reversion prices as its absolute value: on the wheel, on the vectors' market with the linear TSR pricer, a fixed −0.03 fits to an error of 0.010816623721669666, +0.03's, where QuantLib's own fixed path with no reversion given, on pricers built at −0.03, fits to 0.010817563120824606. nanoql passes the reversion as given. QuantLib's check: that path, the pricers' own reversion repriced as it stands (`:188-189`); here on nanoql's pricers, whose TSR prices on the SABR cube differ from QuantLib's (CMR5 (xxvii)).
+
+Facts:
+
+- `AGivenNegativeReversionPricesAsGiven`
+- `TheMatrixAndParametricOverloadsPassItAsGiven`
+
+## CmsCalibrationGuessTests
+
+[`Divergences/CmsCalibrationGuessTests.cs`](../tests/NanoQL.Tests/Divergences/CmsCalibrationGuessTests.cs)
+
+The CMS market calibration's guess with the reversion fixed (the S-cms plan's CMR5 (x)): QuantLib's vector overload passes the betas to the optimizer untransformed on that path alone (`cmsmarketcalibration.cpp:359-366`), where its free path and its matrix and parametric overloads transform them (`:379-381`, `:426-427`), and reads the result back through the transform (`:372`), so a guess of β starts the fit at e^(−β²): on the wheel, on the vectors' market quoting the spreads the cube's own fit implies (0.0017046615749698334, 0.0018719617461963108, 0.0020272382060141435, 0.0022422177072925265), the fit from a guess of 0.5 returns a beta of 0.5000000003809772 and an error of 4.659445968967119e-16, and on those spreads 2bp lower a beta of 0.9999985865285671, another fit. nanoql transforms the guess on every path. QuantLib's check: its vector overload given the guess's transform, √(−ln 0.5), which starts the fit at a beta of 0.5: there a beta of 0.5000000000000001 and an error of 0, and 2bp lower 1e-06 and 0.00019999259008147676. The matrix overload, which transforms, calibrates a beta per swap length, another problem on this market, and refuses a market of one length ("not enough points to interpolate").
+
+Facts:
+
+- `TheFixedPathStartsAtTheGuess`
+- `FromTheGuessItFindsQuantLibsFit`
+
+## CmsCalibrationReversionTransformTests
+
+[`Divergences/CmsCalibrationReversionTransformTests.cs`](../tests/NanoQL.Tests/Divergences/CmsCalibrationReversionTransformTests.cs)
+
+The CMS market calibration's reversion transform (the S-cms plan's CMR5 (xi)): QuantLib fits the reversion through y = m² unconstrained and reads it back as √y (`cmsmarketcalibration.hpp:84-89`), so a fit that ends at y below 0 returns a NaN reversion beside finite betas and error: on the wheel, on the vectors' market, Simplex(0.1) fits with the reversion free on the Standard model, whose prices don't read it, return a NaN reversion on spreads from every guess of 0.05 to 1e-4 (a beta of 0.2425733030330998, an error of 0.011716914297575421), and finite ones on prices and forward prices. nanoql reads √|y|, QuantLib's map wherever y ≥ 0. QuantLib's check: its values on every fit, betas and errors bit for bit, and the reversion where QuantLib's is finite. On forward prices the two Simplex paths agree to the bit for 114 evaluations; at the 115th, at the same point, one SABR section fit of the recalibrated cube, the 10-year expiry on the 2-year tenor, lands on the other of two solutions QuantLib's own fit flips between when its beta moves one ulp (S7's ill-conditioned section fit, whose outputs the S7 plan's S7R6 filter drops from the vectors), the costs 3.5e-12 apart, and from there the fit lands 2.8e-8 away in beta.
+
+Facts:
+
+- `TheLevenbergMarquardtFitsKeepQuantLibsValues`
+- `TheSimplexFitsHaveAFiniteReversion`
+
+## CmsMarketInputRefusalTests
+
+[`Divergences/CmsMarketInputRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/CmsMarketInputRefusalTests.cs)
+
+`CmsMarket`'s quotes and weights of other sizes. QuantLib checks the first row of bid and ask spreads only, reading it unchecked when there is none (`cmsmarket.cpp:63-69`), and reads every row's two columns per index (`:80`); its weighted errors read the weights unchecked (`:207`, `:218`), its calibration checking them when it is built: each an undefined read past a row's or a matrix's end. nanoql refuses each on entry, the quotes before the first read.
+
+Facts:
+
+- `AnEmptyOrRaggedQuoteTableIsRefused`
+- `WeightsOfAnotherShapeAreRefused`
+
 ## CompositeClockTests
 
 [`Divergences/CompositeClockTests.cs`](../tests/NanoQL.Tests/Divergences/CompositeClockTests.cs)
@@ -985,6 +1041,29 @@ Facts:
 
 - `TheSpreadDiscountAndUltimateForwardCurvesExtrapolateTheirBase`
 - `ThePiecewiseSpreadCurveExtrapolatesItsBase`
+
+## DigitalCouponExCouponTests
+
+[`Divergences/DigitalCouponExCouponTests.cs`](../tests/NanoQL.Tests/Divergences/DigitalCouponExCouponTests.cs)
+
+A digital coupon's ex-coupon date and fixing convention (the S-cms plan's CMR5 (ix)): QuantLib's `DigitalCoupon` builds its floating coupon from twelve of the underlying's terms but not its ex-coupon date or its fixing convention, which take their defaults, no date and Preceding (`digitalcoupon.cpp:39-50`, `floatingratecoupon.hpp:60-61`), so a digital coupon on an underlying that goes ex-coupon accrues to its payment as if it didn't, and one on an underlying whose fixing convention isn't Preceding can fix on another date than its underlying. nanoql's keeps both of the underlying's. QuantLib's check: the underlying coupon's ex-coupon date and accrued amounts, which a digital coupon with neither option reproduces (the wheel): a 6-month Euribor coupon from 19 January 2026, paid 20 July 2026 and ex-coupon on 13 July, on the harness vectors' 3.1% curve and 20% lognormal volatility, accrues 14,892.889329889716 on 1e6 by 12 July and −599.1392259151036 on 13 July; and the capped coupon on the same underlying, which passes both terms (`capflooredcoupon.cpp:30-43`): on a coupon from Saturday 18 January 2025 with 0 fixing days and a Modified Following fixing convention, QuantLib's digital coupon fixes on 17 January where its underlying fixes on 20 January (the C++ harness).
+
+Facts:
+
+- `TheUnderlyingsExCouponDateIsKept`
+- `TheUnderlyingsFixingConventionIsKept`
+- `WithNeitherOptionItAccruesAsItsUnderlying`
+
+## DigitalLegNakedOptionTests
+
+[`Divergences/DigitalLegNakedOptionTests.cs`](../tests/NanoQL.Tests/Divergences/DigitalLegNakedOptionTests.cs)
+
+The digital legs' naked option flag (the S-cms plan's CMR5 (viii)): QuantLib's `DigitalCmsLeg`, `DigitalIborLeg` and `DigitalCmsSpreadLeg` leave `nakedOption_` uninitialized unless `withNakedOption` is called (`digitalcmscoupon.cpp`, `digitaliborcoupon.cpp`, `digitalcmsspreadcoupon.cpp`, their constructors), so a leg built without it reads an indeterminate value, undefined behaviour. nanoql's legs default to `false`, the covered option, the coupon's own default. QuantLib's check: its legs built with `withNakedOption(false)` (the C++ harness's vectors): on the `cash calls at 5%` legs, the Ibor leg's first coupon pays 0.030579238011458898 and the CMS leg's 0.06130050779731958, where the naked legs pay 0 and 0.010000000000000286.
+
+Facts:
+
+- `TheIborAndCmsLegsDefaultToACoveredOption`
+- `TheCmsSpreadLegDefaultsToACoveredOption`
 
 ## DiscretizedAssetStateTests
 
@@ -1339,6 +1418,17 @@ The float-float swap's refusal of a second leg's nominals that don't match its s
 Facts:
 
 - `TheSecondLegsCheckPrintsTheSchedulesSize`
+
+## FloatingDigitalLegSpreadTests
+
+[`Divergences/FloatingDigitalLegSpreadTests.cs`](../tests/NanoQL.Tests/Divergences/FloatingDigitalLegSpreadTests.cs)
+
+The digital legs' zero-gearing period (the S-cms plan's CMR5 (vii)): QuantLib's `FloatingDigitalLeg` builds a period of zero gearing as a fixed coupon at the period's spread, read with a default of 1.0 (`cashflowvectors.hpp:282-286`), where `FloatingLeg` reads 0.0, so with no spreads given the period pays 100%: on the C++ harness, a two-year semiannual digital Ibor leg from 17 January 2025 with gearings (0, 1) and no spreads pays its first coupon at a fixed 1.0, at 0.0 with a spread of 0 given and at 0.01 with 0.01. nanoql reads 0.0, as `FloatingLeg` does. QuantLib's check: its Ibor leg on the same schedule and gearings, whose first coupon is fixed at 0.0 with no spreads given (the wheel).
+
+Facts:
+
+- `AZeroGearingPeriodWithoutASpreadPaysNothing`
+- `TheCmsLegReadsTheSameDefault`
 
 ## FloatingLegUndefinedInputsTests
 

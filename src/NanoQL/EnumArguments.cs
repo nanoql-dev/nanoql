@@ -275,6 +275,19 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a calibration type outside <see cref="CmsMarketCalibrationCalibrationType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "unknown/illegal
+    /// calibration type" (<c>cmsmarketcalibration.cpp:156</c>).</exception>
+    internal static void Check(CmsMarketCalibrationCalibrationType value, string paramName)
+    {
+        if (value is < CmsMarketCalibrationCalibrationType.OnSpread or > CmsMarketCalibrationCalibrationType.OnForwardCmsPrice)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown/illegal calibration type");
+        }
+    }
+
     /// <summary>Refuses a strategy outside <see cref="LinearTsrPricerSettingsStrategy"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

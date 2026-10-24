@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 645 | 87 |
-| partial | 27 | 25 |
-| ported | 588 | 68 |
+| not started | 638 | 85 |
+| partial | 24 | 25 |
+| ported | 598 | 70 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -88,16 +88,16 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `capflooredcoupon` | ported | Coupons/CapFlooredCoupon/CappedFlooredCmsCoupon.cs, Coupons/CapFlooredCoupon/CappedFlooredCoupon.cs, Coupons/CapFlooredCoupon/CappedFlooredIborCoupon.cs |  |
 | `capflooredinflationcoupon` | not started |  | no nanoql type: CappedFlooredYoYInflationCoupon |
 | `cashflows` | ported | Coupons/CashFlows.cs |  |
-| `cashflowvectors` | partial | Coupons/CashFlowVectorsFunctions.cs | partial: FloatingDigitalLeg, which waits for S-cms with the digital coupons |
+| `cashflowvectors` | ported | Coupons/CashFlowVectorsFunctions.cs |  |
 | `cmscoupon` | ported | Coupons/CmsCoupon.cs, Coupons/CmsLeg.cs |  |
 | `conundrumpricer` | ported | Coupons/ConundrumPricer/AnalyticHaganPricer.cs, Coupons/ConundrumPricer/ConundrumIntegrand.cs, Coupons/ConundrumPricer/GFunction.cs, Coupons/ConundrumPricer/GFunctionExactYield.cs, Coupons/ConundrumPricer/GFunctionFactory.cs, Coupons/ConundrumPricer/GFunctionFactoryYieldCurveModel.cs, Coupons/ConundrumPricer/GFunctionStandard.cs, Coupons/ConundrumPricer/GFunctionWithShifts.cs, Coupons/ConundrumPricer/HaganPricer.cs, Coupons/ConundrumPricer/HaganPricerState.cs, Coupons/ConundrumPricer/MarketQuotedOptionPricer.cs, Coupons/ConundrumPricer/NumericHaganPricer.cs, Coupons/ConundrumPricer/NumericHaganPricerIntegrationLimits.cs, Coupons/ConundrumPricer/VanillaOptionPricer.cs | no nanoql type: NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand |
 | `coupon` | ported | Coupons/Coupon.cs |  |
-| `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CmsCouponPricer.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/CouponRateView.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IMeanRevertingPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for S-cms's ports of those coupons; no nanoql type: MeanRevertingPricer |
+| `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CmsCouponPricer.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/CouponRateView.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IMeanRevertingPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the range-accrual and multiple-resets coupons, which wait for S-cms's ports of those coupons; no nanoql type: MeanRevertingPricer |
 | `cpicoupon` | ported | Coupons/CPICoupon/CPICashFlow.cs, Coupons/CPICoupon/CPICoupon.cs, Coupons/CPICoupon/CPILeg.cs |  |
 | `cpicouponpricer` | ported | Coupons/CPICouponPricer.cs |  |
-| `digitalcmscoupon` | not started |  | no nanoql type: DigitalCmsCoupon, DigitalCmsLeg |
-| `digitalcoupon` | not started |  | no nanoql type: DigitalCoupon |
-| `digitaliborcoupon` | not started |  | no nanoql type: DigitalIborCoupon, DigitalIborLeg |
+| `digitalcmscoupon` | ported | Coupons/DigitalCmsCoupon.cs, Coupons/DigitalCmsLeg.cs |  |
+| `digitalcoupon` | ported | Coupons/DigitalCoupon.cs |  |
+| `digitaliborcoupon` | ported | Coupons/DigitalIborCoupon.cs, Coupons/DigitalIborLeg.cs |  |
 | `dividend` | ported | Coupons/Dividend/Dividend.cs, Coupons/Dividend/DividendFunctions.cs, Coupons/Dividend/FixedDividend.cs, Coupons/Dividend/FractionalDividend.cs |  |
 | `duration` | ported | Coupons/DurationType.cs |  |
 | `equitycashflow` | not started |  | no nanoql type: EquityCashFlow, EquityCashFlowPricer, EquityQuantoCashFlowPricer |
@@ -235,8 +235,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `cmsspreadcoupon` | not started |  | no nanoql type: CmsSpreadCoupon, CappedFlooredCmsSpreadCoupon, CmsSpreadLeg, CmsSpreadCouponPricer |
-| `digitalcmsspreadcoupon` | not started |  | no nanoql type: DigitalCmsSpreadCoupon, DigitalCmsSpreadLeg |
+| `cmsspreadcoupon` | ported | Experimental/Coupons/CmsSpreadCoupon/CappedFlooredCmsSpreadCoupon.cs, Experimental/Coupons/CmsSpreadCoupon/CmsSpreadCoupon.cs, Experimental/Coupons/CmsSpreadCoupon/CmsSpreadCouponPricer.cs, Experimental/Coupons/CmsSpreadCoupon/CmsSpreadLeg.cs |  |
+| `digitalcmsspreadcoupon` | ported | Experimental/Coupons/DigitalCmsSpreadCoupon.cs, Experimental/Coupons/DigitalCmsSpreadLeg.cs |  |
 | `lognormalcmsspreadpricer` | not started |  | no nanoql type: LognormalCmsSpreadPricer |
 | `proxyibor` | not started |  | no nanoql type: ProxyIbor |
 | `quantocouponpricer` | not started |  | no nanoql type: BlackIborQuantoCouponPricer |
@@ -647,7 +647,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `equitytotalreturnswap` | not started |  | no nanoql type: EquityTotalReturnSwap |
 | `europeanoption` | ported | Instruments/EuropeanOption.cs |  |
 | `fixedvsfloatingswap` | ported | Instruments/FixedVsFloatingSwap.cs, Instruments/FixedVsFloatingSwapArguments.cs, Instruments/FixedVsFloatingSwapResults.cs |  |
-| `floatfloatswap` | partial | Instruments/FloatFloatSwap.cs, Instruments/FloatFloatSwapArguments.cs, Instruments/FloatFloatSwapResults.cs | partial: the swap-spread legs, QuantLib's CmsSpreadLeg on a SwapSpreadIndex, which wait for S-cms's CmsSpreadLeg |
+| `floatfloatswap` | ported | Instruments/FloatFloatSwap.cs, Instruments/FloatFloatSwapArguments.cs, Instruments/FloatFloatSwapResults.cs |  |
 | `floatfloatswaption` | ported | Instruments/FloatFloatSwaption.cs |  |
 | `forward` | not started |  | no nanoql type: Forward, ForwardTypePayoff |
 | `forwardrateagreement` | ported | Instruments/ForwardRateAgreement.cs, Instruments/ForwardRateAgreementResults.cs |  |
@@ -1893,11 +1893,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `cmsmarket` | not started |  | no nanoql type: CmsMarket |
-| `cmsmarketcalibration` | not started |  | no nanoql type: CmsMarketCalibration, CmsMarketCalibrationCalibrationType |
+| `cmsmarket` | ported | TermStructures/Volatility/Swaption/CmsMarket.cs |  |
+| `cmsmarketcalibration` | ported | TermStructures/Volatility/Swaption/CmsMarketCalibration/CmsMarketCalibration.cs, TermStructures/Volatility/Swaption/CmsMarketCalibration/CmsMarketCalibrationCalibrationType.cs, TermStructures/Volatility/Swaption/CmsMarketCalibration/CmsMarketCalibrationResults{TResult}.cs |  |
 | `gaussian1dswaptionvolatility` | ported | TermStructures/Volatility/Swaption/Gaussian1dSwaptionVolatility.cs |  |
 | `interpolatedswaptionvolatilitycube` | ported | TermStructures/Volatility/Swaption/InterpolatedSwaptionVolatilityCube.cs |  |
-| `sabrswaptionvolatilitycube` | partial | TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/IXabrCubeModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SabrSwaptionVolatilityCube.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SwaptionVolCubeSabrModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/XabrSwaptionVolatilityCube{TModel}.cs | partial: recalibration (three overloads), updateAfterRecalibration and sabrCalibrationSection, which change a calibrated cube and wait for S-cms's CmsMarketCalibration, their only user; no nanoql type: XabrModelTraits |
+| `sabrswaptionvolatilitycube` | ported | TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/IXabrCubeModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SabrSwaptionVolatilityCube.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/SwaptionVolCubeSabrModel.cs, TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/XabrSwaptionVolatilityCube{TModel}.cs | no nanoql type: XabrModelTraits |
 | `spreadedswaptionvol` | ported | TermStructures/Volatility/Swaption/SpreadedSwaptionVolatility.cs |  |
 | `swaptionconstantvol` | ported | TermStructures/Volatility/Swaption/ConstantSwaptionVolatility.cs |  |
 | `swaptionvolcube` | ported | TermStructures/Volatility/Swaption/SwaptionVolatilityCube.cs |  |
@@ -2093,9 +2093,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `cdsoption` | not started |  | 1 cases |
 | `chooseroption` | not started |  | 2 cases |
 | `cliquetoption` | not started |  | 4 cases |
-| `cms` | partial | TestSuite/CmsTests.cs | 3 of 5 cases; not yet: testCmsMarketCalibration, testSabrCubeRecalibrationInitializesLazily |
+| `cms` | ported | TestSuite/CmsTests.cs | 5 of 5 cases |
 | `cms_normal` | ported | TestSuite/CmsNormalTests.cs | 3 of 3 cases |
-| `cmsspread` | not started |  | 2 cases |
+| `cmsspread` | partial | TestSuite/CmsSpreadTests.cs | 1 of 2 cases; not yet: testCouponPricing |
 | `commodityunitofmeasure` | not started |  | 2 cases |
 | `compiledboostversion` | not ported: tests the C++ platform |  |  |
 | `compoundoption` | not started |  | 2 cases |
@@ -2112,7 +2112,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `dates` | ported | TestSuite/DatesTests.cs | 14 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; parseDates by Conventions/DateParserFormatTests.cs; not ported: intraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out) |
 | `daycounters` | ported | TestSuite/DayCountersTests.cs | 20 of 22 cases; not ported: testIntraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); testYearFractionToDateForLinearDayCounter (QL_HIGH_RESOLUTION_DATE, which the default build leaves out) |
 | `defaultprobabilitycurves` | ported | TestSuite/DefaultProbabilityCurvesTests.cs | 10 of 10 cases |
-| `digitalcoupon` | not started |  | 8 cases |
+| `digitalcoupon` | ported | TestSuite/DigitalCouponTests.cs | 8 of 8 cases |
 | `digitaloption` | partial | TestSuite/DigitalOptionTests.cs | 3 of 10 cases; not yet: testCashAtHitOrNothingAmericanValues, testAssetAtHitOrNothingAmericanValues, testCashAtExpiryOrNothingAmericanValues, testAssetAtExpiryOrNothingAmericanValues, testCashAtHitOrNothingAmericanGreeks, testCashAtHitOrNothingAmericanLowVolatility, testMCCashAtHit |
 | `distributions` | partial | TestSuite/DistributionsTests.cs | 13 of 21 cases; not yet: testBivariate, testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation |
 | `dividendoption` | partial | TestSuite/DividendOptionTests.cs | 13 of 18 cases; not yet: testEuropeanEndLimit, testCashDividendEuropeanEngine, testCashDividendEuropeanEngineWithManyDividends, testCashDividendEuropeanEngineWithSingleDividends, testZeroStrikeCallWithCashDividends |

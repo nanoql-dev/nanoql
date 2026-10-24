@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/volatility/swaption/sabrswaptionvolatilitycube.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: recalibration (three overloads), updateAfterRecalibration and sabrCalibrationSection, which change a calibrated cube and wait for S-cms's CmsMarketCalibration, their only user
 
 using System.Collections.Immutable;
 using System.Globalization;
@@ -45,8 +44,15 @@ namespace NanoQL.TermStructures;
 /// date change; this one calibrates when it is built, under the context it is given, so a refusal of the calibration
 /// comes at construction, and a new market is a new cube. The parameter guesses are read on the cube's grid, its
 /// at-the-money structure's, where QuantLib reads them on the grid of its construction-time reference date, the
-/// evaluation date: the two differ where the structure's reference date isn't that date. QuantLib's recalibration
-/// members, which change a calibrated cube, aren't ported yet. Immutable and thread-safe once built.
+/// evaluation date: the two differ where the structure's reference date isn't that date. Immutable and thread-safe
+/// once built.
+/// </para>
+/// <para>
+/// QuantLib's <c>recalibration</c> members change a calibrated cube: they set a swap tenor's β guesses and refit that
+/// tenor's sections, and <c>updateAfterRecalibration</c> then refits the dense grid. Here each
+/// <see cref="Recalibration(IEnumerable{double}, Period, EvaluationContext)"/> overload returns a new cube, a copy of
+/// this one's calibrated state with both steps applied, and leaves this cube unchanged. The β values are the fits'
+/// guesses, so they are the sections' βs where the cube fixes β and the refit's starting point where it doesn't.
 /// </para>
 /// <para>
 /// An extension point, as in QuantLib: a model of one's own is a <typeparamref name="TModel"/>, and QuantLib-Python's
@@ -72,12 +78,14 @@ public class XabrSwaptionVolatilityCube<TModel> : SwaptionVolatilityCube
     private readonly bool backwardFlat;
     private readonly double cutoffStrike;
     private readonly VolatilityType volatilityType;
-    private readonly Cube parametersGuess;
+
+    // The calibrated state: written by the constructor, and on a fresh copy by the recalibrations.
+    private Cube parametersGuess;
     private readonly Cube marketVolCube;
-    private readonly Cube volCubeAtmCalibrated;
-    private readonly Cube sparseParameters;
-    private readonly Cube? denseParameters;
-    private readonly ImmutableArray<ImmutableArray<SmileSection>> sparseSmiles;
+    private Cube volCubeAtmCalibrated;
+    private Cube sparseParameters;
+    private Cube? denseParameters;
+    private ImmutableArray<ImmutableArray<SmileSection>> sparseSmiles;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="XabrSwaptionVolatilityCube{TModel}"/> class, and calibrates it.
@@ -255,6 +263,9 @@ public class XabrSwaptionVolatilityCube<TModel> : SwaptionVolatilityCube
     /// <returns>A new matrix, laid out as <see cref="MarketVolCube()"/>'s.</returns>
     public Matrix VolCubeAtmCalibrated() => volCubeAtmCalibrated.Browse();
 
+    // Whether the cube has dense parameters: at-the-money-calibrated or calibrated in a single pass.
+    internal bool HasDenseParameters => denseParameters is not null;
+
     /// <summary>A strike spread's market volatilities at the cube's nodes.</summary>
     /// <param name="i">The strike spread's index.</param>
     /// <returns>A copy of the volatilities: a row per option tenor and a column per swap tenor.</returns>
@@ -266,6 +277,189 @@ public class XabrSwaptionVolatilityCube<TModel> : SwaptionVolatilityCube
         ArgumentOutOfRangeException.ThrowIfNegative(i);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(i, NStrikes);
         return marketVolCube.Points[i].Clone();
+    }
+
+    /// <summary>
+    /// A cube recalibrated at one β for a swap tenor: QuantLib's <c>recalibration(beta, swapTenor)</c>, each option
+    /// tenor's β guess the one given, followed by <c>updateAfterRecalibration</c>.
+    /// </summary>
+    /// <param name="beta">The β guess for every option tenor.</param>
+    /// <param name="swapTenor">The swap tenor, one of the cube's.</param>
+    /// <param name="context">The evaluation context, which the at-the-money strikes read.</param>
+    /// <returns>The new cube; this one is unchanged.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="context"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The swap tenor isn't one of the cube's.</exception>
+    /// <exception cref="NanoQLException">A fit fails or reaches the tolerance.</exception>
+    public XabrSwaptionVolatilityCube<TModel> Recalibration(double beta, Period swapTenor, EvaluationContext context) =>
+        Recalibration(Enumerable.Repeat(beta, NOptionTenors), swapTenor, context);
+
+    /// <summary>
+    /// A cube recalibrated at a β per option tenor for a swap tenor: QuantLib's <c>recalibration(beta, swapTenor)</c>,
+    /// which sets the tenor's β guesses and refits its sections, followed by <c>updateAfterRecalibration</c>, which
+    /// refits the dense grid.
+    /// </summary>
+    /// <param name="beta">The β guesses, one per option tenor.</param>
+    /// <param name="swapTenor">The swap tenor, one of the cube's.</param>
+    /// <param name="context">The evaluation context, which the at-the-money strikes read.</param>
+    /// <returns>The new cube; this one is unchanged.</returns>
+    /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">There isn't a β per option tenor, or the swap tenor isn't one of the
+    /// cube's.</exception>
+    /// <exception cref="NanoQLException">A fit fails or reaches the tolerance.</exception>
+    public XabrSwaptionVolatilityCube<TModel> Recalibration(
+        IEnumerable<double> beta, Period swapTenor, EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(beta);
+        ArgumentNullException.ThrowIfNull(context);
+        return RecalibrationStep([.. beta], swapTenor, context).UpdatedAfterRecalibration(context);
+    }
+
+    /// <summary>
+    /// A cube recalibrated on a β term structure for a swap tenor: QuantLib's
+    /// <c>recalibration(swapLengths, beta, swapTenor)</c>, the βs given at the option dates of the periods given,
+    /// interpolated linearly at the cube's option times and flat outside them, followed by
+    /// <c>updateAfterRecalibration</c>.
+    /// </summary>
+    /// <param name="swapLengths">The periods whose option dates the βs are given at, increasing; at least 2.</param>
+    /// <param name="beta">The βs, one per period.</param>
+    /// <param name="swapTenor">The swap tenor, one of the cube's.</param>
+    /// <param name="context">The evaluation context, which the at-the-money strikes read.</param>
+    /// <returns>The new cube; this one is unchanged.</returns>
+    /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The βs aren't one per period, there are fewer than 2, or the swap tenor
+    /// isn't one of the cube's.</exception>
+    /// <exception cref="NanoQLException">A fit fails or reaches the tolerance.</exception>
+    public XabrSwaptionVolatilityCube<TModel> Recalibration(
+        IEnumerable<Period> swapLengths, IEnumerable<double> beta, Period swapTenor, EvaluationContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        return RecalibrationStep(CubeBeta(swapLengths, beta), swapTenor, context).UpdatedAfterRecalibration(context);
+    }
+
+    /// <summary>
+    /// QuantLib's <c>recalibration(beta, swapTenor)</c> alone, on a copy: the tenor's β guesses set and its sections
+    /// refit, the dense grid refilled and its sections for the tenor refit; the step a market calibration's cost
+    /// evaluation takes, before <see cref="UpdatedAfterRecalibration"/> at its end.
+    /// </summary>
+    /// <param name="beta">The β guesses, one per option tenor.</param>
+    /// <param name="swapTenor">The swap tenor.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <returns>The copy.</returns>
+    internal XabrSwaptionVolatilityCube<TModel> RecalibrationStep(
+        IReadOnlyList<double> beta, Period swapTenor, EvaluationContext context)
+    {
+        if (!(beta.Count == NOptionTenors))
+        {
+            throw new ArgumentException(
+                $"beta size ({beta.Count}) must be equal to number of option tenors ({NOptionTenors})", nameof(beta));
+        }
+
+        int k = IndexOf(marketVolCube.SwapTenors, swapTenor);
+        if (!(k != marketVolCube.SwapTenors.Count))
+        {
+            throw new ArgumentException($"swap tenor ({swapTenor}) not found", nameof(swapTenor));
+        }
+
+        var copy = (XabrSwaptionVolatilityCube<TModel>)MemberwiseClone();
+        copy.parametersGuess = new Cube(parametersGuess);
+        for (int i = 0; i < NOptionTenors; ++i)
+        {
+            copy.parametersGuess.SetElement(1, i, k, beta[i]);
+        }
+
+        copy.parametersGuess.UpdateInterpolators();
+        copy.volCubeAtmCalibrated = new Cube(marketVolCube);
+        if (singlePassCalibration)
+        {
+            copy.sparseSmiles = copy.FillVolatilityCube(true, null, context);
+            copy.denseParameters = new Cube(denseParameters!);
+            copy.SabrCalibrationSection(copy.volCubeAtmCalibrated, copy.denseParameters, swapTenor, context);
+            copy.sparseParameters = new Cube(copy.denseParameters);
+        }
+        else
+        {
+            copy.sparseParameters = new Cube(sparseParameters);
+            copy.SabrCalibrationSection(marketVolCube, copy.sparseParameters, swapTenor, context);
+        }
+
+        if (isAtmCalibrated && !singlePassCalibration)
+        {
+            copy.sparseSmiles = copy.FillVolatilityCube(false, copy.sparseParameters, context);
+            copy.denseParameters = new Cube(denseParameters!);
+            copy.SabrCalibrationSection(copy.volCubeAtmCalibrated, copy.denseParameters, swapTenor, context);
+        }
+
+        return copy;
+    }
+
+    /// <summary>
+    /// QuantLib's <c>updateAfterRecalibration</c>, on a copy: the dense grid refilled from the at-the-money
+    /// volatilities and refit whole, for a cube that fills it.
+    /// </summary>
+    /// <param name="context">The evaluation context.</param>
+    /// <returns>The copy.</returns>
+    internal XabrSwaptionVolatilityCube<TModel> UpdatedAfterRecalibration(EvaluationContext context)
+    {
+        var copy = (XabrSwaptionVolatilityCube<TModel>)MemberwiseClone();
+        copy.volCubeAtmCalibrated = new Cube(marketVolCube);
+        if (singlePassCalibration)
+        {
+            copy.sparseSmiles = copy.FillVolatilityCube(true, null, context);
+            copy.denseParameters = copy.SabrCalibration(copy.volCubeAtmCalibrated, context);
+            copy.denseParameters.UpdateInterpolators();
+            copy.sparseParameters = new Cube(copy.denseParameters);
+        }
+        else if (isAtmCalibrated)
+        {
+            copy.sparseSmiles = copy.FillVolatilityCube(false, copy.sparseParameters, context);
+            copy.denseParameters = copy.SabrCalibration(copy.volCubeAtmCalibrated, context);
+            copy.denseParameters.UpdateInterpolators();
+        }
+
+        return copy;
+    }
+
+    /// <summary>
+    /// The β per option tenor of QuantLib's term-structure recalibration: the βs given at the option dates of the
+    /// periods, interpolated linearly at the cube's option times and flat outside them.
+    /// </summary>
+    /// <param name="swapLengths">The periods.</param>
+    /// <param name="beta">The βs, one per period.</param>
+    /// <returns>The βs, one per option tenor.</returns>
+    internal double[] CubeBeta(IEnumerable<Period> swapLengths, IEnumerable<double> beta)
+    {
+        ArgumentNullException.ThrowIfNull(swapLengths);
+        ArgumentNullException.ThrowIfNull(beta);
+        Period[] lengths = [.. swapLengths];
+        double[] betas = [.. beta];
+        if (!(betas.Length == lengths.Length))
+        {
+            throw new ArgumentException(
+                $"beta size ({betas.Length}) must be equal to number of swap lengths ({lengths.Length})", nameof(beta));
+        }
+
+        double[] betaTimes = [.. lengths.Select(l => TimeFromReference(OptionDateFromTenor(l)))];
+        var betaInterpolation = new LinearInterpolation(betaTimes, betas);
+        var cubeBeta = new double[OptionTimes.Length];
+        for (int i = 0; i < OptionTimes.Length; i++)
+        {
+            double t = OptionTimes[i];
+
+            // flat extrapolation ensures admissable values
+            if (t < betaTimes[0])
+            {
+                t = betaTimes[0];
+            }
+
+            if (t > betaTimes[^1])
+            {
+                t = betaTimes[^1];
+            }
+
+            cubeBeta[i] = betaInterpolation.Evaluate(t);
+        }
+
+        return cubeBeta;
     }
 
     /// <summary>
@@ -502,6 +696,156 @@ public class XabrSwaptionVolatilityCube<TModel> : SwaptionVolatilityCube
         sabrParametersCube.SetLayer(nParams + 3, endCriteriaLayer);
 
         return sabrParametersCube;
+    }
+
+    /// <summary>
+    /// The fits of one swap tenor's nodes of a market volatility cube, into a parameter cube: QuantLib's
+    /// <c>sabrCalibrationSection</c>.
+    /// </summary>
+    /// <param name="marketVolCube">The market volatilities.</param>
+    /// <param name="parametersCube">The parameter cube, whose tenor's nodes are set.</param>
+    /// <param name="swapTenor">The swap tenor.</param>
+    /// <param name="context">The evaluation context the at-the-money strikes read.</param>
+    private protected void SabrCalibrationSection(
+        Cube marketVolCube, Cube parametersCube, Period swapTenor, EvaluationContext context)
+    {
+        IReadOnlyList<double> optionTimes = marketVolCube.OptionTimes;
+        IReadOnlyList<double> swapLengths = marketVolCube.SwapLengths;
+        IReadOnlyList<Date> optionDates = marketVolCube.OptionDates;
+        IReadOnlyList<Period> swapTenors = marketVolCube.SwapTenors;
+
+        int k = IndexOf(swapTenors, swapTenor);
+        if (!(k != swapTenors.Count))
+        {
+            throw new NanoQLException("swap tenor not found");
+        }
+
+        int nParams = TModel.NParams;
+        var calibrationResult = new double[nParams + 4];
+        IReadOnlyList<Matrix> tmpMarketVolCube = marketVolCube.Points;
+        ImmutableArray<double> strikeSpreads = StrikeSpreads;
+        var strikes = new List<double>(strikeSpreads.Length);
+        var volatilities = new List<double>(strikeSpreads.Length);
+
+        for (int j = 0; j < optionTimes.Count; j++)
+        {
+            double atmForward = AtmStrike(optionDates[j], swapTenors[k], context);
+            double shiftTmp = AtmVol.Shift(optionTimes[j], swapLengths[k]);
+            strikes.Clear();
+            volatilities.Clear();
+            for (int i = 0; i < NStrikes; i++)
+            {
+                double strike = atmForward + strikeSpreads[i];
+                if (strike + shiftTmp >= cutoffStrike)
+                {
+                    strikes.Add(strike);
+                    volatilities.Add(tmpMarketVolCube[i][j, k]);
+                }
+            }
+
+            double[] guess = parametersGuess.Evaluate(optionTimes[j], swapLengths[k]);
+
+            IXabrInterpolation sabrInterpolation = TModel.CreateInterpolation(
+                strikes.ToArray(),
+                volatilities.ToArray(),
+                optionTimes[j],
+                atmForward,
+                guess,
+                isParameterFixed.AsSpan(),
+                VegaWeightedSmileFit,
+                endCriteria,
+                optMethod,
+                errorAccept,
+                useMaxError,
+                maxGuesses,
+                shiftTmp,
+                volatilityType);
+
+            double interpolationError = sabrInterpolation.RmsError;
+            double maxError = sabrInterpolation.MaxError;
+            double calibrationError = interpolationError;
+            double calibrationMaxError = maxError;
+            calibrationResult[0] = sabrInterpolation.Alpha;
+            calibrationResult[1] = sabrInterpolation.Beta;
+            calibrationResult[2] = sabrInterpolation.Nu;
+            calibrationResult[3] = sabrInterpolation.Rho;
+            if (nParams >= 5)
+            {
+                calibrationResult[4] = TModel.ExtractGamma(sabrInterpolation);
+            }
+
+            if (singlePassCalibration && isAtmCalibrated)
+            {
+                double[] parameters = calibrationResult[..nParams];
+                double atmVol = AtmVol.Volatility(optionDates[j], swapTenors[k], atmForward, true);
+                calibrationResult[0] = CalibratedAtmAlpha(optionTimes[j], atmForward, atmVol, parameters, shiftTmp);
+                parameters[0] = calibrationResult[0];
+                (interpolationError, maxError) = SmileErrors(
+                    optionTimes[j],
+                    atmForward,
+                    parameters,
+                    shiftTmp,
+                    strikes.ToArray(),
+                    volatilities.ToArray(),
+                    sabrInterpolation.InterpolationWeights().AsSpan());
+            }
+
+            // Metadata stored after model parameters
+            calibrationResult[nParams] = atmForward;
+            calibrationResult[nParams + 1] = interpolationError;
+            calibrationResult[nParams + 2] = maxError;
+            calibrationResult[nParams + 3] = (int)sabrInterpolation.EndCriteria;
+
+            // the fifth parameter's text, for models that have one: QuantLib's std::to_string, six decimals
+            string gammaInfo = nParams >= 5
+                ? ", gamma " + calibrationResult[4].ToString("F6", CultureInfo.InvariantCulture)
+                : string.Empty;
+            string parametersText =
+                $", alpha {DataFormattersFunctions.General(calibrationResult[0])}"
+                + $", beta {DataFormattersFunctions.General(calibrationResult[1])}"
+                + $", nu {DataFormattersFunctions.General(calibrationResult[2])}"
+                + $", rho {DataFormattersFunctions.General(calibrationResult[3])}"
+                + gammaInfo;
+
+            if (!(calibrationResult[nParams + 3] != (int)EndCriteriaType.MaxIterations))
+            {
+                // QuantLib reads the cube's end criteria, null by default, where the fit runs on its own default's
+                // 60000 iterations: the text gives the iterations the fit ran on.
+                throw new NanoQLException(
+                    $"section calibration failed: option tenor {optionDates[j]}, swap tenor {swapTenors[k]}: max iteration "
+                    + $"({endCriteria?.MaxIterations ?? 60000}){parametersText}"
+                    + $", max error {DataFormattersFunctions.General(calibrationMaxError)}"
+                    + $", error {DataFormattersFunctions.General(calibrationError)}");
+            }
+
+            if (!((useMaxError ? calibrationMaxError : calibrationError) < maxErrorTolerance))
+            {
+                throw new NanoQLException(
+                    $"section calibration failed: option tenor {optionDates[j]}, swap tenor {swapTenors[k]}"
+                    + (useMaxError ? ": max error " : ": error ")
+                    + DataFormattersFunctions.General(useMaxError ? calibrationMaxError : calibrationError)
+                    + parametersText
+                    + (useMaxError ? ", error " : ", max error ")
+                    + DataFormattersFunctions.General(useMaxError ? calibrationError : calibrationMaxError));
+            }
+
+            parametersCube.SetPoint(optionDates[j], swapTenors[k], optionTimes[j], swapLengths[k], calibrationResult);
+            parametersCube.UpdateInterpolators();
+        }
+    }
+
+    // std::find over the swap tenors: the first equal one's index, or the count.
+    private static int IndexOf(IReadOnlyList<Period> swapTenors, Period swapTenor)
+    {
+        for (int i = 0; i < swapTenors.Count; i++)
+        {
+            if (swapTenors[i] == swapTenor)
+            {
+                return i;
+            }
+        }
+
+        return swapTenors.Count;
     }
 
     // The at-the-money structure checked first, as the context: before the base's.

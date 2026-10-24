@@ -100,11 +100,9 @@ public release.
 Files that port only part of their QuantLib file, each with a `// Partial:` line naming what is left (playbook §1).
 The licensing gate checks that this list and the files match.
 
-- `src/NanoQL/Coupons/CashFlowVectorsFunctions.cs`: `FloatingDigitalLeg`, which waits for S-cms with the digital coupons.
-- `src/NanoQL/Coupons/CouponPricer/CouponPricerFunctions.cs`: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for S-cms's ports of those coupons.
+- `src/NanoQL/Coupons/CouponPricer/CouponPricerFunctions.cs`: the visitor's cases for the range-accrual and multiple-resets coupons, which wait for S-cms's ports of those coupons.
 - `src/NanoQL/Coupons/YoYInflationLeg.cs`: `withCaps` and `withFloors`, which build capped and floored coupons and wait for S-cms's `CappedFlooredYoYInflationCoupon`.
 - `src/NanoQL/Experimental/CallableBonds/CallableBondVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(dc, bdc)`, which no QuantLib 1.44 class uses and which waits for its first user.
-- `src/NanoQL/Instruments/FloatFloatSwap.cs`: the swap-spread legs, QuantLib's `CmsSpreadLeg` on a `SwapSpreadIndex`, which wait for S-cms's `CmsSpreadLeg`.
 - `src/NanoQL/Methods/FiniteDifferences/StepCondition.cs`: `NullCondition`, which no QuantLib 1.44 class or test uses and which waits for its first user.
 - `src/NanoQL/Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs`: `FdmLogBasketInnerValue`, which waits for S-exo with the basket option's payoff.
 - `src/NanoQL/Numerics/Integrals/FourierIntegration.cs`: the discrete Simpson and trapezoid, tanh-sinh and exp-sinh algorithms, which wait for their integrators: S-van's discrete integrals and tanh-sinh, and S-core's exp-sinh.
@@ -121,7 +119,6 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/TermStructures/Volatility/EquityFX/LocalVolTermStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead, as `LocalVolCurve` and `LocalVolSurface` do.
 - `src/NanoQL/TermStructures/Volatility/Optionlet/OptionletStripper1.cs`: `capletVols()`, a matrix QuantLib allocates and never writes, not ported.
 - `src/NanoQL/TermStructures/Volatility/Optionlet/OptionletVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its only QuantLib user, the spreaded optionlet volatility, passes its base's reference date to the reference-date constructor.
-- `src/NanoQL/TermStructures/Volatility/Swaption/SabrSwaptionVolatilityCube/XabrSwaptionVolatilityCube{TModel}.cs`: the recalibration members (`recalibration`, `updateAfterRecalibration` and `sabrCalibrationSection`), which change a calibrated cube and wait for S-cms's `CmsMarketCalibration`, their only user.
 - `src/NanoQL/TermStructures/Volatility/Swaption/SwaptionVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its only QuantLib user, the spreaded swaption volatility, passes its base's reference date to the reference-date constructor.
 - `src/NanoQL/TermStructures/VolatilityTermStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead, as the local volatility structures do.
 - `src/NanoQL/TermStructures/Yield/ZeroYieldStructure.cs`: the constructor taking a day counter only.
@@ -133,7 +130,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/AmericanOptionTests.cs`: the Barone-Adesi-Whaley, Bjerksund-Stensland, Ju and QD-plus cases, which wait for S-van's analytic and QD engines; the shout cases, which wait for S-van's shout engine; and `testQdPlusBoundaryConvergence` and `testQdAmericanEngines`, which wait for S-exo's Halley solver.
 - `tests/NanoQL.Tests/TestSuite/BarrierOptionTests.cs`: `testHaugValues`' binomial checks, which wait for S-bar's `BinomialBarrierEngine`; `testBabsiriValues`' and `testBeagleholeValues`' Monte Carlo checks, which wait for S-bar's `MCBarrierEngine`; `testDividendBarrierOption`'s and `testDividendBarrierOptionWithDividendsPastMaturity`'s Heston checks, which wait for batch 4's `FdHestonBarrierEngine`; `testLocalVolAndHestonComparison`, which waits for batch 4's local volatility and Heston barrier engines; and the four perturbative cases, which wait for S-xeq's `PerturbativeBarrierOptionEngine`.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for S-mmp's `SequenceStatistics`.
-- `tests/NanoQL.Tests/TestSuite/CmsTests.cs`: `testCmsMarketCalibration` and `testSabrCubeRecalibrationInitializesLazily`, which wait for S-cms's `CmsMarket`, `CmsMarketCalibration` and the cube's recalibration members.
+- `tests/NanoQL.Tests/TestSuite/CmsSpreadTests.cs`: `testCouponPricing`, which waits for S-xrt's `LognormalCmsSpreadPricer`.
 - `tests/NanoQL.Tests/TestSuite/CreditDefaultSwapTests.cs`: `testCachedValue`'s integral-engine checks, which wait for S-core's `IntegralCdsEngine`.
 - `tests/NanoQL.Tests/TestSuite/DigitalOptionTests.cs`: the American digital cases, which wait for S-van's `AnalyticDigitalAmericanEngine`; `testMCCashAtHit`, which waits for S-van's `MCDigitalEngine`.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, Student t and stochastic-collocation cases, whose distributions aren't ported yet.
