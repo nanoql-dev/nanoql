@@ -202,6 +202,10 @@ public sealed class ZeroCouponInflationSwap : Swap
     /// engine's results: the engine's own BPS is zero, a simple cash flow being insensitive to a rate, and its annual
     /// compounding isn't linear in the rate.
     /// </summary>
+    /// <remarks>Given at the results' NPV date, as their leg NPVs are: the end discount over the NPV date's discount,
+    /// where QuantLib's reads the end discount alone, from the curve's reference date, so with a later NPV date its BPS
+    /// isn't the fixed leg's NPV move (<c>zerocouponinflationswap.cpp:147-154</c>; C3's review, C3-O1's class, ruled
+    /// by the user on 2026-10-24). At the default NPV date the two agree.</remarks>
     /// <param name="results">The results.</param>
     /// <returns>The sensitivity, signed by whether the leg is paid.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="results"/> is null.</exception>
@@ -211,7 +215,7 @@ public sealed class ZeroCouponInflationSwap : Swap
         ArgumentNullException.ThrowIfNull(results);
         double endDiscount = Element(results.EndDiscounts, 0)
             ?? throw new NanoQLException("cannot calculate fixedLegBPS because end discount is not populated");
-        double df = PayerMultipliers[0] * endDiscount;
+        double df = PayerMultipliers[0] * endDiscount / (results.NpvDateDiscount ?? 1.0);
         double t = DayCounter.YearFraction(startDate, maturityDate);
         return df * Nominal * (Math.Pow(1.0 + FixedRate + BasisPoint, t) - Math.Pow(1.0 + FixedRate, t));
     }

@@ -100,8 +100,6 @@ public release.
 Files that port only part of their QuantLib file, each with a `// Partial:` line naming what is left (playbook §1).
 The licensing gate checks that this list and the files match.
 
-- `src/NanoQL/Coupons/CouponPricer/CouponPricerFunctions.cs`: the visitor's cases for the range-accrual and multiple-resets coupons, which wait for S-cms's ports of those coupons.
-- `src/NanoQL/Coupons/YoYInflationLeg.cs`: `withCaps` and `withFloors`, which build capped and floored coupons and wait for S-cms's `CappedFlooredYoYInflationCoupon`.
 - `src/NanoQL/Experimental/CallableBonds/CallableBondVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(dc, bdc)`, which no QuantLib 1.44 class uses and which waits for its first user.
 - `src/NanoQL/Methods/FiniteDifferences/StepCondition.cs`: `NullCondition`, which no QuantLib 1.44 class or test uses and which waits for its first user.
 - `src/NanoQL/Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs`: `FdmLogBasketInnerValue`, which waits for S-exo with the basket option's payoff.

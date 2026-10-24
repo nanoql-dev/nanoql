@@ -65,8 +65,9 @@ public class ZeroCouponInflationSwapVectorTests
     /// <summary>The swap a case's arguments describe.</summary>
     /// <param name="c">The case.</param>
     /// <param name="index">The zero-inflation index.</param>
+    /// <param name="fixedRate">A fixed rate in place of the case's, or <see langword="null"/> for the case's.</param>
     /// <returns>The swap.</returns>
-    internal static ZeroCouponInflationSwap SwapOf(VectorCase c, ZeroInflationIndex index)
+    internal static ZeroCouponInflationSwap SwapOf(VectorCase c, ZeroInflationIndex index, double? fixedRate = null)
     {
         JsonElement infConvention = c.Input("infConvention");
         return new ZeroCouponInflationSwap(
@@ -77,7 +78,7 @@ public class ZeroCouponInflationSwapVectorTests
             CashFlowInputs.NullableCalendarOf(c.Input("fixCalendar")),
             (BusinessDayConvention)c.Int("fixConvention"),
             CashFlowInputs.DayCounterOf(c.Input("dayCounter")),
-            c.Double("fixedRate"),
+            fixedRate ?? c.Double("fixedRate"),
             index,
             InflationCashFlowInputs.PeriodOf(c.Input("observationLag")),
             (CPIInterpolationType)c.Int("interpolation"),

@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/couponpricer.hpp ql/cashflows/couponpricer.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the visitor's cases for the range-accrual and multiple-resets coupons, which wait for S-cms's ports of those coupons
 
 using System.Collections.Immutable;
 using NanoQL.Experimental;
@@ -223,6 +222,14 @@ public static class CouponPricerFunctions
         DigitalCmsSpreadCoupon c => pricer is CmsSpreadCouponPricer
             ? c.SetPricer(pricer)
             : throw new ArgumentException("pricer not compatible with CMS spread coupon", nameof(pricer)),
+
+        // The range-accrual and multiple-resets coupons (couponpricer.cpp:424-437) take their own pricers.
+        RangeAccrualFloatersCoupon c => pricer is RangeAccrualPricer
+            ? c.SetPricer(pricer)
+            : throw new ArgumentException("pricer not compatible with range-accrual coupon", nameof(pricer)),
+        MultipleResetsCoupon c => pricer is MultipleResetsPricer
+            ? c.SetPricer(pricer)
+            : throw new ArgumentException("pricer not compatible with multiple-resets coupon", nameof(pricer)),
 
         CappedFlooredCoupon c => VisitCappedFlooredCoupon(c, pricer),
         IborCoupon c => pricer is IborCouponPricer

@@ -319,6 +319,122 @@ public static class DiscountingSwapEngine
     }
 
     /// <summary>
+    /// Prices a zero-coupon swap, with the fixed payment that zeroes it.
+    /// </summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="includeSettlementDateFlows">
+    /// Whether cash flows on the settlement date count; the context's
+    /// <see cref="EvaluationContext.IncludeReferenceDateEvents"/> when <see langword="null"/>.
+    /// </param>
+    /// <param name="settlementDate">The settlement date; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the NPV is given at; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <returns>The swap's results: the expired results when the swap has expired.</returns>
+    /// <remarks>
+    /// The fair payment is QuantLib's <c>fairFixedPayment</c>, the floating leg's NPV over the discount at the fixed
+    /// amount's payment date, signed, with the discount read at the swap's payment date, where QuantLib reads its fixed
+    /// leg's end discount, at the leg's maturity date: the accrual end for the fixed-rate constructor's coupon, so with
+    /// a payment delay, or an adjusted payment date, its fair payment fed back leaves a non-zero NPV (the S-cms plan's
+    /// CMR5 (xxiv)). For the fixed-payment constructor the two dates are one, and the payment QuantLib's. The floating
+    /// leg's NPV, given at the NPV date, is taken back to the curve's reference date by the NPV date's discount, as
+    /// QuantLib's asset swap scales its fair values (<c>assetswap.cpp:273</c>, <c>:294</c>), where QuantLib's divides
+    /// it by a discount from the reference date, so with an NPV date after the reference date its fair payment is high
+    /// by that discount's reciprocal (with CMR5 (xxiv)); at the default NPV date the discount is 1.
+    /// </remarks>
+    /// <exception cref="ArgumentException">
+    /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
+    /// </exception>
+    /// <exception cref="NanoQLException">A leg fails to price; the message names the leg.</exception>
+    public static ZeroCouponSwapResults Calculate(
+        ZeroCouponSwap swap,
+        EvaluationContext context,
+        YieldTermStructure discountCurve,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        CheckArguments(swap, context, discountCurve, settlementDate, npvDate);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        SwapResults results = Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate);
+
+        // Knowing that for the fair payment NPV = 0.0, where:
+        // NPV = (discount at fixed amount pay date) * (payer\receiver * fixed amount)
+        //     + (discount at float amount pay date) * (-payer\receiver * float amount)
+        // we have:
+        // fair amount = NPV float / discount at fixed amount pay date
+        // with NPV float corrected for the payer sign.
+        double scaling = swap.Payer(1) ? -1.0 : 1.0;
+        double? fairFixedPayment = results.LegNPV[1] is double floatingNpv
+            ? floatingNpv * (results.NpvDateDiscount ?? 1.0) / (discountCurve.Discount(swap.PaymentDate) * scaling)
+            : null;
+        return swap.FetchResults(new ZeroCouponSwapResults(results) { FairFixedPayment = fairFixedPayment });
+    }
+
+    /// <summary>
+    /// Prices a multiple-resets swap, with its fair spread solved on a compounded leg.
+    /// </summary>
+    /// <param name="swap">The swap.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="discountCurve">The discount curve.</param>
+    /// <param name="includeSettlementDateFlows">
+    /// Whether cash flows on the settlement date count; the context's
+    /// <see cref="EvaluationContext.IncludeReferenceDateEvents"/> when <see langword="null"/>.
+    /// </param>
+    /// <param name="settlementDate">The settlement date; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <param name="npvDate">The date the NPV is given at; the curve's reference date when
+    /// <see langword="null"/>.</param>
+    /// <returns>The swap's results: the expired results when the swap has expired.</returns>
+    /// <remarks>
+    /// On a compounded leg the spread compounds with each fixing, so QuantLib's fair spread, linear in the floating
+    /// leg's BPS, misses par (the S-cms plan's CMR5 (xv)); here it is the spread at which the swap, rebuilt at it and
+    /// priced on this curve and under these dates, is worth zero, solved by Brent's method to 1e-12 from QuantLib's
+    /// estimate. It is <see langword="null"/> when the floating leg's BPS is zero or unknown, as QuantLib's. On an
+    /// averaged leg the spread is linear, and the swap's results derive QuantLib's.
+    /// </remarks>
+    /// <exception cref="ArgumentException">
+    /// The settlement date or the NPV date is <c>default(Date)</c>, or before the curve's reference date.
+    /// </exception>
+    /// <exception cref="NanoQLException">A leg fails to price; the message names the leg.</exception>
+    public static FixedVsFloatingSwapResults Calculate(
+        MultipleResetsSwap swap,
+        EvaluationContext context,
+        YieldTermStructure discountCurve,
+        bool? includeSettlementDateFlows = null,
+        Date? settlementDate = null,
+        Date? npvDate = null)
+    {
+        CheckArguments(swap, context, discountCurve, settlementDate, npvDate);
+        if (swap.IsExpired(context))
+        {
+            return swap.SetupExpired();
+        }
+
+        swap.Validate();
+        SwapResults results = Body(swap, context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate);
+        double? fairSpread = null;
+        if (swap.AveragingMethod == RateAveragingType.Compound
+            && results.LegBPS[1] is double bps && bps != 0.0 && results.NPV is double npv)
+        {
+            double guess = swap.Spread - (npv / (bps / 1.0e-4));
+            double Npv(double spread) =>
+                Body(swap.WithSpread(spread), context, discountCurve, includeSettlementDateFlows, settlementDate, npvDate).NPV
+                ?? throw new NanoQLException("result not available");
+            fairSpread = new Brent().Solve(Npv, 1.0e-12, guess, 1.0e-4);
+        }
+
+        return swap.FetchResults(new FixedVsFloatingSwapResults(results) { FairSpread = fairSpread });
+    }
+
+    /// <summary>
     /// Prices a swap as QuantLib's engine does on an empty discount-curve handle, the engine a helper sets when it is
     /// given none: an expired swap's results, which QuantLib's instrument gives before it calls the engine, and
     /// otherwise QuantLib's refusal, once the swap's arguments are validated (<c>discountingswapengine.cpp:42</c>).

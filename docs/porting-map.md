@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 638 | 85 |
-| partial | 24 | 25 |
-| ported | 598 | 70 |
+| not started | 627 | 79 |
+| partial | 22 | 25 |
+| ported | 611 | 76 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -86,13 +86,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `averagebmacoupon` | ported | Coupons/AverageBMACoupon/AverageBMACoupon.cs, Coupons/AverageBMACoupon/AverageBMACouponPricer.cs, Coupons/AverageBMACoupon/AverageBMALeg.cs |  |
 | `blackovernightindexedcouponpricer` | ported | Coupons/BlackAveragingOvernightIndexedCouponPricer.cs, Coupons/BlackCompoundingOvernightIndexedCouponPricer.cs |  |
 | `capflooredcoupon` | ported | Coupons/CapFlooredCoupon/CappedFlooredCmsCoupon.cs, Coupons/CapFlooredCoupon/CappedFlooredCoupon.cs, Coupons/CapFlooredCoupon/CappedFlooredIborCoupon.cs |  |
-| `capflooredinflationcoupon` | not started |  | no nanoql type: CappedFlooredYoYInflationCoupon |
+| `capflooredinflationcoupon` | ported | Coupons/CappedFlooredYoYInflationCoupon.cs |  |
 | `cashflows` | ported | Coupons/CashFlows.cs |  |
 | `cashflowvectors` | ported | Coupons/CashFlowVectorsFunctions.cs |  |
 | `cmscoupon` | ported | Coupons/CmsCoupon.cs, Coupons/CmsLeg.cs |  |
 | `conundrumpricer` | ported | Coupons/ConundrumPricer/AnalyticHaganPricer.cs, Coupons/ConundrumPricer/ConundrumIntegrand.cs, Coupons/ConundrumPricer/GFunction.cs, Coupons/ConundrumPricer/GFunctionExactYield.cs, Coupons/ConundrumPricer/GFunctionFactory.cs, Coupons/ConundrumPricer/GFunctionFactoryYieldCurveModel.cs, Coupons/ConundrumPricer/GFunctionStandard.cs, Coupons/ConundrumPricer/GFunctionWithShifts.cs, Coupons/ConundrumPricer/HaganPricer.cs, Coupons/ConundrumPricer/HaganPricerState.cs, Coupons/ConundrumPricer/MarketQuotedOptionPricer.cs, Coupons/ConundrumPricer/NumericHaganPricer.cs, Coupons/ConundrumPricer/NumericHaganPricerIntegrationLimits.cs, Coupons/ConundrumPricer/VanillaOptionPricer.cs | no nanoql type: NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand |
 | `coupon` | ported | Coupons/Coupon.cs |  |
-| `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CmsCouponPricer.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/CouponRateView.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IMeanRevertingPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the range-accrual and multiple-resets coupons, which wait for S-cms's ports of those coupons; no nanoql type: MeanRevertingPricer |
+| `couponpricer` | ported | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CmsCouponPricer.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/CouponRateView.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IMeanRevertingPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | no nanoql type: MeanRevertingPricer |
 | `cpicoupon` | ported | Coupons/CPICoupon/CPICashFlow.cs, Coupons/CPICoupon/CPICoupon.cs, Coupons/CPICoupon/CPILeg.cs |  |
 | `cpicouponpricer` | ported | Coupons/CPICouponPricer.cs |  |
 | `digitalcmscoupon` | ported | Coupons/DigitalCmsCoupon.cs, Coupons/DigitalCmsLeg.cs |  |
@@ -100,7 +100,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `digitaliborcoupon` | ported | Coupons/DigitalIborCoupon.cs, Coupons/DigitalIborLeg.cs |  |
 | `dividend` | ported | Coupons/Dividend/Dividend.cs, Coupons/Dividend/DividendFunctions.cs, Coupons/Dividend/FixedDividend.cs, Coupons/Dividend/FractionalDividend.cs |  |
 | `duration` | ported | Coupons/DurationType.cs |  |
-| `equitycashflow` | not started |  | no nanoql type: EquityCashFlow, EquityCashFlowPricer, EquityQuantoCashFlowPricer |
+| `equitycashflow` | ported | Coupons/EquityCashFlow/EquityCashFlow.cs, Coupons/EquityCashFlow/EquityCashFlowFunctions.cs, Coupons/EquityCashFlow/EquityCashFlowPricer.cs, Coupons/EquityCashFlow/EquityQuantoCashFlowPricer.cs |  |
 | `fixedratecoupon` | ported | Coupons/FixedRateCoupon.cs, Coupons/FixedRateLeg.cs |  |
 | `floatingratecoupon` | ported | Coupons/FloatingRateCoupon.cs, Coupons/FloatingRateCouponExtensions.cs |  |
 | `iborcoupon` | ported | Coupons/IborCoupon.cs, Coupons/IborLeg.cs | no nanoql type: IborCouponSettings |
@@ -108,16 +108,16 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcoupon` | ported | Coupons/InflationCoupon.cs, Coupons/InflationCouponExtensions.cs |  |
 | `inflationcouponpricer` | ported | Coupons/InflationCouponPricer/BachelierYoYInflationCouponPricer.cs, Coupons/InflationCouponPricer/BlackYoYInflationCouponPricer.cs, Coupons/InflationCouponPricer/InflationCouponPricer.cs, Coupons/InflationCouponPricer/InflationCouponPricerFunctions.cs, Coupons/InflationCouponPricer/UnitDisplacedBlackYoYInflationCouponPricer.cs, Coupons/InflationCouponPricer/YoYInflationCouponPricer.cs |  |
 | `lineartsrpricer` | ported | Coupons/LinearTsrPricer/LinearTsrPricer.cs, Coupons/LinearTsrPricer/LinearTsrPricerSettings.cs, Coupons/LinearTsrPricer/LinearTsrPricerSettingsStrategy.cs, Coupons/LinearTsrPricer/LinearTsrPricerState.cs |  |
-| `multipleresetscoupon` | not started |  | no nanoql type: MultipleResetsCoupon, MultipleResetsPricer, AveragingMultipleResetsPricer, CompoundingMultipleResetsPricer, MultipleResetsLeg |
+| `multipleresetscoupon` | ported | Coupons/MultipleResetsCoupon/AveragingMultipleResetsPricer.cs, Coupons/MultipleResetsCoupon/CompoundingMultipleResetsPricer.cs, Coupons/MultipleResetsCoupon/MultipleResetsCoupon.cs, Coupons/MultipleResetsCoupon/MultipleResetsLeg.cs, Coupons/MultipleResetsCoupon/MultipleResetsPricer.cs |  |
 | `overnightindexedcoupon` | ported | Coupons/OvernightIndexedCoupon/CappedFlooredOvernightIndexedCoupon.cs, Coupons/OvernightIndexedCoupon/OvernightIndexedCoupon.cs, Coupons/OvernightIndexedCoupon/OvernightLeg.cs |  |
 | `overnightindexedcouponpricer` | ported | Coupons/OvernightIndexedCouponPricer/ArithmeticAveragedOvernightIndexedCouponPricer.cs, Coupons/OvernightIndexedCouponPricer/CompoundingOvernightIndexedCouponPricer.cs, Coupons/OvernightIndexedCouponPricer/OvernightIndexedCouponPricer.cs, Coupons/OvernightIndexedCouponPricer/OvernightIndexedCouponPricerExtensions.cs |  |
-| `rangeaccrual` | not started |  | no nanoql type: RangeAccrualFloatersCoupon, RangeAccrualPricer, RangeAccrualPricerByBgm, RangeAccrualLeg |
+| `rangeaccrual` | ported | Coupons/RangeAccrual/RangeAccrualFloatersCoupon.cs, Coupons/RangeAccrual/RangeAccrualLeg.cs, Coupons/RangeAccrual/RangeAccrualPricer.cs, Coupons/RangeAccrual/RangeAccrualPricerByBgm.cs |  |
 | `rateaveraging` | ported | Coupons/RateAveragingType.cs |  |
 | `replication` | ported | Coupons/Replication/DigitalReplication.cs, Coupons/Replication/ReplicationType.cs |  |
 | `simplecashflow` | ported | Coupons/SimpleCashFlow/AmortizingPayment.cs, Coupons/SimpleCashFlow/Redemption.cs, Coupons/SimpleCashFlow/SimpleCashFlow.cs |  |
 | `stubiborcoupon` | ported | Coupons/StubIborCoupon/StubIborCoupon.cs, Coupons/StubIborCoupon/StubIborCouponWeightedIndex.cs, Coupons/StubIborCoupon/StubIndexSelection.cs, Coupons/StubIborCoupon/StubIndexSelectionConvention.cs |  |
-| `timebasket` | not started |  | no nanoql type: TimeBasket |
-| `yoyinflationcoupon` | partial | Coupons/YoYInflationCoupon.cs, Coupons/YoYInflationLeg.cs | partial: withCaps and withFloors, which build capped and floored coupons and wait for S-cms's CappedFlooredYoYInflationCoupon |
+| `timebasket` | ported | Coupons/TimeBasket.cs |  |
+| `yoyinflationcoupon` | ported | Coupons/YoYInflationCoupon.cs, Coupons/YoYInflationLeg.cs |  |
 | `zeroinflationcashflow` | ported | Coupons/ZeroInflationCashFlow.cs |  |
 
 ### `ql/currencies/`
@@ -661,14 +661,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `makecapfloor` | ported | Instruments/MakeCapFloor.cs |  |
 | `makecds` | ported | Instruments/MakeCreditDefaultSwap.cs |  |
 | `makecms` | ported | Instruments/MakeCms.cs |  |
-| `makemultipleresetsswap` | not started |  | no nanoql type: MakeMultipleResetsSwap |
+| `makemultipleresetsswap` | ported | Instruments/MakeMultipleResetsSwap.cs |  |
 | `makeois` | ported | Instruments/MakeOIS.cs |  |
 | `makeswaption` | ported | Instruments/MakeSwaption.cs |  |
 | `makevanillaswap` | ported | Instruments/MakeVanillaSwap.cs |  |
 | `makeyoyinflationcapfloor` | ported | Instruments/MakeYoYInflationCapFloor.cs |  |
 | `margrabeoption` | not started |  | no nanoql type: MargrabeOption, MargrabeOptionResults |
 | `multiassetoption` | not started |  | no nanoql type: MultiAssetOption, MultiAssetOptionResults |
-| `multipleresetsswap` | not started |  | no nanoql type: MultipleResetsSwap |
+| `multipleresetsswap` | ported | Instruments/MultipleResetsSwap.cs |  |
 | `nonstandardswap` | ported | Instruments/NonstandardSwap.cs, Instruments/NonstandardSwapArguments.cs | no nanoql type: NonstandardSwapResults |
 | `nonstandardswaption` | ported | Instruments/NonstandardSwaption.cs |  |
 | `oneassetoption` | ported | Instruments/OneAssetOption.cs, Instruments/OneAssetOptionResults.cs |  |
@@ -683,7 +683,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `simplechooseroption` | not started |  | no nanoql type: SimpleChooserOption |
 | `simplifynotificationgraph` | not ported: observer plumbing, removed |  |  |
 | `softbarrieroption` | not started |  | no nanoql type: SoftBarrierOption |
-| `stickyratchet` | not started |  | no nanoql type: DoubleStickyRatchetPayoff, RatchetPayoff, StickyPayoff, RatchetMaxPayoff, RatchetMinPayoff, StickyMaxPayoff, StickyMinPayoff |
+| `stickyratchet` | ported | Instruments/StickyRatchet/DoubleStickyRatchetPayoff.cs, Instruments/StickyRatchet/RatchetMaxPayoff.cs, Instruments/StickyRatchet/RatchetMinPayoff.cs, Instruments/StickyRatchet/RatchetPayoff.cs, Instruments/StickyRatchet/StickyMaxPayoff.cs, Instruments/StickyRatchet/StickyMinPayoff.cs, Instruments/StickyRatchet/StickyPayoff.cs |  |
 | `stock` | not started |  | no nanoql type: Stock |
 | `swap` | ported | Instruments/Swap/Swap.cs, Instruments/Swap/SwapResults.cs, Instruments/Swap/SwapType.cs |  |
 | `swaption` | ported | Instruments/Swaption/Settlement.cs, Instruments/Swaption/SettlementMethod.cs, Instruments/Swaption/SettlementType.cs, Instruments/Swaption/Swaption.cs, Instruments/Swaption/SwaptionFunctions.cs, Instruments/Swaption/SwaptionPriceType.cs |  |
@@ -697,7 +697,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `writerextensibleoption` | not started |  | no nanoql type: WriterExtensibleOption |
 | `yearonyearinflationswap` | ported | Instruments/YearOnYearInflationSwap.cs, Instruments/YearOnYearInflationSwapResults.cs |  |
 | `zerocouponinflationswap` | ported | Instruments/ZeroCouponInflationSwap.cs |  |
-| `zerocouponswap` | not started |  | no nanoql type: ZeroCouponSwap |
+| `zerocouponswap` | ported | Instruments/ZeroCouponSwap.cs, Instruments/ZeroCouponSwapResults.cs |  |
 
 ### `ql/instruments/bonds/`
 
@@ -1640,7 +1640,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `cvaswapengine` | not started |  | no nanoql type: CounterpartyAdjSwapEngine |
+| `cvaswapengine` | ported | PricingEngines/Swap/CounterpartyAdjSwapEngine.cs |  |
 | `discountingconstnotionalcrosscurrencyswapengine` | ported | PricingEngines/Swap/DiscountingConstNotionalCrossCurrencySwapEngine.cs |  |
 | `discountingswapengine` | ported | PricingEngines/Swap/DiscountingSwapEngine.cs |  |
 | `discretizedswap` | ported | PricingEngines/Swap/DiscretizedSwap.cs |  |
@@ -1923,7 +1923,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `forwardstructure` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `impliedtermstructure` | ported | TermStructures/Yield/ImpliedTermStructure.cs |  |
 | `interpolatedsimplezerocurve` | ported | TermStructures/Yield/InterpolatedSimpleZeroCurve/InterpolatedSimpleZeroCurveFormula.cs, TermStructures/Yield/InterpolatedSimpleZeroCurve/InterpolatedSimpleZeroCurve{TInterpolator}.cs, TermStructures/Yield/InterpolatedSimpleZeroCurve/SimpleZeroCurve.cs |  |
-| `multipleresetsswaphelper` | not started |  | no nanoql type: MultipleResetsSwapRateHelper |
+| `multipleresetsswaphelper` | ported | TermStructures/Yield/MultipleResetsSwapRateHelper.cs |  |
 | `nonlinearfittingmethods` | ported | TermStructures/Yield/NonlinearFittingMethods/CubicBSplinesFitting.cs, TermStructures/Yield/NonlinearFittingMethods/ExponentialSplinesFitting.cs, TermStructures/Yield/NonlinearFittingMethods/NaturalCubicFitting.cs, TermStructures/Yield/NonlinearFittingMethods/NelsonSiegelFitting.cs, TermStructures/Yield/NonlinearFittingMethods/SimplePolynomialFitting.cs, TermStructures/Yield/NonlinearFittingMethods/SpreadFittingMethod.cs, TermStructures/Yield/NonlinearFittingMethods/SvenssonFitting.cs |  |
 | `oisratehelper` | ported | TermStructures/Yield/OISRateHelper.cs |  |
 | `overnightindexfutureratehelper` | not started |  | no nanoql type: OvernightIndexFutureRateHelper, SofrFutureRateHelper |
@@ -2118,7 +2118,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `dividendoption` | partial | TestSuite/DividendOptionTests.cs | 13 of 18 cases; not yet: testEuropeanEndLimit, testCashDividendEuropeanEngine, testCashDividendEuropeanEngineWithManyDividends, testCashDividendEuropeanEngineWithSingleDividends, testZeroStrikeCallWithCashDividends |
 | `doublebarrieroption` | not started |  | 3 cases |
 | `doublebinaryoption` | not started |  | 2 cases |
-| `equitycashflow` | not started |  | 8 cases |
+| `equitycashflow` | ported | TestSuite/EquityCashFlowTests.cs | 8 of 8 cases |
 | `equityindex` | ported | TestSuite/EquityIndexTests.cs | 11 of 12 cases; not ported: testFixingObservability (observer notifications, which an immutable index has no use for, R1) |
 | `equitytotalreturnswap` | not started |  | 5 cases |
 | `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 22 of 27 cases; not yet: testIntegralEngines, testMcEngines, testQmcEngines, testFFTEngines, testFdEnginesWithNonStrikedPayoff |
@@ -2151,7 +2151,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `indexes` | ported | TestSuite/IndexesTests.cs | 6 of 6 cases; replaced: testFixingObservability by Vectors/Indexes/BMAIndexVectorTests.cs |
 | `inflation` | ported | TestSuite/InflationTests.cs | 27 of 28 cases; replaced: testNotifications by Vectors/Coupons/IndexedCashFlowVectorTests.cs; not ported: testCpiAsIndexInterpolation (CPI::AsIndex, deprecated in QuantLib 1.43, D5) |
 | `inflationcapfloor` | ported | TestSuite/InflationCapFloorTests.cs | 4 of 4 cases; replaced: testVolatilityQuoteObservability by Conventions/YoYInflationCapFloorQuoteTests.cs |
-| `inflationcapflooredcoupon` | not started |  | 2 cases |
+| `inflationcapflooredcoupon` | ported | TestSuite/InflationCapFlooredCouponTests.cs | 2 of 2 cases |
 | `inflationcpibond` | ported | TestSuite/InflationCPIBondTests.cs | 2 of 2 cases |
 | `inflationcpicapfloor` | not started |  | 2 cases |
 | `inflationcpiswap` | ported | TestSuite/CPISwapTests.cs | 5 of 5 cases |
@@ -2181,8 +2181,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `mersennetwister` | ported | TestSuite/MersenneTwisterTests.cs | 1 of 1 cases |
 | `money` | ported | TestSuite/MoneyTests.cs | 4 of 4 cases |
 | `mtmcrosscurrencybasisswap` | ported | TestSuite/MtMCrossCurrencyBasisSwapTests.cs | 14 of 15 cases; not ported: testFxResetCouponUpdates (observer notifications and deepUpdate, which immutable cash flows have no use for, R1) |
-| `multipleresetscoupons` | not started |  | 5 cases |
-| `multipleresetsswap` | not started |  | 8 cases |
+| `multipleresetscoupons` | ported | TestSuite/MultipleResetsCouponsTests.cs | 5 of 5 cases |
+| `multipleresetsswap` | ported | TestSuite/MultipleResetsSwapTests.cs | 8 of 8 cases |
 | `noarbsabr` | not started |  | 2 cases |
 | `normalclvmodel` | not started |  | 5 cases |
 | `nthorderderivativeop` | partial | TestSuite/NthOrderDerivativeOpTests.cs | 1 of 15 cases; not yet: testFirstOrder2PointsApply, testFirstOrder3PointsOnUniformGrid, testFirstOrder5PointsOnUniformGrid, testFirstOrder2PointsOnUniformGrid, testFirstOrder4PointsOnUniformGrid, testFirstOrder2PointsOn2DimUniformGrid, testSecondOrder3PointsNonUniformGrid, testSecondOrder4PointsNonUniformGrid, testThirdOrder4PointsUniformGrid, testHigherOrderHestonOptionPricing, testHigherOrderAndRichardsonExtrapolation, testCompareFirstDerivativeOpNonUniformGrid, testCompareFirstDerivativeOp2dUniformGrid, testMixedSecondOrder9PointsOnUniformGrid |
@@ -2212,7 +2212,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `quantlibtestsuite` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `quantooption` | partial | TestSuite/QuantoOptionTests.cs | 1 of 10 cases; not yet: testValues, testGreeks, testForwardValues, testForwardGreeks, testForwardPerformanceValues, testBarrierValues, testPDEOptionValues, testAmericanQuantoOption, testDoubleBarrierValues |
 | `quotes` | not started |  | 6 cases |
-| `rangeaccrual` | not started |  | 3 cases |
+| `rangeaccrual` | ported | TestSuite/RangeAccrualTests.cs | 3 of 3 cases |
 | `riskneutraldensitycalculator` | not started |  | 14 cases |
 | `riskstats` | ported | TestSuite/RiskStatsTests.cs | 1 of 1 cases |
 | `rngtraits` | partial | TestSuite/RngTraitsTests.cs | 3 of 4 cases; not yet: testRanLux |
@@ -2252,5 +2252,5 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `vpp` | not started |  | 6 cases |
 | `xoshiro256starstar` | not started |  | 3 cases |
 | `zabr` | ported | TestSuite/ZabrTests.cs | 1 of 1 cases |
-| `zerocouponswap` | not started |  | 6 cases |
+| `zerocouponswap` | ported | TestSuite/ZeroCouponSwapTests.cs | 6 of 6 cases |
 | `zigguratgaussian` | not started |  | 2 cases |

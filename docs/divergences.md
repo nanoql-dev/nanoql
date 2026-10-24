@@ -336,6 +336,16 @@ Facts:
 - `TheSurfaceOverloadRefusesOneTimeUnderTheLinearStrategy`
 - `TheFlatStrategyRefusesNoTimes`
 
+## BlackYoYBelowShiftTests
+
+[`Divergences/BlackYoYBelowShiftTests.cs`](../tests/NanoQL.Tests/Divergences/BlackYoYBelowShiftTests.cs)
+
+The Black year-on-year pricer's option struck at or below 0 (the S-cms plan's CMR5 (xxiii), its year-on-year part): QuantLib's `BlackYoYInflationCouponPricer` prices an optionlet by `blackFormula` at the coupon's effective strike, unshifted (`inflationcouponpricer.cpp:178-188`), which refuses a strike below 0, so a coupon capped or floored below 0 refuses: on the wheel, the vectors' at-the-money coupon (a forward of 3.05%) capped at −1% refuses ("strike + displacement (-0.01 + 0) must be non-negative"), at −1e-12 likewise, and at 0 pays 0.0. nanoql's caplet there is the forward less the strike and its floorlet 0, the formula's limits, so a coupon capped below 0 pays its cap and one floored there its swaplet. QuantLib's check: its Black formula at 0 and at 1e-12, a coupon capped at 1e-12 paying 9.999986949615902e-13.
+
+Facts:
+
+- `ACouponCappedBelowZeroPaysItsCap`
+
 ## BondEmptyLegTests
 
 [`Divergences/BondEmptyLegTests.cs`](../tests/NanoQL.Tests/Divergences/BondEmptyLegTests.cs)
@@ -650,6 +660,36 @@ A capped coupon over a null underlying. QuantLib's constructor reads the underly
 Facts:
 
 - `ANullUnderlyingIsRefused`
+
+## CappedYoYEffectiveStrikeTests
+
+[`Divergences/CappedYoYEffectiveStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/CappedYoYEffectiveStrikeTests.cs)
+
+A capped year-on-year coupon's effective strike without its option (found while porting the S-cms plan's C3): QuantLib's `CappedFlooredYoYInflationCoupon::effectiveCap` returns (C − b) / a whether or not the fixing is capped (`capflooredinflationcoupon.cpp:126-128`), and its constructor sets C only for a cap it was given (`:27-49`, the member declared at `.hpp:135`), so the effective cap of a coupon with no cap reads a member nothing set, undefined behaviour; its `effectiveFloor` likewise. On the wheel, the vectors' at-the-money coupons gave such values as 1.69e-306 and 1.43e-311, and 0.029 for the effective floor of the coupon with neither option, the floor of a coupon built before it. nanoql's is null, as QuantLib's `CappedFlooredCoupon`'s `Null<Rate>()` on the same members (`capflooredcoupon.cpp:123-135`). QuantLib's check: its effective strikes where the coupon has the option (the vectors), and its capped Ibor coupon's null where it hasn't.
+
+Facts:
+
+- `AnEffectiveStrikeIsNullWithoutItsOption`
+
+## CappedYoYPricerStateTests
+
+[`Divergences/CappedYoYPricerStateTests.cs`](../tests/NanoQL.Tests/Divergences/CappedYoYPricerStateTests.cs)
+
+A capped year-on-year coupon read again (found while porting the S-cms plan's C3): QuantLib's `CappedFlooredYoYInflationCoupon::rate` prices its caplet and floorlet on the pricer's state (`capflooredinflationcoupon.cpp:92-105`), which its swaplet rate sets only when first computed, the coupon's `InflationCoupon::rate` being cached (`inflationcoupon.cpp:64-75`), so with one pricer on a leg a coupon read again after another reads that other coupon's state: on the wheel, on the vectors' `one cap` leg (six annual coupons capped at 3.5%, the Black pricer), the first coupon's amount read after the leg's rates is 28,665.871612869618 on 1e6, where read first it is 30,024.190259687595, its rate's. QuantLib's capped Ibor and digital coupons read their underlying's pricer the same way after its cached rate, and its stripped coupon initializes the pricer first (`strippedcapflooredcoupon.cpp:46-47`). nanoql's pricers take the coupon on every call, so a coupon's amount is the same however often and in whatever order its leg is read. QuantLib's check: its amounts read in turn, each coupon's rate and amount before the next coupon's (the vectors).
+
+Facts:
+
+- `ACouponReadAgainAfterItsLegKeepsItsAmount`
+
+## CappedYoYPricerTests
+
+[`Divergences/CappedYoYPricerTests.cs`](../tests/NanoQL.Tests/Divergences/CappedYoYPricerTests.cs)
+
+Setting an inflation pricer on a capped year-on-year coupon (the S-cms plan's CMR5 (xvii)): QuantLib's `setCouponPricer` calls the non-virtual `InflationCoupon::setPricer` (`inflationcouponpricer.cpp`), so a `CappedFlooredYoYInflationCoupon` built on an underlying coupon gets the pricer on itself only, while its rate reads the underlying's rate and the underlying's pricer (`capflooredinflationcoupon.cpp:88-105`): the coupon keeps the underlying's old pricer, and the new one is unused. nanoql's copy carries the pricer into its underlying (`CappedFlooredYoYInflationCoupon`'s `WithPricer`). QuantLib's check: its coupon with the pricer set on both, which the coupon on its own terms is, priced by the pricer (the vectors): on the at-the-money coupon capped at 3.1%, the unit-displaced Black pricer's 0.026633082577577766, where QuantLib's coupon on an underlying holding the Black pricer keeps that pricer's 0.028900831678540094.
+
+Facts:
+
+- `ThePricerReachesTheUnderlying`
 
 ## CdiCloneTests
 
@@ -979,6 +1019,29 @@ Facts:
 - `AGlobalCurveOnAChangedQuoteIsBootstrappedAfresh`
 - `AFixedReferenceCurveTakesItsContextsPillars`
 - `AMovingCurvesJumpsFollowItsReferenceDate`
+
+## CvaEngineFixingLoopTests
+
+[`Divergences/CvaEngineFixingLoopTests.cs`](../tests/NanoQL.Tests/Divergences/CvaEngineFixingLoopTests.cs)
+
+The CVA engine's loop over the fixed payment dates (the S-cms plan's CMR5 (xvi)): QuantLib's `CounterpartyAdjSwapEngine` skips the dates before the counterparty curve's reference date with `while (*nextFD < priceDate) ++nextFD;` (`cvaswapengine.cpp:128`), with no end check, so when every fixed payment is before that date it reads past the dates, undefined behaviour. nanoql's loop stops at the end, and the swap is then worth its NPV, its fair rate the swap's. QuantLib's checks: its values where its loop stays in range (the C++ harness's vectors, a seasoned swap among them); and a seasoned swap against a fresh one with the same remaining flows, which QuantLib's loop prices alike, the seasoned swap skipping its past payments: the vectors' seasoned 5-year payer from 16 April 2022 at its fair rate, -1,880.3521932368576 and 0.025867936451198614, restarted on 16 April 2024.
+
+Facts:
+
+- `ASeasonedSwapSkipsItsPastPayments`
+- `EveryPaymentBeforeThePriceDateLeavesTheSwapsValue`
+
+## CvaSwaptionStrikeTests
+
+[`Divergences/CvaSwaptionStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/CvaSwaptionStrikeTests.cs)
+
+The CVA engine's swaptionlets (C3's review, C3-O2, ruled by the user on 2026-10-24, (a)): QuantLib strikes every swaptionlet and its reverse at the swap's risk-free fair rate, `-baseSwapRate * legNPV[1] / legNPV[0]` (`cvaswapengine.cpp:147`, `:170`, `:179`), which the fixed rate cancels out of, so its adjustment is the same whatever the swap's rate. On the harness, on the vectors' 5-year payer from 17 January 2025 on 1e7 (Black 15%, a flat 2% hazard rate, 40% recovery, no investor curve), QuantLib's adjustment is -2,625.223121590 at 1%, at the fair rate 0.03147227737464738 and at 5%, where the swap is worth 990,581.19 and -854,739.96, and the receiver's -2,617.287664647 at each. nanoql strikes them at the swap's fixed rate, the contract's own exposure: its adjustment is QuantLib's at the fair rate (the harness's vectors, each swap at its fair rate), and follows the exposure off par: -21,968.948298009 at 1% and -75.016505939 at 5%. The independent check off par is the swaptions' parity: each period's payer and receiver swaptions differ by the forward swap at their strike, so a payer swap's adjustment less the receiver's at one rate is minus the forward swaps at that rate weighted by the parties' losses given default over the periods, at every volatility. The fair rate keeps QuantLib's (C3's review, C3R2-O1), its first-order root of the adjusted NPV on swaptionlets struck at the risk-free fair rate: QuantLib's 0.031415371873538545 at 1%, 0.03141537187353853 at the fair rate and 0.03141537187353854 at 5%, nanoql's to the bit, the adjusted NPV at it -26.87; on the contract's strikes it would be 0.030996068704439883 at 1%, the adjusted NPV at it 19,112.14, and 0.03147065128358219 at 5%.
+
+Facts:
+
+- `OffParTheAdjustmentFollowsTheExposure`
+- `APayerLessAReceiverIsTheForwardSwapsAtTheRate`
+- `TheFairRateIsQuantLibsAtEveryRate`
 
 ## DataParserStrictnessTests
 
@@ -2277,6 +2340,27 @@ Facts:
 - `APathGeneratorOfNoStepIsRefused`
 - `AnEmptyMultiPathsPathSizeIsRefused`
 
+## MultipleResetsFairSpreadTests
+
+[`Divergences/MultipleResetsFairSpreadTests.cs`](../tests/NanoQL.Tests/Divergences/MultipleResetsFairSpreadTests.cs)
+
+The compounded multiple-resets swap's fair spread (the S-cms plan's CMR5 (xv)): QuantLib's `FixedVsFloatingSwap::fairSpread` is the spread less the NPV over the floating leg's BPS (`fixedvsfloatingswap.cpp`), linear in the spread, while on a compounding leg the spread compounds with each fixing, so at it the swap misses par: on the wheel, on the vectors' 5-year payer of monthly resets compounded quarterly on 1e7, QuantLib's fair spread from a spread of 0 is −0.00044495679505344586, where the swap is worth −1.078e-5 a unit of nominal, and from 2% −0.000582486889730293, worth −6.618e-4. nanoql's is the spread at which the swap is worth zero, solved from QuantLib's estimate; on an averaging leg the spread is linear, and QuantLib's formula stands. QuantLib's checks: its NPV at the solved spread, the root of its own swap's NPV, −0.00044267984438780547, within 1.5e-8 of par on 1e7 (a secant on the wheel); and on the vectors' averaged swap, its fair spread, −0.001341481056075899, bit for bit, where its swap is worth −4.7e-10.
+
+Facts:
+
+- `TheCompoundedFairSpreadPricesAtPar`
+- `TheAveragedFairSpreadIsQuantLibs`
+
+## MultipleResetsZeroResetsTests
+
+[`Divergences/MultipleResetsZeroResetsTests.cs`](../tests/NanoQL.Tests/Divergences/MultipleResetsZeroResetsTests.cs)
+
+Zero resets per coupon (the S-cms plan's CMR5 (xiv)): QuantLib's checks of the resets per coupon are themselves a modulo by them (`multipleresetscoupon.cpp:159`, `multipleresetsswap.cpp:57`), and the swap divides by them in its base constructor's arguments before (`multipleresetsswap.cpp:49`), so zero resets is an integer division by zero, undefined behaviour, which no check refuses. nanoql's leg and swap refuse zero resets first, naming them.
+
+Facts:
+
+- `ZeroResetsAreRefusedFirst`
+
 ## NegativeCountTests
 
 [`Divergences/NegativeCountTests.cs`](../tests/NanoQL.Tests/Divergences/NegativeCountTests.cs)
@@ -2521,6 +2605,42 @@ A quote is a `double`, so a quote equal to QuantLib's null sentinel, `Null<Real>
 Facts:
 
 - `AQuoteEqualToQuantLibsNullIsAValue`
+
+## RangeAccrualLegTests
+
+[`Divergences/RangeAccrualLegTests.cs`](../tests/NanoQL.Tests/Divergences/RangeAccrualLegTests.cs)
+
+The range accrual leg's null entries (the S-cms plan's CMR5 (xii)): QuantLib's `RangeAccrualLeg` builds `Leg leg(n)`, n null cash flows, then pushes its n coupons after them (`rangeaccrual.cpp`, its `operator Leg`), so the leg holds 2n flows, the first n null, which setCouponPricer and every reader of the leg dereference: on the wheel, the vectors' semiannual leg of four periods has eight flows, and setCouponPricer refuses it ("Boost assertion failed: px != 0"). nanoql's leg holds the n coupons. QuantLib's check: its coupons, the leg's second half, bit for bit (the vectors).
+
+Facts:
+
+- `TheLegHoldsItsCouponsAlone`
+
+## RangeAccrualObservationTenorTests
+
+[`Divergences/RangeAccrualObservationTenorTests.cs`](../tests/NanoQL.Tests/Divergences/RangeAccrualObservationTenorTests.cs)
+
+A range accrual with no observation dates (the S-cms plan's CMR5 (xiii)): QuantLib's `RangeAccrualLeg` defaults its observation tenor to `Period()`, so each coupon's observation schedule holds its start and end alone, and the BGM pricer divides a sum over no observations by their number, 0/0: on the wheel, the vectors' semiannual leg built without a tenor pays a rate of NaN, and a coupon whose observation schedule holds its start and end alone pays NaN on each of the pricer's three routes. nanoql's leg refuses a floating coupon with no observation tenor, and its pricer a coupon with no observation dates, each with a text naming what is missing.
+
+Facts:
+
+- `ALegWithoutAnObservationTenorIsRefused`
+- `ACouponWithNoObservationDatesIsRefused`
+
+## RangeAccrualStartedCouponTests
+
+[`Divergences/RangeAccrualStartedCouponTests.cs`](../tests/NanoQL.Tests/Divergences/RangeAccrualStartedCouponTests.cs)
+
+A range accrual in progress (the S-cms plan's CMR5 (xviii)): QuantLib's BGM pricer prices an observation from its expiry, so a coupon whose start is past is priced on QuantLib's call-spread route and smile correction with the before-fixing phase clamped (`rangeaccrual.cpp:403-423`, `:474-478`), but its no-smile route takes the phase unclamped (`:365-372`), and an observation whose expiry is past is priced by no route (NaN): on the wheel, on the C++ range accrual vectors' Euribor 6M, curve and fixings, a weekly coupon from 10 January 2025 (its first observation on 17 January, fixing on the evaluation date, 15 January) pays 0.033335938211808636 on the no-smile route at volatilities 10% and 30% and 0.03337731105469358 on the call-spread route, and the no-smile route refuses at 30% and 10% (0.03465775920672742 by call spread); a coupon from 19 December 2024 refuses on every route. nanoql's no-smile route clamps the phase as the other two do, and an observation whose fixing is known, its fixing date before the evaluation date, or on it once published, is counted by its fixing f, the deflator times 1{f > l} − 1{f > u}, the two digitals QuantLib's range reads, its date past or not. QuantLib's checks: its call-spread route, within that route's rounding; its pricer on the coupon restated with only its observations not yet known (the same start, end and fixings), scaled by their share, plus the known part, with the 19 December coupon's fourth known observation dated after the evaluation date (16 January, fixing on 14 January), and a coupon from 9 January whose one known observation is that one, which QuantLib's pricer takes as a digital on a day's expiry, 0.014901944616257642 at 2.92% to 4% where the known fixing gives 0.015369074793388015; the 19 December coupon below 3.2%, from 2.6% (known fixings 3.3022%, above, 2.589% and 2.5592%, below, and 2.9258%) and from 0, a lower trigger at or below the pricer's ε/2, which QuantLib's digital takes as 1 (`:347`); on a coupon's start date, QuantLib's values on every route; and the smile-correction route, which reads the no-smile digital (`:474-478`), so QuantLib's equals its unclamped no-smile route on the 10 January coupon, 0.033335938211808636 at 10% and 30%, and refuses at 30% and 10%, where nanoql's equals its clamped one, the correction 0 once the start is past.
+
+Facts:
+
+- `BeforeItsFirstObservationTheNoSmileRouteIsTheCallSpreadRoutes`
+- `KnownObservationsAreCountedByTheirFixings`
+- `AnObservationFixedBeforeItsDateIsKnown`
+- `KnownObservationsOutOfTheirRangeCountNothing`
+- `BeforeItsFirstObservationTheSmileCorrectionRouteIsTheNoSmileRoutes`
+- `OnItsStartDateEveryRouteIsQuantLibs`
 
 ## RankReducedSqrtNegativeEigenvalueTests
 
@@ -3394,6 +3514,16 @@ Facts:
 
 - `FewerThanFiveParametersAreRefused`
 
+## ZeroCouponInflationSwapBpsNpvDateTests
+
+[`Divergences/ZeroCouponInflationSwapBpsNpvDateTests.cs`](../tests/NanoQL.Tests/Divergences/ZeroCouponInflationSwapBpsNpvDateTests.cs)
+
+`ZeroCouponInflationSwap.FixedLegBPS` at an NPV date (C3's review, C3-O1's class, ruled by the user on 2026-10-24): QuantLib's `fixedLegBPS` discounts the fixed flow's move by the fixed leg's end discount, read from the curve's reference date (`zerocouponinflationswap.cpp:147-154`), while the engine gives the leg NPVs at its NPV date, so with a later NPV date the BPS isn't the fixed leg's NPV move. On the wheel, on the vectors' first swap (a payer of 1,000,000 at 3.2% to 15 June 2029), QuantLib's BPS is 464.37247408343586 at every NPV date, where the fixed leg's NPV moves by 483.32387426443165 for a basis point at an NPV date a year after the evaluation date and 523.5785024892248 three years after. nanoql's is the end discount over the NPV date's discount, the NPV move; at the default NPV date QuantLib's bits (the vectors). QuantLib's check: its own fixed leg NPVs at the rate and a basis point above it, at the NPV date.
+
+Facts:
+
+- `AtAnNpvDateTheBpsIsTheFixedLegsMove`
+
 ## ZeroCouponInflationSwapConventionTests
 
 [`Divergences/ZeroCouponInflationSwapConventionTests.cs`](../tests/NanoQL.Tests/Divergences/ZeroCouponInflationSwapConventionTests.cs)
@@ -3413,6 +3543,18 @@ Facts:
 Facts:
 
 - `TheFairRateZeroesTheSwap`
+
+## ZeroCouponSwapFairPaymentDelayTests
+
+[`Divergences/ZeroCouponSwapFairPaymentDelayTests.cs`](../tests/NanoQL.Tests/Divergences/ZeroCouponSwapFairPaymentDelayTests.cs)
+
+The zero-coupon swap's fair payment with a payment delay (the S-cms plan's CMR5 (xxiv)): QuantLib's `fairFixedPayment` divides the floating leg's NPV by its fixed leg's end discount (`zerocouponswap.cpp:147-153`), read at `CashFlows::maturityDate` of that leg (`discountingswapengine.cpp:97-99`), the accrual end for the fixed-rate constructor's coupon, paid a payment delay later (`cashflows.cpp:52-64`), so that swap's fair rate fed back leaves a non-zero NPV: on the wheel, on the vectors' 5-year receiver on 1e8 from 17 January 2025 at 3.2% on Actual/365 (Fixed), −1,013.7182254604995, −14,173.113207207993, −42,397.21247311309 and −131,035.65942218527 at delays of 1, 10, 30 and 90 days, where the fixed-payment constructor's fair payment, 16,776,091.202675004 at every delay, fed back gives 0. nanoql discounts at the fixed flow's payment date. QuantLib's check: its fixed-payment constructor on the same swap, its fair payment and rate. At an NPV date (C3's review, C3-O1, with (xxiv)): the floating leg's NPV is given at the engine's NPV date (`cashflows.cpp:498`) and its end discount from the curve's reference date (`discountingswapengine.cpp:97-101`), so QuantLib's fair payment is high by the NPV date's discount's reciprocal: on the same swap without a delay, 17,200,779.97339953 at an NPV date of 15 January 2026 and 18,085,160.07066775 at 17 January 2028, fed back through the fixed-payment constructor at those dates 384,195.3384123612 and 1,245,139.539481705. nanoql takes the NPV back by the NPV date's discount, as QuantLib's asset swap does (`assetswap.cpp:273`, `:294`). QuantLib's check: its fair payment with no NPV date, and the fed-back NPV.
+
+Facts:
+
+- `TheFairPaymentIsTheFixedPaymentConstructors`
+- `TheFairRateFedBackIsAtPar`
+- `AtAnNpvDateTheFairPaymentIsTheReferenceDates`
 
 ## ZeroGearingWithoutDayCounterTests
 

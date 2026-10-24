@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/cashflows/yoyinflationcoupon.hpp ql/cashflows/yoyinflationcoupon.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: withCaps and withFloors, which build capped and floored coupons and wait for S-cms's CappedFlooredYoYInflationCoupon
 
 using System.Collections.Immutable;
 using NanoQL.Indexes;
@@ -18,8 +17,9 @@ namespace NanoQL.Coupons;
 /// <remarks>
 /// An immutable builder: each method returns a modified copy. <see cref="ToLeg"/> builds the leg, in place of
 /// QuantLib's conversion operator, and attaches QuantLib's default <see cref="YoYInflationCouponPricer"/>, as QuantLib
-/// does when there are no caps or floors. A period with a zero gearing is a fixed-rate coupon paying its spread. A
-/// builder has no value equality.
+/// does when there are no caps or floors; a leg with caps or floors needs a pricer set on it, as QuantLib's comment
+/// says. A period with a zero gearing is a fixed-rate coupon paying its spread, capped and floored; a period with a
+/// cap or a floor a <see cref="CappedFlooredYoYInflationCoupon"/>. A builder has no value equality.
 /// </remarks>
 public sealed record YoYInflationLeg
 {
@@ -73,6 +73,10 @@ public sealed record YoYInflationLeg
 
     private ImmutableArray<double> Spreads { get; init; } = [];
 
+    private ImmutableArray<double?> Caps { get; init; } = [];
+
+    private ImmutableArray<double?> Floors { get; init; } = [];
+
     /// <summary>Sets one notional for every coupon.</summary>
     /// <param name="notional">The notional.</param>
     /// <returns>The modified builder.</returns>
@@ -115,7 +119,7 @@ public sealed record YoYInflationLeg
         return this with { FixingDays = [fixingDays] };
     }
 
-    /// <summary>Sets the coupons' fixing days, the coupons after the last taking none.</summary>
+    /// <summary>Sets the coupons' fixing days; the last one repeats for any further coupons.</summary>
     /// <param name="fixingDays">The fixing days.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="fixingDays"/> is null.</exception>
@@ -137,7 +141,7 @@ public sealed record YoYInflationLeg
     /// <returns>The modified builder.</returns>
     public YoYInflationLeg WithGearings(double gearing) => this with { Gearings = [gearing] };
 
-    /// <summary>Sets the coupons' gearings, the coupons after the last taking 1.</summary>
+    /// <summary>Sets the coupons' gearings; the last one repeats for any further coupons.</summary>
     /// <param name="gearings">The gearings.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="gearings"/> is null.</exception>
@@ -152,7 +156,7 @@ public sealed record YoYInflationLeg
     /// <returns>The modified builder.</returns>
     public YoYInflationLeg WithSpreads(double spread) => this with { Spreads = [spread] };
 
-    /// <summary>Sets the coupons' spreads, the coupons after the last taking 0.</summary>
+    /// <summary>Sets the coupons' spreads; the last one repeats for any further coupons.</summary>
     /// <param name="spreads">The spreads.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="spreads"/> is null.</exception>
@@ -162,11 +166,43 @@ public sealed record YoYInflationLeg
         return this with { Spreads = [.. spreads] };
     }
 
-    /// <summary>Builds the leg, with QuantLib's default pricer attached to each year-on-year coupon.</summary>
+    /// <summary>Sets one cap for every coupon.</summary>
+    /// <param name="cap">The cap, or <see langword="null"/> for none.</param>
+    /// <returns>The modified builder.</returns>
+    public YoYInflationLeg WithCaps(double? cap) => this with { Caps = [cap] };
+
+    /// <summary>Sets the coupons' caps; the last one repeats for any further coupons.</summary>
+    /// <param name="caps">The caps, each <see langword="null"/> for none.</param>
+    /// <returns>The modified builder.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="caps"/> is null.</exception>
+    public YoYInflationLeg WithCaps(IEnumerable<double?> caps)
+    {
+        ArgumentNullException.ThrowIfNull(caps);
+        return this with { Caps = [.. caps] };
+    }
+
+    /// <summary>Sets one floor for every coupon.</summary>
+    /// <param name="floor">The floor, or <see langword="null"/> for none.</param>
+    /// <returns>The modified builder.</returns>
+    public YoYInflationLeg WithFloors(double? floor) => this with { Floors = [floor] };
+
+    /// <summary>Sets the coupons' floors; the last one repeats for any further coupons.</summary>
+    /// <param name="floors">The floors, each <see langword="null"/> for none.</param>
+    /// <returns>The modified builder.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="floors"/> is null.</exception>
+    public YoYInflationLeg WithFloors(IEnumerable<double?> floors)
+    {
+        ArgumentNullException.ThrowIfNull(floors);
+        return this with { Floors = [.. floors] };
+    }
+
+    /// <summary>Builds the leg, with QuantLib's default pricer attached to each year-on-year coupon when there are no
+    /// caps or floors.</summary>
     /// <returns>The leg, one coupon per schedule period.</returns>
     /// <exception cref="NanoQLException">No payment day counter or notional was given; the schedule is empty; more
-    /// notionals, gearings or spreads were given than there are periods; or a date is computed on QuantLib's empty
-    /// calendar where it can't give one.</exception>
+    /// notionals, gearings, spreads, caps or floors were given than there are periods; or a date is computed on
+    /// QuantLib's empty calendar where it can't give one.</exception>
+    /// <exception cref="ArgumentException">A period's cap is below its floor, with the coupon's text.</exception>
     public ImmutableArray<CashFlow> ToLeg()
     {
         Schedule schedule = Schedule;
@@ -188,6 +224,8 @@ public sealed record YoYInflationLeg
         CheckSize(Notionals.Length, n, "nominals");
         CheckSize(Gearings.Length, n, "gearings");
         CheckSize(Spreads.Length, n, "spreads");
+        CheckSize(Caps.Length, n, "caps");
+        CheckSize(Floors.Length, n, "floors");
 
         var leg = ImmutableArray.CreateBuilder<CashFlow>(n);
 
@@ -217,10 +255,10 @@ public sealed record YoYInflationLeg
             if (gearing == 0.0)
             {
                 // fixed coupon
-                double rate = CashFlowVectorsFunctions.EffectiveFixedRate(Spreads, [], [], i);
+                double rate = CashFlowVectorsFunctions.EffectiveFixedRate(Spreads, Caps, Floors, i);
                 leg.Add(new FixedRateCoupon(paymentDate, notional, rate, paymentDayCounter, start, end, refStart, refEnd));
             }
-            else
+            else if (CashFlowVectorsFunctions.NoOption(Caps, Floors, i))
             {
                 // yoy inflation coupon, just swaplet
                 leg.Add(new YoYInflationCoupon(
@@ -238,11 +276,34 @@ public sealed record YoYInflationLeg
                     refStart,
                     refEnd));
             }
+            else
+            {
+                // cap/floorlet
+                leg.Add(new CappedFlooredYoYInflationCoupon(
+                    paymentDate,
+                    notional,
+                    start,
+                    end,
+                    VectorsFunctions.Get(FixingDays, i, 0),
+                    Index,
+                    ObservationLag,
+                    Interpolation,
+                    paymentDayCounter,
+                    gearing,
+                    VectorsFunctions.Get(Spreads, i, 0.0),
+                    VectorsFunctions.Get(Caps, i, null),
+                    VectorsFunctions.Get(Floors, i, null),
+                    refStart,
+                    refEnd));
+            }
         }
 
         // Without caps or floors, this is enough; otherwise, a more
         // specific pricer will need to be set in client code.
-        return InflationCouponPricerFunctions.SetCouponPricer(leg.MoveToImmutable(), new YoYInflationCouponPricer());
+        ImmutableArray<CashFlow> built = leg.MoveToImmutable();
+        return Caps.IsEmpty && Floors.IsEmpty
+            ? InflationCouponPricerFunctions.SetCouponPricer(built, new YoYInflationCouponPricer())
+            : built;
     }
 
     private static void CheckSize(int given, int n, string what)
