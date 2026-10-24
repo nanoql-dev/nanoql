@@ -123,7 +123,7 @@ public static class MCAmericanEngine
         {
             // control variate might lead to small negative
             // option values for deep OTM options
-            value = Math.Max(0.0, value);
+            value = Max(0.0, value);
         }
 
         return option.FetchResults(new OneAssetOptionResults
@@ -229,4 +229,7 @@ public static class MCAmericanEngine
             return AnalyticEuropeanEngine.Calculate(controlOption, Context, process).NPV;
         }
     }
+
+    // std::max's semantics, which keep or drop a NaN by position where Math.Max propagates it.
+    private static double Max(double a, double b) => a < b ? b : a;
 }

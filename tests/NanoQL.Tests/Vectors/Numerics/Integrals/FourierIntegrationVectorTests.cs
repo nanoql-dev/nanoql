@@ -47,6 +47,7 @@ public class FourierIntegrationVectorTests
                 "simpson" => FourierIntegration.Simpson(1e-8),
                 "trapezoid" => FourierIntegration.Trapezoid(1e-8),
                 "gaussKronrod" => FourierIntegration.GaussKronrod(1e-8),
+                "tanhSinh" => FourierIntegration.TanhSinh(1e-8),
                 _ => throw new ArgumentOutOfRangeException(nameof(c), factory, "unknown factory"),
             };
 

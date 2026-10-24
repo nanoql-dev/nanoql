@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 604 | 75 |
-| partial | 22 | 24 |
-| ported | 634 | 81 |
+| not started | 590 | 73 |
+| partial | 22 | 25 |
+| ported | 648 | 82 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -817,7 +817,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `exponentialintegrals` | ported | Numerics/Integrals/ExponentialIntegralsFunctions.cs |  |
 | `expsinhintegral` | not started |  | no nanoql type: ExpSinhIntegral |
 | `filonintegral` | not started |  | no nanoql type: FilonIntegral, FilonIntegralType |
-| `fourierintegration` | partial | Numerics/Integrals/FourierIntegration.cs | partial: discreteSimpson and discreteTrapezoid (S-van's discrete integrals); tanhSinh (S-van); expSinh (S-core) |
+| `fourierintegration` | partial | Numerics/Integrals/FourierIntegration.cs | partial: discreteSimpson and discreteTrapezoid (S-van's discrete integrals); expSinh (S-core) |
 | `gaussianorthogonalpolynomial` | ported | Numerics/Integrals/GaussianOrthogonalPolynomial/GaussChebyshev2ndPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussChebyshevPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussGegenbauerPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussHermitePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussHyperbolicPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussJacobiPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussLaguerrePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussLegendrePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussianOrthogonalPolynomial.cs |  |
 | `gaussianquadratures` | ported | Numerics/Integrals/GaussianQuadratures/GaussChebyshev2ndIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshev2ndIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshevIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshevIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussGegenbauerIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussHermiteIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussHyperbolicIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussJacobiIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLaguerreIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLegendreIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLegendreIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussianQuadrature.cs, Numerics/Integrals/GaussianQuadratures/GaussianQuadratureIntegrator.cs, Numerics/Integrals/GaussianQuadratures/MultiDimGaussianIntegration.cs, Numerics/Integrals/GaussianQuadratures/TabulatedGaussLegendre.cs |  |
 | `gausslaguerrecosinepolynomial` | not started |  | no nanoql type: GaussLaguerreTrigonometricBase, GaussLaguerreCosinePolynomial, GaussLaguerreSinePolynomial |
@@ -827,7 +827,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `momentbasedgaussianpolynomial` | not started |  | no nanoql type: MomentBasedGaussianPolynomial |
 | `segmentintegral` | ported | Numerics/Integrals/SegmentIntegral.cs |  |
 | `simpsonintegral` | ported | Numerics/Integrals/SimpsonIntegral.cs |  |
-| `tanhsinhintegral` | not started |  | no nanoql type: TanhSinhIntegral |
+| `tanhsinhintegral` | ported | Numerics/Integrals/TanhSinhIntegral.cs |  |
 | `trapezoidintegral` | ported | Numerics/Integrals/TrapezoidIntegral/Default.cs, Numerics/Integrals/TrapezoidIntegral/ITrapezoidIntegrationPolicy.cs, Numerics/Integrals/TrapezoidIntegral/MidPoint.cs, Numerics/Integrals/TrapezoidIntegral/TrapezoidIntegral{TIntegrationPolicy}.cs |  |
 | `twodimensionalintegral` | not started |  | no nanoql type: TwoDimensionalIntegral |
 
@@ -841,7 +841,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `backwardflatlinearinterpolation` | ported | Numerics/Interpolations/BackwardflatLinear.cs, Numerics/Interpolations/BackwardflatLinearInterpolation.cs |  |
 | `bicubicsplineinterpolation` | ported | Numerics/Interpolations/Bicubic.cs, Numerics/Interpolations/BicubicSpline.cs |  |
 | `bilinearinterpolation` | ported | Numerics/Interpolations/Bilinear.cs, Numerics/Interpolations/BilinearInterpolation.cs |  |
-| `chebyshevinterpolation` | not started |  | no nanoql type: ChebyshevInterpolation, ChebyshevInterpolationPointsType |
+| `chebyshevinterpolation` | ported | Numerics/Interpolations/ChebyshevInterpolation.cs, Numerics/Interpolations/ChebyshevInterpolationPointsType.cs |  |
 | `convexmonotoneinterpolation` | not started |  | no nanoql type: ConvexMonotoneInterpolation, ConvexMonotone |
 | `cubicinterpolation` | ported | Numerics/Interpolations/CubicInterpolation/AkimaCubicInterpolation.cs, Numerics/Interpolations/CubicInterpolation/Cubic.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolation.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolationBoundaryCondition.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolationDerivativeApprox.cs, Numerics/Interpolations/CubicInterpolation/CubicNaturalSpline.cs, Numerics/Interpolations/CubicInterpolation/CubicSplineOvershootingMinimization1.cs, Numerics/Interpolations/CubicInterpolation/CubicSplineOvershootingMinimization2.cs, Numerics/Interpolations/CubicInterpolation/FritschButlandCubic.cs, Numerics/Interpolations/CubicInterpolation/HarmonicCubic.cs, Numerics/Interpolations/CubicInterpolation/KrugerCubic.cs, Numerics/Interpolations/CubicInterpolation/MonotonicCubicNaturalSpline.cs, Numerics/Interpolations/CubicInterpolation/MonotonicParabolic.cs, Numerics/Interpolations/CubicInterpolation/Parabolic.cs |  |
 | `extrapolation` | ported | Numerics/Interpolations/Extrapolator.cs, Numerics/Interpolations/ExtrapolatorExtensions.cs |  |
@@ -851,7 +851,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `interpolation2d` | ported | Numerics/Interpolations/IInterpolator2D.cs, Numerics/Interpolations/Interpolation2D.cs | no nanoql type: Interpolation2DTemplateImpl |
 | `kernelinterpolation` | not started |  | no nanoql type: KernelInterpolation |
 | `kernelinterpolation2d` | not started |  | no nanoql type: KernelInterpolation2D |
-| `lagrangeinterpolation` | not started |  | no nanoql type: LagrangeInterpolation |
+| `lagrangeinterpolation` | ported | Numerics/Interpolations/LagrangeInterpolation.cs |  |
 | `linearinterpolation` | ported | Numerics/Interpolations/Linear.cs, Numerics/Interpolations/LinearInterpolation.cs |  |
 | `loginterpolation` | ported | Numerics/Interpolations/LogInterpolation/FritschButlandLogCubic.cs, Numerics/Interpolations/LogInterpolation/HarmonicLogCubic.cs, Numerics/Interpolations/LogInterpolation/KrugerLog.cs, Numerics/Interpolations/LogInterpolation/KrugerLogCubic.cs, Numerics/Interpolations/LogInterpolation/KrugerLogMixedLinearCubic.cs, Numerics/Interpolations/LogInterpolation/LogCubic.cs, Numerics/Interpolations/LogInterpolation/LogCubicInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/LogInterpolationImpl.cs, Numerics/Interpolations/LogInterpolation/LogLinear.cs, Numerics/Interpolations/LogInterpolation/LogLinearInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogMixedLinearCubic.cs, Numerics/Interpolations/LogInterpolation/LogMixedLinearCubicInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogMixedLinearCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/LogParabolic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogCubic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogMixedLinearCubic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogParabolic.cs | no nanoql type: DefaultLogCubic, DefaultLogMixedLinearCubic |
 | `mixedinterpolation` | ported | Numerics/Interpolations/MixedInterpolation/MixedInterpolationBehavior.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearCubic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearCubicInterpolation.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearCubicNaturalSpline.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearFritschButlandCubic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearKrugerCubic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearMonotonicCubicNaturalSpline.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearMonotonicParabolic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearParabolic.cs |  |
@@ -962,7 +962,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `halley` | not started |  | no nanoql type: Halley |
 | `newton` | ported | Numerics/Solvers1D/Newton.cs |  |
 | `newtonsafe` | ported | Numerics/Solvers1D/NewtonSafe.cs |  |
-| `ridder` | not started |  | no nanoql type: Ridder |
+| `ridder` | ported | Numerics/Solvers1D/Ridder.cs |  |
 | `secant` | not started |  | no nanoql type: Secant |
 
 ### `ql/math/statistics/`
@@ -1669,12 +1669,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `analyticbsmhullwhiteengine` | not started |  | no nanoql type: AnalyticBSMHullWhiteEngine |
+| `analyticbsmhullwhiteengine` | ported | PricingEngines/Vanilla/AnalyticBSMHullWhiteEngine.cs |  |
 | `analyticcevengine` | not started |  | no nanoql type: CEVCalculator, AnalyticCEVEngine |
 | `analyticdigitalamericanengine` | ported | PricingEngines/Vanilla/AnalyticDigitalAmericanEngine.cs, PricingEngines/Vanilla/AnalyticDigitalAmericanKOEngine.cs |  |
 | `analyticdividendeuropeanengine` | ported | PricingEngines/Vanilla/AnalyticDividendEuropeanEngine.cs |  |
 | `analyticeuropeanengine` | ported | PricingEngines/Vanilla/AnalyticEuropeanEngine.cs |  |
-| `analyticeuropeanvasicekengine` | not started |  | no nanoql type: AnalyticBlackVasicekEngine |
+| `analyticeuropeanvasicekengine` | ported | PricingEngines/Vanilla/AnalyticBlackVasicekEngine.cs |  |
 | `analyticgjrgarchengine` | not started |  | no nanoql type: AnalyticGJRGARCHEngine |
 | `analytich1hwengine` | not started |  | no nanoql type: AnalyticH1HWEngine |
 | `analytichestonengine` | ported | PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngine.cs, PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngineAPHelper.cs, PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngineComplexLogFormula.cs, PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngineOptimalAlpha.cs | no nanoql type: AnalyticHestonEngineAP_Helper |
@@ -1682,10 +1682,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `analyticpdfhestonengine` | not started |  | no nanoql type: AnalyticPDFHestonEngine |
 | `analyticptdhestonengine` | not started |  | no nanoql type: AnalyticPTDHestonEngine, AnalyticPTDHestonEngineComplexLogFormula |
 | `analyticroughhestonengine` | not started |  | no nanoql type: AnalyticRoughHestonEngine, AnalyticRoughHestonEngineApproximation |
-| `baroneadesiwhaleyengine` | not started |  | no nanoql type: BaroneAdesiWhaleyApproximationEngine |
+| `baroneadesiwhaleyengine` | ported | PricingEngines/Vanilla/BaroneAdesiWhaleyApproximationEngine.cs |  |
 | `batesengine` | not started |  | no nanoql type: BatesEngine, BatesDetJumpEngine, BatesDoubleExpEngine, BatesDoubleExpDetJumpEngine |
 | `binomialengine` | ported | PricingEngines/Vanilla/BinomialEngine/BinomialCRRVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialEQPVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialJ4VanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialJRVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialLRVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialTianVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialTrigeorgisVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialVanillaEngine.cs |  |
-| `bjerksundstenslandengine` | not started |  | no nanoql type: BjerksundStenslandApproximationEngine |
+| `bjerksundstenslandengine` | ported | PricingEngines/Vanilla/BjerksundStenslandApproximationEngine.cs |  |
 | `cashdividendeuropeanengine` | not started |  | no nanoql type: CashDividendEuropeanEngine, CashDividendEuropeanEngineCashDividendModel |
 | `coshestonengine` | not started |  | no nanoql type: COSHestonEngine |
 | `discretizedvanillaoption` | ported | PricingEngines/Vanilla/DiscretizedVanillaOption.cs |  |
@@ -1700,9 +1700,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdsabrvanillaengine` | not started |  | no nanoql type: FdSabrVanillaEngine |
 | `fdsimplebsswingengine` | not started |  | no nanoql type: FdSimpleBSSwingEngine |
 | `hestonexpansionengine` | not started |  | no nanoql type: HestonExpansionEngine, HestonExpansionEngineHestonExpansionFormula, HestonExpansion, LPP2HestonExpansion, LPP3HestonExpansion, FordeHestonExpansion |
-| `integralengine` | not started |  | no nanoql type: IntegralEngine |
-| `jumpdiffusionengine` | not started |  | no nanoql type: JumpDiffusionEngine |
-| `juquadraticengine` | not started |  | no nanoql type: JuQuadraticApproximationEngine |
+| `integralengine` | ported | PricingEngines/Vanilla/IntegralEngine.cs |  |
+| `jumpdiffusionengine` | ported | PricingEngines/Vanilla/JumpDiffusionEngine.cs |  |
+| `juquadraticengine` | ported | PricingEngines/Vanilla/JuQuadraticApproximationEngine.cs |  |
 | `mcamericanengine` | ported | PricingEngines/Vanilla/MCAmericanEngine/AmericanPathPricer.cs, PricingEngines/Vanilla/MCAmericanEngine/MCAmericanEngine.cs, PricingEngines/Vanilla/MCAmericanEngine/MakeMCAmericanEngine{TRng,TStats,TRngCalibration}.cs |  |
 | `mcdigitalengine` | ported | PricingEngines/Vanilla/MCDigitalEngine/DigitalPathPricer.cs, PricingEngines/Vanilla/MCDigitalEngine/MCDigitalEngine.cs, PricingEngines/Vanilla/MCDigitalEngine/MakeMCDigitalEngine{TRng,TStats}.cs |  |
 | `mceuropeanengine` | ported | PricingEngines/Vanilla/MCEuropeanEngine/EuropeanPathPricer.cs, PricingEngines/Vanilla/MCEuropeanEngine/MCEuropeanEngine.cs, PricingEngines/Vanilla/MCEuropeanEngine/MakeMCEuropeanEngine{TRng,TStats}.cs |  |
@@ -1710,8 +1710,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `mceuropeanhestonengine` | not started |  | no nanoql type: MCEuropeanHestonEngine, MakeMCEuropeanHestonEngine, EuropeanHestonPathPricer |
 | `mchestonhullwhiteengine` | not started |  | no nanoql type: MCHestonHullWhiteEngine, MakeMCHestonHullWhiteEngine, HestonHullWhitePathPricer |
 | `mcvanillaengine` | ported | PricingEngines/Vanilla/MCVanillaEngine{TMc,TPath,TStats}.cs |  |
-| `qdfpamericanengine` | not started |  | no nanoql type: QdFpIterationScheme, QdFpLegendreScheme, QdFpLegendreTanhSinhScheme, QdFpTanhSinhIterationScheme, QdFpAmericanEngine, QdFpAmericanEngineFixedPointEquation |
-| `qdplusamericanengine` | not started |  | no nanoql type: QdPlusAmericanEngine, QdPlusAmericanEngineSolverType |
+| `qdfpamericanengine` | ported | PricingEngines/Vanilla/QdFpAmericanEngine/DqFpEquation.cs, PricingEngines/Vanilla/QdFpAmericanEngine/DqFpEquationA.cs, PricingEngines/Vanilla/QdFpAmericanEngine/DqFpEquationB.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpAmericanEngine.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpAmericanEngineFixedPointEquation.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpIterationScheme.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpLegendreScheme.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpLegendreTanhSinhScheme.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpTanhSinhIterationScheme.cs |  |
+| `qdplusamericanengine` | ported | PricingEngines/Vanilla/QdPlusAmericanEngine/QdPlusAddOnValue.cs, PricingEngines/Vanilla/QdPlusAmericanEngine/QdPlusAmericanEngine.cs, PricingEngines/Vanilla/QdPlusAmericanEngine/QdPlusAmericanEngineSolverType.cs, PricingEngines/Vanilla/QdPlusAmericanEngine/QdPutCallParityEngine.cs |  |
 
 ### `ql/processes/`
 
@@ -1734,7 +1734,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `hullwhiteprocess` | ported | Processes/HullWhiteProcess/HullWhiteForwardProcess.cs, Processes/HullWhiteProcess/HullWhiteProcess.cs, Processes/HullWhiteProcess/HullWhiteProcessFunctions.cs |  |
 | `hybridhestonhullwhiteprocess` | not started |  | no nanoql type: HybridHestonHullWhiteProcess, HybridHestonHullWhiteProcessDiscretization |
 | `jointstochasticprocess` | not started |  | no nanoql type: JointStochasticProcess |
-| `merton76process` | not started |  | no nanoql type: Merton76Process |
+| `merton76process` | ported | Processes/Merton76Process.cs |  |
 | `mfstateprocess` | ported | Processes/MfStateProcess.cs |  |
 | `ornsteinuhlenbeckprocess` | ported | Processes/OrnsteinUhlenbeckProcess.cs |  |
 | `squarerootprocess` | ported | Processes/SquareRootProcess.cs |  |
@@ -2060,7 +2060,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `americanoption` | partial | TestSuite/AmericanOptionTests.cs | 6 of 32 cases; not yet: testBaroneAdesiWhaleyValues, testBaroneAdesiWhaleyValuesAtNonPositiveRate, testBjerksundStenslandValues, testJuValues, testJuValuesAtZeroRate, testBaroneAdesiWhaleyAndJuAtLowVolatility, testJuNotBelowExerciseValue, testBjerksundStenslandAtUnitBeta, testFdShoutGreeks, testFDShoutNPV, testZeroVolFDShoutNPV, testLargeDividendShoutNPV, testQdPlusBoundaryValues, testQdPlusBoundaryConvergence, testQdAmericanEngines, testQdFpIterationScheme, testAndersenLakeHighPrecisionExample, testQdEngineStandardExample, testBulkQdFpAmericanEngine, testQdEngineWithLobattoIntegral, testQdEnginesNotBelowExerciseValue, testQdNegativeDividendYield, testBjerksundStenslandEuropeanGreeks, testBjerksundStenslandAmericanGreeks, testSingleBjerksundStenslandGreeks, testBaroneAdesiWhaleyNegativeRates |
+| `americanoption` | partial | TestSuite/AmericanOptionTests.cs | 28 of 32 cases; not yet: testFdShoutGreeks, testFDShoutNPV, testZeroVolFDShoutNPV, testLargeDividendShoutNPV; moved: testBjerksundStenslandAmericanGreeks line 2437 to Divergences/BjerksundStenslandTriggerTests.cs |
 | `amortizingbond` | ported | TestSuite/AmortizingBondTests.cs | 3 of 3 cases |
 | `andreasenhugevolatilityinterpl` | not started |  | 14 cases |
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
@@ -2121,7 +2121,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `equitycashflow` | ported | TestSuite/EquityCashFlowTests.cs | 8 of 8 cases |
 | `equityindex` | ported | TestSuite/EquityIndexTests.cs | 11 of 12 cases; not ported: testFixingObservability (observer notifications, which an immutable index has no use for, R1) |
 | `equitytotalreturnswap` | not started |  | 5 cases |
-| `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 24 of 27 cases; not yet: testIntegralEngines, testFFTEngines, testFdEnginesWithNonStrikedPayoff |
+| `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 25 of 27 cases; not yet: testFFTEngines, testFdEnginesWithNonStrikedPayoff |
 | `everestoption` | not started |  | 1 cases |
 | `exchangerate` | ported | TestSuite/ExchangeRateTests.cs | 5 of 5 cases |
 | `extendedblackvariancesurface` | not started |  | 1 cases |
@@ -2147,7 +2147,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `hestonmodel` | partial | TestSuite/HestonModelTests.cs | 7 of 39 cases; not yet: testDAXCalibration, testAnalyticVsBlack, testMcVsCached, testFdBarrierVsCached, testFdVanillaVsCached, testFdVanillaWithDividendsVsCached, testFdAmerican, testKahlJaeckelCase, testMultipleStrikesEngine, testAnalyticPiecewiseTimeDependent, testDAXCalibrationOfTimeDependentModel, testAlanLewisReferencePrices, testExpansionOnAlanLewisReference, testExpansionOnFordeReference, testAllIntegrationMethods, testCosHestonCumulants, testCosHestonEngine, testCosHestonEngineTruncation, testCharacteristicFct, testAndersenPiterbargPricing, testAndersenPiterbargControlVariateIntegrand, testAndersenPiterbargConvergence, testPiecewiseTimeDependentChFvsHestonChF, testPiecewiseTimeDependentComparison, testPiecewiseTimeDependentChFAsymtotic, testSmallSigmaExpansion4ExpFitting, testExponentialFitting4StrikesAndMaturities, testAsymptoticControlVariate, testLocalVolFromHestonModel, testOptimalAlphaKmin, testHestonBlackVolSurfaceAtmLevel, testAnalyticPDFHestonEngine |
 | `hestonslvmodel` | not started |  | 19 cases |
 | `himalayaoption` | not started |  | 1 cases |
-| `hybridhestonhullwhiteprocess` | not started |  | 13 cases |
+| `hybridhestonhullwhiteprocess` | partial | TestSuite/HybridHestonHullWhiteProcessTests.cs | 1 of 13 cases; not yet: testCompareBsmHWandHestonHW, testZeroBondPricing, testMcVanillaPricing, testMcPureHestonPricing, testAnalyticHestonHullWhitePricing, testCallableEquityPricing, testDiscretizationError, testFdmHestonHullWhiteEngine, testBsmHullWhitePricing, testSpatialDiscretizatinError, testHestonHullWhiteCalibration, testH1HWPricingEngine |
 | `indexes` | ported | TestSuite/IndexesTests.cs | 6 of 6 cases; replaced: testFixingObservability by Vectors/Indexes/BMAIndexVectorTests.cs |
 | `inflation` | ported | TestSuite/InflationTests.cs | 27 of 28 cases; replaced: testNotifications by Vectors/Coupons/IndexedCashFlowVectorTests.cs; not ported: testCpiAsIndexInterpolation (CPI::AsIndex, deprecated in QuantLib 1.43, D5) |
 | `inflationcapfloor` | ported | TestSuite/InflationCapFloorTests.cs | 4 of 4 cases; replaced: testVolatilityQuoteObservability by Conventions/YoYInflationCapFloorQuoteTests.cs |
@@ -2157,11 +2157,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcpiswap` | ported | TestSuite/CPISwapTests.cs | 5 of 5 cases |
 | `inflationvolatility` | not started |  | 3 cases |
 | `instruments` | not started |  | 2 cases |
-| `integrals` | partial | TestSuite/IntegralsTests.cs | 13 of 21 cases; not yet: testTanhSinh, testExpSinh, testTwoDimensionalIntegration, testFolinIntegration, testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator, testPiecewiseIntegral |
+| `integrals` | partial | TestSuite/IntegralsTests.cs | 14 of 21 cases; not yet: testExpSinh, testTwoDimensionalIntegration, testFolinIntegration, testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator, testPiecewiseIntegral |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
-| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 25 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testMultiSpline, testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation |
-| `jumpdiffusion` | not started |  | 2 cases |
+| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 32 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testMultiSpline, testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLaplaceInterpolation |
+| `jumpdiffusion` | ported | TestSuite/JumpDiffusionTests.cs | 2 of 2 cases |
 | `lazyobject` | not ported: tests LazyObject, which is replaced |  |  |
 | `libormarketmodel` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
 | `libormarketmodelprocess` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
@@ -2223,7 +2223,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `shortratemodels` | ported | TestSuite/ShortRateModelsTests.cs | 9 of 9 cases; replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks by Conventions/ModelRebuildTests.cs; testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks by Conventions/ModelRebuildTests.cs |
 | `sofrfutures` | ported | TestSuite/SofrFuturesTests.cs | 5 of 6 cases; not ported: testOvernightIndexFutureRateHelperNotification (observer notifications, which an immutable helper has no use for, R1) |
 | `softbarrieroption` | not started |  | 1 cases |
-| `solvers` | partial | TestSuite/SolversTests.cs | 4 of 9 cases; not yet: testBisection, testFalsePosition, testRidder, testSecant, testHalley |
+| `solvers` | partial | TestSuite/SolversTests.cs | 5 of 9 cases; not yet: testBisection, testFalsePosition, testSecant, testHalley |
 | `squarerootclvmodel` | not started |  | 3 cases |
 | `stats` | partial | TestSuite/StatsTests.cs | 2 of 4 cases; not yet: testSequenceStatistics, testConvergenceStatistics |
 | `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |

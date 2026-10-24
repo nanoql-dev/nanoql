@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/integrals.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testTanhSinh (S-van); testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (S-core); testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator (S-van); testPiecewiseIntegral (S-xrt)
+// Partial: testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (S-core); testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator (S-van); testPiecewiseIntegral (S-xrt)
 
 using System.Numerics;
 using NanoQL.Numerics;
@@ -83,6 +83,13 @@ public class IntegralsTests
 
         // on degenerated domain [1,1+macheps] an exception is thrown
         // which is also ok, but not tested here
+    }
+
+    [Fact]
+    public void TestTanhSinh()
+    {
+        // Testing tanh-sinh integration...
+        TestSeveral(new TanhSinhIntegral());
     }
 
     [Fact]

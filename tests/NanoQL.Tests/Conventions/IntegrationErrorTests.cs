@@ -6,11 +6,12 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// An integration's error estimate (the S-cms plan's CMR2): QuantLib's integrators keep it in a mutable member, which
-/// only the non-adaptive Gauss-Kronrod rule, tanh-sinh and exp-sinh set, so <c>absoluteError()</c> reads an unset
-/// member on every other; nanoql's <see cref="IntegrationResult.AbsoluteError"/> is <see langword="null"/> there, and
-/// <see cref="Integrator.IntegrationSuccess"/>, which reads it, refuses a result without one rather than compare an
-/// unset value. An empty interval's integral is exact: an error of 0, which every integrator reports.
+/// An integration's error estimate (the S-cms plan's CMR2, tanh-sinh's the S-van plan's): QuantLib's integrators keep
+/// it in a mutable member, which only the non-adaptive Gauss-Kronrod rule, tanh-sinh and exp-sinh set, so
+/// <c>absoluteError()</c> reads an unset member on every other; nanoql's <see cref="IntegrationResult.AbsoluteError"/>
+/// is <see langword="null"/> there, and <see cref="Integrator.IntegrationSuccess"/>, which reads it, refuses a result
+/// without one rather than compare an unset value. An empty interval's integral is exact: an error of 0, which every
+/// integrator reports.
 /// </summary>
 public class IntegrationErrorTests
 {
@@ -63,9 +64,23 @@ public class IntegrationErrorTests
     }
 
     [Fact]
+    public void TheTanhSinhRuleReportsBoostsEstimate()
+    {
+        // QuantLib's values (the vectors' tanhsinhintegral and the harness's tanh_sinh, their first cases): eˣ on [0, 1]
+        // in 58 evaluations, Boost's error 1.5459454355661034e-11; the rule's accuracy is QL_MAX_REAL and its maximum
+        // unbounded, as QuantLib's, so every integration with an estimate succeeds
+        var rule = new TanhSinhIntegral();
+        IntegrationResult result = rule.IntegrateWithStatistics(Math.Exp, 0.0, 1.0);
+        Assert.Equal((1.718281828459045, 58, 1.5459454355661034e-11), (result.Value, result.NumberOfEvaluations, result.AbsoluteError));
+        Assert.True(rule.IntegrationSuccess(result));
+        IntegrationResult reversed = rule.IntegrateWithStatistics(Math.Exp, 1.0, 0.0);
+        Assert.Equal((-1.718281828459045, 58, 1.5459454355661034e-11), (reversed.Value, reversed.NumberOfEvaluations, reversed.AbsoluteError));
+    }
+
+    [Fact]
     public void AnEmptyIntervalIsExact()
     {
-        foreach (Integrator integrator in WithoutEstimate.Append(new GaussKronrodNonAdaptive(1e-6, 100, 1e-6)))
+        foreach (Integrator integrator in WithoutEstimate.Append(new GaussKronrodNonAdaptive(1e-6, 100, 1e-6)).Append(new TanhSinhIntegral()))
         {
             IntegrationResult result = integrator.IntegrateWithStatistics(Math.Exp, 2.0, 2.0);
             Assert.Equal((0.0, 0, 0.0), (result.Value, result.NumberOfEvaluations, result.AbsoluteError));

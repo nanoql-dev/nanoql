@@ -188,6 +188,31 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a QD+ solver type outside <see cref="QdPlusAmericanEngineSolverType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(QdPlusAmericanEngineSolverType value, string paramName)
+    {
+        if (value is < QdPlusAmericanEngineSolverType.Brent or > QdPlusAmericanEngineSolverType.SuperHalley)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown solver type");
+        }
+    }
+
+    /// <summary>Refuses a fixed-point equation outside <see cref="QdFpAmericanEngineFixedPointEquation"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib has no text for it: its engine reads any other value as equation B.</remarks>
+    internal static void Check(QdFpAmericanEngineFixedPointEquation value, string paramName)
+    {
+        if (value is < QdFpAmericanEngineFixedPointEquation.FpA or > QdFpAmericanEngineFixedPointEquation.Auto)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown fixed point equation");
+        }
+    }
+
     /// <summary>Refuses an exercise type outside <see cref="ExerciseType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

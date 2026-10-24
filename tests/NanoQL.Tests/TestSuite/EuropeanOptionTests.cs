@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/europeanoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testIntegralEngines, which waits for S-van's IntegralEngine; testFFTEngines, which waits for S-xeq's FFTVanillaEngine; testFdEnginesWithNonStrikedPayoff, which waits for S-hes's FdHestonVanillaEngine and S-van's FdCIRVanillaEngine
+// Partial: testFFTEngines, which waits for S-xeq's FFTVanillaEngine; testFdEnginesWithNonStrikedPayoff, which waits for S-hes's FdHestonVanillaEngine and S-van's FdCIRVanillaEngine
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -755,6 +755,19 @@ public class EuropeanOptionTests
     }
 
     [Fact]
+    public void TestIntegralEngines()
+    {
+        // Testing integral engines against analytic results...
+
+        EngineType engine = EngineType.Integral;
+        Size timeSteps = 300;
+        Size gridPoints = 300;
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 0.0001;
+        TestEngineConsistency(engine, timeSteps, gridPoints, relativeTol);
+    }
+
+    [Fact]
     public void TestMcEngines()
     {
         // Testing Monte Carlo European engines against analytic results...
@@ -1250,6 +1263,7 @@ public class EuropeanOptionTests
             EngineType.JOSHI => (option, context) => BinomialJ4VanillaEngine.Calculate(option, context, stochProcess, binomialSteps),
             EngineType.FiniteDifferences => (option, context) =>
                 FdBlackScholesVanillaEngine.Calculate(option, context, stochProcess, tGrid: binomialSteps, xGrid: samples),
+            EngineType.Integral => (option, context) => IntegralEngine.Calculate(option, context, stochProcess),
             EngineType.PseudoMonteCarlo => new MakeMCEuropeanEngine<PseudoRandom, GeneralStatistics>(stochProcess, 42)
                 .WithSteps(1)
                 .WithSamples(samples)

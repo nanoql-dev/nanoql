@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/math/integrals/fourierintegration.hpp ql/math/integrals/fourierintegration.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: discreteSimpson and discreteTrapezoid (S-van's discrete integrals); tanhSinh (S-van); expSinh (S-core)
+// Partial: discreteSimpson and discreteTrapezoid (S-van's discrete integrals); expSinh (S-core)
 
 namespace NanoQL.Numerics;
 
@@ -153,6 +153,12 @@ public sealed class FourierIntegration
     public static FourierIntegration Trapezoid(double absTolerance, int maxEvaluations = 1000) =>
         new(Algorithm.Trapezoid, new TrapezoidIntegral<Default>(absTolerance, maxEvaluations));
 
+    /// <summary>The tanh-sinh integration, on [0, ∞) directly, Boost's map of a half-infinite range.</summary>
+    /// <param name="relTolerance">The tolerance relative to the integral's L1 norm.</param>
+    /// <returns>The integration.</returns>
+    public static FourierIntegration TanhSinh(double relTolerance = 1e-8) =>
+        new(Algorithm.TanhSinh, new TanhSinhIntegral(relTolerance));
+
     /// <summary>
     /// Andersen and Piterbarg's integration limit: the larger of the roots of c_∞·u + ln u + ln ε and of
     /// (v₀t/2)·u² + ln u + ln ε, or the first alone where the second can't be bracketed.
@@ -238,6 +244,8 @@ public sealed class FourierIntegration
             case Algorithm.GaussChebyshev2nd:
                 return new IntegrationResult(
                     gaussianQuadrature_!.Evaluate(x => Integrand1(c_inf, f, x)), gaussianQuadrature_.Order);
+            case Algorithm.TanhSinh:
+                return integrator_!.IntegrateWithStatistics(f, 0.0, double.MaxValue);
             case Algorithm.Simpson:
             case Algorithm.Trapezoid:
             case Algorithm.GaussLobatto:

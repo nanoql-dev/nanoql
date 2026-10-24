@@ -159,6 +159,41 @@ Facts:
 - `APayoffDiscountCurveRunsOverItsOwnTime`
 - `EachEnginesThetaIsPerItsOwnDayCountersYear`
 
+## ApproximationThetaMismatchedTimesTests
+
+[`Divergences/ApproximationThetaMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/ApproximationThetaMismatchedTimesTests.cs)
+
+The American approximations' theta where early exercise is never optimal, on structures dated differently (the mismatched-dates class, the S-van plan's VR4 "across C1–C4"). There Barone-Adesi-Whaley, Ju and Bjerksund-Stensland report the European results, and QuantLib's theta divides every term by the volatility's time (`baroneadesiwhaleyengine.cpp:200-204`, `juquadraticengine.cpp:108-112`, `bjerksundstenslandengine.cpp:145-149`), as its analytic European engine does. nanoql's analytic European engine divides each term by its own structure's time (`Divergences/AnalyticThetaMismatchedTimesTests.cs`, checked there against QuantLib's `blackScholesTheta`), and the approximations' European branch is that engine's. QuantLib's check: through the analytic engine's. QuantLib's thetas, its approximations' and its analytic engine's alike, recorded [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section theta]. Where the structures share their dates, QuantLib's bits (the engines' vectors).
+
+Facts:
+
+- `ANeverExercisedPutsThetaIsTheAnalyticEngines`
+- `ANeverExercisedCallsThetaIsTheAnalyticEngines`
+
+## ApproximationUpstreamFixesTests
+
+[`Divergences/ApproximationUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/ApproximationUpstreamFixesTests.cs)
+
+Two fixes QuantLib's master made to the American approximations after the pin, which nanoql takes (the S-van plan's VR5 (ii) and (iii)), with QuantLib 1.44's values recorded [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section upstream]. #2854 (`b19a8aa53`): below a variance of ε, Bjerksund-Stensland's approximation divides by zero, and QuantLib 1.44 returns NaN; the master returns the European value floored at the exercise value. #2906 (`513d6002a`): for short-dated, highly volatile options Ju's correction can take the value below the European one, a lower bound for the American; the master floors it there, with the European delta and gamma. QuantLib's check: the master's own cases, `TestSuite/AmericanOptionTests.cs`' `TestBaroneAdesiWhaleyAndJuAtLowVolatility` and `TestJuNotBelowEuropeanValue`; here the values themselves.
+
+Facts:
+
+- `BjerksundStenslandAtZeroVarianceIsTheFlooredEuropeanValue`
+- `JuBelowTheEuropeanValueIsTheEuropeanResults`
+
+## ApproximationWindowTests
+
+[`Divergences/ApproximationWindowTests.cs`](../tests/NanoQL.Tests/Divergences/ApproximationWindowTests.cs)
+
+The American approximations on an exercise window opening after the reference date (the S-van plan's VR4 (xxvi), VD27). QuantLib's Barone-Adesi-Whaley, Bjerksund-Stensland, Ju, QD+ and QD fixed-point engines read only the last date (`baroneadesiwhaleyengine.cpp:161-166`, `bjerksundstenslandengine.cpp:463-469`, `juquadraticengine.cpp:61-66`, `qdplusamericanengine.cpp:178-184`), so a put (S 80, K 100, σ 25%, r 5%, a year) exercisable in its last 3 months prices as exercisable now: 20.28 to 20.40, where QuantLib's FD engine gives 18.999. nanoql prices the window by the discount to its opening times the expectation, over S(t₁)'s density, of the engine's own American from the opening (`ApproximationWindow`). QuantLib's check: its FD engine on the window (4,000 × 4,000), each engine within its own error on the option exercisable now (its value against the FD engine's there) [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section window]. A window opening on the reference date is QuantLib's, bit for bit.
+
+Facts:
+
+- `AnEnginesWindowValueIsTheFdEnginesToItsOwnError`
+- `AnEnginesWindowValueDeltaAndGammaAreTheFdEnginesToItsOwnError`
+- `AWindowOpeningOnTheReferenceDateIsQuantLibs`
+- `ANodesRefusalRefusesTheWindow`
+
 ## AssetSwapNonParRepaymentTests
 
 [`Divergences/AssetSwapNonParRepaymentTests.cs`](../tests/NanoQL.Tests/Divergences/AssetSwapNonParRepaymentTests.cs)
@@ -201,6 +236,18 @@ Cubic B-splines on a repeated knot (the S-sr plan's SSR6 (vi)). QuantLib's recur
 Facts:
 
 - `ARepeatedKnotIsTheLimitOfKnotsAGapApart`
+
+## BaroneAdesiWhaleyCriticalPriceTests
+
+[`Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs`](../tests/NanoQL.Tests/Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs)
+
+Barone-Adesi-Whaley's critical price where its Newton iteration leaves its range (the S-van plan's VR4 (vii)). A put's step can leave (0, K) and a call's seed or step (K, ∞), and QuantLib's next Black formula throws "forward + displacement (0 + 0) must be positive" (`baroneadesiwhaleyengine.cpp:59-130`); Ju's engine calls the same critical price (`juquadraticengine.cpp:126`) and throws with it [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section baw]. nanoql takes the root of QuantLib's own equation over the range, by Brent's method. QuantLib's check: the equation's residual at the root, within QuantLib's own tolerance, and its FD engine (2,000 × 2,000) on the option. Where Newton stays in range the critical price is QuantLib's, bit for bit (the engines' vectors).
+
+Facts:
+
+- `APutWhoseNewtonStepLeavesZeroToKIsPricedOnTheEquationsRoot`
+- `ACallWhoseSeedLeavesKToInfinityIsPricedOnTheEquationsRoot`
+- `JusEngineSharesTheRoot`
 
 ## BarrierMismatchedTimesTests
 
@@ -286,6 +333,52 @@ Facts:
 - `StructuresOnAnotherReferenceDateAreReadByDate`
 - `StructuresDatedAfterTheRiskFreeCurveAccrueNothingBeforeTheirDate`
 - `StructuresSharingTheRiskFreeTimesAreQuantLibs`
+
+## BjerksundStenslandMismatchedTimesTests
+
+[`Divergences/BjerksundStenslandMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/BjerksundStenslandMismatchedTimesTests.cs)
+
+Bjerksund-Stensland's Greeks on structures dated differently (the S-van plan's VR4 (viii)). QuantLib's American branch takes the dividend, risk-free and volatility times from the risk-free curve's reference date (`bjerksundstenslandengine.cpp:248-251`, `:320`, `:366`), so where a curve settles T+2 the rate sensitivity of the other runs over the wrong time. nanoql takes each structure's time from its own reference date. QuantLib's check: its own NPVs bumped by ±1e-6 in the rate, which nanoql's rho and dividend rho match to the difference's own accuracy [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section bjsdates]. Where the structures share their dates, QuantLib's bits (the engine's vectors).
+
+Facts:
+
+- `ADividendCurveSettlingLaterTakesItsOwnTime`
+- `ARiskFreeCurveSettlingLaterTakesItsOwnTime`
+
+## BjerksundStenslandOverflowTests
+
+[`Divergences/BjerksundStenslandOverflowTests.cs`](../tests/NanoQL.Tests/Divergences/BjerksundStenslandOverflowTests.cs)
+
+Bjerksund-Stensland's phi family where a power overflows against an underflowing normal tail (the S-van plan's VR4 (xxxiii)). `phi` returns e^λ·[N(d) − (I/S)^κ·N(d − 2 ln(I/S)/√v)] (`bjerksundstenslandengine.cpp:37-48`); on puts with q ≫ r and a long expiry the symmetric call's (I/S)^κ overflows while the N factor underflows, the product is NaN, and the European floor misses it: QuantLib prices puts at σ 5%, 30 years, r 0.1%, q 30% NaN [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section overflow]. The Greeks' functions carry the same powers beside erfc and Gaussian densities. nanoql takes each such product as one exponent, through log N's tail, where the power isn't finite or the tail is 0. QuantLib's check: its FD engine (2,000 × 2,000) on the value, delta and gamma; the other Greeks against the engine's own NPVs bumped by ±1e-6; QuantLib's bits where the guard doesn't fire.
+
+Facts:
+
+- `TheValueDeltaAndGammaAreTheFdEngines`
+- `TheOtherGreeksAreTheBumpedValues`
+- `WhereTheGuardDoesntFireTheBitsAreQuantLibs`
+
+## BjerksundStenslandTriggerTests
+
+[`Divergences/BjerksundStenslandTriggerTests.cs`](../tests/NanoQL.Tests/Divergences/BjerksundStenslandTriggerTests.cs)
+
+Bjerksund-Stensland where its 1993 trigger falls below its lower bound B₀ (the S-van plan's VR9, the user's ruling of 2026-10-24). Where bT + 2√v < 0 the trigger's exponent is positive and I falls below B₀ (`bjerksundstenslandengine.cpp:196-206`): an infeasible exercise boundary, on which QuantLib's closed form falls below its European value, which its floor then returns, up to 3.4 below its own FD engine on its own Greeks case's inputs. nanoql puts the trigger at the perpetual boundary B∞ there: a flat boundary at or above B₀ is a feasible exercise rule, so its value is a lower bound of the American (Bjerksund and Stensland 2002, §3). QuantLib's check: its QD+ engine, which the trigger's value stays below and within 0.5% of, and its FD engine (1,000 × 1,000) recorded [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section vr9, on `TestBjerksundStenslandAmericanGreeks`' market: q on Act/360, r on Act/365 (Fixed), the volatility on 30/360].
+
+Facts:
+
+- `BelowB0ThePerpetualTriggerGivesALowerBound`
+- `AtOrAboveTheBoundaryTheOptionIsExercised`
+- `TheValueJumpsAtTheRegionsEdge`
+- `FarBelowTheForwardThePerpetualTriggerIsStillPriced`
+
+## BjerksundStenslandUnsetGreeksTests
+
+[`Divergences/BjerksundStenslandUnsetGreeksTests.cs`](../tests/NanoQL.Tests/Divergences/BjerksundStenslandUnsetGreeksTests.cs)
+
+Bjerksund-Stensland's three Greeks it never sets (the S-van run's own find). QuantLib's engine assigns its results from a local `OneAssetOption::results` it never resets (`bjerksundstenslandengine.cpp:123`, `:157`, `:183`), so the forward delta, elasticity and in-the-money probability it reports are uninitialized memory: denormals such as 7.756808686434e-312, 7.745284637023e-312 and 2.1219957905e-314 for a one-year put at 100, varying by run [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section unset]. nanoql reports none, as every engine that doesn't compute one, in each of the engine's branches.
+
+Facts:
+
+- `TheForwardDeltaElasticityAndInTheMoneyProbabilityAreNone`
 
 ## BlackCalculatorItmProbabilityTests
 
@@ -382,6 +475,17 @@ Facts:
 Facts:
 
 - `TheExtrapolatedVarianceIsFlooredAtZero`
+
+## BlackVasicekVolatilityTests
+
+[`Divergences/BlackVasicekVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/BlackVasicekVolatilityTests.cs)
+
+The Black-Vasicek engine's equity volatility and dividends (the S-van plan's VR4 (xii)). QuantLib reads the equity volatility at time 0 (`blackVol(t, K)` with t = 0, `analyticeuropeanvasicekengine.cpp:78`) and leaves the dividend curve out, so a volatility curve rising from 10% to 30% prices on 10% and a dividend yield changes nothing. nanoql integrates the equity's term variance over [0, T] and takes the dividend discount into the forward. QuantLib's check: the engine's limit as the short rate's volatility vanishes, QuantLib's analytic European engine on the Vasicek bond's flat rate with the term volatility and the dividend curve [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section vasicek; QuantLib's own engine through the harness]. On a flat volatility and no dividend, QuantLib's bits (the engine's harness vectors).
+
+Facts:
+
+- `TheEquityVolatilityIsItsTermVariance`
+- `TheDividendsEnterTheForward`
 
 ## BlackVolTimeExtrapolationRefusalTests
 
@@ -480,6 +584,27 @@ Facts:
 
 - `TheTuesdayAfterAMondayBoxingDayIsAHoliday`
 - `TheTuesdayAfterAMondayFirstOfOctoberIsAHoliday`
+
+## BsmHullWhiteMismatchedTimesTests
+
+[`Divergences/BsmHullWhiteMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/BsmHullWhiteMismatchedTimesTests.cs)
+
+The BSM-Hull-White engine's variance offset on structures counted differently (the S-van plan's VR4 (xi)). QuantLib takes the Hull-White terms over the risk-free curve's time and the equity volatility in the covariance as its own structure quotes it (`analyticbsmhullwhiteengine.cpp:86-102`), so a volatility on Act/360 beside a curve on Act/365 enters the covariance at a rate its variance doesn't run at. nanoql takes the equity volatility as its variance per unit of the risk-free curve's time. QuantLib's check: its own engine on the market restated on one day counter, the volatility scaled by √(365/360) [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section bsmhw]. Where the structures share their counts, QuantLib's bits (the engine's vectors).
+
+Facts:
+
+- `TheCovarianceReadsTheVolatilityPerTheCurvesTime`
+
+## BsmHullWhiteSmallReversionTests
+
+[`Divergences/BsmHullWhiteSmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/BsmHullWhiteSmallReversionTests.cs)
+
+The BSM-Hull-White engine's variance offset at small mean reversion (the S-van plan's VR4 (xxvii), §3.3's small-reversion class). QuantLib's closed form, v = σ²/a²·(t + 2e^(−at)/a − e^(−2at)/(2a) − 3/(2a)) and μ = 2ρση/a·(t − (1 − e^(−at))/a) (`analyticbsmhullwhiteengine.cpp:97-110`), cancels to σ²t³/3 and ρσηt² with a relative error of about 3ε/(a·t)³, used down to (a·t)⁴ = ε. nanoql takes the series to (a·t)⁴ below a·t = 1e-2 and the closed form above. QuantLib's check: its own closed form evaluated to 50 digits (Python's decimal) on both sides of the cut, priced by QuantLib's analytic European engine on the total variance η²t + v + μ [executed on the wheel: `scratchpad\c2\bsmhw_decimal.py`].
+
+Facts:
+
+- `BelowTheCutTheSeriesIsTheClosedFormsExactValue`
+- `AboveTheCutTheClosedFormIsKept`
 
 ## BuilderTests
 
@@ -2063,6 +2188,16 @@ Facts:
 
 - `TheProxyIsAFreshCurveAtEveryPoint`
 
+## IntegralEngineZeroVarianceTests
+
+[`Divergences/IntegralEngineZeroVarianceTests.cs`](../tests/NanoQL.Tests/Divergences/IntegralEngineZeroVarianceTests.cs)
+
+The integral engine at zero variance (the S-van plan's VR4 (x)). QuantLib integrates the payoff over ±10√variance against a density scaled by 1/√(2π·variance) (`integralengine.cpp:78-83`), both 0 or ∞ at zero variance, so its value is NaN [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section integral]. nanoql takes the limit, the discounted payoff at the forward. QuantLib's check: its analytic European engine at the same zero volatility.
+
+Facts:
+
+- `AtZeroVarianceTheValueIsTheDiscountedPayoffAtTheForward`
+
 ## InterpolatedSmileSectionCountTests
 
 [`Divergences/InterpolatedSmileSectionCountTests.cs`](../tests/NanoQL.Tests/Divergences/InterpolatedSmileSectionCountTests.cs)
@@ -2137,6 +2272,27 @@ Facts:
 - `ASwaptionWithNoFixedCouponAfterItsExerciseIsPricedOnItsFloatingResets`
 - `WithNoCouponAfterItsExerciseTheSwaptionIsWorthNothing`
 
+## JumpDiffusionReferenceDateTests
+
+[`Divergences/JumpDiffusionReferenceDateTests.cs`](../tests/NanoQL.Tests/Divergences/JumpDiffusionReferenceDateTests.cs)
+
+The jump-diffusion engine on structures dated differently (the S-van plan's VR4 (xiii), and the run's own find on its rho and theta). QuantLib rebuilds each term's flat curve and constant volatility on the risk-free curve's reference date with the time measured from the volatility's (`jumpdiffusionengine.cpp:62-67`, `:113-114`), so with no jumps it isn't the Black-Scholes price on a curve settling T+2. nanoql builds both on the volatility's reference date; its rho is then per unit of the risk-free curve's own rate over its own time, and theta's risk-free term runs over that time, as the analytic European engine's (the mismatched-dates class). QuantLib's check: with no jumps, its analytic European engine on the same market, every output but the theta, which is S-eq's (`Divergences/AnalyticThetaMismatchedTimesTests.cs`) [executed on the wheel, QuantLib's jump-diffusion engine emulated by its rebuilt structures: `scratchpad\c2\oracle_c2.py`, section jd]. Where the structures share their dates and counts, QuantLib's bits (the engine's harness vectors).
+
+Facts:
+
+- `WithNoJumpsARiskFreeCurveSettlingLaterGivesTheAnalyticResults`
+- `WithNoJumpsAVolatilitySettlingLaterGivesTheAnalyticValue`
+
+## JumpDiffusionZeroVolatilityTests
+
+[`Divergences/JumpDiffusionZeroVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/JumpDiffusionZeroVolatilityTests.cs)
+
+The jump-diffusion engine's vega and theta at zero diffusive volatility (the S-van plan's VR4 (xxix)). For the no-jump term v₀ = 0, so its vega weight √(variance/t)/v₀ and its theta's jump term i·jumpSquareVol/(2v₀t²) are 0/0 (`jumpdiffusionengine.cpp:110`, `:123-127`): QuantLib's vega and theta are NaN at σ = 0 [executed through the harness]. nanoql takes their limits, 1 and 0, the values they take at any positive volatility. QuantLib's check: its own Greeks at σ = 1e-12, the sum taken to 1e-12, and the limit they approach from σ = 1e-8.
+
+Facts:
+
+- `AtZeroVolatilityTheVegaAndThetaAreTheirLimits`
+
 ## KahaleAtmLevelTests
 
 [`Divergences/KahaleAtmLevelTests.cs`](../tests/NanoQL.Tests/Divergences/KahaleAtmLevelTests.cs)
@@ -2210,6 +2366,17 @@ Facts:
 
 - `AFixingTheRatioBranchDoesntReadChangesNothing`
 - `ALagShorterThanThePeriodForecastsThroughTheYoYCurve`
+
+## LagrangeZeroNodeTests
+
+[`Divergences/LagrangeZeroNodeTests.cs`](../tests/NanoQL.Tests/Divergences/LagrangeZeroNodeTests.cs)
+
+The Lagrange interpolation at its nodes (the S-van plan's VR4 (xxviii), and the run's own find on descending nodes). QuantLib finds the node by a binary search for the first x not below x − 10ε|x| and returns its y when that x is less than 10ε|x| above (`lagrangeinterpolation.hpp:114-120`): at x = 0 the band is empty, so a node at zero falls through to the barycentric sum, which divides by zero (NaN); and on descending x values the search never lands on a node, so every node's value is NaN [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section lagrange]. nanoql scans the nodes in order with the band closed. QuantLib's check: the node's y, and its own values beside the nodes.
+
+Facts:
+
+- `ANodeAtZeroGivesItsValue`
+- `DescendingNodesGiveTheirValues`
 
 ## LeastSquaresStandardErrorTests
 
@@ -2771,6 +2938,28 @@ An empty matrix's pseudo square root is refused with QuantLib's master's text, "
 Facts:
 
 - `AnEmptyMatrixIsRefusedBeforeItsDecomposition`
+
+## QdFpTanhSinhSchemeTests
+
+[`Divergences/QdFpTanhSinhSchemeTests.cs`](../tests/NanoQL.Tests/Divergences/QdFpTanhSinhSchemeTests.cs)
+
+The QD fixed-point engine's tanh-sinh scheme with no fixed-point step (the S-van run's own find). QuantLib's Gauss-Legendre scheme refuses m = 0 ("at least one fixed point iteration step is needed", `qdfpamericanengine.cpp:44`), but its tanh-sinh scheme checks nothing, and its m − 1 naive steps wrap to 2⁶⁴ − 1, so the engine never ends [executed on the wheel in a child process, killed after 30 seconds]. nanoql refuses m = 0 with the Gauss-Legendre scheme's text. With no node QuantLib's engine refuses when it prices ("not enough points to interpolate: at least 2 required, 1 provided"), and nanoql's likewise.
+
+Facts:
+
+- `NoFixedPointStepIsRefused`
+- `NoNodeIsRefusedWhenPricing`
+
+## QdMismatchedTimesTests
+
+[`Divergences/QdMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/QdMismatchedTimesTests.cs)
+
+The QD+ and QD fixed-point engines on structures counted differently (the S-van plan's VR4 (ix)). QuantLib reads the volatility as `blackVol(T, K)` at the risk-free curve's time (`qdplusamericanengine.cpp:179-184`), so a volatility on Act/360 beside curves on Act/365 is read at a time its variance doesn't run over: about −0.6% on a one-year option. nanoql reads σ² as the volatility's variance at the maturity date over the engine's time, and r and q from each curve's discount over it. QuantLib's check: its own engines on the market restated on one day counter, the volatility scaled by √(365/360) so its variance to the maturity is the original's [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section qd]. Where the structures share their counts, QuantLib's bits (the engines' vectors).
+
+Facts:
+
+- `QdPlusReadsTheVolatilitysOwnVariance`
+- `QdFixedPointReadsTheVolatilitysOwnVariance`
 
 ## QuantoTermStructureDayCounterTests
 

@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY (S-van); testMultiSpline (S-exo); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (S-core); testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
+// Partial: testMultiSpline (S-exo); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (S-core); testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
 // Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs); testBicubicUpdate (Conventions/InterpolationConstructionTests.cs)
 
 using NanoQL.Numerics;
@@ -22,6 +22,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class InterpolationsTests
 {
+    // QL_EPSILON (qldefines.hpp): machine epsilon.
+    private const double QL_EPSILON = 2.220446049250313e-16;
+
     // QuantLib's Null<Real>(), the largest float, which the tests pass as the ignored value of a not-a-knot condition.
     private const Real NullReal = 3.4028234663852886e38;
 
@@ -1221,6 +1224,160 @@ public class InterpolationsTests
     }
 
     [Fact]
+    public void TestLagrangeInterpolation()
+    {
+        // Testing Lagrange interpolation...
+        double[] x = [-1.0, -0.5, -0.25, 0.1, 0.4, 0.75, 0.96];
+        double[] y = new double[x.Length];
+        for (int i = 0; i < x.Length; ++i)
+        {
+            y[i] = LagrangeTestFct(x[i]);
+        }
+
+        var interpl = new LagrangeInterpolation(x, y);
+
+        // reference results are taken from R package pracma
+        Real[] references =
+        [
+            -0.5000000000000000, -0.5392414024347419, -0.5591485962711904,
+            -0.5629199661387594, -0.5534414777017116, -0.5333043347921566,
+            -0.5048221831582063, -0.4700478608272949, -0.4307896950846587,
+            -0.3886273460669714, -0.3449271969711449, -0.3008572908782903,
+            -0.2574018141928359, -0.2153751266968088, -0.1754353382192734,
+            -0.1380974319209344, -0.1037459341938971, -0.0726471311765894,
+            -0.0449608318838433, -0.0207516779521373, 0.0000000000000000,
+            0.0173877793964286, 0.0315691961126723, 0.0427562482700356,
+            0.0512063534145595, 0.0572137590808174, 0.0611014067405497,
+            0.0632132491361394, 0.0639070209989264, 0.0635474631523613,
+            0.0625000000000000, 0.0611248703983366, 0.0597717119144768,
+            0.0587745984686508, 0.0584475313615655, 0.0590803836865967,
+            0.0609352981268212, 0.0642435381368876, 0.0692027925097279,
+            0.0759749333281079, 0.0846842273010179, 0.0954160004849021,
+            0.1082157563897290, 0.1230887474699003, 0.1400000000000001,
+            0.1588747923353829, 0.1795995865576031, 0.2020234135046815,
+            0.2259597111862140, 0.2511886165833182, 0.2774597108334206,
+            0.3044952177998833, 0.3319936560264689, 0.3596339440766487,
+            0.3870799592577457, 0.4139855497299214, 0.4400000000000001,
+            0.4647739498001331, 0.4879657663513030, 0.5092483700116673,
+            0.5283165133097421, 0.5448945133624253, 0.5587444376778583,
+            0.5696747433431296, 0.5775493695968156, 0.5822972837863635,
+            0.5839224807103117, 0.5825144353453510, 0.5782590089582251,
+            0.5714498086024714, 0.5625000000000000, 0.5519545738075141,
+            0.5405030652677689, 0.5289927272456703, 0.5184421566492137,
+            0.5100553742352614, 0.5052363578001620, 0.5056040287552059,
+            0.5130076920869246,
+        ];
+
+        const double tol = 50 * QL_EPSILON;
+        for (int i = 0; i < 79; ++i)
+        {
+            Real xx = -1.0 + (i * 0.025);
+            Real calculated = interpl.Evaluate(xx);
+            Assert.False(
+                double.IsNaN(calculated) || Math.Abs(references[i] - calculated) > tol,
+                $"failed to reproduce the Lagrange interpolation\n    x         : {xx}\n    calculated: {calculated}"
+                + $"\n    expected  : {references[i]}");
+        }
+    }
+
+    [Fact]
+    public void TestLagrangeInterpolationAtSupportPoint()
+    {
+        // Testing Lagrange interpolation at supporting points...
+        const int n = 5;
+        double[] x = new double[n], y = new double[n];
+        for (int i = 0; i < n; ++i)
+        {
+            x[i] = i / (Real)n;
+            y[i] = 1.0 / (1.0 - x[i]);
+        }
+
+        var interpl = new LagrangeInterpolation(x, y);
+
+        const Real relTol = 5e-12;
+
+        for (int i = 1; i < n - 1; ++i)
+        {
+            for (Real z = x[i] - (100 * QL_EPSILON); z < x[i] + (100 * QL_EPSILON); z += 2 * QL_EPSILON)
+            {
+                Real expected = 1.0 / (1.0 - x[i]);
+                Real calculated = interpl.Evaluate(z);
+
+                Assert.False(
+                    double.IsNaN(calculated) || Math.Abs(expected - calculated) > relTol,
+                    $"failed to reproduce the Lagrange interplation\n    x         : {z}\n    calculated: {calculated}"
+                    + $"\n    expected  : {expected}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestLagrangeInterpolationDerivative()
+    {
+        // Testing Lagrange interpolation derivatives...
+        double[] x = [-1.0, -0.3, 0.1, 0.3, 0.9];
+        double[] y = [2.0, 3.0, 6.0, 3.0, -1.0];
+
+        var interpl = new LagrangeInterpolation(x, y);
+
+        Real eps = Math.Sqrt(QL_EPSILON);
+        for (Real xx = -1.0; xx <= 0.9; xx += 0.01)
+        {
+            Real calculated = interpl.Derivative(xx, true);
+            Real expected = (interpl.Evaluate(xx + eps, true) - interpl.Evaluate(xx - eps, true)) / (2 * eps);
+
+            Assert.False(
+                double.IsNaN(calculated) || Math.Abs(expected - calculated) > 25 * eps,
+                $"failed to reproduce the Lagrange interplation derivative\n    x         : {xx}"
+                + $"\n    calculated: {calculated}\n    expected  : {expected}");
+        }
+    }
+
+    [Fact]
+    public void TestLagrangeInterpolationOnChebyshevPoints()
+    {
+        // Testing Lagrange interpolation on Chebyshev nodes...
+
+        // Test example taken from
+        // J.P. Berrut, L.N. Trefethen, Barycentric Lagrange Interpolation
+        // https://people.maths.ox.ac.uk/trefethen/barycentric.pdf
+        const int n = 50;
+        double[] x = new double[n + 1], y = new double[n + 1];
+        for (int i = 0; i <= n; ++i)
+        {
+            // Chebyshev nodes
+            x[i] = Math.Cos(((2 * i) + 1) * Math.PI / ((2 * n) + 2));
+            y[i] = Math.Exp(x[i]) / Math.Cos(x[i]);
+        }
+
+        var interpl = new LagrangeInterpolation(x, y);
+
+        const Real tol = 1e-13;
+        const Real tolDeriv = 1e-11;
+
+        for (Real xx = -1.0; xx <= 1.0; xx += 0.03)
+        {
+            Real calculated = interpl.Evaluate(xx, true);
+            Real expected = Math.Exp(xx) / Math.Cos(xx);
+
+            Real diff = Math.Abs(expected - calculated);
+            Assert.False(
+                double.IsNaN(calculated) || diff > tol,
+                $"failed to reproduce the Lagrange interpolation on Chebyshev nodes\n    x         : {xx}"
+                + $"\n    calculated: {calculated}\n    expected  : {expected}\n    difference: {diff}");
+
+            Real calculatedDeriv = interpl.Derivative(xx, true);
+            Real expectedDeriv = Math.Exp(xx) * (Math.Cos(xx) + Math.Sin(xx)) / (Math.Cos(xx) * Math.Cos(xx));
+
+            Real diffDeriv = Math.Abs(expectedDeriv - calculatedDeriv);
+            Assert.False(
+                double.IsNaN(calculated) || diffDeriv > tolDeriv,
+                $"failed to reproduce the Lagrange interpolation derivative on Chebyshev nodes\n    x         : {xx}"
+                + $"\n    calculated: {calculatedDeriv}\n    expected  : {expectedDeriv}\n    difference: {diffDeriv}");
+        }
+    }
+
+    [Fact]
     public void TestBSplines()
     {
         // Testing B-Splines...
@@ -1300,6 +1457,124 @@ public class InterpolationsTests
     }
 
     // Adapted: without its update smoke test (lines 3172-3184): an interpolation is immutable and has no update().
+    [Fact]
+    public void TestChebyshevInterpolation()
+    {
+        // Testing Chebyshev interpolation...
+        (Func<Real, Real> Fct, string Name)[] fcts =
+        [
+            (Math.Sin, "sin"),
+            (Math.Cos, "cos"),
+            (x => Math.Exp(-x * x), "e^(-x*x)"),
+        ];
+
+        (Size Nodes, Real Tol)[] tests =
+        [
+            (11, 1e-5),
+            (20, 1e-11),
+        ];
+
+        foreach (var t in tests)
+        {
+            foreach (var fct in fcts)
+            {
+                var interp = new ChebyshevInterpolation(t.Nodes, fct.Fct);
+
+                for (Real x = -0.99; x < 1.0; x += 0.01)
+                {
+                    Real expected = fct.Fct(x);
+                    Real calculated = interp.Evaluate(x);
+                    Real diff = Math.Abs(expected - calculated);
+                    Real tol = t.Tol;
+
+                    Assert.False(
+                        double.IsNaN(calculated) || Math.Abs(calculated - expected) > tol,
+                        $"failed to reproduce the Chebyshev interpolation values\n    x         : {x}\n    fct       : "
+                        + $"{fct.Name}\n    calculated: {calculated}\n    expected  : {expected}\n    difference: {diff}"
+                        + $"\n    tolerance : {tol}");
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestChebyshevInterpolationOnNodes()
+    {
+        // Testing Chebyshev interpolation on and around nodes...
+        const double tol = 10 * QL_EPSILON;
+        Func<Real, Real> testFct = Math.Sin;
+
+        const Size nrNodes = 7;
+        double[] y = new double[nrNodes];
+
+        foreach (ChebyshevInterpolationPointsType pointType in new[]
+                 { ChebyshevInterpolationPointsType.FirstKind, ChebyshevInterpolationPointsType.SecondKind })
+        {
+            Vector nodes = ChebyshevInterpolation.Nodes(nrNodes, pointType);
+            for (int i = 0; i < nrNodes; ++i)
+            {
+                y[i] = testFct(nodes[i]);
+            }
+
+            var interp = new ChebyshevInterpolation(y, pointType);
+            for (int j = 0; j < nodes.Size; ++j)
+            {
+                Real node = nodes[j];
+
+                // test on Chebyshev node
+                Real expected = testFct(node);
+                Real calculated = interp.Evaluate(node);
+                Real diff = Math.Abs(expected - calculated);
+
+                Assert.False(
+                    diff > tol,
+                    $"failed to reproduce the node values\n    node      : {node}\n    calculated: {calculated}"
+                    + $"\n    expected  : {expected}\n    difference: {diff}\n    tolerance : {tol}");
+
+                // check around Chebyshev node
+                for (Integer i = -50; i < 50; ++i)
+                {
+                    Real x = node + (i * QL_EPSILON);
+                    expected = testFct(x);
+                    calculated = interp.Evaluate(x, true);
+                    diff = Math.Abs(expected - calculated);
+
+                    Assert.False(
+                        diff > tol,
+                        $"failed to reproduce values around nodes\n    node      : {node}\n    epsilon   : {x - node}"
+                        + $"\n    calculated: {calculated}\n    expected  : {expected}\n    difference: {diff}"
+                        + $"\n    tolerance : {tol}");
+                }
+            }
+        }
+    }
+
+    // Adapted: QuantLib's updateY overwrites the values in place; WithY returns the interpolation of the new ones.
+    [Fact]
+    public void TestChebyshevInterpolationUpdateY()
+    {
+        // Testing Y update for Chebyshev interpolation...
+        double[] y = [1, 4, 7, 4];
+        var interp = new ChebyshevInterpolation(y);
+
+        double[] yd = [6, 4, 5, 6];
+        interp = interp.WithY(yd);
+
+        const double tol = 10 * QL_EPSILON;
+
+        for (int i = 0; i < y.Length; ++i)
+        {
+            Real expected = yd[i];
+            Real calculated = interp.Evaluate(interp.Nodes()[i], true);
+            Real diff = Math.Abs(calculated - expected);
+
+            Assert.False(
+                diff > tol,
+                $"failed to reproduce updated node values\n    node      : {i}\n    expected  : {expected}"
+                + $"\n    calculated: {calculated}\n    difference: {diff}\n    tolerance : {tol}");
+        }
+    }
+
     [Fact]
     public void TestFlatExtrapolation()
     {
@@ -1661,4 +1936,7 @@ public class InterpolationsTests
 
         return f1 / f2;
     }
+
+    // The test suite's lagrangeTestFct: |x| + x/2 - x squared.
+    private static Real LagrangeTestFct(Real x) => Math.Abs(x) + (0.5 * x) - (x * x);
 }
