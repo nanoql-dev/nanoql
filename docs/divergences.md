@@ -1618,6 +1618,30 @@ Facts:
 
 - `ParametersSetOnAModelGiveTheModelBuiltAtThem`
 
+## HaganAnalyticNormalisationTests
+
+[`Divergences/HaganAnalyticNormalisationTests.cs`](../tests/NanoQL.Tests/Divergences/HaganAnalyticNormalisationTests.cs)
+
+The analytic Hagan pricer's normalisation (the S-cms plan's CMR5 (xxii)): Hagan's analytic forms add sign·G′(R0)·annuity·(…) to (discount/annuity)·C(K) (`conundrumpricer.cpp:520-547`, `:573-576`), which presumes G(R0) = P(Tp)/A0, where the numeric pricer divides by G(R0) (`:472-490`). The shift g-functions' Z omits P(0,Tp)/P(0,T0) (`:783-786`), so their analytic convexity term is high by exactly P(T0)/P(Tp) against the numeric twin: on the wheel, on QuantLib's cms.cpp market (flat 5%, its at-the-money matrix), a 1-year-delay coupon fixing in 5 years prices 0.05235802683487254 on the analytic parallel shifts against 0.052312587540360674 numeric, a convexity adjustment 1.045 times the numeric one where the standard model's is 0.994. On an index discounting on a curve of its own (3% against a 5% forwarding curve), every analytic model is 7.9% above its numeric twin. nanoql scales the shift models' analytic term by P(0,Tp)/P(0,T0) on their own curve, and on an exogenous discounting curve takes discount·G′(R0)/G(R0) for annuity·G′(R0), as the numeric pricer normalises its integrand; the standard and exact-yield models on one curve keep QuantLib's values. QuantLib's check: its numeric twins, which neither part changes.
+
+Facts:
+
+- `TheShiftModelsTermIsQuantLibsTimesTheirDiscountRatio`
+- `TheNumericValuesStand`
+- `TheShiftModelsAgreeWithTheStandardModel`
+- `AnExogenousDiscountingCurveIsNormalised`
+
+## HaganShiftShapeTests
+
+[`Divergences/HaganShiftShapeTests.cs`](../tests/NanoQL.Tests/Divergences/HaganShiftShapeTests.cs)
+
+The shape of the Hagan g-function's shift (the S-cms plan's CMR5 (v)): QuantLib's `shapeOfShift` computes (1 − e^(−a·x))/a, which cancels as the reversion a nears 0 from above, and reads a negative reversion as 0 (`conundrumpricer.cpp:929-938`): on the wheel, on a flat 3% curve and a 20% volatility, a 1-year coupon fixing in 10 years prices 0.03239868837727989 on the numeric pricer's non-parallel shifts at a = 0 and at every negative a, and 0.032398699033410853 at a = 1e-12, 1.1e-8 away (the analytic pricer 9.5e-9). nanoql takes −expm1(−a·x)/a below 1e-4, negative reversions included, and x at 0, with QuantLib's form at and above 1e-4. QuantLib's checks: its own values at 0 and at 1e-4, on the numeric pricer, whose values CMR5 (xxii) leaves QuantLib's.
+
+Facts:
+
+- `ASmallReversionIsContinuous`
+- `ANegativeReversionIsRead`
+
 ## HestonForwardByDateTests
 
 [`Divergences/HestonForwardByDateTests.cs`](../tests/NanoQL.Tests/Divergences/HestonForwardByDateTests.cs)
@@ -1911,6 +1935,17 @@ Facts:
 
 - `ThePutBranchsVolatilityGivesTheSectionsOwnPrices`
 
+## KronrodAdaptiveDepthTests
+
+[`Divergences/KronrodAdaptiveDepthTests.cs`](../tests/NanoQL.Tests/Divergences/KronrodAdaptiveDepthTests.cs)
+
+The adaptive Gauss-Kronrod rule's recursion (the S-cms plan's CMR5 (vi)): QuantLib halves the interval by recursion bounded by its evaluations only (`kronrodintegral.cpp:386-439`), so at a tolerance it can't reach it overflows a default stack before the bound refuses: integrating e^(−x²) cos 3x and √|x − 1.3| over [0, 4], QuantLib's C++ dies of a stack overflow at 1e-14 on its default stack (exit −1073741571), which in .NET ends the process uncaught. nanoql iterates over an explicit stack in QuantLib's order. QuantLib's check: its own values, counts and refusals, on a thread with a 1 GB stack (the S-cms planner's `kronrodstack.cpp`): at tolerances 1e-6 to 1e-13 the values and counts below, and at 1e-14 and 1e-15 "maximum number of function evaluations exceeded".
+
+Facts:
+
+- `QuantLibsValuesAtTolerancesItReaches`
+- `TolerancesItCantReachAreRefused`
+
 ## LaggedYoYRateBranchTests
 
 [`Divergences/LaggedYoYRateBranchTests.cs`](../tests/NanoQL.Tests/Divergences/LaggedYoYRateBranchTests.cs)
@@ -1933,6 +1968,73 @@ Facts:
 - `ConjugateGradientEndsAtItsLastAcceptedPoint`
 - `TheHypersphereAndLowerDiagonalRootsMoveWithIt`
 
+## LinearTsrNormalVegaRatioTests
+
+[`Divergences/LinearTsrNormalVegaRatioTests.cs`](../tests/NanoQL.Tests/Divergences/LinearTsrNormalVegaRatioTests.cs)
+
+The linear TSR pricer's vega-ratio strategy on a normal section (the S-cms plan's CMR5 (xxviii)): QuantLib's `strikeFromVegaRatio` reads `SmileSection::vega` outside its `try` (`lineartsrpricer.cpp:227-228`), which refuses a normal section (`smilesection.cpp:119-128`), so every normal-volatility coupon on the strategy refuses: on the wheel, on a flat 3% curve and a 0.8% normal volatility, "vega for normal smilesection not yet implemented". nanoql's search reads a normal section's vega from QuantLib's own Bachelier derivative (`bachelierBlackFormulaStdDevDerivative`) times √T, the ratio scale-free; S5's `SmileSection.Vega` keeps QuantLib's refusal. QuantLib's checks: its lognormal values, and the bound found has the ratio of QuantLib's Bachelier derivatives the strategy asks.
+
+Facts:
+
+- `ALognormalSectionKeepsQuantLibsValue`
+- `ANormalSectionsBoundsHaveTheRatio`
+
+## LinearTsrPriceThresholdTests
+
+[`Divergences/LinearTsrPriceThresholdTests.cs`](../tests/NanoQL.Tests/Divergences/LinearTsrPriceThresholdTests.cs)
+
+The linear TSR pricer's price-threshold strategy (the S-cms plan's CMR5 (ii)): QuantLib's `strikeFromPrice` starts Brent at the swap rate, the bracket's end (`lineartsrpricer.cpp:263`), which Brent refuses (`solver1d.hpp:203-206`), and the refusal is swallowed, and the threshold it passes is the vega ratio's member (`:310`): every threshold falls back to the default bounds, so on the wheel, on a flat 3% curve and a 20% volatility, a 1-year coupon fixing in 10 years prices 0.032367510616761526 at every threshold, the default rate bound's price. nanoql searches with the threshold from the bracket's midpoint, as the vega-ratio search does. QuantLib's check: its rate-bound strategy on the bounds the search finds, and the out-of-the-money price at each bound the threshold, within the search's accuracy.
+
+Facts:
+
+- `TheBoundsAreTheThresholdsStrikes`
+- `TheThresholdMovesThePrice`
+
+## LinearTsrReversionCutTests
+
+[`Divergences/LinearTsrReversionCutTests.cs`](../tests/NanoQL.Tests/Divergences/LinearTsrReversionCutTests.cs)
+
+The linear TSR pricer's reversion cut (the S-cms plan's CMR5 (iv)): QuantLib's `GsrG` reads every reversion with |a| below 1e-4 as 0 (`lineartsrpricer.cpp:71-79`), so the model's slope jumps there: on the wheel, on a flat 3% curve and a 20% volatility, a 1-year coupon fixing in 10 years prices 0.03235538786871865 for every a below 1e-4 and 0.03235551192457936 at 1e-4, a jump of 1.2e-7 in its convexity adjustment of 1.9e-3. nanoql takes −expm1(−a·τ)/a below the cut (§3.3's expm1 class) and τ at a = 0, with QuantLib's form at and above it, which loses at most 1e-12 there. QuantLib's checks: its own values at 0 and at the cut.
+
+Facts:
+
+- `ThePriceIsContinuousAcrossTheCut`
+- `TheLimitAtZeroIsQuantLibsValue`
+
+## LinearTsrSectionForwardTests
+
+[`Divergences/LinearTsrSectionForwardTests.cs`](../tests/NanoQL.Tests/Divergences/LinearTsrSectionForwardTests.cs)
+
+The linear TSR pricer's forward on a section with an at-the-money level of its own (the S-cms plan's CMR5 (xxvii), as the user ruled on its round 2): QuantLib wraps a section without an at-the-money level at the coupon's forward and keeps one that has its own (`lineartsrpricer.cpp:177-181`), so on such a section the options price on the section's forward while the model's split and singular terms take the coupon's. S7's SABR and ZABR cubes build each section on an interpolated forward (`sabrswaptionvolatilitycube.hpp:1015-1029`): on QuantLib's cms.cpp SABR cube over a 1%–5% zero curve, a 1-year coupon fixing in 5 years has a section forward 5.7e-3 below its own, and QuantLib's TSR prices its caplet at F + 1% 1.83e-3 below QuantLib's numeric Hagan pricer and its floorlet at F − 1% 1.29e-3 above (the S-cms planner's `tsrwrap.cpp`). nanoql wraps every section at the coupon's forward, so every TSR price on those cubes moves; a matrix's sections have no at-the-money level, and the interpolated cube's carry the coupon's forward, so there the prices are QuantLib's. A ZABR section, whose own price is its kernel's, is priced through the volatility it reports. QuantLib's checks: its values on a matrix and the interpolated cube, and its numeric Hagan pricer on the SABR cube.
+
+Facts:
+
+- `AMatrixAndTheInterpolatedCubeKeepQuantLibsValues`
+- `OnTheSabrCubeOverASlopedCurveTheOptionsAgreeWithHagan`
+- `AZabrSectionIsPricedThroughItsVolatility`
+
+## LinearTsrStdDevBoundsTests
+
+[`Divergences/LinearTsrStdDevBoundsTests.cs`](../tests/NanoQL.Tests/Divergences/LinearTsrStdDevBoundsTests.cs)
+
+The linear TSR pricer's standard-deviations strategy (the S-cms plan's CMR5 (iii)): QuantLib sets both bounds for either option, so a caplet is integrated from below its strike, takes the lognormal width k·σ without √T where the normal width has it, and subtracts the shift twice (`lineartsrpricer.cpp:318-342`): on the wheel, on a flat 3% curve and a 20% volatility, a 1-year coupon fixing in 10 years prices 0.03276470349655507, 0.03364469105154387 and 0.03424293117331103 at k = 3, 5 and 10, moving away from the full range's 0.032367510616761526 as k grows. nanoql sets each option's own bound, the width k·σ·√T and the shift once. QuantLib's check: its rate-bound strategy on the corrected bounds, and the full range as k grows.
+
+Facts:
+
+- `TheBoundsAreTheRateBoundsAtThoseStrikes`
+- `OnAShiftedSectionTheShiftIsSubtractedOnce`
+- `TheyConvergeToTheFullRange`
+
+## LinearTsrVolatilityDayCounterTests
+
+[`Divergences/LinearTsrVolatilityDayCounterTests.cs`](../tests/NanoQL.Tests/Divergences/LinearTsrVolatilityDayCounterTests.cs)
+
+The linear TSR pricer's day counter after a new volatility (a defect the S-cms run found, R8): QuantLib's constructor stores the volatility's day counter (`lineartsrpricer.cpp:61`, `volDayCounter_`), which the model's slope reads (`GsrG`, `:73`), and `setSwaptionVolatility` leaves it, so a pricer given another volatility prices the slope on the old one's day counter: on the wheel, on a flat 3% curve, a 1-year coupon fixing in 10 years on a pricer built on an Actual/365 volatility and given an Actual/360 one prices 0.0323995567530028, where a pricer built on the Actual/360 volatility prices 0.03239972383363776. nanoql's copy reads its own volatility's day counter, so it prices as a pricer built on it. QuantLib's check: the pricer built on the new volatility.
+
+Facts:
+
+- `ACopyPricesAsAPricerBuiltOnItsVolatility`
+
 ## LocalVolCurveRefusalTests
 
 [`Divergences/LocalVolCurveRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/LocalVolCurveRefusalTests.cs)
@@ -1952,6 +2054,19 @@ Facts:
 Facts:
 
 - `CurvesOnAnotherDayCounterAreReadAtTheSurfacesInstants`
+
+## LognormalStrikeBelowShiftTests
+
+[`Divergences/LognormalStrikeBelowShiftTests.cs`](../tests/NanoQL.Tests/Divergences/LognormalStrikeBelowShiftTests.cs)
+
+A lognormal CMS option struck at or below −shift (the S-cms plan's CMR5 (xxiii), its Hagan and TSR parts): QuantLib's Hagan caplet on a lognormal volatility prices `optionletPrice(Call, max(effectiveCap, 1e-10))` (`conundrumpricer.cpp:171-178`), E[R] − 1e-10 for a strike below 0, dropping −K; its linear TSR pricer refuses the strike in its section ("strike + displacement (-0.0045371 + 0) must be non-negative"). On the wheel, on a flat 3% curve and a 20% volatility, a capped CMS coupon fixing in a year with a spread of 1% and a cap of 0.5% pays 0.010000000099999993 on the analytic pricer and 0.009996991868222522 on the numeric one, where R > 0 makes the right rate the cap; and a digital replicated by caplets at ±1e-4 around 0 gives a probability of 0.49999950000000765. nanoql prices a caplet at or below −shift, on a forward above −shift, as the coupon's expected rate less the strike and a floorlet there as 0, the limits of each pricer's own formula, in each pricer before it prices an option. A forward at or below −shift has no lognormal rate distribution, and QuantLib's refusal stands there. QuantLib's checks: its own swaplets, which give the expected rate, its values above −shift, and its refusals on such a forward.
+
+Facts:
+
+- `ACapBelowTheSpreadPaysTheCap`
+- `ADigitalAtZeroReplicatesToOne`
+- `OnAShiftedSectionTheBoundIsMinusShift`
+- `AForwardAtOrBelowMinusShiftIsRefused`
 
 ## MakeSwaptionNullIndexTests
 
@@ -2685,6 +2800,18 @@ Facts:
 
 - `AStepFromANegativeStateIsHestonsPartialTruncation`
 - `AnEulerPathBelowZeroStaysFinite`
+
+## StandardGFunctionTenorTests
+
+[`Divergences/StandardGFunctionTenorTests.cs`](../tests/NanoQL.Tests/Divergences/StandardGFunctionTenorTests.cs)
+
+The standard g-function's swap length (the S-cms plan's CMR5 (i), as the user ruled during its run): QuantLib passes the swap index's tenor as its length in the tenor's own units (`conundrumpricer.cpp:130`, `swapTenor_.length()` into a `Size`), so an 18-month index reads as 18 years: on the wheel, on a flat 3% curve and a 20% volatility, a 1-year coupon fixing in 10 years on an 18-month index with an annual fixed leg prices 0.030653808259814307 on the analytic Hagan pricer's standard model, a convexity adjustment of 3.04e-4 against the exact-yield model's 7.13e-5. Read in years the length doesn't repair it: that swap starts with a 6-month stub, and the payment's delay δ is counted in the first period's length (`:126`), where the model presumes equal periods, so the adjustment comes out −3.25e-4. nanoql reads the length in years where the tenor is a whole number of fixed-leg periods (18 months on a semiannual leg, 3 periods), and refuses the standard model otherwise, naming the exact-yield model, which reads the schedule. QuantLib's checks: its own whole-year tenors, and its exact-yield model on the same swap.
+
+Facts:
+
+- `WholeYearTenorsKeepQuantLibsValues`
+- `WholePeriodsAreReadInYears`
+- `AStubSwapIsRefused`
 
 ## StatePriceCacheTests
 

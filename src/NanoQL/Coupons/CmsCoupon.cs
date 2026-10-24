@@ -18,9 +18,10 @@ namespace NanoQL.Coupons;
 /// already rolled to a business day.
 /// </para>
 /// <para>
-/// Its rate needs a CMS coupon pricer, which QuantLib's <c>CmsCouponPricer</c> family gives and which waits for batch 3
-/// (S-cms): until then <see cref="CouponPricerFunctions"/> refuses every pricer for it, as QuantLib's visitor refuses a
-/// pricer that isn't a <c>CmsCouponPricer</c>, and its rate refuses with QuantLib's "pricer not set".
+/// Its rate needs a <see cref="CmsCouponPricer"/>: the Hagan pricers (<see cref="NumericHaganPricer"/>,
+/// <see cref="AnalyticHaganPricer"/>) or the <see cref="LinearTsrPricer"/>. <see cref="CouponPricerFunctions"/> sets
+/// one and refuses any other pricer, as QuantLib's visitor does; without one its rate refuses with QuantLib's "pricer
+/// not set".
 /// </para>
 /// </remarks>
 public sealed class CmsCoupon : FloatingRateCoupon

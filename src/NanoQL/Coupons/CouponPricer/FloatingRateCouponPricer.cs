@@ -13,7 +13,10 @@ namespace NanoQL.Coupons;
 /// <remarks>
 /// A pricer is a stateless function of the coupon and the context: each member computes, inside the call, the
 /// per-coupon values that QuantLib's <c>initialize(coupon)</c> stores in the pricer before its queries. So one pricer
-/// may serve any number of coupons, on any thread, and a query never depends on another coupon's earlier one.
+/// may serve any number of coupons, on any thread, and a query never depends on another coupon's earlier one. A capped
+/// or collared coupon reads its three rates through an internal per-call view of them, which a pricer whose per-coupon
+/// state costs more than its queries overrides to build that state once, as QuantLib's one <c>initialize</c> serves
+/// them.
 /// </remarks>
 public abstract class FloatingRateCouponPricer
 {
@@ -56,4 +59,20 @@ public abstract class FloatingRateCouponPricer
     /// <param name="context">The evaluation context.</param>
     /// <returns>The rate.</returns>
     public abstract double FloorletRate(FloatingRateCoupon coupon, double effectiveFloor, EvaluationContext context);
+
+    // The coupon's rates on this pricer for one call: QuantLib's pricer after initialize(coupon). The default calls the
+    // coupon's rate and the public members, so a pricer that doesn't override it keeps its bits.
+    internal virtual CouponRateView RateView(FloatingRateCoupon coupon, EvaluationContext context) =>
+        new PublicMembers(this, coupon, context);
+
+    // The default view: the coupon's rate and the pricer's public caplet and floorlet rates.
+    private sealed class PublicMembers(FloatingRateCouponPricer pricer, FloatingRateCoupon coupon, EvaluationContext context)
+        : CouponRateView
+    {
+        public override double SwapletRate() => coupon.Rate(context);
+
+        public override double CapletRate(double effectiveCap) => pricer.CapletRate(coupon, effectiveCap, context);
+
+        public override double FloorletRate(double effectiveFloor) => pricer.FloorletRate(coupon, effectiveFloor, context);
+    }
 }

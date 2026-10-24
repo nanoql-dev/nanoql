@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/solvers.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBisection, testFalsePosition, testSecant (S-core's solvers); testNewton (S-cms); testRidder (S-van); testHalley (S-exo)
+// Partial: testBisection, testFalsePosition, testSecant (S-core's solvers); testRidder (S-van); testHalley (S-exo)
 
 using System.Runtime.CompilerServices;
 using NanoQL.Numerics;
@@ -22,6 +22,13 @@ public class SolversTests
     {
         // Testing Brent solver...
         TestSolver(new Brent(), "Brent", 1.0e-6);
+    }
+
+    [Fact]
+    public void TestNewton()
+    {
+        // Testing Newton solver...
+        TestSolver(new Newton(), "Newton", 1.0e-12);
     }
 
     [Fact]
@@ -134,6 +141,9 @@ public class SolversTests
     // QuantLib's test_solver is a template over the solver, instantiated with F1, F2, F3 and Probe; C# can't show that
     // they meet an open solver's function concept, so each solver's overload passes them to the generic body.
     private static void TestSolver(Brent solver, string name, Real? accuracy) =>
+        TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
+
+    private static void TestSolver(Newton solver, string name, Real? accuracy) =>
         TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
 
     private static void TestSolver(NewtonSafe solver, string name, Real? accuracy) =>

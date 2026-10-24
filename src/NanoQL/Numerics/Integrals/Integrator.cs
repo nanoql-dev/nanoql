@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/math/integrals/integral.hpp ql/math/integrals/integral.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: absoluteError and integrationSuccess, which wait for S-cms: no integrator S-eq ports computes an error, so QuantLib's absoluteError reads an uninitialized member after each of them; S-cms's CMS pricer is their first caller, on its Kronrod rules (integrationSuccess also compares the evaluation count with maxEvaluations, which the trapezoid family uses as an iteration bound)
 
 using System.Globalization;
 
@@ -15,8 +14,10 @@ namespace NanoQL.Numerics;
 /// </summary>
 /// <remarks>
 /// Immutable: <see cref="SetAbsoluteAccuracy"/> and <see cref="SetMaxEvaluations"/> return copies. QuantLib keeps the
-/// number of evaluations of the last call in a mutable member, which <c>operator()</c> resets
-/// (<c>integral.cpp:76-86</c>); here <see cref="IntegrateWithStatistics"/> returns it with the value.
+/// number of evaluations and the error estimate of the last call in mutable members, the count reset by
+/// <c>operator()</c> (<c>integral.cpp:76-86</c>); here <see cref="IntegrateWithStatistics"/> returns both with the
+/// value, the error <see langword="null"/> where QuantLib's integrator computes none, and
+/// <see cref="IntegrationSuccess"/> reads them from the result.
 /// </remarks>
 public abstract class Integrator
 {
@@ -89,7 +90,10 @@ public abstract class Integrator
     /// <param name="a">The lower limit; above <paramref name="b"/>, the integral is the negative of the reversed
     /// one.</param>
     /// <param name="b">The upper limit.</param>
-    /// <returns>The integral and the number of evaluations; 0 and 0 where the limits are equal.</returns>
+    /// <returns>
+    /// The integral, the number of evaluations and the rule's error estimate, if it computes one; 0, 0 and an error of
+    /// 0 where the limits are equal.
+    /// </returns>
     /// <exception cref="ArgumentNullException"><paramref name="f"/> is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The rule doesn't reach its accuracy within its maximum.</exception>
     public IntegrationResult IntegrateWithStatistics(Func<double, double> f, double a, double b)
@@ -97,7 +101,7 @@ public abstract class Integrator
         ArgumentNullException.ThrowIfNull(f);
         if (a == b)
         {
-            return new IntegrationResult(0.0, 0);
+            return new IntegrationResult(0.0, 0) { AbsoluteError = 0.0 };
         }
 
         if (b > a)
@@ -111,11 +115,31 @@ public abstract class Integrator
         }
     }
 
-    /// <summary>The rule's integral over [a, b], a below b, with the number of evaluations it made.</summary>
+    /// <summary>
+    /// Whether an integration of this integrator succeeded: QuantLib's <c>integrationSuccess()</c>, its number of
+    /// evaluations at most <see cref="MaxEvaluations"/> and its error estimate at most <see cref="AbsoluteAccuracy"/>
+    /// (<c>integral.cpp:71-74</c>).
+    /// </summary>
+    /// <param name="result">The integration's result, from this integrator.</param>
+    /// <returns>Whether it succeeded.</returns>
+    /// <exception cref="NanoQLException">
+    /// The result carries no error estimate: its integrator computes none, where QuantLib's reads an unset member.
+    /// </exception>
+    public bool IntegrationSuccess(IntegrationResult result)
+    {
+        double error = result.AbsoluteError ?? throw new NanoQLException("the integrator computes no error estimate");
+        return result.NumberOfEvaluations <= maxEvaluations && error <= absoluteAccuracy;
+    }
+
+    /// <summary>
+    /// The rule's integral over [a, b], a below b, with the number of evaluations it made and its error estimate, if
+    /// it computes one.
+    /// </summary>
     /// <param name="f">The integrand.</param>
     /// <param name="a">The lower limit.</param>
     /// <param name="b">The upper limit.</param>
-    /// <returns>The integral and the number of evaluations.</returns>
+    /// <returns>The integral, the number of evaluations and the error estimate, or <see langword="null"/> for
+    /// none.</returns>
     protected abstract IntegrationResult IntegrateCore(Func<double, double> f, double a, double b);
 
     private static string Show(double value) => value.ToString(CultureInfo.InvariantCulture);

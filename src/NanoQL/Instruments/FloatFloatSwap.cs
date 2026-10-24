@@ -24,8 +24,10 @@ namespace NanoQL.Instruments;
 /// </para>
 /// <para>
 /// The constructors build the legs, as QuantLib's do: an Ibor leg with the index's default pricer, which reads the
-/// context's at-par switch, so they take the context; a CMS leg without a pricer, whose CMS coupon pricers wait for
-/// batch 3 (S-cms). A zero gearing becomes QuantLib's machine epsilon, so that the legs are built of floating coupons.
+/// context's at-par switch, so they take the context; a CMS leg without a pricer, as QuantLib's, on which
+/// <see cref="CouponPricerFunctions.SetCouponPricer{T}(T, int, FloatingRateCouponPricer)"/> sets a
+/// <see cref="CmsCouponPricer"/>. A zero gearing becomes QuantLib's machine epsilon, so that the legs are built of
+/// floating coupons.
 /// The first leg is paid by a payer swap. An engine's results are a <see cref="FloatFloatSwapResults"/>, whose fair
 /// spreads <see cref="FetchResults"/> derives from the legs' BPS when the engine gives none. QuantLib's
 /// <c>setupArguments</c> isn't ported: nanoql's engines read the legs.

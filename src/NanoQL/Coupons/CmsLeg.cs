@@ -15,8 +15,8 @@ namespace NanoQL.Coupons;
 /// <summary>A builder of a sequence of CMS coupons, capped, floored or not.</summary>
 /// <remarks>
 /// An immutable builder, as <see cref="IborLeg"/>: each method returns a modified copy, and <see cref="ToLeg"/> builds
-/// the leg in place of QuantLib's conversion operator. The coupons are built without pricers, as QuantLib's are; a CMS
-/// coupon pricer, which waits for batch 3 (S-cms), is set with
+/// the leg in place of QuantLib's conversion operator. The coupons are built without pricers, as QuantLib's are; a
+/// <see cref="CmsCouponPricer"/> is set with
 /// <see cref="CouponPricerFunctions.SetCouponPricer(ImmutableArray{CashFlow}, FloatingRateCouponPricer)"/>. A builder
 /// has no value equality: its vectors compare by reference.
 /// </remarks>

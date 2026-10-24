@@ -238,13 +238,18 @@ public class SwapIndex : InterestRateIndex
     {
         ArgumentNullException.ThrowIfNull(context);
         VanillaSwap swap = UnderlyingSwap(fixingDate, context);
+        return UnderlyingSwapResults(swap, context).FairRate ?? throw new NanoQLException("result not available");
+    }
 
-        // QuantLib's swap carries the engine its builder attaches: on the exogenous curve, or on the forwarding curve.
+    // An underlying swap's results on the engine QuantLib's builder attaches to it: discounting on the exogenous curve,
+    // or on the forwarding curve. The CMS pricers read the fair rate and the fixed leg's BPS from it, as QuantLib's
+    // read them from the swap.
+    internal FixedVsFloatingSwapResults UnderlyingSwapResults(FixedVsFloatingSwap swap, EvaluationContext context)
+    {
         YieldTermStructure? curve = ExogenousDiscount ? discount : ForwardingTermStructure;
-        FixedVsFloatingSwapResults results = curve is null
+        return curve is null
             ? DiscountingSwapEngine.CalculateWithoutCurve(swap, context)
             : DiscountingSwapEngine.Calculate(swap, context, curve, includeSettlementDateFlows: false);
-        return results.FairRate ?? throw new NanoQLException("result not available");
     }
 
     /// <summary>

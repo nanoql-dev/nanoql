@@ -23,9 +23,11 @@ namespace NanoQL.Coupons;
 /// </para>
 /// <para>
 /// The rate is the underlying's swaplet rate plus the floorlet's minus the caplet's, all through the underlying's own
-/// pricer. A copy with another pricer (<see cref="FloatingRateCouponExtensions.SetPricer"/>) carries the pricer into a
-/// copy of the underlying too, as QuantLib's <c>setPricer</c> sets both. The coupon copies the underlying's terms when it
-/// is built, its nominal from <see cref="Coupon.ContractNominal"/>, since a constructor has no context.
+/// pricer, read from one view of its rates for the call, so a pricer whose per-coupon state costs more than its queries
+/// builds it once, as QuantLib's one <c>initialize</c> serves the three. A copy with another pricer
+/// (<see cref="FloatingRateCouponExtensions.SetPricer"/>) carries the pricer into a copy of the underlying too, as
+/// QuantLib's <c>setPricer</c> sets both. The coupon copies the underlying's terms when it is built, its nominal from
+/// <see cref="Coupon.ContractNominal"/>, since a constructor has no context.
 /// </para>
 /// <para>Unsealed, as in QuantLib, where the capped Ibor and CMS coupons derive from it.</para>
 /// </remarks>
@@ -162,17 +164,18 @@ public class CappedFlooredCoupon : FloatingRateCoupon
     {
         ArgumentNullException.ThrowIfNull(context);
         FloatingRateCouponPricer pricer = underlying.Pricer ?? throw new NanoQLException("pricer not set");
-        double swapletRate = underlying.Rate(context);
+        CouponRateView rates = pricer.RateView(underlying, context);
+        double swapletRate = rates.SwapletRate();
         double floorletRate = 0.0;
         if (isFloored)
         {
-            floorletRate = pricer.FloorletRate(underlying, EffectiveFloor!.Value, context);
+            floorletRate = rates.FloorletRate(EffectiveFloor!.Value);
         }
 
         double capletRate = 0.0;
         if (isCapped)
         {
-            capletRate = pricer.CapletRate(underlying, EffectiveCap!.Value, context);
+            capletRate = rates.CapletRate(EffectiveCap!.Value);
         }
 
         return swapletRate + floorletRate - capletRate;

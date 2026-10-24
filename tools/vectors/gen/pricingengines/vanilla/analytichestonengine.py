@@ -26,14 +26,14 @@ adaptive integration's count on the small-sigma model over 7,490 to 9,110. The c
 compute no search and aren't filtered. A price case's NPVs are its "strikes"' and its counts its "countStrikes"'.
 
 A case holds one model {"riskFree", "dividend", "s0", "v0", "kappa", "theta", "sigma", "rho"}, the curves
-tools/vectors/gen/processes/blackscholesprocess.py's specs, and an engine {"cpxLog" (QuantLib's integer, or null for
-the order or tolerance constructor), "integration", "andersenPiterbargEpsilon"} with an integration {"type":
-"gaussLaguerre" | "gaussLegendre" | "gaussChebyshev" | "gaussChebyshev2nd", "order"} | {"type": "gaussLobatto",
-"relTolerance", "absTolerance", "maxEvaluations"} | {"type": "simpson" | "trapezoid", "absTolerance",
-"maxEvaluations"} | {"type": "relTolerance", "relTolerance", "maxEvaluations"} (the engine's Gauss-Lobatto constructor).
-The wheel's calls, by QuantLib-SWIG 1.44's options.i and fourier.i: HestonModel(HestonProcess(...)), the engine's
-order, tolerance and formula constructors (andersenPiterbargEpsilon passed as C++'s default, 1e-25, where given), chF,
-lnChF, numberOfEvaluations, and AnalyticHestonEngine_OptimalAlpha(t, engine). Read back by
+tools/vectors/gen/processes/blackscholesprocess.py's specs, and an engine {"cpxLog" (QuantLib's integer, or null for the
+order or tolerance constructor), "integration", "andersenPiterbargEpsilon"} with an integration {"type": "gaussLaguerre"
+| "gaussLegendre" | "gaussChebyshev" | "gaussChebyshev2nd", "order"} | {"type": "gaussLobatto", "relTolerance",
+"absTolerance", "maxEvaluations"} | {"type": "simpson" | "trapezoid" | "gaussKronrod", "absTolerance", "maxEvaluations"}
+| {"type": "relTolerance", "relTolerance", "maxEvaluations"} (the engine's Gauss-Lobatto constructor). The wheel's
+calls, by QuantLib-SWIG 1.44's options.i and fourier.i: HestonModel(HestonProcess(...)), the engine's order, tolerance
+and formula constructors (andersenPiterbargEpsilon passed as C++'s default, 1e-25, where given), chF, lnChF,
+numberOfEvaluations, and AnalyticHestonEngine_OptimalAlpha(t, engine). Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/AnalyticHestonEngineVectorTests.cs."""
 import importlib.util
 import math
@@ -103,7 +103,10 @@ ENGINES += [("Gatheral, Lobatto", {"cpxLog": G, "integration": {"type": "gaussLo
                                    "andersenPiterbargEpsilon": 1e-25}),
             ("Gatheral, trapezoid", {"cpxLog": G, "integration": {"type": "trapezoid", "absTolerance": 1e-8,
                                                                    "maxEvaluations": 1000},
-                                     "andersenPiterbargEpsilon": 1e-25})]
+                                     "andersenPiterbargEpsilon": 1e-25}),
+            ("Gatheral, Gauss-Kronrod", {"cpxLog": G, "integration": {"type": "gaussKronrod", "absTolerance": 1e-8,
+                                                                       "maxEvaluations": 1000},
+                                         "andersenPiterbargEpsilon": 1e-25})]
 
 
 def integration(spec):

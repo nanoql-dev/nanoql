@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/integrals.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testGaussKronrodAdaptive, testGaussKronrodNonAdaptive (S-cms); testTanhSinh (S-van); testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (S-core); testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator (S-van); testPiecewiseIntegral (S-xrt)
+// Partial: testTanhSinh (S-van); testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (S-core); testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator (S-van); testPiecewiseIntegral (S-xrt)
 
 using System.Numerics;
 using NanoQL.Numerics;
@@ -64,6 +64,16 @@ public class IntegralsTests
     }
 
     [Fact]
+    public void TestGaussKronrodAdaptive()
+    {
+        // Testing adaptive Gauss-Kronrod integration...
+
+        int maxEvaluations = 1000;
+        TestSeveral(new GaussKronrodAdaptive(Tolerance, maxEvaluations));
+        TestDegeneratedDomain(new GaussKronrodAdaptive(Tolerance, maxEvaluations));
+    }
+
+    [Fact]
     public void TestGaussLobatto()
     {
         // Testing adaptive Gauss-Lobatto integration...
@@ -103,6 +113,19 @@ public class IntegralsTests
         var integrator = new GaussChebyshev2ndIntegrator(64);
         TestSingle(integrator, "f(x) = Gaussian(x)", new NormalDistribution().Evaluate, -10.0, 10.0, 1.0);
         TestDegeneratedDomain(integrator);
+    }
+
+    [Fact]
+    public void TestGaussKronrodNonAdaptive()
+    {
+        // Testing non-adaptive Gauss-Kronrod integration...
+
+        Real precision = Tolerance;
+        int maxEvaluations = 100;
+        Real relativeAccuracy = Tolerance;
+        var gaussKronrodNonAdaptive = new GaussKronrodNonAdaptive(precision, maxEvaluations, relativeAccuracy);
+        TestSeveral(gaussKronrodNonAdaptive);
+        TestDegeneratedDomain(gaussKronrodNonAdaptive);
     }
 
     [Fact]

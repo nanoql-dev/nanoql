@@ -262,6 +262,32 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a yield-curve model outside <see cref="GFunctionFactoryYieldCurveModel"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "unknown/illegal
+    /// gFunction type" (<c>conundrumpricer.cpp:144</c>).</exception>
+    internal static void Check(GFunctionFactoryYieldCurveModel value, string paramName)
+    {
+        if (value is < GFunctionFactoryYieldCurveModel.Standard or > GFunctionFactoryYieldCurveModel.NonParallelShifts)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown/illegal gFunction type");
+        }
+    }
+
+    /// <summary>Refuses a strategy outside <see cref="LinearTsrPricerSettingsStrategy"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "Unknown strategy"
+    /// (<c>lineartsrpricer.cpp:346</c>).</exception>
+    internal static void Check(LinearTsrPricerSettingsStrategy value, string paramName)
+    {
+        if (value is < LinearTsrPricerSettingsStrategy.RateBound or > LinearTsrPricerSettingsStrategy.BSStdDevs)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"Unknown strategy ({(int)value})");
+        }
+    }
+
     /// <summary>Refuses a swap type outside <see cref="SwapType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

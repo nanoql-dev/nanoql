@@ -131,6 +131,7 @@ public class AnalyticHestonEngineVectorTests
                 spec.GetProperty("maxEvaluations").GetInt32()),
             "simpson" => FourierIntegration.Simpson(spec.GetProperty("absTolerance").GetDouble(), spec.GetProperty("maxEvaluations").GetInt32()),
             "trapezoid" => FourierIntegration.Trapezoid(spec.GetProperty("absTolerance").GetDouble(), spec.GetProperty("maxEvaluations").GetInt32()),
+            "gaussKronrod" => FourierIntegration.GaussKronrod(spec.GetProperty("absTolerance").GetDouble(), spec.GetProperty("maxEvaluations").GetInt32()),
             _ => throw new ArgumentException($"unknown integration {type}", nameof(spec)),
         };
     }

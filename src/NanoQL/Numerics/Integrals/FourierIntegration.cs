@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/math/integrals/fourierintegration.hpp ql/math/integrals/fourierintegration.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: gaussKronrod (S-cms's Kronrod rules); discreteSimpson and discreteTrapezoid (S-van's discrete integrals); tanhSinh (S-van); expSinh (S-core)
+// Partial: discreteSimpson and discreteTrapezoid (S-van's discrete integrals); tanhSinh (S-van); expSinh (S-core)
 
 namespace NanoQL.Numerics;
 
@@ -122,6 +122,19 @@ public sealed class FourierIntegration
             Algorithm.GaussLobatto,
             new GaussLobattoIntegral(maxEvaluations, absTolerance ?? NullReal, relTolerance, useConvergenceEstimate));
 
+    /// <summary>
+    /// The adaptive Gauss-Kronrod integration, on [0, the caller's bound] or on [0, 1] mapped by −ln(x)/c_∞; its
+    /// convergence is usually poor, as QuantLib documents.
+    /// </summary>
+    /// <param name="absTolerance">The absolute tolerance, above machine epsilon.</param>
+    /// <param name="maxEvaluations">The maximum number of evaluations, at least 15.</param>
+    /// <returns>The integration.</returns>
+    /// <exception cref="ArgumentException">The tolerance isn't above machine epsilon, or the maximum is below
+    /// 15.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The maximum is negative.</exception>
+    public static FourierIntegration GaussKronrod(double absTolerance, int maxEvaluations = 1000) =>
+        new(Algorithm.GaussKronrod, new GaussKronrodAdaptive(absTolerance, maxEvaluations));
+
     /// <summary>Simpson's integration, on [0, the caller's bound] or on [0, 1] mapped by −ln(x)/c_∞.</summary>
     /// <param name="absTolerance">The absolute tolerance, above machine epsilon.</param>
     /// <param name="maxEvaluations">The maximum number of refinements.</param>
@@ -228,6 +241,7 @@ public sealed class FourierIntegration
             case Algorithm.Simpson:
             case Algorithm.Trapezoid:
             case Algorithm.GaussLobatto:
+            case Algorithm.GaussKronrod:
             {
                 double? bound = maxBound?.Invoke();
                 if (bound is double b && b != NullReal)

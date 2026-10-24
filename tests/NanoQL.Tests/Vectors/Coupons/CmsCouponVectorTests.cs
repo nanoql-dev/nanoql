@@ -4,6 +4,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using NanoQL.Coupons;
+using NanoQL.TermStructures;
 using NanoQL.Tests.Harness;
 using NanoQL.Time;
 
@@ -13,8 +14,8 @@ namespace NanoQL.Tests.Vectors;
 /// The CMS coupon vectors, <c>tests/vectors/cashflows/cmscoupon.json</c>: the structure of <see cref="CmsLeg"/>s
 /// (gearings and spreads, a payment day counter, convention and fixing days, caps and floors, in arrears, amortizing
 /// nominals, a zero gearing's fixed coupon, ex-coupon dates, a fixing convention and zero payments), through each
-/// setter's one-value and list forms, each coupon's rate and amount refused without a pricer, as QuantLib's are, until
-/// batch 3's CMS coupon pricers (S-cms).
+/// setter's one-value and list forms, each leg priced by an <see cref="AnalyticHaganPricer"/> on the standard model and
+/// a constant 20% lognormal volatility.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class CmsCouponVectorTests
@@ -28,7 +29,7 @@ public class CmsCouponVectorTests
         {
             EvaluationContext context = c.Context();
             JsonElement spec = c.Input("leg");
-            ImmutableArray<CashFlow> leg = LegOf(spec, context).ToLeg();
+            ImmutableArray<CashFlow> leg = CouponPricerFunctions.SetCouponPricer(LegOf(spec, context).ToLeg(), Pricer(context));
 
             Coupon[] coupons = [.. leg.Select(cf => (Coupon)cf)];
             check.Output(c, "floating", coupons.Select(x => x is FloatingRateCoupon).ToArray());
@@ -50,6 +51,14 @@ public class CmsCouponVectorTests
 
         check.Complete();
     }
+
+    // The generator's pricer: Hagan's analytic one on the standard model, no mean reversion, a constant volatility of
+    // 20% (Actual/365, TARGET, Modified Following) fixed on the evaluation date.
+    private static AnalyticHaganPricer Pricer(EvaluationContext context) => new(
+        new ConstantSwaptionVolatility(
+            context.EvaluationDate, new TARGET(), BusinessDayConvention.ModifiedFollowing, 0.20, new Actual365Fixed()),
+        GFunctionFactoryYieldCurveModel.Standard,
+        0.0);
 
     // The builder a leg spec describes: a list of one value through the setter taking one value, as QuantLib's
     // conversion repeats the last value; a longer list through the setter taking a list.

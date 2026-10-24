@@ -1,19 +1,20 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
-"""Vectors for QuantLib's CmsLeg and its coupons (ql/cashflows/cmscoupon.hpp, capflooredcoupon.hpp), the legs' structure
-only: their rates wait for batch 3's CMS coupon pricers (S-cms), so each rate and amount is QuantLib's refusal "pricer
-not set". Legs on 10Y and 2Y EUR swap indexes over Euribor 6M and 3M, on the evaluation date 15 January 2025: plain,
-with gearings and spreads per coupon, a single gearing, a payment day counter, convention and fixing days, caps and
-floors (capped and floored CMS coupons), in arrears, amortizing nominals, a zero gearing, which QuantLib's leg builds as
-a fixed coupon at the spread, whose rate and amount are given, floors and fixing days per coupon, ex-coupon dates with a
-fixing convention, and zero payments (the wheel's CmsZeroLeg, QuantLib's CmsLeg with withZeroPayments).
+"""Vectors for QuantLib's CmsLeg and its coupons (ql/cashflows/cmscoupon.hpp, capflooredcoupon.hpp), each leg priced by
+an AnalyticHaganPricer (ql/cashflows/conundrumpricer.hpp) on the Standard model, a zero mean reversion and a constant
+lognormal swaption volatility of 20% (Actual/365, TARGET, Modified Following, fixed on the evaluation date), set on the
+leg by setCouponPricer. Legs on 10Y and 2Y EUR swap indexes over Euribor 6M and 3M, on the evaluation date 15 January
+2025: plain, with gearings and spreads per coupon, a single gearing, a payment day counter, convention and fixing days,
+caps and floors (capped and floored CMS coupons), in arrears, amortizing nominals, a zero gearing, which QuantLib's leg
+builds as a fixed coupon at the spread, whose rate and amount are given, floors and fixing days per coupon, ex-coupon
+dates with a fixing convention, and zero payments (the wheel's CmsZeroLeg, QuantLib's CmsLeg with withZeroPayments).
 
 Each case's outputs are, per coupon, whether it is a floating coupon, its payment, accrual, reference-period and
-ex-coupon dates, its nominal, its rate and amount (refused, or the fixed coupon's), and for a floating coupon its fixing
+ex-coupon dates, its nominal, its rate and amount (priced, or the fixed coupon's), and for a floating coupon its fixing
 date, fixing days, gearing, spread and whether it fixes in arrears, null for a fixed coupon; amounts compared at the
 largest nominal. The wheel binds no cast to a capped coupon, so the caps and floors aren't read: their cases check the
-rest of the legs, and tests/NanoQL.Tests/Conventions/CmsPricerRefusalTests.cs that a capped leg is built of capped CMS
-coupons.
+rest of the legs, and their rates and amounts are the capped coupons';
+tests/NanoQL.Tests/Conventions/CmsPricerVisitorTests.cs checks that a capped leg is built of capped CMS coupons.
 
 Each case's inputs hold its settings and "leg" ({"schedule", "index", "nominals", "paymentDayCounter",
 "paymentConvention", "fixingDays", "gearings", "spreads", "caps", "floors", "inArrears", "zeroPayments", "exCoupon",
@@ -131,11 +132,21 @@ def coupon_outputs(cashflows, scale):
     return out
 
 
+VOLATILITY = 0.20
+
+
+def pricer():
+    vol = ql.ConstantSwaptionVolatility(TODAY, ql.TARGET(), MF, VOLATILITY, ql.Actual365Fixed())
+    return ql.AnalyticHaganPricer(ql.SwaptionVolatilityStructureHandle(vol), ql.GFunctionFactory.Standard,
+                                  ql.QuoteHandle(ql.SimpleQuote(0.0)))
+
+
 def cases():
     out = []
     for name, spec in legs():
         with v.case_settings(TODAY) as st:
             cashflows = make_leg(spec)
+            ql.setCouponPricer(cashflows, pricer())
             out.append({"name": name, "inputs": {"settings": st, "leg": spec},
                         "expected": coupon_outputs(cashflows, max(abs(x) for x in spec["nominals"]))})
     return out

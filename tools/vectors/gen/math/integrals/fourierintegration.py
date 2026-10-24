@@ -3,7 +3,7 @@
 """Vectors for FourierIntegration (ql/math/integrals/fourierintegration.hpp, .cpp) as far as the wheel exposes it:
 andersenPiterbargIntegrationLimit over decay rates, tolerances, initial variances and maturities, a zero initial
 variance among them, whose second root can't be bracketed and which falls back to the first; isAdaptiveIntegration of
-each factory nanoql ports (the quadratures' at four orders, Gauss-Lobatto, Simpson and the trapezoid);
+each factory nanoql ports (the quadratures' at four orders, Gauss-Lobatto, Simpson, the trapezoid and Gauss-Kronrod);
 numberOfEvaluations of the quadratures, their order; and gaussLaguerre's refusal of an order above 192. The wheel
 doesn't expose calculate, which the Heston engine's vectors reach (tools/vectors/gen/pricingengines/vanilla/
 analytichestonengine.py), nor an integrator's count before a call, which QuantLib leaves uninitialized. The wheel's
@@ -51,7 +51,8 @@ def cases():
                                      "numberOfEvaluations": f.numberOfEvaluations()}})
     adaptive = {"gaussLobatto": lambda: ql.FourierIntegration.gaussLobatto(1e-8, 1e-8),
                 "simpson": lambda: ql.FourierIntegration.simpson(1e-8),
-                "trapezoid": lambda: ql.FourierIntegration.trapezoid(1e-8)}
+                "trapezoid": lambda: ql.FourierIntegration.trapezoid(1e-8),
+                "gaussKronrod": lambda: ql.FourierIntegration.gaussKronrod(1e-8)}
     for name, factory in adaptive.items():
         out.append({"name": name, "inputs": {"settings": st, "factory": name},
                     "expected": {"isAdaptiveIntegration": factory().isAdaptiveIntegration()}})

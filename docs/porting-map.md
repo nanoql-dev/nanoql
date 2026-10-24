@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 650 | 89 |
-| partial | 28 | 24 |
-| ported | 582 | 67 |
+| not started | 645 | 87 |
+| partial | 27 | 25 |
+| ported | 588 | 68 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -90,9 +90,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `cashflows` | ported | Coupons/CashFlows.cs |  |
 | `cashflowvectors` | partial | Coupons/CashFlowVectorsFunctions.cs | partial: FloatingDigitalLeg, which waits for S-cms with the digital coupons |
 | `cmscoupon` | ported | Coupons/CmsCoupon.cs, Coupons/CmsLeg.cs |  |
-| `conundrumpricer` | not started |  | no nanoql type: VanillaOptionPricer, MarketQuotedOptionPricer, GFunction, GFunctionFactory, GFunctionFactoryYieldCurveModel, HaganPricer, NumericHaganPricer, NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand, AnalyticHaganPricer |
+| `conundrumpricer` | ported | Coupons/ConundrumPricer/AnalyticHaganPricer.cs, Coupons/ConundrumPricer/ConundrumIntegrand.cs, Coupons/ConundrumPricer/GFunction.cs, Coupons/ConundrumPricer/GFunctionExactYield.cs, Coupons/ConundrumPricer/GFunctionFactory.cs, Coupons/ConundrumPricer/GFunctionFactoryYieldCurveModel.cs, Coupons/ConundrumPricer/GFunctionStandard.cs, Coupons/ConundrumPricer/GFunctionWithShifts.cs, Coupons/ConundrumPricer/HaganPricer.cs, Coupons/ConundrumPricer/HaganPricerState.cs, Coupons/ConundrumPricer/MarketQuotedOptionPricer.cs, Coupons/ConundrumPricer/NumericHaganPricer.cs, Coupons/ConundrumPricer/NumericHaganPricerIntegrationLimits.cs, Coupons/ConundrumPricer/VanillaOptionPricer.cs | no nanoql type: NumericHaganPricerFunction, NumericHaganPricerConundrumIntegrand |
 | `coupon` | ported | Coupons/Coupon.cs |  |
-| `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for batch 3; the CMS pricer bases CmsCouponPricer and MeanRevertingPricer, and the CMS cases' test for a CmsCouponPricer, which wait for S-cms; no nanoql type: CmsCouponPricer, MeanRevertingPricer |
+| `couponpricer` | partial | Coupons/CouponPricer/BlackIborCouponPricer.cs, Coupons/CouponPricer/BlackIborCouponPricerTimingAdjustment.cs, Coupons/CouponPricer/CmsCouponPricer.cs, Coupons/CouponPricer/CouponPricerFunctions.cs, Coupons/CouponPricer/CouponRateView.cs, Coupons/CouponPricer/FloatingRateCouponPricer.cs, Coupons/CouponPricer/IMeanRevertingPricer.cs, Coupons/CouponPricer/IborCouponPricer.cs | partial: the visitor's cases for the CMS-spread, digital, range-accrual and multiple-resets coupons (the capped coupon's CMS-spread check among them), which wait for S-cms's ports of those coupons; no nanoql type: MeanRevertingPricer |
 | `cpicoupon` | ported | Coupons/CPICoupon/CPICashFlow.cs, Coupons/CPICoupon/CPICoupon.cs, Coupons/CPICoupon/CPILeg.cs |  |
 | `cpicouponpricer` | ported | Coupons/CPICouponPricer.cs |  |
 | `digitalcmscoupon` | not started |  | no nanoql type: DigitalCmsCoupon, DigitalCmsLeg |
@@ -107,7 +107,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `indexedcashflow` | ported | Coupons/IndexedCashFlow.cs |  |
 | `inflationcoupon` | ported | Coupons/InflationCoupon.cs, Coupons/InflationCouponExtensions.cs |  |
 | `inflationcouponpricer` | ported | Coupons/InflationCouponPricer/BachelierYoYInflationCouponPricer.cs, Coupons/InflationCouponPricer/BlackYoYInflationCouponPricer.cs, Coupons/InflationCouponPricer/InflationCouponPricer.cs, Coupons/InflationCouponPricer/InflationCouponPricerFunctions.cs, Coupons/InflationCouponPricer/UnitDisplacedBlackYoYInflationCouponPricer.cs, Coupons/InflationCouponPricer/YoYInflationCouponPricer.cs |  |
-| `lineartsrpricer` | not started |  | no nanoql type: LinearTsrPricer, LinearTsrPricerSettings, LinearTsrPricerSettingsStrategy |
+| `lineartsrpricer` | ported | Coupons/LinearTsrPricer/LinearTsrPricer.cs, Coupons/LinearTsrPricer/LinearTsrPricerSettings.cs, Coupons/LinearTsrPricer/LinearTsrPricerSettingsStrategy.cs, Coupons/LinearTsrPricer/LinearTsrPricerState.cs |  |
 | `multipleresetscoupon` | not started |  | no nanoql type: MultipleResetsCoupon, MultipleResetsPricer, AveragingMultipleResetsPricer, CompoundingMultipleResetsPricer, MultipleResetsLeg |
 | `overnightindexedcoupon` | ported | Coupons/OvernightIndexedCoupon/CappedFlooredOvernightIndexedCoupon.cs, Coupons/OvernightIndexedCoupon/OvernightIndexedCoupon.cs, Coupons/OvernightIndexedCoupon/OvernightLeg.cs |  |
 | `overnightindexedcouponpricer` | ported | Coupons/OvernightIndexedCouponPricer/ArithmeticAveragedOvernightIndexedCouponPricer.cs, Coupons/OvernightIndexedCouponPricer/CompoundingOvernightIndexedCouponPricer.cs, Coupons/OvernightIndexedCouponPricer/OvernightIndexedCouponPricer.cs, Coupons/OvernightIndexedCouponPricer/OvernightIndexedCouponPricerExtensions.cs |  |
@@ -660,7 +660,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `lookbackoption` | not started |  | no nanoql type: ContinuousFloatingLookbackOption, ContinuousFixedLookbackOption, ContinuousPartialFloatingLookbackOption, ContinuousPartialFixedLookbackOption |
 | `makecapfloor` | ported | Instruments/MakeCapFloor.cs |  |
 | `makecds` | ported | Instruments/MakeCreditDefaultSwap.cs |  |
-| `makecms` | not started |  | no nanoql type: MakeCms |
+| `makecms` | ported | Instruments/MakeCms.cs |  |
 | `makemultipleresetsswap` | not started |  | no nanoql type: MakeMultipleResetsSwap |
 | `makeois` | ported | Instruments/MakeOIS.cs |  |
 | `makeswaption` | ported | Instruments/MakeSwaption.cs |  |
@@ -817,13 +817,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `exponentialintegrals` | ported | Numerics/Integrals/ExponentialIntegralsFunctions.cs |  |
 | `expsinhintegral` | not started |  | no nanoql type: ExpSinhIntegral |
 | `filonintegral` | not started |  | no nanoql type: FilonIntegral, FilonIntegralType |
-| `fourierintegration` | partial | Numerics/Integrals/FourierIntegration.cs | partial: gaussKronrod (S-cms's Kronrod rules); discreteSimpson and discreteTrapezoid (S-van's discrete integrals); tanhSinh (S-van); expSinh (S-core) |
+| `fourierintegration` | partial | Numerics/Integrals/FourierIntegration.cs | partial: discreteSimpson and discreteTrapezoid (S-van's discrete integrals); tanhSinh (S-van); expSinh (S-core) |
 | `gaussianorthogonalpolynomial` | ported | Numerics/Integrals/GaussianOrthogonalPolynomial/GaussChebyshev2ndPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussChebyshevPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussGegenbauerPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussHermitePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussHyperbolicPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussJacobiPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussLaguerrePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussLegendrePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussianOrthogonalPolynomial.cs |  |
 | `gaussianquadratures` | ported | Numerics/Integrals/GaussianQuadratures/GaussChebyshev2ndIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshev2ndIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshevIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshevIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussGegenbauerIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussHermiteIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussHyperbolicIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussJacobiIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLaguerreIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLegendreIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLegendreIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussianQuadrature.cs, Numerics/Integrals/GaussianQuadratures/GaussianQuadratureIntegrator.cs, Numerics/Integrals/GaussianQuadratures/MultiDimGaussianIntegration.cs, Numerics/Integrals/GaussianQuadratures/TabulatedGaussLegendre.cs |  |
 | `gausslaguerrecosinepolynomial` | not started |  | no nanoql type: GaussLaguerreTrigonometricBase, GaussLaguerreCosinePolynomial, GaussLaguerreSinePolynomial |
 | `gausslobattointegral` | ported | Numerics/Integrals/GaussLobattoIntegral.cs |  |
-| `integral` | partial | Numerics/Integrals/IntegrationResult.cs, Numerics/Integrals/Integrator.cs | partial: absoluteError and integrationSuccess, which wait for S-cms: no integrator S-eq ports computes an error, so QuantLib's absoluteError reads an uninitialized member after each of them; S-cms's CMS pricer is their first caller, on its Kronrod rules (integrationSuccess also compares the evaluation count with maxEvaluations, which the trapezoid family uses as an iteration bound) |
-| `kronrodintegral` | not started |  | no nanoql type: GaussKronrodNonAdaptive, GaussKronrodAdaptive |
+| `integral` | ported | Numerics/Integrals/IntegrationResult.cs, Numerics/Integrals/Integrator.cs |  |
+| `kronrodintegral` | ported | Numerics/Integrals/GaussKronrodAdaptive.cs, Numerics/Integrals/GaussKronrodNonAdaptive.cs |  |
 | `momentbasedgaussianpolynomial` | not started |  | no nanoql type: MomentBasedGaussianPolynomial |
 | `segmentintegral` | ported | Numerics/Integrals/SegmentIntegral.cs |  |
 | `simpsonintegral` | ported | Numerics/Integrals/SimpsonIntegral.cs |  |
@@ -960,7 +960,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `falseposition` | not started |  | no nanoql type: FalsePosition |
 | `finitedifferencenewtonsafe` | ported | Numerics/Solvers1D/FiniteDifferenceNewtonSafe.cs |  |
 | `halley` | not started |  | no nanoql type: Halley |
-| `newton` | not started |  | no nanoql type: Newton |
+| `newton` | ported | Numerics/Solvers1D/Newton.cs |  |
 | `newtonsafe` | ported | Numerics/Solvers1D/NewtonSafe.cs |  |
 | `ridder` | not started |  | no nanoql type: Ridder |
 | `secant` | not started |  | no nanoql type: Secant |
@@ -2093,8 +2093,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `cdsoption` | not started |  | 1 cases |
 | `chooseroption` | not started |  | 2 cases |
 | `cliquetoption` | not started |  | 4 cases |
-| `cms` | not started |  | 5 cases |
-| `cms_normal` | not started |  | 3 cases |
+| `cms` | partial | TestSuite/CmsTests.cs | 3 of 5 cases; not yet: testCmsMarketCalibration, testSabrCubeRecalibrationInitializesLazily |
+| `cms_normal` | ported | TestSuite/CmsNormalTests.cs | 3 of 3 cases |
 | `cmsspread` | not started |  | 2 cases |
 | `commodityunitofmeasure` | not started |  | 2 cases |
 | `compiledboostversion` | not ported: tests the C++ platform |  |  |
@@ -2157,7 +2157,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcpiswap` | ported | TestSuite/CPISwapTests.cs | 5 of 5 cases |
 | `inflationvolatility` | not started |  | 3 cases |
 | `instruments` | not started |  | 2 cases |
-| `integrals` | partial | TestSuite/IntegralsTests.cs | 11 of 21 cases; not yet: testGaussKronrodAdaptive, testTanhSinh, testExpSinh, testGaussKronrodNonAdaptive, testTwoDimensionalIntegration, testFolinIntegration, testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator, testPiecewiseIntegral |
+| `integrals` | partial | TestSuite/IntegralsTests.cs | 13 of 21 cases; not yet: testTanhSinh, testExpSinh, testTwoDimensionalIntegration, testFolinIntegration, testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator, testPiecewiseIntegral |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
 | `interpolations` | partial | TestSuite/InterpolationsTests.cs | 25 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testMultiSpline, testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLagrangeInterpolation, testLagrangeInterpolationAtSupportPoint, testLagrangeInterpolationDerivative, testLagrangeInterpolationOnChebyshevPoints, testChebyshevInterpolation, testChebyshevInterpolationOnNodes, testChebyshevInterpolationUpdateY, testLaplaceInterpolation |
@@ -2223,7 +2223,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `shortratemodels` | ported | TestSuite/ShortRateModelsTests.cs | 9 of 9 cases; replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks by Conventions/ModelRebuildTests.cs; testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks by Conventions/ModelRebuildTests.cs |
 | `sofrfutures` | not started |  | 6 cases |
 | `softbarrieroption` | not started |  | 1 cases |
-| `solvers` | partial | TestSuite/SolversTests.cs | 3 of 9 cases; not yet: testBisection, testFalsePosition, testNewton, testRidder, testSecant, testHalley |
+| `solvers` | partial | TestSuite/SolversTests.cs | 4 of 9 cases; not yet: testBisection, testFalsePosition, testRidder, testSecant, testHalley |
 | `squarerootclvmodel` | not started |  | 3 cases |
 | `stats` | partial | TestSuite/StatsTests.cs | 2 of 4 cases; not yet: testSequenceStatistics, testConvergenceStatistics |
 | `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |
