@@ -11,9 +11,9 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// <see cref="SpreadedOptionletVolatility"/>'s harness vectors,
-/// <c>tests/vectors/cxx/termstructures/volatility/optionlet/spreadedoptionletvol.json</c>: spreads over constant optionlet
-/// volatilities and stripped adapters, the structure's inspectors (its base's, and its extrapolation flag copied), its
-/// volatilities by time and by date and its smile sections' volatilities.
+/// <c>tests/vectors/cxx/termstructures/volatility/optionlet/spreadedoptionletvol.json</c>: spreads over constant
+/// optionlet volatilities and stripped adapters, the structure's inspectors (its base's, its calendar among them, and
+/// its extrapolation flag copied), its volatilities by time and by date and its smile sections' volatilities.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class SpreadedOptionletVolatilityCxxVectorTests
@@ -37,6 +37,7 @@ public class SpreadedOptionletVolatilityCxxVectorTests
 
             // QuantLib's refusal for a base on a fixed date is nanoql's null.
             check.Mapped(c, "settlementDays", () => s.SettlementDays, null, "a fixed reference date's settlement days are null");
+            check.Output(c, "calendar", s.Calendar?.Name);
             check.Output(c, "businessDayConvention", s.BusinessDayConvention);
             check.Output(c, "allowsExtrapolation", s.AllowsExtrapolation);
             check.Output(

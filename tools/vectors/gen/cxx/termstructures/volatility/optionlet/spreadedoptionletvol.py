@@ -6,11 +6,12 @@ optionlet volatilities (on a fixed reference date and on two settlement days, sh
 normal, one with extrapolation enabled) and over the adapters of two strippers of
 cxx/termstructures/volatility/optionlet/optionletstripper.py (one extrapolating), on 16 June 2025.
 
-Each case's outputs are the structure's inspectors, each its own output (its base's dates, strikes, type, displacement, settlement days or
-{"throws": true}, convention, and its extrapolation flag, the base's copied at construction), its volatility at 10
-points by time and 4 by date, with and without the extrapolation flag, and its smile section's volatilities at 7 strikes
-at two times. A base is {"kind": "structure", "structure": a constant optionlet volatility of
-termstructures/volatility/optionlet/constantoptionletvol.py} or {"kind": "adapter", "stripper", "enableExtrapolation"}.
+Each case's outputs are the structure's inspectors, each its own output (its base's dates, strikes, type, displacement,
+settlement days or {"throws": true}, calendar's name, convention, and its extrapolation flag, the base's copied at
+construction), its volatility at 10 points by time and 4 by date, with and without the extrapolation flag, and its smile
+section's volatilities at 7 strikes at two times. A base is {"kind": "structure", "structure": a constant optionlet
+volatility of termstructures/volatility/optionlet/constantoptionletvol.py} or {"kind": "adapter", "stripper",
+"enableExtrapolation"}.
 Read back by tests/NanoQL.Tests/Vectors/Cxx/TermStructures/SpreadedOptionletVolatilityCxxVectorTests.cs."""
 import importlib.util
 import os

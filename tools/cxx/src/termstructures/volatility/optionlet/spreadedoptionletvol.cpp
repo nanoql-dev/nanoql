@@ -7,7 +7,8 @@
 //
 //     SpreadedOptionletVolatility::inspectors (base, spread): {"referenceDate", "maxDate", "maxTime", "minStrike",
 //                                             "maxStrike", "volatilityType", "displacement", "settlementDays" (or
-//                                             {"throws": true}), "businessDayConvention", "allowsExtrapolation"}
+//                                             {"throws": true}), "calendar" (its name, or null when empty),
+//                                             "businessDayConvention", "allowsExtrapolation"}
 //     SpreadedOptionletVolatility::volatility(Time) (base, spread, time, strike, extrapolate)
 //     SpreadedOptionletVolatility::volatility(Date) (base, spread, date, strike, extrapolate)
 //     SpreadedOptionletVolatility::smileSection     (base, spread, time, [strike, ...]): the section's volatilities
@@ -110,6 +111,8 @@ namespace harness {
                          {"settlementDays", attempt([](const SpreadedOptionletVolatility& x) {
                               return json::value(static_cast<std::int64_t>(x.settlementDays()));
                           }, *v)},
+                         {"calendar", v->calendar().empty() ? json::value(nullptr)
+                                                            : json::value(v->calendar().name())},
                          {"businessDayConvention", static_cast<std::int64_t>(v->businessDayConvention())},
                          {"allowsExtrapolation", v->allowsExtrapolation()},
                      });
