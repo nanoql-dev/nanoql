@@ -44,6 +44,16 @@ namespace NanoQL.TermStructures;
 /// anchored solve can't fit fails as QuantLib's unsolved one, its right point removed.
 /// </para>
 /// <para>
+/// One of QuantLib's defects is kept. With interpolation, a segment's slope is found by a Brent search that stops once
+/// its bracket is narrow (<c>kahalesmilesection.cpp:151-155</c>, <c>brent.hpp:87-90</c>), so it can end at a sign
+/// change of the segment's mismatch that isn't a root. The segment it accepts then misses its right end's price, and
+/// the section's price jumps there, an arbitrage: on a lognormal SABR smile (a forward of 5% for a year, α 0.3, β 1,
+/// ν 0.3, ρ −0.3) the call is 0.000330 just below a strike of 7.5% and 0.000646 at it, as QuantLib's is. Rejecting such
+/// a segment as unsolved removes the jump, but its grid point is then removed, as an unsolved segment's is, so the core
+/// shrinks, and on many such smiles the section misses the source by more or can't be built. Without interpolation,
+/// the default, no segment is fitted and the core keeps the source's prices.
+/// </para>
+/// <para>
 /// QuantLib's public helper structs (<c>cFunction</c> and the three solvers' functions) are the fit's internals here.
 /// </para>
 /// </remarks>
