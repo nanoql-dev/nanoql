@@ -978,19 +978,64 @@ Facts:
 - `AZeroTargetIsRefused`
 - `ANonZeroTargetIsRefused`
 
+## CevAtExpiryTests
+
+[`Divergences/CevAtExpiryTests.cs`](../tests/NanoQL.Tests/Divergences/CevAtExpiryTests.cs)
+
+The CEV engine at a time of 0 (a run find, S-van's C3). The formula's non-centrality x₀/t is infinite at t = 0, which Boost refuses ("Non centrality parameter is inf"), so QuantLib throws on an option exercised today with the reference date's events included; and an exercise before the discount curve's reference date throws QuantLib's "negative time" (`analyticcevengine.cpp:104-111`). nanoql reads the curve by date, nothing accrued before its reference date (master's mismatched-dates row), and at t = 0 the value is the payoff at f0, the limit QuantLib's own values approach: a day out, its call at K 90 on f0 100 is 9.999178115968299 [executed on the wheel: `scratchpad\c3\oracle_c3.py`, σ 20%, r 3% on Actual/365 (Fixed), from 15 October 2026].
+
+Facts:
+
+- `ExercisedTodayTheValueIsThePayoff`
+- `ExercisedBeforeTheCurvesDateTheValueIsThePayoff`
+
+## CevDensityBelowZeroTests
+
+[`Divergences/CevDensityBelowZeroTests.cs`](../tests/NanoQL.Tests/Divergences/CevDensityBelowZeroTests.cs)
+
+The CEV density below zero (a run find, S-van's C3). Where the Sankaran guess's Brent fails, QuantLib's inverse starts a second Brent from the forward (`cevrndcalculator.cpp:105-120`), which can step below zero, where X(f) = f^(2(1 − β)) is NaN and Boost refuses it: QuantLib throws "Non centrality parameter is -nan(ind)" at a quantile that exists. nanoql's density and distribution are 0 below zero, the absorbing boundary, and QuantLib's values at and above it stand, so the second Brent finds the quantile to its accuracy, 1e-8 in the forward. The check: the distribution brackets the probability within that accuracy [executed on the wheel: f0 100, α = σ·f0^(1 − β)].
+
+Facts:
+
+- `WhereQuantLibStepsBelowZeroTheQuantileIsFound`
+- `BelowZeroTheDensityAndDistributionAre0`
+
+## CevNearOneTests
+
+[`Divergences/CevNearOneTests.cs`](../tests/NanoQL.Tests/Divergences/CevNearOneTests.cs)
+
+The CEV engine and density near β = 1 (the S-van plan's VR10, the user's ruling of 2026-10-23). At β = 1 `CEVCalculator`'s δ = (1 − 2β)/(1 − β) divides by zero (`analyticcevengine.cpp:36`) and Boost refuses the infinite degrees of freedom; near it Boost's non-central chi-squared refuses or runs for seconds, from |β − 1| ≤ 1e-4 at σ 5% and 0.1 years to 1e-6 at σ 80% and 10 years; `CEVRNDCalculator` refuses β = 1 (`cevrndcalculator.cpp:39`). nanoql prices Black's formula at Hagan's CEV-equivalent volatility (the SABR volatility at ν = 0) for |β − 1| < 1e-3, exactly Black's at β = 1; its density refuses the band but β = 1, where it is the lognormal density. QuantLib's check: its CEV formula where it still prices inside the band, and at the band's edge [executed on the wheel: `scratchpad\c3\oracle_c3.py`, `oracle_c3.out`; f0 100, σ 20%, r 3% on Actual/365 (Fixed), from 15 October 2026].
+
+Facts:
+
+- `InTheBandTheValueIsBlackAtHagansVolatility`
+- `AtBetaOneTheValueIsBlacks`
+- `TheDensityRefusesTheBand`
+- `AtBetaOneTheDensityIsLognormal`
+- `AtBetaOneTheDensitysInverseIsTheLognormals`
+
+## CevTailTests
+
+[`Divergences/CevTailTests.cs`](../tests/NanoQL.Tests/Divergences/CevTailTests.cs)
+
+The CEV formula's small tails (the S-van plan's VR4 (xxxiv)). `CEVCalculator::value` takes a tail as 1 − cdf (or Γ-ratio − cdf, `analyticcevengine.cpp:50-80`), which loses most of its digits where the tail is small: a 36-day call at K 150 comes out about 11% low. nanoql takes Boost's complement where QuantLib's difference is below 1e-3, and QuantLib's arithmetic and bits elsewhere. The check: Hagan's ν = 0 Black (QuantLib's `unsafeSabrLogNormalVolatility`), within 2% of the CEV value at |β − 1| = 1e-2 and 36 days, and QuantLib's FD CEV engine (200 × 2,000), 5.70e-11 and 6.83e-11 [executed on the wheel and C++: `scratchpad\c3\oracle_c3.py`, the planner's VP57; f0 100, σ 20%, r 3% on Actual/365 (Fixed), from 15 October 2026].
+
+Facts:
+
+- `ASmallTailTakesTheComplement`
+- `AboveTheGuardQuantLibsBitsStand`
+
 ## ChiSquaredSeriesRefusalTests
 
 [`Divergences/ChiSquaredSeriesRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/ChiSquaredSeriesRefusalTests.cs)
 
-`NonCentralCumulativeChiSquareDistribution` past its series' range. When QuantLib's loop ends at `itrmax` with its bound still negative, the bound passes as converged (`chisquaredistribution.cpp:79-88`), so above df + 20,000 a partial sum returns; when the first term falls below the normal range (`:54-55`), the series runs on subnormal numbers, then zeros; and when the Poisson weight's start, exp(−ncp/2) (`:39-41`), falls below it, from ncp 1,416.8, every term carries fewer bits, and from ncp 1,490.3 every term is 0, which the stop (`:82`) passes as converged. nanoql refuses each: QuantLib's own "didn't converge" for the first, and a text naming the term for the other two. The subnormal first term and the subnormal weight below pass a check against zero alone, so the refusals test "outside the range of doubles" as below the normal range; at ncp 1,500 the weight is exactly zero.
+`NonCentralCumulativeChiSquareDistribution` past QuantLib 1.44's series' range. When its first term falls below the normal range (`chisquaredistribution.cpp:54-55`), the series runs on subnormal numbers, then zeros; when the Poisson weight's start, exp(−ncp/2) (`:39-41`), falls below it, from ncp 1,416.8, every term carries fewer bits, and from ncp 1,490.3 every term is 0, which the stop (`:82`) passes as converged; and when its loop ends at `itrmax` with its bound still negative, the bound passes as converged (`:79-88`), so above df + 20,000 a partial sum returns. nanoql takes QuantLib's master's series, upstream's #2908 (the S-van plan's VR11): it skips the underflowing weights and terms by their logarithms, so the first two return the distribution's values, Boost's within upstream's 1e-10; and it refuses a loop that ends before its bound can be computed, "didn't converge", as the S-eq port refused it.
 
 Facts:
 
-- `ASubnormalFirstTermIsRefused`
+- `PastQuantLibsRangeTheSeriesIsUpstreams`
 - `ASeriesStoppedUnconvergedAboveDfIsRefused`
 - `ASeriesStoppedUnconvergedInTheLargeDfWindowIsRefused`
-- `ASubnormalPoissonWeightIsRefused`
-- `AZeroPoissonWeightIsRefused`
 
 ## CirFellerConstraintTests
 
@@ -2043,6 +2088,19 @@ Facts:
 - `TheModelsTimeRunsFromTheEarliestCurveDate`
 - `TheHelpersMaturityRunsFromTheEarlierCurveDate`
 - `TheOptimalAlphasDateFormReadsTheEnginesTime`
+
+## HestonPdfTests
+
+[`Divergences/HestonPdfTests.cs`](../tests/NanoQL.Tests/Divergences/HestonPdfTests.cs)
+
+`HestonProcess.Pdf`, the joint density of the log spot and the variance (a run find of S-van's C3, ruled by the user on 2026-10-24: fixed). QuantLib's (`hestonprocess.cpp:300-334`) integrates over the integrated variance up to twice a Cornish-Fisher quantile whose skew and kurtosis are finite differences of the characteristic function at a step of 1e-2: they rest on its last bits (one ulp on v moves QuantLib's value at κ 2, a quarter of a year, from −5.27 to 9.31), and the cut-off can fall where the integrand is still a fifth of its peak; and its 128-point Gauss-Laguerre rule stops near u = 500, where at short times the characteristic function hasn't decayed. nanoql inverts the log spot's characteristic function given the variance, from the integrated variance's. The checks: the log spot's marginal, the density integrated over the variance, is the log spot's density from Heston's characteristic function as QuantLib's analytic Heston engine computes it (`AnalyticHestonEngine.ChF`), inverted here, on a process meeting Feller's condition and one far from it, from under three weeks to a year; and where QuantLib's range holds the integrand, QuantLib's value [executed on the C++ harness and QuantLib's own functions: `scratchpad\c3\heston_harness\`, `scratchpad\c3\probe\heston_pdf.cpp`; r and q on flat Actual/365 (Fixed) curves from 15 October 2026].
+
+Facts:
+
+- `WhereQuantLibsDensityFailsItIsPositive`
+- `TheLogSpotsMarginalIsTheCharacteristicFunctionsDensity`
+- `WhereQuantLibsRangeHoldsTheIntegrandItsValueStands`
+- `WhereTheVariancesDensityIsZeroTheDensityIsZero`
 
 ## HullWhiteForwardProcessSmallReversionTests
 

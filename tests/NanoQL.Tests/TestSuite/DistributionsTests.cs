@@ -630,6 +630,61 @@ public class DistributionsTests
         CheckEqual(nonCentral.Evaluate(-1.0), 0.0);
     }
 
+    // Upstream: QuantLib's master's case for #2908 (the S-van plan's VR11). Adapted: Boost's
+    // non_central_chi_squared_distribution is nanoql's internal port, bound through reflection.
+    [Fact]
+    public void TestNonCentralChiSquareLargeArguments()
+    {
+        // Testing the non-central cumulative chi-square distribution for large non-centrality and large arguments...
+
+        // for ncp/2 or x/2 above about 708, exp(-ncp/2) or the first
+        // term of the series underflow; the distribution used to return
+        // 0 instead of the actual value (up to 1).
+        var boostCdf = Vectors.BoostInternals.Function<Func<double, double, double, double>>(
+            "NonCentralChiSquaredFunctions", "Cdf");
+        Real[] dfs = [0.5, 1.0, 4.8, 20.0];
+        Real[] ncps = [0.0, 1.0, 10.0, 1400.0, 1600.0, 5000.0, 20000.0];
+        Real[] ks = [-8.0, -3.0, -1.0, 0.0, 1.0, 3.0, 8.0, 50.0];
+
+        const Real tol = 1e-10;
+        foreach (Real df in dfs)
+        {
+            foreach (Real ncp in ncps)
+            {
+                var d = new NonCentralCumulativeChiSquareDistribution(df, ncp);
+
+                Real mean = df + ncp;
+                Real stdDev = Math.Sqrt(2.0 * (df + 2.0 * ncp));
+                List<Real> xs = [1500.0, 2000.0, 1.0e4, 1.0e6, 1.0e12];
+                foreach (Real k in ks)
+                {
+                    if (mean + k * stdDev > 0.0)
+                    {
+                        xs.Add(mean + k * stdDev);
+                    }
+                }
+
+                foreach (Real x in xs)
+                {
+                    Real expected = boostCdf(df, ncp, x);
+                    Real calculated = d.Evaluate(x);
+                    Real diff = Math.Abs(expected - calculated);
+
+                    Assert.False(
+                        diff > tol,
+                        "Failed to reproduce non-central chi-square cdf"
+                        + $"\n    df        : {df}"
+                        + $"\n    ncp       : {ncp}"
+                        + $"\n    x         : {x}"
+                        + $"\n    expected  : {expected}"
+                        + $"\n    calculated: {calculated}"
+                        + $"\n    diff      : {diff}"
+                        + $"\n    tol       : {tol}");
+                }
+            }
+        }
+    }
+
     private static Real Gaussian(Real x)
     {
         Real normFact = sigma * Math.Sqrt(2 * M_PI);

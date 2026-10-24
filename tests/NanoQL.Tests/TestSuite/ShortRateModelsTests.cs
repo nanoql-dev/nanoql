@@ -371,6 +371,46 @@ public class ShortRateModelsTests
             + $"\n  difference: {diff:E}\n  tolerance : {tol:E}");
     }
 
+    // Upstream: QuantLib's master's case for #2908 (the S-van plan's VR11).
+    [Fact]
+    public void TestCoxIngersollRossShortExpiryBondOptions()
+    {
+        // Testing short-expiry bond options for CIR model...
+
+        // For short option expiries, the arguments of the non-central
+        // chi-square distribution in the closed formula become very
+        // large; it used to return 0, so that in-the-money calls were
+        // priced at 0 and puts at minus their intrinsic value.
+        var model = new CoxIngersollRoss(0.03, 0.04, 0.3, 0.1);
+        const double bondMaturity = 1.0;
+
+        // reference values computed with the closed formula and a
+        // 40-digit evaluation of the non-central chi-square distribution
+        (double Expiry, Real Strike, Real Call, Real Put)[] cases =
+        [
+            (1.0 / 52, 0.90, 0.0696854342991965, 0.0),
+            (1.0 / 365, 0.97, 6.19091004229057e-5, 8.16319849046085e-4),
+        ];
+
+        const Real tolerance = 1e-12;
+        foreach ((double expiry, Real strike, Real expectedCall, Real expectedPut) in cases)
+        {
+            Real call = model.DiscountBondOption(OptionType.Call, strike, expiry, bondMaturity);
+            Real put = model.DiscountBondOption(OptionType.Put, strike, expiry, bondMaturity);
+
+            Assert.False(
+                Math.Abs(call - expectedCall) > tolerance || Math.Abs(put - expectedPut) > tolerance,
+                "Failed to reproduce CIR bond option prices:"
+                + $"\n  expiry    : {expiry}"
+                + $"\n  strike    : {strike}"
+                + $"\n  call      : {call:E}"
+                + $"\n  expected  : {expectedCall:E}"
+                + $"\n  put       : {put:E}"
+                + $"\n  expected  : {expectedPut:E}"
+                + $"\n  tolerance : {tolerance:E}");
+        }
+    }
+
     [Fact]
     public void TestVasicekDiscountFactorForSmallMeanReversion()
     {

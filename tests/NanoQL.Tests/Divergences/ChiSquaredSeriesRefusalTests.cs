@@ -2,29 +2,34 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Numerics;
+using NanoQL.Tests.Vectors;
 
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="NonCentralCumulativeChiSquareDistribution"/> past its series' range. When QuantLib's loop ends at
-/// <c>itrmax</c> with its bound still negative, the bound passes as converged (<c>chisquaredistribution.cpp:79-88</c>),
-/// so above df + 20,000 a partial sum returns; when the first term falls below the normal range (<c>:54-55</c>), the
-/// series runs on subnormal numbers, then zeros; and when the Poisson weight's start, exp(−ncp/2) (<c>:39-41</c>),
-/// falls below it, from ncp 1,416.8, every term carries fewer bits, and from ncp 1,490.3 every term is 0, which the
-/// stop (<c>:82</c>) passes as converged. nanoql refuses each: QuantLib's own "didn't converge" for the first, and a
-/// text naming the term for the other two. The subnormal first term and the subnormal weight below pass a check
-/// against zero alone, so the refusals test "outside the range of doubles" as below the normal range; at ncp 1,500 the
-/// weight is exactly zero.
+/// <see cref="NonCentralCumulativeChiSquareDistribution"/> past QuantLib 1.44's series' range. When its first term
+/// falls below the normal range (<c>chisquaredistribution.cpp:54-55</c>), the series runs on subnormal numbers, then
+/// zeros; when the Poisson weight's start, exp(−ncp/2) (<c>:39-41</c>), falls below it, from ncp 1,416.8, every term
+/// carries fewer bits, and from ncp 1,490.3 every term is 0, which the stop (<c>:82</c>) passes as converged; and when
+/// its loop ends at <c>itrmax</c> with its bound still negative, the bound passes as converged (<c>:79-88</c>), so above
+/// df + 20,000 a partial sum returns. nanoql takes QuantLib's master's series, upstream's #2908 (the S-van plan's VR11):
+/// it skips the underflowing weights and terms by their logarithms, so the first two return the distribution's values,
+/// Boost's within upstream's 1e-10; and it refuses a loop that ends before its bound can be computed, "didn't converge",
+/// as the S-eq port refused it.
 /// </summary>
 public class ChiSquaredSeriesRefusalTests
 {
-    [Fact]
-    public void ASubnormalFirstTermIsRefused()
+    [Theory]
+    [InlineData(10.0, 0.0, 1547.0, 1.8101376060711385)] // the first term subnormal: the answer is 1
+    [InlineData(30.0, 1470.0, 1500.0, 0.5051744561775329)] // the Poisson weight subnormal
+    [InlineData(30.0, 1500.0, 1530.0, 0.0)] // the Poisson weight 0, at the mean
+    public void PastQuantLibsRangeTheSeriesIsUpstreams(double df, double ncp, double x, double quantLib)
     {
-        // QuantLib reads 1.8101376060711385 at df 10, x 1,547, where the answer is 1
-        var e = Assert.Throws<NanoQLException>(
-            () => new NonCentralCumulativeChiSquareDistribution(10.0, 0.0).Evaluate(1547.0));
-        Assert.Equal("the series' first term is outside the range of doubles at x 1547", e.Message);
+        // QuantLib 1.44's values recorded; #2908's against Boost's distribution, upstream's check
+        _ = quantLib;
+        var boostCdf = BoostInternals.Function<Func<double, double, double, double>>("NonCentralChiSquaredFunctions", "Cdf");
+        double value = new NonCentralCumulativeChiSquareDistribution(df, ncp).Evaluate(x);
+        Assert.True(Math.Abs(value - boostCdf(df, ncp, x)) <= 1e-10, $"{value} against Boost's {boostCdf(df, ncp, x)}");
     }
 
     [Fact]
@@ -48,26 +53,5 @@ public class ChiSquaredSeriesRefusalTests
         e = Assert.Throws<NanoQLException>(
             () => new NonCentralCumulativeChiSquareDistribution(1.2e15, 0.0).Evaluate(1.2e15));
         Assert.Equal("didn't converge", e.Message);
-    }
-
-    [Fact]
-    public void ASubnormalPoissonWeightIsRefused()
-    {
-        // QuantLib reads 0.5051744561775329 at df 30, ncp 1,470, x 1,500, where its Sankaran approximation reads
-        // 0.505159
-        var e = Assert.Throws<NanoQLException>(
-            () => new NonCentralCumulativeChiSquareDistribution(30.0, 1470.0).Evaluate(1500.0));
-        Assert.Equal("the series' Poisson weight exp(-ncp/2) is outside the range of doubles at ncp 1470", e.Message);
-        Assert.Equal(0.505159, new NonCentralCumulativeChiSquareSankaranApprox(30.0, 1470.0).Evaluate(1500.0), 5e-6);
-    }
-
-    [Fact]
-    public void AZeroPoissonWeightIsRefused()
-    {
-        // QuantLib reads 0.0 at df 30, ncp 1,500, x 1,530, the mean, where its Sankaran approximation reads 0.5051
-        var e = Assert.Throws<NanoQLException>(
-            () => new NonCentralCumulativeChiSquareDistribution(30.0, 1500.0).Evaluate(1530.0));
-        Assert.Equal("the series' Poisson weight exp(-ncp/2) is outside the range of doubles at ncp 1500", e.Message);
-        Assert.Equal(0.5051, new NonCentralCumulativeChiSquareSankaranApprox(30.0, 1500.0).Evaluate(1530.0), 5e-5);
     }
 }

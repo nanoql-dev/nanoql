@@ -15,7 +15,7 @@ namespace NanoQL.Numerics;
 /// default policy, which throws: each check returns, or throws with Boost's message ("Error in function
 /// &lt;function&gt;: &lt;message&gt;", the value in C#'s formatting). A domain error on the caller's argument (a
 /// probability, a random variate) throws <see cref="ArgumentOutOfRangeException"/>; one on a distribution's stored
-/// parameter (its scale or location) throws <see cref="NanoQLException"/>.
+/// parameter (its scale, location, degrees of freedom or non-centrality) throws <see cref="NanoQLException"/>.
 /// </summary>
 internal static class CommonErrorHandlingFunctions
 {
@@ -75,6 +75,57 @@ internal static class CommonErrorHandlingFunctions
             throw new ArgumentOutOfRangeException(
                 paramName,
                 $"Error in function {function}: Random variate x is {Show(x)}, but must be finite!");
+        }
+    }
+
+    /// <summary><c>check_df</c>: degrees of freedom must be positive and finite.</summary>
+    /// <param name="function">Boost's name of the calling function.</param>
+    /// <param name="df">The degrees of freedom.</param>
+    /// <exception cref="NanoQLException">The degrees of freedom aren't positive, or aren't finite.</exception>
+    internal static void CheckDf(string function, double df)
+    {
+        //  df > 0 but NOT +infinity allowed.
+        if ((df <= 0) || !double.IsFinite(df))
+        {
+            throw new NanoQLException(
+                $"Error in function {function}: Degrees of freedom argument is {Show(df)}, but must be > 0 !");
+        }
+    }
+
+    /// <summary>
+    /// <c>check_positive_x</c>: a random variate must be finite and not below 0. This catches both an infinity and a
+    /// NaN.
+    /// </summary>
+    /// <param name="function">Boost's name of the calling function.</param>
+    /// <param name="x">The random variate.</param>
+    /// <param name="paramName">The caller's name for the argument.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The variate is negative, or isn't finite.</exception>
+    internal static void CheckPositiveX(string function, double x, string paramName)
+    {
+        if (!double.IsFinite(x) || (x < 0))
+        {
+            throw new ArgumentOutOfRangeException(
+                paramName, $"Error in function {function}: Random variate x is {Show(x)}, but must be finite and >= 0!");
+        }
+    }
+
+    /// <summary>
+    /// <c>check_non_centrality</c>: a non-centrality must be finite, not below 0, and no larger than
+    /// <c>LLONG_MAX</c> less the root finder's 200 iterations, which as a <c>double</c> is 2^63.
+    /// </summary>
+    /// <param name="function">Boost's name of the calling function.</param>
+    /// <param name="ncp">The non-centrality.</param>
+    /// <exception cref="NanoQLException">The non-centrality is refused.</exception>
+    internal static void CheckNonCentrality(string function, double ncp)
+    {
+        // static_cast<double>(LLONG_MAX) - get_max_root_iterations<Policy>()
+        const double upperLimit = (double)long.MaxValue - 200;
+
+        if ((ncp < 0) || !double.IsFinite(ncp) || ncp > upperLimit)
+        {
+            throw new NanoQLException(
+                $"Error in function {function}: Non centrality parameter is {Show(ncp)}, but must be > 0, and a countable "
+                + "value such that x+1 != x");
         }
     }
 

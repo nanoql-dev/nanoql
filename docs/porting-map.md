@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 590 | 73 |
-| partial | 22 | 25 |
-| ported | 648 | 82 |
+| not started | 587 | 72 |
+| partial | 21 | 26 |
+| ported | 652 | 82 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -1119,7 +1119,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `bsmrndcalculator` | not started |  | no nanoql type: BSMRNDCalculator |
-| `cevrndcalculator` | not started |  | no nanoql type: CEVRNDCalculator |
+| `cevrndcalculator` | ported | Methods/FiniteDifferences/Utilities/CEVRNDCalculator.cs |  |
 | `escroweddividendadjustment` | ported | Methods/FiniteDifferences/Utilities/EscrowedDividendAdjustment.cs |  |
 | `fdmaffinemodelswapinnervalue` | ported | Methods/FiniteDifferences/Utilities/FdmAffineModelSwapInnerValue/FdmAffineG2ModelSwapInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmAffineModelSwapInnerValue/FdmAffineHullWhiteModelSwapInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmAffineModelSwapInnerValue/FdmAffineModelSwapInnerValue{TModel}.cs |  |
 | `fdmaffinemodeltermstructure` | ported | Methods/FiniteDifferences/Utilities/FdmAffineModelTermStructure.cs |  |
@@ -1138,7 +1138,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `gbsmrndcalculator` | not started |  | no nanoql type: GBSMRNDCalculator |
 | `hestonrndcalculator` | not started |  | no nanoql type: HestonRNDCalculator |
 | `localvolrndcalculator` | not started |  | no nanoql type: LocalVolRNDCalculator |
-| `riskneutraldensitycalculator` | not started |  | no nanoql type: RiskNeutralDensityCalculator |
+| `riskneutraldensitycalculator` | ported | Methods/FiniteDifferences/Utilities/RiskNeutralDensityCalculator.cs |  |
 | `smilesectionrndcalculator` | not started |  | no nanoql type: SmileSectionRNDCalculator |
 | `squarerootprocessrndcalculator` | not started |  | no nanoql type: SquareRootProcessRNDCalculator |
 
@@ -1670,7 +1670,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `analyticbsmhullwhiteengine` | ported | PricingEngines/Vanilla/AnalyticBSMHullWhiteEngine.cs |  |
-| `analyticcevengine` | not started |  | no nanoql type: CEVCalculator, AnalyticCEVEngine |
+| `analyticcevengine` | ported | PricingEngines/Vanilla/AnalyticCEVEngine.cs, PricingEngines/Vanilla/CEVCalculator.cs |  |
 | `analyticdigitalamericanengine` | ported | PricingEngines/Vanilla/AnalyticDigitalAmericanEngine.cs, PricingEngines/Vanilla/AnalyticDigitalAmericanKOEngine.cs |  |
 | `analyticdividendeuropeanengine` | ported | PricingEngines/Vanilla/AnalyticDividendEuropeanEngine.cs |  |
 | `analyticeuropeanengine` | ported | PricingEngines/Vanilla/AnalyticEuropeanEngine.cs |  |
@@ -1729,7 +1729,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `gjrgarchprocess` | not started |  | no nanoql type: GJRGARCHProcess, GJRGARCHProcessDiscretization |
 | `gsrprocess` | ported | Processes/GsrProcess.cs |  |
 | `gsrprocesscore` | ported | Processes/GsrProcessCore.cs, Processes/GsrProcessCoreMemo.cs |  |
-| `hestonprocess` | partial | Processes/HestonProcess/HestonProcess.cs, Processes/HestonProcess/HestonProcessDiscretization.cs | partial: pdf, the Fokker-Planck density, which waits for Boost's non-central chi-squared density, which S-van ports |
+| `hestonprocess` | ported | Processes/HestonProcess/HestonProcess.cs, Processes/HestonProcess/HestonProcessDiscretization.cs |  |
 | `hestonslvprocess` | not started |  | no nanoql type: HestonSLVProcess |
 | `hullwhiteprocess` | ported | Processes/HullWhiteProcess/HullWhiteForwardProcess.cs, Processes/HullWhiteProcess/HullWhiteProcess.cs, Processes/HullWhiteProcess/HullWhiteProcessFunctions.cs |  |
 | `hybridhestonhullwhiteprocess` | not started |  | no nanoql type: HybridHestonHullWhiteProcess, HybridHestonHullWhiteProcessDiscretization |
@@ -2213,7 +2213,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `quantooption` | partial | TestSuite/QuantoOptionTests.cs | 1 of 10 cases; not yet: testValues, testGreeks, testForwardValues, testForwardGreeks, testForwardPerformanceValues, testBarrierValues, testPDEOptionValues, testAmericanQuantoOption, testDoubleBarrierValues |
 | `quotes` | not started |  | 6 cases |
 | `rangeaccrual` | ported | TestSuite/RangeAccrualTests.cs | 3 of 3 cases |
-| `riskneutraldensitycalculator` | not started |  | 14 cases |
+| `riskneutraldensitycalculator` | partial | TestSuite/RiskNeutralDensityCalculatorTests.cs | 2 of 14 cases; not yet: testDensityAgainstOptionPrices, testBSMagainstHestonRND, testLocalVolatilityRND, testSquareRootProcessRND, testBlackScholesWithSkew, testSmileSectionRNDvsBSM, testSmileSectionRNDQuantileRange, testSmileSectionRNDLowVolFatWings, testSmileSectionRNDvsHeston, testSmileSectionRNDMissingAtmLevel, testSmileSectionRNDMartingale, testSmileSectionRNDLeftTailCdf |
 | `riskstats` | ported | TestSuite/RiskStatsTests.cs | 1 of 1 cases |
 | `rngtraits` | partial | TestSuite/RngTraitsTests.cs | 3 of 4 cases; not yet: testRanLux |
 | `roughhestonmodel` | not started |  | 24 cases |

@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/processes/hestonprocess.hpp ql/processes/hestonprocess.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: pdf, the Fokker-Planck density, which waits for Boost's non-central chi-squared density, which S-van ports
 
 using System.Numerics;
 using NanoQL.Numerics;
@@ -26,6 +25,10 @@ namespace NanoQL.Processes;
 public sealed class HestonProcess : StochasticProcess
 {
     private static readonly GaussLaguerreIntegration GaussLaguerre128 = new(128);
+
+    // Pdf's inversion: its Gauss-Legendre panels, and their number at most
+    private static readonly GaussLegendreIntegration GaussLegendre32 = new(32);
+    private const int MaxInversionPanels = 100000;
 
     private readonly YieldTermStructure riskFreeRate;
     private readonly YieldTermStructure dividendYield;
@@ -172,6 +175,104 @@ public sealed class HestonProcess : StochasticProcess
         return new Vector([x0[0] * Math.Exp(dx[0]), x0[1] + dx[1]]);
     }
 
+    /// <summary>
+    /// The joint density of the log spot <paramref name="x"/> and the variance <paramref name="v"/> at time
+    /// <paramref name="t"/>: the variance's non-central chi-squared density times the log spot's conditional density
+    /// given it, from the integrated variance's characteristic function (Broadie and Kaya).
+    /// </summary>
+    /// <param name="x">The log spot.</param>
+    /// <param name="v">The variance.</param>
+    /// <param name="t">The time, on the risk-free curve's clock.</param>
+    /// <param name="eps">QuantLib's accuracy for a tail search whose result its own code overwrites
+    /// (<c>hestonprocess.cpp:307-323</c>): the density depends on it neither there nor here.</param>
+    /// <returns>The density.</returns>
+    /// <remarks>
+    /// <para>
+    /// The dividend curve is read at the instant <paramref name="t"/> denotes on the risk-free curve's clock, nothing
+    /// accrued before its own reference date (the mismatched-dates class); QuantLib's read, the dividend curve's own
+    /// time <paramref name="t"/>, where the two curves share their times.
+    /// </para>
+    /// <para>
+    /// QuantLib's density doesn't hold its digits (<c>hestonprocess.cpp:300-334</c>). It integrates over the integrated
+    /// variance up to twice a Cornish-Fisher quantile whose skew and kurtosis are finite differences of the
+    /// characteristic function at a step of 1e-2, which rest on its last bits, and that cut-off can fall where the
+    /// integrand is still a fifth of its peak (10% low on ordinary inputs); and its 128-point Gauss-Laguerre rule for the
+    /// conditional density reaches u ≈ 500, where at short times the characteristic function hasn't decayed (NaN and
+    /// negative densities at a quarter of a year). Here the log spot's conditional density given the variance is the
+    /// inversion of its characteristic function: given the integrated variance ξ the log spot is normal, with mean
+    /// x₀ + a − cξ and variance (1 − ρ²)ξ, c = ½ − ρκ/σ, as QuantLib's integrand has it, so its characteristic function
+    /// given the variance is e^{iu(x₀ + a)}·Φ(−uc + i·½u²(1 − ρ²)), Φ the integrated variance's, with the Bessel ratio
+    /// in its exponentially weighted form. The inversion integral runs by 32-point Gauss-Legendre panels no wider than
+    /// the integrand's oscillation and decay allow, out to where E[e^{−½u²(1 − ρ²)ξ}], which bounds the integrand,
+    /// falls below 1e-17. A documented divergence (a run find, ruled by the user on 2026-10-24,
+    /// <c>Divergences/HestonPdfTests.cs</c>), checked by the log spot's marginal, the density integrated over the
+    /// variance, against the log spot's density from Heston's characteristic function, which QuantLib's analytic Heston
+    /// engine prices by. Where the variance's density is 0 the density is 0. The value's absolute accuracy is about
+    /// 1e-13, the inversion's rounding floor: far from the density's mass it is noise of that size, of either sign.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="NanoQLException">Boost's non-central chi-squared refuses its arguments; |ρ| is 1, where the log
+    /// spot's conditional density has no variance; or the inversion doesn't converge within 100,000 panels.</exception>
+    public double Pdf(double x, double v, double t, double eps = 1e-3)
+    {
+        _ = eps;
+        double k = Sigma * Sigma * (1 - Math.Exp(-Kappa * t)) / (4 * Kappa);
+        double a = Math.Log(dividendYield.DiscountAt(riskFreeRate, t) / riskFreeRate.Discount(t))
+            + (Rho / Sigma * (v - V0 - (Kappa * Theta * t)));
+        double x0 = Math.Log(S0);
+
+        double df0 = 4 * Theta * Kappa / (Sigma * Sigma);
+        double ncp = 4 * Kappa * Math.Exp(-Kappa * t) / (Sigma * Sigma * (1 - Math.Exp(-Kappa * t))) * V0;
+        NonCentralChiSquaredFunctions.NonCentralChiSquaredDistribution(df0, ncp);
+        double variance = NonCentralChiSquaredFunctions.Pdf(df0, ncp, v / k) / k;
+        if (variance == 0.0)
+        {
+            return 0.0;
+        }
+
+        double damping = 0.5 * (1 - (Rho * Rho));
+        if (!(damping > 0.0))
+        {
+            throw new NanoQLException("the log spot's conditional density has no variance at |rho| = 1");
+        }
+
+        double c = 0.5 - (Rho * Kappa / Sigma);
+        double y = x - x0 - a;
+
+        // the scale of the integrated variance, and from it the integrand's frequency and decay
+        double xiScale = 2.0 * t * Max(V0, Max(v, Theta));
+        double frequency = Math.Abs(y) + (Math.Abs(c) * xiScale);
+        double decay = 1.0 / Math.Sqrt(damping * xiScale);
+        double maxWidth = Min(50.0, Min(decay, 20.0 / frequency));
+
+        // Re[e^{-iuy}·Φ(ζ(u))], ζ(u) = -uc + i·½u²(1 − ρ²)
+        double Integrand(double u) =>
+            (Complex.Exp(new Complex(0.0, -u * y)) * Phi(new Complex(-u * c, damping * u * u), V0, v, t, true)).Real;
+
+        double sum = 0.0, lo = 0.0, width = Min(2.0, maxWidth);
+        for (int panel = 0; ; panel++)
+        {
+            if (panel == MaxInversionPanels)
+            {
+                throw new NanoQLException("the log spot's conditional characteristic function doesn't decay within the inversion's panels");
+            }
+
+            double from = lo, half = 0.5 * width;
+            sum += half * GaussLegendre32.Evaluate(s => Integrand(from + (half * (s + 1))));
+            lo += width;
+
+            // E[exp(-½u²(1 − ρ²)ξ)] = Φ(i·½u²(1 − ρ²)) bounds |Φ(ζ(u))| and falls with u
+            if (Phi(new Complex(0.0, damping * lo * lo), V0, v, t, true).Real < 1e-17)
+            {
+                break;
+            }
+
+            width = Min(width * 1.2, maxWidth);
+        }
+
+        return sum / Math.PI * variance;
+    }
+
     /// <inheritdoc/>
     /// <exception cref="NanoQLException">
     /// The quadratic-exponential martingale correction has no solution ("illegal value"), or the variance's law can't
@@ -285,6 +386,8 @@ public sealed class HestonProcess : StochasticProcess
 
     private static double Min(double a, double b) => b < a ? b : a;
 
+    private static double Squared(double x) => x * x;
+
     // This is the continuous version of a characteristic function
     // for the exact sampling of the Heston process, s. page 8, formula 13,
     // M. Broadie, O. Kaya, Exact Simulation of Stochastic Volatility and
@@ -295,7 +398,7 @@ public sealed class HestonProcess : StochasticProcess
     // For details please see:
     // Roger Lord, "Efficient Pricing Algorithms for exotic Derivatives",
     // http://repub.eur.nl/pub/13917/LordR-Thesis.pdf
-    private Complex Phi(Complex a, double nu_0, double nu_t, double dt)
+    private Complex Phi(Complex a, double nu_0, double nu_t, double dt, bool weightedBessel = false)
     {
         double theta = Theta;
         double kappa = Kappa;
@@ -317,10 +420,19 @@ public sealed class HestonProcess : StochasticProcess
                 - (ga * (1.0 + Complex.Exp(-ga * dt)) / (1.0 - Complex.Exp(-ga * dt)))))
             * Complex.Exp(nu * log_z) / Complex.Pow(z, nu)
             * (nu_t > 1e-8
-                ? ModifiedBesselFunctions.ModifiedBesselFunction_i(nu, Math.Sqrt(nu_0 * nu_t) * alpha)
-                    / ModifiedBesselFunctions.ModifiedBesselFunction_i(nu, Math.Sqrt(nu_0 * nu_t) * beta)
+                ? (weightedBessel
+                    ? BesselRatio(nu, Math.Sqrt(nu_0 * nu_t) * alpha, Math.Sqrt(nu_0 * nu_t) * beta)
+                    : ModifiedBesselFunctions.ModifiedBesselFunction_i(nu, Math.Sqrt(nu_0 * nu_t) * alpha)
+                        / ModifiedBesselFunctions.ModifiedBesselFunction_i(nu, Math.Sqrt(nu_0 * nu_t) * beta))
                 : Complex.Pow(alpha / beta, nu));
     }
+
+    // I_nu(za)/I_nu(zb) through the exponentially weighted functions, I_nu(z)·e^(−z), which don't overflow where the
+    // ratio's terms do at short times (Pdf's form; Evolve keeps QuantLib's)
+    private static Complex BesselRatio(double nu, Complex za, Complex zb) =>
+        ModifiedBesselFunctions.ModifiedBesselFunction_i_exponentiallyWeighted(nu, za)
+        / ModifiedBesselFunctions.ModifiedBesselFunction_i_exponentiallyWeighted(nu, zb)
+        * Complex.Exp(za - zb);
 
     private double Ch(double x, double u, double nu_0, double nu_t, double dt) =>
         MathConstants.M_2_PI * Math.Sin(u * x) / u * Phi(u, nu_0, nu_t, dt).Real;

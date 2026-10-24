@@ -104,7 +104,6 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Methods/FiniteDifferences/StepCondition.cs`: `NullCondition`, which no QuantLib 1.44 class or test uses and which waits for its first user.
 - `src/NanoQL/Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs`: `FdmLogBasketInnerValue`, which waits for S-exo with the basket option's payoff.
 - `src/NanoQL/Numerics/Integrals/FourierIntegration.cs`: the discrete Simpson and trapezoid and the exp-sinh algorithms, which wait for their integrators: S-van's discrete integrals and S-core's exp-sinh.
-- `src/NanoQL/Processes/HestonProcess/HestonProcess.cs`: `pdf`, the Fokker-Planck density, which waits for Boost's non-central chi-squared density, which S-van ports.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/TermStructures/Credit/DefaultDensityStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the default density, which waits for S-xcr's curves, its only users.
 - `src/NanoQL/TermStructures/Credit/HazardRateStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-xcr's curves, its only users.
@@ -146,6 +145,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing, L-BFGS-B, differential evolution and CMA-ES cases, whose optimizers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: `testDefaultInstantiation`'s ConvexMonotone curve (S-core); `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (S-core); `testConvexMonotoneForwardConsistency`, `testLocalBootstrapConsistency` and `testGlobalBootstrapVariables` (S-core).
 - `tests/NanoQL.Tests/TestSuite/QuantoOptionTests.cs`: the analytic and forward cases and `testPDEOptionValues`, which wait for S-exo's quanto engines; the barrier case, which waits for S-bar's quanto barrier option; `testAmericanQuantoOption`, which waits for S-hes's Heston engine; and `testDoubleBarrierValues`, which waits for S-xeq's quanto double-barrier option.
+- `tests/NanoQL.Tests/TestSuite/RiskNeutralDensityCalculatorTests.cs`: every case but the CEV calculator's `testMassAtZeroCEVProcessRND` and `testCEVCDF`: `testDensityAgainstOptionPrices`, `testLocalVolatilityRND` and the six smile-section cases, which wait for S-van's C5 calculators, and `testBSMagainstHestonRND`, `testSquareRootProcessRND`, `testBlackScholesWithSkew` and `testSmileSectionRNDvsHeston`, which wait for S-hes's Heston and square-root calculators.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant and Halley cases, whose solvers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/StatsTests.cs`: `testSequenceStatistics` and `testConvergenceStatistics`, which wait for S-mmp's sequence and convergence statistics.
