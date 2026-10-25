@@ -11,6 +11,7 @@ using NanoQL.Instruments;
 using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.Processes;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 
 namespace NanoQL.PricingEngines;
@@ -433,6 +434,17 @@ public class AnalyticHestonEngine
         double fwd = process.S0 * process.DividendYield.Discount(maturity) / process.RiskFreeRate.Discount(maturity);
 
         return PriceVanillaPayoff(payoff, maturity, fwd, process.RiskFreeRate.Discount(maturity));
+    }
+
+    // The time form on another structure's clock (the S-hes plan's HR7 (xi), the Heston surface's): the time on the
+    // clock, the forward and the risk-free discount read at the instant it denotes; QuantLib's time form where the clock
+    // shares the curves' times.
+    internal (double Price, int Evaluations) PriceVanillaPayoffWithStatistics(PlainVanillaPayoff payoff, TermStructure clock, double maturity)
+    {
+        HestonProcess process = Model.Process;
+        double dr = process.RiskFreeRate.DiscountAt(clock, maturity);
+        double fwd = process.S0 * process.DividendYield.DiscountAt(clock, maturity) / dr;
+        return PriceVanillaPayoff(payoff, maturity, fwd, dr);
     }
 
     // The add-on term, for the control variate's check that the engine prices the Heston model alone.

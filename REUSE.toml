@@ -24,6 +24,14 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "Copyright (C) 2002 Peter Jäckel \"Monte Carlo Methods in Finance\"."
 SPDX-License-Identifier = "BSD-3-Clause AND LicenseRef-Jaeckel"
 
+# QuantLib's node table for its exponentially fitted Gauss-Laguerre Heston engine, generated from
+# exponentialfittinghestonengine.cpp by tools/tables/exponentialfittinghestonengine.py: data only.
+[[annotations]]
+path = "src/NanoQL/PricingEngines/Vanilla/ExponentialFittingHestonEngine/ExponentialFittingHestonEngineValues.bin"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Copyright (C) 2020 Klaus Spanderen"
+SPDX-License-Identifier = "BSD-3-Clause"
+
 # QuantLib's tables for its Sobol generator, generated from sobolrsg.cpp by tools/tables/sobolrsg.py: data only,
 # among them the Joe-Kuo and Kuo direction numbers under their licence.
 [[annotations]]

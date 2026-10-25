@@ -5,11 +5,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/riskneutraldensitycalculator.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBSMagainstHestonRND, testSquareRootProcessRND, testBlackScholesWithSkew, testSmileSectionRNDvsHeston (S-hes's density calculators and Heston Black-volatility surface)
 
 using NanoQL.Experimental;
 using NanoQL.Instruments;
 using NanoQL.Methods;
+using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
@@ -85,6 +85,79 @@ public class RiskNeutralDensityCalculatorTests
                     "failed to reproduce Black-Scholes-Merton pdf"
                     + $"\n   calculated: {calculatedPDF}\n   expected:   {expectedPDF}"
                     + $"\n   diff:       {calculatedPDF - expectedPDF}\n   tol:        {tol}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestBSMagainstHestonRND()
+    {
+        // Testing Black-Scholes-Merton and Heston densities...
+
+        DayCounter dayCounter = new Actual365Fixed();
+        Date todaysDate = Date.TodaysDate();
+
+        const Real s0 = 10;
+
+        const Real r = 0.155;
+        const Real q = 0.0721;
+        const Real v = 0.27;
+
+        const Real kappa = 1.0;
+        const Real theta = v * v;
+        const Real rho = -0.75;
+        const Real v0 = v * v;
+        const Real sigma = 0.0001;
+
+        var rTS = new FlatForward(todaysDate, r, dayCounter);
+        var qTS = new FlatForward(todaysDate, q, dayCounter);
+
+        var bsmProcess = new BlackScholesMertonProcess(s0, qTS, rTS, new BlackConstantVol(todaysDate, new NullCalendar(), v, dayCounter));
+
+        var bsm = new BSMRNDCalculator(bsmProcess);
+        var heston = new HestonRNDCalculator(new HestonProcess(rTS, qTS, s0, v0, kappa, theta, sigma, rho), 1e-8);
+
+        Real[] times = [0.5, 1.0, 2.0];
+        Real[] strikes = [7.5, 10, 15];
+        Real[] probs = [1e-6, 0.01, 0.5, 0.99, 1.0 - 1e-6];
+
+        foreach (Real t in times)
+        {
+            foreach (Real strike in strikes)
+            {
+                Real xs = Math.Log(strike);
+
+                Real expectedPDF = bsm.Pdf(xs, t);
+                Real calculatedPDF = heston.Pdf(xs, t);
+
+                const Real tol = 1e-4;
+                Assert.False(
+                    Math.Abs(expectedPDF - calculatedPDF) > tol,
+                    "failed to reproduce Black-Scholes-Merton pdf with the Heston model"
+                    + $"\n   calculated: {calculatedPDF}\n   expected:   {expectedPDF}"
+                    + $"\n   diff:       {calculatedPDF - expectedPDF}\n   tol:        {tol}");
+
+                Real expectedCDF = bsm.Cdf(xs, t);
+                Real calculatedCDF = heston.Cdf(xs, t);
+
+                Assert.False(
+                    Math.Abs(expectedCDF - calculatedCDF) > tol,
+                    "failed to reproduce Black-Scholes-Merton cdf with the Heston model"
+                    + $"\n   calculated: {calculatedCDF}\n   expected:   {expectedCDF}"
+                    + $"\n   diff:       {calculatedCDF - expectedCDF}\n   tol:        {tol}");
+            }
+
+            foreach (Real prob in probs)
+            {
+                Real expectedInvCDF = bsm.InvCdf(prob, t);
+                Real calculatedInvCDF = heston.InvCdf(prob, t);
+
+                const Real tol = 1e-3;
+                Assert.False(
+                    Math.Abs(expectedInvCDF - calculatedInvCDF) > tol,
+                    "failed to reproduce Black-Scholes-Merton inverse cdf with the Heston model"
+                    + $"\n   calculated: {calculatedInvCDF}\n   expected:   {expectedInvCDF}"
+                    + $"\n   diff:       {calculatedInvCDF - expectedInvCDF}\n   tol:        {tol}");
             }
         }
     }
@@ -231,6 +304,192 @@ public class RiskNeutralDensityCalculatorTests
         }
 
         Assert.True(failures.Count == 0, string.Join("\n", failures));
+    }
+
+    [Fact]
+    public void TestSquareRootProcessRND()
+    {
+        // Testing probability density for a square root process...
+
+        (Real V0, Real Kappa, Real Theta, Real Sigma)[] @params =
+        [
+            (0.17, 1.0, 0.09, 0.5),
+            (1.0, 0.6, 0.1, 0.75),
+            (0.005, 0.6, 0.1, 0.05),
+        ];
+
+        foreach ((Real v0, Real kappa, Real theta, Real sigma) in @params)
+        {
+            var rndCalculator = new SquareRootProcessRNDCalculator(v0, kappa, theta, sigma);
+
+            const Real t = 0.75;
+            Real tInfty = 60.0 / kappa;
+
+            const Real tol = 1e-10;
+            for (Real v = 1e-5; v < 1.0; v += (v < theta) ? 0.005 : 0.1)
+            {
+                Real cdfCalculated = rndCalculator.Cdf(v, t);
+                Real cdfExpected = new GaussLobattoIntegral(10000, 0.01 * tol).Integrate(x => rndCalculator.Pdf(x, t), 0, v);
+
+                Assert.False(
+                    Math.Abs(cdfCalculated - cdfExpected) > tol,
+                    "failed to calculate cdf"
+                    + $"\n   t:          {t}\n   v:          {v}\n   calculated: {cdfCalculated}\n   expected:   {cdfExpected}"
+                    + $"\n   diff:       {cdfCalculated - cdfExpected}\n   tolerance:  {tol}");
+
+                if (cdfExpected < (1 - 1e-6) && cdfExpected > 1e-6)
+                {
+                    Real vCalculated = rndCalculator.InvCdf(cdfCalculated, t);
+
+                    Assert.False(
+                        Math.Abs(v - vCalculated) > tol,
+                        "failed to calculate round trip cdf <-> invcdf"
+                        + $"\n   t:          {t}\n   v:          {v}\n   cdf:        {cdfExpected}\n   calculated: {vCalculated}"
+                        + $"\n   diff:       {v - vCalculated}\n   tolerance:  {tol}");
+                }
+
+                Real statPdfCalculated = rndCalculator.Pdf(v, tInfty);
+                Real statPdfExpected = rndCalculator.StationaryPdf(v);
+
+                Assert.False(
+                    Math.Abs(statPdfCalculated - statPdfExpected) > tol,
+                    "failed to calculate stationary pdf"
+                    + $"\n   v:          {v}\n   calculated: {statPdfCalculated}\n   expected:   {statPdfExpected}"
+                    + $"\n   diff:       {statPdfCalculated - statPdfExpected}\n   tolerance:  {tol}");
+
+                Real statCdfCalculated = rndCalculator.Cdf(v, tInfty);
+                Real statCdfExpected = rndCalculator.StationaryCdf(v);
+
+                Assert.False(
+                    Math.Abs(statCdfCalculated - statCdfExpected) > tol,
+                    "failed to calculate stationary cdf"
+                    + $"\n   v:          {v}\n   calculated: {statCdfCalculated}\n   expected:   {statCdfExpected}"
+                    + $"\n   diff:       {statCdfCalculated - statCdfExpected}\n   tolerance:  {tol}");
+            }
+
+            for (Real q = 1e-5; q < 1.0; q += 0.001)
+            {
+                Real statInvCdfCalculated = rndCalculator.InvCdf(q, tInfty);
+                Real statInvCdfExpected = rndCalculator.StationaryInvCdf(q);
+
+                Assert.False(
+                    Math.Abs(statInvCdfCalculated - statInvCdfExpected) > tol,
+                    "failed to calculate stationary inverse of cdf"
+                    + $"\n   q:          {q}\n   calculated: {statInvCdfCalculated}\n   expected:   {statInvCdfExpected}"
+                    + $"\n   diff:       {statInvCdfCalculated - statInvCdfExpected}\n   tolerance:  {tol}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestBlackScholesWithSkew()
+    {
+        // Testing probability density for a BSM process with strike dependent volatility vs local volatility...
+
+        var todaysDate = new Date(3, Month.October, 2016);
+        DayCounter dc = new Actual365Fixed();
+        Date maturityDate = todaysDate + new Period(3, TimeUnit.Months);
+        double maturity = dc.YearFraction(todaysDate, maturityDate);
+
+        // use Heston model to create volatility surface with skew
+        const Real r = 0.08;
+        const Real q = 0.03;
+        const Real s0 = 100;
+        const Real v0 = 0.06;
+        const Real kappa = 1.0;
+        const Real theta = 0.06;
+        const Real sigma = 0.4;
+        const Real rho = -0.75;
+
+        var rTS = new FlatForward(todaysDate, r, dc);
+        var qTS = new FlatForward(todaysDate, q, dc);
+
+        var hestonProcess = new HestonProcess(rTS, qTS, s0, v0, kappa, theta, sigma, rho);
+
+        var hestonSurface = new HestonBlackVolSurface(
+            new HestonModel(hestonProcess),
+            AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg,
+            FourierIntegration.DiscreteTrapezoid(128));
+
+        var timeGrid = new TimeGrid(maturity, 51);
+
+        LocalVolTermStructure localVol = new NoExceptLocalVolSurface(hestonSurface, rTS, qTS, s0, Math.Sqrt(theta));
+
+        var localVolCalc = new LocalVolRNDCalculator(s0, rTS, qTS, localVol, timeGrid, 151, 0.25);
+
+        var hestonCalc = new HestonRNDCalculator(hestonProcess);
+
+        var gbsmCalc = new GBSMRNDCalculator(new BlackScholesMertonProcess(s0, qTS, rTS, hestonSurface));
+
+        Real[] strikes = [85, 75, 90, 110, 125, 150];
+
+        foreach (Real strike in strikes)
+        {
+            Real logStrike = Math.Log(strike);
+
+            Real expected = hestonCalc.Cdf(logStrike, maturity);
+            Real calculatedGBSM = gbsmCalc.Cdf(strike, maturity);
+
+            const Real gbsmTol = 1e-5;
+            Assert.False(
+                Math.Abs(expected - calculatedGBSM) > gbsmTol,
+                "failed to match Heston and GBSM cdf"
+                + $"\n   t:          {maturity}\n   k:          {strike}\n   calculated: {calculatedGBSM}\n   expected:   {expected}"
+                + $"\n   diff:       {Math.Abs(calculatedGBSM - expected)}\n   tol:        {gbsmTol}");
+
+            Real calculatedLocalVol = localVolCalc.Cdf(logStrike, maturity);
+            const Real localVolTol = 1e-3;
+            Assert.False(
+                Math.Abs(expected - calculatedLocalVol) > localVolTol,
+                "failed to match Heston and local Volatility cdf"
+                + $"\n   t:          {maturity}\n   k:          {strike}\n   calculated: {calculatedLocalVol}\n   expected:   {expected}"
+                + $"\n   diff:       {Math.Abs(calculatedLocalVol - expected)}\n   tol:        {localVolTol}");
+        }
+
+        foreach (Real strike in strikes)
+        {
+            Real logStrike = Math.Log(strike);
+
+            Real expected = hestonCalc.Pdf(logStrike, maturity) / strike;
+            Real calculatedGBSM = gbsmCalc.Pdf(strike, maturity);
+
+            const Real gbsmTol = 1e-5;
+            Assert.False(
+                Math.Abs(expected - calculatedGBSM) > gbsmTol,
+                "failed to match Heston and GBSM pdf"
+                + $"\n   t:          {maturity}\n   k:          {strike}\n   calculated: {calculatedGBSM}\n   expected:   {expected}"
+                + $"\n   diff:       {Math.Abs(calculatedGBSM - expected)}\n   tol:        {gbsmTol}");
+
+            Real calculatedLocalVol = localVolCalc.Pdf(logStrike, maturity) / strike;
+            const Real localVolTol = 1e-4;
+            Assert.False(
+                Math.Abs(expected - calculatedLocalVol) > localVolTol,
+                "failed to match Heston and local Volatility pdf"
+                + $"\n   t:          {maturity}\n   k:          {strike}\n   calculated: {calculatedLocalVol}\n   expected:   {expected}"
+                + $"\n   diff:       {Math.Abs(calculatedLocalVol - expected)}\n   tol:        {localVolTol}");
+        }
+
+        Real[] quantiles = [0.05, 0.25, 0.5, 0.75, 0.95];
+        foreach (Real quantile in quantiles)
+        {
+            Real expected = Math.Exp(hestonCalc.InvCdf(quantile, maturity));
+            Real calculatedGBSM = gbsmCalc.InvCdf(quantile, maturity);
+
+            const Real gbsmTol = 1e-3;
+            Assert.False(
+                Math.Abs(expected - calculatedGBSM) > gbsmTol,
+                "failed to match Heston and GBSM inverse cdf"
+                + $"\n   t:          {maturity}\n   quantile:   {quantile}\n   calculated: {calculatedGBSM}\n   expected:   {expected}"
+                + $"\n   diff:       {Math.Abs(calculatedGBSM - expected)}\n   tol:        {gbsmTol}");
+
+            Real calculatedLocalVol = Math.Exp(localVolCalc.InvCdf(quantile, maturity));
+            const Real localVolTol = 0.2;
+            Assert.False(
+                Math.Abs(expected - calculatedLocalVol) > localVolTol,
+                "failed to match Heston and local Volatility inverse cdf"
+                + $"\n   t:          {maturity}\n   quantile:   {quantile}\n   calculated: {calculatedLocalVol}\n   expected:   {expected}"
+                + $"\n   diff:       {Math.Abs(calculatedLocalVol - expected)}\n   tol:        {localVolTol}");
+        }
     }
 
     [Fact]
@@ -428,6 +687,64 @@ public class RiskNeutralDensityCalculatorTests
             Math.Abs(beyond - edge) > tol,
             "failed to saturate past the tabulated range"
             + $"\n   at the edge: {edge}\n   beyond it:   {beyond}\n   tolerance:   {tol}");
+    }
+
+    [Fact]
+    public void TestSmileSectionRNDvsHeston()
+    {
+        // Testing SmileSectionRNDCalculator on a Heston-implied smile against HestonRNDCalculator...
+
+        DayCounter dc = new Actual365Fixed();
+        Date today = Date.TodaysDate();
+        Date maturity = today + new Period(1, TimeUnit.Years);
+
+        const Real s0 = 100.0;
+        const Real r = 0.05;
+        const Real q = 0.02;
+
+        var rTS = new FlatForward(today, r, dc);
+        var qTS = new FlatForward(today, q, dc);
+
+        const Real v0 = 0.04, kappa = 1.0, theta = 0.04;
+        const Real sigma = 0.3, rho = -0.5;
+
+        var hestonProcess = new HestonProcess(rTS, qTS, s0, v0, kappa, theta, sigma, rho);
+        var hestonModel = new HestonModel(hestonProcess);
+
+        var hestonRnd = new HestonRNDCalculator(hestonProcess);
+
+        var hestonVolSurface = new HestonBlackVolSurface(hestonModel);
+
+        double T = hestonVolSurface.TimeFromReference(maturity);
+        Real fwd = s0 * qTS.Discount(maturity) / rTS.Discount(maturity);
+
+        var smile = new AtmSmileSection(hestonVolSurface.SmileSection(T), fwd);
+        var smileRnd = new SmileSectionRNDCalculator(smile);
+
+        Real logFwd = Math.Log(fwd);
+        const Real cdfTol = 5e-3;
+        const Real pdfTol = 1e-3;
+
+        foreach (Real offset in new[] { -0.30, -0.15, 0.0, 0.15, 0.30 })
+        {
+            Real x = logFwd + offset;
+
+            Real expectedCDF = hestonRnd.Cdf(x, T);
+            Real calculatedCDF = smileRnd.Cdf(x, T);
+            Assert.False(
+                Math.Abs(expectedCDF - calculatedCDF) > cdfTol,
+                "failed to reproduce Heston cdf with SmileSection RND"
+                + $"\n   x:          {x}\n   calculated: {calculatedCDF}\n   expected:   {expectedCDF}"
+                + $"\n   diff:       {calculatedCDF - expectedCDF}\n   tolerance:  {cdfTol}");
+
+            Real expectedPDF = hestonRnd.Pdf(x, T);
+            Real calculatedPDF = smileRnd.Pdf(x, T);
+            Assert.False(
+                Math.Abs(expectedPDF - calculatedPDF) > pdfTol,
+                "failed to reproduce Heston pdf with SmileSection RND"
+                + $"\n   x:          {x}\n   calculated: {calculatedPDF}\n   expected:   {expectedPDF}"
+                + $"\n   diff:       {calculatedPDF - expectedPDF}\n   tolerance:  {pdfTol}");
+        }
     }
 
     [Fact]

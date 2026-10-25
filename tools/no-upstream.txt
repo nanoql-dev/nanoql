@@ -8,6 +8,12 @@ src/NanoQL/EnumArguments.cs
 src/NanoQL/MsvcConversions.cs
 src/NanoQL/NanoQLException.cs
 src/NanoQL/NumericLimits.cs
+src/NanoQL/Numerics/DoubleDouble.cs
+src/NanoQL/Numerics/ExtendedDouble.cs
+src/NanoQL/Numerics/IKappaTExpression.cs
+src/NanoQL/Numerics/IRealArithmetic.cs
+src/NanoQL/Numerics/QuadDouble.cs
+src/NanoQL/Numerics/RealDouble.cs
 src/NanoQL/PricingEngines/Vanilla/ApproximationWindow.cs
 tests/NanoQL.Tests/Conventions/**
 tests/NanoQL.Tests/Divergences/**

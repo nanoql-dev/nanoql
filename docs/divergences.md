@@ -157,6 +157,34 @@ Facts:
 
 - `TheVolatilityAtExpiryIsTheStructures`
 
+## AnalyticPdfHestonTailsTests
+
+[`Divergences/AnalyticPdfHestonTailsTests.cs`](../tests/NanoQL.Tests/Divergences/AnalyticPdfHestonTailsTests.cs)
+
+The analytic PDF Heston engine's tails beyond its window (the code review's C2-B1-2, ruled (d)). QuantLib integrates the payoff against the density over ln F ± 8√V (`analyticpdfhestonengine.cpp:54-65`) and drops the mass beyond: on its own markets a half-year put at 0.7F 7% low and at 0.5F 53% low (the far-from-Feller set), at a vol of variance of 1 and correlation −0.9 a five-year put at half the forward 18% low [executed on the wheel: `scratchpad\c2b12\oracle_tails.py`]; its own test checks calls, whose right tail is thin there. nanoql adds the tails' values where they're worth more than the integrations' accuracy: the payoff a line a + bS between its strikes, a piece's value is a times its probability plus bF times its probability under the share measure, both from the spot's distribution at the window's edges and the strikes; QuantLib's price where they aren't. The window's value is QuantLib's to the bit, the price less the additional result `tailsValue`. The check: QuantLib's analytic engine.
+
+Facts:
+
+- `AFatLeftTailIsAdded`
+- `OnQuantLibsVectorMarketsThePricesAreTheAnalyticEngines`
+- `DigitalAndAssetPutsTakeTheirTails`
+- `AStrikeBeyondTheWindowSplitsItsTail`
+- `WhereTheTailsAreWithinTheAccuracyQuantLibsPriceStands`
+- `ATailBelowTheDistributionsResolutionOrWorthLessThanTheAccuracyIsLeftOut`
+- `APayoffNotLinearOnATailWithMassIsRefused`
+- `TheShareMeasuresDistributionKeepsPutCallParity`
+
+## AnalyticPdfHestonWindowTests
+
+[`Divergences/AnalyticPdfHestonWindowTests.cs`](../tests/NanoQL.Tests/Divergences/AnalyticPdfHestonWindowTests.cs)
+
+The analytic PDF Heston engine's integration window (the S-hes plan's HR7 (vii), under R8). QuantLib centres the window on x₀ + ln(D_r/D_q) (`analyticpdfhestonengine.cpp:54`), the forward's mirror about the spot, where the density of ln S_T centres on ln F = x₀ + ln(D_q/D_r), as `NanoQL.Methods.HestonRNDCalculator` reads it: at a carry of 10% over ten years with v₀ = θ = 0.0025 the window misses the density and the call at 100 prices 0.00025 where the analytic engine gives 63.24. nanoql centres the window on ln F, QuantLib's window where the carry is 0. The check: QuantLib's analytic engine.
+
+Facts:
+
+- `AtAHighCarryThePdfEngineMatchesTheAnalyticEngine`
+- `AtANegativeCarryThePdfEngineMatchesTheAnalyticEngine`
+
 ## AnalyticThetaMismatchedTimesTests
 
 [`Divergences/AnalyticThetaMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/AnalyticThetaMismatchedTimesTests.cs)
@@ -1180,6 +1208,40 @@ Facts:
 
 - `AVolatilityOnAnotherDayCounterIsFlattenedOnTheRiskFreeClock`
 - `TheNPVIsTheValueAtSettlement`
+
+## CosHestonLargeKappaTests
+
+[`Divergences/CosHestonLargeKappaTests.cs`](../tests/NanoQL.Tests/Divergences/CosHestonLargeKappaTests.cs)
+
+The COS Heston engine's cumulants past κt = 100 (the S-hes plan's HR11, under R8). QuantLib's c₁ to c₄ (`coshestonengine.cpp:177-286`) take powers of e^{κt} whose products overflow: c₄ is NaN at κt = 200, c₃ from 300, c₂ at 400, and the engine's truncation range with them, so it prices NaN. nanoql evaluates each cumulant past its upper cut in an extended-range double, QuantLib's expression unchanged, and QuantLib's double, and so its bits, up to it. The check: QuantLib's expressions in Boost's 50-digit `cpp_bin_float_50` [executed at the run], QuantLib's cumulants at κt = 100, and QuantLib's analytic engine.
+
+Facts:
+
+- `PastTheUpperCutTheCumulantsAreTheFiftyDigitValues`
+- `PastTheUpperCutThePriceMatchesTheAnalyticEngine`
+
+## CosHestonSmallKappaTests
+
+[`Divergences/CosHestonSmallKappaTests.cs`](../tests/NanoQL.Tests/Divergences/CosHestonSmallKappaTests.cs)
+
+The COS Heston engine's cumulants at small κt (the S-hes plan's HR7 (ix), under R8, by HR6). QuantLib's c₁ to c₄ (`coshestonengine.cpp:177-286`) are expansions in e^{κt} that cancel in double as κt falls: c₄ is off by 2.7% at κt = 5e-3, c₃ by 0.23% at 1e-3, c₂ by 600% at 1e-6 and c₁ by 8e-8 at 1e-9. nanoql evaluates each below its cut (2e-3, 0.2, 0.5 and 1), where QuantLib's double first departs from the expression's exact value by more than 1e-12 relative, in double-double, QuantLib's expression unchanged; below double-double's own floor (1e-9, 1e-6, 1e-3 and 5e-3) in quad-double; below quad-double's floor (1e-12, 1e-12, 5e-10 and 2e-7) by the cubic in κ through four quad-double values there; and in QuantLib's double, and so its bits, from the cut up. The check: QuantLib's expressions in Boost's `cpp_bin_float` at 100 digits, and at 250 below the double-double floors [executed at the run], QuantLib's cumulants at the cuts, and QuantLib's analytic engine.
+
+Facts:
+
+- `AtAndBelowTheCutTheCumulantsAreTheReferenceValues`
+- `AtTheCutTheCumulantsAreContinuous`
+- `AtASmallKappaThePriceMatchesTheAnalyticEngine`
+
+## CosHestonSmallSigmaTests
+
+[`Divergences/CosHestonSmallSigmaTests.cs`](../tests/NanoQL.Tests/Divergences/CosHestonSmallSigmaTests.cs)
+
+The COS Heston engine's characteristic function at small σ (the S-hes plan's HR7 (viii), under R8). QuantLib's COS engine computes the classic form, divided by σ² (`coshestonengine.cpp:132-150`), which cancels as σ falls: its at-the-money price is off by 2.9e-11 relative at σ = 1e-3, 3.7e-5 at 1e-6 and 3.4% at 1e-8, where the analytic engine's Andersen and Lake form, QuantLib's own, holds. nanoql's COS engine takes the analytic engine's form of the same function below σ = 0.07, the cut where the classic form first departs from it by more than 1e-12 relative, measured on a grid of six parameter sets, ten u and nine times to 30 years; above it QuantLib's form and bits. The check: QuantLib's analytic engine, and the two forms within 1e-12 at the cut.
+
+Facts:
+
+- `BelowTheCutCosMatchesTheAnalyticEngine`
+- `AtTheCutTheTwoFormsAgree`
 
 ## CouponPricerSettingTests
 
@@ -2299,6 +2361,59 @@ Facts:
 - `ASmallReversionIsContinuous`
 - `ANegativeReversionIsRead`
 
+## HestonAnalyticMismatchedTimesTests
+
+[`Divergences/HestonAnalyticMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/HestonAnalyticMismatchedTimesTests.cs)
+
+The Heston extensions' analytic engines, surface and density on curves dated or counted differently (the S-hes plan's HR7 (xi), the mismatched-dates class of master Revision 58). QuantLib's engines run the model's time from the risk-free curve's reference date (`process->time`: `coshestonengine.cpp:66`, `exponentialfittinghestonengine.cpp:221`, `hestonexpansionengine.cpp:70`, `analyticpdfhestonengine.cpp:44`, `analyticptdhestonengine.cpp:268-270`), and the PDF engine, the surface and the density calculator read the dividend curve at the risk-free curve's times (`analyticpdfhestonengine.cpp:51-52`, `hestonblackvolsurface.cpp:75-92`, `hestonrndcalculator.cpp:117-118`). nanoql's run on the model's clock, from the earliest reference date of the curves on the risk-free curve's day counter, each curve read at the instant a time denotes, nothing accruing before its own date; the density calculator's times are the risk-free curve's, as `BSMRNDCalculator`'s. The check: QuantLib on the market restated on one clock, which nanoql on the original market reproduces to rounding [executed on the wheel, and through the harness for the expansions and the det-jump Bates engines].
+
+Facts:
+
+- `CosExponentialFittingAndTheExpansionsRunFromTheEarliestDate`
+- `ThePdfEngineReadsEachCurveAtItsInstant`
+- `TheTimeDependentModelRunsOnTheModelsClock`
+- `TheRoughEngineRunsFromTheEarliestDate`
+- `TheBatesEnginesRunFromTheEarliestDate`
+- `TheSurfaceAndTheDensityCalculatorReadEachCurveAtItsInstant`
+
+## HestonDensityTransformCutTests
+
+[`Divergences/HestonDensityTransformCutTests.cs`](../tests/NanoQL.Tests/Divergences/HestonDensityTransformCutTests.cs)
+
+Where the Heston density's Fourier integral stops (R8; found by the S-hes code review, C2-B1-1). QuantLib's density and distribution integrate the characteristic function after the substitution u = e^{−cx}, returning 0 below u = QL_EPSILON (`hestonrndcalculator.cpp:59-86`), so the integral stops at x = −ln ε/c, with c = min(10, max(1e-4, √(1 − ρ²)/σ))·(v₀ + κθt). At a small vol of variance over long terms, and at short terms, the characteristic function, about e^{−Vx²/2} with V the expected integrated variance, is still large there: QuantLib's PDF engine prices a twenty-year call at twice the forward at 6.81 where its analytic engine gives 0.97. nanoql caps c at √(−ln ε·V/2), so the cut falls where e^{−Vx²/2} is below QL_EPSILON, V the PDF engine's window variance; where QuantLib's constant already cuts below it, QuantLib's constant and bits. The check: QuantLib's analytic engine for the prices, its strike derivative for the distribution, and QuantLib's density where the cap is idle.
+
+Facts:
+
+- `WhereQuantLibsCutComesEarlyThePdfEngineMatchesTheAnalyticEngine`
+- `WhereQuantLibsCutComesEarlyTheDistributionMatchesTheAnalyticDigital`
+- `WhereQuantLibsCutComesLateTheDensityIsQuantLibs`
+
+## HestonExpansionLargeKappaTests
+
+[`Divergences/HestonExpansionLargeKappaTests.cs`](../tests/NanoQL.Tests/Divergences/HestonExpansionLargeKappaTests.cs)
+
+The LPP2 and LPP3 expansions past κt = 100 (the S-hes plan's HR11, under R8). QuantLib's coefficients (`hestonexpansionengine.cpp:128-720`) take powers of e^{κt} whose products overflow: LPP3's z₀ is inf at κt = 140, its z₁ NaN and its z₃ 0, LPP2's z₀ inf at κt = 200 and NaN from 300, so the engine prices the forward's discounted intrinsic value under the volatility's 1e-8 floor, or throws. nanoql evaluates each coefficient past its upper cut in an extended-range double, QuantLib's expression unchanged, and QuantLib's double, and so its bits, up to it. The check: QuantLib's expressions in Boost's 50-digit `cpp_bin_float_50` [executed at the run], QuantLib's analytic engine, and QuantLib's implied volatilities at κt ≤ 100.
+
+Facts:
+
+- `PastTheUpperCutTheCoefficientsAreTheFiftyDigitValues`
+- `PastTheUpperCutThePricesMatchTheAnalyticEngine`
+- `UpToTheUpperCutTheImpliedVolatilitiesAreQuantLibs`
+
+## HestonExpansionSmallKappaTests
+
+[`Divergences/HestonExpansionSmallKappaTests.cs`](../tests/NanoQL.Tests/Divergences/HestonExpansionSmallKappaTests.cs)
+
+The LPP2 and LPP3 expansions at small κt, from a small κ or a short term (the S-hes plan's HR7 (x), under R8, by HR6). QuantLib's coefficients (`hestonexpansionengine.cpp:128-720`) are expansions in e^{κt} that cancel in double as κt falls: LPP3's z₃ is −0.196 for 1.310 at κt = 5e-3 and 3.6e8 for 0.478 at a term of 52 minutes at κ 1.5, where its volatility three standard deviations up is 142, and its price at κ = 1e-4 is 9.7% below the analytic engine's; LPP2's z₁ is −73.1 for −0.189 at κt = 5e-7. nanoql evaluates each coefficient below its cut (LPP2's 0.5, 0.2 and 0.5, LPP3's 2, 1, 1 and 1), where QuantLib's double first departs from the expression's exact value by more than 1e-12 relative, in double-double, QuantLib's expression unchanged; below double-double's own floor (LPP2's 2e-6, 5e-7 and 2e-6, LPP3's 1e-3, 5e-4, 5e-5 and 5e-3) in quad-double; below quad-double's floor (LPP2's 1e-12 each, LPP3's 5e-10, 2e-10, 1e-12 and 5e-8) by the cubic in κ through four quad-double values there; and in QuantLib's double, and so its bits, from the cut up. The check: QuantLib's expressions in Boost's `cpp_bin_float` at 100 digits, and at 250 below the double-double floors [executed at the run], QuantLib's implied volatilities at the cuts, QuantLib's analytic engine, and at short terms QuantLib's Forde expansion.
+
+Facts:
+
+- `AtAndBelowTheCutLpp2sCoefficientsAreTheReferenceValues`
+- `AtAndBelowTheCutLpp3sCoefficientsAreTheReferenceValues`
+- `AtTheCutTheCoefficientsAreContinuous`
+- `AtASmallKappaThePricesMatchTheAnalyticEngine`
+- `AtShortTermsTheCoefficientsAreTheReferenceValues`
+
 ## HestonForwardByDateTests
 
 [`Divergences/HestonForwardByDateTests.cs`](../tests/NanoQL.Tests/Divergences/HestonForwardByDateTests.cs)
@@ -2322,6 +2437,18 @@ Facts:
 - `TheHelpersMaturityRunsFromTheEarlierCurveDate`
 - `TheOptimalAlphasDateFormReadsTheEnginesTime`
 
+## HestonModelTimeZeroTests
+
+[`Divergences/HestonModelTimeZeroTests.cs`](../tests/NanoQL.Tests/Divergences/HestonModelTimeZeroTests.cs)
+
+The Heston analytic engines at the model's time 0, an option expiring on the evaluation date with reference-date events included (the S-hes plan's HR7 (xxxi), under R8). QuantLib's PDF engine window is zero-wide and prices a call at 90 at 0; the time-dependent engine's Gauss-Laguerre integrates sin(φ(x − ln K))/φ, which doesn't decay, and prices it 10.0687; exponential fitting's average variance is 0/0 and it throws "stdDev (-nan(ind)) must be non-negative"; COS's cumulants at t = 0 are rounding noise, so at the forward its bounds test fails and the series prices 1.7e-7 where the intrinsic value is 0. nanoql prices the forward's discounted intrinsic value at the model's time 0 in the PDF, time-dependent, exponential-fitting, COS and expansion engines, before any cumulant or coefficient. The check: QuantLib's COS and expansions off the forward, bit for bit, and its analytic European engine at zero volatility.
+
+Facts:
+
+- `ThePdfTimeDependentAndFittingEnginesPriceTheIntrinsicValue`
+- `OffTheForwardCosAndTheExpansionsAreQuantLibs`
+- `AtTheForwardCosPricesTheIntrinsicZero`
+
 ## HestonPdfTests
 
 [`Divergences/HestonPdfTests.cs`](../tests/NanoQL.Tests/Divergences/HestonPdfTests.cs)
@@ -2334,6 +2461,31 @@ Facts:
 - `TheLogSpotsMarginalIsTheCharacteristicFunctionsDensity`
 - `WhereQuantLibsRangeHoldsTheIntegrandItsValueStands`
 - `WhereTheVariancesDensityIsZeroTheDensityIsZero`
+
+## HestonTermZeroMembersTests
+
+[`Divergences/HestonTermZeroMembersTests.cs`](../tests/NanoQL.Tests/Divergences/HestonTermZeroMembersTests.cs)
+
+The COS engine's members and the LPP expansions at a term of 0 (the S-hes plan's HR7 (xxxii), under R8). QuantLib's cumulants at t = 0 (`coshestonengine.cpp:177-286`) leave rounding residue, c₂ −5.1e-19 and c₃ −2.2e-18 here, and its skew c₃/c₂^{3/2} is NaN; its LPP2 and LPP3 coefficients (`hestonexpansionengine.cpp:128-720`) divide 0 by 0 at a term of 0, and their implied volatility is the 1e-8 floor. nanoql's members at t = 0 are their limits, the cumulants, skew and kurtosis 0, and the expansions' coefficients theirs: the first three Forde, Jacquier and Lee's leading order, √v₀, ρσ/(4√v₀) and (1 − 5ρ²/2)σ²/(24 v₀^{3/2}), LPP3's z₃ ρ(8ρ² − 5)σ³/(96 v₀^{5/2}). The check: QuantLib's Forde expansion at a term of 0, whose variance is the square of that leading order, and QuantLib's z₃ in Boost's 250-digit `cpp_bin_float` at a term of 1e-6 [executed at the run], next to its limit.
+
+Facts:
+
+- `AtTimeZeroTheCosMembersAreZero`
+- `AtATermOfZeroTheExpansionsAreTheirLimits`
+- `AtATermOfOneMillionthLpp3sZ3IsTheReferenceValueNextToItsLimit`
+
+## HestonTinyKappaTests
+
+[`Divergences/HestonTinyKappaTests.cs`](../tests/NanoQL.Tests/Divergences/HestonTinyKappaTests.cs)
+
+The Heston density, the PDF engine and exponential fitting at a tiny κ (the S-hes plan's HR7 (xxv), under R8). QuantLib's PDF engine window 8√(θt + (v₀ − θ)(1 − e^{−κt})/κ) (`analyticpdfhestonengine.cpp:46-48`) and exponential fitting's average variance (`exponentialfittinghestonengine.cpp:252`) lose the (v₀ − θ) term once 1 − e^{−κt} rounds to 0, and `HestonRNDCalculator`'s density, which the PDF engine integrates, throws "Interval contains no more machine number" at every x from κ = 1e-16, where its values agree to six digits from 1e-8 to 1e-14. nanoql takes −expm1(−κt) below κt = 1e-2 in both windows, and raises the density's κ to 1e-12/t where κt is below 1e-12, the density moving by about κt relative there, and its inverse distribution's starting guess takes the same κ, where QuantLib's (1 − e^{−κt})/(tκ) is NaN at κ 0 and the inversion throws (the code review's C2-F1-1). The check: the density at that κ, bit for bit, QuantLib's within its complex functions' last bits, QuantLib's analytic engine, and the distribution at the inverse's quantiles.
+
+Facts:
+
+- `AtATinyKappaThePdfEnginePrices`
+- `BelowTheFloorTheDensityIsQuantLibsAtTheFloor`
+- `ExponentialFittingIsContinuousAsKappaFalls`
+- `BelowTheFloorTheInverseDistributionInverts`
 
 ## HullWhiteForwardProcessSmallReversionTests
 
@@ -3411,6 +3563,16 @@ Facts:
 - `AnExpiredSwapHasNoValuationDate`
 - `PerLegResultsAnEngineDoesNotReturnAreNull`
 
+## RoughHestonTimeFormTests
+
+[`Divergences/RoughHestonTimeFormTests.cs`](../tests/NanoQL.Tests/Divergences/RoughHestonTimeFormTests.cs)
+
+The rough Heston engine's time form of the price (the S-hes plan's HR7 (xii), under R8, the dates class of HR7 (xi)). QuantLib's `priceVanillaPayoff(payoff, Time)` reads both curves at the risk-free curve's time (`analyticroughhestonengine.cpp:594-600`), where its date form reads each by date: on a dividend curve on another day counter the two forms of one maturity price apart. nanoql's time form is on the model's clock, each curve read at the instant the time denotes, so a time and the date it denotes price alike, the date form QuantLib's.
+
+Facts:
+
+- `ATimeAndTheDateItDenotesPriceAlike`
+
 ## RoundingPrecisionRangeTests
 
 [`Divergences/RoundingPrecisionRangeTests.cs`](../tests/NanoQL.Tests/Divergences/RoundingPrecisionRangeTests.cs)
@@ -3733,6 +3895,17 @@ Facts:
 
 - `AStepFromANegativeStateIsHestonsPartialTruncation`
 - `AnEulerPathBelowZeroStaysFinite`
+
+## SquareRootStationaryDensityTests
+
+[`Divergences/SquareRootStationaryDensityTests.cs`](../tests/NanoQL.Tests/Divergences/SquareRootStationaryDensityTests.cs)
+
+The square-root process's stationary density past α ≈ 170 (the S-hes plan's HR7 (xiii), under R8). QuantLib computes β^α·v^{α−1}·e^{−βv−lnΓ(α)} (`squarerootprocessrndcalculator.cpp:71`), whose first factor overflows and the product is NaN from α of about 170 (σ ≤ 0.02 at κ 2, θ 0.04). nanoql computes the same density in logarithms, exp(α ln β + (α − 1) ln v − βv − lnΓ(α)), where the product isn't finite, and QuantLib's product where it is. The check: Boost's gamma density, the stationary law being Gamma(α, θ/α), through the harness (`tools/cxx/src/boost/math/distributions/gamma.cpp`); QuantLib's bits where the product is finite.
+
+Facts:
+
+- `PastTheOverflowTheDensityIsBoostsGammaDensity`
+- `WhereTheProductIsFiniteTheDensityIsQuantLibs`
 
 ## StandardGFunctionTenorTests
 

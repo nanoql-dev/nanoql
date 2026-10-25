@@ -589,6 +589,45 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a formulation outside <see cref="AnalyticPTDHestonEngineComplexLogFormula"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's engine fails "unknown complex log formula" when it prices.</remarks>
+    internal static void Check(AnalyticPTDHestonEngineComplexLogFormula value, string paramName)
+    {
+        if (value is < AnalyticPTDHestonEngineComplexLogFormula.Gatheral or > AnalyticPTDHestonEngineComplexLogFormula.AndersenPiterbarg)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown complex log formula");
+        }
+    }
+
+    /// <summary>Refuses a route outside <see cref="AnalyticRoughHestonEngineApproximation"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's engine fails "unknown approximation: " and the value when it prices.</remarks>
+    internal static void Check(AnalyticRoughHestonEngineApproximation value, string paramName)
+    {
+        if (value is < AnalyticRoughHestonEngineApproximation.AdamsPredictorCorrector or > AnalyticRoughHestonEngineApproximation.Lifted)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown approximation");
+        }
+    }
+
+    /// <summary>Refuses an expansion outside <see cref="HestonExpansionEngineHestonExpansionFormula"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's engine fails "unknown expansion formula" when it prices.</remarks>
+    internal static void Check(HestonExpansionEngineHestonExpansionFormula value, string paramName)
+    {
+        if (value is < HestonExpansionEngineHestonExpansionFormula.LPP2 or > HestonExpansionEngineHestonExpansionFormula.Forde)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown expansion formula");
+        }
+    }
+
     /// <summary>Refuses a conversion type outside <see cref="MoneyConversionType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

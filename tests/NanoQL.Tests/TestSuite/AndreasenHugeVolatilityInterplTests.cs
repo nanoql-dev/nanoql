@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/andreasenhugevolatilityinterpl.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBarrierOptionPricing, which waits for S-hes's HestonBlackVolSurface; testDifferentOptimizers, which waits for S-core's BFGS
+// Partial: testDifferentOptimizers, which waits for S-core's BFGS
 
 using NanoQL.Instruments;
 using NanoQL.Methods;
@@ -310,6 +310,85 @@ public class AndreasenHugeVolatilityInterplTests
                 }
             }
         }
+    }
+
+    [Fact]
+    public void TestBarrierOptionPricing()
+    {
+        // Testing Barrier option pricing with Andreasen-Huge local volatility surface...
+
+        // QuantLib's case dates its curves 4 January 2018 and leaves the evaluation date at the system date, where its
+        // one-year barrier option expired in 2019 and both prices are 0; here the evaluation date is the curves' date,
+        // the case's intent
+        var today = new Date(4, Month.January, 2018);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual365Fixed();
+
+        YieldTermStructure rTS = new FlatForward(today, 0.01, dc);
+        YieldTermStructure qTS = new FlatForward(today, 0.03, dc);
+
+        const double Spot = 100;
+        var hestonModel = new HestonModel(new HestonProcess(rTS, qTS, Spot, 0.04, 2.0, 0.04, 0.4, -0.75));
+
+        BlackVolTermStructure hestonVol = new HestonBlackVolSurface(hestonModel);
+
+        var dupireLocalVolProcess = new GeneralizedBlackScholesProcess(Spot, qTS, rTS, hestonVol);
+
+        double[] strikes = [25, 50, 75, 90, 100, 110, 125, 150, 200, 400];
+        int[] maturityMonths = [1, 3, 6, 9, 12];
+
+        var calibrationSet = new List<(VanillaOption Option, double Volatility)>();
+
+        foreach (double strike in strikes)
+        {
+            foreach (int maturityMonth in maturityMonths)
+            {
+                Date maturityDate = today + new Period(maturityMonth, TimeUnit.Months);
+                double t = dc.YearFraction(today, maturityDate);
+
+                double vol = hestonVol.BlackVol(t, strike);
+
+                double mn = Math.Log(Spot / strike) / Math.Sqrt(t);
+
+                if (Math.Abs(mn) < 3.07 * vol)
+                {
+                    calibrationSet.Add((
+                        new VanillaOption(new PlainVanillaPayoff(OptionType.Call, strike), new EuropeanExercise(maturityDate)),
+                        vol));
+                }
+            }
+        }
+
+        var andreasenHugeVolInterplation = new AndreasenHugeVolatilityInterpl([.. calibrationSet], Spot, rTS, qTS);
+
+        var localVolAdapter = new AndreasenHugeLocalVolAdapter(andreasenHugeVolInterplation);
+
+        var andreasenHugeLocalVolProcess = new GeneralizedBlackScholesProcess(Spot, qTS, rTS, hestonVol, localVolAdapter);
+
+        const double Strike = 120.0;
+        const double Barrier = 80.0;
+        const double Rebate = 0.0;
+        Date maturity = today + new Period(1, TimeUnit.Years);
+        const BarrierType BarrierType = BarrierType.DownOut;
+
+        var barrierOption = new BarrierOption(
+            BarrierType, Barrier, Rebate, new PlainVanillaPayoff(OptionType.Put, Strike), new EuropeanExercise(maturity));
+
+        double dupireNPV = FdBlackScholesBarrierEngine.Calculate(
+            barrierOption, context, dupireLocalVolProcess, default, 50, 100, 0, FdmSchemeDesc.Douglas(), true, 0.2).NPV!.Value;
+
+        double andreasenHugeNPV = FdBlackScholesBarrierEngine.Calculate(
+            barrierOption, context, andreasenHugeLocalVolProcess, default, 200, 400, 0, FdmSchemeDesc.Douglas(), true, 0.25).NPV!.Value;
+
+        const double Tol = 0.15;
+        double diff = Math.Abs(andreasenHugeNPV - dupireNPV);
+
+        Assert.False(
+            diff > Tol,
+            "failed to reproduce barrier prices with Andreasen-Huge local volatility surface"
+            + $"\n    Andreasen-Huge price: {andreasenHugeNPV}\n    Dupire formula price: {dupireNPV}"
+            + $"\n    diff:                 {diff}\n    tolerance:            {Tol}");
+        Assert.True(dupireNPV > 1.0, $"the barrier option prices {dupireNPV}");
     }
 
     [Fact]

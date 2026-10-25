@@ -4,10 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/hestonslvmodel.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSquareRootZeroFlowBC, testTransformedZeroFlowBC, testSquareRootEvolveWithStationaryDensity, testSquareRootLogEvolveWithStationaryDensity, testSquareRootFokkerPlanckFwdEquation, testHestonFokkerPlanckFwdEquation, testHestonFokkerPlanckFwdEquationLogLVLeverage, testLocalVolsvSLVPropDensity, testBarrierPricingViaHestonLocalVol, testMonteCarloVsFdmPricing, testMonteCarloCalibration, testMoustacheGraph, testDiffusionAndDriftSlvProcess, which wait for S-core's Heston stochastic-local-volatility models, processes and forward operators
+// Partial: testSquareRootZeroFlowBC, testTransformedZeroFlowBC, testSquareRootEvolveWithStationaryDensity, testSquareRootLogEvolveWithStationaryDensity, testSquareRootFokkerPlanckFwdEquation, testHestonFokkerPlanckFwdEquation, testHestonFokkerPlanckFwdEquationLogLVLeverage, testLocalVolsvSLVPropDensity, testMonteCarloVsFdmPricing, testMonteCarloCalibration, testMoustacheGraph, testDiffusionAndDriftSlvProcess, which wait for S-core's Heston stochastic-local-volatility models, processes and forward operators
 
 using NanoQL.Instruments;
 using NanoQL.Methods;
+using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
@@ -172,6 +173,87 @@ public class HestonSlvModelTests
                     Math.Abs(expected - calcShifted) > tol,
                     "failed to reproduce european option price with a shifted mesher"
                     + $"\n   strike:     {strikes[i]}\n   calculated: {calcShifted:F8}\n   expected:   {expected:F8}\n   tolerance:  {tol:F8}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestBarrierPricingViaHestonLocalVol()
+    {
+        // Testing calibration via vanilla options...
+
+        DayCounter dc = new ActualActual(ActualActualConvention.ISDA);
+        var todaysDate = new Date(5, Month.November, 2015);
+        var context = new EvaluationContext { EvaluationDate = todaysDate };
+
+        const double S0 = 100;
+        const double R = 0.1;
+        const double Q = 0.025;
+
+        const double Kappa = 2.0;
+        const double Theta = 0.09;
+        const double Rho = -0.75;
+        const double Sigma = 0.8;
+        const double V0 = 0.19;
+
+        YieldTermStructure rTS = new FlatForward(todaysDate, R, dc);
+        YieldTermStructure qTS = new FlatForward(todaysDate, Q, dc);
+
+        var hestonProcess = new HestonProcess(rTS, qTS, S0, V0, Kappa, Theta, Sigma, Rho);
+
+        var hestonModel = new HestonModel(hestonProcess);
+
+        var surf = new HestonBlackVolSurface(hestonModel);
+
+        double[] strikeValues = [50, 75, 100, 125, 150, 200, 400];
+        Period[] maturities =
+        [
+            new(1, TimeUnit.Months), new(2, TimeUnit.Months),
+            new(3, TimeUnit.Months), new(4, TimeUnit.Months),
+            new(5, TimeUnit.Months), new(6, TimeUnit.Months),
+            new(9, TimeUnit.Months), new(1, TimeUnit.Years),
+            new(18, TimeUnit.Months), new(2, TimeUnit.Years),
+            new(3, TimeUnit.Years), new(5, TimeUnit.Years),
+        ];
+
+        // QuantLib also builds a local volatility surface on surf, which the loop doesn't read
+
+        var hestonEngine = new AnalyticHestonEngine(hestonModel, 164);
+
+        foreach (double strike in strikeValues)
+        {
+            foreach (Period maturitie in maturities)
+            {
+                Date exerciseDate = todaysDate + maturitie;
+                double t = dc.YearFraction(todaysDate, exerciseDate);
+
+                double impliedVol = surf.BlackVol(t, strike, true);
+
+                var bsProcess = new GeneralizedBlackScholesProcess(
+                    S0, qTS, rTS, new BlackConstantVol(todaysDate, new NullCalendar(), impliedVol, dc));
+
+                var exercise = new EuropeanExercise(exerciseDate);
+                var payoff = new PlainVanillaPayoff(S0 < strike ? OptionType.Call : OptionType.Put, strike);
+
+                var option = new VanillaOption(payoff, exercise);
+
+                double analyticNPV = AnalyticEuropeanEngine.Calculate(option, context, bsProcess).NPV!.Value;
+
+                double hestonNPV = hestonEngine.Calculate(option, context).NPV!.Value;
+
+                double localVolNPV = FdBlackScholesVanillaEngine.Calculate(
+                    option, context, bsProcess, default, null, 201, 801, 0, FdmSchemeDesc.Douglas(), true).NPV!.Value;
+
+                const double Tol = 1e-3;
+                Assert.False(
+                    Math.Abs(analyticNPV - hestonNPV) > Tol,
+                    "Heston and BS price do not match "
+                    + $"\n  Heston :       {hestonNPV}\n  Black-Scholes: {analyticNPV}\n  diff :   {Math.Abs(analyticNPV - hestonNPV)}");
+
+                Assert.False(
+                    Math.Abs(analyticNPV - localVolNPV) > Tol,
+                    "LocalVol and BS price do not match "
+                    + $"\n  LocalVol :     {localVolNPV}\n  Black-Scholes: {analyticNPV}\n  diff :   {Math.Abs(analyticNPV - localVolNPV)}");
             }
         }
     }
