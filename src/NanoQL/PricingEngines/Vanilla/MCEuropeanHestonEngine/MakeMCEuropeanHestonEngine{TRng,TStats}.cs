@@ -43,7 +43,22 @@ public sealed record MakeMCEuropeanHestonEngine<TRng, TStats>
         Seed = seed;
     }
 
-    private HestonProcess Process { get; init; }
+    /// <summary>Initializes a new instance of the <see cref="MakeMCEuropeanHestonEngine{TRng, TStats}"/> record on a
+    /// Heston stochastic-local volatility process: QuantLib's builder with its template parameter <c>P</c> the SLV
+    /// process.</summary>
+    /// <param name="process">The Heston stochastic-local volatility process.</param>
+    /// <param name="seed">The seed, in [1, 4294967295].</param>
+    /// <exception cref="ArgumentNullException"><paramref name="process"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="seed"/> is outside its range.</exception>
+    public MakeMCEuropeanHestonEngine(HestonSLVProcess process, long seed)
+    {
+        ArgumentNullException.ThrowIfNull(process);
+        Seeds.Check(seed);
+        Process = process;
+        Seed = seed;
+    }
+
+    private StochasticProcess Process { get; init; }
 
     private bool Antithetic { get; init; }
 
@@ -159,12 +174,15 @@ public sealed record MakeMCEuropeanHestonEngine<TRng, TStats>
             throw new NanoQLException("number of steps not given");
         }
 
-        HestonProcess process = Process;
+        StochasticProcess process = Process;
         int? steps = Steps, stepsPerYear = StepsPerYear, samples = Samples, maxSamples = MaxSamples;
         bool antithetic = Antithetic;
         double? tolerance = Tolerance;
         long seed = Seed;
-        return (option, context) => MCEuropeanHestonEngine.Calculate<TRng, TStats>(
-            option, context, process, steps, stepsPerYear, antithetic, samples, tolerance, maxSamples, seed);
+        return process is HestonSLVProcess slvProcess
+            ? (option, context) => MCEuropeanHestonEngine.Calculate<TRng, TStats>(
+                option, context, slvProcess, steps, stepsPerYear, antithetic, samples, tolerance, maxSamples, seed)
+            : (option, context) => MCEuropeanHestonEngine.Calculate<TRng, TStats>(
+                option, context, (HestonProcess)process, steps, stepsPerYear, antithetic, samples, tolerance, maxSamples, seed);
     }
 }

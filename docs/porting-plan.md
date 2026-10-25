@@ -103,6 +103,7 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Experimental/CallableBonds/CallableBondVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(dc, bdc)`, which no QuantLib 1.44 class uses and which waits for its first user.
 - `src/NanoQL/Methods/FiniteDifferences/StepCondition.cs`: `NullCondition`, which no QuantLib 1.44 class or test uses and which waits for its first user.
 - `src/NanoQL/Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs`: `FdmLogBasketInnerValue`, which waits for S-exo with the basket option's payoff.
+- `src/NanoQL/Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGenerator.cs`: `Burley2020SobolBrownianGenerator` and `Burley2020SobolBrownianGeneratorFactory`, which wait for S-mm with `Burley2020SobolRsg`.
 - `src/NanoQL/Numerics/Integrals/FourierIntegration.cs`: the exp-sinh algorithm, which waits for S-core's exp-sinh integrator.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/TermStructures/Credit/DefaultDensityStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the default density, which waits for S-xcr's curves, its only users.
@@ -134,10 +135,10 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/EuropeanOptionTests.cs`: `testFFTEngines`, which waits for S-xeq's `FFTVanillaEngine`.
 - `tests/NanoQL.Tests/TestSuite/FdHestonTests.cs`: `testFdmHestonBarrierVsBlackScholes`, `testFdmHestonBarrier` and `testMethodOfLinesAndCN`, which wait for S-bar's `FdHestonBarrierEngine`.
 - `tests/NanoQL.Tests/TestSuite/FdSabrTests.cs`: `testFdmSabrOp` and `testOosterleeTestCaseIV`, which wait for S-core's Richardson extrapolation and Sobol Brownian bridge sequences.
-- `tests/NanoQL.Tests/TestSuite/FdmLinearOpTests.cs`: `testDerivativeWeightsOnNonUniformGrids`, `testBiCGstab` and `testGMRES`, which wait for S-core; `testFdmHestonHullWhiteOp`, which waits for S-exo; and `testFdmMesherIntegral`, which waits for S-hes.
+- `tests/NanoQL.Tests/TestSuite/FdmLinearOpTests.cs`: `testDerivativeWeightsOnNonUniformGrids`, `testBiCGstab` and `testGMRES`, which wait for S-core; and `testFdmHestonHullWhiteOp`, which waits for S-exo.
 - `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testMomentBasedGaussianPolynomial` and `testGaussLaguerreCosinePolynomial`, which wait for S-core; `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/HestonModelTests.cs`: `testFdBarrierVsCached` (S-bar), and `testAllIntegrationMethods` and `testCosHestonCumulants` (S-core).
-- `tests/NanoQL.Tests/TestSuite/HestonSlvModelTests.cs`: every case but `testBlackScholesFokkerPlanckFwdEquation`, `testBlackScholesFokkerPlanckFwdEquationLocalVol` and `testBarrierPricingViaHestonLocalVol`, which wait for S-core's Heston stochastic-local-volatility models, processes and forward operators.
+- `tests/NanoQL.Tests/TestSuite/HestonSlvModelTests.cs`: `testMoustacheGraph`, which waits for S-bar's `FdHestonDoubleBarrierEngine` and `AnalyticDoubleBarrierBinaryEngine`, and `testDiffusionAndDriftSlvProcess`, which waits for S-core's Sobol Brownian bridge sequences.
 - `tests/NanoQL.Tests/TestSuite/HybridHestonHullWhiteProcessTests.cs`: `testZeroBondPricing`, which waits for S-core's Sobol Brownian bridge sequences.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (S-core); and `testPiecewiseIntegral` (S-xrt).
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (multi-dimensional splines, no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace).

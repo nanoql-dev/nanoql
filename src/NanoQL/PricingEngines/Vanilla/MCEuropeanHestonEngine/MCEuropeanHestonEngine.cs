@@ -19,8 +19,8 @@ namespace NanoQL.PricingEngines;
 /// A static class over <see cref="MCVanillaEngine{TMc, TPath, TStats}"/> on multi-variate paths (the S-hes plan's
 /// HR2 (iv), the S-van plan's VD6 form): <c>Calculate</c> builds the simulation for the call and returns the samples'
 /// mean as the NPV and, where the random-number traits allow one, their error estimate. The process is a
-/// <see cref="HestonProcess"/>, a <see cref="BatesProcess"/> among them, whose jumps the paths then carry, QuantLib's
-/// template parameter <c>P</c>; the paths step in place, allocating nothing per sample after the first (HR2 (i),
+/// <see cref="HestonProcess"/>, a <see cref="BatesProcess"/> among them, whose jumps the paths then carry, or a
+/// <see cref="HestonSLVProcess"/>, QuantLib's template parameter <c>P</c>; the paths step in place, allocating nothing per sample after the first (HR2 (i),
 /// (iii)). The payoff must be plain vanilla.
 /// </para>
 /// <para>
@@ -61,6 +61,63 @@ public static class MCEuropeanHestonEngine
         VanillaOption option,
         EvaluationContext context,
         HestonProcess process,
+        int? timeSteps,
+        int? timeStepsPerYear,
+        bool antitheticVariate,
+        int? requiredSamples,
+        double? requiredTolerance,
+        int? maxSamples,
+        long seed)
+        where TRng : IRngTraits
+        where TStats : IStatistics, new()
+    {
+        ArgumentNullException.ThrowIfNull(option);
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(process);
+        TermStructure clock = process.ModelClock();
+        return Price<TRng, TStats>(
+            option,
+            context,
+            process.OnClock(clock),
+            process.RiskFreeRate,
+            clock,
+            timeSteps,
+            timeStepsPerYear,
+            antitheticVariate,
+            requiredSamples,
+            requiredTolerance,
+            maxSamples,
+            seed);
+    }
+
+    /// <summary>Prices a European vanilla option by Monte Carlo under a Heston stochastic-local volatility process:
+    /// QuantLib's engine with its template parameter <c>P</c> the SLV process.</summary>
+    /// <typeparam name="TRng">The random-number traits.</typeparam>
+    /// <typeparam name="TStats">The statistics accumulator.</typeparam>
+    /// <param name="option">The option.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="process">The Heston stochastic-local volatility process.</param>
+    /// <param name="timeSteps">The number of time steps, or <see langword="null"/> for steps per year.</param>
+    /// <param name="timeStepsPerYear">The number of time steps per year, or <see langword="null"/> for a number of steps.</param>
+    /// <param name="antitheticVariate">Whether antithetic variates are used.</param>
+    /// <param name="requiredSamples">The number of samples, or <see langword="null"/>.</param>
+    /// <param name="requiredTolerance">The absolute tolerance, or <see langword="null"/>; it takes precedence.</param>
+    /// <param name="maxSamples">The most samples for a tolerance, or <see langword="null"/> for no limit.</param>
+    /// <param name="seed">The seed, in [1, 4294967295].</param>
+    /// <returns>The option's results, the NPV and the error estimate; the expired results when it has expired.</returns>
+    /// <exception cref="ArgumentNullException">The option, the context or the process is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">
+    /// The time steps are given neither or both ways, or aren't positive; or the strike is negative.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">A number of samples is negative, or the seed is outside its range.</exception>
+    /// <exception cref="NanoQLException">
+    /// The payoff isn't plain vanilla, neither a tolerance nor a number of samples is given, the samples can't reach the
+    /// tolerance, or a step refuses.
+    /// </exception>
+    public static OneAssetOptionResults Calculate<TRng, TStats>(
+        VanillaOption option,
+        EvaluationContext context,
+        HestonSLVProcess process,
         int? timeSteps,
         int? timeStepsPerYear,
         bool antitheticVariate,

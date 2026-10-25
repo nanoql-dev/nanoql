@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/fdmlinearop.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testDerivativeWeightsOnNonUniformGrids, testBiCGstab, testGMRES (S-core); testFdmHestonHullWhiteOp (S-exo); testFdmMesherIntegral (S-hes)
+// Partial: testDerivativeWeightsOnNonUniformGrids, testBiCGstab, testGMRES (S-core); testFdmHestonHullWhiteOp (S-exo)
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -852,6 +852,53 @@ public class FdmLinearOpTests
                 $"Error calculating the Gamma of the digital option\n rel. tolerance:  {relTol}\n expected:        "
                 + $"{expectedGamma}\n calculated:      {calculatedGamma}");
         }
+    }
+
+    [Fact]
+    public void TestFdmMesherIntegral()
+    {
+        // Testing integrals over meshers functions...
+
+        var mesher = new FdmMesherComposite(
+            new Concentrating1dMesher(-1, 1.6, 21, (0, 0.1)),
+            new Concentrating1dMesher(-3, 4, 11, (1, 0.01)),
+            new Concentrating1dMesher(-2, 1, 5, (0.5, 0.1)));
+
+        var f = new Vector(mesher.Layout.Size);
+        FdmLinearOpIterator iter = mesher.Layout.Begin();
+        for (int k = 0; k < mesher.Layout.Size; ++k, iter.Increment())
+        {
+            double x = mesher.Location(iter, 0);
+            double y = mesher.Location(iter, 1);
+            double z = mesher.Location(iter, 2);
+
+            f[iter.Index] = (x * x) + (3 * y * y) - (3 * z * z)
+                + (2 * x * y) - (x * z) - (3 * y * z)
+                + (4 * x) - y - (3 * z) + 2;
+        }
+
+        const double tol = 1e-12;
+
+        // Simpson's rule has to be exact here, Mathematica code gives
+        // Integrate[x*x+3*y*y-3*z*z+2*x*y-x*z-3*y*z+4*x-y-3*z+2,
+        //           {x, -1, 16/10}, {y, -3, 4}, {z, -2, 1}]
+        const double expectedSimpson = 876.512;
+        double calculatedSimpson = new FdmMesherIntegral(
+            mesher, (x, y) => DiscreteSimpsonIntegral.Integrate(x.AsSpan(), y.AsSpan())).Integrate(f);
+
+        Assert.False(
+            Math.Abs(calculatedSimpson - expectedSimpson) > tol * expectedSimpson,
+            "discrete mesher integration using Simpson's rule failed: "
+            + $"\n    calculated: {calculatedSimpson:G16}\n    expected:   {expectedSimpson:G16}");
+
+        const double expectedTrapezoid = 917.0148209153263;
+        double calculatedTrapezoid = new FdmMesherIntegral(
+            mesher, (x, y) => DiscreteTrapezoidIntegral.Integrate(x.AsSpan(), y.AsSpan())).Integrate(f);
+
+        Assert.False(
+            Math.Abs(calculatedTrapezoid - expectedTrapezoid) > tol * expectedTrapezoid,
+            "discrete mesher integration using Trapezoid rule failed: "
+            + $"\n    calculated: {calculatedTrapezoid:G16}\n    expected:   {expectedTrapezoid:G16}");
     }
 
     [Fact]

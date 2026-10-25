@@ -2546,6 +2546,16 @@ Facts:
 - `TheHelpersMarketValueReadsTheDividendCurveByDate`
 - `OptimalAlphasDateFormReadsTheForwardByDate`
 
+## HestonGreensFctSemiAnalyticalTests
+
+[`Divergences/HestonGreensFctSemiAnalyticalTests.cs`](../tests/NanoQL.Tests/Divergences/HestonGreensFctSemiAnalyticalTests.cs)
+
+`FdmHestonGreensFct`'s semi-analytical algorithm reads `HestonProcess.Pdf`, S-van's fixed density (the S-van plan's §2.8, `Divergences/HestonPdfTests.cs`), where QuantLib 1.44's returns NaN at every point: on the equity Heston process at 0.02 years, the plain and log transformations, QuantLib's Green's function is NaN at each of the nine points below (the harness, `FdmHestonGreensFct::get`); nanoql's is the density at each node, times v under the log transformation, positive and finite.
+
+Facts:
+
+- `TheDensityIsTheProcesssAtEachNode`
+
 ## HestonHullWhiteMismatchedTimesTests
 
 [`Divergences/HestonHullWhiteMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/HestonHullWhiteMismatchedTimesTests.cs)
@@ -2594,6 +2604,52 @@ Facts:
 - `TheLogSpotsMarginalIsTheCharacteristicFunctionsDensity`
 - `WhereQuantLibsRangeHoldsTheIntegrandItsValueStands`
 - `WhereTheVariancesDensityIsZeroTheDensityIsZero`
+
+## HestonSlvFdmMandatoryDatesTests
+
+[`Divergences/HestonSlvFdmMandatoryDatesTests.cs`](../tests/NanoQL.Tests/Divergences/HestonSlvFdmMandatoryDatesTests.cs)
+
+The finite-difference SLV model's mandatory dates (the S-hes plan's HR7 (xx)). QuantLib appends their times to its exponential grid unsorted and builds the leverage surface on that list (`hestonslvfdmmodel.cpp:325-330`, `:412`): a mandatory date inside the period refuses ("dates must be sorted unique!"), one at the end date ("need strikes for every time step"), and one on the grid's own time ("dates must be sorted unique!"), each on QuantLib-SWIG 1.44. nanoql runs the surface and the loop on the grid's times, sorted and made unique: a date at the end or on the grid's own time is QuantLib's calibration without it, bit for bit, and one inside the period prices the local volatility's options as the calibration without it does, QuantLib's own measure of a calibration.
+
+Facts:
+
+- `AMandatoryDateAtTheEndIsTheCalibrationWithoutIt`
+- `AMandatoryDateOnTheGridsOwnTimeIsTheCalibrationWithoutIt`
+- `AMandatoryDateInsideThePeriodCalibratesToTheLocalVolatility`
+
+## HestonSlvFdmMixingGreensTests
+
+[`Divergences/HestonSlvFdmMixingGreensTests.cs`](../tests/NanoQL.Tests/Divergences/HestonSlvFdmMixingGreensTests.cs)
+
+The finite-difference SLV model's first density is the Green's function of the process its forward operator evolves, the variance's volatility the mixing factor times σ (D4-1 of the S-hes run record, under R8). QuantLib builds its operator and variance mesher on the mixed σ and its Green's function on the unmixed σ (`hestonslvfdmmodel.cpp:297`, `:346`, `:415`, `:418`), a density the operator's process doesn't have. The independent check is the mixed process's own density (`HestonProcess.Pdf`, S-van's): against it the Gaussian algorithm on the mixed σ is within 5% in L1 at the first step, on the unmixed σ 76% off. At a mixing factor of 1 the density is QuantLib's; no QuantLib case runs the model with another.
+
+Facts:
+
+- `TheFirstDensityIsTheMixedProcesssGreensFunction`
+- `TheMixedSigmasDensityIsTheMixedProcesssAndTheUnmixedIsnt`
+
+## HestonSlvMcLocalVolStepEndTests
+
+[`Divergences/HestonSlvMcLocalVolStepEndTests.cs`](../tests/NanoQL.Tests/Divergences/HestonSlvMcLocalVolStepEndTests.cs)
+
+The Monte Carlo SLV calibration reads the local volatility at each step's end, where QuantLib 1.44 reads it at the step's start (`hestonslvmcmodel.cpp:181`), so a time-dependent local volatility's leverage lags it by a step; QuantLib's master takes the step's end (#2860, the S-hes plan's HR8 (i); its case is `TestSuite.HestonSlvModelTests.TestMonteCarloCalibrationTimeDependentLocalVol`). On that case's market, at the grid's third time, QuantLib 1.44's leverage is the second time's local volatility over √v₀ (QuantLib-SWIG 1.44), nanoql's the third's.
+
+Facts:
+
+- `TheLeverageFollowsTheLocalVolatilityAtTheStepsEnd`
+
+## HestonSlvMismatchedTimesTests
+
+[`Divergences/HestonSlvMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/HestonSlvMismatchedTimesTests.cs)
+
+The stochastic-local volatility models and the Heston Green's function on structures counted differently (the S-hes plan's HR7 (xxi), the mismatched-dates class of master Revision 58). QuantLib's models run their time grids from the risk-free curve's reference date and read the dividend curve and the local volatility at the risk-free curve's times (`hestonslvmcmodel.cpp:47-55`, `hestonslvfdmmodel.cpp:300-330`), its Green's function the rates likewise. nanoql's run on `FdmHestonOp.Clock`, each structure read at the instants its times denote, a local volatility on another clock read through an adapter that extrapolates where the local volatility does. QuantLib's check: its models on the market restated on one clock (r 4% on Act/360, q 2%·360/365 on Act/360), which nanoql's on the original market (q 2% on Act/365) reproduce [executed on the wheel and the harness: `scratchpad\c4\oracle_c4.py`]; the finite-difference calibration within its own spread under one-ulp moves of its inputs (3.2e-9 measured, the S-hes run record's C4 entry).
+
+Facts:
+
+- `TheMonteCarloModelReadsTheDividendCurveAtItsOwnTimes`
+- `TheFiniteDifferenceModelReadsTheDividendCurveAtItsOwnTimes`
+- `TheGreensFunctionReadsTheRatesOnTheClock`
+- `ALocalVolatilityOnAnotherClockExtrapolatesWhereItDoes`
 
 ## HestonTermZeroMembersTests
 

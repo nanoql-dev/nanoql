@@ -161,6 +161,10 @@ public class HestonProcess : StochasticProcess
         return origin == riskFreeRate.ReferenceDate ? riskFreeRate : new FlatForward(origin, 0.0, riskFreeRate.DayCounter);
     }
 
+    // The structure whose times the process's are: the engine's clock on a copy OnClock made, the risk-free curve
+    // otherwise.
+    internal TermStructure TimeClock => clock ?? riskFreeRate;
+
     // The process on an engine's clock (the S-van plan's VR1 (v) form; the S-hes plan's HR7 (vi)): a copy, of the same
     // type, whose times, Time(date)'s among them, are the clock's, and whose curves are read at the instants those times
     // denote, each accruing nothing before its own reference date (TermStructure.AccrualTime); the process itself where
@@ -722,7 +726,7 @@ public class HestonProcess : StochasticProcess
 
     // ForwardDrift's value without QuantLib's rate objects (YieldTermStructure.ContinuousForwardRate, the same
     // arithmetic), for the in-place step
-    private double ForwardDriftInPlace(double t0, double dt)
+    internal double ForwardDriftInPlace(double t0, double dt)
     {
         double t1 = t0 + dt;
         double r = clock is not null
@@ -737,7 +741,7 @@ public class HestonProcess : StochasticProcess
     }
 
     // r over [t1, t2]: QuantLib's read, or on the Monte Carlo engine's clock at the instants its times denote
-    private double RiskFreeForwardRate(double t1, double t2) =>
+    internal double RiskFreeForwardRate(double t1, double t2) =>
         clock is not null
             ? riskFreeRate.ContinuousForwardRateAt(clock, t1, t2)
             : riskFreeRate.ForwardRate(t1, t2, Compounding.Continuous).Rate;
@@ -746,7 +750,7 @@ public class HestonProcess : StochasticProcess
     // otherwise at the instants they denote, nothing accruing before the curve's reference date (the user's rulings of
     // 2026-10-21 on the S-eq plan, C4-O2 and C4R2-O2; TermStructure.AccrualTime); on the Monte Carlo engine's clock at
     // the instants its times denote
-    private double DividendRate(double t1, double t2) =>
+    internal double DividendRate(double t1, double t2) =>
         clock is not null
             ? dividendYield.ContinuousForwardRateAt(clock, t1, t2)
             : dividendYield.SharesTimes(riskFreeRate)
