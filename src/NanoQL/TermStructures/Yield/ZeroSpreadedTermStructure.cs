@@ -6,6 +6,7 @@
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
 using NanoQL.Time;
+using CultureInfo = System.Globalization.CultureInfo;
 
 namespace NanoQL.TermStructures;
 
@@ -72,10 +73,61 @@ public sealed class ZeroSpreadedTermStructure : ZeroYieldStructure
     /// <exception cref="ArgumentException">The compounding is compounded with no frequency or <see cref="Frequency.Once"/>.</exception>
     protected override double ZeroYieldImpl(double t)
     {
+        if (comp == Compounding.Continuous)
+        {
+            return ContinuousZeroYield(t);
+        }
+
         InterestRate zeroRate = originalCurve.ZeroRate(t, comp, freq, true);
         var spreadedRate = new InterestRate(
             zeroRate.Rate + spread, zeroRate.DayCounter, zeroRate.Compounding, zeroRate.Frequency);
         return spreadedRate.EquivalentRate(Compounding.Continuous, Frequency.NoFrequency, t).Rate;
+    }
+
+    // The spreaded zero yield for a continuously compounded spread, by the InterestRate route's arithmetic and checks
+    // without building the rate objects, so a finite-difference step reading the curve allocates nothing (the S-hes
+    // plan's HD8, FdmBatesOp's spreaded dividend curve): ZeroRate(t, Continuous)'s log(1/D(t))/t, the time 1e-4 at
+    // t = 0, plus the spread, then EquivalentRate(Continuous)'s log(exp(r·t))/t.
+    private double ContinuousZeroYield(double t)
+    {
+        const double Dt = 0.0001;
+        double tz = t == 0.0 ? Dt : t;
+        double zero = ImpliedContinuous(1.0 / originalCurve.Discount(tz, true), tz);
+        double rate = zero + spread;
+        if (!(t >= 0.0))
+        {
+            throw new ArgumentException(
+                $"negative time ({t.ToString(CultureInfo.InvariantCulture)}) not allowed", nameof(t));
+        }
+
+        return ImpliedContinuous(Math.Exp(rate * t), t);
+    }
+
+    // InterestRate.ImpliedRate's continuous branch, with its checks.
+    private static double ImpliedContinuous(double compound, double t)
+    {
+        if (!(compound > 0.0))
+        {
+            throw new ArgumentException("positive compound factor required", nameof(compound));
+        }
+
+        if (compound == 1.0)
+        {
+            if (!(t >= 0.0))
+            {
+                throw new ArgumentException(
+                    $"non negative time ({t.ToString(CultureInfo.InvariantCulture)}) required", nameof(t));
+            }
+
+            return 0.0;
+        }
+
+        if (!(t > 0.0))
+        {
+            throw new ArgumentException($"positive time ({t.ToString(CultureInfo.InvariantCulture)}) required", nameof(t));
+        }
+
+        return Math.Log(compound) / t;
     }
 
     // The original, refused when null before the base constructor reads it.

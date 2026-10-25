@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/hestonmodel.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testDAXCalibration, testKahlJaeckelCase, testAnalyticPiecewiseTimeDependent, testDAXCalibrationOfTimeDependentModel, testAlanLewisReferencePrices, testExpansionOnAlanLewisReference, testExpansionOnFordeReference, testCosHestonEngine, testCosHestonEngineTruncation, testCharacteristicFct, testAndersenPiterbargPricing, testPiecewiseTimeDependentChFvsHestonChF, testPiecewiseTimeDependentComparison, testPiecewiseTimeDependentChFAsymtotic, testSmallSigmaExpansion4ExpFitting, testExponentialFitting4StrikesAndMaturities, testAsymptoticControlVariate, testOptimalAlphaKmin and testAnalyticPDFHestonEngine, which wait for S-hes's COS, expansion, exponential-fitting, PDF and time-dependent Heston engines; testAnalyticVsBlack, testFdVanillaVsCached, testFdVanillaWithDividendsVsCached, testFdAmerican and testMultipleStrikesEngine, which wait for S-hes's FdHestonVanillaEngine; testMcVsCached, which waits for S-hes's MCEuropeanHestonEngine; testFdBarrierVsCached, which waits for S-bar's FdHestonBarrierEngine; testAllIntegrationMethods and testCosHestonCumulants, which wait for S-core's exp-sinh integral and numerical differentiation; testAndersenPiterbargControlVariateIntegrand, which waits for S-exo's MCVarianceSwapEngine; testLocalVolFromHestonModel and testHestonBlackVolSurfaceAtmLevel, which wait for S-hes's HestonBlackVolSurface
+// Partial: testDAXCalibration, testKahlJaeckelCase, testAnalyticPiecewiseTimeDependent, testDAXCalibrationOfTimeDependentModel, testAlanLewisReferencePrices, testExpansionOnAlanLewisReference, testExpansionOnFordeReference, testCosHestonEngine, testCosHestonEngineTruncation, testCharacteristicFct, testAndersenPiterbargPricing, testPiecewiseTimeDependentChFvsHestonChF, testPiecewiseTimeDependentComparison, testPiecewiseTimeDependentChFAsymtotic, testSmallSigmaExpansion4ExpFitting, testExponentialFitting4StrikesAndMaturities, testAsymptoticControlVariate, testOptimalAlphaKmin and testAnalyticPDFHestonEngine, which wait for S-hes's COS, expansion, exponential-fitting, PDF and time-dependent Heston engines; testFdBarrierVsCached, which waits for S-bar's FdHestonBarrierEngine; testAllIntegrationMethods and testCosHestonCumulants, which wait for S-core's exp-sinh integral and numerical differentiation; testAndersenPiterbargControlVariateIntegrand, which waits for S-exo's MCVarianceSwapEngine; testLocalVolFromHestonModel and testHestonBlackVolSurfaceAtmLevel, which wait for S-hes's HestonBlackVolSurface
 
 using System.Numerics;
 using NanoQL.Instruments;
@@ -97,6 +97,53 @@ public class HestonModelTests
     }
 
     [Fact]
+    public void TestAnalyticVsBlack()
+    {
+        // Testing analytic Heston engine against Black formula...
+        Date settlementDate = Date.TodaysDate();
+        var context = new EvaluationContext { EvaluationDate = settlementDate };
+
+        DayCounter dayCounter = new ActualActual(ActualActualConvention.ISDA);
+        Date exerciseDate = settlementDate + new Period(6, TimeUnit.Months);
+
+        var payoff = new PlainVanillaPayoff(OptionType.Put, 30);
+        var exercise = new EuropeanExercise(exerciseDate);
+
+        YieldTermStructure riskFreeTS = FlatRate(0.1, dayCounter, context);
+        YieldTermStructure dividendTS = FlatRate(0.04, dayCounter, context);
+
+        Real s0 = 32.0;
+
+        const Real v0 = 0.05;
+        const Real kappa = 5.0;
+        const Real theta = 0.05;
+        const Real sigma = 1.0e-4;
+        const Real rho = 0.0;
+
+        var process = new HestonProcess(riskFreeTS, dividendTS, s0, v0, kappa, theta, sigma, rho);
+
+        var option = new VanillaOption(payoff, exercise);
+        Real calculated = AnalyticHestonEngine.Calculate(option, context, new HestonModel(process), 144).NPV!.Value;
+
+        Real yearFraction = dayCounter.YearFraction(settlementDate, exerciseDate);
+        Real forwardPrice = 32 * Math.Exp((0.1 - 0.04) * yearFraction);
+        Real expected = BlackFormulaFunctions.BlackFormula(
+            payoff.OptionType, payoff.Strike, forwardPrice, Math.Sqrt(0.05 * yearFraction)) * Math.Exp(-0.1 * yearFraction);
+        Real error = Math.Abs(calculated - expected);
+        Real tolerance = 2.0e-7;
+        Assert.False(
+            error > tolerance,
+            $"failed to reproduce Black price with AnalyticHestonEngine\n    calculated: {calculated}\n    expected:   {expected}\n    error:      {error:E}");
+
+        calculated = FdHestonVanillaEngine.Calculate(option, context, new HestonModel(process), 200, 200, 100).NPV!.Value;
+        error = Math.Abs(calculated - expected);
+        tolerance = 1.0e-3;
+        Assert.False(
+            error > tolerance,
+            $"failed to reproduce Black price with FdHestonVanillaEngine\n    calculated: {calculated}\n    expected:   {expected}\n    error:      {error:E}");
+    }
+
+    [Fact]
     public void TestAnalyticVsCached()
     {
         // Testing analytic Heston engine against cached values...
@@ -172,6 +219,178 @@ public class HestonModelTests
                 Math.Abs(interpolated - expected2[i]) > 100 * tolerance,
                 $"Failed to reproduce cached analytic prices:\n    calculated: {interpolated}\n    expected:   {expected2[i]}");
         }
+    }
+
+    [Fact]
+    public void TestMcVsCached()
+    {
+        // Testing Monte Carlo Heston engine against cached values...
+        var settlementDate = new Date(27, Month.December, 2004);
+        var context = new EvaluationContext { EvaluationDate = settlementDate };
+
+        DayCounter dayCounter = new ActualActual(ActualActualConvention.ISDA);
+        var exerciseDate = new Date(28, Month.March, 2005);
+
+        var payoff = new PlainVanillaPayoff(OptionType.Put, 1.05);
+        var exercise = new EuropeanExercise(exerciseDate);
+
+        YieldTermStructure riskFreeTS = FlatRate(0.7, dayCounter, context);
+        YieldTermStructure dividendTS = FlatRate(0.4, dayCounter, context);
+
+        Real s0 = 1.05;
+
+        var process = new HestonProcess(
+            riskFreeTS, dividendTS, s0, 0.3, 1.16, 0.2, 0.8, 0.8, HestonProcessDiscretization.QuadraticExponentialMartingale);
+
+        var option = new VanillaOption(payoff, exercise);
+
+        Func<VanillaOption, EvaluationContext, OneAssetOptionResults> engine =
+            new MakeMCEuropeanHestonEngine<PseudoRandom, GeneralStatistics>(process, 1234)
+                .WithStepsPerYear(11)
+                .WithAntitheticVariate()
+                .WithSamples(50000)
+                .ToEngine();
+
+        OneAssetOptionResults results = engine(option, context);
+
+        Real expected = 0.0632851308977151;
+        Real calculated = results.NPV!.Value;
+        Real errorEstimate = results.ErrorEstimate!.Value;
+        Real tolerance = 7.5e-4;
+
+        Assert.False(
+            Math.Abs(calculated - expected) > 2.34 * errorEstimate,
+            $"Failed to reproduce cached price\n    calculated: {calculated}\n    expected:   {expected} +/- {errorEstimate}");
+
+        Assert.False(
+            errorEstimate > tolerance,
+            $"failed to reproduce error estimate\n    calculated: {errorEstimate}\n    expected:   {tolerance}");
+    }
+
+    [Fact]
+    public void TestFdVanillaVsCached()
+    {
+        // Testing FD vanilla Heston engine against cached values...
+        var settlementDate = new Date(27, Month.December, 2004);
+        var context = new EvaluationContext { EvaluationDate = settlementDate };
+
+        DayCounter dayCounter = new ActualActual(ActualActualConvention.ISDA);
+        var exerciseDate = new Date(28, Month.March, 2005);
+
+        var payoff = new PlainVanillaPayoff(OptionType.Put, 1.05);
+        var exercise = new EuropeanExercise(exerciseDate);
+
+        YieldTermStructure riskFreeTS = FlatRate(0.7, dayCounter, context);
+        YieldTermStructure dividendTS = FlatRate(0.4, dayCounter, context);
+
+        Real s0 = 1.05;
+
+        var option = new VanillaOption(payoff, exercise);
+
+        var process = new HestonProcess(riskFreeTS, dividendTS, s0, 0.3, 1.16, 0.2, 0.8, 0.8);
+
+        Func<VanillaOption, EvaluationContext, OneAssetOptionResults> engine =
+            new MakeFdHestonVanillaEngine(new HestonModel(process))
+                .WithTGrid(100)
+                .WithXGrid(200)
+                .WithVGrid(100)
+                .ToEngine();
+
+        Real expected = 0.06325;
+        Real calculated = engine(option, context).NPV!.Value;
+        Real error = Math.Abs(calculated - expected);
+        Real tolerance = 1.0e-4;
+
+        Assert.False(
+            error > tolerance,
+            $"failed to reproduce cached price with FD engine\n    calculated: {calculated}\n    expected:   {expected}\n    error:      {error:E}");
+    }
+
+    [Fact]
+    public void TestFdVanillaWithDividendsVsCached()
+    {
+        // Testing FD vanilla Heston engine for discrete dividends...
+        var settlementDate = new Date(27, Month.December, 2004);
+        var context = new EvaluationContext { EvaluationDate = settlementDate };
+
+        DayCounter dayCounter = new ActualActual(ActualActualConvention.ISDA);
+
+        var payoff = new PlainVanillaPayoff(OptionType.Call, 95.0);
+
+        Real s0 = 100.0;
+        YieldTermStructure riskFreeTS = FlatRate(0.05, dayCounter, context);
+        YieldTermStructure dividendTS = FlatRate(0.0, dayCounter, context);
+
+        var exerciseDate = new Date(28, Month.March, 2006);
+        var exercise = new EuropeanExercise(exerciseDate);
+
+        var dividendDates = new List<Date>();
+        var dividends = new List<Real>();
+        for (Date d = settlementDate + new Period(3, TimeUnit.Months);
+             d < exercise.LastDate();
+             d += new Period(6, TimeUnit.Months))
+        {
+            dividendDates.Add(d);
+            dividends.Add(1.0);
+        }
+
+        var process = new HestonProcess(riskFreeTS, dividendTS, s0, 0.04, 1.0, 0.04, 0.001, 0.0);
+
+        var option = new VanillaOption(payoff, exercise);
+        Func<VanillaOption, EvaluationContext, OneAssetOptionResults> engine =
+            new MakeFdHestonVanillaEngine(new HestonModel(process))
+                .WithCashDividends(dividendDates, dividends)
+                .WithTGrid(200)
+                .WithXGrid(400)
+                .WithVGrid(100)
+                .ToEngine();
+
+        Real calculated = engine(option, context).NPV!.Value;
+
+        // Value calculated with an independent FD framework, validated with
+        // an independent MC framework
+        Real expected = 12.946;
+        Real error = Math.Abs(calculated - expected);
+        Real tolerance = 5.0e-3;
+
+        Assert.False(
+            error > tolerance,
+            $"failed to reproduce discrete dividend price with FD engine\n    calculated: {calculated}\n    expected:   {expected}\n    error:      {error:E}");
+    }
+
+    [Fact]
+    public void TestFdAmerican()
+    {
+        // Testing FD vanilla Heston engine for american exercise...
+        var settlementDate = new Date(27, Month.December, 2004);
+        var context = new EvaluationContext { EvaluationDate = settlementDate };
+
+        DayCounter dayCounter = new ActualActual(ActualActualConvention.ISDA);
+
+        Real s0 = 100.0;
+        YieldTermStructure riskFreeTS = FlatRate(0.05, dayCounter, context);
+        YieldTermStructure dividendTS = FlatRate(0.03, dayCounter, context);
+        var process = new HestonProcess(riskFreeTS, dividendTS, s0, 0.04, 1.0, 0.04, 0.001, 0.0);
+        var payoff = new PlainVanillaPayoff(OptionType.Put, 95.0);
+        var exerciseDate = new Date(28, Month.March, 2006);
+        var exercise = new AmericanExercise(settlementDate, exerciseDate);
+        var option = new VanillaOption(payoff, exercise);
+        Real calculated = new MakeFdHestonVanillaEngine(new HestonModel(process))
+            .WithTGrid(200)
+            .WithXGrid(400)
+            .WithVGrid(100)
+            .ToEngine()(option, context).NPV!.Value;
+
+        BlackVolTermStructure volTS = new BlackConstantVol(settlementDate, new NullCalendar(), 0.2, dayCounter);
+        var refProcess = new BlackScholesMertonProcess(s0, dividendTS, riskFreeTS, volTS);
+        Real expected = FdBlackScholesVanillaEngine.Calculate(option, context, refProcess, [], null, 200, 400).NPV!.Value;
+
+        Real error = Math.Abs(calculated - expected);
+        Real tolerance = 1.0e-3;
+
+        Assert.False(
+            error > tolerance,
+            $"failed to reproduce american option price with FD engine\n    calculated: {calculated}\n    expected:   {expected}\n    error:      {error:E}");
     }
 
     [Fact]
@@ -265,6 +484,67 @@ public class HestonModelTests
             Assert.False(
                 maxDiff > tr,
                 $"Failed to reproduce Heston pricing values within given tolerance\n    maxDifference: {maxDiff}\n    tolerance:     {tr}");
+        }
+    }
+
+    [Fact]
+    public void TestMultipleStrikesEngine()
+    {
+        // Testing multiple-strikes FD Heston engine...
+        var settlementDate = new Date(27, Month.December, 2004);
+        var context = new EvaluationContext { EvaluationDate = settlementDate };
+
+        DayCounter dayCounter = new ActualActual(ActualActualConvention.ISDA);
+        var exerciseDate = new Date(28, Month.March, 2006);
+
+        var exercise = new EuropeanExercise(exerciseDate);
+
+        YieldTermStructure riskFreeTS = FlatRate(0.06, dayCounter, context);
+        YieldTermStructure dividendTS = FlatRate(0.02, dayCounter, context);
+
+        Real s0 = 1.05;
+
+        var process = new HestonProcess(riskFreeTS, dividendTS, s0, 0.16, 2.5, 0.09, 0.8, -0.8);
+        var model = new HestonModel(process);
+
+        Real[] strikes = [1.0, 0.5, 0.75, 1.5, 2.0];
+
+        // QuantLib's multiStrikeEngine, its cache filled by the first strike's option: CalculateStrikes on it (HR4 (ii))
+        var first = new VanillaOption(new PlainVanillaPayoff(OptionType.Put, strikes[0]), exercise);
+        System.Collections.Immutable.ImmutableArray<OneAssetOptionResults> multiStrike =
+            FdHestonVanillaEngine.CalculateStrikes(first, strikes, context, model, 20, 400, 50);
+
+        Real relTol = 5e-3;
+        for (int i = 0; i < strikes.Length; ++i)
+        {
+            Real strike = strikes[i];
+            var payoff = new PlainVanillaPayoff(OptionType.Put, strike);
+
+            var aOption = new VanillaOption(payoff, exercise);
+
+            Real npvCalculated = multiStrike[i].NPV!.Value;
+            Real deltaCalculated = multiStrike[i].Delta!.Value;
+            Real gammaCalculated = multiStrike[i].Gamma!.Value;
+            Real thetaCalculated = multiStrike[i].Theta!.Value;
+
+            OneAssetOptionResults single = FdHestonVanillaEngine.Calculate(aOption, context, model, 20, 400, 50);
+            Real npvExpected = single.NPV!.Value;
+            Real deltaExpected = single.Delta!.Value;
+            Real gammaExpected = single.Gamma!.Value;
+            Real thetaExpected = single.Theta!.Value;
+
+            Assert.False(
+                Math.Abs(npvCalculated - npvExpected) / npvExpected > relTol,
+                $"failed to reproduce price with FD multi strike engine\n    calculated: {npvCalculated}\n    expected:   {npvExpected}\n    error:      {relTol:E}");
+            Assert.False(
+                Math.Abs(deltaCalculated - deltaExpected) / deltaExpected > relTol,
+                $"failed to reproduce delta with FD multi strike engine\n    calculated: {deltaCalculated}\n    expected:   {deltaExpected}\n    error:      {relTol:E}");
+            Assert.False(
+                Math.Abs(gammaCalculated - gammaExpected) / gammaExpected > relTol,
+                $"failed to reproduce gamma with FD multi strike engine\n    calculated: {gammaCalculated}\n    expected:   {gammaExpected}\n    error:      {relTol:E}");
+            Assert.False(
+                Math.Abs(thetaCalculated - thetaExpected) / thetaExpected > relTol,
+                $"failed to reproduce theta with FD multi strike engine\n    calculated: {thetaCalculated}\n    expected:   {thetaExpected}\n    error:      {relTol:E}");
         }
     }
 

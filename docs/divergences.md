@@ -321,6 +321,29 @@ Facts:
 
 - `TestZeroVolatility`
 
+## BatesDetJumpSmallReversionTests
+
+[`Divergences/BatesDetJumpSmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/BatesDetJumpSmallReversionTests.cs)
+
+The deterministic-intensity Bates engines at small κ_λ (the S-hes plan's HR7 (iv)). Their term weights the constant-intensity term by the intensity's average, (x − 1 + e^{−x})θ_λ/(xλ) + (1 − e^{−x})/x at x = κ_λt, which QuantLib writes as differences that cancel as x falls (`batesengine.cpp:80`, `:140`): with θ_λ 0.6 beside λ 0.3 a call prices 9.8118999810864693 at κ_λ = 1e-12 where the constant-intensity engine, its limit, gives 9.8119169388898158 [executed: `scratchpad\cxxprobe\src\c1oracle.cpp`]. Below x = 1e-2 nanoql writes the weights as x·φ₂(−x) and −expm1(−x)/x, which don't cancel, QuantLib's expressions and bits at and above it. Checks: the limit, and, since the term is linear in the intensity, the price equal to the constant-intensity engine's at λ_eff = θ_λ·w₁ + λ·w₂, the weights w₁ = (x − 1 + e^{−x})/x and w₂ = (1 − e^{−x})/x evaluated in 50 digits (Python's `decimal`), either side of the cut.
+
+Facts:
+
+- `TheDetJumpPriceTendsToTheConstantIntensityOne`
+- `TheWeightsAreTheirFiftyDigitValues`
+
+## BatesDoubleExpUpJumpTests
+
+[`Divergences/BatesDoubleExpUpJumpTests.cs`](../tests/NanoQL.Tests/Divergences/BatesDoubleExpUpJumpTests.cs)
+
+The double-exponential Bates models where the up-jumps' mean size η_u reaches 1 (the S-hes plan's HR7 (v), a refusal by the user's ruling). The up-jumps' exponential moment, which the model's drift compensates, is finite for η_u below 1 only ("the condition η1 > 1 is necessary and sufficient for the random variable J_t to have finite expectation", Gulisashvili and Vives, η1 = 1/η_u), yet QuantLib's engine prices beyond it: a 100 call 3,040,812 at η_u = 1.01, a plausible 26.39 at 1.5, NaN at 1 [executed: `scratchpad\cxxprobe\src\c1oracle.cpp`]. nanoql's engines refuse a model at η_u ≥ 1, the models' constraint on η_u is (0, 1), so a construction or a calibration step there is refused, and below 1 QuantLib's values stand.
+
+Facts:
+
+- `AnUpJumpMeanOfOneOrMoreIsRefused`
+- `TheConstraintRefusesACalibrationStepThere`
+- `BelowOneQuantLibsValuesStand`
+
 ## BiCGstabLastIterationTests
 
 [`Divergences/BiCGstabLastIterationTests.cs`](../tests/NanoQL.Tests/Divergences/BiCGstabLastIterationTests.cs)
@@ -1676,6 +1699,69 @@ Facts:
 
 - `AsTheRatesVolatilityVanishesItIsTheBlackScholesQuanto`
 
+## FdHestonHighCarryTests
+
+[`Divergences/FdHestonHighCarryTests.cs`](../tests/NanoQL.Tests/Divergences/FdHestonHighCarryTests.cs)
+
+The FD Heston engine's equity grid at high carry and low volatility (B1-1 of the S-hes plan's C1 review, under R8). QuantLib's engine builds its equity mesher on a helper process whose curves its call binds in each other's places (`fdhestonvanillaengine.cpp:126-128`), so the mesher walks the forward's mirror about the spot. Where the carry is large against the volatility the grid's far edge falls inside the distribution and QuantLib's price stops converging: a five-year call at 1.25 times the forward, carry 0.30 and volatility 0.1, prices 0 on every grid, where the analytic engine gives 1.5732 [executed on the wheel]; where cash dividends take the mirrored walk below zero, its bound isn't a number and QuantLib's engine refuses ("end must be larger than start"). nanoql keeps QuantLib's mesher wherever its range holds the true forwards' band, the walk's ends on the helper's curves in place widened by the volatility's quantile, half the mesher's own margin, and widens it to that band through QuantLib's own constraints where it doesn't, a bound that isn't a number falling short (B2-2 of the review). The multi-strike solve, whose mesher takes no constraints, solves each strike alone where its grid doesn't hold the band at the points the solve is read at, S·K/Kᵢ for the option's strike K (B2-1), their forwards quanto-adjusted where a quanto helper is given (B3-1); the two paths run on different grids, so a strike's value steps where the switch moves, by up to about 0.4% at carry 0.06 (F2-1). The check: QuantLib's components given those constraints through the harness (`tests/vectors/cxx/pricingengines/vanilla/fdhestonvanillaengine.json`), and the analytic engine's price under refinement.
+
+Facts:
+
+- `AHighCarryCallConvergesToTheAnalyticEngine`
+- `ANegativeCarryPutConvergesToTheAnalyticEngine`
+- `AMarketInsideTheBandKeepsQuantLibsBits`
+- `TheMultiStrikeSolveTakesEachStrikeAloneWhereItsGridFallsShort`
+- `AReferenceStrikeAwayFromTheSpotTakesEachStrikeAlone`
+- `AQuantoForwardFarFromTheDomesticTakesEachStrikeAlone`
+- `CashDividendsTakingTheMirroredWalkBelowZeroPrice`
+
+## FdHestonMismatchedTimesTests
+
+[`Divergences/FdHestonMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/FdHestonMismatchedTimesTests.cs)
+
+The finite-difference Heston and Bates engines on structures dated or counted differently (the S-hes plan's HR7 (ii), the mismatched-dates class of master Revision 58). QuantLib's engines run from the risk-free curve's reference date (`process->time`) and read the dividend curve, the leverage function and the Bates spread curve at the risk-free curve's times (`fdmhestonop.cpp:55-89`, `fdmbatesop.cpp:45-58`). nanoql's run on `FdmHestonOp.Clock`, from the earliest reference date of the structures read, on the risk-free curve's day counter, each structure read at the instants its times denote, nothing accruing before its own date, the leverage at its instant. QuantLib's check: its engines on the market restated on one clock, which nanoql's engines on the original market reproduce to rounding [executed on the wheel: `scratchpad\c1\oracle_c1.py`].
+
+Facts:
+
+- `ADividendCurveOnAnotherDayCounterIsReadAtItsOwnTimes`
+- `ARiskFreeCurveSettlingLaterIsReadFromItsDateOnTheEarliestClock`
+- `ALeverageFunctionOnItsOwnClockIsReadAtItsInstant`
+- `TheBatesSpreadedDividendCurveIsReadAtItsOwnTimes`
+
+## FdHestonMultipleStrikesLeverageTests
+
+[`Divergences/FdHestonMultipleStrikesLeverageTests.cs`](../tests/NanoQL.Tests/Divergences/FdHestonMultipleStrikesLeverageTests.cs)
+
+The multiple-strikes calculation with a leverage function (the S-hes plan's HR7 (i)). QuantLib's cache serves each strike V(S·d)/d from one solve (`fdhestonvanillaengine.cpp:209-224`), which assumes the model scales with the spot; a spot-dependent leverage breaks it: with a leverage of 1.4, 1.0 and 0.7 at strikes 50, 100 and 150, after a call at 100 it serves 50.50657855051417, 27.518542374323449, 0.8299478410251605, 0.057935950793473072 and 0.0010848235476194543 at 50, 75, 125, 150 and 200 where its engine priced for each strike alone gives 50.704063145305852, 28.070741991049783, 0.43296316837484017, 0.0063957853450491283 and 2.489998860627156e-05 [executed: `scratchpad\cxxprobe\src\c1oracle.cpp`]. nanoql's `CalculateStrikes` solves each strike alone there. Check: QuantLib's engine priced for each strike alone.
+
+Facts:
+
+- `EachStrikeIsTheEnginesPriceForItAlone`
+- `EachStrikeIsQuantLibsEnginePricedForItAlone`
+
+## FdHestonSkewFactorTests
+
+[`Divergences/FdHestonSkewFactorTests.cs`](../tests/NanoQL.Tests/Divergences/FdHestonSkewFactorTests.cs)
+
+The Heston variance mesher's skew factor bounded at σ_m/κ = 2 (the S-hes plan's HR9, by the user's ruling). QuantLib's factor, max(1, σ_m/κ)^1.5 (`fdmhestonvariancemesher.cpp:122-128`), widens the equity mesher at small κ until its prices leave QuantLib's own analytic engine, refining the grid not bringing them back: an at-the-money put (v₀ = θ 0.04, ρ −0.7, a year, r 3%, q 1%) prices 4.8106 for 3.7045 at σ 1.0 and κ 0.1, 26.48 for 3.590 at κ 0.02 (15.69 on 200 × 200 × 100) and 48.52 for 6.2144 at σ 0.3 and κ 1e-8 [executed on the wheel: `scratchpad\c1\oracle_c1.py`]. The bounded factor, min(2, max(1, σ_m/κ))^1.5, brings them within the grid's own error of the analytic engine, an American put converges as the grid is refined, and wherever σ_m/κ ≤ 2, every QuantLib case among them, QuantLib's engine stands, the Kahl-Jaeckel ratio at the cap itself.
+
+Facts:
+
+- `LargeRatiosPriceWithinTheGridsErrorOfTheAnalyticEngine`
+- `AnAmericanPutConvergesUnderRefinement`
+- `AtRatiosUpToTwoQuantLibsEngineStands`
+
+## FdHestonStrikesReferenceTests
+
+[`Divergences/FdHestonStrikesReferenceTests.cs`](../tests/NanoQL.Tests/Divergences/FdHestonStrikesReferenceTests.cs)
+
+The multiple-strikes calculation on a reference that isn't a plain vanilla (the S-hes plan's HR7 (xxiv)). QuantLib's cache stores the reference payoff's values scaled, V(S·d)/d, under plain-vanilla keys at each strike (`fdhestonvanillaengine.cpp:209-224`) and serves them to a later plain vanilla (`:174-191`); V(S·d)/d is a vanilla at Kᵢ only for a plain-vanilla reference. After a cash-or-nothing reference (100, cash 10) it serves plain calls at 80, 100 and 120 6.8209430073262878, 5.8085085805369312 and 1.6286553941678532, after an asset-or-nothing one 91.147695950275022, 66.230378622429299 and 17.487133347226365, where its engine priced for each strike alone gives 22.93727546246711, 8.144976787928341 and 1.2010639430197885 [executed: `scratchpad\cxxprobe\src\c1oracle.cpp`]. nanoql's `CalculateStrikes` solves each strike's plain vanilla alone there. Check: QuantLib's engine priced for each strike alone.
+
+Facts:
+
+- `ACashOrNothingReferenceGetsEachStrikeSolvedAlone`
+- `AnAssetOrNothingReferenceGetsEachStrikeSolvedAlone`
+
 ## FdSabrZeroNuTests
 
 [`Divergences/FdSabrZeroNuTests.cs`](../tests/NanoQL.Tests/Divergences/FdSabrZeroNuTests.cs)
@@ -1739,6 +1825,19 @@ The Dupire operator's mixed term (the S-g1d plan's G1R6 (xi)): a one-direction o
 Facts:
 
 - `TheMixedTermIsZero`
+
+## FdmHestonVarianceMesherFallbackTests
+
+[`Divergences/FdmHestonVarianceMesherFallbackTests.cs`](../tests/NanoQL.Tests/Divergences/FdmHestonVarianceMesherFallbackTests.cs)
+
+The Heston variance mesher's fallbacks, QuantLib's master since 1.44 (#2908's mesher part and #2940, taken under R8; the S-hes plan's HR7 (iii), HR8 (ii), (iii)). Where the variance falls fast (v₀ 0.25, θ 0.0025, κ 10, σ 0.1), 1.44's time-averaged quantiles don't reach v₀ and every finite-difference Heston engine throws "interpolation range is [4.01809, 5.16225] x [0, 0.0483231]: extrapolation at (4.60517, 0.25) not allowed" [executed on the wheel: `scratchpad\c1\oracle_c1.py`]; master falls back to the default mesh, evenly spaced over θ and v₀ ± 4σ√(θ/2κ), whose locations are those 1.44 builds on its own default branch, and the engine prices within its grid's accuracy of QuantLib's analytic engine. A distribution too narrow for the grid's minimum steps falls back to the same default mesh before any quantile is computed, the mesh 1.44 reaches only after its quantiles fail; at σ 1e-4 master's later checks would reach it too, and at 5.6e-4 and 6.8e-4 (v₀ = θ 0.04, κ 1) that test alone does, the later checks passing the quantile grid.
+
+Facts:
+
+- `AFastFallingVarianceIsPricedOnTheDefaultMesh`
+- `TheFallbacksLocationsAreTheDefaultMesh`
+- `ADistributionTooNarrowForTheGridFallsBackBeforeItsQuantiles`
+- `ADistributionTooNarrowForTheGridStaysOnTheDefaultMesh`
 
 ## FdmMismatchedTimesTests
 
@@ -2799,6 +2898,17 @@ Facts:
 
 - `AWindowCountsCrossingsFromItsOpening`
 - `AWindowOpenTodayIsQuantLibs`
+
+## McHestonMismatchedTimesTests
+
+[`Divergences/McHestonMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/McHestonMismatchedTimesTests.cs)
+
+The Monte Carlo Heston engine on curves dated or counted differently (the S-hes plan's HR7 (vi), the mismatched-dates class of master Revision 58). QuantLib's engine runs its paths on the process's times, the risk-free curve's from its reference date, reads the dividend curve at those times and discounts at the grid's last time on the risk-free curve (`mceuropeanhestonengine.hpp:121-129`). nanoql's runs its paths on the model's clock, from the earliest curve date on the risk-free curve's day counter, each curve read at the instants the grid's times denote, and discounts there. QuantLib's check: its engine on the market restated on one clock, from the same seed, which the fixed engine on the original market reproduces to rounding [executed on the wheel: `scratchpad\c1\oracle_c1.py`].
+
+Facts:
+
+- `ADividendCurveOnAnotherDayCounterIsReadAtItsOwnTimes`
+- `ARiskFreeCurveSettlingLaterIsReadFromItsDateOnTheEarliestClock`
 
 ## McHullWhiteCollarTests
 

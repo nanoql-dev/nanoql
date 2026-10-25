@@ -5,12 +5,13 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/fdmlinearop.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testUniformGridMesher, testFirstDerivativesMapApply, testSecondDerivativesMapApply, testDerivativeWeightsOnNonUniformGrids, testSecondOrderMixedDerivativesMapApply, testTripleBandMapSolve, testFdmHestonBarrier, testFdmHestonAmerican, testFdmHestonExpress, testBiCGstab, testGMRES (S-core); testFdmHestonHullWhiteOp (S-exo); testFdmMesherIntegral (S-hes)
+// Partial: testDerivativeWeightsOnNonUniformGrids, testBiCGstab, testGMRES (S-core); testFdmHestonHullWhiteOp (S-exo); testFdmMesherIntegral (S-hes)
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
 using NanoQL.Instruments;
 using NanoQL.Methods;
+using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
@@ -182,6 +183,597 @@ public class FdmLinearOpTests
                     }
                 }
             }
+        }
+    }
+
+    [Fact]
+    public void TestUniformGridMesher()
+    {
+        // Testing uniform grid mesher...
+        Size[] dim = [5, 7, 8];
+
+        var layout = new FdmLinearOpLayout(dim);
+        (double, double)[] boundaries = [(-5, 10), (5, 100), (10, 20)];
+
+        var mesher = new UniformGridMesher(layout, boundaries);
+
+        Real dx1 = 15.0 / (dim[0] - 1);
+        Real dx2 = 95.0 / (dim[1] - 1);
+        Real dx3 = 10.0 / (dim[2] - 1);
+
+        const double tol = 100 * QL_EPSILON;
+        if (Math.Abs(dx1 - mesher.Dminus(layout.Begin(), 0)) > tol
+            || Math.Abs(dx1 - mesher.Dplus(layout.Begin(), 0)) > tol
+            || Math.Abs(dx2 - mesher.Dminus(layout.Begin(), 1)) > tol
+            || Math.Abs(dx2 - mesher.Dplus(layout.Begin(), 1)) > tol
+            || Math.Abs(dx3 - mesher.Dminus(layout.Begin(), 2)) > tol
+            || Math.Abs(dx3 - mesher.Dplus(layout.Begin(), 2)) > tol)
+        {
+            Assert.Fail("inconsistent uniform mesher object");
+        }
+    }
+
+    [Fact]
+    public void TestFirstDerivativesMapApply()
+    {
+        // Testing application of first-derivatives map...
+        Size[] dim = [400, 100, 50];
+
+        var index = new FdmLinearOpLayout(dim);
+
+        (double First, double Second)[] boundaries = [(-5, 5), (0, 10), (5, 15)];
+
+        FdmMesher mesher = new UniformGridMesher(index, boundaries);
+
+        var map = new FirstDerivativeOp(2, mesher);
+
+        var r = new Vector(mesher.Layout.Size);
+        FdmLinearOpIterator iter = index.Begin();
+        for (Size i = 0; i < index.Size; ++i, iter.Increment())
+        {
+            r[iter.Index] = Math.Sin(mesher.Location(iter, 0)) + Math.Cos(mesher.Location(iter, 2));
+        }
+
+        Vector t = map.Apply(r);
+        Real dz = (boundaries[2].Second - boundaries[2].First) / (dim[2] - 1);
+        iter = index.Begin();
+        for (Size i = 0; i < index.Size; ++i, iter.Increment())
+        {
+            Size z = iter.Coordinates[2];
+
+            Size z0 = (z > 0) ? z - 1 : 1;
+            Size z2 = (z < dim[2] - 1) ? z + 1 : dim[2] - 2;
+            Real lz0 = boundaries[2].First + (z0 * dz);
+            Real lz2 = boundaries[2].First + (z2 * dz);
+
+            Real expected;
+            if (z == 0)
+            {
+                expected = (Math.Cos(boundaries[2].First + dz) - Math.Cos(boundaries[2].First)) / dz;
+            }
+            else if (z == dim[2] - 1)
+            {
+                expected = (Math.Cos(boundaries[2].Second) - Math.Cos(boundaries[2].Second - dz)) / dz;
+            }
+            else
+            {
+                expected = (Math.Cos(lz2) - Math.Cos(lz0)) / (2 * dz);
+            }
+
+            Real calculated = t[iter.Index];
+            if (Math.Abs(calculated - expected) > 1e-10)
+            {
+                Assert.Fail($"first derivative calculation failed.\n    calculated: {calculated}\n    expected:   {expected}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestSecondDerivativesMapApply()
+    {
+        // Testing application of second-derivatives map...
+        Size[] dim = [50, 50, 50];
+
+        var index = new FdmLinearOpLayout(dim);
+
+        (double, double)[] boundaries = [(0, 0.5), (0, 0.5), (0, 0.5)];
+
+        FdmMesher mesher = new UniformGridMesher(index, boundaries);
+        var r = new Vector(mesher.Layout.Size);
+        FdmLinearOpIterator iter = index.Begin();
+        for (Size k = 0; k < index.Size; ++k, iter.Increment())
+        {
+            Real x = mesher.Location(iter, 0);
+            Real y = mesher.Location(iter, 1);
+            Real z = mesher.Location(iter, 2);
+
+            r[iter.Index] = Math.Sin(x) * Math.Cos(y) * Math.Exp(z);
+        }
+
+        Vector t = new SecondDerivativeOp(0, mesher).Apply(r);
+
+        const Real tol = 5e-2;
+        iter = index.Begin();
+        for (Size k = 0; k < index.Size; ++k, iter.Increment())
+        {
+            Size i = iter.Index;
+            Real x = mesher.Location(iter, 0);
+            Real y = mesher.Location(iter, 1);
+            Real z = mesher.Location(iter, 2);
+
+            Real d = -Math.Sin(x) * Math.Cos(y) * Math.Exp(z);
+            if (iter.Coordinates[0] == 0 || iter.Coordinates[0] == dim[0] - 1)
+            {
+                d = 0;
+            }
+
+            if (Math.Abs(d - t[i]) > tol)
+            {
+                Assert.Fail($"numerical derivative in dx^2 deviation is too big\n  found at {x} {y} {z}");
+            }
+        }
+
+        t = new SecondDerivativeOp(1, mesher).Apply(r);
+        iter = index.Begin();
+        for (Size k = 0; k < index.Size; ++k, iter.Increment())
+        {
+            Size i = iter.Index;
+            Real x = mesher.Location(iter, 0);
+            Real y = mesher.Location(iter, 1);
+            Real z = mesher.Location(iter, 2);
+
+            Real d = -Math.Sin(x) * Math.Cos(y) * Math.Exp(z);
+            if (iter.Coordinates[1] == 0 || iter.Coordinates[1] == dim[1] - 1)
+            {
+                d = 0;
+            }
+
+            if (Math.Abs(d - t[i]) > tol)
+            {
+                Assert.Fail($"numerical derivative in dy^2 deviation is too big\n  found at {x} {y} {z}");
+            }
+        }
+
+        t = new SecondDerivativeOp(2, mesher).Apply(r);
+        iter = index.Begin();
+        for (Size k = 0; k < index.Size; ++k, iter.Increment())
+        {
+            Size i = iter.Index;
+            Real x = mesher.Location(iter, 0);
+            Real y = mesher.Location(iter, 1);
+            Real z = mesher.Location(iter, 2);
+
+            Real d = Math.Sin(x) * Math.Cos(y) * Math.Exp(z);
+            if (iter.Coordinates[2] == 0 || iter.Coordinates[2] == dim[2] - 1)
+            {
+                d = 0;
+            }
+
+            if (Math.Abs(d - t[i]) > tol)
+            {
+                Assert.Fail($"numerical derivative in dz^2 deviation is too big\n  found at {x} {y} {z}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestSecondOrderMixedDerivativesMapApply()
+    {
+        // Testing application of second-order mixed-derivatives map...
+        Size[] dim = [50, 50, 50];
+
+        var index = new FdmLinearOpLayout(dim);
+
+        (double, double)[] boundaries = [(0, 0.5), (0, 0.5), (0, 0.5)];
+
+        FdmMesher mesher = new UniformGridMesher(index, boundaries);
+
+        var r = new Vector(mesher.Layout.Size);
+
+        FdmLinearOpIterator iter = index.Begin();
+        for (Size k = 0; k < index.Size; ++k, iter.Increment())
+        {
+            Real x = mesher.Location(iter, 0);
+            Real y = mesher.Location(iter, 1);
+            Real z = mesher.Location(iter, 2);
+
+            r[iter.Index] = Math.Sin(x) * Math.Cos(y) * Math.Exp(z);
+        }
+
+        Vector t = new SecondOrderMixedDerivativeOp(0, 1, mesher).Apply(r);
+        Vector u = new SecondOrderMixedDerivativeOp(1, 0, mesher).Apply(r);
+
+        const Real tol = 5e-2;
+        iter = index.Begin();
+        for (Size k = 0; k < index.Size; ++k, iter.Increment())
+        {
+            Size i = iter.Index;
+            Real x = mesher.Location(iter, 0);
+            Real y = mesher.Location(iter, 1);
+            Real z = mesher.Location(iter, 2);
+
+            Real d = -Math.Cos(x) * Math.Sin(y) * Math.Exp(z);
+
+            if (Math.Abs(d - t[i]) > tol)
+            {
+                Assert.Fail($"numerical derivative in dxdy deviation is too big\n  found at {x} {y} {z}");
+            }
+
+            if (Math.Abs(t[i] - u[i]) > 1e5 * QL_EPSILON)
+            {
+                Assert.Fail($"numerical derivative in dxdy not equal to dydx\n  found at {x} {y} {z}\n  value    {Math.Abs(t[i] - u[i])}");
+            }
+        }
+
+        t = new SecondOrderMixedDerivativeOp(0, 2, mesher).Apply(r);
+        u = new SecondOrderMixedDerivativeOp(2, 0, mesher).Apply(r);
+        iter = index.Begin();
+        for (Size k = 0; k < index.Size; ++k, iter.Increment())
+        {
+            Size i = iter.Index;
+            Real x = mesher.Location(iter, 0);
+            Real y = mesher.Location(iter, 1);
+            Real z = mesher.Location(iter, 2);
+
+            Real d = Math.Cos(x) * Math.Cos(y) * Math.Exp(z);
+
+            if (Math.Abs(d - t[i]) > tol)
+            {
+                Assert.Fail($"numerical derivative in dxdy deviation is too big\n  found at {x} {y} {z}");
+            }
+
+            if (Math.Abs(t[i] - u[i]) > 1e5 * QL_EPSILON)
+            {
+                Assert.Fail($"numerical derivative in dxdz not equal to dzdx\n  found at {x} {y} {z}\n  value    {Math.Abs(t[i] - u[i])}");
+            }
+        }
+
+        t = new SecondOrderMixedDerivativeOp(1, 2, mesher).Apply(r);
+        u = new SecondOrderMixedDerivativeOp(2, 1, mesher).Apply(r);
+        iter = index.Begin();
+        for (Size k = 0; k < index.Size; ++k, iter.Increment())
+        {
+            Size i = iter.Index;
+            Real x = mesher.Location(iter, 0);
+            Real y = mesher.Location(iter, 1);
+            Real z = mesher.Location(iter, 2);
+
+            Real d = -Math.Sin(x) * Math.Sin(y) * Math.Exp(z);
+
+            if (Math.Abs(d - t[i]) > tol)
+            {
+                Assert.Fail($"numerical derivative in dydz deviation is too big\n  found at {x} {y} {z}");
+            }
+
+            if (Math.Abs(t[i] - u[i]) > 1e5 * QL_EPSILON)
+            {
+                Assert.Fail($"numerical derivative in dydz not equal to dzdy\n  found at {x} {y} {z}\n  value    {Math.Abs(t[i] - u[i])}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestTripleBandMapSolve()
+    {
+        // Testing triple-band map solution...
+        Size[] dim = [100, 400];
+
+        var layout = new FdmLinearOpLayout(dim);
+
+        (double, double)[] boundaries = [(0, 1.0), (0, 1.0)];
+
+        FdmMesher mesher = new UniformGridMesher(layout, boundaries);
+
+        var dy = new FirstDerivativeOp(1, mesher);
+        dy.Axpyb(new Vector(1, 2.0), dy, dy, new Vector(1, 1.0));
+
+        // check copy constructor
+        var copyOfDy = new TripleBandLinearOp(dy);
+
+        var u = new Vector(layout.Size);
+        for (Size i = 0; i < layout.Size; ++i)
+        {
+            u[i] = Math.Sin(0.1 * i) + Math.Cos(0.35 * i);
+        }
+
+        Vector t = dy.SolveSplitting(copyOfDy.Apply(u), 1.0, 0.0);
+        for (Size i = 0; i < u.Size; ++i)
+        {
+            if (Math.Abs(u[i] - t[i]) > 1e-6)
+            {
+                Assert.Fail($"solve and apply are not consistent \n expected      : {u[i]}\n calculated    : {t[i]}");
+            }
+        }
+
+        var dx = new FirstDerivativeOp(0, mesher);
+        dx.Axpyb(new Vector(), dx, dx, new Vector(1, 1.0));
+
+        TripleBandLinearOp copyOfDx = new FirstDerivativeOp(0, mesher);
+
+        // check assignment
+        copyOfDx = dx.Clone();
+
+        t = dx.SolveSplitting(copyOfDx.Apply(u), 1.0, 0.0);
+        for (Size i = 0; i < u.Size; ++i)
+        {
+            if (Math.Abs(u[i] - t[i]) > 1e-6)
+            {
+                Assert.Fail($"solve and apply are not consistent \n expected      : {u[i]}\n calculated    : {t[i]}");
+            }
+        }
+
+        var dxx = new SecondDerivativeOp(0, mesher);
+        dxx.Axpyb(new Vector(1, 0.5), dxx, dx, new Vector(1, 1.0));
+
+        // check of copy constructor
+        var copyOfDxx = new TripleBandLinearOp(dxx);
+
+        t = dxx.SolveSplitting(copyOfDxx.Apply(u), 1.0, 0.0);
+
+        for (Size i = 0; i < u.Size; ++i)
+        {
+            if (Math.Abs(u[i] - t[i]) > 1e-6)
+            {
+                Assert.Fail($"solve and apply are not consistent \n expected      : {u[i]}\n calculated    : {t[i]}");
+            }
+        }
+
+        // check assignment operator
+        _ = copyOfDxx.Add(new SecondDerivativeOp(1, mesher));
+        copyOfDxx = dxx.Clone();
+
+        t = dxx.SolveSplitting(copyOfDxx.Apply(u), 1.0, 0.0);
+
+        for (Size i = 0; i < u.Size; ++i)
+        {
+            if (Math.Abs(u[i] - t[i]) > 1e-6)
+            {
+                Assert.Fail($"solve and apply are not consistent \n expected      : {u[i]}\n calculated    : {t[i]}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestFdmHestonBarrier()
+    {
+        // Testing FDM with barrier option in Heston model...
+        Size[] dim = [200, 100];
+
+        var index = new FdmLinearOpLayout(dim);
+
+        (double, double)[] boundaries = [(3.8, 4.905274778), (0.0, 1.0)];
+
+        FdmMesher mesher = new UniformGridMesher(index, boundaries);
+
+        Real s0 = 100.0;
+
+        var context = new EvaluationContext { EvaluationDate = new Date(28, Month.March, 2004) };
+        YieldTermStructure rTS = FlatRate(0.05, new Actual365Fixed(), context);
+        YieldTermStructure qTS = FlatRate(0.0, new Actual365Fixed(), context);
+
+        var hestonProcess = new HestonProcess(rTS, qTS, s0, 0.04, 2.5, 0.04, 0.66, -0.8);
+
+        FdmLinearOpComposite hestonOp = new FdmHestonOp(mesher, hestonProcess);
+
+        var rhs = new Vector(mesher.Layout.Size);
+        FdmLinearOpIterator iter = mesher.Layout.Begin();
+        for (Size k = 0; k < mesher.Layout.Size; ++k, iter.Increment())
+        {
+            rhs[iter.Index] = Math.Max(Math.Exp(mesher.Location(iter, 0)) - 100, 0.0);
+        }
+
+        ImmutableArray<BoundaryCondition<FdmLinearOp>> bcSet =
+        [
+            new FdmDirichletBoundary(mesher, 0.0, 0, BoundaryConditionSide.Upper),
+        ];
+
+        Real theta = 0.5 + (Math.Sqrt(3.0) / 6.0);
+        var hsEvolver = new HundsdorferScheme(theta, 0.5, hestonOp, bcSet);
+        var hsModel = new FiniteDifferenceModel<HundsdorferScheme>(hsEvolver);
+        hsModel.Rollback(rhs.AsSpan(), 1.0, 0.0, 50);
+
+        var ret = new Matrix(dim[0], dim[1]);
+        for (Size i = 0; i < dim[0]; ++i)
+        {
+            for (Size j = 0; j < dim[1]; ++j)
+            {
+                ret[i, j] = rhs[i + (j * dim[0])];
+            }
+        }
+
+        var tx = new List<Real>();
+        var ty = new List<Real>();
+        iter = mesher.Layout.Begin();
+        for (Size k = 0; k < mesher.Layout.Size; ++k, iter.Increment())
+        {
+            if (iter.Coordinates[1] == 0)
+            {
+                tx.Add(mesher.Location(iter, 0));
+            }
+
+            if (iter.Coordinates[0] == 0)
+            {
+                ty.Add(mesher.Location(iter, 1));
+            }
+        }
+
+        var interpolate = new BilinearInterpolation(ty.ToArray(), tx.ToArray(), ret);
+
+        const Real x = 100;
+        const Real v0 = 0.04;
+
+        Real npv = interpolate.Evaluate(v0, Math.Log(x));
+        Real delta = 0.5 * (interpolate.Evaluate(v0, Math.Log(x + 1)) - interpolate.Evaluate(v0, Math.Log(x - 1)));
+        Real gamma = interpolate.Evaluate(v0, Math.Log(x + 1)) + interpolate.Evaluate(v0, Math.Log(x - 1)) - (2 * npv);
+
+        const Real npvExpected = 9.049016;
+        const Real deltaExpected = 0.511285;
+        const Real gammaExpected = -0.034296;
+
+        if (Math.Abs(npv - npvExpected) > 0.000001)
+        {
+            Assert.Fail("Error in calculating PV for Heston barrier option");
+        }
+
+        if (Math.Abs(delta - deltaExpected) > 0.000001)
+        {
+            Assert.Fail("Error in calculating Delta for Heston barrier option");
+        }
+
+        if (Math.Abs(gamma - gammaExpected) > 0.000001)
+        {
+            Assert.Fail("Error in calculating Gamma for Heston barrier option");
+        }
+    }
+
+    [Fact]
+    public void TestFdmHestonAmerican()
+    {
+        // Testing FDM with American option in Heston model...
+        Size[] dim = [200, 100];
+
+        var index = new FdmLinearOpLayout(dim);
+
+        (double, double)[] boundaries = [(3.8, Math.Log(220.0)), (0.0, 1.0)];
+
+        FdmMesher mesher = new UniformGridMesher(index, boundaries);
+
+        Real s0 = 100.0;
+
+        var context = new EvaluationContext { EvaluationDate = new Date(28, Month.March, 2004) };
+        YieldTermStructure rTS = FlatRate(0.05, new Actual365Fixed(), context);
+        YieldTermStructure qTS = FlatRate(0.0, new Actual365Fixed(), context);
+
+        var hestonProcess = new HestonProcess(rTS, qTS, s0, 0.04, 2.5, 0.04, 0.66, -0.8);
+
+        FdmLinearOpComposite linearOp = new FdmHestonOp(mesher, hestonProcess);
+
+        Payoff payoff = new PlainVanillaPayoff(OptionType.Put, 100.0);
+        var rhs = new Vector(mesher.Layout.Size);
+        FdmLinearOpIterator iter = mesher.Layout.Begin();
+        for (Size k = 0; k < mesher.Layout.Size; ++k, iter.Increment())
+        {
+            rhs[iter.Index] = payoff.Evaluate(Math.Exp(mesher.Location(iter, 0)));
+        }
+
+        var condition = new FdmAmericanStepCondition(mesher, new FdmLogInnerValue(payoff, mesher, 0));
+        Real theta = 0.5 + (Math.Sqrt(3.0) / 6.0);
+        var hsEvolver = new HundsdorferScheme(theta, 0.5, linearOp);
+        var hsModel = new FiniteDifferenceModel<HundsdorferScheme>(hsEvolver);
+        hsModel.Rollback(rhs.AsSpan(), 1.0, 0.0, 50, condition);
+
+        var ret = new Matrix(dim[0], dim[1]);
+        for (Size i = 0; i < dim[0]; ++i)
+        {
+            for (Size j = 0; j < dim[1]; ++j)
+            {
+                ret[i, j] = rhs[i + (j * dim[0])];
+            }
+        }
+
+        var tx = new List<Real>();
+        var ty = new List<Real>();
+        iter = mesher.Layout.Begin();
+        for (Size k = 0; k < mesher.Layout.Size; ++k, iter.Increment())
+        {
+            if (iter.Coordinates[1] == 0)
+            {
+                tx.Add(mesher.Location(iter, 0));
+            }
+
+            if (iter.Coordinates[0] == 0)
+            {
+                ty.Add(mesher.Location(iter, 1));
+            }
+        }
+
+        var interpolate = new BilinearInterpolation(ty.ToArray(), tx.ToArray(), ret);
+
+        const Real x = 100;
+        const Real v0 = 0.04;
+
+        Real npv = interpolate.Evaluate(v0, Math.Log(x));
+        const Real npvExpected = 5.641648;
+
+        if (Math.Abs(npv - npvExpected) > 0.000001)
+        {
+            Assert.Fail("Error in calculating PV for Heston American Option");
+        }
+    }
+
+    [Fact]
+    public void TestFdmHestonExpress()
+    {
+        // Testing FDM with express certificate in Heston model...
+        Size[] dim = [200, 100];
+
+        var index = new FdmLinearOpLayout(dim);
+
+        (double, double)[] boundaries = [(3.8, Math.Log(220.0)), (0.0, 1.0)];
+
+        FdmMesher mesher = new UniformGridMesher(index, boundaries);
+
+        Real s0 = 100.0;
+
+        var evaluationDate = new Date(28, Month.March, 2004);
+        var context = new EvaluationContext { EvaluationDate = evaluationDate };
+
+        YieldTermStructure rTS = FlatRate(0.05, new Actual365Fixed(), context);
+        YieldTermStructure qTS = FlatRate(0.0, new Actual365Fixed(), context);
+
+        var hestonProcess = new HestonProcess(rTS, qTS, s0, 0.04, 2.5, 0.04, 0.66, -0.8);
+
+        Real[] triggerLevels = [100.0, 100.0];
+        Real[] redemptions = [108.0, 108.0];
+        double[] exerciseTimes = [0.333, 0.666];
+
+        ImmutableArray<Dividend> dividendSchedule =
+            [new FixedDividend(2.5, evaluationDate + new Period(6, TimeUnit.Months))];
+        var dividendCondition = new FdmDividendHandler(
+            dividendSchedule, mesher, rTS.ReferenceDate, rTS.DayCounter, 0, context);
+
+        StepCondition expressCondition = new FdmHestonExpressCondition(redemptions, triggerLevels, exerciseTimes, mesher);
+
+        IEnumerable<double>[] stoppingTimes = [exerciseTimes, dividendCondition.DividendTimes];
+
+        StepCondition[] conditions = [expressCondition, dividendCondition];
+
+        var condition = new FdmStepConditionComposite(stoppingTimes, conditions);
+
+        Payoff payoff = new ExpressPayoff();
+
+        FdmInnerValueCalculator calculator = new FdmLogInnerValue(payoff, mesher, 0);
+
+        ImmutableArray<BoundaryCondition<FdmLinearOp>> bcSet = [];
+        var solverDesc = new FdmSolverDesc(mesher, bcSet, condition, calculator, 1.0, 50, 0);
+        var solver = new FdmHestonSolver(hestonProcess, solverDesc);
+
+        Real s = s0;
+        const Real v0 = 0.04;
+
+        if (Math.Abs(solver.ValueAt(s, v0) - 101.027) > 0.01)
+        {
+            Assert.Fail("Error in calculating PV for Heston Express Certificate");
+        }
+
+        if (Math.Abs(solver.DeltaAt(s, v0) - 0.4181) > 0.001)
+        {
+            Assert.Fail("Error in calculating Delta for Heston Express Certificate");
+        }
+
+        if (Math.Abs(solver.GammaAt(s, v0) + 0.0400) > 0.001)
+        {
+            Assert.Fail("Error in calculating Gamma for Heston Express Certificate");
+        }
+
+        if (Math.Abs(solver.MeanVarianceDeltaAt(s, v0) - 0.6602) > 0.001)
+        {
+            Assert.Fail("Error in calculating mean variance Delta for Heston Express Certificate");
+        }
+
+        if (Math.Abs(solver.MeanVarianceGammaAt(s, v0) + 0.0316) > 0.001)
+        {
+            Assert.Fail("Error in calculating mean variance Delta for Heston Express Certificate");
         }
     }
 
@@ -392,6 +984,10 @@ public class FdmLinearOpTests
         }
     }
 
+    // The test suite's flatRate(forward, dc): a flat forward from the evaluation date.
+    private static YieldTermStructure FlatRate(Rate forward, DayCounter dc, EvaluationContext context) =>
+        FlatForward.Create(0, new NullCalendar(), forward, dc, context);
+
     // The test suite's timeToDays: Integer(std::lround(t * daysPerYear)).
     private static Integer TimeToDays(double t, Integer daysPerYear = 360) =>
         (Integer)Math.Round(t * daysPerYear, MidpointRounding.AwayFromZero);
@@ -410,5 +1006,52 @@ public class FdmLinearOpTests
         }
 
         return retVal;
+    }
+
+    // The test suite's FdmHestonExpressCondition: at each exercise time, the redemption above the trigger.
+    private sealed class FdmHestonExpressCondition : StepCondition
+    {
+        private readonly Real[] redemptions;
+        private readonly Real[] triggerLevels;
+        private readonly double[] exerciseTimes;
+        private readonly FdmMesher mesher;
+
+        public FdmHestonExpressCondition(Real[] redemptions, Real[] triggerLevels, double[] exerciseTimes, FdmMesher mesher)
+        {
+            this.redemptions = redemptions;
+            this.triggerLevels = triggerLevels;
+            this.exerciseTimes = exerciseTimes;
+            this.mesher = mesher;
+        }
+
+        public override void ApplyTo(Span<double> a, double t)
+        {
+            int index = Array.IndexOf(exerciseTimes, t);
+
+            if (index >= 0)
+            {
+                FdmLinearOpIterator iter = mesher.Layout.Begin();
+                for (Size k = 0; k < mesher.Layout.Size; ++k, iter.Increment())
+                {
+                    Real s = Math.Exp(mesher.Location(iter, 0));
+
+                    if (s > triggerLevels[index])
+                    {
+                        a[iter.Index] = redemptions[index];
+                    }
+                }
+            }
+        }
+    }
+
+    // The test suite's ExpressPayoff.
+    private sealed class ExpressPayoff : Payoff
+    {
+        public override string Name => "ExpressPayoff";
+
+        public override string Description => "ExpressPayoff";
+
+        public override double Evaluate(double price) =>
+            ((price >= 100.0) ? 108.0 : 100.0) - ((price <= 75.0) ? 100.0 - price : 0.0);
     }
 }

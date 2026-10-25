@@ -5,7 +5,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/europeanoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testFFTEngines, which waits for S-xeq's FFTVanillaEngine; testFdEnginesWithNonStrikedPayoff, which waits for S-hes's FdHestonVanillaEngine
+// Partial: testFFTEngines, which waits for S-xeq's FFTVanillaEngine
+// Not ported: testFdEnginesWithNonStrikedPayoff (a vanilla option takes a striked payoff, so no engine can be given another, and Conventions/FdVanillaEngineErrorTests.cs asserts the type)
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;

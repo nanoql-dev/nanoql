@@ -69,6 +69,41 @@ public sealed class FdmBlackScholesMesher : Fdm1dMesher
         FdmQuantoHelper? fdmQuantoHelper = null,
         double spotAdjustment = 0.0,
         EvaluationContext? context = null)
+        : this(
+            size,
+            process,
+            maturity,
+            strike,
+            xMinConstraint,
+            xMaxConstraint,
+            eps,
+            scaleFactor,
+            cPoint,
+            dividendSchedule,
+            fdmQuantoHelper,
+            spotAdjustment,
+            context,
+            FdmBlackScholesOp.Clock(process, fdmQuantoHelper))
+    {
+    }
+
+    // The finite-difference Heston engines' form (the S-hes plan's HR7 (ii)): the engine's clock given, its own and
+    // not the helper process's, whose curves QuantLib's engines bind in each other's places.
+    internal FdmBlackScholesMesher(
+        int size,
+        GeneralizedBlackScholesProcess process,
+        double maturity,
+        double strike,
+        double? xMinConstraint,
+        double? xMaxConstraint,
+        double eps,
+        double scaleFactor,
+        (double? Point, double? Density) cPoint,
+        ImmutableArray<Dividend> dividendSchedule,
+        FdmQuantoHelper? fdmQuantoHelper,
+        double spotAdjustment,
+        EvaluationContext? context,
+        TermStructure clock)
         : base(size)
     {
         ArgumentNullException.ThrowIfNull(process);
@@ -83,6 +118,67 @@ public sealed class FdmBlackScholesMesher : Fdm1dMesher
             throw new ArgumentException("an evaluation context is needed to read the dividends' amounts", nameof(context));
         }
 
+        (double xMin, double xMax) = Bounds(process, maturity, strike, eps, scaleFactor, dividends, fdmQuantoHelper, spotAdjustment, context, clock);
+
+        if (xMinConstraint is double xMinGiven)
+        {
+            xMin = xMinGiven;
+        }
+
+        if (xMaxConstraint is double xMaxGiven)
+        {
+            xMax = xMaxGiven;
+        }
+
+        Fdm1dMesher helper;
+        if (cPoint.Point is double c
+            && Math.Log(c) >= xMin && Math.Log(c) <= xMax)
+        {
+            helper = new Concentrating1dMesher(xMin, xMax, size, (Math.Log(c), cPoint.Density));
+        }
+        else
+        {
+            helper = new Uniform1dMesher(xMin, xMax, size);
+        }
+
+        for (int i = 0; i < size; ++i)
+        {
+            locations[i] = helper.Location(i);
+            dplus[i] = helper.Dplus(i);
+            dminus[i] = helper.Dminus(i);
+        }
+    }
+
+    // The dividend curve the mesher's forward walk reads: the process's, quanto-adjusted where a quanto helper is given.
+    internal static YieldTermStructure DividendCurve(
+        GeneralizedBlackScholesProcess process, double strike, FdmQuantoHelper? fdmQuantoHelper) =>
+        fdmQuantoHelper is not null
+            ? new QuantoTermStructure(
+                process.DividendYield,
+                process.RiskFreeRate,
+                fdmQuantoHelper.FTS,
+                process.BlackVolatility,
+                strike,
+                fdmQuantoHelper.FxVolTS,
+                fdmQuantoHelper.ExchRateATMlevel,
+                fdmQuantoHelper.EquityFxCorrelation)
+            : process.DividendYield;
+
+    // The grid's edges before any constraint: below the lowest and above the highest forward the dividends and the
+    // curves give up to maturity, by the volatility's quantile at 1 - eps times the scale factor; the dividends checked
+    // by the constructor
+    internal static (double XMin, double XMax) Bounds(
+        GeneralizedBlackScholesProcess process,
+        double maturity,
+        double strike,
+        double eps,
+        double scaleFactor,
+        ImmutableArray<Dividend> dividends,
+        FdmQuantoHelper? fdmQuantoHelper,
+        double spotAdjustment,
+        EvaluationContext? context,
+        TermStructure clock)
+    {
         double s = process.X0;
         if (!(s > 0.0))
         {
@@ -91,7 +187,6 @@ public sealed class FdmBlackScholesMesher : Fdm1dMesher
 
         // the engine's times (FdmBlackScholesOp.Clock): the process's where no structure is dated before the risk-free
         // curve
-        TermStructure clock = FdmBlackScholesOp.Clock(process, fdmQuantoHelper);
         var intermediateSteps = new List<(double Time, double Amount)>();
         foreach (Dividend d in dividends)
         {
@@ -114,17 +209,7 @@ public sealed class FdmBlackScholesMesher : Fdm1dMesher
 
         YieldTermStructure rTS = process.RiskFreeRate;
 
-        YieldTermStructure qTS = fdmQuantoHelper is not null
-            ? new QuantoTermStructure(
-                process.DividendYield,
-                process.RiskFreeRate,
-                fdmQuantoHelper.FTS,
-                process.BlackVolatility,
-                strike,
-                fdmQuantoHelper.FxVolTS,
-                fdmQuantoHelper.ExchRateATMlevel,
-                fdmQuantoHelper.EquityFxCorrelation)
-            : process.DividendYield;
+        YieldTermStructure qTS = DividendCurve(process, strike, fdmQuantoHelper);
 
         double lastDivTime = 0.0;
         double fwd = s + spotAdjustment;
@@ -155,34 +240,7 @@ public sealed class FdmBlackScholesMesher : Fdm1dMesher
 
         double xMin = Math.Log(mi) - (sigmaSqrtT * normInvEps * scaleFactor);
         double xMax = Math.Log(ma) + (sigmaSqrtT * normInvEps * scaleFactor);
-
-        if (xMinConstraint is double xMinGiven)
-        {
-            xMin = xMinGiven;
-        }
-
-        if (xMaxConstraint is double xMaxGiven)
-        {
-            xMax = xMaxGiven;
-        }
-
-        Fdm1dMesher helper;
-        if (cPoint.Point is double c
-            && Math.Log(c) >= xMin && Math.Log(c) <= xMax)
-        {
-            helper = new Concentrating1dMesher(xMin, xMax, size, (Math.Log(c), cPoint.Density));
-        }
-        else
-        {
-            helper = new Uniform1dMesher(xMin, xMax, size);
-        }
-
-        for (int i = 0; i < size; ++i)
-        {
-            locations[i] = helper.Location(i);
-            dplus[i] = helper.Dplus(i);
-            dminus[i] = helper.Dminus(i);
-        }
+        return (xMin, xMax);
     }
 
     /// <summary>

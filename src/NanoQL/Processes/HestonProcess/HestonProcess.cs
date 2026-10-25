@@ -17,14 +17,27 @@ namespace NanoQL.Processes;
 /// dW₁dW₂ = ρ dt. Its state is the underlying and the variance.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Immutable: the curves, the spot and the parameters are fixed at construction, where QuantLib's process holds handles
-/// and a quote. <see cref="Evolve"/> steps by the chosen <see cref="HestonProcessDiscretization"/>; the exact schemes
-/// sample the variance from its non-central chi-squared law, whose inverse refuses where its series doesn't converge
-/// (the S-eq plan's SEQR7 (xvii)), and Broadie and Kaya's schemes also sample the integrated variance.
+/// and a quote. <see cref="Evolve(double, Vector, double, Vector)"/> steps by the chosen
+/// <see cref="HestonProcessDiscretization"/>; the exact schemes sample the variance from its non-central chi-squared
+/// law, whose inverse refuses where its series doesn't converge (the S-eq plan's SEQR7 (xvii)), and Broadie and Kaya's
+/// schemes also sample the integrated variance.
+/// </para>
+/// <para>
+/// An extension point, as in QuantLib: <see cref="BatesProcess"/> derives from it (the S-hes plan's HR1). The in-place
+/// <see cref="Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/> steps the truncation,
+/// reflection and quadratic-exponential schemes without allocating, by QuantLib's arithmetic, its rates read without
+/// building QuantLib's rate objects, so its bits are the allocating form's (HR2); the exact schemes' samplers allocate,
+/// and step through the allocating form.
+/// </para>
 /// </remarks>
-public sealed class HestonProcess : StochasticProcess
+public class HestonProcess : StochasticProcess
 {
     private static readonly GaussLaguerreIntegration GaussLaguerre128 = new(128);
+
+    // the standard normal's cumulative distribution, which QuantLib's steps build afresh
+    private static readonly CumulativeNormalDistribution CumNormal = new();
 
     // Pdf's inversion: its Gauss-Legendre panels, and their number at most
     private static readonly GaussLegendreIntegration GaussLegendre32 = new(32);
@@ -33,6 +46,9 @@ public sealed class HestonProcess : StochasticProcess
     private readonly YieldTermStructure riskFreeRate;
     private readonly YieldTermStructure dividendYield;
     private readonly HestonProcessDiscretization scheme;
+
+    // The Monte Carlo engines' clock (OnClock): null for the risk-free curve's own times, QuantLib's.
+    private TermStructure? clock;
 
     /// <summary>Initializes a new instance of the <see cref="HestonProcess"/> class.</summary>
     /// <param name="riskFreeRate">The risk-free curve.</param>
@@ -43,7 +59,7 @@ public sealed class HestonProcess : StochasticProcess
     /// <param name="theta">The variance's long-run mean θ.</param>
     /// <param name="sigma">The variance's volatility σ.</param>
     /// <param name="rho">The correlation ρ of the two Brownian motions.</param>
-    /// <param name="d">The discretization <see cref="Evolve"/> steps by.</param>
+    /// <param name="d">The discretization <see cref="Evolve(double, Vector, double, Vector)"/> steps by.</param>
     /// <exception cref="ArgumentNullException">A curve is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="d"/> isn't a member of its enum.</exception>
     public HestonProcess(
@@ -112,6 +128,13 @@ public sealed class HestonProcess : StochasticProcess
     /// <inheritdoc/>
     public override Vector InitialValues() => new([S0, V0]);
 
+    /// <inheritdoc/>
+    public override void InitialValues(Span<double> result)
+    {
+        result[0] = S0;
+        result[1] = V0;
+    }
+
     // The earliest reference date of the risk-free and dividend curves: the date the model's variance accrues from in
     // the engines that read the model by date, each curve accruing nothing before its own (the user's rulings of
     // 2026-10-21 on the S-eq plan, C4R2-O2 (i); C4R5-O1); the risk-free curve's where the dividend curve isn't dated
@@ -124,8 +147,35 @@ public sealed class HestonProcess : StochasticProcess
     internal double ModelTime(Date date)
     {
         Date origin = EarliestReferenceDate();
-        double t = origin == riskFreeRate.ReferenceDate ? Time(date) : riskFreeRate.DayCounter.YearFraction(origin, date);
+        double t = origin == riskFreeRate.ReferenceDate
+            ? riskFreeRate.DayCounter.YearFraction(riskFreeRate.ReferenceDate, date)
+            : riskFreeRate.DayCounter.YearFraction(origin, date);
         return Math.Max(t, 0.0);
+    }
+
+    // The model's clock, whose times ModelTime gives: the risk-free curve where the dividend curve isn't dated before
+    // it, else a flat curve on the earliest reference date and the risk-free curve's day counter.
+    internal TermStructure ModelClock()
+    {
+        Date origin = EarliestReferenceDate();
+        return origin == riskFreeRate.ReferenceDate ? riskFreeRate : new FlatForward(origin, 0.0, riskFreeRate.DayCounter);
+    }
+
+    // The process on an engine's clock (the S-van plan's VR1 (v) form; the S-hes plan's HR7 (vi)): a copy, of the same
+    // type, whose times, Time(date)'s among them, are the clock's, and whose curves are read at the instants those times
+    // denote, each accruing nothing before its own reference date (TermStructure.AccrualTime); the process itself where
+    // the clock shares the risk-free curve's times, so a market on that clock keeps QuantLib's bits. The variance's
+    // dynamics run in the clock's time.
+    internal HestonProcess OnClock(TermStructure clock)
+    {
+        if (clock.SharesTimes(riskFreeRate))
+        {
+            return this;
+        }
+
+        var copy = (HestonProcess)MemberwiseClone();
+        copy.clock = clock;
+        return copy;
     }
 
     /// <inheritdoc/>
@@ -138,7 +188,7 @@ public sealed class HestonProcess : StochasticProcess
 
         return new Vector(
         [
-            riskFreeRate.ForwardRate(t, t, Compounding.Continuous).Rate
+            RiskFreeForwardRate(t, t)
                 - DividendRate(t, t)
                 - (0.5 * vol * vol),
             Kappa * (Theta - (scheme == HestonProcessDiscretization.PartialTruncation ? x[1] : vol * vol)),
@@ -282,6 +332,12 @@ public sealed class HestonProcess : StochasticProcess
     {
         ArgumentNullException.ThrowIfNull(x0);
         ArgumentNullException.ThrowIfNull(dw);
+        return EvolveHeston(t0, x0, dt, dw);
+    }
+
+    // QuantLib's HestonProcess::evolve, non-virtual, so a derived process's in-place step can fall back to it alone
+    private Vector EvolveHeston(double t0, Vector x0, double dt, Vector dw)
+    {
         var retVal = new Vector(2);
         double vol, vol2, mu, nu, dy;
 
@@ -338,7 +394,7 @@ public sealed class HestonProcess : StochasticProcess
                 break;
             case HestonProcessDiscretization.QuadraticExponential:
             case HestonProcessDiscretization.QuadraticExponentialMartingale:
-                EvolveQuadraticExponential(t0, x0, dt, dw, retVal);
+                EvolveQuadraticExponential(t0, x0.AsSpan(), dt, dw.AsSpan(), retVal.AsSpan(), false);
                 break;
             case HestonProcessDiscretization.BroadieKayaExactSchemeLobatto:
             case HestonProcessDiscretization.BroadieKayaExactSchemeLaguerre:
@@ -371,6 +427,60 @@ public sealed class HestonProcess : StochasticProcess
         return retVal;
     }
 
+    /// <inheritdoc/>
+    /// <remarks>The truncation, reflection and quadratic-exponential schemes step without allocating, by QuantLib's
+    /// arithmetic, so the values are <see cref="Evolve(double, Vector, double, Vector)"/>'s bit for bit; the exact
+    /// schemes step through it.</remarks>
+    /// <exception cref="NanoQLException">
+    /// The quadratic-exponential martingale correction has no solution ("illegal value"), or the variance's law can't
+    /// be inverted.
+    /// </exception>
+    public override void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result)
+    {
+        double vol, vol2, mu, nu;
+
+        double sdt = Math.Sqrt(dt);
+        double sqrhov = Math.Sqrt(1.0 - (Rho * Rho));
+
+        switch (scheme)
+        {
+            case HestonProcessDiscretization.PartialTruncation:
+                vol = x0[1] > 0.0 ? Math.Sqrt(x0[1]) : 0.0;
+                vol2 = Sigma * vol;
+                mu = ForwardDriftInPlace(t0, dt) - (0.5 * vol * vol);
+                nu = Kappa * (Theta - x0[1]);
+
+                result[0] = x0[0] * Math.Exp((mu * dt) + (vol * dw[0] * sdt));
+                result[1] = x0[1] + (nu * dt) + (vol2 * sdt * ((Rho * dw[0]) + (sqrhov * dw[1])));
+                break;
+            case HestonProcessDiscretization.FullTruncation:
+                vol = x0[1] > 0.0 ? Math.Sqrt(x0[1]) : 0.0;
+                vol2 = Sigma * vol;
+                mu = ForwardDriftInPlace(t0, dt) - (0.5 * vol * vol);
+                nu = Kappa * (Theta - (vol * vol));
+
+                result[0] = x0[0] * Math.Exp((mu * dt) + (vol * dw[0] * sdt));
+                result[1] = x0[1] + (nu * dt) + (vol2 * sdt * ((Rho * dw[0]) + (sqrhov * dw[1])));
+                break;
+            case HestonProcessDiscretization.Reflection:
+                vol = Math.Sqrt(Math.Abs(x0[1]));
+                vol2 = Sigma * vol;
+                mu = ForwardDriftInPlace(t0, dt) - (0.5 * vol * vol);
+                nu = Kappa * (Theta - (vol * vol));
+
+                result[0] = x0[0] * Math.Exp((mu * dt) + (vol * dw[0] * sdt));
+                result[1] = (vol * vol) + (nu * dt) + (vol2 * sdt * ((Rho * dw[0]) + (sqrhov * dw[1])));
+                break;
+            case HestonProcessDiscretization.QuadraticExponential:
+            case HestonProcessDiscretization.QuadraticExponentialMartingale:
+                EvolveQuadraticExponential(t0, x0, dt, dw, result, true);
+                break;
+            default:
+                EvolveHeston(t0, new Vector(x0), dt, new Vector(dw)).AsSpan().CopyTo(result);
+                break;
+        }
+    }
+
     /// <summary>The time of a date: the risk-free curve's year fraction from its reference date.</summary>
     /// <param name="date">The date.</param>
     /// <returns>The time.</returns>
@@ -378,7 +488,9 @@ public sealed class HestonProcess : StochasticProcess
     public override double Time(Date date)
     {
         Date.ThrowIfDefault(date, nameof(date));
-        return riskFreeRate.DayCounter.YearFraction(riskFreeRate.ReferenceDate, date);
+        return clock is not null
+            ? clock.TimeFromReference(date)
+            : riskFreeRate.DayCounter.YearFraction(riskFreeRate.ReferenceDate, date);
     }
 
     // std::max and std::min
@@ -536,7 +648,9 @@ public sealed class HestonProcess : StochasticProcess
         }
     }
 
-    private void EvolveQuadraticExponential(double t0, Vector x0, double dt, Vector dw, Vector retVal)
+    // inPlace reads the drift's rates without building QuantLib's rate objects, the same bits
+    private void EvolveQuadraticExponential(
+        double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> retVal, bool inPlace)
     {
         // for details of the quadratic exponential discretization scheme
         // see Leif Andersen,
@@ -580,7 +694,7 @@ public sealed class HestonProcess : StochasticProcess
         {
             double p = (psi - 1) / (psi + 1);
             double beta = (1 - p) / m;
-            double u = new CumulativeNormalDistribution().Evaluate(dw[1]);
+            double u = CumNormal.Evaluate(dw[1]);
 
             if (scheme == HestonProcessDiscretization.QuadraticExponentialMartingale)
             {
@@ -596,7 +710,7 @@ public sealed class HestonProcess : StochasticProcess
             retVal[1] = u <= p ? 0.0 : Math.Log((1 - p) / (1 - u)) / beta;
         }
 
-        double mu = ForwardDrift(t0, dt);
+        double mu = inPlace ? ForwardDriftInPlace(t0, dt) : ForwardDrift(t0, dt);
 
         retVal[0] = x0[0] * Math.Exp((mu * dt) + k0 + (k1 * x0[1]) + (k2 * retVal[1])
             + (Math.Sqrt((k3 * x0[1]) + (k4 * retVal[1])) * dw[0]));
@@ -604,15 +718,40 @@ public sealed class HestonProcess : StochasticProcess
 
     // r − q over [t0, t0 + dt], continuously compounded
     private double ForwardDrift(double t0, double dt) =>
-        riskFreeRate.ForwardRate(t0, t0 + dt, Compounding.Continuous).Rate - DividendRate(t0, t0 + dt);
+        RiskFreeForwardRate(t0, t0 + dt) - DividendRate(t0, t0 + dt);
+
+    // ForwardDrift's value without QuantLib's rate objects (YieldTermStructure.ContinuousForwardRate, the same
+    // arithmetic), for the in-place step
+    private double ForwardDriftInPlace(double t0, double dt)
+    {
+        double t1 = t0 + dt;
+        double r = clock is not null
+            ? riskFreeRate.ContinuousForwardRateAt(clock, t0, t1)
+            : riskFreeRate.ContinuousForwardRate(t0, t1);
+        double q = clock is not null
+            ? dividendYield.ContinuousForwardRateAt(clock, t0, t1)
+            : dividendYield.SharesTimes(riskFreeRate)
+                ? dividendYield.ContinuousForwardRate(t0, t1)
+                : dividendYield.ContinuousForwardRateAt(riskFreeRate, t0, t1);
+        return r - q;
+    }
+
+    // r over [t1, t2]: QuantLib's read, or on the Monte Carlo engine's clock at the instants its times denote
+    private double RiskFreeForwardRate(double t1, double t2) =>
+        clock is not null
+            ? riskFreeRate.ContinuousForwardRateAt(clock, t1, t2)
+            : riskFreeRate.ForwardRate(t1, t2, Compounding.Continuous).Rate;
 
     // q over [t1, t2] on the risk-free curve's clock: QuantLib's read where the dividend curve shares its times;
     // otherwise at the instants they denote, nothing accruing before the curve's reference date (the user's rulings of
-    // 2026-10-21 on the S-eq plan, C4-O2 and C4R2-O2; TermStructure.AccrualTime)
+    // 2026-10-21 on the S-eq plan, C4-O2 and C4R2-O2; TermStructure.AccrualTime); on the Monte Carlo engine's clock at
+    // the instants its times denote
     private double DividendRate(double t1, double t2) =>
-        dividendYield.SharesTimes(riskFreeRate)
-            ? dividendYield.ForwardRate(t1, t2, Compounding.Continuous).Rate
-            : dividendYield.ContinuousForwardRateAt(riskFreeRate, t1, t2);
+        clock is not null
+            ? dividendYield.ContinuousForwardRateAt(clock, t1, t2)
+            : dividendYield.SharesTimes(riskFreeRate)
+                ? dividendYield.ForwardRate(t1, t2, Compounding.Continuous).Rate
+                : dividendYield.ContinuousForwardRateAt(riskFreeRate, t1, t2);
 
     private double VarianceDistribution(double v, double dw, double dt)
     {

@@ -23,6 +23,12 @@ namespace NanoQL;
 /// <see cref="Expectation"/>, <see cref="StdDeviation"/> and <see cref="Covariance"/> default to the process's
 /// discretization, as QuantLib's do; a process built without one overrides the three, or they refuse.
 /// </para>
+/// <para>
+/// <see cref="InitialValues(Span{double})"/> and <see cref="Evolve(double, ReadOnlySpan{double}, double,
+/// ReadOnlySpan{double}, Span{double})"/> are the in-place forms the multi-dimensional Monte Carlo loop steps through
+/// (the S-hes plan's HR2): each defaults to its allocating form and a copy, so a process that doesn't override them
+/// keeps its bits; a process overrides them to step without allocating, by QuantLib's arithmetic.
+/// </para>
 /// </remarks>
 public abstract class StochasticProcess
 {
@@ -51,6 +57,14 @@ public abstract class StochasticProcess
     /// <summary>The initial values of the state variables.</summary>
     /// <returns>A new vector.</returns>
     public abstract Vector InitialValues();
+
+    /// <summary>
+    /// The initial values of the state variables, written into the caller's span; by default
+    /// <see cref="InitialValues()"/>'s values, copied.
+    /// </summary>
+    /// <param name="result">The values, of the process's <see cref="Size"/> at least.</param>
+    /// <exception cref="ArgumentException"><paramref name="result"/> is shorter than the process's size.</exception>
+    public virtual void InitialValues(Span<double> result) => CopyInto(InitialValues(), result);
 
     /// <summary>The drift part of the equation, μ(t, x_t).</summary>
     /// <param name="t">The time.</param>
@@ -117,6 +131,20 @@ public abstract class StochasticProcess
         return Apply(Expectation(t0, x0, dt), StdDeviation(t0, x0, dt) * dw);
     }
 
+    /// <summary>
+    /// The state after a time interval Δt, written into the caller's span: the in-place form of
+    /// <see cref="Evolve(double, Vector, double, Vector)"/>, by default its values, copied.
+    /// </summary>
+    /// <param name="t0">The start of the interval.</param>
+    /// <param name="x0">The state at its start, of the process's <see cref="Size"/>.</param>
+    /// <param name="dt">The interval's length.</param>
+    /// <param name="dw">The Brownian increments, one per factor.</param>
+    /// <param name="result">The state at the interval's end, of the process's size at least; it mustn't overlap
+    /// <paramref name="x0"/> or <paramref name="dw"/>.</param>
+    /// <exception cref="ArgumentException">The sizes don't match.</exception>
+    public virtual void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result) =>
+        CopyInto(Evolve(t0, new Vector(x0), dt, new Vector(dw)), result);
+
     /// <summary>Applies a change to the state; by default x + Δx.</summary>
     /// <param name="x0">The state.</param>
     /// <param name="dx">The change.</param>
@@ -146,4 +174,15 @@ public abstract class StochasticProcess
     // QuantLib dereferences its discretization pointer, which is undefined when the process was built without one.
     private StochasticProcessDiscretization Discretization() =>
         discretization ?? throw new NanoQLException("no discretization given");
+
+    // The in-place forms' default: an allocating form's vector, copied into the caller's span.
+    private static void CopyInto(Vector values, Span<double> result)
+    {
+        if (result.Length < values.Size)
+        {
+            throw new ArgumentException("the result is shorter than the process's state", nameof(result));
+        }
+
+        values.AsSpan().CopyTo(result);
+    }
 }

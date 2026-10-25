@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Vectors;
 /// <see cref="StochasticProcess1D"/>'s defaults the process doesn't override (<see cref="StochasticProcess1D.Evolve(double, double, double, double)"/>,
 /// <see cref="StochasticProcess1D.Apply(double, double)"/>) and the multi-dimensional interface it implements on
 /// vectors and matrices of size 1 (<see cref="StochasticProcess.Size"/>, the base's <see cref="StochasticProcess.Factors"/>,
-/// <see cref="StochasticProcess.InitialValues"/>, and the vector forms of drift, diffusion, expectation, standard
+/// <see cref="StochasticProcess.InitialValues()"/>, and the vector forms of drift, diffusion, expectation, standard
 /// deviation, covariance and evolve). A matrix compares as its rows.
 /// </summary>
 [Trait("Oracle", "QuantLib")]

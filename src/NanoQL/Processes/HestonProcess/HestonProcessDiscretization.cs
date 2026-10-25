@@ -6,7 +6,7 @@
 
 namespace NanoQL.Processes;
 
-/// <summary>The schemes <see cref="HestonProcess.Evolve"/> steps by: QuantLib's
+/// <summary>The schemes <see cref="HestonProcess.Evolve(double, Numerics.Vector, double, Numerics.Vector)"/> steps by: QuantLib's
 /// <c>HestonProcess::Discretization</c>.</summary>
 public enum HestonProcessDiscretization
 {

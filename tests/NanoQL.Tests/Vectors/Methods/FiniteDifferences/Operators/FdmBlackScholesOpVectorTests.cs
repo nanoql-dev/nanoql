@@ -67,7 +67,7 @@ public class FdmBlackScholesOpVectorTests
     }
 
     // A sparse matrix's stored elements in storage order, as the wheel's row_idx, col_idx and data list them.
-    private static (int[] Rows, int[] Columns, double[] Values) Stored(SparseMatrix m)
+    internal static (int[] Rows, int[] Columns, double[] Values) Stored(SparseMatrix m)
     {
         var rows = new List<int>();
         for (int i = 0; i + 1 < m.Filled1; ++i)

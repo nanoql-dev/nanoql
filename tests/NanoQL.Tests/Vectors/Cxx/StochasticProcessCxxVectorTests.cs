@@ -14,7 +14,7 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's StochasticProcess vectors, <c>tests/vectors/cxx/stochasticprocess.json</c>: on
 /// Ornstein-Uhlenbeck processes, the vector form of <see cref="StochasticProcess.Apply"/> that
 /// <see cref="StochasticProcess1D"/> implements, and the base's <see cref="StochasticProcess.Time"/>, which refuses;
-/// and the base's own defaults (<see cref="StochasticProcess.Evolve"/>, <see cref="StochasticProcess.Apply"/>,
+/// and the base's own defaults (<see cref="StochasticProcess.Evolve(double, Vector, double, Vector)"/>, <see cref="StochasticProcess.Apply"/>,
 /// <see cref="StochasticProcess.Factors"/>) on the harness's multi-dimensional process, which
 /// <see cref="LinearProcess"/> repeats.
 /// </summary>
