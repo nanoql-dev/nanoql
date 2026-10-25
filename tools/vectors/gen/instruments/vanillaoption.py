@@ -18,7 +18,10 @@ oneassetoption.hpp, .cpp, europeanoption.hpp, .cpp) and its implied volatility (
 The stability filter of the S-eq plan's S7R6 runs on each solve: the solve is redone with the target price, the spot
 and the two curves' rates moved one ulp up, then down, together and each alone, and the implied volatility is written
 only where every move leaves it within 1e-12 x max(|a|, |b|, 1), or throwing where it throws; the generator prints
-"dropped n of m outputs" per solve and for the file.
+"dropped n of m outputs" per solve and for the file. An American exercisable today whose finite-difference value at
+the bracket's lower volatility is below its exercise value has its implied volatility left out too: nanoql floors that
+value, QuantLib's master's #2914 (the S-van plan's VR5 (v), tests/NanoQL.Tests/Divergences/
+AmericanExerciseAtTheRootTests.cs), and Brent's method takes another path.
 
 The process specs are tools/vectors/gen/processes/blackscholesprocess.py's, a payoff spec
 tools/vectors/gen/pricingengines/blackcalculator.py's, a dividend tools/vectors/gen/pricingengines/vanilla/
@@ -115,6 +118,19 @@ def solve(payoff_spec, days, pspec, dividends, target, args, kind="European"):
     return v.attempt(lambda: o.impliedVolatility(target, p, *a))
 
 
+def floored(payoff_spec, days, pspec, dividends, args, kind):
+    """Whether nanoql's engine floors the solver's first trial, QuantLib's master's #2914 (the S-van plan's VR5 (v)):
+    an American exercisable today whose finite-difference value at the lower volatility is below its exercise value."""
+    if kind != "American":
+        return False
+    o = option(payoff_spec, days, european=False, kind=kind)
+    p = bsp.process(market(pspec["x0"], pspec["riskFree"]["forward"], pspec["dividend"]["forward"], args["minVol"],
+                           pspec["type"]))
+    o.setPricingEngine(ql.FdBlackScholesVanillaEngine(p, [ade.dividend(d) for d in dividends], 100, 100)
+                       if dividends else ql.FdBlackScholesVanillaEngine(p, 100, 100))
+    return o.NPV() < bc.payoff(payoff_spec)(pspec["x0"])
+
+
 def moved(x, direction):
     return math.nextafter(x, direction)
 
@@ -182,10 +198,10 @@ def cases():
         pspec = market(x0, r, q, vol, kind)
         target = fixed_target if fixed_target is not None else npv(payoff_spec, days, pspec, dividends, ex_kind)
         base = solve(payoff_spec, days, pspec, dividends, target, args, ex_kind)
-        keep = True
+        keep = not floored(payoff_spec, days, pspec, dividends, args, ex_kind)
         inputs = [target, x0, r, q]
-        moves = [[moved(x, d) for x in inputs] for d in (math.inf, -math.inf)]
-        for i in range(len(inputs)):
+        moves = [[moved(x, d) for x in inputs] for d in (math.inf, -math.inf)] if keep else []
+        for i in range(len(inputs) if keep else 0):
             for d in (math.inf, -math.inf):
                 m = list(inputs)
                 m[i] = moved(inputs[i], d)

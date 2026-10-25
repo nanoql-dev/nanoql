@@ -90,6 +90,17 @@ Facts:
 - `AnExerciseOnlyAtMaturityIsTheEuropean`
 - `TheConvertibleConvertsAtMaturity`
 
+## AmericanExerciseAtTheRootTests
+
+[`Divergences/AmericanExerciseAtTheRootTests.cs`](../tests/NanoQL.Tests/Divergences/AmericanExerciseAtTheRootTests.cs)
+
+American options worth exercising on the reference date, after QuantLib's master's #2879 and #2914 (R8's upstream rule; the S-van plan's VR5 (iv), (v)), which upstream's cases check (`AmericanOptionTests`). QuantLib 1.44's binomial engine reports the Black-Scholes theta from the tree's value and Greeks where the option is exercised at the root, where the intrinsic value is time-independent and the equation doesn't hold: 5.7500000000149 for a put at 115 on 100 and 9.149999999935266 for a call at 85, 91 days, on 201 Cox-Ross-Rubinstein steps; and its finite-difference engine's interpolant undershoots the exercise value between nodes, 9.999997372915146 for a call at 100 on 110 over 90 days (q 2%, σ 10%) on its default grid, below its intrinsic 10, which its implied volatility then can't reach ("root not bracketed: f[0.0001,4] -> [2.627085e-06,6.603111e+01]") [executed on the wheel: `scratchpad\c4\wheel_c4.py`]. nanoql's binomial theta is 0 at the root; its finite-difference value is floored at the exercise value where the holder can exercise on the clock's reference date, and the implied volatility returns its lower bound where the price error there is within rounding; elsewhere QuantLib's bits.
+
+Facts:
+
+- `TheBinomialThetaAtTheRootIsZero`
+- `TheFiniteDifferenceValueIsTheExerciseValueAndItsVolatilityTheLowerBound`
+
 ## AmericanPayoffAtExpiryKnockedOutTests
 
 [`Divergences/AmericanPayoffAtExpiryKnockedOutTests.cs`](../tests/NanoQL.Tests/Divergences/AmericanPayoffAtExpiryKnockedOutTests.cs)
@@ -1586,6 +1597,65 @@ Facts:
 - `OnStructuresDatedLaterTheBarrierEngineIsQuantLibsOnTheRestatedMarket`
 - `OnACurveSettlingLaterTheRebateEngineIsQuantLibsOnTheRestatedMarket`
 
+## FdCevNearOneTests
+
+[`Divergences/FdCevNearOneTests.cs`](../tests/NanoQL.Tests/Divergences/FdCevNearOneTests.cs)
+
+The finite-difference CEV and SABR engines near β = 1 (the S-van plan's VR10). QuantLib's mesher reads the CEV density's quantiles through Boost's non-central chi-squared, which throws within the band ("Series did not converge" at β 0.9999 on a year at α 0.75, f0 2.1; "beta can not be one" at 1) [executed: `scratchpad\c4\probe\fdcev_edges.cpp`]. Within |β − 1| < 1e-3 nanoql's mesher takes its bounds from the lognormal limit's quantiles, the CEV density at β = 1, and the engines' upper boundary is the analytic engine's value, Black's formula at Hagan's equivalent volatility there (`Divergences/CevNearOneTests.cs`). The checks: the lognormal's quantiles in closed form, and the analytic CEV engine.
+
+Facts:
+
+- `TheMeshersBoundsAreTheLognormalLimitsQuantiles`
+- `TheEnginesInTheBandAreTheAnalyticEngines`
+
+## FdCirModelTests
+
+[`Divergences/FdCirModelTests.cs`](../tests/NanoQL.Tests/Divergences/FdCirModelTests.cs)
+
+The finite-difference engine for a Black-Scholes equity under a Cox-Ingersoll-Ross short rate (the S-van plan's VR4 (xv) and VR8). QuantLib's operator's rate diffusion is σ²r where the CIR generator's is ½σ²r, and its covariance 2ρσ_Sσ where it is ρσ_Sσ√r (`fdmcirop.cpp:55-60`, `:74-82`): through its own machinery a cash-like put's implied bond is the CIR bond at σ√2 (0.8612436 at σ 0.15, where the CIR bond is 0.8609795 and at σ√2 0.8612489), it blows up (1e32 to 1e226) at ρ ±0.5 on its schemes for every σ, and at σ 0.3 even at ρ = 0; and its rate grid, the process's time-averaged quantiles, leaves the rate's path where it drifts or σ is small (3.58 to 15.7 where the deterministic-rate limit is 4.21 and 3.28) [executed by the S-van planner: VP26, VP45]. Its test's 4.275 is its own operator on its 10-step grid (4.27310 refined). nanoql's operator is the CIR generator's, its rate grid uniform on [0, max(upper, r₀, θ, E[r_T])], upper the last point of QuantLib's, where at r = 0 the equation is its own boundary condition, and its default scheme Hundsdorfer's, where QuantLib's modified Hundsdorfer blows up on fine grids when the rate drifts up fast. The checks: QuantLib's CIR model's closed-form bond (the rates part, every ρ); the deterministic-rate limit against Black's formula at the mean path's average rate; and a Monte Carlo of QuantLib's CIR process, the log spot's step exact given the rate's path and draws, for ρ ≠ 0 and the rising rate. Flat Actual/365 (Fixed) curves from 15 October 2026.
+
+Facts:
+
+- `ACashLikePutsBondIsTheCirModels`
+- `QuantLibsBondIsTheCirBondAtTwiceTheVariance`
+- `AtANonZeroCorrelationTheValueIsTheMonteCarlos`
+- `ARisingRateAtThirtyPercentIsTheMonteCarlos`
+- `TheDeterministicRateLimitIsBlacksFormula`
+- `TheDefaultSchemeHoldsTheFastDriftUp`
+
+## FdCirQuantoTests
+
+[`Divergences/FdCirQuantoTests.cs`](../tests/NanoQL.Tests/Divergences/FdCirQuantoTests.cs)
+
+The finite-difference CIR engine with a quanto helper (a run find of the S-van plan's C4, under R8). QuantLib's engine passes the helper to its equity mesher alone, and its operator takes none (`fdcirvanillaengine.cpp:60-63`, `fdmcirop.cpp`) [read], so a quanto prices without the quanto drift, on a mesher centred for it. nanoql's operator subtracts the helper's adjustment with the grid's short rate as the domestic one, r − q − ½v − (r − r_f + ρσσ_fx): the quanto drift r_f − q − ½v − ρσσ_fx, the domestic rate only discounting. QuantLib's check: as the rate's volatility goes to 0 with r₀ = θ the helper's domestic rate, the engine is QuantLib's finite-difference Black-Scholes engine on the same quanto helper.
+
+Facts:
+
+- `AsTheRatesVolatilityVanishesItIsTheBlackScholesQuanto`
+
+## FdSabrZeroNuTests
+
+[`Divergences/FdSabrZeroNuTests.cs`](../tests/NanoQL.Tests/Divergences/FdSabrZeroNuTests.cs)
+
+The finite-difference SABR engine at ν = 0 (the S-van plan's VR4 (xxxi), VD28). QuantLib's parameter check accepts ν = 0 (`sabr.cpp:157`), but the log volatility's grid collapses and its concentrating mesher refuses ("end must be larger than start", `fdsabrvanillaengine.cpp:87-95`) [read]; so it does at a tiny positive ν, where the grid's span is a few ulps of ln α or none, and a little above that it returns NaN [executed by the reviewer, C4's round 1]; at ν = 1e-8 it prices as the CEV engines. SABR at ν = 0 is the CEV process with α its volatility, and wherever ν√T is at most 1e-10·max(1, |ln α|) nanoql's engine prices on the finite-difference CEV engine with its own grids, damping steps, scaling, ε and scheme. QuantLib's check: its FD CEV engine, and its FD SABR engine at ν = 1e-8.
+
+Facts:
+
+- `AtZeroNuItIsTheCevEngine`
+- `AtATinyNuItIsTheCevEngine`
+
+## FdShoutSwingCirMismatchedTimesTests
+
+[`Divergences/FdShoutSwingCirMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/FdShoutSwingCirMismatchedTimesTests.cs)
+
+The shout, swing and CIR engines on structures dated differently (the mismatched-dates class; master Revision 58). QuantLib's engines run on the risk-free curve's times and read the dividend curve and the volatility at those times on their own clocks (`fdblackscholesshoutengine.cpp:65-73`, `fdsimplebsswingengine.cpp:47-77`, `fdcirvanillaengine.cpp:64-69`): on a risk-free curve settling two business days after the other structures, QuantLib's shout engine reads 14.261505884225283 and its swing engine 17.000771278512975 [executed on the wheel: `scratchpad\c4\wheel_mismatched.py`]. nanoql's run on `FdmBlackScholesOp.Clock`, from the earliest reference date, each structure accruing nothing before its own, as its finite-difference Black-Scholes engine does (`Divergences/FdmMismatchedTimesTests.cs`). QuantLib's check: its own engines on the market restated from today, the risk-free curve discounting nothing before its date; for the CIR engine, whose QuantLib values are another model's (`Divergences/FdCirModelTests.cs`), nanoql's own engine on that market.
+
+Facts:
+
+- `TheShoutEnginePricesTheRestatedMarket`
+- `TheSwingEnginePricesTheRestatedMarket`
+- `TheCirEnginePricesTheRestatedMarket`
+
 ## FdmBoundaryDirectionTests
 
 [`Divergences/FdmBoundaryDirectionTests.cs`](../tests/NanoQL.Tests/Divergences/FdmBoundaryDirectionTests.cs)
@@ -1596,6 +1666,16 @@ Facts:
 
 - `TheIndicesRefuseADirectionOutsideTheLayout`
 - `TheDirichletBoundaryRefusesADirectionOutsideTheLayout`
+
+## FdmCevOpDirectionTests
+
+[`Divergences/FdmCevOpDirectionTests.cs`](../tests/NanoQL.Tests/Divergences/FdmCevOpDirectionTests.cs)
+
+`FdmCEVOp` in a direction other than 0 (the S-van plan's VR4 (xiv)). QuantLib's operator builds its second derivative on direction 0 whatever its direction (`fdmcevop.cpp:39-40`), so that in direction 1 of a two-dimensional mesher it differentiates along the other axis, with the CEV coefficients of direction 1: it differs from its own operator in direction 0 of the transposed mesher by 1.107 [executed by the S-van planner: VP25]. nanoql's operator differentiates along the direction given. QuantLib's check: its operator in direction 0, its engine's, on the transposed mesher, whose bits nanoql's direction 0 keeps (the operator's vectors).
+
+Facts:
+
+- `InDirectionOneItIsDirectionZeroOnTheTransposedMesher`
 
 ## FdmDividendHandler3dTests
 
@@ -3327,6 +3407,17 @@ Facts:
 
 - `ADrawShorterThanTheDimensionIsRefused`
 
+## ShoutDividendStrikeTests
+
+[`Divergences/ShoutDividendStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/ShoutDividendStrikeTests.cs)
+
+The finite-difference shout engine with a dividend between the shout and expiry (the S-van plan's VR4 (xxx)). QuantLib's inner value takes the intrinsic value at the spot, the escrowed level less the dividend adjustment, but strikes the residual option at the escrowed level (`fdmshoutloginnervaluecalculator.cpp:47-73`), handing the dividends' present value back: on `testLargeDividendShoutNPV`'s option, a call at 80 on 100 with a dividend of 30 at three months, its engine gives 24.90999 = 20 + 4.90999, a shout now whose residual is at the money on the escrowed 70 [read; executed by the reviewer, the S-van plan's round 1, p08], and its test's reference, a shout without dividends up to the dividend date, prices the same handed-back residual. A shout at τ pays max(S_T − K, S_τ − K) = (S_τ − K) + (S_T − S_τ)⁺, so the residual is struck at the spot S_τ. nanoql strikes it there, its volatility read there; without dividends the two levels are one, and QuantLib's bits stand. The checks: the payoff identity at t₀, and, independently, a binomial programme of the same stopping problem on the escrowed process.
+
+Facts:
+
+- `AShoutNowIsTheIntrinsicValueAndACallStruckAtTheSpot`
+- `TheValueIsABinomialProgrammesOfTheStoppingProblem`
+
 ## SimplexEmptyInitialValueTests
 
 [`Divergences/SimplexEmptyInitialValueTests.cs`](../tests/NanoQL.Tests/Divergences/SimplexEmptyInitialValueTests.cs)
@@ -3649,6 +3740,28 @@ A discrete swaption volatility structure on no option tenors, no option dates or
 Facts:
 
 - `AnEmptyGridIsRefused`
+
+## SwingExerciseDateTimesTests
+
+[`Divergences/SwingExerciseDateTimesTests.cs`](../tests/NanoQL.Tests/Divergences/SwingExerciseDateTimesTests.cs)
+
+`SwingExercise`'s date times (run finds of the S-van plan's C4, under R8). QuantLib's Bermudan base sorts the dates and leaves the seconds in the order given (`vanillaswingoption.cpp:52-69`), so date times given out of order pair each second with another date: days 3 and 1 at 0 and 43,200 seconds become day 1 at 0 and day 3 at 43,200; and its fixed step moves one day whenever the seconds pass a day (`vanillaswingoption.cpp:37-48`), so a two-day step from day 1 to day 9 exercises on each of days 1 to 9 [executed: `scratchpad\c4\probe\swing_seconds.cpp`]. nanoql sorts the date times together, and a step moves as many days as it holds. Given in order, and at steps under a day, QuantLib's date times.
+
+Facts:
+
+- `DateTimesGivenOutOfOrderKeepTheirPairs`
+- `AStepOfDaysMovesThatManyDays`
+
+## SwingExerciseSecondsTests
+
+[`Divergences/SwingExerciseSecondsTests.cs`](../tests/NanoQL.Tests/Divergences/SwingExerciseSecondsTests.cs)
+
+The simple swing engine on exercises within a day (the S-van plan's VR4 (xvi)). QuantLib's engine times each exercise by its date (`fdsimplebsswingengine.cpp:72-76`) where `SwingExercise::exerciseTimes` adds its seconds (`vanillaswingoption.cpp:83-97`): 60 half-daily exercises price as the 30 daily ones, 6.0120197306323737 with 5 rights and 11.479815522463735 with 10, on a put forward at 30, spot 30, r 14%, q 2%, σ 40%, Actual/Actual (ISDA) from 15 October 2026 [executed: `scratchpad\c4\probe\swing_seconds.cpp`]. nanoql times them by the exercise's date times on the engine's clock, the maturity the last of them. The check, independent of QuantLib: with every right forced (the minimum and the maximum the number of exercises) the value is the sum of the forward payoffs' values at the exercise times, K·D(t) − S₀·D_q(t), a closed form.
+
+Facts:
+
+- `WithEveryRightForcedTheValueIsTheForwardsAtTheExerciseTimes`
+- `HalfDailyExercisesAreWorthMoreThanDailyOnes`
 
 ## SymmetricSchurNaNSortTests
 

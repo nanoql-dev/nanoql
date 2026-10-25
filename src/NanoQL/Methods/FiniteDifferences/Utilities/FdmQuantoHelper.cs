@@ -127,4 +127,18 @@ public sealed class FdmQuantoHelper
             result[i] = rDomestic - rForeign + (equityVol[i] * fxVol * EquityFxCorrelation);
         }
     }
+
+    // The foreign forward rate and the exchange rate's volatility over the instants two times on another structure's
+    // clock denote, QuantoAdjustmentAt's reads: for an engine whose domestic rate is its own state, the CIR engine's.
+    internal (double RForeign, double FxVol) ForeignAt(TermStructure clock, double t1, double t2)
+    {
+        if (FTS.SharesTimes(clock) && FxVolTS.SharesTimes(clock))
+        {
+            return (FTS.ContinuousForwardRate(t1, t2), FxVolTS.BlackForwardVol(t1, t2, ExchRateATMlevel));
+        }
+
+        return (
+            FTS.ContinuousForwardRateAt(clock, t1, t2),
+            Math.Sqrt(FxVolTS.BlackForwardVarianceAt(clock, t1, t2, ExchRateATMlevel) / (t2 - t1)));
+    }
 }

@@ -124,14 +124,14 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/DayCounters/YearFractionToDateFunctions.cs`: `roundToDayStart`, which waits for S-exo's spread option tests, its only callers.
 - `src/NanoQL/Utilities/DataParsers/DateParser.cs`: `parseFormatted`, not ported: a `DateOnly`'s `ParseExact` does its job.
-- `tests/NanoQL.Tests/TestSuite/AmericanOptionTests.cs`: the shout cases, which wait for S-van's shout engine.
 - `tests/NanoQL.Tests/TestSuite/BarrierOptionTests.cs`: `testHaugValues`' binomial checks, which wait for S-bar's `BinomialBarrierEngine`; `testBabsiriValues`' and `testBeagleholeValues`' Monte Carlo checks, which wait for S-bar's `MCBarrierEngine`; `testDividendBarrierOption`'s and `testDividendBarrierOptionWithDividendsPastMaturity`'s Heston checks, which wait for batch 4's `FdHestonBarrierEngine`; `testLocalVolAndHestonComparison`, which waits for batch 4's local volatility and Heston barrier engines; and the four perturbative cases, which wait for S-xeq's `PerturbativeBarrierOptionEngine`.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for S-mmp's `SequenceStatistics`.
 - `tests/NanoQL.Tests/TestSuite/CmsSpreadTests.cs`: `testCouponPricing`, which waits for S-xrt's `LognormalCmsSpreadPricer`.
 - `tests/NanoQL.Tests/TestSuite/CreditDefaultSwapTests.cs`: `testCachedValue`'s integral-engine checks, which wait for S-core's `IntegralCdsEngine`.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, Student t and stochastic-collocation cases, whose distributions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/DividendOptionTests.cs`: the cash-dividend engine's cases, which wait for S-exo's `CashDividendEuropeanEngine`.
-- `tests/NanoQL.Tests/TestSuite/EuropeanOptionTests.cs`: `testFFTEngines` (S-xeq) and `testFdEnginesWithNonStrikedPayoff` (S-hes and S-van).
+- `tests/NanoQL.Tests/TestSuite/EuropeanOptionTests.cs`: `testFFTEngines` (S-xeq) and `testFdEnginesWithNonStrikedPayoff` (S-hes).
+- `tests/NanoQL.Tests/TestSuite/FdSabrTests.cs`: `testFdmSabrOp` and `testOosterleeTestCaseIV`, which wait for S-core's Richardson extrapolation and Sobol Brownian bridge sequences.
 - `tests/NanoQL.Tests/TestSuite/FdmLinearOpTests.cs`: the uniform-grid mesher, derivative-map, triple-band solve, Heston and iterative-solver cases, which wait for S-core; `testFdmHestonHullWhiteOp`, which waits for S-exo; and `testFdmMesherIntegral`, which waits for S-hes.
 - `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testMomentBasedGaussianPolynomial` and `testGaussLaguerreCosinePolynomial`, which wait for S-core; `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/HestonModelTests.cs`: the COS, expansion, exponential-fitting, PDF and time-dependent engines' cases, the finite-difference Heston cases, `testMcVsCached` and the Heston Black-volatility surface's cases (S-hes), `testFdBarrierVsCached` (S-bar), `testAllIntegrationMethods` and `testCosHestonCumulants` (S-core), `testAndersenPiterbargControlVariateIntegrand` (S-exo), and `testAndersenPiterbargConvergence` (S-van).
@@ -149,5 +149,6 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position, secant and Halley cases, whose solvers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/StatsTests.cs`: `testSequenceStatistics` and `testConvergenceStatistics`, which wait for S-mmp's sequence and convergence statistics.
+- `tests/NanoQL.Tests/TestSuite/SwingOptionTests.cs`: every case but `testFdBSSwingOption`, which wait for S-xeq's extended Ornstein-Uhlenbeck processes, jump mesher and engines.
 - `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, S-bar).
 - `tests/NanoQL.Tests/TestSuite/VarianceSwapsTests.cs`: `testMCVarianceSwap`, which waits for S-exo's `MCVarianceSwapEngine`.

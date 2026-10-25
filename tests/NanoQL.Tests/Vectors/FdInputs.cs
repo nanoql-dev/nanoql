@@ -76,6 +76,17 @@ internal static class FdInputs
                     spec.GetProperty("tAvgSteps").GetInt32(),
                     Real(spec, "epsilon"),
                     point.ValueKind == JsonValueKind.Null ? null : point.GetDouble());
+            case "CEV":
+                JsonElement cev = spec.GetProperty("cPoint");
+                return new FdmCEV1dMesher(
+                    spec.GetProperty("size").GetInt32(),
+                    Real(spec, "f0"),
+                    Real(spec, "alpha"),
+                    Real(spec, "beta"),
+                    Real(spec, "maturity"),
+                    Real(spec, "eps"),
+                    Real(spec, "scaleFactor"),
+                    (NullableReal(cev[0]), NullableReal(cev[1])));
             default:
                 throw new InvalidOperationException($"unknown mesher '{type}'");
         }

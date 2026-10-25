@@ -9,6 +9,7 @@
 
 using NanoQL.Instruments;
 using NanoQL.Methods;
+using NanoQL.Numerics;
 using NanoQL.Processes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
@@ -205,12 +206,30 @@ public static class BinomialVanillaEngine
         discretized.Rollback(0.0);
         double p0 = discretized.PresentValue();
 
+        double? theta;
+        if (delta is not double d || gamma is not double g)
+        {
+            theta = null;
+        }
+        else if (option.Exercise.Type == ExerciseType.American
+            && option.Exercise.Date(0) <= origin
+            && ComparisonFunctions.CloseEnough(p0, payoff.Evaluate(s0)))
+        {
+            // Allow for roundoff when identifying exercise at the root.
+            // The intrinsic value is time-independent; the PDE does not hold here.
+            theta = 0.0;
+        }
+        else
+        {
+            theta = GreeksFunctions.BlackScholesTheta(process, p0, d, g, maturityDate);
+        }
+
         return new OneAssetOptionResults
         {
             NPV = p0,
             Delta = delta,
             Gamma = gamma,
-            Theta = delta is double d && gamma is double g ? GreeksFunctions.BlackScholesTheta(process, p0, d, g, maturityDate) : null,
+            Theta = theta,
         };
     }
 }

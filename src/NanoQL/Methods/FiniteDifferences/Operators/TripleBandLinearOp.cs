@@ -425,6 +425,34 @@ public class TripleBandLinearOp : FdmLinearOp
     }
 
     /// <summary>
+    /// Sets this operator, in place, to diag(<paramref name="a"/>)·<paramref name="x"/> +
+    /// diag(<paramref name="u"/>)·<paramref name="y"/> + diag(<paramref name="b"/>): QuantLib's
+    /// <c>axpyb(a, x, y.mult(u), b)</c> with <c>mult</c>'s temporary operator written straight into this one, by the
+    /// same arithmetic in the same order, so that a time step allocates nothing.
+    /// </summary>
+    /// <param name="a">The scales of <paramref name="x"/>'s rows: one value for all, or one per point.</param>
+    /// <param name="x">The operator scaled by <paramref name="a"/>.</param>
+    /// <param name="y">The operator scaled by <paramref name="u"/>.</param>
+    /// <param name="u">The scales of <paramref name="y"/>'s rows: one value for all, or one per point.</param>
+    /// <param name="b">The diagonal added: one value for all, or one per point.</param>
+    internal void SetAxpybOfMult(
+        ReadOnlySpan<double> a, TripleBandLinearOp x, TripleBandLinearOp y, ReadOnlySpan<double> u, ReadOnlySpan<double> b)
+    {
+        int size = N;
+        int ainc = (a.Length > 1) ? 1 : 0;
+        int uinc = (u.Length > 1) ? 1 : 0;
+        int binc = (b.Length > 1) ? 1 : 0;
+        for (int i = 0; i < size; ++i)
+        {
+            double s = a[i * ainc];
+            double h = u[i * uinc];
+            diag[i] = (y.diag[i] * h) + (s * x.diag[i]) + b[i * binc];
+            lower[i] = (y.lower[i] * h) + (s * x.lower[i]);
+            upper[i] = (y.upper[i] * h) + (s * x.upper[i]);
+        }
+    }
+
+    /// <summary>
     /// Sets this operator, in place, to <paramref name="y"/> + diag(<paramref name="b"/>): QuantLib's
     /// <c>axpyb(Array(), x, y, b)</c>, whose x it doesn't read, by the same arithmetic, so that a time step allocates
     /// nothing.

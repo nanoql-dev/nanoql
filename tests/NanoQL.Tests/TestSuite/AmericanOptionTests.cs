@@ -5,12 +5,12 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/americanoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testFdShoutGreeks, testFDShoutNPV, testZeroVolFDShoutNPV, testLargeDividendShoutNPV (S-van's shout engine)
-// Moved: testBjerksundStenslandAmericanGreeks line 2437 (Divergences/BjerksundStenslandTriggerTests.cs)
+// Moved: testBjerksundStenslandAmericanGreeks line 2437 (Divergences/BjerksundStenslandTriggerTests.cs); testLargeDividendShoutNPV line 1042 (Divergences/ShoutDividendStrikeTests.cs)
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
 using NanoQL.Instruments;
+using NanoQL.Methods;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
@@ -24,6 +24,10 @@ public class AmericanOptionTests
 {
     // QL_EPSILON (qldefines.hpp): machine epsilon.
     private const double QL_EPSILON = 2.220446049250313e-16;
+
+    // testLargeDividendShoutNPV's moved value: the fixed engine's on the case's grid, 100 × 400 (the S-van plan's VR4
+    // (xxx)), QuantLib's 24.90999 recorded in Divergences/ShoutDividendStrikeTests.cs
+    private const double MovedLargeDividendShoutNPV = 20.116257458140247;
 
     // testQdAmericanEngines' random cases' reference values, QuantLib's PDE values
     private static readonly double[] QdPdeValues =
@@ -195,7 +199,153 @@ public class AmericanOptionTests
     public void TestFdAmericanGreeks()
     {
         // Testing finite-differences American option greeks...
-        TestFdGreeks();
+        TestFdGreeks((option, context, process) => FdBlackScholesVanillaEngine.Calculate(option, context, process, tGrid: 50));
+    }
+
+    [Fact]
+    public void TestFdShoutGreeks()
+    {
+        // Testing finite-differences shout option greeks...
+        TestFdGreeks((option, context, process) => FdBlackScholesShoutEngine.Calculate(option, context, process, tGrid: 50));
+    }
+
+    [Fact]
+    public void TestFDShoutNPV()
+    {
+        // Testing finite-differences shout option pricing...
+        DayCounter dc = new Actual365Fixed();
+        var today = new Date(4, Month.February, 2021);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Real spot = 100.0;
+        YieldTermStructure q = FlatRate(0.03, dc, context);
+        YieldTermStructure r = FlatRate(0.06, dc, context);
+
+        BlackVolTermStructure volTS = FlatVol(0.25, dc, context);
+        var process = new BlackScholesMertonProcess(spot, q, r, volTS);
+
+        Date maturityDate = today + new Period(5, TimeUnit.Years);
+
+        (Real Strike, OptionType Type, Real Expected)[] testDescriptions =
+        [
+            (105, OptionType.Put, 19.136),
+            (105, OptionType.Call, 28.211),
+            (120, OptionType.Put, 28.02),
+            (80, OptionType.Call, 40.785),
+        ];
+
+        foreach ((Real strike, OptionType type, Real expected) in testDescriptions)
+        {
+            var option = new VanillaOption(new PlainVanillaPayoff(type, strike), new AmericanExercise(maturityDate));
+
+            const Real tol = 2e-2;
+            Real calculated = FdBlackScholesShoutEngine.Calculate(option, context, process, tGrid: 400, xGrid: 200).NPV!.Value;
+            Real diff = Math.Abs(calculated - expected);
+
+            Assert.False(
+                diff > tol,
+                "failed to reproduce known shout option price for "
+                + $"\n    strike:     {strike}"
+                + $"\n    option type:{(type == OptionType.Call ? "Call" : "Put")}"
+                + $"\n    calculated: {calculated}"
+                + $"\n    expected:   {expected}"
+                + $"\n    difference: {diff}"
+                + $"\n    tolerance:  {tol}");
+        }
+    }
+
+    [Fact]
+    public void TestZeroVolFDShoutNPV()
+    {
+        // Testing zero volatility shout option pricing with discrete dividends...
+        DayCounter dc = new Actual365Fixed();
+        var today = new Date(14, Month.February, 2021);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Real spot = 100.0;
+        YieldTermStructure q = FlatRate(0.03, dc, context);
+        YieldTermStructure r = FlatRate(0.07, dc, context);
+
+        BlackVolTermStructure volTS = FlatVol(1e-6, dc, context);
+        var process = new BlackScholesMertonProcess(spot, q, r, volTS);
+
+        Date maturityDate = today + new Period(1, TimeUnit.Years);
+        Date dividendDate = today + new Period(3, TimeUnit.Months);
+        const Real dividendAmount = 10.0;
+        ImmutableArray<Dividend> dividends = DividendFunctions.DividendVector([dividendDate], [dividendAmount]);
+
+        var option = new VanillaOption(
+            new PlainVanillaPayoff(OptionType.Put, 100.0), new AmericanExercise(today, maturityDate));
+
+        Real americanNPV = FdBlackScholesVanillaEngine.Calculate(
+            option, context, process, dividends, tGrid: 50, xGrid: 50).NPV!.Value;
+
+        var option2 = new VanillaOption(
+            new PlainVanillaPayoff(OptionType.Put, 100.0), new AmericanExercise(today, maturityDate));
+
+        Real shoutNPV = FdBlackScholesShoutEngine.Calculate(option2, context, process, dividends, 50, 50).NPV!.Value;
+
+        DiscountFactor df = r.Discount(maturityDate) / r.Discount(dividendDate);
+
+        const Real tol = 1e-3;
+        Real diff = Math.Abs(americanNPV - (shoutNPV / df));
+
+        Assert.False(
+            diff > tol,
+            "failed to reproduce American option NPV with "
+            + "shout option pricing engine for "
+            + $"\n    calculated: {shoutNPV / df}"
+            + $"\n    expected  : {americanNPV}"
+            + $"\n    difference: {diff}"
+            + $"\n    tolerance:  {tol}");
+    }
+
+    [Fact]
+    public void TestLargeDividendShoutNPV()
+    {
+        // Testing zero strike shout option pricing with discrete dividends...
+        DayCounter dc = new Actual365Fixed();
+        var today = new Date(21, Month.February, 2021);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        const Real s0 = 100.0;
+        const Volatility vol = 0.25;
+
+        YieldTermStructure q = FlatRate(0.00, dc, context);
+        YieldTermStructure r = FlatRate(0.00, dc, context);
+        BlackVolTermStructure vTS = FlatVol(vol, dc, context);
+
+        var process = new BlackScholesMertonProcess(s0, q, r, vTS);
+
+        Date maturityDate = today + new Period(6, TimeUnit.Months);
+        Date dividendDate = today + new Period(3, TimeUnit.Months);
+        const Real divAmount = 30.0;
+        ImmutableArray<Dividend> dividends = DividendFunctions.DividendVector([dividendDate], [divAmount]);
+
+        const Real strike = 80.0;
+        var option = new VanillaOption(
+            new PlainVanillaPayoff(OptionType.Call, strike), new AmericanExercise(today, maturityDate));
+
+        Real calculated = FdBlackScholesShoutEngine.Calculate(option, context, process, dividends, 100, 400).NPV!.Value;
+
+        // Moved: the check of line 1042 against a shout without dividends up to the dividend date, which prices the
+        // residual option struck at the escrowed level as QuantLib's engine does, 24.90999 = 20 + 4.90999: the engine
+        // strikes it at the spot (the S-van plan's VR4 (xxx)), and the shout's value is the fixed engine's, checked
+        // against a shout at t0 and a binomial programme of the same stopping problem
+        // (Divergences/ShoutDividendStrikeTests.cs).
+        const Real expected = MovedLargeDividendShoutNPV;
+
+        const Real tol = 5e-2;
+        Real diff = Math.Abs(expected - calculated);
+
+        Assert.False(
+            diff > tol,
+            "failed to reproduce American option NPV with "
+            + "shout option pricing engine for "
+            + $"\n    calculated: {calculated}"
+            + $"\n    expected  : {expected}"
+            + $"\n    difference: {diff}"
+            + $"\n    tolerance:  {tol}");
     }
 
     // Adapted: the quotes changed in place become a process built for each value.
@@ -481,7 +631,8 @@ public class AmericanOptionTests
 
     // Adapted: the quotes changed in place become a process built for each value; the engine is the
     // finite-difference engine, QuantLib's template argument.
-    private static void TestFdGreeks()
+    private static void TestFdGreeks(
+        Func<VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, OneAssetOptionResults> engine)
     {
         Dictionary<string, Real> calculated = [], expected = [], tolerance = [];
         tolerance["delta"] = 7.0e-4;
@@ -551,15 +702,14 @@ public class AmericanOptionTests
                                         }
                                     }
 
-                                    OneAssetOptionResults Price(Real s) => FdBlackScholesVanillaEngine.Calculate(
+                                    OneAssetOptionResults Price(Real s) => engine(
                                         option,
                                         context,
                                         new BlackScholesMertonProcess(
                                             s,
                                             FlatRate(q, dc, context),
                                             FlatRate(r, dc, context),
-                                            FlatVol(v, dc, context)),
-                                        tGrid: 50);
+                                            FlatVol(v, dc, context)));
                                 }
                             }
                         }
@@ -567,6 +717,147 @@ public class AmericanOptionTests
                 }
             }
         }
+    }
+
+    // Upstream: QuantLib's master's case for #2879 (the S-van plan's VR5 (iv)).
+    [Fact]
+    public void TestBinomialTheta()
+    {
+        // Testing binomial theta for American options...
+        var today = new Date(21, Month.September, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual365Fixed();
+        Date maturity = today + 91;
+        Real spot = 100.0;
+        var exercise = new AmericanExercise(today, maturity);
+
+        (OptionType Type, Real Strike, Rate Q, Rate R, bool Exercised)[] cases =
+        [
+            (OptionType.Put, 115.0, 0.00, 0.05, true),
+            (OptionType.Put, 100.0, 0.00, 0.05, false),
+            (OptionType.Call, 85.0, 0.10, 0.01, true),
+            (OptionType.Call, 85.0, 0.00, -0.05, true),
+        ];
+        foreach (var data in cases)
+        {
+            var process = new BlackScholesMertonProcess(
+                spot,
+                new FlatForward(today, data.Q, dc),
+                new FlatForward(today, data.R, dc),
+                new BlackConstantVol(today, new NullCalendar(), 0.15, dc));
+            var payoff = new PlainVanillaPayoff(data.Type, data.Strike);
+            var option = new VanillaOption(payoff, exercise);
+            int steps = data.Exercised ? 201 : 1001;
+            (string Name, Func<OneAssetOptionResults> Price)[] engines =
+            [
+                ("CRR", () => BinomialVanillaEngine.Calculate<CoxRossRubinstein>(option, context, process, steps)),
+                ("JR", () => BinomialVanillaEngine.Calculate<JarrowRudd>(option, context, process, steps)),
+                ("EQP", () => BinomialVanillaEngine.Calculate<AdditiveEQPBinomialTree>(option, context, process, steps)),
+                ("Trigeorgis", () => BinomialVanillaEngine.Calculate<Trigeorgis>(option, context, process, steps)),
+                ("Tian", () => BinomialVanillaEngine.Calculate<Tian>(option, context, process, steps)),
+                ("LR", () => BinomialVanillaEngine.Calculate<LeisenReimer>(option, context, process, steps)),
+                ("Joshi", () => BinomialVanillaEngine.Calculate<Joshi4>(option, context, process, steps)),
+            ];
+
+            Real expectedTheta = 0.0;
+            if (!data.Exercised)
+            {
+                // At fixed spot, shortening maturity is equivalent to advancing time
+                // in this flat market. Use an independent finite-difference engine.
+                var shorter = new VanillaOption(payoff, new AmericanExercise(today, maturity - 1));
+                var longer = new VanillaOption(payoff, new AmericanExercise(today, maturity + 1));
+                Real shorterNPV = FdBlackScholesVanillaEngine.Calculate(shorter, context, process, tGrid: 400, xGrid: 400).NPV!.Value;
+                Real longerNPV = FdBlackScholesVanillaEngine.Calculate(longer, context, process, tGrid: 400, xGrid: 400).NPV!.Value;
+                expectedTheta = (shorterNPV - longerNPV) / dc.YearFraction(maturity - 1, maturity + 1);
+            }
+
+            foreach ((string name, Func<OneAssetOptionResults> price) in engines)
+            {
+                string context2 = $"{name} tree, {data.Type}, strike {data.Strike}, r {data.R}, q {data.Q}";
+                OneAssetOptionResults results = price();
+                if (data.Exercised)
+                {
+                    // Immediate exercise gives an affine, time-independent payoff.
+                    Assert.True(Math.Abs(results.NPV!.Value - 15.0) <= 1.0e-10, context2);
+                    Assert.True(Math.Abs(results.Delta!.Value - (int)data.Type) <= 1.0e-10, context2);
+                    Assert.True(Math.Abs(results.Gamma!.Value) <= 1.0e-10, context2);
+                    Assert.True(Math.Abs(results.Theta!.Value) <= 1.0e-8, context2);
+                }
+                else
+                {
+                    Assert.True(results.NPV!.Value > payoff.Evaluate(spot), context2);
+
+                    // Allow for tree discretization and the one-day time bump.
+                    Assert.True(Math.Abs(results.Theta!.Value - expectedTheta) <= 0.05, context2);
+                }
+            }
+        }
+    }
+
+    // Upstream: QuantLib's master's case for #2879 (the S-van plan's VR5 (iv)).
+    [Fact]
+    public void TestBinomialThetaNonFlatCurve()
+    {
+        // Testing binomial American theta with a non-flat curve...
+        var today = new Date(21, Month.September, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual365Fixed();
+        Date maturity = today + 365;
+
+        // The initial rate is 1%, the one-year zero rate is 5%. Non-decreasing,
+        // positive zero rates give positive forwards, so this call never exercises early.
+        var riskFree = new ZeroCurve([today, today + 1, maturity], [0.01, 0.01, 0.05], dc);
+        var process = new BlackScholesMertonProcess(
+            100.0,
+            new FlatForward(today, 0.0, dc),
+            riskFree,
+            new BlackConstantVol(today, new NullCalendar(), 0.20, dc));
+        var payoff = new PlainVanillaPayoff(OptionType.Call, 100.0);
+        var american = new VanillaOption(payoff, new AmericanExercise(today, maturity));
+        var european = new VanillaOption(payoff, new EuropeanExercise(maturity));
+        OneAssetOptionResults analytic = AnalyticEuropeanEngine.Calculate(european, context, process);
+
+        // Use closed-form European value and spatial derivatives in the PDE at t=0.
+        // AnalyticEuropeanEngine::theta itself uses the maturity zero rate.
+        Real expectedTheta = (0.01 * (analytic.NPV!.Value - (100.0 * analytic.Delta!.Value)))
+            - (0.5 * 0.20 * 0.20 * 100.0 * 100.0 * analytic.Gamma!.Value);
+        foreach (int steps in new[] { 1001, 4001 })
+        {
+            string context2 = $"CRR tree, {steps} steps";
+            OneAssetOptionResults a = BinomialVanillaEngine.Calculate<CoxRossRubinstein>(american, context, process, steps);
+            OneAssetOptionResults e = BinomialVanillaEngine.Calculate<CoxRossRubinstein>(european, context, process, steps);
+            Assert.True(a.NPV!.Value > payoff.Evaluate(100.0), context2);
+            Assert.True(Math.Abs(a.NPV!.Value - e.NPV!.Value) <= 1.0e-10, context2);
+            Assert.True(Math.Abs(a.Theta!.Value - e.Theta!.Value) <= 1.0e-10, context2);
+
+            // Allow for discretization of the spatial Greeks by the tree.
+            Assert.True(Math.Abs(a.Theta!.Value - expectedTheta) <= 0.005, context2);
+        }
+    }
+
+    // Upstream: QuantLib's master's case for #2879 (the S-van plan's VR5 (iv)).
+    [Fact]
+    public void TestBinomialThetaDeferredExercise()
+    {
+        // Testing binomial theta with deferred American exercise...
+        var today = new Date(21, Month.September, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual365Fixed();
+        var process = new BlackScholesMertonProcess(
+            100.0,
+            new FlatForward(today, 0.0, dc),
+            new FlatForward(today, 0.05, dc),
+            new BlackConstantVol(today, new NullCalendar(), 0.15, dc));
+        var payoff = new PlainVanillaPayoff(OptionType.Put, 115.0);
+        var option = new VanillaOption(payoff, new AmericanExercise(today + 1, today + 91));
+        OneAssetOptionResults results = BinomialVanillaEngine.Calculate<CoxRossRubinstein>(option, context, process, 2);
+
+        // The coarse grid snaps the earliest exercise date to t=0 and returns intrinsic.
+        // The actual earliest date still forbids exercise now, so retain PDE theta r*K.
+        Assert.True(Math.Abs(results.NPV!.Value - 15.0) <= 1.0e-10);
+        Assert.True(Math.Abs(results.Delta!.Value + 1.0) <= 1.0e-10);
+        Assert.True(Math.Abs(results.Gamma!.Value) <= 1.0e-10);
+        Assert.True(Math.Abs(results.Theta!.Value - (0.05 * 115.0)) <= 1.0e-8);
     }
 
     // Adapted: the quotes changed in place become a process built for each row.
@@ -840,6 +1131,77 @@ public class AmericanOptionTests
                 .NPV!.Value;
             Assert.False(calculated < intrinsic, $"{c.Type} {c.Strike}: {calculated} below the exercise value {intrinsic}");
         }
+    }
+
+    // Upstream: QuantLib's master's case for #2914 (the S-van plan's VR5 (v)).
+    [Fact]
+    public void TestFdAmericanNotBelowExerciseValue()
+    {
+        // Testing that finite-difference American prices stay above the exercise value...
+
+        // The default grid can undershoot the payoff between nodes. Implied
+        // volatility prices an American with this engine, so that price has to
+        // be something a volatility can reproduce.
+        var today = new Date(15, Month.October, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual365Fixed();
+
+        (OptionType Type, Real Spot, Real Strike, Rate R, Rate Q, Volatility Vol, Integer Days)[] cases =
+        [
+            // reported: default 100x100 grid, short of intrinsic by about 2.6e-6
+            (OptionType.Call, 110.0, 100.0, 0.00, 0.02, 0.10, 90),
+
+            // widest miss in the sweep that found the report, about 7e-3
+            (OptionType.Call, 150.0, 100.0, 0.05, 0.10, 0.35, 1095),
+            (OptionType.Put, 70.0, 100.0, 0.10, 0.00, 0.20, 365),
+        ];
+
+        foreach (var c in cases)
+        {
+            var process = new BlackScholesMertonProcess(
+                c.Spot,
+                new FlatForward(today, c.Q, dc),
+                new FlatForward(today, c.R, dc),
+                new BlackConstantVol(today, new NullCalendar(), c.Vol, dc));
+            var payoff = new PlainVanillaPayoff(c.Type, c.Strike);
+            var exercise = new AmericanExercise(today, today + c.Days);
+
+            var option = new VanillaOption(payoff, exercise);
+
+            Real intrinsic = payoff.Evaluate(c.Spot);
+            Real calculated = FdBlackScholesVanillaEngine.Calculate(option, context, process).NPV!.Value;
+            Assert.False(calculated < intrinsic, $"value below exercise: {c.Type} {c.Strike}, {calculated} below {intrinsic}");
+
+            Volatility implied = option.ImpliedVolatility(calculated, process, context, 1.0e-8, 200, 1.0e-4, 4.0);
+
+            var repricedProcess = new BlackScholesMertonProcess(
+                c.Spot,
+                new FlatForward(today, c.Q, dc),
+                new FlatForward(today, c.R, dc),
+                new BlackConstantVol(today, new NullCalendar(), implied, dc));
+            Real repriced = FdBlackScholesVanillaEngine.Calculate(option, context, repricedProcess).NPV!.Value;
+            Real error = Math.Abs(repriced - calculated);
+            Assert.False(error > 1.0e-6, $"implied-volatility round trip: {c.Type} {c.Strike}, {repriced} against {calculated}");
+        }
+
+        // A European on the same market is worth less than intrinsic. The floor
+        // must not be applied to it, and neither to an American that cannot be
+        // exercised yet.
+        var process2 = new BlackScholesMertonProcess(
+            110.0,
+            new FlatForward(today, 0.02, dc),
+            new FlatForward(today, 0.00, dc),
+            new BlackConstantVol(today, new NullCalendar(), 0.10, dc));
+        var payoff2 = new PlainVanillaPayoff(OptionType.Call, 100.0);
+        Real intrinsic2 = payoff2.Evaluate(110.0);
+
+        var european = new VanillaOption(payoff2, new EuropeanExercise(today + 90));
+        Real europeanValue = FdBlackScholesVanillaEngine.Calculate(european, context, process2).NPV!.Value;
+        Assert.True(europeanValue < intrinsic2 - 0.1, $"European value {europeanValue}");
+
+        var deferred = new VanillaOption(payoff2, new AmericanExercise(today + 30, today + 90));
+        Real deferredValue = FdBlackScholesVanillaEngine.Calculate(deferred, context, process2).NPV!.Value;
+        Assert.True(deferredValue < intrinsic2 - 0.05, $"deferred exercise value {deferredValue}");
     }
 
     // Upstream: QuantLib's master's case for #2906 (the S-van plan's VR5 (iii)).

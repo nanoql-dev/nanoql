@@ -83,6 +83,10 @@ public sealed class EscrowedDividendAdjustment
     /// <summary>Gets the dividend curve.</summary>
     public YieldTermStructure DividendYield { get; }
 
+    // The clock the adjustment reads its curves on, for an inner value calculator that reads them too: the risk-free
+    // curve where none is given
+    internal TermStructure Clock => clock;
+
     /// <summary>The adjustment of the spot at time <paramref name="t"/>.</summary>
     /// <param name="t">The time.</param>
     /// <returns>Minus the value at <paramref name="t"/> of the dividends paid from then to maturity.</returns>

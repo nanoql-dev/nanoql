@@ -48,6 +48,21 @@ internal static class ImpliedVolatilityHelper
         option.Validate();
 
         var f = new PriceError(process, body, targetValue);
+
+        // close(f, 0) is tolerance squared when the other argument is
+        // zero, about 1e-28, so a price that sits a few ulps above the
+        // target does not count as a root. An American at exercise is
+        // flat in volatility, and the finite-difference price at the
+        // lower vol is that flat value plus a rounding error. The lower
+        // vol is then a solution: no smaller price exists in the bracket.
+        double lowerError = f.Evaluate(minVol);
+        double scale = Math.Abs(targetValue) > 1.0 ? Math.Abs(targetValue) : 1.0;
+        double bound = 1.0e4 * NumericLimits.QL_EPSILON * scale;
+        if (lowerError >= 0.0 && lowerError <= bound)
+        {
+            return minVol;
+        }
+
         Brent solver = new Brent().SetMaxEvaluations(maxEvaluations);
         double guess = (minVol + maxVol) / 2.0;
         try

@@ -248,9 +248,56 @@ public static class FdBlackScholesVanillaEngine
 
         double spot = process.X0 + spotAdjustment;
 
+        double value = solver.ValueAt(spot);
+
+        // The step condition enforces the exercise on grid nodes. The monotonic
+        // cubic interpolant can still undershoot the payoff between nodes, and
+        // VanillaOption::impliedVolatility prices Americans with this engine, so
+        // a value below the payoff cannot be inverted. Floor only when the
+        // holder can exercise on the reference date and the payoff is paid
+        // then. Greeks stay on the interpolant: resetting them would disagree
+        // with a bump wherever the undershoot is local.
+        Exercise exercise = option.Exercise;
+        bool exercisable = false;
+        switch (exercise.Type)
+        {
+            case ExerciseType.American:
+                exercisable = exercise.Date(0) <= settlementDate && settlementDate <= exercise.LastDate();
+                break;
+            case ExerciseType.Bermudan:
+                foreach (Date date in exercise.Dates)
+                {
+                    if (date == settlementDate)
+                    {
+                        exercisable = true;
+                        break;
+                    }
+                }
+
+                break;
+            case ExerciseType.European:
+                break;
+            default:
+                throw new NanoQLException("exercise type is not supported");
+        }
+
+        if (exercisable && exercise is EarlyExercise { PayoffAtExpiry: true })
+        {
+            exercisable = false;
+        }
+
+        if (exercisable)
+        {
+            double exerciseValue = payoff.Evaluate(process.X0);
+            if (value < exerciseValue)
+            {
+                value = exerciseValue;
+            }
+        }
+
         return new OneAssetOptionResults
         {
-            NPV = solver.ValueAt(spot),
+            NPV = value,
             Delta = solver.DeltaAt(spot),
             Gamma = solver.GammaAt(spot),
             Theta = solver.ThetaAt(spot),
