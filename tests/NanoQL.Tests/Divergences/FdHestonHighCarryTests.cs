@@ -28,7 +28,8 @@ namespace NanoQL.Tests.Divergences;
 /// no constraints, solves each strike alone where its grid doesn't hold the band at the points the solve is read at,
 /// S·K/Kᵢ for the option's strike K (B2-1), their forwards quanto-adjusted where a quanto helper is given (B3-1); the
 /// two paths run on different grids, so a strike's value steps where the switch moves, by up to about 0.4% at carry 0.06
-/// (F2-1). The check: QuantLib's components given those constraints through the harness
+/// (F2-1). The band holds the strike too, widened by the same half margin, where an option far from the forwards takes
+/// its value (D3-1 of the S-hes run record). The check: QuantLib's components given those constraints through the harness
 /// (<c>tests/vectors/cxx/pricingengines/vanilla/fdhestonvanillaengine.json</c>), and the analytic engine's price under
 /// refinement.
 /// </summary>
@@ -57,6 +58,25 @@ public class FdHestonHighCarryTests
         const double Analytic = 0.5091548969691079;
         Assert.Equal(Analytic, AnalyticHestonEngine.Calculate(put, Context, model, 192).NPV!.Value);
         AssertConverges(model, put, Analytic, 3e-3);
+    }
+
+    [Fact]
+    public void AStrikeBeyondTheForwardsBandKeepsItsTail()
+    {
+        // a year's put at 0.7 of the forward, carry -0.3: QuantLib's grid holds the forwards' band but the strike sits
+        // near its edge, and QuantLib 1.44's engine stalls, 0.0066016341928117825, 0.006176625089392059 and
+        // 0.006063108322089414 on grids of 100 x 100 x 50, 200 x 200 x 100 and 400 x 400 x 100, +7.2%, +0.27% and -1.6%
+        // [executed on the wheel: scratchpad\c3\oracle_c3d.py]; nanoql's band holds the strike too (D3-1 of the run record)
+        (HestonModel model, VanillaOption put) = Market(1, 0.01, 0.31, 0.7, OptionType.Put);
+        const double Analytic = 0.006160366199509028;
+        Assert.Equal(Analytic, AnalyticHestonEngine.Calculate(put, Context, model, 192).NPV!.Value);
+        double[] errors =
+        [
+            .. new[] { (100, 100, 50), (200, 200, 100), (400, 400, 100) }.Select(g => Math.Abs(
+                (FdHestonVanillaEngine.Calculate(put, Context, model, g.Item1, g.Item2, g.Item3).NPV!.Value / Analytic) - 1.0)),
+        ];
+        Assert.True(errors[1] < 0.5 * errors[0] && errors[2] < 0.5 * errors[1], string.Join(", ", errors));
+        Assert.True(errors[2] < 1.5e-2, string.Join(", ", errors));
     }
 
     [Fact]

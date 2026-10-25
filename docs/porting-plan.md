@@ -138,7 +138,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testMomentBasedGaussianPolynomial` and `testGaussLaguerreCosinePolynomial`, which wait for S-core; `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/HestonModelTests.cs`: `testFdBarrierVsCached` (S-bar), and `testAllIntegrationMethods` and `testCosHestonCumulants` (S-core).
 - `tests/NanoQL.Tests/TestSuite/HestonSlvModelTests.cs`: every case but `testBlackScholesFokkerPlanckFwdEquation`, `testBlackScholesFokkerPlanckFwdEquationLocalVol` and `testBarrierPricingViaHestonLocalVol`, which wait for S-core's Heston stochastic-local-volatility models, processes and forward operators.
-- `tests/NanoQL.Tests/TestSuite/HybridHestonHullWhiteProcessTests.cs`: every case but `testBsmHullWhiteEngine` and `testSpatialDiscretizatinError`, which wait for S-hes's and S-core's Heston-Hull-White units.
+- `tests/NanoQL.Tests/TestSuite/HybridHestonHullWhiteProcessTests.cs`: `testZeroBondPricing`, which waits for S-core's Sobol Brownian bridge sequences.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (S-core); and `testPiecewiseIntegral` (S-xrt).
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (multi-dimensional splines, no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace).
 - `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice, Faure and Burley 2020 cases and the discrepancy cases, whose generators and statistics aren't ported yet.

@@ -563,6 +563,33 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a GJR-GARCH discretization outside <see cref="GJRGARCHProcessDiscretization"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's process fails "unknown discretization schema" when it evolves.</remarks>
+    internal static void Check(GJRGARCHProcessDiscretization value, string paramName)
+    {
+        if (value is < GJRGARCHProcessDiscretization.PartialTruncation or > GJRGARCHProcessDiscretization.Reflection)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown discretization schema");
+        }
+    }
+
+    /// <summary>Refuses a hybrid Heston-Hull-White discretization outside
+    /// <see cref="HybridHestonHullWhiteProcessDiscretization"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's process fails "unknown discretization scheme" when it evolves.</remarks>
+    internal static void Check(HybridHestonHullWhiteProcessDiscretization value, string paramName)
+    {
+        if (value is < HybridHestonHullWhiteProcessDiscretization.Euler or > HybridHestonHullWhiteProcessDiscretization.BSMHullWhite)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown discretization scheme");
+        }
+    }
+
     /// <summary>Refuses a position outside <see cref="PositionType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

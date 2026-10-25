@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 528 | 61 |
+| not started | 515 | 60 |
 | partial | 21 | 30 |
-| ported | 711 | 89 |
+| ported | 724 | 90 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -1042,7 +1042,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmcirop` | ported | Methods/FiniteDifferences/Operators/FdmCIROp/FdmCIREquityPart.cs, Methods/FiniteDifferences/Operators/FdmCIROp/FdmCIRMixedPart.cs, Methods/FiniteDifferences/Operators/FdmCIROp/FdmCIROp.cs, Methods/FiniteDifferences/Operators/FdmCIROp/FdmCIRRatesPart.cs |  |
 | `fdmg2op` | ported | Methods/FiniteDifferences/Operators/FdmG2Op.cs |  |
 | `fdmhestonfwdop` | not started |  | no nanoql type: FdmHestonFwdOp |
-| `fdmhestonhullwhiteop` | not started |  | no nanoql type: FdmHestonHullWhiteEquityPart, FdmHestonHullWhiteOp |
+| `fdmhestonhullwhiteop` | ported | Methods/FiniteDifferences/Operators/FdmHestonHullWhiteEquityPart.cs, Methods/FiniteDifferences/Operators/FdmHestonHullWhiteOp.cs |  |
 | `fdmhestonop` | ported | Methods/FiniteDifferences/Operators/FdmHestonOp/FdmHestonEquityPart.cs, Methods/FiniteDifferences/Operators/FdmHestonOp/FdmHestonOp.cs, Methods/FiniteDifferences/Operators/FdmHestonOp/FdmHestonVariancePart.cs |  |
 | `fdmhullwhiteop` | ported | Methods/FiniteDifferences/Operators/FdmHullWhiteOp.cs |  |
 | `fdmlinearop` | ported | Methods/FiniteDifferences/Operators/FdmLinearOp.cs |  |
@@ -1087,13 +1087,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdm1dimsolver` | ported | Methods/FiniteDifferences/Solvers/Fdm1DimSolver.cs |  |
 | `fdm2dblackscholessolver` | not started |  | no nanoql type: Fdm2dBlackScholesSolver |
 | `fdm2dimsolver` | ported | Methods/FiniteDifferences/Solvers/Fdm2DimSolver.cs |  |
-| `fdm3dimsolver` | not started |  | no nanoql type: Fdm3DimSolver |
+| `fdm3dimsolver` | ported | Methods/FiniteDifferences/Solvers/Fdm3DimSolver.cs |  |
 | `fdmbackwardsolver` | ported | Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmBackwardSolver.cs, Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmSchemeDesc.cs, Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmSchemeDescFdmSchemeType.cs |  |
 | `fdmbatessolver` | ported | Methods/FiniteDifferences/Solvers/FdmBatesSolver.cs |  |
 | `fdmblackscholessolver` | ported | Methods/FiniteDifferences/Solvers/FdmBlackScholesSolver.cs |  |
 | `fdmcirsolver` | ported | Methods/FiniteDifferences/Solvers/FdmCIRSolver.cs |  |
 | `fdmg2solver` | ported | Methods/FiniteDifferences/Solvers/FdmG2Solver.cs |  |
-| `fdmhestonhullwhitesolver` | not started |  | no nanoql type: FdmHestonHullWhiteSolver |
+| `fdmhestonhullwhitesolver` | ported | Methods/FiniteDifferences/Solvers/FdmHestonHullWhiteSolver.cs |  |
 | `fdmhestonsolver` | ported | Methods/FiniteDifferences/Solvers/FdmHestonSolver.cs |  |
 | `fdmhullwhitesolver` | ported | Methods/FiniteDifferences/Solvers/FdmHullWhiteSolver.cs |  |
 | `fdmndimsolver` | not started |  | no nanoql type: FdmNdimSolver |
@@ -1193,7 +1193,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `batesmodel` | ported | Models/Equity/BatesModel/BatesDetJumpModel.cs, Models/Equity/BatesModel/BatesDoubleExpDetJumpModel.cs, Models/Equity/BatesModel/BatesDoubleExpModel.cs, Models/Equity/BatesModel/BatesDoubleExpUpJumpConstraint.cs, Models/Equity/BatesModel/BatesModel.cs |  |
-| `gjrgarchmodel` | not started |  | no nanoql type: GJRGARCHModel |
+| `gjrgarchmodel` | ported | Models/Equity/GJRGARCHModel.cs, Models/Equity/GJRGARCHModelVolatilityConstraint.cs |  |
 | `hestonmodel` | ported | Models/Equity/HestonModel.cs, Models/Equity/HestonModelFellerConstraint.cs |  |
 | `hestonmodelhelper` | ported | Models/Equity/HestonModelHelper.cs |  |
 | `hestonslvfdmmodel` | not started |  | no nanoql type: HestonSLVFokkerPlanckFdmParams, HestonSLVFDMModel, HestonSLVFDMModelLogEntry |
@@ -1675,10 +1675,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `analyticdividendeuropeanengine` | ported | PricingEngines/Vanilla/AnalyticDividendEuropeanEngine.cs |  |
 | `analyticeuropeanengine` | ported | PricingEngines/Vanilla/AnalyticEuropeanEngine.cs |  |
 | `analyticeuropeanvasicekengine` | ported | PricingEngines/Vanilla/AnalyticBlackVasicekEngine.cs |  |
-| `analyticgjrgarchengine` | not started |  | no nanoql type: AnalyticGJRGARCHEngine |
-| `analytich1hwengine` | not started |  | no nanoql type: AnalyticH1HWEngine |
+| `analyticgjrgarchengine` | ported | PricingEngines/Vanilla/AnalyticGJRGARCHEngine.cs |  |
+| `analytich1hwengine` | ported | PricingEngines/Vanilla/AnalyticH1HWEngine.cs |  |
 | `analytichestonengine` | ported | PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngine.cs, PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngineAPHelper.cs, PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngineComplexLogFormula.cs, PricingEngines/Vanilla/AnalyticHestonEngine/AnalyticHestonEngineOptimalAlpha.cs | no nanoql type: AnalyticHestonEngineAP_Helper |
-| `analytichestonhullwhiteengine` | not started |  | no nanoql type: AnalyticHestonHullWhiteEngine |
+| `analytichestonhullwhiteengine` | ported | PricingEngines/Vanilla/AnalyticHestonHullWhiteEngine.cs |  |
 | `analyticpdfhestonengine` | ported | PricingEngines/Vanilla/AnalyticPDFHestonEngine.cs |  |
 | `analyticptdhestonengine` | ported | PricingEngines/Vanilla/AnalyticPTDHestonEngine/AnalyticPTDHestonEngine.cs, PricingEngines/Vanilla/AnalyticPTDHestonEngine/AnalyticPTDHestonEngineComplexLogFormula.cs |  |
 | `analyticroughhestonengine` | ported | PricingEngines/Vanilla/AnalyticRoughHestonEngine/AnalyticRoughHestonEngine.cs, PricingEngines/Vanilla/AnalyticRoughHestonEngine/AnalyticRoughHestonEngineApproximation.cs |  |
@@ -1695,7 +1695,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdblackscholesvanillaengine` | ported | PricingEngines/Vanilla/FdBlackScholesVanillaEngine/FdBlackScholesVanillaEngine.cs, PricingEngines/Vanilla/FdBlackScholesVanillaEngine/FdBlackScholesVanillaEngineCashDividendModel.cs, PricingEngines/Vanilla/FdBlackScholesVanillaEngine/MakeFdBlackScholesVanillaEngine.cs |  |
 | `fdcevvanillaengine` | ported | PricingEngines/Vanilla/FdCEVVanillaEngine.cs |  |
 | `fdcirvanillaengine` | ported | PricingEngines/Vanilla/FdCIRVanillaEngine.cs, PricingEngines/Vanilla/MakeFdCIRVanillaEngine.cs |  |
-| `fdhestonhullwhitevanillaengine` | not started |  | no nanoql type: FdHestonHullWhiteVanillaEngine |
+| `fdhestonhullwhitevanillaengine` | ported | PricingEngines/Vanilla/FdHestonHullWhiteVanillaEngine.cs |  |
 | `fdhestonvanillaengine` | ported | PricingEngines/Vanilla/FdHestonVanillaEngine/FdHestonVanillaEngine.cs, PricingEngines/Vanilla/FdHestonVanillaEngine/MakeFdHestonVanillaEngine.cs |  |
 | `fdsabrvanillaengine` | ported | PricingEngines/Vanilla/FdSabrVanillaEngine.cs |  |
 | `fdsimplebsswingengine` | ported | PricingEngines/Vanilla/FdSimpleBSSwingEngine.cs |  |
@@ -1706,9 +1706,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `mcamericanengine` | ported | PricingEngines/Vanilla/MCAmericanEngine/AmericanPathPricer.cs, PricingEngines/Vanilla/MCAmericanEngine/MCAmericanEngine.cs, PricingEngines/Vanilla/MCAmericanEngine/MakeMCAmericanEngine{TRng,TStats,TRngCalibration}.cs |  |
 | `mcdigitalengine` | ported | PricingEngines/Vanilla/MCDigitalEngine/DigitalPathPricer.cs, PricingEngines/Vanilla/MCDigitalEngine/MCDigitalEngine.cs, PricingEngines/Vanilla/MCDigitalEngine/MakeMCDigitalEngine{TRng,TStats}.cs |  |
 | `mceuropeanengine` | ported | PricingEngines/Vanilla/MCEuropeanEngine/EuropeanPathPricer.cs, PricingEngines/Vanilla/MCEuropeanEngine/MCEuropeanEngine.cs, PricingEngines/Vanilla/MCEuropeanEngine/MakeMCEuropeanEngine{TRng,TStats}.cs |  |
-| `mceuropeangjrgarchengine` | not started |  | no nanoql type: MCEuropeanGJRGARCHEngine, MakeMCEuropeanGJRGARCHEngine, EuropeanGJRGARCHPathPricer |
+| `mceuropeangjrgarchengine` | ported | PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/EuropeanGJRGARCHPathPricer.cs, PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/MCEuropeanGJRGARCHEngine.cs, PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/MakeMCEuropeanGJRGARCHEngine{TRng,TStats}.cs |  |
 | `mceuropeanhestonengine` | ported | PricingEngines/Vanilla/MCEuropeanHestonEngine/EuropeanHestonPathPricer.cs, PricingEngines/Vanilla/MCEuropeanHestonEngine/MCEuropeanHestonEngine.cs, PricingEngines/Vanilla/MCEuropeanHestonEngine/MakeMCEuropeanHestonEngine{TRng,TStats}.cs |  |
-| `mchestonhullwhiteengine` | not started |  | no nanoql type: MCHestonHullWhiteEngine, MakeMCHestonHullWhiteEngine, HestonHullWhitePathPricer |
+| `mchestonhullwhiteengine` | ported | PricingEngines/Vanilla/MCHestonHullWhiteEngine/HestonHullWhitePathPricer.cs, PricingEngines/Vanilla/MCHestonHullWhiteEngine/MCHestonHullWhiteEngine.cs, PricingEngines/Vanilla/MCHestonHullWhiteEngine/MakeMCHestonHullWhiteEngine{TRng,TStats}.cs |  |
 | `mcvanillaengine` | ported | PricingEngines/Vanilla/MCVanillaEngine{TMc,TPath,TStats}.cs |  |
 | `qdfpamericanengine` | ported | PricingEngines/Vanilla/QdFpAmericanEngine/DqFpEquation.cs, PricingEngines/Vanilla/QdFpAmericanEngine/DqFpEquationA.cs, PricingEngines/Vanilla/QdFpAmericanEngine/DqFpEquationB.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpAmericanEngine.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpAmericanEngineFixedPointEquation.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpIterationScheme.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpLegendreScheme.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpLegendreTanhSinhScheme.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpTanhSinhIterationScheme.cs |  |
 | `qdplusamericanengine` | ported | PricingEngines/Vanilla/QdPlusAmericanEngine/QdPlusAddOnValue.cs, PricingEngines/Vanilla/QdPlusAmericanEngine/QdPlusAmericanEngine.cs, PricingEngines/Vanilla/QdPlusAmericanEngine/QdPlusAmericanEngineSolverType.cs, PricingEngines/Vanilla/QdPlusAmericanEngine/QdPutCallParityEngine.cs |  |
@@ -1726,14 +1726,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `forwardmeasureprocess` | ported | Processes/ForwardMeasureProcess/ForwardMeasureProcess.cs, Processes/ForwardMeasureProcess/ForwardMeasureProcess1D.cs |  |
 | `g2process` | ported | Processes/G2Process/G2ForwardProcess.cs, Processes/G2Process/G2Process.cs |  |
 | `geometricbrownianprocess` | ported | Processes/GeometricBrownianMotionProcess.cs |  |
-| `gjrgarchprocess` | not started |  | no nanoql type: GJRGARCHProcess, GJRGARCHProcessDiscretization |
+| `gjrgarchprocess` | ported | Processes/GJRGARCHProcess.cs, Processes/GJRGARCHProcessDiscretization.cs |  |
 | `gsrprocess` | ported | Processes/GsrProcess.cs |  |
 | `gsrprocesscore` | ported | Processes/GsrProcessCore.cs, Processes/GsrProcessCoreMemo.cs |  |
 | `hestonprocess` | ported | Processes/HestonProcess/HestonProcess.cs, Processes/HestonProcess/HestonProcessDiscretization.cs |  |
 | `hestonslvprocess` | not started |  | no nanoql type: HestonSLVProcess |
 | `hullwhiteprocess` | ported | Processes/HullWhiteProcess/HullWhiteForwardProcess.cs, Processes/HullWhiteProcess/HullWhiteProcess.cs, Processes/HullWhiteProcess/HullWhiteProcessFunctions.cs |  |
-| `hybridhestonhullwhiteprocess` | not started |  | no nanoql type: HybridHestonHullWhiteProcess, HybridHestonHullWhiteProcessDiscretization |
-| `jointstochasticprocess` | not started |  | no nanoql type: JointStochasticProcess |
+| `hybridhestonhullwhiteprocess` | ported | Processes/HybridHestonHullWhiteProcess.cs, Processes/HybridHestonHullWhiteProcessDiscretization.cs |  |
+| `jointstochasticprocess` | ported | Processes/JointStochasticProcess.cs |  |
 | `merton76process` | ported | Processes/Merton76Process.cs |  |
 | `mfstateprocess` | ported | Processes/MfStateProcess.cs |  |
 | `ornsteinuhlenbeckprocess` | ported | Processes/OrnsteinUhlenbeckProcess.cs |  |
@@ -2142,12 +2142,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `g2process` | ported | TestSuite/G2ProcessTests.cs | 8 of 8 cases; replaced: testG2ProcessObservesTermStructure by Conventions/ModelRebuildTests.cs |
 | `garch` | not started |  | 2 cases |
 | `gaussianquadratures` | partial | TestSuite/GaussianQuadraturesTests.cs | 8 of 12 cases; not yet: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial, testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes |
-| `gjrgarchmodel` | not started |  | 2 cases |
+| `gjrgarchmodel` | ported | TestSuite/GjrGarchModelTests.cs | 2 of 2 cases |
 | `gsr` | ported | TestSuite/GsrTests.cs | 13 of 13 cases |
 | `hestonmodel` | partial | TestSuite/HestonModelTests.cs | 36 of 39 cases; not yet: testFdBarrierVsCached, testAllIntegrationMethods, testCosHestonCumulants |
 | `hestonslvmodel` | partial | TestSuite/HestonSlvModelTests.cs | 3 of 19 cases; not yet: testSquareRootZeroFlowBC, testTransformedZeroFlowBC, testSquareRootEvolveWithStationaryDensity, testSquareRootLogEvolveWithStationaryDensity, testSquareRootFokkerPlanckFwdEquation, testHestonFokkerPlanckFwdEquation, testHestonFokkerPlanckFwdEquationLogLVLeverage, testFDMCalibration, testLocalVolsvSLVPropDensity, testBarrierPricingMixedModels, testMonteCarloVsFdmPricing, testMonteCarloCalibration, testForwardSkewSLV, testMoustacheGraph, testDiffusionAndDriftSlvProcess, testBarrierPricingMixedModelsMonteCarloVsFdmPricing |
 | `himalayaoption` | not started |  | 1 cases |
-| `hybridhestonhullwhiteprocess` | partial | TestSuite/HybridHestonHullWhiteProcessTests.cs | 2 of 13 cases; not yet: testCompareBsmHWandHestonHW, testZeroBondPricing, testMcVanillaPricing, testMcPureHestonPricing, testAnalyticHestonHullWhitePricing, testCallableEquityPricing, testDiscretizationError, testFdmHestonHullWhiteEngine, testBsmHullWhitePricing, testHestonHullWhiteCalibration, testH1HWPricingEngine |
+| `hybridhestonhullwhiteprocess` | partial | TestSuite/HybridHestonHullWhiteProcessTests.cs | 12 of 13 cases; not yet: testZeroBondPricing |
 | `indexes` | ported | TestSuite/IndexesTests.cs | 6 of 6 cases; replaced: testFixingObservability by Vectors/Indexes/BMAIndexVectorTests.cs |
 | `inflation` | ported | TestSuite/InflationTests.cs | 27 of 28 cases; replaced: testNotifications by Vectors/Coupons/IndexedCashFlowVectorTests.cs; not ported: testCpiAsIndexInterpolation (CPI::AsIndex, deprecated in QuantLib 1.43, D5) |
 | `inflationcapfloor` | ported | TestSuite/InflationCapFloorTests.cs | 4 of 4 cases; replaced: testVolatilityQuoteObservability by Conventions/YoYInflationCapFloorQuoteTests.cs |

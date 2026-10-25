@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Immutable;
+using NanoQL.Instruments;
 using NanoQL.Methods;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
@@ -13,14 +14,18 @@ using static NanoQL.Time.Month;
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
-/// The multi-dimensional Monte Carlo loop and the finite-difference Heston and Bates steps allocate nothing (the S-hes
+/// The multi-dimensional Monte Carlo loop and the finite-difference Heston, Bates and Heston-Hull-White steps allocate
+/// nothing (the S-hes
 /// plan's HR2 (iii) and HD8, S3's closing ruling in S-sr's forms): the draw-price-add of
 /// <see cref="EuropeanHestonPathPricer"/> on paths a <see cref="MultiPathGenerator{TGsg}"/> steps in place through the
 /// process's in-place forms, on a <see cref="HestonProcess"/> under the quadratic-exponential martingale scheme and full
 /// truncation and on a <see cref="BatesProcess"/>, each batch into an <see cref="IncrementalStatistics"/>, which keeps no
-/// sample; and a rollback of <see cref="FdmBackwardSolver"/> on <see cref="FdmHestonOp"/>, plain and with a quanto helper
-/// and a leverage function, and on <see cref="FdmBatesOp"/>, under the engines' default scheme, Hundsdorfer's, measured
-/// on fresh values after a warm-up (<see cref="AllocationAssert"/>) and giving the warm-up's values.
+/// sample; the same of <see cref="EuropeanGJRGARCHPathPricer"/> on a <see cref="GJRGARCHProcess"/> and of
+/// <see cref="HestonHullWhitePathPricer"/> on a <see cref="HybridHestonHullWhiteProcess"/> under both discretizations, its
+/// step terms in double-double at a·dt 0.005; and a rollback of <see cref="FdmBackwardSolver"/> on
+/// <see cref="FdmHestonOp"/>, plain and with a quanto helper and a leverage function, on <see cref="FdmBatesOp"/> and on
+/// <see cref="FdmHestonHullWhiteOp"/>, under the engines' default scheme, Hundsdorfer's, measured on fresh values after a
+/// warm-up (<see cref="AllocationAssert"/>) and giving the warm-up's values.
 /// </summary>
 public class HestonAllocationTests
 {
@@ -75,6 +80,38 @@ public class HestonAllocationTests
         RollbackAllocatesNothing(new FdmBatesOp(mesher, process, [], 12), mesher);
     }
 
+    [Fact]
+    public void TheGjrGarchAndHybridDrawPriceAddAllocatesNothingPerSample()
+    {
+        var gjrGarch = new GJRGARCHProcess(RiskFree, Dividends, 50.0, 2.0e-4, 2.0e-6, 0.024, 0.93, 0.059, 0.1, 365.0);
+        var heston = new HestonProcess(RiskFree, Dividends, 100.0, 0.04, 1.5, 0.04, 0.5, -0.7);
+        HullWhiteForwardProcess hullWhite = new HullWhiteForwardProcess(RiskFree, 0.1, 0.01).WithForwardMeasureTime(2.0);
+        foreach (bool antithetic in new[] { false, true })
+        {
+            AllocationAssert.AllocatesNothing(
+                () => Model(gjrGarch, new EuropeanGJRGARCHPathPricer(OptionType.Call, 50.0, 0.95), antithetic),
+                model => model.AddSamples(Batch));
+            foreach (HybridHestonHullWhiteProcessDiscretization d in Enum.GetValues<HybridHestonHullWhiteProcessDiscretization>())
+            {
+                var hybrid = new HybridHestonHullWhiteProcess(heston, hullWhite, -0.4, d);
+                AllocationAssert.AllocatesNothing(
+                    () => Model(hybrid, new HestonHullWhitePathPricer(1.0, new PlainVanillaPayoff(OptionType.Call, 100.0), hybrid), antithetic),
+                    model => model.AddSamples(Batch));
+            }
+        }
+    }
+
+    [Fact]
+    public void AHestonHullWhiteStepOnHundsdorferAllocatesNothing()
+    {
+        var process = new HestonProcess(RiskFree, Dividends, 100.0, 0.04, 1.5, 0.04, 0.5, -0.7);
+        var mesher = new FdmMesherComposite(
+            new Uniform1dMesher(Math.Log(20.0), Math.Log(500.0), 11),
+            new FdmHestonVarianceMesher(5, process, 1.0),
+            new Uniform1dMesher(-0.1, 0.1, 5));
+        RollbackAllocatesNothing(new FdmHestonHullWhiteOp(mesher, process, new HullWhiteProcess(RiskFree, 0.1, 0.01), -0.5), mesher);
+    }
+
     private static FdmMesherComposite Mesher(HestonProcess process) =>
         new(new Uniform1dMesher(Math.Log(20.0), Math.Log(500.0), 21), new FdmHestonVarianceMesher(9, process, 1.0));
 
@@ -84,6 +121,16 @@ public class HestonAllocationTests
             process, Grid, PseudoRandom.MakeSequenceGenerator(process.Factors * (Grid.Size - 1), 42), false);
         var model = new MonteCarloModel<MultiPath, IncrementalStatistics>(
             generator, new EuropeanHestonPathPricer(OptionType.Call, 100.0, 0.95), new IncrementalStatistics(), antithetic);
+        model.AddSamples(First);
+        return model;
+    }
+
+    private static MonteCarloModel<MultiPath, IncrementalStatistics> Model(
+        StochasticProcess process, PathPricer<MultiPath> pricer, bool antithetic)
+    {
+        IPathGenerator<MultiPath> generator = MultiVariate<PseudoRandom>.MakePathGenerator(
+            process, Grid, PseudoRandom.MakeSequenceGenerator(process.Factors * (Grid.Size - 1), 42), false);
+        var model = new MonteCarloModel<MultiPath, IncrementalStatistics>(generator, pricer, new IncrementalStatistics(), antithetic);
         model.AddSamples(First);
         return model;
     }

@@ -14,8 +14,9 @@ namespace NanoQL.Tests.Conventions;
 /// <see cref="StochasticProcess.Evolve(double, ReadOnlySpan{double}, double, ReadOnlySpan{double}, Span{double})"/>
 /// give the allocating forms' values bit for bit (the S-hes plan's HR2 (i), (ii)): on every discretization of
 /// <see cref="HestonProcess"/>, the overrides for the truncation, reflection and quadratic-exponential schemes and the
-/// fallback for the exact ones; on <see cref="BatesProcess"/>, its jumps added once; and, through the base's defaults,
-/// on landed processes that don't override them.
+/// fallback for the exact ones; on <see cref="BatesProcess"/>, its jumps added once; on every discretization of
+/// <see cref="GJRGARCHProcess"/>; on both of <see cref="HybridHestonHullWhiteProcess"/>, its step terms below their cut
+/// and above it; and, through the base's defaults, on landed processes that don't override them.
 /// </summary>
 public class StochasticProcessInPlaceTests
 {
@@ -41,6 +42,31 @@ public class StochasticProcessInPlaceTests
     {
         var process = new BatesProcess(RiskFree, Dividends, 100.0, 0.04, 1.5, 0.05, 0.5, -0.7, 2.0, -0.2, 0.1, d);
         AssertSameSteps(process, 0.0, 0.25);
+    }
+
+    [Theory]
+    [InlineData(GJRGARCHProcessDiscretization.PartialTruncation)]
+    [InlineData(GJRGARCHProcessDiscretization.FullTruncation)]
+    [InlineData(GJRGARCHProcessDiscretization.Reflection)]
+    public void TheGjrGarchInPlaceStepIsTheAllocatingOne(GJRGARCHProcessDiscretization d)
+    {
+        var process = new GJRGARCHProcess(RiskFree, Dividends, 50.0, 2.0e-4, 2.0e-6, 0.024, 0.93, 0.059, 0.1, 365.0, d);
+        AssertSameSteps(process, 0.0, 1.0 / 365.0);
+    }
+
+    [Theory]
+    [InlineData(HybridHestonHullWhiteProcessDiscretization.Euler, 0.05)]
+    [InlineData(HybridHestonHullWhiteProcessDiscretization.Euler, 2.0)]
+    [InlineData(HybridHestonHullWhiteProcessDiscretization.BSMHullWhite, 0.05)]
+    [InlineData(HybridHestonHullWhiteProcessDiscretization.BSMHullWhite, 2.0)]
+    public void TheHybridInPlaceStepIsTheAllocatingOne(HybridHestonHullWhiteProcessDiscretization d, double dt)
+    {
+        var process = new HybridHestonHullWhiteProcess(
+            new HestonProcess(RiskFree, Dividends, 100.0, 0.04, 1.5, 0.05, 0.5, -0.7),
+            new HullWhiteForwardProcess(RiskFree, 0.1, 0.01).WithForwardMeasureTime(20.0),
+            -0.4,
+            d);
+        AssertSameSteps(process, 0.0, dt);
     }
 
     [Fact]

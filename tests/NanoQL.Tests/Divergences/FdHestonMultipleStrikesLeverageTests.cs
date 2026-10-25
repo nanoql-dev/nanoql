@@ -20,7 +20,10 @@ namespace NanoQL.Tests.Divergences;
 /// 0.0010848235476194543 at 50, 75, 125, 150 and 200 where its engine priced for each strike alone gives
 /// 50.704063145305852, 28.070741991049783, 0.43296316837484017, 0.0063957853450491283 and 2.489998860627156e-05
 /// [executed: <c>scratchpad\cxxprobe\src\c1oracle.cpp</c>]. nanoql's <c>CalculateStrikes</c> solves each strike alone
-/// there. Check: QuantLib's engine priced for each strike alone.
+/// there. Check: QuantLib's engine priced for each strike alone, and at 50 and 200, whose strikes the equity grid's band
+/// holds (D3-1 of the S-hes run record), QuantLib's components on that widened grid, 50.705877448953522 and
+/// 2.4854769620642274e-05, which give its engine's bits at the other strikes [executed:
+/// <c>scratchpad\cxxprobe\src\c3lev.cpp</c>].
 /// </summary>
 public class FdHestonMultipleStrikesLeverageTests
 {
@@ -53,8 +56,8 @@ public class FdHestonMultipleStrikesLeverageTests
     {
         double[] quantLib =
         [
-            50.704063145305852, 28.070741991049783, 8.7674936942583859, 0.43296316837484017, 0.0063957853450491283,
-            2.489998860627156e-05,
+            50.705877448953522, 28.070741991049783, 8.7674936942583859, 0.43296316837484017, 0.0063957853450491283,
+            2.4854769620642274e-05,
         ];
         ImmutableArray<OneAssetOptionResults> results = FdHestonVanillaEngine.CalculateStrikes(
             Option(100.0), Strikes, Context, Model, 100, 200, 100, 0, null, Leverage());

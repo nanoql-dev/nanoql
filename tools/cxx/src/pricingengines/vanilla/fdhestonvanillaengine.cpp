@@ -23,9 +23,9 @@
 // dividendAmounts, tGrid, xGrid, vGrid, dampingSteps, scheme): QuantLib's solve for the option assembled from the
 // components the engine's getSolverDesc builds, in its order, with nanoql's rule for the equity grid (the S-hes C1
 // review's B1-1): where QuantLib's mesher doesn't hold the band of the same mesher on the helper's curves in place at
-// half its scale factor, QuantLib's mesher again given its constraints at the union of the two ranges, a bound of
-// QuantLib's that isn't a number short of the band's (B2-2). It returns {"NPV", "delta", "gamma", "theta"} and
-// "widened".
+// half its scale factor, with the strike widened by the same half margin (D3-1 of the S-hes run record), QuantLib's
+// mesher again given its constraints at the union of the two ranges, a bound of QuantLib's that isn't a number short
+// of the band's (B2-2). It returns {"NPV", "delta", "gamma", "theta"} and "widened".
 
 #include "convert.hpp"
 #include "models/equity/hestonspec.hpp"
@@ -33,6 +33,7 @@
 #include <ql/cashflows/dividend.hpp>
 #include <ql/exercise.hpp>
 #include <ql/instruments/vanillaoption.hpp>
+#include <ql/math/distributions/normaldistribution.hpp>
 #include <ql/methods/finitedifferences/meshers/fdmblackscholesmesher.hpp>
 #include <ql/methods/finitedifferences/meshers/fdmhestonvariancemesher.hpp>
 #include <ql/methods/finitedifferences/meshers/fdmmeshercomposite.hpp>
@@ -145,10 +146,11 @@ namespace harness {
         // QuantLib's getSolverDesc assembled from its components (fdhestonvanillaengine.cpp:103-166: the variance
         // mesher, the helper process in its call's order, FdmBlackScholesMesher, FdmLogInnerValue, vanillaComposite),
         // with nanoql's rule for the equity grid: where the mesher's range doesn't hold the band of the same mesher on
-        // the helper's curves in place at half its scale factor, the mesher again with QuantLib's constraints set to the
-        // union of the two ranges, a bound that isn't a number short of the band's (B2-2). Each range is a mesher's first
-        // and last locations, which QuantLib's 1-D meshers pin to their bounds. Returns the solve's {"NPV", "delta",
-        // "gamma", "theta"} at the spot and v0, and "widened".
+        // the helper's curves in place at half its scale factor, the strike widened by the same half margin with it
+        // (D3-1), the mesher again with QuantLib's constraints set to the union of the two ranges, a bound that isn't a
+        // number short of the band's (B2-2). Each range is a mesher's first and last locations, which QuantLib's 1-D
+        // meshers pin to their bounds. Returns the solve's {"NPV", "delta", "gamma", "theta"} at the spot and v0, and
+        // "widened".
         json::value widenedResults(const equity::ProcessSpec& p, Option::Type type, Real strike, const ExerciseSpec& e,
                                    const std::vector<DateSpec>& dividendDates, const std::vector<Real>& dividendAmounts,
                                    Size tGrid, Size xGrid, Size vGrid, Size dampingSteps, const SchemeSpec& s) {
@@ -173,7 +175,10 @@ namespace harness {
             };
             const FdmBlackScholesMesher band(xGrid, inPlace, maturity, strike, Null<Real>(), Null<Real>(), 0.0001, 1.0,
                                              cPoint, dividends);
-            const Real bandMin = band.locations().front(), bandMax = band.locations().back();
+            // and the strike by the same half margin (D3-1 of the S-hes run record)
+            const Real halfMargin = vol * std::sqrt(maturity) * InverseCumulativeNormal()(1 - 0.0001) * 1.0;
+            const Real bandMin = std::min(band.locations().front(), std::log(strike) - halfMargin);
+            const Real bandMax = std::max(band.locations().back(), std::log(strike) + halfMargin);
             // QuantLib's mesher on the helper; where one of its bounds isn't a number (its swapped walk below zero, the
             // review's B2-2) its 1-D mesher refuses, and each bound is read from the mesher with the other side given
             // the band's bound, NaN where that refuses too

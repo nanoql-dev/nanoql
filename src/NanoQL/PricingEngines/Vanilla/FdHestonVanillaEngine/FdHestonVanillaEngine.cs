@@ -43,12 +43,13 @@ namespace NanoQL.PricingEngines;
 /// carry 0.30 and volatility 0.1, priced 0 where the analytic engine gives 1.5732), and where cash dividends take the
 /// mirrored walk below zero its bound isn't a number and the engine refuses. Here the mesher is QuantLib's wherever its
 /// range holds the true forwards' band, the walk's ends on the helper's curves in place widened by the volatility's
-/// quantile, half the mesher's own margin, and QuantLib's mesher widened to the band through its own constraints where
-/// it doesn't, a bound that isn't a number falling short. The multi-strike solve, whose mesher takes no constraints,
-/// solves each strike alone where its grid doesn't hold the band at the points the solve is read at, S·K/Kᵢ, their
-/// forwards quanto-adjusted where a quanto helper is given; the two paths run on different grids, so a strike's value
-/// steps where the switch moves, by up to about 0.4% at carry 0.06 (B1-1, B2-1, B2-2 and B3-1 of the S-hes plan's C1
-/// review; <c>Divergences/FdHestonHighCarryTests.cs</c>).
+/// quantile, half the mesher's own margin, and the strike widened by the same half margin, and QuantLib's mesher widened
+/// to the band through its own constraints where it doesn't, a bound that isn't a number falling short. The
+/// multi-strike solve, whose mesher takes no constraints, solves each strike alone where its grid doesn't hold the band
+/// at the points the solve is read at, S·K/Kᵢ, their forwards quanto-adjusted where a quanto helper is given; the two
+/// paths run on different grids, so a strike's value steps where the switch moves, by up to about 0.4% at carry 0.06
+/// (B1-1, B2-1, B2-2 and B3-1 of the S-hes plan's C1 review, the strike's band D3-1 of its run record;
+/// <c>Divergences/FdHestonHighCarryTests.cs</c>).
 /// </para>
 /// <para>
 /// QuantLib's <c>enableMultipleStrikesCaching</c> solves once on a mesher spanning several strikes and serves later
@@ -437,34 +438,8 @@ public static class FdHestonVanillaEngine
         Fdm1dMesher equityMesher;
         if (strikes is null || strikes.Count == 0)
         {
-            // QuantLib's mesher on its helper, which walks the forward's mirror about the spot; where its range doesn't
-            // hold the true forwards' band, the walk's ends on the helper's curves in place widened by the volatility's
-            // quantile, half the mesher's own margin, QuantLib's mesher widened to the band through its own constraints
-            // (B1-1 of the S-hes plan's C1 review): QuantLib's grid wherever it holds the distribution
-            (double xMin, double xMax) = FdmBlackScholesMesher.Bounds(
-                helperProcess, maturity, payoff.Strike, 0.0001, 2.0, dividends, quantoHelper, 0.0, context, clock);
-            (double bandMin, double bandMax) = FdmBlackScholesMesher.Bounds(
-                trueProcess, maturity, payoff.Strike, 0.0001, 1.0, dividends, quantoHelper, 0.0, context, clock);
-            // a bound of QuantLib's that isn't a number, its swapped walk below zero, is short of a band that is (B2-2
-            // of the review)
-            bool lowShort = double.IsNaN(xMin) ? !double.IsNaN(bandMin) : bandMin < xMin;
-            bool highShort = double.IsNaN(xMax) ? !double.IsNaN(bandMax) : bandMax > xMax;
-            bool widened = lowShort || highShort;
-            equityMesher = new FdmBlackScholesMesher(
-                xGrid,
-                helperProcess,
-                maturity,
-                payoff.Strike,
-                widened ? (lowShort ? bandMin : xMin) : null,
-                widened ? (highShort ? bandMax : xMax) : null,
-                0.0001,
-                2.0,
-                (payoff.Strike, 0.1),
-                dividends,
-                quantoHelper,
-                0.0,
-                context,
-                clock);
+            equityMesher = EquityMesher(
+                xGrid, helperProcess, trueProcess, maturity, payoff.Strike, 2.0, dividends, quantoHelper, context, clock);
         }
         else
         {
@@ -497,7 +472,9 @@ public static class FdHestonVanillaEngine
     // for the option's strike K (B1-1 and B2-1 of the S-hes plan's C1 review): from each read point to its forward on
     // the curves in place, the dividend curve quanto-adjusted as the operator's drift is (B3-1), widened there by half
     // the mesher's margin, with its -σ²T/2, and without QuantLib's floor terms, which don't scale with the spot; where
-    // it doesn't, each strike is solved alone
+    // it doesn't, each strike is solved alone. The strike K takes no band of its own here: the grid is centred on the
+    // strikes' mirrored forwards, and a band around K, measured, fired only where the grid already held it (D3-1 of
+    // the S-hes run record)
     internal static bool MultiStrikeGridHolds(
         VanillaOption option,
         HestonModel model,
@@ -537,12 +514,65 @@ public static class FdHestonVanillaEngine
         return !(bandMin < xMin || bandMax > xMax);
     }
 
+    // QuantLib's mesher on its helper, which walks the forward's mirror about the spot; where its range doesn't hold the
+    // true forwards' band, the walk's ends on the helper's curves in place widened by the volatility's quantile, half
+    // the mesher's own margin, QuantLib's mesher widened to the band through its own constraints (B1-1 of the S-hes
+    // plan's C1 review): QuantLib's grid wherever it holds the distribution. The band holds the strike widened by the
+    // same half margin too, where an option far from the forwards takes its value: without it a put at 0.7 of the
+    // forward priced 0 at a year, carry -0.2 and volatility 0.1 (D3-1 of the S-hes run record). The Heston-Hull-White
+    // engine's mesher too, at its scale factor (D3-1).
+    internal static FdmBlackScholesMesher EquityMesher(
+        int xGrid,
+        GeneralizedBlackScholesProcess helperProcess,
+        GeneralizedBlackScholesProcess trueProcess,
+        double maturity,
+        double strike,
+        double scaleFactor,
+        ImmutableArray<Dividend> dividends,
+        FdmQuantoHelper? quantoHelper,
+        EvaluationContext context,
+        TermStructure clock)
+    {
+        (double xMin, double xMax) = FdmBlackScholesMesher.Bounds(
+            helperProcess, maturity, strike, 0.0001, scaleFactor, dividends, quantoHelper, 0.0, context, clock);
+        (double bandMin, double bandMax) = FdmBlackScholesMesher.Bounds(
+            trueProcess, maturity, strike, 0.0001, scaleFactor / 2.0, dividends, quantoHelper, 0.0, context, clock);
+
+        // the strike's band: the volatility per unit of the clock's time, a constant volatility on the clock (the
+        // helpers'), so σ√T as Bounds reads it
+        double halfMargin = trueProcess.BlackVolatility.BlackVol(maturity, strike) * Math.Sqrt(maturity)
+            * new InverseCumulativeNormal().Evaluate(1 - 0.0001) * (scaleFactor / 2.0);
+        bandMin = Min(bandMin, Math.Log(strike) - halfMargin);
+        bandMax = Max(bandMax, Math.Log(strike) + halfMargin);
+
+        // a bound of QuantLib's that isn't a number, its swapped walk below zero, is short of a band that is (B2-2 of
+        // the review)
+        bool lowShort = double.IsNaN(xMin) ? !double.IsNaN(bandMin) : bandMin < xMin;
+        bool highShort = double.IsNaN(xMax) ? !double.IsNaN(bandMax) : bandMax > xMax;
+        bool widened = lowShort || highShort;
+        return new FdmBlackScholesMesher(
+            xGrid,
+            helperProcess,
+            maturity,
+            strike,
+            widened ? (lowShort ? bandMin : xMin) : null,
+            widened ? (highShort ? bandMax : xMax) : null,
+            0.0001,
+            scaleFactor,
+            (strike, 0.1),
+            dividends,
+            quantoHelper,
+            0.0,
+            context,
+            clock);
+    }
+
     // QuantLib's processHelper(s0, dividendYield, riskFreeRate, vol), whose parameters are (s0, rTS, qTS, vol): the
     // helper's risk-free curve the dividend curve and its dividend curve the risk-free curve, as QuantLib's call binds
     // them, so the equity mesher is QuantLib's; and the helper with its curves in place, whose forwards are the
     // process's. The volatility, an estimate per unit of the engine's time, on the clock, and the meshers on the
     // engine's clock, not the helpers'.
-    private static (GeneralizedBlackScholesProcess Helper, GeneralizedBlackScholesProcess True) HelperProcesses(
+    internal static (GeneralizedBlackScholesProcess Helper, GeneralizedBlackScholesProcess True) HelperProcesses(
         HestonProcess process, double vol, TermStructure clock)
     {
         var volatility = new BlackConstantVol(clock.ReferenceDate, null, vol, clock.DayCounter);
