@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/hestonmodel.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testDAXCalibration, testKahlJaeckelCase, testAnalyticPiecewiseTimeDependent, testDAXCalibrationOfTimeDependentModel, testAlanLewisReferencePrices, testExpansionOnAlanLewisReference, testExpansionOnFordeReference, testCosHestonEngine, testCosHestonEngineTruncation, testCharacteristicFct, testAndersenPiterbargPricing, testPiecewiseTimeDependentChFvsHestonChF, testPiecewiseTimeDependentComparison, testPiecewiseTimeDependentChFAsymtotic, testSmallSigmaExpansion4ExpFitting, testExponentialFitting4StrikesAndMaturities, testAsymptoticControlVariate, testOptimalAlphaKmin and testAnalyticPDFHestonEngine, which wait for S-hes's COS, expansion, exponential-fitting, PDF and time-dependent Heston engines; testAnalyticVsBlack, testFdVanillaVsCached, testFdVanillaWithDividendsVsCached, testFdAmerican and testMultipleStrikesEngine, which wait for S-hes's FdHestonVanillaEngine; testMcVsCached, which waits for S-hes's MCEuropeanHestonEngine; testFdBarrierVsCached, which waits for S-bar's FdHestonBarrierEngine; testAllIntegrationMethods and testCosHestonCumulants, which wait for S-core's exp-sinh integral and numerical differentiation; testAndersenPiterbargControlVariateIntegrand, which waits for S-exo's MCVarianceSwapEngine; testAndersenPiterbargConvergence, which waits for S-van's discrete integrals; testLocalVolFromHestonModel and testHestonBlackVolSurfaceAtmLevel, which wait for S-hes's HestonBlackVolSurface
+// Partial: testDAXCalibration, testKahlJaeckelCase, testAnalyticPiecewiseTimeDependent, testDAXCalibrationOfTimeDependentModel, testAlanLewisReferencePrices, testExpansionOnAlanLewisReference, testExpansionOnFordeReference, testCosHestonEngine, testCosHestonEngineTruncation, testCharacteristicFct, testAndersenPiterbargPricing, testPiecewiseTimeDependentChFvsHestonChF, testPiecewiseTimeDependentComparison, testPiecewiseTimeDependentChFAsymtotic, testSmallSigmaExpansion4ExpFitting, testExponentialFitting4StrikesAndMaturities, testAsymptoticControlVariate, testOptimalAlphaKmin and testAnalyticPDFHestonEngine, which wait for S-hes's COS, expansion, exponential-fitting, PDF and time-dependent Heston engines; testAnalyticVsBlack, testFdVanillaVsCached, testFdVanillaWithDividendsVsCached, testFdAmerican and testMultipleStrikesEngine, which wait for S-hes's FdHestonVanillaEngine; testMcVsCached, which waits for S-hes's MCEuropeanHestonEngine; testFdBarrierVsCached, which waits for S-bar's FdHestonBarrierEngine; testAllIntegrationMethods and testCosHestonCumulants, which wait for S-core's exp-sinh integral and numerical differentiation; testAndersenPiterbargControlVariateIntegrand, which waits for S-exo's MCVarianceSwapEngine; testLocalVolFromHestonModel and testHestonBlackVolSurfaceAtmLevel, which wait for S-hes's HestonBlackVolSurface
 
 using System.Numerics;
 using NanoQL.Instruments;
@@ -265,6 +265,61 @@ public class HestonModelTests
             Assert.False(
                 maxDiff > tr,
                 $"Failed to reproduce Heston pricing values within given tolerance\n    maxDifference: {maxDiff}\n    tolerance:     {tr}");
+        }
+    }
+
+    [Fact]
+    public void TestAndersenPiterbargConvergence()
+    {
+        // Testing Andersen-Piterbarg pricing convergence...
+
+        var settlementDate = new Date(5, Month.July, 2002);
+        var context = new EvaluationContext { EvaluationDate = settlementDate };
+        var maturityDate = new Date(5, Month.July, 2003);
+
+        DayCounter dayCounter = new Actual365Fixed();
+        YieldTermStructure rTS = FlatRate(0.01, dayCounter, context);
+        YieldTermStructure qTS = FlatRate(0.02, dayCounter, context);
+
+        Real s0 = 100.0;
+
+        const Real v0 = 0.04;
+        const Real rho = -0.5;
+        const Real sigma = 1.0;
+        const Real kappa = 4.0;
+        const Real theta = 0.25;
+
+        var hestonModel = new HestonModel(new HestonProcess(rTS, qTS, s0, v0, kappa, theta, sigma, rho));
+
+        var option = new VanillaOption(new PlainVanillaPayoff(OptionType.Call, s0), new EuropeanExercise(maturityDate));
+
+        // Alan Lewis reference prices posted in
+        // http://wilmott.com/messageview.cfm?catid=34&threadid=90957
+        const Real reference = 16.070154917028834278213466703938231827658768230714;
+
+        Real[] diffs =
+        [
+            0.0892433814611486298, 0.00013096156482816923,
+            1.34107015270501506e-07, 1.22913235145460931e-10,
+            1.24344978758017533e-13,
+        ];
+
+        for (int n = 10; n <= 50; n += 10)
+        {
+            Real npv = AnalyticHestonEngine.Calculate(
+                option,
+                context,
+                hestonModel,
+                AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg,
+                FourierIntegration.DiscreteTrapezoid(n),
+                1e-13).NPV!.Value;
+
+            Real calculatedDiff = Math.Abs(npv - reference);
+            Assert.False(
+                calculatedDiff > 1.25 * diffs[(n / 10) - 1],
+                "failed to prove convergence for trapezoid rule "
+                + $"\n  calculated difference: {calculatedDiff}"
+                + $"\n  expected difference:   {diffs[(n / 10) - 1]}");
         }
     }
 

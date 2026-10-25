@@ -102,6 +102,8 @@ def mesher_1d(spec):
             spec["size"], bsp.process(spec["process"]), spec["maturity"], spec["strike"], spec["xMin"], spec["xMax"],
             spec["eps"], spec["scaleFactor"], (NULL, NULL) if c is None else (c[0], c[1]),
             dividends(spec["dividends"]), quanto(spec["quanto"]), spec["spotAdjustment"])
+    if t == "Predefined":
+        return ql.Predefined1dMesher(spec["x"])
     raise ValueError(f"unknown mesher {t}")
 
 

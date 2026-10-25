@@ -59,7 +59,7 @@ public abstract class BlackVolTermStructure : VolatilityTermStructure
         CheckRange(maturity, extrapolate);
         CheckStrike(strike, extrapolate);
         double t = TimeFromReference(maturity);
-        return BlackVolImpl(t, strike);
+        return BlackVolOn(maturity, t, strike);
     }
 
     /// <summary>The spot volatility at a maturity time and strike.</summary>
@@ -88,7 +88,7 @@ public abstract class BlackVolTermStructure : VolatilityTermStructure
         CheckRange(maturity, extrapolate);
         CheckStrike(strike, extrapolate);
         double t = TimeFromReference(maturity);
-        return BlackVarianceImpl(t, strike);
+        return BlackVarianceOn(maturity, t, strike);
     }
 
     /// <summary>The spot variance at a maturity time and strike.</summary>
@@ -130,7 +130,22 @@ public abstract class BlackVolTermStructure : VolatilityTermStructure
         // using the time implementation
         double time1 = TimeFromReference(date1);
         double time2 = TimeFromReference(date2);
-        return BlackForwardVol(time1, time2, strike, extrapolate);
+        if (time2 == time1 || !(time1 <= time2))
+        {
+            return BlackForwardVol(time1, time2, strike, extrapolate);
+        }
+
+        // the time implementation's arithmetic, its variances read at the dates
+        CheckRange(time2, extrapolate);
+        CheckStrike(strike, extrapolate);
+        double var1 = BlackVarianceOn(date1, time1, strike);
+        double var2 = BlackVarianceOn(date2, time2, strike);
+        if (!(var2 >= var1))
+        {
+            throw new NanoQLException("variances must be non-decreasing");
+        }
+
+        return Math.Sqrt((var2 - var1) / (time2 - time1));
     }
 
     /// <summary>The forward (at-the-money) volatility between two times, at a strike.</summary>
@@ -211,7 +226,22 @@ public abstract class BlackVolTermStructure : VolatilityTermStructure
         // using the time implementation
         double time1 = TimeFromReference(date1);
         double time2 = TimeFromReference(date2);
-        return BlackForwardVariance(time1, time2, strike, extrapolate);
+        if (!(time1 <= time2))
+        {
+            return BlackForwardVariance(time1, time2, strike, extrapolate);
+        }
+
+        // the time implementation's arithmetic, its variances read at the dates
+        CheckRange(time2, extrapolate);
+        CheckStrike(strike, extrapolate);
+        double v1 = BlackVarianceOn(date1, time1, strike);
+        double v2 = BlackVarianceOn(date2, time2, strike);
+        if (!(v2 >= v1))
+        {
+            throw new NanoQLException("variances must be non-decreasing");
+        }
+
+        return v2 - v1;
     }
 
     /// <summary>The forward (at-the-money) variance between two times, at a strike.</summary>
@@ -241,6 +271,16 @@ public abstract class BlackVolTermStructure : VolatilityTermStructure
 
         return v2 - v1;
     }
+
+    // The variance at a date and its time, which BlackVariance(Date), BlackForwardVariance(Date, Date) and
+    // BlackForwardVol(Date, Date) read, the range checked: the variance at the date's time, QuantLib's read. A structure
+    // whose times can't carry its dates reads them by date (the implied structure on a day counter whose year fractions
+    // don't add, the S-van plan's VR4 (xxii)); every other structure keeps this read and its bits.
+    internal virtual double BlackVarianceOn(Date d, double t, double strike) => BlackVarianceImpl(t, strike);
+
+    // The volatility at a date and its time, which BlackVol(Date) reads, the range checked: QuantLib's read at the
+    // date's time, as BlackVarianceOn.
+    internal virtual double BlackVolOn(Date d, double t, double strike) => BlackVolImpl(t, strike);
 
     // The variance accrued by a date, none before the reference date (TermStructure.AccrualTimeTo), where QuantLib's
     // read throws: BlackVariance on and after that date.

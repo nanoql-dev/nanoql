@@ -170,6 +170,16 @@ Facts:
 - `APayoffDiscountCurveRunsOverItsOwnTime`
 - `EachEnginesThetaIsPerItsOwnDayCountersYear`
 
+## AndreasenHugeCallPutErrorTests
+
+[`Divergences/AndreasenHugeCallPutErrorTests.cs`](../tests/NanoQL.Tests/Divergences/AndreasenHugeCallPutErrorTests.cs)
+
+Andreasen-Huge's call-put calibration error by strike (the S-van plan's VR4 (xvii)). QuantLib takes each option's put or call error by comparing the forward with the j-th grid point, `fwd > gridInFwd_[j]` (`andreasenhugevolatilityinterpl.cpp:418`), about an eighth of the smallest strike, so it always takes the puts': on calls struck 101.5 to 130 from 15 October 2026, all above the forward, it gives (1.6410985795898742e-08, 1.148950832474151e-06, 2.1308681968043031e-07), where each option's vega-scaled error on its out-of-the-money side, from the calibrated prices, gives (1.6414905070833644e-08, 1.1491274031493572e-06, 2.1310003360549513e-07) [executed: the wheel, `scratchpad\c5\probe_ah_callput.py`]. nanoql compares the forward with the strike, the out-of-the-money side; QuantLib's check, the per-option errors from the calibrated prices, gives nanoql's values. Where every strike is below the forward the two choices agree, and QuantLib's bits stand.
+
+Facts:
+
+- `TheErrorIsEachOptionsOutOfTheMoneySide`
+
 ## ApproximationThetaMismatchedTimesTests
 
 [`Divergences/ApproximationThetaMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/ApproximationThetaMismatchedTimesTests.cs)
@@ -1356,6 +1366,28 @@ Facts:
 
 - `ADefaultRoundingHasNoPrecisionOrDigit`
 
+## DeltaSurfaceMismatchedTimesTests
+
+[`Divergences/DeltaSurfaceMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/DeltaSurfaceMismatchedTimesTests.cs)
+
+The delta-quoted volatility surface's curves on another clock (the S-van plan's VR4 (xxi), the mismatched-dates class). QuantLib reads its domestic and foreign curves at the surface's own times (`blackvolsurfacedelta.cpp:96-97`, `:210`), so curves on another day counter, or dated otherwise, are read at other instants: under a surface on Actual/365 (Fixed) from 15 October 2026, curves at 4% and 1% on Actual/360 give a one-year forward of 1.2159363500651499 where the same curves restated on Actual/365 (Fixed), each rate times 365/360 and so the same discount at every date, give 1.2164430957757022; and QuantLib's own cases' curves, floating from 1 January 2010, a TARGET holiday, and so dated 4 January, are read three days on: their one-month at-the-money volatility is 0.13010360399762275, where the curves restated on the surface's clock give 0.13008061079668704 [executed: the wheel, `scratchpad\c5\probe_delta_ql.py`]. nanoql reads each curve at the instant a time denotes, on its own clock; QuantLib's check, its surface on the curves restated on the surface's clock, gives nanoql's values. Where the curves share the surface's day counter and reference date, QuantLib's bits stand. QuantLib's cases on the floating curves are moved to the fixed surface's values (`TestSuite/BlackVolSurfaceDeltaTests.cs`).
+
+Facts:
+
+- `OnCurvesOnAnotherDayCounterItReadsThemAtTheInstants`
+- `OnQuantLibsFloatingCurvesItReadsThemAtTheInstants`
+- `WhereTheCurvesShareTheSurfacesClockItIsQuantLibs`
+
+## DeltaSurfaceSmileSectionTests
+
+[`Divergences/DeltaSurfaceSmileSectionTests.cs`](../tests/NanoQL.Tests/Divergences/DeltaSurfaceSmileSectionTests.cs)
+
+The delta-quoted volatility surface's smile section and its forward (the S-van plan's VR4 (xxxii)). QuantLib's `blackVolSmile` passes the at-the-money volatility as the section's at-the-money level, or 1 without an at-the-money quote (`blackvolsurfacedelta.cpp:118`, `:135`), which `InterpolatedSmileSection` takes as the forward (`interpolatedsmilesection.hpp:52-58`) and its option prices, vega, digital prices and density read as the forward (`smilesection.cpp:78`, `:120`, `:124`, `:135`): on QuantLib's cases' surface, the six-month section prices on a forward of 0.11, the at-the-money volatility, where the surface's own forward, its `atmLevel(t)`, is S·P_f/P_d, about 1.17 [read]. nanoql's section takes the surface's forward; its volatilities are QuantLib's. The checks: the forward from QuantLib's curves, and the section's prices against Black's formula at the section's own volatilities.
+
+Facts:
+
+- `TheSectionPricesOnTheSurfacesForward`
+
 ## DeltaVolQuoteAtmDeltaTests
 
 [`Divergences/DeltaVolQuoteAtmDeltaTests.cs`](../tests/NanoQL.Tests/Divergences/DeltaVolQuoteAtmDeltaTests.cs)
@@ -1409,6 +1441,17 @@ Facts:
 
 - `TheIborAndCmsLegsDefaultToACoveredOption`
 - `TheCmsSpreadLegDefaultsToACoveredOption`
+
+## DiscreteIntegratorFewPointsTests
+
+[`Divergences/DiscreteIntegratorFewPointsTests.cs`](../tests/NanoQL.Tests/Divergences/DiscreteIntegratorFewPointsTests.cs)
+
+The discrete integrators with too few evaluations (the S-van plan's VR4 (xix), (xx)). With fewer than two, QuantLib's count of intervals, an unsigned `Size`, wraps below zero and its loop runs about 2⁶⁴ times (`discreteintegrals.cpp:74-79`, `:92`) [read]; nanoql refuses them, at construction and where the count is set below two since. With two, one interval, QuantLib's Simpson integrator closes its odd interval count by an end correction that counts f(a) a second time: on exp over [0, 1] it gives 2.5258075808961893, where its own `DiscreteSimpsonIntegral` on the same two points gives the trapezoid's 1.8591409142295225 [executed: the C++ harness]; nanoql's integrator gives the trapezoid there. QuantLib's check: its array form.
+
+Facts:
+
+- `BelowTwoEvaluationsTheIntegratorsRefuse`
+- `AtTwoEvaluationsSimpsonIsTheTrapezoid`
 
 ## DiscretizedAssetStateTests
 
@@ -1751,6 +1794,17 @@ The fitted curve's recalculation path (the S-sr plan's SSD22). A fitted curve is
 Facts:
 
 - `ACurveOnMovedPricesIsTheFreshFit`
+
+## FixedLocalVolNodeExtrapolationTests
+
+[`Divergences/FixedLocalVolNodeExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/FixedLocalVolNodeExtrapolationTests.cs)
+
+The fixed local volatility surface's constant extrapolation in strike at a node time (the S-van plan's VR4 (xviii)). Between nodes QuantLib holds a strike outside a time's strikes at the nearest one, but at a node, and for every time before the first, which it clamps onto the first node, it evaluates the strike interpolation beyond its range (`fixedlocalvolsurface.cpp:135-137`, `:143-161`): on three strikes 80, 100 and 120 and three times from 15 October 2026, linear in both, at the second node and strike 60 it gives 0.25, where a nanosecond either side it gives 0.22999999995989012 and 0.23000000001994536; before the first node 0.24, where a nanosecond after it 0.2200000000401099 [executed: the wheel, `scratchpad\c5\probe_fixed_node.py`]. nanoql clamps at a node too; QuantLib's check, its own off-node value as the time tends to the node, gives nanoql's values. Inside a time's strikes QuantLib's bits stand.
+
+Facts:
+
+- `AtANodeAStrikeOutsideIsHeldAtTheNearest`
+- `BeforeTheFirstNodeAStrikeOutsideIsHeldAtTheNearest`
 
 ## FlatExtrapolator2DNullTests
 
@@ -2230,6 +2284,18 @@ Facts:
 - `AnAdditiveDayCounterKeepsQuantLibsBits`
 - `ADateBeforeTheReferenceDateIsRefused`
 
+## ImpliedVolTermStructureDateTests
+
+[`Divergences/ImpliedVolTermStructureDateTests.cs`](../tests/NanoQL.Tests/Divergences/ImpliedVolTermStructureDateTests.cs)
+
+The implied Black-volatility structure on a day counter whose year fractions don't add, and before its original's reference date (the S-van plan's VR4 (xxii)). QuantLib reads its original between the reference date's time on the original's clock and that time plus the query's (`impliedvoltermstructure.hpp:101-109`): on Thirty360, from 15 October 2026 at 20% and implied at 31 January 2027, its variance at 28 February 2027 is 0.0031111111111111114, 3.70% above the original's forward variance by date, 0.0030000000000000009, and at 30 June 2027 0.67% above it; implied at 30 November 2026, its variance at 31 March 2027 is 0.83% below it [executed: QuantLib 1.44's C++, `scratchpad\c5\probe\implied_vol.cpp`]. nanoql reads a date by date where the sum misses the date's own time on the original's clock, and keeps QuantLib's bits elsewhere, as on every date of Actual/365 (Fixed). Implied at 15 July 2026, before the original's date, QuantLib's variance at 15 January 2027 is 0.02016438356164384, the original's variance read three months before its own date added; nanoql's accrues none before it, the original's 0.01008219178082192, and at 15 September 2026 none at all, where QuantLib refuses the negative time; on Thirty360 from 31 August 2026, a date the sum misses is read by date from the original's own date.
+
+Facts:
+
+- `OnThirty360ADateReadsTheOriginalsVarianceByDate`
+- `OnAnAdditiveDayCounterEveryDateKeepsQuantLibsBits`
+- `AReferenceDateBeforeTheOriginalsAccruesNothingBeforeIt`
+
 ## IncrementalStatisticsLeadingZeroWeightTests
 
 [`Divergences/IncrementalStatisticsLeadingZeroWeightTests.cs`](../tests/NanoQL.Tests/Divergences/IncrementalStatisticsLeadingZeroWeightTests.cs)
@@ -2614,6 +2680,19 @@ Facts:
 Facts:
 
 - `AFallingVarianceIsRefused`
+
+## LocalVolMismatchedTimesTests
+
+[`Divergences/LocalVolMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/LocalVolMismatchedTimesTests.cs)
+
+The mismatched-dates class (Revision 58) through the S-van plan's C5 readers (its VR4 (xxiii)). QuantLib's Andreasen-Huge interpolation reads the dividend curve at the risk-free curve's times (`andreasenhugevolatilityinterpl.cpp:299`, `:414`, `:462`, `:547`, `:623`); its Black-Scholes, generalized Black-Scholes and local-volatility density calculators read their curves and volatility at one time; and its forward operators read like `FdmBlackScholesOp`. So a dividend curve on Actual/360 under a market on Actual/365 (Fixed) is read at other instants: from 15 October 2026, curves at 3% and 1%, the Andreasen-Huge forward at half a year is 101.0050167084168 where the dividend curve restated on Actual/365 (Fixed), its rate times 365/360 and so the same discount at every date, gives 100.99800271468963; the density calculators' cumulative probabilities at 105 are 0.6208898362432407, where the restated market gives 0.6210392949047169 [executed: the wheel, `scratchpad\c5\probe_lv_mismatch.py`]. nanoql reads each structure at the instant a time denotes, on its own clock: the risk-free curve's for the interpolation and the Black-Scholes calculators, the local volatility's for its calculator, and `FdmBlackScholesOp`'s for the forward operators. QuantLib's check, its readers on the restated market, gives nanoql's values. Where every structure shares the clock, QuantLib's bits stand (the vectors). On its default grid the local-volatility calculator solves to its local volatility's last date, the last representable one for a structure without a maximum date, which a curve dated later reads too.
+
+Facts:
+
+- `AndreasenHugeReadsTheDividendCurveAtTheInstants`
+- `TheDensityCalculatorsReadEachStructureAtTheInstants`
+- `TheForwardOperatorsReadEachStructureAtTheInstants`
+- `OnItsDefaultGridToTheLastDateTheLocalVolCalculatorReadsACurveDatedLater`
 
 ## LocalVolSurfaceMismatchedTimesTests
 

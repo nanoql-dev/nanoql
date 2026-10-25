@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 571 | 68 |
-| partial | 21 | 27 |
-| ported | 668 | 85 |
+| not started | 554 | 64 |
+| partial | 21 | 30 |
+| ported | 685 | 86 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -813,11 +813,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `discreteintegrals` | not started |  | no nanoql type: DiscreteTrapezoidIntegral, DiscreteSimpsonIntegral, DiscreteTrapezoidIntegrator, DiscreteSimpsonIntegrator |
+| `discreteintegrals` | ported | Numerics/Integrals/DiscreteIntegrals/DiscreteSimpsonIntegral.cs, Numerics/Integrals/DiscreteIntegrals/DiscreteSimpsonIntegrator.cs, Numerics/Integrals/DiscreteIntegrals/DiscreteTrapezoidIntegral.cs, Numerics/Integrals/DiscreteIntegrals/DiscreteTrapezoidIntegrator.cs |  |
 | `exponentialintegrals` | ported | Numerics/Integrals/ExponentialIntegralsFunctions.cs |  |
 | `expsinhintegral` | not started |  | no nanoql type: ExpSinhIntegral |
 | `filonintegral` | not started |  | no nanoql type: FilonIntegral, FilonIntegralType |
-| `fourierintegration` | partial | Numerics/Integrals/FourierIntegration.cs | partial: discreteSimpson and discreteTrapezoid (S-van's discrete integrals); expSinh (S-core) |
+| `fourierintegration` | partial | Numerics/Integrals/FourierIntegration.cs | partial: expSinh (S-core) |
 | `gaussianorthogonalpolynomial` | ported | Numerics/Integrals/GaussianOrthogonalPolynomial/GaussChebyshev2ndPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussChebyshevPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussGegenbauerPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussHermitePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussHyperbolicPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussJacobiPolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussLaguerrePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussLegendrePolynomial.cs, Numerics/Integrals/GaussianOrthogonalPolynomial/GaussianOrthogonalPolynomial.cs |  |
 | `gaussianquadratures` | ported | Numerics/Integrals/GaussianQuadratures/GaussChebyshev2ndIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshev2ndIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshevIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussChebyshevIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussGegenbauerIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussHermiteIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussHyperbolicIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussJacobiIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLaguerreIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLegendreIntegration.cs, Numerics/Integrals/GaussianQuadratures/GaussLegendreIntegrator.cs, Numerics/Integrals/GaussianQuadratures/GaussianQuadrature.cs, Numerics/Integrals/GaussianQuadratures/GaussianQuadratureIntegrator.cs, Numerics/Integrals/GaussianQuadratures/MultiDimGaussianIntegration.cs, Numerics/Integrals/GaussianQuadratures/TabulatedGaussLegendre.cs |  |
 | `gausslaguerrecosinepolynomial` | not started |  | no nanoql type: GaussLaguerreTrigonometricBase, GaussLaguerreCosinePolynomial, GaussLaguerreSinePolynomial |
@@ -1025,7 +1025,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmmesher` | ported | Methods/FiniteDifferences/Meshers/FdmMesher.cs |  |
 | `fdmmeshercomposite` | ported | Methods/FiniteDifferences/Meshers/FdmMesherComposite.cs |  |
 | `fdmsimpleprocess1dmesher` | ported | Methods/FiniteDifferences/Meshers/FdmSimpleProcess1dMesher.cs |  |
-| `predefined1dmesher` | not started |  | no nanoql type: Predefined1dMesher |
+| `predefined1dmesher` | ported | Methods/FiniteDifferences/Meshers/Predefined1dMesher.cs |  |
 | `uniform1dmesher` | ported | Methods/FiniteDifferences/Meshers/Uniform1dMesher.cs |  |
 | `uniformgridmesher` | not started |  | no nanoql type: UniformGridMesher |
 
@@ -1036,7 +1036,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `fdm2dblackscholesop` | not started |  | no nanoql type: Fdm2dBlackScholesOp |
 | `fdmbatesop` | not started |  | no nanoql type: FdmBatesOp |
-| `fdmblackscholesfwdop` | not started |  | no nanoql type: FdmBlackScholesFwdOp |
+| `fdmblackscholesfwdop` | ported | Methods/FiniteDifferences/Operators/FdmBlackScholesFwdOp.cs |  |
 | `fdmblackscholesop` | ported | Methods/FiniteDifferences/Operators/FdmBlackScholesOp.cs |  |
 | `fdmcevop` | ported | Methods/FiniteDifferences/Operators/FdmCEVOp.cs |  |
 | `fdmcirop` | ported | Methods/FiniteDifferences/Operators/FdmCIROp/FdmCIREquityPart.cs, Methods/FiniteDifferences/Operators/FdmCIROp/FdmCIRMixedPart.cs, Methods/FiniteDifferences/Operators/FdmCIROp/FdmCIROp.cs, Methods/FiniteDifferences/Operators/FdmCIROp/FdmCIRRatesPart.cs |  |
@@ -1049,7 +1049,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmlinearopcomposite` | ported | Methods/FiniteDifferences/Operators/FdmLinearOpComposite.cs |  |
 | `fdmlinearopiterator` | ported | Methods/FiniteDifferences/Operators/FdmLinearOpIterator.cs |  |
 | `fdmlinearoplayout` | ported | Methods/FiniteDifferences/Operators/FdmLinearOpLayout.cs |  |
-| `fdmlocalvolfwdop` | not started |  | no nanoql type: FdmLocalVolFwdOp |
+| `fdmlocalvolfwdop` | ported | Methods/FiniteDifferences/Operators/FdmLocalVolFwdOp.cs |  |
 | `fdmornsteinuhlenbeckop` | not started |  | no nanoql type: FdmOrnsteinUhlenbeckOp |
 | `fdmsabrop` | ported | Methods/FiniteDifferences/Operators/FdmSabrOp.cs |  |
 | `fdmsquarerootfwdop` | not started |  | no nanoql type: FdmSquareRootFwdOp, FdmSquareRootFwdOpTransformationType |
@@ -1118,7 +1118,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `bsmrndcalculator` | not started |  | no nanoql type: BSMRNDCalculator |
+| `bsmrndcalculator` | ported | Methods/FiniteDifferences/Utilities/BSMRNDCalculator.cs |  |
 | `cevrndcalculator` | ported | Methods/FiniteDifferences/Utilities/CEVRNDCalculator.cs |  |
 | `escroweddividendadjustment` | ported | Methods/FiniteDifferences/Utilities/EscrowedDividendAdjustment.cs |  |
 | `fdmaffinemodelswapinnervalue` | ported | Methods/FiniteDifferences/Utilities/FdmAffineModelSwapInnerValue/FdmAffineG2ModelSwapInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmAffineModelSwapInnerValue/FdmAffineHullWhiteModelSwapInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmAffineModelSwapInnerValue/FdmAffineModelSwapInnerValue{TModel}.cs |  |
@@ -1135,11 +1135,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmquantohelper` | ported | Methods/FiniteDifferences/Utilities/FdmQuantoHelper.cs |  |
 | `fdmshoutloginnervaluecalculator` | ported | Methods/FiniteDifferences/Utilities/FdmShoutLogInnerValueCalculator.cs |  |
 | `fdmtimedepdirichletboundary` | ported | Methods/FiniteDifferences/Utilities/FdmTimeDepDirichletBoundary.cs |  |
-| `gbsmrndcalculator` | not started |  | no nanoql type: GBSMRNDCalculator |
+| `gbsmrndcalculator` | ported | Methods/FiniteDifferences/Utilities/GBSMRNDCalculator.cs |  |
 | `hestonrndcalculator` | not started |  | no nanoql type: HestonRNDCalculator |
-| `localvolrndcalculator` | not started |  | no nanoql type: LocalVolRNDCalculator |
+| `localvolrndcalculator` | ported | Methods/FiniteDifferences/Utilities/LocalVolRNDCalculator.cs |  |
 | `riskneutraldensitycalculator` | ported | Methods/FiniteDifferences/Utilities/RiskNeutralDensityCalculator.cs |  |
-| `smilesectionrndcalculator` | not started |  | no nanoql type: SmileSectionRNDCalculator |
+| `smilesectionrndcalculator` | ported | Methods/FiniteDifferences/Utilities/SmileSectionRNDCalculator.cs |  |
 | `squarerootprocessrndcalculator` | not started |  | no nanoql type: SquareRootProcessRNDCalculator |
 
 ### `ql/methods/lattices/`
@@ -1843,25 +1843,25 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `andreasenhugelocalvoladapter` | not started |  | no nanoql type: AndreasenHugeLocalVolAdapter |
-| `andreasenhugevolatilityadapter` | not started |  | no nanoql type: AndreasenHugeVolatilityAdapter |
-| `andreasenhugevolatilityinterpl` | not started |  | no nanoql type: AndreasenHugeVolatilityInterpl, AndreasenHugeVolatilityInterplInterpolationType, AndreasenHugeVolatilityInterplCalibrationType |
+| `andreasenhugelocalvoladapter` | ported | TermStructures/Volatility/EquityFX/AndreasenHugeLocalVolAdapter.cs |  |
+| `andreasenhugevolatilityadapter` | ported | TermStructures/Volatility/EquityFX/AndreasenHugeVolatilityAdapter.cs |  |
+| `andreasenhugevolatilityinterpl` | ported | TermStructures/Volatility/EquityFX/AndreasenHugeVolatilityInterpl/AndreasenHugeCalibrationError.cs, TermStructures/Volatility/EquityFX/AndreasenHugeVolatilityInterpl/AndreasenHugeVolatilityInterpl.cs, TermStructures/Volatility/EquityFX/AndreasenHugeVolatilityInterpl/AndreasenHugeVolatilityInterplCalibrationType.cs, TermStructures/Volatility/EquityFX/AndreasenHugeVolatilityInterpl/AndreasenHugeVolatilityInterplInterpolationType.cs |  |
 | `blackconstantvol` | ported | TermStructures/Volatility/EquityFX/BlackConstantVol.cs |  |
 | `blackvariancecurve` | ported | TermStructures/Volatility/EquityFX/BlackVarianceCurve.cs |  |
 | `blackvariancesurface` | ported | TermStructures/Volatility/EquityFX/BlackVarianceSurface.cs, TermStructures/Volatility/EquityFX/BlackVarianceSurfaceExtrapolation.cs |  |
-| `blackvolsurfacedelta` | not started |  | no nanoql type: BlackVolatilitySurfaceDelta, BlackVolatilitySurfaceDeltaSmileInterpolationMethod |
+| `blackvolsurfacedelta` | ported | TermStructures/Volatility/EquityFX/BlackVolatilitySurfaceDelta.cs, TermStructures/Volatility/EquityFX/BlackVolatilitySurfaceDeltaSmileInterpolationMethod.cs |  |
 | `blackvoltermstructure` | partial | TermStructures/Volatility/EquityFX/BlackVolTermStructure/BlackVarianceTermStructure.cs, TermStructures/Volatility/EquityFX/BlackVolTermStructure/BlackVolTermStructure.cs, TermStructures/Volatility/EquityFX/BlackVolTermStructure/BlackVolatilityTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead) |
 | `blackvoltimeextrapolation` | ported | TermStructures/Volatility/EquityFX/BlackVolTimeExtrapolation.cs, TermStructures/Volatility/EquityFX/BlackVolTimeExtrapolationType.cs |  |
-| `fixedlocalvolsurface` | not started |  | no nanoql type: FixedLocalVolSurface, FixedLocalVolSurfaceExtrapolation |
-| `gridmodellocalvolsurface` | not started |  | no nanoql type: GridModelLocalVolSurface |
+| `fixedlocalvolsurface` | ported | TermStructures/Volatility/EquityFX/FixedLocalVolSurface.cs, TermStructures/Volatility/EquityFX/FixedLocalVolSurfaceExtrapolation.cs |  |
+| `gridmodellocalvolsurface` | ported | TermStructures/Volatility/EquityFX/GridModelLocalVolSurface.cs |  |
 | `hestonblackvolsurface` | not started |  | no nanoql type: HestonBlackVolSurface |
-| `impliedvoltermstructure` | not started |  | no nanoql type: ImpliedVolTermStructure |
+| `impliedvoltermstructure` | ported | TermStructures/Volatility/EquityFX/ImpliedVolTermStructure.cs |  |
 | `localconstantvol` | ported | TermStructures/Volatility/EquityFX/LocalConstantVol.cs |  |
 | `localvolcurve` | ported | TermStructures/Volatility/EquityFX/LocalVolCurve.cs |  |
 | `localvolsurface` | ported | TermStructures/Volatility/EquityFX/LocalVolSurface.cs |  |
 | `localvoltermstructure` | partial | TermStructures/Volatility/EquityFX/LocalVolTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead, as LocalVolCurve and LocalVolSurface do) |
-| `noexceptlocalvolsurface` | not started |  | no nanoql type: NoExceptLocalVolSurface |
-| `piecewiseblackvariancesurface` | not started |  | no nanoql type: PiecewiseBlackVarianceSurface |
+| `noexceptlocalvolsurface` | ported | TermStructures/Volatility/EquityFX/NoExceptLocalVolSurface.cs |  |
+| `piecewiseblackvariancesurface` | ported | TermStructures/Volatility/EquityFX/PiecewiseBlackVarianceSurface.cs |  |
 
 ### `ql/termstructures/volatility/inflation/`
 
@@ -2062,7 +2062,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `americanoption` | ported | TestSuite/AmericanOptionTests.cs | 32 of 32 cases; moved: testBjerksundStenslandAmericanGreeks line 2437 to Divergences/BjerksundStenslandTriggerTests.cs; testLargeDividendShoutNPV line 1042 to Divergences/ShoutDividendStrikeTests.cs |
 | `amortizingbond` | ported | TestSuite/AmortizingBondTests.cs | 3 of 3 cases |
-| `andreasenhugevolatilityinterpl` | not started |  | 14 cases |
+| `andreasenhugevolatilityinterpl` | partial | TestSuite/AndreasenHugeVolatilityInterplTests.cs | 12 of 14 cases; not yet: testBarrierOptionPricing, testDifferentOptimizers |
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
 | `asianoptions` | not started |  | 23 cases |
 | `assetswap` | ported | TestSuite/AssetSwapTests.cs | 9 of 9 cases |
@@ -2078,7 +2078,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackcalculator` | ported | TestSuite/BlackCalculatorTests.cs | 6 of 6 cases |
 | `blackdeltacalculator` | ported | TestSuite/BlackDeltaCalculatorTests.cs | 4 of 4 cases |
 | `blackformula` | ported | TestSuite/BlackFormulaTests.cs | 15 of 15 cases |
-| `blackvolsurfacedelta` | not started |  | 5 cases |
+| `blackvolsurfacedelta` | ported | TestSuite/BlackVolSurfaceDeltaTests.cs | 5 of 5 cases; moved: testBlackVolSurfaceDeltaNonConstantVol line 115 to Divergences/DeltaSurfaceMismatchedTimesTests.cs; testTimeExtrapolation line 172 to Divergences/DeltaSurfaceMismatchedTimesTests.cs; testSmileInterpolation line 247 to Divergences/DeltaSurfaceMismatchedTimesTests.cs |
 | `bondforward` | ported | TestSuite/BondForwardTests.cs | 3 of 3 cases |
 | `bonds` | ported | TestSuite/BondsTests.cs | 22 of 22 cases |
 | `brownianbridge` | partial | TestSuite/BrownianBridgeTests.cs | 1 of 2 cases; not yet: testPathGeneration |
@@ -2144,8 +2144,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `gaussianquadratures` | partial | TestSuite/GaussianQuadraturesTests.cs | 8 of 12 cases; not yet: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial, testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes |
 | `gjrgarchmodel` | not started |  | 2 cases |
 | `gsr` | ported | TestSuite/GsrTests.cs | 13 of 13 cases |
-| `hestonmodel` | partial | TestSuite/HestonModelTests.cs | 7 of 39 cases; not yet: testDAXCalibration, testAnalyticVsBlack, testMcVsCached, testFdBarrierVsCached, testFdVanillaVsCached, testFdVanillaWithDividendsVsCached, testFdAmerican, testKahlJaeckelCase, testMultipleStrikesEngine, testAnalyticPiecewiseTimeDependent, testDAXCalibrationOfTimeDependentModel, testAlanLewisReferencePrices, testExpansionOnAlanLewisReference, testExpansionOnFordeReference, testAllIntegrationMethods, testCosHestonCumulants, testCosHestonEngine, testCosHestonEngineTruncation, testCharacteristicFct, testAndersenPiterbargPricing, testAndersenPiterbargControlVariateIntegrand, testAndersenPiterbargConvergence, testPiecewiseTimeDependentChFvsHestonChF, testPiecewiseTimeDependentComparison, testPiecewiseTimeDependentChFAsymtotic, testSmallSigmaExpansion4ExpFitting, testExponentialFitting4StrikesAndMaturities, testAsymptoticControlVariate, testLocalVolFromHestonModel, testOptimalAlphaKmin, testHestonBlackVolSurfaceAtmLevel, testAnalyticPDFHestonEngine |
-| `hestonslvmodel` | not started |  | 19 cases |
+| `hestonmodel` | partial | TestSuite/HestonModelTests.cs | 8 of 39 cases; not yet: testDAXCalibration, testAnalyticVsBlack, testMcVsCached, testFdBarrierVsCached, testFdVanillaVsCached, testFdVanillaWithDividendsVsCached, testFdAmerican, testKahlJaeckelCase, testMultipleStrikesEngine, testAnalyticPiecewiseTimeDependent, testDAXCalibrationOfTimeDependentModel, testAlanLewisReferencePrices, testExpansionOnAlanLewisReference, testExpansionOnFordeReference, testAllIntegrationMethods, testCosHestonCumulants, testCosHestonEngine, testCosHestonEngineTruncation, testCharacteristicFct, testAndersenPiterbargPricing, testAndersenPiterbargControlVariateIntegrand, testPiecewiseTimeDependentChFvsHestonChF, testPiecewiseTimeDependentComparison, testPiecewiseTimeDependentChFAsymtotic, testSmallSigmaExpansion4ExpFitting, testExponentialFitting4StrikesAndMaturities, testAsymptoticControlVariate, testLocalVolFromHestonModel, testOptimalAlphaKmin, testHestonBlackVolSurfaceAtmLevel, testAnalyticPDFHestonEngine |
+| `hestonslvmodel` | partial | TestSuite/HestonSlvModelTests.cs | 2 of 19 cases; not yet: testSquareRootZeroFlowBC, testTransformedZeroFlowBC, testSquareRootEvolveWithStationaryDensity, testSquareRootLogEvolveWithStationaryDensity, testSquareRootFokkerPlanckFwdEquation, testHestonFokkerPlanckFwdEquation, testHestonFokkerPlanckFwdEquationLogLVLeverage, testFDMCalibration, testLocalVolsvSLVPropDensity, testBarrierPricingViaHestonLocalVol, testBarrierPricingMixedModels, testMonteCarloVsFdmPricing, testMonteCarloCalibration, testForwardSkewSLV, testMoustacheGraph, testDiffusionAndDriftSlvProcess, testBarrierPricingMixedModelsMonteCarloVsFdmPricing |
 | `himalayaoption` | not started |  | 1 cases |
 | `hybridhestonhullwhiteprocess` | partial | TestSuite/HybridHestonHullWhiteProcessTests.cs | 1 of 13 cases; not yet: testCompareBsmHWandHestonHW, testZeroBondPricing, testMcVanillaPricing, testMcPureHestonPricing, testAnalyticHestonHullWhitePricing, testCallableEquityPricing, testDiscretizationError, testFdmHestonHullWhiteEngine, testBsmHullWhitePricing, testSpatialDiscretizatinError, testHestonHullWhiteCalibration, testH1HWPricingEngine |
 | `indexes` | ported | TestSuite/IndexesTests.cs | 6 of 6 cases; replaced: testFixingObservability by Vectors/Indexes/BMAIndexVectorTests.cs |
@@ -2157,7 +2157,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcpiswap` | ported | TestSuite/CPISwapTests.cs | 5 of 5 cases |
 | `inflationvolatility` | not started |  | 3 cases |
 | `instruments` | not started |  | 2 cases |
-| `integrals` | partial | TestSuite/IntegralsTests.cs | 14 of 21 cases; not yet: testExpSinh, testTwoDimensionalIntegration, testFolinIntegration, testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator, testPiecewiseIntegral |
+| `integrals` | partial | TestSuite/IntegralsTests.cs | 17 of 21 cases; not yet: testExpSinh, testTwoDimensionalIntegration, testFolinIntegration, testPiecewiseIntegral |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
 | `interpolations` | partial | TestSuite/InterpolationsTests.cs | 32 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testMultiSpline, testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLaplaceInterpolation |
@@ -2202,7 +2202,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `pathgenerator` | ported | TestSuite/PathGeneratorTests.cs | 2 of 2 cases |
 | `period` | ported | TestSuite/PeriodTests.cs | 9 of 9 cases |
 | `perpetualfutures` | not started |  | 1 cases |
-| `piecewiseblackvariancesurface` | not started |  | 20 cases |
+| `piecewiseblackvariancesurface` | partial | TestSuite/PiecewiseBlackVarianceSurfaceTests.cs | 17 of 20 cases; not ported: testObserver (observer notifications, which an immutable surface has no use for, R1); testSmileSectionRequiresSharedPtr (QuantLib's shared_ptr requirement, which a .NET reference has no counterpart for); not yet: testSabrEquivalence |
 | `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 33 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency, testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency, testGlobalBootstrapVariables |
 | `piecewisezerospreadedtermstructure` | ported | TestSuite/PiecewiseZeroSpreadedTermStructureTests.cs | 10 of 10 cases; replaced: testQuoteChanging by TestSuite/PiecewiseZeroSpreadedTermStructureTests.cs |
 | `preconditions` | replaced: test infrastructure: xUnit and the vector harness |  |  |
@@ -2213,7 +2213,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `quantooption` | partial | TestSuite/QuantoOptionTests.cs | 1 of 10 cases; not yet: testValues, testGreeks, testForwardValues, testForwardGreeks, testForwardPerformanceValues, testBarrierValues, testPDEOptionValues, testAmericanQuantoOption, testDoubleBarrierValues |
 | `quotes` | not started |  | 6 cases |
 | `rangeaccrual` | ported | TestSuite/RangeAccrualTests.cs | 3 of 3 cases |
-| `riskneutraldensitycalculator` | partial | TestSuite/RiskNeutralDensityCalculatorTests.cs | 2 of 14 cases; not yet: testDensityAgainstOptionPrices, testBSMagainstHestonRND, testLocalVolatilityRND, testSquareRootProcessRND, testBlackScholesWithSkew, testSmileSectionRNDvsBSM, testSmileSectionRNDQuantileRange, testSmileSectionRNDLowVolFatWings, testSmileSectionRNDvsHeston, testSmileSectionRNDMissingAtmLevel, testSmileSectionRNDMartingale, testSmileSectionRNDLeftTailCdf |
+| `riskneutraldensitycalculator` | partial | TestSuite/RiskNeutralDensityCalculatorTests.cs | 10 of 14 cases; not yet: testBSMagainstHestonRND, testSquareRootProcessRND, testBlackScholesWithSkew, testSmileSectionRNDvsHeston |
 | `riskstats` | ported | TestSuite/RiskStatsTests.cs | 1 of 1 cases |
 | `rngtraits` | partial | TestSuite/RngTraitsTests.cs | 3 of 4 cases; not yet: testRanLux |
 | `roughhestonmodel` | not started |  | 24 cases |

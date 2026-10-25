@@ -453,6 +453,33 @@ public class TripleBandLinearOp : FdmLinearOp
     }
 
     /// <summary>
+    /// Sets this operator, in place, to <paramref name="x"/>·diag(<paramref name="ux"/>) +
+    /// <paramref name="y"/>·diag(<paramref name="uy"/>): QuantLib's
+    /// <c>axpyb(Array(1, 1.0), x.multR(ux), y.multR(uy), Array(1, 0.0))</c> with <c>multR</c>'s temporary operators
+    /// written straight into this one, by the same arithmetic in the same order, so that a time step allocates nothing.
+    /// </summary>
+    /// <param name="x">The first operator.</param>
+    /// <param name="ux">The scales of <paramref name="x"/>'s columns, one per point.</param>
+    /// <param name="y">The second operator.</param>
+    /// <param name="uy">The scales of <paramref name="y"/>'s columns, one per point.</param>
+    internal void SetSumOfMultR(TripleBandLinearOp x, ReadOnlySpan<double> ux, TripleBandLinearOp y, ReadOnlySpan<double> uy)
+    {
+        const double S = 1.0;
+        double b = 0.0;
+        int size = N;
+        for (int i = 0; i < size; ++i)
+        {
+            double xm1 = i > 0 ? ux[i - 1] : 1.0, x0 = ux[i], xp1 = i < size - 1 ? ux[i + 1] : 1.0;
+            double ym1 = i > 0 ? uy[i - 1] : 1.0, y0 = uy[i], yp1 = i < size - 1 ? uy[i + 1] : 1.0;
+
+            // axpyb's form for one scale and one diagonal value: y + s·x + b
+            diag[i] = (y.diag[i] * y0) + (S * (x.diag[i] * x0)) + b;
+            lower[i] = (y.lower[i] * ym1) + (S * (x.lower[i] * xm1));
+            upper[i] = (y.upper[i] * yp1) + (S * (x.upper[i] * xp1));
+        }
+    }
+
+    /// <summary>
     /// Sets this operator, in place, to <paramref name="y"/> + diag(<paramref name="b"/>): QuantLib's
     /// <c>axpyb(Array(), x, y, b)</c>, whose x it doesn't read, by the same arithmetic, so that a time step allocates
     /// nothing.

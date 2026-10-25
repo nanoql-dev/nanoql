@@ -87,6 +87,8 @@ internal static class FdInputs
                     Real(spec, "eps"),
                     Real(spec, "scaleFactor"),
                     (NullableReal(cev[0]), NullableReal(cev[1])));
+            case "Predefined":
+                return new Predefined1dMesher(Doubles(spec.GetProperty("x")));
             default:
                 throw new InvalidOperationException($"unknown mesher '{type}'");
         }

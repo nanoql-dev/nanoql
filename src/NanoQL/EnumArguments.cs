@@ -672,4 +672,31 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, "invalid atm type");
         }
     }
+
+    /// <summary>Refuses a strike extrapolation outside <see cref="FixedLocalVolSurfaceExtrapolation"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(FixedLocalVolSurfaceExtrapolation value, string paramName)
+    {
+        if (value is < FixedLocalVolSurfaceExtrapolation.ConstantExtrapolation
+            or > FixedLocalVolSurfaceExtrapolation.InterpolatorDefaultExtrapolation)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown extrapolation type");
+        }
+    }
+
+    /// <summary>Refuses a smile interpolation outside <see cref="BlackVolatilitySurfaceDeltaSmileInterpolationMethod"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "Invalid method", which
+    /// QuantLib raises where the smile is built (<c>blackvolsurfacedelta.cpp:200</c>).</exception>
+    internal static void Check(BlackVolatilitySurfaceDeltaSmileInterpolationMethod value, string paramName)
+    {
+        if (value is < BlackVolatilitySurfaceDeltaSmileInterpolationMethod.Linear
+            or > BlackVolatilitySurfaceDeltaSmileInterpolationMethod.CubicSpline)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"Invalid method {(int)value}");
+        }
+    }
 }

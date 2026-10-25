@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/integrals.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (S-core); testDiscreteIntegrals, testDiscreteIntegralsWithFewPoints, testDiscreteIntegrator (S-van); testPiecewiseIntegral (S-xrt)
+// Partial: testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (S-core); testPiecewiseIntegral (S-xrt)
 
 using System.Numerics;
 using NanoQL.Numerics;
@@ -133,6 +133,83 @@ public class IntegralsTests
         var gaussKronrodNonAdaptive = new GaussKronrodNonAdaptive(precision, maxEvaluations, relativeAccuracy);
         TestSeveral(gaussKronrodNonAdaptive);
         TestDegeneratedDomain(gaussKronrodNonAdaptive);
+    }
+
+    [Fact]
+    public void TestDiscreteIntegrals()
+    {
+        // Testing discrete integral formulae...
+
+        Real[] x = [1.0, 2.02, 2.34, 3.3, 4.2, 4.6];
+        var f = new Real[6];
+        for (int i = 0; i < 3; ++i)
+        {
+            f[i] = F1(x[i]);
+        }
+
+        for (int i = 3; i < 6; ++i)
+        {
+            f[i] = F2(x[i]);
+        }
+
+        Real expectedSimpson = 16.0401216 + 30.4137528 + (0.2 * F2(4.2)) + (0.2 * F2(4.6));
+        Real expectedTrapezoid =
+            (0.5 * (F1(1.0) + F1(2.02)) * 1.02)
+            + (0.5 * (F1(2.02) + F1(2.34)) * 0.32)
+            + (0.5 * (F2(2.34) + F2(3.3)) * 0.96)
+            + (0.5 * (F2(3.3) + F2(4.2)) * 0.9)
+            + (0.5 * (F2(4.2) + F2(4.6)) * 0.4);
+
+        Real calculatedSimpson = DiscreteSimpsonIntegral.Integrate(x, f);
+        Real calculatedTrapezoid = DiscreteTrapezoidIntegral.Integrate(x, f);
+
+        const Real tol = 1e-12;
+        if (Math.Abs(calculatedSimpson - expectedSimpson) > tol)
+        {
+            Assert.Fail(
+                "discrete Simpson integration failed: "
+                + $"\n    calculated: {calculatedSimpson:R}"
+                + $"\n    expected:   {expectedSimpson:R}");
+        }
+
+        if (Math.Abs(calculatedTrapezoid - expectedTrapezoid) > tol)
+        {
+            Assert.Fail(
+                "discrete Trapezoid integration failed: "
+                + $"\n    calculated: {calculatedTrapezoid:R}"
+                + $"\n    expected:   {expectedTrapezoid:R}");
+        }
+    }
+
+    [Fact]
+    public void TestDiscreteIntegralsWithFewPoints()
+    {
+        // Testing discrete integrals on degenerate grids...
+
+        // With fewer than two nodes there is no interval to integrate, but the unsigned loop bounds (n-1, n-2) used to
+        // wrap around to SIZE_MAX and read past the arrays (e.g. a single-point Simpson rule indexing x[2]).
+        for (int n = 0; n < 2; ++n)
+        {
+            var x = new Real[n];
+            var f = new Real[n];
+            for (int i = 0; i < n; ++i)
+            {
+                x[i] = i;
+                f[i] = 1.0;
+            }
+
+            Assert.Equal(0.0, DiscreteTrapezoidIntegral.Integrate(x, f));
+            Assert.Equal(0.0, DiscreteSimpsonIntegral.Integrate(x, f));
+        }
+    }
+
+    [Fact]
+    public void TestDiscreteIntegrator()
+    {
+        // Testing discrete integrator formulae...
+
+        TestSeveral(new DiscreteSimpsonIntegrator(300));
+        TestSeveral(new DiscreteTrapezoidIntegrator(3000));
     }
 
     [Fact]
@@ -422,6 +499,10 @@ public class IntegralsTests
                 + $"    expected:   {expected:G10}");
         }
     }
+
+    private static Real F1(Real x) => (1.2 * x * x) + (3.2 * x) + 3.1;
+
+    private static Real F2(Real x) => (4.3 * (x - 2.34) * (x - 2.34)) - (6.2 * (x - 2.34)) + F1(2.34);
 
     private static void TestSeveral(Integrator I)
     {

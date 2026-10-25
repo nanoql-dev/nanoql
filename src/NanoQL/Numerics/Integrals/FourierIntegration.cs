@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/math/integrals/fourierintegration.hpp ql/math/integrals/fourierintegration.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: discreteSimpson and discreteTrapezoid (S-van's discrete integrals); expSinh (S-core)
+// Partial: expSinh (S-core)
 
 namespace NanoQL.Numerics;
 
@@ -153,6 +153,28 @@ public sealed class FourierIntegration
     public static FourierIntegration Trapezoid(double absTolerance, int maxEvaluations = 1000) =>
         new(Algorithm.Trapezoid, new TrapezoidIntegral<Default>(absTolerance, maxEvaluations));
 
+    /// <summary>
+    /// Simpson's rule on a fixed number of evaluations, on [0, the caller's bound] or on [0, 1] mapped by
+    /// −ln(1 − x)/c_∞.
+    /// </summary>
+    /// <param name="evaluations">The number of evaluations, at least 2.</param>
+    /// <returns>The integration.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="evaluations"/> is below 2
+    /// (<see cref="DiscreteSimpsonIntegrator"/>).</exception>
+    public static FourierIntegration DiscreteSimpson(int evaluations = 1000) =>
+        new(Algorithm.DiscreteSimpson, new DiscreteSimpsonIntegrator(evaluations));
+
+    /// <summary>
+    /// The trapezoid rule on a fixed number of evaluations, on [0, the caller's bound] or on [0, 1] mapped by
+    /// −ln(1 − x)/c_∞.
+    /// </summary>
+    /// <param name="evaluations">The number of evaluations, at least 2.</param>
+    /// <returns>The integration.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="evaluations"/> is below 2
+    /// (<see cref="DiscreteTrapezoidIntegrator"/>).</exception>
+    public static FourierIntegration DiscreteTrapezoid(int evaluations = 1000) =>
+        new(Algorithm.DiscreteTrapezoid, new DiscreteTrapezoidIntegrator(evaluations));
+
     /// <summary>The tanh-sinh integration, on [0, ∞) directly, Boost's map of a half-infinite range.</summary>
     /// <param name="relTolerance">The tolerance relative to the integral's L1 norm.</param>
     /// <returns>The integration.</returns>
@@ -259,6 +281,20 @@ public sealed class FourierIntegration
                 else
                 {
                     return integrator_!.IntegrateWithStatistics(x => Integrand2(c_inf, f, x), 0.0, 1.0);
+                }
+            }
+
+            case Algorithm.DiscreteTrapezoid:
+            case Algorithm.DiscreteSimpson:
+            {
+                double? bound = maxBound?.Invoke();
+                if (bound is double b && b != NullReal)
+                {
+                    return integrator_!.IntegrateWithStatistics(f, 0.0, b);
+                }
+                else
+                {
+                    return integrator_!.IntegrateWithStatistics(x => Integrand2(c_inf, f, 1.0 - x), 0.0, 1.0);
                 }
             }
 

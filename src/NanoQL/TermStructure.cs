@@ -99,21 +99,30 @@ public abstract class TermStructure : Extrapolator
         DayCounter clockDc = clock.DayCounter;
         Date clockReference = clock.ReferenceDate;
         double year = clockDc.YearFraction(clockReference, clockReference + 365);
-        int n = (int)Math.Floor(t / year * 365.0);
+        int last = Date.MaxDate - clockReference;
+        int n = Math.Min((int)Math.Floor(t / year * 365.0), last);
         while (clockDc.YearFraction(clockReference, clockReference + n) > t)
         {
             --n;
         }
 
-        while (clockDc.YearFraction(clockReference, clockReference + (n + 1)) <= t)
+        while (n < last && clockDc.YearFraction(clockReference, clockReference + (n + 1)) <= t)
         {
             ++n;
         }
 
         Date day = clockReference + n;
         double from = clockDc.YearFraction(clockReference, day);
-        double fraction = (t - from) / (clockDc.YearFraction(clockReference, day + 1) - from);
         double own = DayCounter.YearFraction(ReferenceDate, day);
+        if (n == last)
+        {
+            // the last representable day has no next: its fraction on the day before's interval
+            double fromBefore = clockDc.YearFraction(clockReference, day - 1);
+            double ownBefore = DayCounter.YearFraction(ReferenceDate, day - 1);
+            return own + ((t - from) / (from - fromBefore) * (own - ownBefore));
+        }
+
+        double fraction = (t - from) / (clockDc.YearFraction(clockReference, day + 1) - from);
         return own + (fraction * (DayCounter.YearFraction(ReferenceDate, day + 1) - own));
     }
 
