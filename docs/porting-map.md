@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 447 | 52 |
+| not started | 440 | 48 |
 | partial | 21 | 31 |
-| ported | 792 | 97 |
+| ported | 799 | 101 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -644,7 +644,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `dividendschedule` | ported | Instruments/DividendSchedule.cs |  |
 | `doublebarrieroption` | not started |  | no nanoql type: DoubleBarrierOption |
 | `doublebarriertype` | not started |  | no nanoql type: DoubleBarrierType |
-| `equitytotalreturnswap` | not started |  | no nanoql type: EquityTotalReturnSwap |
+| `equitytotalreturnswap` | ported | Instruments/EquityTotalReturnSwap.cs |  |
 | `europeanoption` | ported | Instruments/EuropeanOption.cs |  |
 | `fixedvsfloatingswap` | ported | Instruments/FixedVsFloatingSwap.cs, Instruments/FixedVsFloatingSwapArguments.cs, Instruments/FixedVsFloatingSwapResults.cs |  |
 | `floatfloatswap` | ported | Instruments/FloatFloatSwap.cs, Instruments/FloatFloatSwapArguments.cs, Instruments/FloatFloatSwapResults.cs |  |
@@ -676,7 +676,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `overnightindexfuture` | ported | Instruments/OvernightIndexFuture.cs |  |
 | `partialtimebarrieroption` | not started |  | no nanoql type: PartialBarrierRange, PartialTimeBarrierOption |
 | `payoffs` | ported | Instruments/Payoffs/AssetOrNothingPayoff.cs, Instruments/Payoffs/CashOrNothingPayoff.cs, Instruments/Payoffs/FloatingTypePayoff.cs, Instruments/Payoffs/GapPayoff.cs, Instruments/Payoffs/NullPayoff.cs, Instruments/Payoffs/PercentageStrikePayoff.cs, Instruments/Payoffs/PlainVanillaPayoff.cs, Instruments/Payoffs/StrikedTypePayoff.cs, Instruments/Payoffs/SuperFundPayoff.cs, Instruments/Payoffs/SuperSharePayoff.cs, Instruments/Payoffs/TypePayoff.cs |  |
-| `perpetualfutures` | not started |  | no nanoql type: PerpetualFutures, PerpetualFuturesPayoffType, PerpetualFuturesFundingType |
+| `perpetualfutures` | ported | Instruments/PerpetualFutures/PerpetualFutures.cs, Instruments/PerpetualFutures/PerpetualFuturesFundingType.cs, Instruments/PerpetualFutures/PerpetualFuturesPayoffType.cs |  |
 | `quantobarrieroption` | not started |  | no nanoql type: QuantoBarrierOption |
 | `quantoforwardvanillaoption` | ported | Instruments/QuantoForwardVanillaOption.cs |  |
 | `quantovanillaoption` | ported | Instruments/QuantoVanillaOption/QuantoOptionResults.cs, Instruments/QuantoVanillaOption/QuantoVanillaOption.cs |  |
@@ -684,13 +684,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `simplifynotificationgraph` | not ported: observer plumbing, removed |  |  |
 | `softbarrieroption` | not started |  | no nanoql type: SoftBarrierOption |
 | `stickyratchet` | ported | Instruments/StickyRatchet/DoubleStickyRatchetPayoff.cs, Instruments/StickyRatchet/RatchetMaxPayoff.cs, Instruments/StickyRatchet/RatchetMinPayoff.cs, Instruments/StickyRatchet/RatchetPayoff.cs, Instruments/StickyRatchet/StickyMaxPayoff.cs, Instruments/StickyRatchet/StickyMinPayoff.cs, Instruments/StickyRatchet/StickyPayoff.cs |  |
-| `stock` | not started |  | no nanoql type: Stock |
+| `stock` | ported | Instruments/Stock.cs |  |
 | `swap` | ported | Instruments/Swap/Swap.cs, Instruments/Swap/SwapResults.cs, Instruments/Swap/SwapType.cs |  |
 | `swaption` | ported | Instruments/Swaption/Settlement.cs, Instruments/Swaption/SettlementMethod.cs, Instruments/Swaption/SettlementType.cs, Instruments/Swaption/Swaption.cs, Instruments/Swaption/SwaptionFunctions.cs, Instruments/Swaption/SwaptionPriceType.cs |  |
 | `twoassetbarrieroption` | not started |  | no nanoql type: TwoAssetBarrierOption |
 | `twoassetcorrelationoption` | ported | Instruments/TwoAssetCorrelationOption.cs |  |
 | `vanillaoption` | ported | Instruments/VanillaOption.cs |  |
-| `vanillastorageoption` | not started |  | no nanoql type: VanillaStorageOption |
+| `vanillastorageoption` | ported | Instruments/VanillaStorageOption.cs |  |
 | `vanillaswap` | ported | Instruments/VanillaSwap.cs |  |
 | `vanillaswingoption` | ported | Instruments/VanillaSwingOption/SwingExercise.cs, Instruments/VanillaSwingOption/VanillaForwardPayoff.cs, Instruments/VanillaSwingOption/VanillaSwingOption.cs |  |
 | `varianceswap` | ported | Instruments/VarianceSwap.cs, Instruments/VarianceSwapResults.cs |  |
@@ -1461,7 +1461,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `americanpayoffatexpiry` | ported | PricingEngines/AmericanPayoffAtExpiry.cs |  |
 | `americanpayoffathit` | ported | PricingEngines/AmericanPayoffAtHit.cs |  |
-| `bacheliercalculator` | not started |  | no nanoql type: BachelierCalculator |
+| `bacheliercalculator` | ported | PricingEngines/BachelierCalculator.cs |  |
 | `blackcalculator` | ported | PricingEngines/BlackCalculator.cs |  |
 | `blackdeltacalculator` | ported | PricingEngines/BlackDeltaCalculator.cs | no nanoql type: BlackDeltaPremiumAdjustedSolverClass, BlackDeltaPremiumAdjustedMaxStrikeClass |
 | `blackformula` | ported | PricingEngines/BlackFormulaFunctions.cs |  |
@@ -1600,7 +1600,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `mcforwardeuropeanbsengine` | ported | PricingEngines/Forward/MCForwardEuropeanBSEngine/ForwardEuropeanBSPathPricer.cs, PricingEngines/Forward/MCForwardEuropeanBSEngine/MCForwardEuropeanBSEngine.cs, PricingEngines/Forward/MCForwardEuropeanBSEngine/MakeMCForwardEuropeanBSEngine{TRng,TStats}.cs |  |
 | `mcforwardeuropeanhestonengine` | ported | PricingEngines/Forward/MCForwardEuropeanHestonEngine/ForwardEuropeanHestonPathPricer.cs, PricingEngines/Forward/MCForwardEuropeanHestonEngine/MCForwardEuropeanHestonEngine.cs, PricingEngines/Forward/MCForwardEuropeanHestonEngine/MakeMCForwardEuropeanHestonEngine{TRng,TStats}.cs |  |
 | `mcforwardvanillaengine` | ported | PricingEngines/Forward/MCForwardVanillaEngine{TMc,TPath,TStats}.cs |  |
-| `mcvarianceswapengine` | not started |  | no nanoql type: MCVarianceSwapEngine, MakeMCVarianceSwapEngine, VariancePathPricer |
+| `mcvarianceswapengine` | ported | PricingEngines/Forward/MCVarianceSwapEngine/MCVarianceSwapEngine.cs, PricingEngines/Forward/MCVarianceSwapEngine/MakeMCVarianceSwapEngine{TRng,TStats}.cs, PricingEngines/Forward/MCVarianceSwapEngine/VariancePathPricer.cs |  |
 | `replicatingvarianceswapengine` | ported | PricingEngines/Forward/ReplicatingVarianceSwapEngine.cs |  |
 
 ### `ql/pricingengines/futures/`
@@ -1608,7 +1608,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `discountingperpetualfuturesengine` | not started |  | no nanoql type: DiscountingPerpetualFuturesEngine, DiscountingPerpetualFuturesEngineInterpolationType |
+| `discountingperpetualfuturesengine` | ported | PricingEngines/Futures/DiscountingPerpetualFuturesEngine/DiscountingPerpetualFuturesEngine.cs, PricingEngines/Futures/DiscountingPerpetualFuturesEngine/DiscountingPerpetualFuturesEngineInterpolationType.cs |  |
 
 ### `ql/pricingengines/inflation/`
 
@@ -2067,7 +2067,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `asianoptions` | not started |  | 23 cases |
 | `assetswap` | ported | TestSuite/AssetSwapTests.cs | 9 of 9 cases |
 | `autocovariances` | not started |  | 3 cases |
-| `bacheliercalculator` | not started |  | 8 cases |
+| `bacheliercalculator` | ported | TestSuite/BachelierCalculatorTests.cs | 8 of 8 cases; moved: testBachelierCalculatorGreeks line 173 to Divergences/BachelierGreeksTests.cs; testBachelierCalculatorGreeks line 213 to Divergences/BachelierGreeksTests.cs |
 | `barrieroption` | partial | TestSuite/BarrierOptionTests.cs | 10 of 15 cases; not yet: testLocalVolAndHestonComparison, testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast, testPerturbativeOrder2FullResolution |
 | `basismodels` | not started |  | 4 cases |
 | `basisswapratehelpers` | ported | TestSuite/BasisSwapRateHelpersTests.cs | 24 of 24 cases; moved: testOvernightIborAveragingAndTelescopicValueDates line 767 to Divergences/TelescopicValueDatesTests.cs; testOvernightOvernightTelescopicValueDatesWithSimpleAveraging line 920 to Divergences/TelescopicValueDatesTests.cs |
@@ -2120,7 +2120,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `doublebinaryoption` | not started |  | 2 cases |
 | `equitycashflow` | ported | TestSuite/EquityCashFlowTests.cs | 8 of 8 cases |
 | `equityindex` | ported | TestSuite/EquityIndexTests.cs | 11 of 12 cases; not ported: testFixingObservability (observer notifications, which an immutable index has no use for, R1) |
-| `equitytotalreturnswap` | not started |  | 5 cases |
+| `equitytotalreturnswap` | ported | TestSuite/EquityTotalReturnSwapTests.cs | 5 of 5 cases |
 | `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 25 of 27 cases; not ported: testFdEnginesWithNonStrikedPayoff (a vanilla option takes a striked payoff, so no engine can be given another, and Conventions/FdVanillaEngineErrorTests.cs asserts the type); not yet: testFFTEngines |
 | `everestoption` | not started |  | 1 cases |
 | `exchangerate` | ported | TestSuite/ExchangeRateTests.cs | 5 of 5 cases |
@@ -2156,7 +2156,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcpicapfloor` | not started |  | 2 cases |
 | `inflationcpiswap` | ported | TestSuite/CPISwapTests.cs | 5 of 5 cases |
 | `inflationvolatility` | not started |  | 3 cases |
-| `instruments` | not started |  | 2 cases |
+| `instruments` | partial | TestSuite/InstrumentsTests.cs | 0 of 2 cases; not ported: testObservable (observer notifications and freezing, which an immutable instrument has no use for, R1); not yet: testCompositeWhenShiftingDates |
 | `integrals` | partial | TestSuite/IntegralsTests.cs | 17 of 21 cases; not yet: testExpSinh, testTwoDimensionalIntegration, testFolinIntegration, testPiecewiseIntegral |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
@@ -2201,7 +2201,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `partialtimebarrieroption` | not started |  | 3 cases |
 | `pathgenerator` | ported | TestSuite/PathGeneratorTests.cs | 2 of 2 cases |
 | `period` | ported | TestSuite/PeriodTests.cs | 9 of 9 cases |
-| `perpetualfutures` | not started |  | 1 cases |
+| `perpetualfutures` | ported | TestSuite/PerpetualFuturesTests.cs | 1 of 1 cases |
 | `piecewiseblackvariancesurface` | partial | TestSuite/PiecewiseBlackVarianceSurfaceTests.cs | 17 of 20 cases; not ported: testObserver (observer notifications, which an immutable surface has no use for, R1); testSmileSectionRequiresSharedPtr (QuantLib's shared_ptr requirement, which a .NET reference has no counterpart for); not yet: testSabrEquivalence |
 | `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 33 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency, testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency, testGlobalBootstrapVariables |
 | `piecewisezerospreadedtermstructure` | ported | TestSuite/PiecewiseZeroSpreadedTermStructureTests.cs | 10 of 10 cases; replaced: testQuoteChanging by TestSuite/PiecewiseZeroSpreadedTermStructureTests.cs |
@@ -2247,7 +2247,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `utilities` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `variancegamma` | not started |  | 2 cases |
 | `varianceoption` | not started |  | 1 cases |
-| `varianceswaps` | partial | TestSuite/VarianceSwapsTests.cs | 1 of 2 cases; not yet: testMCVarianceSwap |
+| `varianceswaps` | ported | TestSuite/VarianceSwapsTests.cs | 2 of 2 cases |
 | `volatilitymodels` | not started |  | 1 cases |
 | `vpp` | not started |  | 6 cases |
 | `xoshiro256starstar` | not started |  | 3 cases |

@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/varianceswaps.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testMCVarianceSwap, which waits for S-exo's MCVarianceSwapEngine
 
 using NanoQL.Instruments;
 using NanoQL.Numerics;
@@ -131,6 +130,62 @@ public class VarianceSwapsTests
         }
     }
 
+    [Fact]
+    public void TestMCVarianceSwap()
+    {
+        // Testing variance swap with Monte Carlo engine...
+
+        MCVarianceSwapData[] values =
+        [
+            // data from "A Guide to Volatility and Variance Swaps",
+            //   Derman, Kamal & Zou, 1999
+            //   with maturity t corrected from 0.25 to 0.246575
+            //   corresponding to Jan 1, 1999 to Apr 1, 1999
+
+            // exercising code using BlackVarianceCurve because BlackVarianceSurface is unreliable
+            // Result should be v*v for arbitrary t1 and v1 (as long as 0<=t1<t and 0<=v1<v)
+
+            // type, varStrike, nominal,     s,    q,    r,  t1,     t,     v1,    v, result, tol
+            new(PositionType.Long, 0.04, 50000, 100.0, 0.00, 0.05, 0.1, 0.246575, 0.1, 0.20, 0.04, 3.0e-4),
+        ];
+
+        DayCounter dc = new Actual365Fixed();
+        Date today = Date.TodaysDate();
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        foreach (MCVarianceSwapData value in values)
+        {
+            Date exDate = today + TimeToDays(value.T, 365);
+            Date intermDate = today + TimeToDays(value.T1, 365);
+            Date[] dates = [intermDate, exDate];
+            Volatility[] vols = [value.V1, value.V];
+
+            YieldTermStructure qTS = new FlatForward(today, value.Q, dc);
+            YieldTermStructure rTS = new FlatForward(today, value.R, dc);
+            BlackVolTermStructure volTS = new BlackVarianceCurve(today, dates, vols, dc, true);
+            var stochProcess = new BlackScholesMertonProcess(value.S, qTS, rTS, volTS);
+
+            Func<VarianceSwap, EvaluationContext, VarianceSwapResults> engine =
+                new MakeMCVarianceSwapEngine<PseudoRandom, GeneralStatistics>(stochProcess, 42)
+                    .WithStepsPerYear(250)
+                    .WithSamples(1023)
+                    .ToEngine();
+
+            var varianceSwap = new VarianceSwap(value.Type, value.VarStrike, value.Nominal, today, exDate);
+
+            Real calculated = engine(varianceSwap, context).Variance!.Value;
+            Real expected = value.Result;
+            Real error = Math.Abs(calculated - expected);
+            Assert.False(
+                error > value.Tol,
+                $" variance swap with     underlying value: {value.S}\n    strike:           {value.VarStrike}\n"
+                + $"    nominal:          {value.Nominal}\n    dividend yield:   {value.Q}\n"
+                + $"    risk-free rate:   {value.R}\n    reference date:   {today}\n    maturity:         {exDate}\n"
+                + $"    volatility:       {value.V}\n\n    expected   value: {expected}\n"
+                + $"    calculated value: {calculated}\n    error:            {error}\n    tolerance:        {value.Tol}");
+        }
+    }
+
     // The test suite's timeToDays: Integer(std::lround(t * daysPerYear)).
     private static Integer TimeToDays(double t, Integer daysPerYear = 360) =>
         (Integer)Math.Round(t * daysPerYear, MidpointRounding.AwayFromZero);
@@ -139,4 +194,18 @@ public class VarianceSwapsTests
         PositionType Type, Real VarStrike, Real Nominal, Real S, Rate Q, Rate R, double T, Volatility V, Real Result, Real Tol);
 
     private readonly record struct Datum(OptionType Type, Real Strike, Volatility V);
+
+    private readonly record struct MCVarianceSwapData(
+        PositionType Type,
+        Real VarStrike,
+        Real Nominal,
+        Real S,
+        Rate Q,
+        Rate R,
+        double T1,
+        double T,
+        Volatility V1,
+        Volatility V,
+        Real Result,
+        Real Tol);
 }

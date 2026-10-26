@@ -791,4 +791,44 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, "unknown cash dividend model");
         }
     }
+
+    /// <summary>Refuses a payoff type outside <see cref="PerpetualFuturesPayoffType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's text, which QuantLib
+    /// raises where the arguments are validated (<c>perpetualfutures.cpp:57</c>).</exception>
+    internal static void Check(PerpetualFuturesPayoffType value, string paramName)
+    {
+        if (value is < PerpetualFuturesPayoffType.Linear or > PerpetualFuturesPayoffType.Quanto)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown payoff type");
+        }
+    }
+
+    /// <summary>Refuses a funding type outside <see cref="PerpetualFuturesFundingType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's text, which QuantLib
+    /// raises where the arguments are validated (<c>perpetualfutures.cpp:65</c>).</exception>
+    internal static void Check(PerpetualFuturesFundingType value, string paramName)
+    {
+        if (value is < PerpetualFuturesFundingType.FundingWithPreviousSpot or > PerpetualFuturesFundingType.FundingWithCurrentSpot)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown funding type");
+        }
+    }
+
+    /// <summary>Refuses an interpolation type outside <see cref="DiscountingPerpetualFuturesEngineInterpolationType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's text, which QuantLib
+    /// raises where the engine prices (<c>discountingperpetualfuturesengine.cpp:256</c>).</exception>
+    internal static void Check(DiscountingPerpetualFuturesEngineInterpolationType value, string paramName)
+    {
+        if (value is < DiscountingPerpetualFuturesEngineInterpolationType.PiecewiseConstant
+            or > DiscountingPerpetualFuturesEngineInterpolationType.CubicSpline)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "Unknown interpolation type");
+        }
+    }
 }

@@ -139,6 +139,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/HestonModelTests.cs`: `testFdBarrierVsCached` (S-bar), and `testAllIntegrationMethods` and `testCosHestonCumulants` (S-core).
 - `tests/NanoQL.Tests/TestSuite/HestonSlvModelTests.cs`: `testMoustacheGraph`, which waits for S-bar's `FdHestonDoubleBarrierEngine` and `AnalyticDoubleBarrierBinaryEngine`, and `testDiffusionAndDriftSlvProcess`, which waits for S-core's Sobol Brownian bridge sequences.
 - `tests/NanoQL.Tests/TestSuite/HybridHestonHullWhiteProcessTests.cs`: `testZeroBondPricing`, which waits for S-core's Sobol Brownian bridge sequences.
+- `tests/NanoQL.Tests/TestSuite/InstrumentsTests.cs`: `testCompositeWhenShiftingDates`, which waits for S-core's `CompositeInstrument`.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (S-core); and `testPiecewiseIntegral` (S-xrt).
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace).
 - `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice, Faure and Burley 2020 cases and the discrepancy cases, whose generators and statistics aren't ported yet.
@@ -154,4 +155,3 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/StatsTests.cs`: `testSequenceStatistics` and `testConvergenceStatistics`, which wait for S-mmp's sequence and convergence statistics.
 - `tests/NanoQL.Tests/TestSuite/SwingOptionTests.cs`: every case but `testFdBSSwingOption`, which wait for S-xeq's extended Ornstein-Uhlenbeck processes, jump mesher and engines.
 - `tests/NanoQL.Tests/TestSuite/TimeSeriesTests.cs`: `testIntervalPrice`, which waits for `IntervalPrice` (`ql/prices`, S-bar).
-- `tests/NanoQL.Tests/TestSuite/VarianceSwapsTests.cs`: `testMCVarianceSwap`, which waits for S-exo's `MCVarianceSwapEngine`.

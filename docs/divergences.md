@@ -376,6 +376,41 @@ Facts:
 
 - `ARepeatedKnotIsTheLimitOfKnotsAGapApart`
 
+## BachelierGreeksTests
+
+[`Divergences/BachelierGreeksTests.cs`](../tests/NanoQL.Tests/Divergences/BachelierGreeksTests.cs)
+
+The Bachelier calculator's theta, vanna and volga. QuantLib's theta reads the spot gamma where the time decay reads the forward gamma, missing (S/F)²; its vanna, the vega's sensitivity to the spot by its documentation, misses D·F/S; its volga divides by σ√T where the derivative in σ divides by σ, missing √T (`bacheliercalculator.cpp:263-271`, `:350-370`). At F/S 1.04 and T 2 they are −1.9078, −0.016563 and 0.0052986 where the price bumped gives −1.8295, −0.015586 and 0.0074933; QuantLib's cases run at T 1, which hides the volga's, and record the theta and vanna at F/S 1.02, −4.3159316452046594 and 0.0048333514600356151 (their checks moved here from `testBachelierCalculatorGreeks`). nanoql takes each missing factor (the S-exo plan's ER5 (xxviii)), the vanna taking the spot as `BlackCalculator.Vanna` does. The checks: Bachelier's price in a spot model, F = S·e^{(r−q)T}, D = e^{−rT}, standard deviation σ_N·√T, bumped in T, in S and σ_N, and in σ_N twice.
+
+Facts:
+
+- `TheThetaReadsTheForwardGamma`
+- `TheVannaIsTheVegasSensitivityToTheSpot`
+- `TheVolgaIsTheVegasSensitivityToTheVolatility`
+
+## BachelierPayoffTests
+
+[`Divergences/BachelierPayoffTests.cs`](../tests/NanoQL.Tests/Divergences/BachelierPayoffTests.cs)
+
+The Bachelier calculator on payoffs other than the plain vanilla. QuantLib's visitor sets alpha, beta and x for cash-or-nothing, asset-or-nothing and gap payoffs, which its value and Greeks never read (`bacheliercalculator.cpp:137-185`), so each prices 3.03, the vanilla's, at K 100, F 100, σ√T 8, where the payoffs are worth 4.75 (cash 10), 50.53 and 7.78 (second strike 90). nanoql values each by Bachelier's closed form and takes the Greeks as its derivatives (the S-exo plan's ER5 (xxvii)). The checks: the closed forms under a normal forward, F_T ~ N(F, σ²), and their bumps (forward, deviation and strike by 1e-5 each way, the gamma's by 1e-3).
+
+Facts:
+
+- `ACashOrNothingPayoffIsWorthTheDiscountedProbability`
+- `AnAssetOrNothingPayoffIsWorthTheDiscountedTruncatedForward`
+- `AGapPayoffIsWorthItsBachelierValue`
+
+## BachelierPutBranchTests
+
+[`Divergences/BachelierPutBranchTests.cs`](../tests/NanoQL.Tests/Divergences/BachelierPutBranchTests.cs)
+
+The Bachelier calculator's put branch. QuantLib tells a call from a put by `alpha >= 0` (`bacheliercalculator.cpp:102-114`, `:183-188`), and a put's alpha, N(d) − 1, rounds to 0 where N(d) rounds to 1, so a put far out of the money prices as the call: F 100, K 50, σ√T 1, D 0.95 prices 47.5 where its value is 0, and at a zero deviation an out-of-the-money put (K 99) prices 0.95. nanoql tells them apart by the payoff's type (the S-exo plan's ER5 (xxvi)). The checks: Bachelier's put formula, and QuantLib's own call through parity.
+
+Facts:
+
+- `AFarOutOfTheMoneyPutIsWorthBacheliersValue`
+- `AnOutOfTheMoneyPutAtAZeroDeviationIsWorthNothing`
+
 ## BaroneAdesiWhaleyCriticalPriceTests
 
 [`Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs`](../tests/NanoQL.Tests/Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs)
@@ -3677,6 +3712,16 @@ Facts:
 - `ANaNErrorEstimateIsRefused`
 - `ANextBatchPastTheSamplesRangeIsRefused`
 
+## McVarianceSwapMismatchedTimesTests
+
+[`Divergences/McVarianceSwapMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/McVarianceSwapMismatchedTimesTests.cs)
+
+The Monte Carlo variance-swap engine on a risk-free curve settling later (the playbook's dates row; the S-exo plan's ER5 (xxix)). QuantLib's grid runs on the risk-free curve's time (`mcvarianceswapengine.hpp:191-201`), so with that curve settling two days on the paths run two days short and the volatility, dated today, is read at the shorter times. nanoql runs the grid on the process's clock, from the earliest structure's date, each structure read there accruing nothing before its own date, as the vanilla Monte Carlo engines do. The check is nanoql on the risk-free curve restated from the evaluation date (a discount of 1 to its date and its rate beyond): the same paths and value.
+
+Facts:
+
+- `ARiskFreeCurveSettlingLaterRunsTheGridFromTheEvaluationDate`
+
 ## MfEndDateTests
 
 [`Divergences/MfEndDateTests.cs`](../tests/NanoQL.Tests/Divergences/MfEndDateTests.cs)
@@ -4000,6 +4045,29 @@ Facts:
 
 - `ToStringNeverThrows`
 - `ShortPeriodThrowsAsQuantLibDoes`
+
+## PerpetualFuturesDivergentTailTests
+
+[`Divergences/PerpetualFuturesDivergentTailTests.cs`](../tests/NanoQL.Tests/Divergences/PerpetualFuturesDivergentTailTests.cs)
+
+The perpetual futures engine's tail past its horizon. QuantLib refuses only a non-positive last funding rate (`discountingperpetualfuturesengine.cpp:86-88`), while its flat tail converges only where k + r_f − r_d > 0 (continuous funding) or (1 + k)·e^{Δt(r_f − r_d)} > 1 (discrete); below that its closed form returns the divergent series' analytic continuation: on QuantLib's case market (r_d 4%, r_f 2%, interest-rate difference 0.005) continuous funding at k 0.01 prices −4,999.998 and quarterly funding at k 0.004 a plausible 9,876.34; and where r_f > r_d it refuses a non-positive rate whose tail converges. nanoql refuses exactly where the tail diverges, a discrete rate of −1 or below among them, and prices a convergent tail at any rate (the S-exo plan's ER5 (xl), ER8). The checks: the refusals' type and text; Ackerer, Hugonnier and Jermann's constant-rate closed forms, QuantLib's own case's.
+
+Facts:
+
+- `AContinuousDivergentTailIsRefused`
+- `ADiscreteDivergentTailIsRefused`
+- `ADiscreteFundingRateOfMinusOneOrBelowIsRefused`
+- `ANonPositiveFundingRateOnAConvergentTailIsPriced`
+
+## PerpetualFuturesMismatchedTimesTests
+
+[`Divergences/PerpetualFuturesMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/PerpetualFuturesMismatchedTimesTests.cs)
+
+The perpetual futures engine on a curve dated apart (the playbook's dates row; the S-exo plan's ER5 (xxix)). QuantLib reads its curves at the grid's times, the instrument's day counter's from the evaluation date (`discountingperpetualfuturesengine.cpp:154-155`, `:172-177`), so a domestic curve settling two days on is read as though its date were today's. nanoql reads each curve at the instants the grid's times denote, nothing accruing before its own date. The check is nanoql on the curve restated from the evaluation date: a discount of 1 to the curve's date and its rate beyond, which a log-linear discount curve on Actual/Actual (ISDA), whose year fractions add, holds exactly.
+
+Facts:
+
+- `ADomesticCurveSettlingLaterIsReadFromItsOwnDate`
 
 ## PremiumAdjustedPutStrikeTests
 
