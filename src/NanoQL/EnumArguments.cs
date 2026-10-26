@@ -765,4 +765,30 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, $"Invalid method {(int)value}");
         }
     }
+
+    /// <summary>Refuses an approximation order outside <see cref="OperatorSplittingSpreadEngineOrder"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's text, which QuantLib
+    /// raises where the engine prices (<c>operatorsplittingspreadengine.cpp:70</c>).</exception>
+    internal static void Check(OperatorSplittingSpreadEngineOrder value, string paramName)
+    {
+        if (value is < OperatorSplittingSpreadEngineOrder.First or > OperatorSplittingSpreadEngineOrder.Second)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown approximation type");
+        }
+    }
+
+    /// <summary>Refuses a cash-dividend model outside <see cref="CashDividendEuropeanEngineCashDividendModel"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib has no text for it: its engine reads any other value as the spot model.</remarks>
+    internal static void Check(CashDividendEuropeanEngineCashDividendModel value, string paramName)
+    {
+        if (value is < CashDividendEuropeanEngineCashDividendModel.Spot or > CashDividendEuropeanEngineCashDividendModel.Escrowed)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown cash dividend model");
+        }
+    }
 }

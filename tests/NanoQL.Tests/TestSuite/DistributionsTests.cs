@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/distributions.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBivariate, testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation
+// Partial: testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation
 
 using NanoQL.Numerics;
 using static NanoQL.Numerics.ComparisonFunctions;
@@ -682,6 +682,149 @@ public class DistributionsTests
                         + $"\n    tol       : {tol}");
                 }
             }
+        }
+    }
+
+    [Fact]
+    public void TestBivariate()
+    {
+        // Testing bivariate cumulative normal distribution...
+        static Func<Real, Real, Real> Dr78(Real rho) => new BivariateCumulativeNormalDistributionDr78(rho).Evaluate;
+        static Func<Real, Real, Real> We04DP(Real rho) => new BivariateCumulativeNormalDistributionWe04DP(rho).Evaluate;
+
+        CheckBivariateAtZero(Dr78, "Drezner 1978", 1.0e-6);
+        CheckBivariate(Dr78, "Drezner 1978");
+
+        // due to relative low accuracy of Dr78, it does not pass with a
+        // smaller perturbation
+        CheckBivariateTail(Dr78, "Drezner 1978", 1.0e-5);
+
+        CheckBivariateAtZero(We04DP, "West 2004", 1.0e-15);
+        CheckBivariate(We04DP, "West 2004");
+
+        CheckBivariateTail(We04DP, "West 2004", 1.0e-6);
+        CheckBivariateTail(We04DP, "West 2004", 1.0e-8);
+    }
+
+    private static void CheckBivariate(Func<Real, Func<Real, Real, Real>> bivariate, string tag)
+    {
+        // The data below are from
+        // "Option pricing formulas", E.G. Haug, McGraw-Hill 1998
+        // pag 193
+        (Real A, Real B, Real Rho, Real Result)[] values =
+        [
+            (0.0, 0.0, 0.0, 0.250000),
+            (0.0, 0.0, -0.5, 0.166667),
+            (0.0, 0.0, 0.5, 1.0 / 3),
+            (0.0, -0.5, 0.0, 0.154269),
+            (0.0, -0.5, -0.5, 0.081660),
+            (0.0, -0.5, 0.5, 0.226878),
+            (0.0, 0.5, 0.0, 0.345731),
+            (0.0, 0.5, -0.5, 0.273122),
+            (0.0, 0.5, 0.5, 0.418340),
+
+            (-0.5, 0.0, 0.0, 0.154269),
+            (-0.5, 0.0, -0.5, 0.081660),
+            (-0.5, 0.0, 0.5, 0.226878),
+            (-0.5, -0.5, 0.0, 0.095195),
+            (-0.5, -0.5, -0.5, 0.036298),
+            (-0.5, -0.5, 0.5, 0.163319),
+            (-0.5, 0.5, 0.0, 0.213342),
+            (-0.5, 0.5, -0.5, 0.145218),
+            (-0.5, 0.5, 0.5, 0.272239),
+
+            (0.5, 0.0, 0.0, 0.345731),
+            (0.5, 0.0, -0.5, 0.273122),
+            (0.5, 0.0, 0.5, 0.418340),
+            (0.5, -0.5, 0.0, 0.213342),
+            (0.5, -0.5, -0.5, 0.145218),
+            (0.5, -0.5, 0.5, 0.272239),
+            (0.5, 0.5, 0.0, 0.478120),
+            (0.5, 0.5, -0.5, 0.419223),
+            (0.5, 0.5, 0.5, 0.546244),
+
+            // known analytical values
+            (0.0, 0.0, Math.Sqrt(1 / 2.0), 3.0 / 8),
+
+            // {  0.0,  big,  any, 0.500000 },
+            (0.0, 30, -1.0, 0.500000),
+            (0.0, 30, 0.0, 0.500000),
+            (0.0, 30, 1.0, 0.500000),
+
+            // { big,  big,   any, 1.000000 },
+            (30, 30, -1.0, 1.000000),
+            (30, 30, 0.0, 1.000000),
+            (30, 30, 1.0, 1.000000),
+
+            // {-big,  any,   any, 0.000000 }
+            (-30, -1.0, -1.0, 0.000000),
+            (-30, 0.0, -1.0, 0.000000),
+            (-30, 1.0, -1.0, 0.000000),
+            (-30, -1.0, 0.0, 0.000000),
+            (-30, 0.0, 0.0, 0.000000),
+            (-30, 1.0, 0.0, 0.000000),
+            (-30, -1.0, 1.0, 0.000000),
+            (-30, 0.0, 1.0, 0.000000),
+            (-30, 1.0, 1.0, 0.000000),
+        ];
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            Func<Real, Real, Real> bcd = bivariate(values[i].Rho);
+            Real value = bcd(values[i].A, values[i].B);
+
+            Real tolerance = 1.0e-6;
+            Assert.True(
+                Math.Abs(value - values[i].Result) < tolerance,
+                $"{tag} bivariate cumulative distribution\n    case: {i + 1}\n    a:    {values[i].A}\n"
+                + $"    b:    {values[i].B}\n    rho:  {values[i].Rho}\n    tabulated value:  {values[i].Result}\n"
+                + $"    result:           {value}");
+        }
+    }
+
+    private static void CheckBivariateAtZero(Func<Real, Func<Real, Real, Real>> bivariate, string tag, Real tolerance)
+    {
+        // BVN(0.0,0.0,rho) = 1/4 + arcsin(rho)/(2*M_PI)
+        // "Handbook of the Normal Distribution",
+        // J.K. Patel & C.B.Read, 2nd Ed, 1996
+        Real[] rho = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99999];
+        const Real x = 0.0;
+        const Real y = 0.0;
+
+        foreach (Real i in rho)
+        {
+            for (int sgn = -1; sgn < 2; sgn += 2)
+            {
+                Func<Real, Real, Real> bvn = bivariate(sgn * i);
+                Real expected = 0.25 + (Math.Asin(sgn * i) / (2 * M_PI));
+                Real realised = bvn(x, y);
+
+                Assert.True(
+                    Math.Abs(realised - expected) < tolerance,
+                    $"{tag} bivariate cumulative distribution\n    rho: {sgn * i}\n    expected:  {expected}\n"
+                    + $"    realised:  {realised}\n    tolerance: {tolerance}");
+            }
+        }
+    }
+
+    private static void CheckBivariateTail(Func<Real, Func<Real, Real, Real>> bivariate, string tag, Real tolerance)
+    {
+        // make sure numerical greeks are sensible, numerical error in
+        // the tails can make garbage greeks for partial time barrier
+        // option
+        Real x = -6.9;
+        Real y = 6.9;
+        Real corr = -0.999;
+        Func<Real, Real, Real> bvn = bivariate(corr);
+        for (int i = 0; i < 10; i++)
+        {
+            Real cdf0 = bvn(x, y);
+            y += tolerance;
+            Real cdf1 = bvn(x, y);
+            Assert.False(
+                cdf0 > cdf1,
+                $"{tag} cdf must be decreasing in the tails\n    cdf0: {cdf0}\n    cdf1: {cdf1}\n    x: {x}\n"
+                + $"    y: {y}\n    rho: {corr}");
         }
     }
 

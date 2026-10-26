@@ -104,6 +104,7 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Methods/FiniteDifferences/StepCondition.cs`: `NullCondition`, which no QuantLib 1.44 class or test uses and which waits for its first user.
 - `src/NanoQL/Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGenerator.cs`: `Burley2020SobolBrownianGenerator` and `Burley2020SobolBrownianGeneratorFactory`, which wait for S-mm with `Burley2020SobolRsg`.
 - `src/NanoQL/Numerics/Integrals/FourierIntegration.cs`: the exp-sinh algorithm, which waits for S-core's exp-sinh integrator.
+- `src/NanoQL/Numerics/RandomNumbers/SobolBrownianBridgeRsg/SobolBrownianBridgeRsg.cs`: `Burley2020SobolBrownianBridgeRsg`, which waits for S-mm with `Burley2020SobolRsg`.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/TermStructures/Credit/DefaultDensityStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the default density, which waits for S-xcr's curves, its only users.
 - `src/NanoQL/TermStructures/Credit/HazardRateStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-xcr's curves, its only users.
@@ -122,16 +123,13 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/TermStructures/YieldTermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
-- `src/NanoQL/Time/DayCounters/YearFractionToDateFunctions.cs`: `roundToDayStart`, which waits for S-exo's spread option tests, its only callers.
 - `src/NanoQL/Utilities/DataParsers/DateParser.cs`: `parseFormatted`, not ported: a `DateOnly`'s `ParseExact` does its job.
 - `tests/NanoQL.Tests/TestSuite/AndreasenHugeVolatilityInterplTests.cs`: `testDifferentOptimizers`, which waits for S-core's BFGS.
 - `tests/NanoQL.Tests/TestSuite/BarrierOptionTests.cs`: `testHaugValues`' binomial checks, which wait for S-bar's `BinomialBarrierEngine`; `testBabsiriValues`' and `testBeagleholeValues`' Monte Carlo checks, which wait for S-bar's `MCBarrierEngine`; `testDividendBarrierOption`'s and `testDividendBarrierOptionWithDividendsPastMaturity`'s Heston checks, which wait for batch 4's `FdHestonBarrierEngine`; `testLocalVolAndHestonComparison`, which waits for batch 4's local volatility and Heston barrier engines; and the four perturbative cases, which wait for S-xeq's `PerturbativeBarrierOptionEngine`.
-- `tests/NanoQL.Tests/TestSuite/BasketOptionTests.cs`: the cases on the spread, two-asset and American Monte Carlo engines, which wait for S-exo's C2.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for S-mmp's `SequenceStatistics`.
 - `tests/NanoQL.Tests/TestSuite/CmsSpreadTests.cs`: `testCouponPricing`, which waits for S-xrt's `LognormalCmsSpreadPricer`.
 - `tests/NanoQL.Tests/TestSuite/CreditDefaultSwapTests.cs`: `testCachedValue`'s integral-engine checks, which wait for S-core's `IntegralCdsEngine`.
-- `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the bivariate normal, Student t and stochastic-collocation cases, whose distributions aren't ported yet.
-- `tests/NanoQL.Tests/TestSuite/DividendOptionTests.cs`: the cash-dividend engine's cases, which wait for S-exo's `CashDividendEuropeanEngine`.
+- `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the Student t and stochastic-collocation cases, whose distributions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/EuropeanOptionTests.cs`: `testFFTEngines`, which waits for S-xeq's `FFTVanillaEngine`.
 - `tests/NanoQL.Tests/TestSuite/FdHestonTests.cs`: `testFdmHestonBarrierVsBlackScholes`, `testFdmHestonBarrier` and `testMethodOfLinesAndCN`, which wait for S-bar's `FdHestonBarrierEngine`.
 - `tests/NanoQL.Tests/TestSuite/FdSabrTests.cs`: `testFdmSabrOp` and `testOosterleeTestCaseIV`, which wait for S-core's Richardson extrapolation and Sobol Brownian bridge sequences.

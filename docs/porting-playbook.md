@@ -297,8 +297,8 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `Claim`, `CdsHelper`, `BlackVolTermStructure`, `BlackVolatilityTermStructure`, `BlackVarianceTermStructure`,
   `LocalVolTermStructure`, `OneAssetOption`, `Dividend`, `Integrator`, `GaussianOrthogonalPolynomial`, `FdmMesher`,
   `FdmLinearOp`, `FdmLinearOpComposite`, `StepCondition`, `BoundaryCondition<TOperator>`, `FdmInnerValueCalculator`,
-  `BinomialTree<T>`, `EqualProbabilitiesBinomialTree<T>`, `EqualJumpsBinomialTree<T>`, `MultiAssetOption` and
-  `BasketPayoff` (abstract);
+  `BinomialTree<T>`, `EqualProbabilitiesBinomialTree<T>`, `EqualJumpsBinomialTree<T>`, `MultiAssetOption`,
+  `BasketPayoff` and `SpreadBlackScholesVanillaEngine` (abstract);
   `DiscretizedOption`, `Vasicek`, `TermStructureFittingParameter`, `Projection`, `ZeroInflationIndex`,
   `YoYInflationIndex`, `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`,
   `YoYInflationCouponPricer`, `CPICouponPricer`, `YoYInflationCapFloor`, `GeneralizedBlackScholesProcess`,

@@ -78,6 +78,18 @@ Facts:
 
 - `AnEmptyFactorVectorIsRefused`
 
+## AmericanBasketStrikeScalingTests
+
+[`Divergences/AmericanBasketStrikeScalingTests.cs`](../tests/NanoQL.Tests/Divergences/AmericanBasketStrikeScalingTests.cs)
+
+The Longstaff-Schwartz basket engine's state scaled by the strike. QuantLib scales the assets' prices by 1/K (`mcamericanbasketengine.cpp:48-50`, `:67-73`): at a zero strike, an exchange of the basket for nothing, the scale is infinite and the price NaN, and at a negative strike the scale's sign swaps the minimum and the maximum (an American maximum call 101.16 on the plan's market where the European is 116.67). nanoql scales by 1/|K|, and by 1 at a zero strike (the S-exo plan's ER5 (xv)); a positive scale leaves the regression's polynomial span unchanged: QuantLib's N-dimensional finite-difference engine at K ≤ 0, and QuantLib's bits at K > 0, are the checks.
+
+Facts:
+
+- `AZeroStrikeMeetsTheFiniteDifferenceEngine`
+- `ANegativeStrikeKeepsTheMaximumAndMeetsTheFiniteDifferenceEngine`
+- `APositiveStrikeKeepsQuantLibsBits`
+
 ## AmericanBoundsOnTimeTests
 
 [`Divergences/AmericanBoundsOnTimeTests.cs`](../tests/NanoQL.Tests/Divergences/AmericanBoundsOnTimeTests.cs)
@@ -515,6 +527,29 @@ Facts:
 - `StructuresOnAnotherReferenceDateAreReadByDate`
 - `StructuresDatedAfterTheRiskFreeCurveAccrueNothingBeforeTheirDate`
 - `StructuresSharingTheRiskFreeTimesAreQuantLibs`
+
+## BivariateDr78DegenerateCorrelationsTests
+
+[`Divergences/BivariateDr78DegenerateCorrelationsTests.cs`](../tests/NanoQL.Tests/Divergences/BivariateDr78DegenerateCorrelationsTests.cs)
+
+QuantLib's fix after v1.44, #2880 (`ca8e70946`), to Drezner's bivariate normal, taken under R8's upstream rule (the S-exo plan's ER6 (i)), with its three cases in `test-suite/distributions.cpp` on master, here until the pin moves: at ρ = ±1, where QuantLib 1.44 divides by zero, the probabilities are Φ(min(a, b)) and max(0, Φ(a) + Φ(b) − 1); near zero bounds the recursion's derived correlations, by hypot forms, stay continuous and symmetric; and near |ρ| = 1 a one-ulp overshoot of a derived correlation is clamped, where QuantLib 1.44 throws.
+
+Facts:
+
+- `TestBivariateDr78DegenerateCorrelations`
+- `TestBivariateDr78NearZero`
+- `TestBivariateDr78NearDegenerateCorrelations`
+
+## BivariateInfiniteArgumentTests
+
+[`Divergences/BivariateInfiniteArgumentTests.cs`](../tests/NanoQL.Tests/Divergences/BivariateInfiniteArgumentTests.cs)
+
+West's bivariate normal at an infinite bound. QuantLib's integrand meets ∞ − ∞ there (`bivariatenormaldistribution.cpp:166-176`, `eqn3`'s exponent, and `eqn6`'s beyond |ρ| = 0.925): NaN at +∞ for ρ > 0 and at −∞ for ρ < 0, and wherever the other bound is 0, where Drezner's returns Φ(b) or 0. nanoql returns the other bound's Φ at +∞ and 0 at −∞, in either argument (the S-exo plan's ER5 (xiv)): QuantLib's own value at ±40 is the check.
+
+Facts:
+
+- `APlusInfiniteBoundIsTheOtherBoundsMarginal`
+- `AMinusInfiniteBoundIsNothing`
 
 ## BjerksundStenslandMismatchedTimesTests
 
@@ -1593,6 +1628,28 @@ Facts:
 
 - `AnAtmQuoteHasNoDelta`
 
+## DengLiZhouNegativeStrikeTests
+
+[`Divergences/DengLiZhouNegativeStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/DengLiZhouNegativeStrikeTests.cs)
+
+Deng, Li and Zhou's engine at a negative strike with exactly one negative weight. QuantLib adds |K| as a zero-volatility asset of weight +1 and lumps it with the positive leg into one lognormal (`denglizhoubasketengine.cpp:86-96`, `:117-140`), where the payoff's identity, the call on (w, K) the put on (−w, −K), reaches the method's own setting of one positive weight: on a two-asset spread at K = −10 the direct route is 0.08 to 0.09 above the identity's, the put at ρ 0.9 0.852254 against 0.766746 (Choi 0.766703, the Monte Carlo 0.7682 ± 0.0035). nanoql prices those inputs by the identity, and every other negative strike by QuantLib's branch, so `testDengLiZhouWithNegativeStrike` (two negative weights) keeps 3.34412 (the S-exo plan's ER5 (xxxv)): QuantLib's engine on the flipped inputs, bit for bit, and Choi's engine are the checks.
+
+Facts:
+
+- `ASpreadAtANegativeStrikeIsTheFlippedPut`
+- `TwoPositiveWeightsAndOneNegativeMeetChoi`
+
+## DengLiZhouZeroVolatilityTests
+
+[`Divergences/DengLiZhouZeroVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/DengLiZhouZeroVolatilityTests.cs)
+
+Deng, Li and Zhou's basket engine at a zero volatility of its positive leg: a real asset, or a negative strike's zero-volatility pseudo-asset where it is the only positive weight. QuantLib divides 0 by 0 and its `max(0.0, NaN)` returns 0 (`denglizhoubasketengine.cpp:173-179`, `:238`), where the price is continuous (9.36646274 at 1e-12 on the plan's market). nanoql floors the positive leg's standard deviation at QL_EPSILON², Choi's engine's floor (`choibasketengine.cpp:76-78`; the S-exo plan's ER5 (xii)): the limit and Choi's engine are the checks.
+
+Facts:
+
+- `AZeroVolatilityOfThePositiveAssetPricesItsLimit`
+- `ANegativeStrikesPseudoAssetAloneOnThePositiveSidePricesItsLimit`
+
 ## DerivedCurveExtrapolationTests
 
 [`Divergences/DerivedCurveExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/DerivedCurveExtrapolationTests.cs)
@@ -2468,6 +2525,21 @@ Facts:
 
 - `TheAtmVolatilityIsTheCapletFixingOnTheSectionsDate`
 - `AnIborSectionIsBuilt`
+
+## GaussianCopulaZeroVarianceTests
+
+[`Divergences/GaussianCopulaZeroVarianceTests.cs`](../tests/NanoQL.Tests/Divergences/GaussianCopulaZeroVarianceTests.cs)
+
+The Gaussian copula spread engine where a volatility accrues no variance to expiry: at a zero volatility, and at an expiry on the volatility's own date. QuantLib reads the smile at expiry through its density calculator, which refuses a smile with no variance ("non-positive at-the-money volatility", `gaussiancopulaspreadengine.cpp`, `smilesectionrndcalculator.cpp`), where Kirk's and the other spread engines price both; nanoql puts that asset at its forward (the S-exo plan's ER5 (xviii) at its boundary, and R8). The checks: Kirk's engine, exact at a zero second volatility, and Black's put on the second asset at a zero first volatility, each within the engine's quadrature (QuantLib's own copula cases hold 1e-3), and the engine's own value at a volatility of 1e-6, which QuantLib's prices too, within 1e-5; the deterministic value at both zero and at an expiry on the volatilities' date; Kirk's value at an expiry before it. A surface whose strikes stop below the forward prices QuantLib's bits: the test for no variance is the density calculator's own, at the forward on the smile section, which reads every strike with extrapolation.
+
+Facts:
+
+- `AZeroSecondVolatilityMeetsKirk`
+- `AZeroFirstVolatilityIsBlacksPutOnTheSecond`
+- `BothZeroAreTheDeterministicValue`
+- `AnExpiryOnTheVolatilitiesDateIsAtTheForwards`
+- `AnExpiryBeforeTheVolatilitiesDateIsAtTheForwards`
+- `ASurfaceWhoseStrikesStopBelowTheForwardIsQuantLibs`
 
 ## GaussianQuadratureRefusalTests
 
@@ -3352,6 +3424,27 @@ Facts:
 - `FridaysAreBusinessDaysAndSundaysWeekendDays`
 - `TestMaltasListOnFridaysAndSundays`
 
+## MargrabeExpiredGreeksTests
+
+[`Divergences/MargrabeExpiredGreeksTests.cs`](../tests/NanoQL.Tests/Divergences/MargrabeExpiredGreeksTests.cs)
+
+An expired Margrabe option's assets' deltas and gammas. QuantLib's option never initializes them (`margrabeoption.hpp:55`, members its constructor leaves unset) and its expired path sets only `MultiAssetOption`'s results (`multiassetoption.cpp:74-77`, through `instrument.hpp:132-133`), so `delta1()` and the others read uninitialized memory (`margrabeoption.cpp:32-54`), which is undefined. nanoql refuses the read as QuantLib's results refuse an unset value: the four are `null`, the NPV and the multi-asset Greeks 0 as QuantLib's (master §2.2's undefined-path row).
+
+Facts:
+
+- `BothEnginesLeaveTheAssetsGreeksUnset`
+
+## MargrabeGreeksQuantityTests
+
+[`Divergences/MargrabeGreeksQuantityTests.cs`](../tests/NanoQL.Tests/Divergences/MargrabeGreeksQuantityTests.cs)
+
+The European Margrabe engine's Greeks at quantities other than 1. QuantLib's gammas drop the quantities and its theta takes them squared (`analyticeuropeanmargrabeengine.cpp:101-104`): a first gamma of 0.01154 against 0.02307 bumped at Q₁ = 2, a second of 0.02136 against 0.06409 at Q₂ = 3, and a theta of −8.361 against −9.013 by a date bump, on the plan's market; QuantLib's own case pins the spreadsheet's values, which reproduce its formulas (`margrabeoption.cpp:250`, `:259`, `:268`, moved here). nanoql takes each quantity once (the S-exo plan's ER5 (xvi)): QuantLib's own prices bumped are the check, and its bits at quantities of 1.
+
+Facts:
+
+- `EachGammaIsItsDeltasDerivative`
+- `TheThetaIsTheValuesDecay`
+
 ## MarkovFunctionalOutputsTests
 
 [`Divergences/MarkovFunctionalOutputsTests.cs`](../tests/NanoQL.Tests/Divergences/MarkovFunctionalOutputsTests.cs)
@@ -3615,6 +3708,17 @@ Facts:
 - `ALegsAtmRateTargetOfQuantLibsNullIsATarget`
 - `ASwaptionHelpersStrikeOfQuantLibsNullIsAStrike`
 
+## OperatorSplittingZeroVolatilityTests
+
+[`Divergences/OperatorSplittingZeroVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/OperatorSplittingZeroVolatilityTests.cs)
+
+The operator-splitting spread engine at a zero volatility of the second asset. QuantLib's corrections are 0·∞ there (`operatorsplittingspreadengine.cpp:60-65`, `:138-139`), so the price is NaN, from a volatility of about 1e-200, where its variance underflows; above, its corrections tend to 0 and its price to Kirk's, exact there (9.9375389513, and 9.937538951281 at 1e-12 on the plan's market). nanoql takes the corrections' limit, 0 (the S-exo plan's ER5 (xi)): QuantLib's own price at a tiny volatility and Kirk's engine are the checks.
+
+Facts:
+
+- `BothOrdersPriceKirksLimit`
+- `ThePutFollowsByParity`
+
 ## OptionDateFromTimeTests
 
 [`Divergences/OptionDateFromTimeTests.cs`](../tests/NanoQL.Tests/Divergences/OptionDateFromTimeTests.cs)
@@ -3712,6 +3816,17 @@ QuantLib's `PathGenerator` takes any `StochasticProcess` and casts it to `Stocha
 Facts:
 
 - `AProcessThatIsNotOneDimensionalIsRefused`
+
+## PearsonNegativeStrikePutTests
+
+[`Divergences/PearsonNegativeStrikePutTests.cs`](../tests/NanoQL.Tests/Divergences/PearsonNegativeStrikePutTests.cs)
+
+Pearson's spread engine where the conditional strike, the second forward at a node plus the strike, is zero or less. QuantLib's integrand takes the call's intrinsic value there whatever the type (`pearsonspreadengine.cpp:73-75`), so a put prices that intrinsic (136.84 on the plan's market where Choi's engine gives 0.00304, Deng-Li-Zhou's 0.00303 and a quadrature 0.00313). nanoql's put takes its conditional value, 0 there (the S-exo plan's ER5 (ix)): Choi's engine and the put-call parity, which QuantLib's put breaks, are the checks.
+
+Facts:
+
+- `APutAtNegativeConditionalStrikesMeetsChoi`
+- `PutCallParityHoldsAtNegativeConditionalStrikes`
 
 ## PeriodEqualityTests
 
@@ -4229,6 +4344,17 @@ Facts:
 
 - `TheProductHasARowsLength`
 
+## SpreadApproximationStrikeTests
+
+[`Divergences/SpreadApproximationStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/SpreadApproximationStrikeTests.cs)
+
+Bjerksund and Stensland's and the operator-splitting spread engines where the second forward and the strike sum to zero or less. QuantLib takes the log of a negative ratio and returns NaN (`bjerksundstenslandspreadengine.cpp:48`, `operatorsplittingspreadengine.cpp:53`), where Kirk's engine, their sibling, refuses through Black's check ("forward (−2.19458) must be positive"). nanoql refuses before the log, "f2 + strike must be positive for this approximation" (the S-exo plan's ER5 (x)): a refusal, the approximations having no value there.
+
+Facts:
+
+- `BjerksundStenslandRefuses`
+- `OperatorSplittingRefusesAtEitherOrder`
+
 ## SpreadFittingClockTests
 
 [`Divergences/SpreadFittingClockTests.cs`](../tests/NanoQL.Tests/Divergences/SpreadFittingClockTests.cs)
@@ -4355,6 +4481,29 @@ A stripped optionlet's fixing times after the evaluation date moves. QuantLib's 
 Facts:
 
 - `TheTimesAreTheConstructionsAndTheAdapterIsTheContexts`
+
+## StulzDegenerateTests
+
+[`Divergences/StulzDegenerateTests.cs`](../tests/NanoQL.Tests/Divergences/StulzDegenerateTests.cs)
+
+Stulz's engine where the assets move together or one doesn't move. At a correlation of 1 with equal volatilities, or at two zero volatilities, its combined variance is 0 or a rounding negative, and QuantLib's derived correlations are NaN or infinite, refused by the bivariate normal ("rho must be >= -1.0 (-nan(ind) not allowed)", `stulzengine.cpp:44-48`); at one zero volatility its bivariate normal reads an infinite bound and returns NaN (We04DP's, `Divergences/BivariateInfiniteArgumentTests.cs`). nanoql prices the co-moving limit, the minimum the asset of the smaller forward and the maximum that of the larger by Black's formula, and the bivariate normal's limit at an infinite bound (the S-exo plan's ER5 (xiii)): QuantLib's `blackFormula` (15.7766093, between Stulz's minimum 15.7766090 and maximum 15.7766097 at ρ = 1 − 1e-15 on the plan's market), QuantLib's own value near the limit, and the deterministic value are the checks.
+
+Facts:
+
+- `AssetsMovingTogetherPriceBlacksFormula`
+- `OneZeroVolatilityPricesItsLimit`
+- `TwoZeroVolatilitiesPriceTheDeterministicValue`
+
+## StulzNegativeStrikeTests
+
+[`Divergences/StulzNegativeStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/StulzNegativeStrikeTests.cs)
+
+Stulz's engine at a negative strike. QuantLib's `log(forward1/strike)` (`stulzengine.cpp:62`) makes the minimum NaN and Black's check refuses the maximum ("strike + displacement (-10 + 0) must be non-negative"), where both payoffs are linear: the call is the call struck at zero less the discounted strike, the put worth nothing (96.0373 and 117.9873 at K = −10 on the plan's market, the Monte Carlo engine 96.067 and 118.007). nanoql prices those forms (the S-exo plan's ER5 (xxxiii)): QuantLib's own K = 0 values less K·D, and the Monte Carlo engine, are the checks.
+
+Facts:
+
+- `ACallIsTheZeroStrikeCallLessTheDiscountedStrike`
+- `APutIsWorthNothing`
 
 ## SvdNonFiniteRefusalTests
 
@@ -4644,6 +4793,75 @@ Facts:
 
 - `ATreesIndicesOutOfRangeAreRefused`
 - `StatePricesBeyondTheGridAreRefused`
+
+## TwoAssetCorrelationBivariateTests
+
+[`Divergences/TwoAssetCorrelationBivariateTests.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetCorrelationBivariateTests.cs)
+
+The two-asset correlation engine's bivariate normal. QuantLib's engine reads Drezner's 1978 algorithm (`analytictwoassetcorrelationengine.cpp:44`), "six decimal places accuracy" by its header (`bivariatenormaldistribution.hpp:33`), where QuantLib's default bivariate normal is West's; the value moves by 2.5e-7 on QuantLib's own case. nanoql reads West's (the S-exo plan's ER7, ruled by the user on 2026-10-25): a quadrature over the joint lognormal (`TwoAssetCorrelationQuadrature`) is the check, at 1e-9, which QuantLib's value meets within Drezner's accuracy.
+
+Facts:
+
+- `TheValueMeetsTheQuadrature`
+
+## TwoAssetCorrelationNegativeStrikeTests
+
+[`Divergences/TwoAssetCorrelationNegativeStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetCorrelationNegativeStrikeTests.cs)
+
+The two-asset correlation engine at a negative second strike. QuantLib checks the first strike but not the second (`analytictwoassetcorrelationengine.cpp:45`), whose `log(s2/X2)` is NaN and reaches Drezner's "case not handled", where the call, (S₂ − X₂)·1{S₁ > X₁}, is s₂e^{(b₂−r)T}N(y₁ + ρσ₂√T) − X₂e^{−rT}N(y₁) (57.670585 at X₂ = −10 on the plan's market; QuantLib's X₂ = 0 value is the same form, 52.851193) and the put worth nothing. nanoql prices those forms (the S-exo plan's ER5 (xxxiv)): a quadrature over the joint lognormal (Revision 69, `TwoAssetCorrelationQuadrature`) and QuantLib's X₂ = 0 value are the checks.
+
+Facts:
+
+- `TheCallMeetsTheQuadratureAndTheZeroStrikeValue`
+- `ThePutIsWorthNothing`
+
+## TwoAssetCorrelationQuadrature
+
+[`Divergences/TwoAssetCorrelationQuadrature.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetCorrelationQuadrature.cs)
+
+An independent value of a two-asset correlation option on flat continuous markets (the master plan's Revision 69 check): the discounted expectation of the second asset's payoff where the first is in the money, integrated over the second asset's driving normal, each first-asset probability conditional on it in closed form, the payoff's kink an end of the integral; Gauss-Lobatto at an absolute accuracy of 1e-13.
+
+## TwoAssetCorrelationSmileTests
+
+[`Divergences/TwoAssetCorrelationSmileTests.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetCorrelationSmileTests.cs)
+
+The two-asset correlation engine on a smile. QuantLib reads the second asset's volatility at the first strike X₁ (`analytictwoassetcorrelationengine.cpp:54-56`), so on a smile it prices the flat-volatility value at X₁ (9.758 on the plan's smile, where X₂'s volatility gives 4.239). nanoql reads it at X₂ (the S-exo plan's ER5 (xvii)): QuantLib's engine on a flat volatility equal to the smile's at X₂ is the check, bit for bit.
+
+Facts:
+
+- `TheSecondVolatilityIsReadAtTheSecondStrike`
+
+## TwoAssetMarket
+
+[`Divergences/TwoAssetMarket.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetMarket.cs)
+
+The two-asset divergence tests' market: flat curves and volatilities from one date, two-asset correlation matrices, spread and basket options expiring in a year.
+
+## TwoAssetMismatchedTimesTests
+
+[`Divergences/TwoAssetMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetMismatchedTimesTests.cs)
+
+C2's engines on structures dated apart (the playbook's dates row; the S-exo plan's ER5 (xviii)). The spread engines, Stulz, the Gaussian copula and the cash-dividend engine read by date, which QuantLib refuses for an option expiring before a later structure's date ("negative time"); the two-asset correlation engine reads each volatility at its own process's time and everything else at the second's (+0.84% on the plan's market with asset 2's curves on Act/360), and the American Margrabe engine builds flat curves from the evaluation date with rates over the risk-free curve's time (`analytictwoassetcorrelationengine.cpp:54-66`, `analyticamericanmargrabeengine.cpp:53-79`). nanoql's by-date reads accrue nothing before a structure's date, and its clocked engines read every structure on the clock across both processes; the cash-dividend engine dates and counts each dividend's volatility on the clock, where QuantLib sizes it on the risk-free curve's time but reads it on the volatility's own (+0.48% with the volatility on Act/360 under curves on Act/365, `cashdividendeuropeanengine.cpp:139-151`). QuantLib's engine on the market restated from the evaluation date, onto one clock, is the check.
+
+Facts:
+
+- `AnExpiryBeforeTheRiskFreeCurvesDateDiscountsNothing`
+- `ARiskFreeCurveSettlingLaterIsPricedFromTheEvaluationDate`
+- `ACashDividendVolatilityCountingItsOwnDaysIsReadOnTheClock`
+
+## TwoAssetTwoRiskFreeCurvesTests
+
+[`Divergences/TwoAssetTwoRiskFreeCurvesTests.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetTwoRiskFreeCurvesTests.cs)
+
+Stulz's, both Margrabe engines and the two-asset correlation engine on a second risk-free curve. QuantLib reads the second process's risk-free curve three ways: Kirk's family and the Monte Carlo basket engines forward the second asset on its own curves and discount on the first's (`spreadblackscholesvanillaengine.cpp:54-68`, `mceuropeanbasketengine.hpp:196`); Stulz and the European Margrabe engine build the second forward on the first process's discount (`stulzengine.cpp:140-152`, `analyticeuropeanmargrabeengine.cpp:61-72`), the two-asset correlation engine takes its rate from the first process alone (`:64-66`), and the American Margrabe engine reads no risk-free rate (`analyticamericanmargrabeengine.cpp:69-79`); at r₁ 5%, r₂ 10% on the plan's market Stulz's minimum call is −94 standard errors from the Monte Carlo engine and Margrabe's exchange +134. nanoql reads Kirk's way in each, the American Margrabe engine's transformed rate the second asset's yield on the first curve (q₂ + r₁ − r₂), and the European Margrabe theta the second asset's carry there (the S-exo plan's ER5 (xxxii)): each engine on the market restated onto the first process's curve, the second asset's yield q₂ + r₁ − r₂ for the same forward, is the check, the European Margrabe theta's among them, with the Monte Carlo basket engines beside.
+
+Facts:
+
+- `StulzPricesTheRestatedMarket`
+- `TheEuropeanMargrabeEnginePricesTheRestatedMarket`
+- `TheEuropeanMargrabeThetaIsTheRestatedMarkets`
+- `TheAmericanMargrabeEnginePricesTheRestatedMarket`
+- `TheTwoAssetCorrelationEnginePricesTheRestatedMarket`
 
 ## UfrSmallAlphaTests
 

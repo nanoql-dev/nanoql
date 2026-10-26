@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/time/daycounters/yearfractiontodate.hpp ql/time/daycounters/yearfractiontodate.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: roundToDayStart, which waits for S-exo's spread option tests, its only callers
 
 using System.Globalization;
 using NanoQL.Numerics;
@@ -78,6 +77,15 @@ public static class YearFractionToDateFunctions
             return guessDate + new Period(searchDirection, TimeUnit.Days);
         }
     }
+
+    /// <summary>The date rounded to the start of its day: the date itself.</summary>
+    /// <param name="d">The date.</param>
+    /// <returns>The date.</returns>
+    /// <remarks>
+    /// A date has no time of day here, as in QuantLib's default build, whose <c>roundToDayStart</c> returns the date
+    /// unchanged; its high-resolution build rounds a date at or past noon to the next day.
+    /// </remarks>
+    public static Date RoundToDayStart(Date d) => d;
 
     // QuantLib's boost::numeric_cast<Integer>(round(x)): C's round, half away from zero, then refused where the result
     // is outside an integer's range, as the cast throws "bad numeric conversion".

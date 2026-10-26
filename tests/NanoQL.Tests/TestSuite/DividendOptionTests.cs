@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/dividendoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCashDividendEuropeanEngine, testCashDividendEuropeanEngineWithManyDividends, testCashDividendEuropeanEngineWithSingleDividends and testZeroStrikeCallWithCashDividends, which wait for S-exo's CashDividendEuropeanEngine
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
 using NanoQL.Instruments;
+using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
 using NanoQL.TermStructures;
@@ -617,6 +617,275 @@ public class DividendOptionTests
     }
 
     // Adapted: the quotes changed in place become processes built for each value, on curves dated by the context.
+    [Fact]
+    public void TestCashDividendEuropeanEngine()
+    {
+        // Testing cash dividend European engine with finite-difference European engine...
+        DayCounter dc = new Actual365Fixed();
+        var today = new Date(1, Month.January, 2024);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        YieldTermStructure rTS = new ZeroCurve(
+            [today, new Date(1, Month.May, 2024), new Date(1, Month.November, 2024), new Date(1, Month.January, 2027)],
+            [0.3, 0.15, 0.1, 0.15],
+            dc);
+
+        YieldTermStructure qTS = new ZeroCurve(
+            [today, new Date(1, Month.May, 2024), new Date(1, Month.November, 2025), new Date(1, Month.January, 2027)],
+            [0.05, 0.03, 0.1, 0.05],
+            dc);
+
+        BlackVolTermStructure vTS = new BlackVarianceCurve(
+            today,
+            [new Date(2, Month.January, 2024), new Date(1, Month.July, 2024), new Date(1, Month.August, 2024),
+                new Date(1, Month.January, 2027)],
+            [0.3, 0.4, 0.42, 0.5],
+            dc);
+
+        var process = new BlackScholesMertonProcess(100.0, qTS, rTS, vTS);
+
+        Date[] dividendDates =
+        [
+            new Date(1, Month.April, 2024), new Date(1, Month.November, 2024), new Date(1, Month.October, 2024),
+            new Date(1, Month.April, 2026), new Date(27, Month.March, 2028), new Date(1, Month.October, 2023),
+        ];
+        Rate[] dividendAmounts = [4, 10, 2, 5, 25, 15];
+
+        ImmutableArray<Dividend> dividendSchedule = DividendFunctions.DividendVector(dividendDates, dividendAmounts);
+
+        const Real tol = 0.005;
+
+        foreach (CashDividendEuropeanEngineCashDividendModel cashDivModel in new[]
+            { CashDividendEuropeanEngineCashDividendModel.Spot, CashDividendEuropeanEngineCashDividendModel.Escrowed })
+        {
+            Func<VanillaOption, EvaluationContext, OneAssetOptionResults> fdEngine =
+                new MakeFdBlackScholesVanillaEngine(process)
+                    .WithTGrid(100)
+                    .WithXGrid(800)
+                    .WithCashDividends(dividendDates, dividendAmounts)
+                    .WithCashDividendModel((FdBlackScholesVanillaEngineCashDividendModel)cashDivModel)
+                    .ToEngine();
+
+            foreach (OptionType optionType in new[] { OptionType.Call, OptionType.Put })
+            {
+                foreach (Date maturityDate in new[] { new Date(1, Month.April, 2026), new Date(1, Month.January, 2027) })
+                {
+                    foreach (Real strike in new Real[] { 50, 100, 125, 175 })
+                    {
+                        var option = new VanillaOption(
+                            new PlainVanillaPayoff(optionType, strike), new EuropeanExercise(maturityDate));
+
+                        Real fdNPV = fdEngine(option, context).NPV!.Value;
+                        Real cdNPV = CashDividendEuropeanEngine.Calculate(
+                            option, context, process, dividendSchedule, cashDivModel).NPV!.Value;
+
+                        Real diff = Math.Abs(fdNPV - cdNPV);
+                        Assert.True(
+                            diff <= tol,
+                            "Failed to compare European option prices with CashDividendEuropeanEngine and "
+                            + $"FdBlackScholesVanillaEngine\n    Strike         : {strike}\n    Option Type    : {optionType}"
+                            + $"\n    Maturity Date  : {maturityDate}\n    Dividends Model: {cashDivModel}"
+                            + $"\n    FDM price      : {fdNPV}\n    Cash Div price : {cdNPV}\n    difference     : {diff}"
+                            + $"\n    tolerance      : {tol}");
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestCashDividendEuropeanEngineWithManyDividends()
+    {
+        // Testing cash dividend European engine with many dividends...
+        DayCounter dc = new Actual365Fixed();
+        var today = new Date(9, Month.November, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Date maturityDate = today + new Period(2, TimeUnit.Years);
+
+        YieldTermStructure qTS = new FlatForward(today, 0.05, dc);
+        YieldTermStructure rTS = new ZeroCurve(
+            [today, new Date(1, Month.May, 2026), new Date(1, Month.November, 2027), new Date(1, Month.January, 2032)],
+            [0.05, 0.075, 0.04, 0.06],
+            dc);
+
+        BlackVolTermStructure vTS = new BlackVarianceCurve(
+            today,
+            [new Date(2, Month.January, 2026), new Date(1, Month.July, 2026), new Date(1, Month.August, 2027),
+                new Date(1, Month.January, 2032)],
+            [0.3, 0.4, 0.42, 0.5],
+            dc);
+
+        var process = new BlackScholesMertonProcess(100, qTS, rTS, vTS);
+
+        var option = new VanillaOption(
+            new PlainVanillaPayoff(OptionType.Call, 110.0), new EuropeanExercise(maturityDate));
+
+        var rng = new MersenneTwisterUniformRng(1234);
+
+        var dividendDates = new List<Date> { today + new Period(-1, TimeUnit.Months) };
+        var dividendAmounts = new List<Real> { 1.0 };
+
+        while (dividendDates[^1] < maturityDate + new Period(1, TimeUnit.Months))
+        {
+            dividendDates.Add(dividendDates[^1] + new Period(1 + (Integer)(rng.NextInt32() % 5), TimeUnit.Days));
+            dividendAmounts.Add(0.1 * rng.NextReal());
+        }
+
+        Real expected = new MakeFdBlackScholesVanillaEngine(process)
+            .WithTGrid(10)
+            .WithXGrid(500)
+            .WithCashDividends(dividendDates, dividendAmounts)
+            .WithCashDividendModel(FdBlackScholesVanillaEngineCashDividendModel.Spot)
+            .ToEngine()(option, context).NPV!.Value;
+
+        Real calculated = CashDividendEuropeanEngine.Calculate(
+            option,
+            context,
+            process,
+            DividendFunctions.DividendVector(dividendDates, dividendAmounts),
+            CashDividendEuropeanEngineCashDividendModel.Spot).NPV!.Value;
+
+        const Real tol = 0.04;
+        Real diff = Math.Abs(expected - calculated);
+        Assert.True(
+            diff <= tol,
+            "Failed to compare European option prices with many dividends, CashDividendEuropeanEngine and "
+            + $"FdBlackScholesVanillaEngine\n    FDM price      : {expected}\n    Cash Div price : {calculated}"
+            + $"\n    difference     : {diff}\n    tolerance      : {tol}");
+    }
+
+    [Fact]
+    public void TestCashDividendEuropeanEngineWithSingleDividends()
+    {
+        // Testing cash dividend European engine with single dividends...
+        DayCounter dc = new Actual365Fixed();
+        var today = new Date(11, Month.November, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Date maturityDate = today + new Period(18, TimeUnit.Months);
+
+        var process = new BlackScholesMertonProcess(
+            100, new FlatForward(today, 0.05, dc), new FlatForward(today, 0.025, dc),
+            new BlackConstantVol(today, new NullCalendar(), 0.3, dc));
+
+        var exercise = new EuropeanExercise(maturityDate);
+
+        Real[] dividendAmounts = [5.0];
+
+        foreach (Date divDate in new[]
+        {
+            today - new Period(1, TimeUnit.Days), today, today + new Period(1, TimeUnit.Days),
+            today + new Period(6, TimeUnit.Months), maturityDate, maturityDate + new Period(1, TimeUnit.Days),
+        })
+        {
+            foreach (CashDividendEuropeanEngineCashDividendModel cashDivModel in new[]
+                { CashDividendEuropeanEngineCashDividendModel.Spot, CashDividendEuropeanEngineCashDividendModel.Escrowed })
+            {
+                Date[] dividendDates = [divDate];
+                Func<VanillaOption, EvaluationContext, OneAssetOptionResults> fdEngine =
+                    new MakeFdBlackScholesVanillaEngine(process)
+                        .WithTGrid(200)
+                        .WithXGrid(400)
+                        .WithCashDividends(dividendDates, dividendAmounts)
+                        .WithCashDividendModel((FdBlackScholesVanillaEngineCashDividendModel)cashDivModel)
+                        .ToEngine();
+
+                foreach (OptionType optionType in new[] { OptionType.Call, OptionType.Put })
+                {
+                    var option = new VanillaOption(new PlainVanillaPayoff(optionType, 95.0), exercise);
+
+                    Real expected = fdEngine(option, context).NPV!.Value;
+                    Real calculated = CashDividendEuropeanEngine.Calculate(
+                        option,
+                        context,
+                        process,
+                        DividendFunctions.DividendVector(dividendDates, dividendAmounts),
+                        cashDivModel).NPV!.Value;
+
+                    const Real tol = 0.001;
+                    Real diff = Math.Abs(expected - calculated);
+                    Assert.True(
+                        diff <= tol,
+                        "Failed to compare European option prices with CashDividendEuropeanEngine and "
+                        + $"FdBlackScholesVanillaEngine\n    Option Type    : {optionType}\n    Dividend Date  : {divDate}"
+                        + $"\n    Dividends Model: {cashDivModel}\n    FDM price      : {expected}"
+                        + $"\n    Cash Div price : {calculated}\n    difference     : {diff}\n    tolerance      : {tol}");
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestZeroStrikeCallWithCashDividends()
+    {
+        // Testing zero strike calls with cash dividends...
+        DayCounter dc = new Actual365Fixed();
+        var today = new Date(26, Month.October, 2025);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Date maturityDate = today + new Period(1, TimeUnit.Years);
+
+        YieldTermStructure qTS = new FlatForward(today, 0.063, dc);
+        YieldTermStructure rTS = new FlatForward(today, 0.094, dc);
+
+        var process = new BlackScholesMertonProcess(
+            100, qTS, rTS, new BlackConstantVol(today, new NullCalendar(), 0.3, dc));
+
+        var europeanOption = new VanillaOption(
+            new PlainVanillaPayoff(OptionType.Call, 0.0), new EuropeanExercise(maturityDate));
+
+        const Real dividend = 5.0;
+        foreach (Date dividendDate in new[] { today, new Date(1, Month.January, 2026), maturityDate })
+        {
+            Func<VanillaOption, EvaluationContext, OneAssetOptionResults> fdEngine =
+                new MakeFdBlackScholesVanillaEngine(process)
+                    .WithTGrid(100)
+                    .WithXGrid(400)
+                    .WithCashDividends([dividendDate], [dividend])
+                    .WithCashDividendModel(FdBlackScholesVanillaEngineCashDividendModel.Escrowed)
+                    .ToEngine();
+
+            Real europeanCalculated = fdEngine(europeanOption, context).NPV!.Value;
+
+            Real europeanExpected = (process.X0 * qTS.Discount(maturityDate))
+                - (dividend * rTS.Discount(dividendDate) / qTS.Discount(dividendDate) * qTS.Discount(maturityDate));
+
+            const Real tol = 1e-3;
+            Real europeanFdmDiff = Math.Abs(europeanCalculated - europeanExpected);
+            Assert.True(
+                europeanFdmDiff <= tol,
+                "Failed to calculate zero strike Europeasn call prices with escrowed dividend model"
+                + $"\n    Dividend Date: {dividendDate}\n    calculated   : {europeanCalculated}"
+                + $"\n    expected     : {europeanExpected}\n    difference   : {europeanFdmDiff}");
+
+            Real europeanCdCalculated = CashDividendEuropeanEngine.Calculate(
+                europeanOption,
+                context,
+                process,
+                DividendFunctions.DividendVector([dividendDate], [dividend])).NPV!.Value;
+
+            Real europeanCdDiff = Math.Abs(europeanCdCalculated - europeanExpected);
+            Assert.True(
+                europeanCdDiff <= tol,
+                "Failed to calculate zero strike Europeasn call prices with spot dividend model"
+                + $"\n    Dividend Date: {dividendDate}\n    calculated   : {europeanCdCalculated}"
+                + $"\n    expected     : {europeanExpected}\n    difference   : {europeanCdDiff}");
+
+            var americanOption = new VanillaOption(
+                new PlainVanillaPayoff(OptionType.Call, 0.0), new AmericanExercise(maturityDate));
+
+            Real americanCalculated = fdEngine(americanOption, context).NPV!.Value;
+            Real americanExpected = process.X0;
+            Real americanDiff = Math.Abs(americanCalculated - americanExpected);
+            Assert.True(
+                americanDiff <= tol,
+                "Failed to calculate zero strike Europeasn call prices with escrowed dividend model"
+                + $"\n    Dividend Date: {dividendDate}\n    calculated   : {americanCalculated}"
+                + $"\n    expected     : {americanExpected}\n    difference   : {americanDiff}");
+        }
+    }
+
     private static void TestFdGreeks(Date today, Exercise exercise, FdBlackScholesVanillaEngineCashDividendModel model)
     {
         Dictionary<string, Real> calculated = [], expected = [], tolerance = [];

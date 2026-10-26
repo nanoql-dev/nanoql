@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 488 | 59 |
-| partial | 21 | 31 |
-| ported | 751 | 90 |
+| not started | 471 | 57 |
+| partial | 21 | 30 |
+| ported | 768 | 93 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -666,7 +666,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `makeswaption` | ported | Instruments/MakeSwaption.cs |  |
 | `makevanillaswap` | ported | Instruments/MakeVanillaSwap.cs |  |
 | `makeyoyinflationcapfloor` | ported | Instruments/MakeYoYInflationCapFloor.cs |  |
-| `margrabeoption` | not started |  | no nanoql type: MargrabeOption, MargrabeOptionResults |
+| `margrabeoption` | ported | Instruments/MargrabeOption/MargrabeOption.cs, Instruments/MargrabeOption/MargrabeOptionResults.cs |  |
 | `multiassetoption` | ported | Instruments/MultiAssetOption.cs, Instruments/MultiAssetOptionResults.cs |  |
 | `multipleresetsswap` | ported | Instruments/MultipleResetsSwap.cs |  |
 | `nonstandardswap` | ported | Instruments/NonstandardSwap.cs, Instruments/NonstandardSwapArguments.cs | no nanoql type: NonstandardSwapResults |
@@ -688,7 +688,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `swap` | ported | Instruments/Swap/Swap.cs, Instruments/Swap/SwapResults.cs, Instruments/Swap/SwapType.cs |  |
 | `swaption` | ported | Instruments/Swaption/Settlement.cs, Instruments/Swaption/SettlementMethod.cs, Instruments/Swaption/SettlementType.cs, Instruments/Swaption/Swaption.cs, Instruments/Swaption/SwaptionFunctions.cs, Instruments/Swaption/SwaptionPriceType.cs |  |
 | `twoassetbarrieroption` | not started |  | no nanoql type: TwoAssetBarrierOption |
-| `twoassetcorrelationoption` | not started |  | no nanoql type: TwoAssetCorrelationOption |
+| `twoassetcorrelationoption` | ported | Instruments/TwoAssetCorrelationOption.cs |  |
 | `vanillaoption` | ported | Instruments/VanillaOption.cs |  |
 | `vanillastorageoption` | not started |  | no nanoql type: VanillaStorageOption |
 | `vanillaswap` | ported | Instruments/VanillaSwap.cs |  |
@@ -800,7 +800,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `binomialdistribution` | ported | Numerics/Distributions/BinomialDistribution/BinomialDistribution.cs, Numerics/Distributions/BinomialDistribution/BinomialDistributionFunctions.cs, Numerics/Distributions/BinomialDistribution/CumulativeBinomialDistribution.cs |  |
-| `bivariatenormaldistribution` | not started |  | no nanoql type: BivariateCumulativeNormalDistributionDr78, BivariateCumulativeNormalDistributionWe04DP |
+| `bivariatenormaldistribution` | ported | Numerics/Distributions/BivariateNormalDistribution/BivariateCumulativeNormalDistributionDr78.cs, Numerics/Distributions/BivariateNormalDistribution/BivariateCumulativeNormalDistributionWe04DP.cs |  |
 | `bivariatestudenttdistribution` | not started |  | no nanoql type: BivariateCumulativeStudentDistribution |
 | `chisquaredistribution` | ported | Numerics/Distributions/ChiSquareDistribution/CumulativeChiSquareDistribution.cs, Numerics/Distributions/ChiSquareDistribution/InverseNonCentralCumulativeChiSquareDistribution.cs, Numerics/Distributions/ChiSquareDistribution/NonCentralCumulativeChiSquareDistribution.cs, Numerics/Distributions/ChiSquareDistribution/NonCentralCumulativeChiSquareSankaranApprox.cs |  |
 | `gammadistribution` | ported | Numerics/Distributions/CumulativeGammaDistribution.cs, Numerics/Distributions/GammaFunction.cs |  |
@@ -944,7 +944,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `ranluxuniformrng` | not started |  | no nanoql type: Ranlux64UniformRng, Ranlux3UniformRng, Ranlux4UniformRng |
 | `rngtraits` | ported | Numerics/RandomNumbers/RngTraits/GenericLowDiscrepancy{TUrsg,TIc}.cs, Numerics/RandomNumbers/RngTraits/GenericPseudoRandom{TUrng,TIc}.cs, Numerics/RandomNumbers/RngTraits/IRngTraits.cs, Numerics/RandomNumbers/RngTraits/LowDiscrepancy.cs, Numerics/RandomNumbers/RngTraits/PoissonPseudoRandom.cs, Numerics/RandomNumbers/RngTraits/PseudoRandom.cs |  |
 | `seedgenerator` | replaced: explicit seeds | Numerics/RandomNumbers/Seeds.cs |  |
-| `sobolbrownianbridgersg` | not started |  | no nanoql type: SobolBrownianBridgeRsg, Burley2020SobolBrownianBridgeRsg |
+| `sobolbrownianbridgersg` | partial | Numerics/RandomNumbers/SobolBrownianBridgeRsg/SobolBrownianBridgeRsg.cs | partial: Burley2020SobolBrownianBridgeRsg, which waits for S-mm with Burley2020SobolRsg; no nanoql type: Burley2020SobolBrownianBridgeRsg |
 | `sobolrsg` | ported | Numerics/RandomNumbers/SobolRsg/SobolRsg.cs, Numerics/RandomNumbers/SobolRsg/SobolRsgDirectionIntegers.cs, Numerics/RandomNumbers/SobolRsg/SobolRsgTables.cs |  |
 | `stochasticcollocationinvcdf` | not started |  | no nanoql type: StochasticCollocationInvCDF |
 | `xoshiro256starstaruniformrng` | not started |  | no nanoql type: Xoshiro256StarStarUniformRng |
@@ -1517,20 +1517,20 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `bjerksundstenslandspreadengine` | not started |  | no nanoql type: BjerksundStenslandSpreadEngine |
+| `bjerksundstenslandspreadengine` | ported | PricingEngines/Basket/BjerksundStenslandSpreadEngine.cs |  |
 | `choibasketengine` | ported | PricingEngines/Basket/ChoiBasketEngine.cs |  |
-| `denglizhoubasketengine` | not started |  | no nanoql type: DengLiZhouBasketEngine |
+| `denglizhoubasketengine` | ported | PricingEngines/Basket/DengLiZhouBasketEngine.cs |  |
 | `fd2dblackscholesvanillaengine` | ported | PricingEngines/Basket/Fd2dBlackScholesVanillaEngine.cs |  |
 | `fdndimblackscholesvanillaengine` | ported | PricingEngines/Basket/FdndimBlackScholesVanillaEngine.cs |  |
-| `gaussiancopulaspreadengine` | not started |  | no nanoql type: GaussianCopulaSpreadEngine |
-| `kirkengine` | not started |  | no nanoql type: KirkEngine |
-| `mcamericanbasketengine` | not started |  | no nanoql type: MCAmericanBasketEngine, MakeMCAmericanBasketEngine, AmericanBasketPathPricer |
+| `gaussiancopulaspreadengine` | ported | PricingEngines/Basket/GaussianCopulaSpreadEngine.cs |  |
+| `kirkengine` | ported | PricingEngines/Basket/KirkEngine.cs |  |
+| `mcamericanbasketengine` | ported | PricingEngines/Basket/MCAmericanBasketEngine/AmericanBasketPathPricer.cs, PricingEngines/Basket/MCAmericanBasketEngine/MCAmericanBasketEngine.cs, PricingEngines/Basket/MCAmericanBasketEngine/MakeMCAmericanBasketEngine{TRng,TStats}.cs |  |
 | `mceuropeanbasketengine` | ported | PricingEngines/Basket/MCEuropeanBasketEngine/EuropeanMultiPathPricer.cs, PricingEngines/Basket/MCEuropeanBasketEngine/MCEuropeanBasketEngine.cs, PricingEngines/Basket/MCEuropeanBasketEngine/MakeMCEuropeanBasketEngine{TRng,TStats}.cs |  |
-| `operatorsplittingspreadengine` | not started |  | no nanoql type: OperatorSplittingSpreadEngine, OperatorSplittingSpreadEngineOrder |
-| `pearsonspreadengine` | not started |  | no nanoql type: PearsonSpreadEngine |
+| `operatorsplittingspreadengine` | ported | PricingEngines/Basket/OperatorSplittingSpreadEngine/OperatorSplittingSpreadEngine.cs, PricingEngines/Basket/OperatorSplittingSpreadEngine/OperatorSplittingSpreadEngineOrder.cs |  |
+| `pearsonspreadengine` | ported | PricingEngines/Basket/PearsonSpreadEngine.cs |  |
 | `singlefactorbsmbasketengine` | ported | PricingEngines/Basket/SingleFactorBsmBasketEngine/SingleFactorBsmBasketEngine.cs, PricingEngines/Basket/SingleFactorBsmBasketEngine/SumExponentialsRootSolver.cs |  |
-| `spreadblackscholesvanillaengine` | not started |  | no nanoql type: SpreadBlackScholesVanillaEngine |
-| `stulzengine` | not started |  | no nanoql type: StulzEngine |
+| `spreadblackscholesvanillaengine` | ported | PricingEngines/Basket/SpreadBlackScholesVanillaEngine.cs |  |
+| `stulzengine` | ported | PricingEngines/Basket/StulzEngine.cs |  |
 | `vectorbsmprocessextractor` | ported | PricingEngines/Basket/VectorBsmProcessExtractor.cs |  |
 
 ### `ql/pricingengines/bond/`
@@ -1580,13 +1580,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `analyticamericanmargrabeengine` | not started |  | no nanoql type: AnalyticAmericanMargrabeEngine |
+| `analyticamericanmargrabeengine` | ported | PricingEngines/Exotic/AnalyticAmericanMargrabeEngine.cs |  |
 | `analyticcomplexchooserengine` | not started |  | no nanoql type: AnalyticComplexChooserEngine |
 | `analyticcompoundoptionengine` | not started |  | no nanoql type: AnalyticCompoundOptionEngine |
-| `analyticeuropeanmargrabeengine` | not started |  | no nanoql type: AnalyticEuropeanMargrabeEngine |
+| `analyticeuropeanmargrabeengine` | ported | PricingEngines/Exotic/AnalyticEuropeanMargrabeEngine.cs |  |
 | `analyticholderextensibleoptionengine` | not started |  | no nanoql type: AnalyticHolderExtensibleOptionEngine |
 | `analyticsimplechooserengine` | not started |  | no nanoql type: AnalyticSimpleChooserEngine |
-| `analytictwoassetcorrelationengine` | not started |  | no nanoql type: AnalyticTwoAssetCorrelationEngine |
+| `analytictwoassetcorrelationengine` | ported | PricingEngines/Exotic/AnalyticTwoAssetCorrelationEngine.cs |  |
 | `analyticwriterextensibleoptionengine` | not started |  | no nanoql type: AnalyticWriterExtensibleOptionEngine |
 
 ### `ql/pricingengines/forward/`
@@ -1686,7 +1686,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `batesengine` | ported | PricingEngines/Vanilla/BatesEngine/BatesDetJumpEngine.cs, PricingEngines/Vanilla/BatesEngine/BatesDoubleExpDetJumpEngine.cs, PricingEngines/Vanilla/BatesEngine/BatesDoubleExpEngine.cs, PricingEngines/Vanilla/BatesEngine/BatesEngine.cs, PricingEngines/Vanilla/BatesEngine/DetJumpWeights.cs |  |
 | `binomialengine` | ported | PricingEngines/Vanilla/BinomialEngine/BinomialCRRVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialEQPVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialJ4VanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialJRVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialLRVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialTianVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialTrigeorgisVanillaEngine.cs, PricingEngines/Vanilla/BinomialEngine/BinomialVanillaEngine.cs |  |
 | `bjerksundstenslandengine` | ported | PricingEngines/Vanilla/BjerksundStenslandApproximationEngine.cs |  |
-| `cashdividendeuropeanengine` | not started |  | no nanoql type: CashDividendEuropeanEngine, CashDividendEuropeanEngineCashDividendModel |
+| `cashdividendeuropeanengine` | ported | PricingEngines/Vanilla/CashDividendEuropeanEngine/CashDividendEuropeanEngine.cs, PricingEngines/Vanilla/CashDividendEuropeanEngine/CashDividendEuropeanEngineCashDividendModel.cs |  |
 | `coshestonengine` | ported | PricingEngines/Vanilla/COSHestonEngine.cs |  |
 | `discretizedvanillaoption` | ported | PricingEngines/Vanilla/DiscretizedVanillaOption.cs |  |
 | `exponentialfittinghestonengine` | ported | PricingEngines/Vanilla/ExponentialFittingHestonEngine/ExponentialFittingHestonEngine.cs, PricingEngines/Vanilla/ExponentialFittingHestonEngine/ExponentialFittingHestonEngineValues.cs |  |
@@ -2036,7 +2036,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `simpledaycounter` | ported | Time/DayCounters/SimpleDayCounter.cs |  |
 | `thirty360` | ported | Time/DayCounters/Thirty360.cs, Time/DayCounters/Thirty360Convention.cs |  |
 | `thirty365` | ported | Time/DayCounters/Thirty365.cs |  |
-| `yearfractiontodate` | partial | Time/DayCounters/YearFractionToDateFunctions.cs | partial: roundToDayStart, which waits for S-exo's spread option tests, its only callers |
+| `yearfractiontodate` | ported | Time/DayCounters/YearFractionToDateFunctions.cs |  |
 
 ### `ql/utilities/`
 
@@ -2071,7 +2071,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `barrieroption` | partial | TestSuite/BarrierOptionTests.cs | 10 of 15 cases; not yet: testLocalVolAndHestonComparison, testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast, testPerturbativeOrder2FullResolution |
 | `basismodels` | not started |  | 4 cases |
 | `basisswapratehelpers` | ported | TestSuite/BasisSwapRateHelpersTests.cs | 24 of 24 cases; moved: testOvernightIborAveragingAndTelescopicValueDates line 767 to Divergences/TelescopicValueDatesTests.cs; testOvernightOvernightTelescopicValueDatesWithSimpleAveraging line 920 to Divergences/TelescopicValueDatesTests.cs |
-| `basketoption` | partial | TestSuite/BasketOptionTests.cs | 8 of 25 cases; not yet: testEuroTwoValues, testBarraquandThreeValues, testTavellaValues, testOddSamples, test2DPDEGreeks, testBjerksundStenslandSpreadEngine, testOperatorSplittingSpreadEngine, testStrangSplittingSpreadEngineVsMathematica, testPDEvsApproximations, testDengLiZhouVsPDE, testDengLiZhouWithNegativeStrike, testSpreadAndBasketBenchmarks, testNoDivByZeroOperatorSplitting, testPearsonSpreadEngine, testGaussianCopulaSpreadEngineFlatVol, testGaussianCopulaSpreadEngineSVI, testGaussianCopulaSpreadEngineParityAcrossVols |
+| `basketoption` | ported | TestSuite/BasketOptionTests.cs | 25 of 25 cases |
 | `batesmodel` | ported | TestSuite/BatesModelTests.cs | 4 of 4 cases |
 | `bermudanswaption` | ported | TestSuite/BermudanSwaptionTests.cs | 6 of 6 cases |
 | `binaryoption` | not started |  | 3 cases |
@@ -2114,8 +2114,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `defaultprobabilitycurves` | ported | TestSuite/DefaultProbabilityCurvesTests.cs | 10 of 10 cases |
 | `digitalcoupon` | ported | TestSuite/DigitalCouponTests.cs | 8 of 8 cases |
 | `digitaloption` | ported | TestSuite/DigitalOptionTests.cs | 10 of 10 cases |
-| `distributions` | partial | TestSuite/DistributionsTests.cs | 13 of 21 cases; not yet: testBivariate, testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation |
-| `dividendoption` | partial | TestSuite/DividendOptionTests.cs | 13 of 18 cases; not yet: testEuropeanEndLimit, testCashDividendEuropeanEngine, testCashDividendEuropeanEngineWithManyDividends, testCashDividendEuropeanEngineWithSingleDividends, testZeroStrikeCallWithCashDividends |
+| `distributions` | partial | TestSuite/DistributionsTests.cs | 14 of 21 cases; not yet: testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation |
+| `dividendoption` | partial | TestSuite/DividendOptionTests.cs | 17 of 18 cases; not yet: testEuropeanEndLimit |
 | `doublebarrieroption` | not started |  | 3 cases |
 | `doublebinaryoption` | not started |  | 2 cases |
 | `equitycashflow` | ported | TestSuite/EquityCashFlowTests.cs | 8 of 8 cases |
@@ -2168,7 +2168,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `linearleastsquaresregression` | not started |  | 3 cases |
 | `lookbackoptions` | not started |  | 5 cases |
 | `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 6 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy, testSobolBurleySkipping, testBurley2020SobolRsgOutputBounds |
-| `margrabeoption` | not started |  | 3 cases |
+| `margrabeoption` | ported | TestSuite/MargrabeOptionTests.cs | 3 of 3 cases; moved: testEuroExchangeTwoAssets line 250 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 259 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 268 to Divergences/MargrabeGreeksQuantityTests.cs |
 | `marketmodel` | not started |  | 19 cases |
 | `marketmodel_cms` | not started |  | 1 cases |
 | `marketmodel_smm` | not started |  | 1 cases |
@@ -2242,7 +2242,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `tracing` | not ported: tests the C++ platform |  |  |
 | `trinomialtree` | ported | TestSuite/TrinomialTreeTests.cs | 2 of 2 cases |
 | `twoassetbarrieroption` | not started |  | 1 cases |
-| `twoassetcorrelationoption` | not started |  | 1 cases |
+| `twoassetcorrelationoption` | ported | TestSuite/TwoAssetCorrelationOptionTests.cs | 1 of 1 cases |
 | `ultimateforwardtermstructure` | ported | TestSuite/UltimateForwardTermStructureTests.cs | 8 of 8 cases; replaced: testObservability by TestSuite/UltimateForwardTermStructureTests.cs |
 | `utilities` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `variancegamma` | not started |  | 2 cases |

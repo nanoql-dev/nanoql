@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Methods;
+using NanoQL.Models;
 using NanoQL.Numerics;
 
 namespace NanoQL.Tests.Conventions;
@@ -140,6 +141,7 @@ public class GeneratorCopyTests
             new HaltonRsg(4, 7, true, true),
             PseudoRandom.MakeSequenceGenerator(4, 7),
             new MoroInvCumulativeHaltonGaussianRsg(new HaltonRsg(4, 7)),
+            new SobolBrownianBridgeRsg(3, 4, SobolBrownianGeneratorBaseOrdering.Diagonal, 7),
         ];
         foreach (IRsg original in sequences)
         {
