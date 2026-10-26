@@ -713,6 +713,32 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a double barrier type outside <see cref="DoubleBarrierType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "Invalid barrier type"
+    /// (<c>doublebarrieroption.cpp:98-102</c>).</exception>
+    internal static void Check(DoubleBarrierType value, string paramName)
+    {
+        if (value is < DoubleBarrierType.KnockIn or > DoubleBarrierType.KOKI)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "Invalid barrier type");
+        }
+    }
+
+    /// <summary>Refuses a partial-time barrier range outside <see cref="PartialBarrierRange"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "invalid barrier range"
+    /// (<c>analyticpartialtimebarrieroptionengine.cpp:55-56</c>).</exception>
+    internal static void Check(PartialBarrierRange value, string paramName)
+    {
+        if (value is not (PartialBarrierRange.Start or PartialBarrierRange.EndB1 or PartialBarrierRange.EndB2))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "invalid barrier range");
+        }
+    }
+
     /// <summary>Refuses a delta convention outside <see cref="DeltaVolQuoteDeltaType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

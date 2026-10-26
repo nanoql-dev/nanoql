@@ -71,6 +71,40 @@ public static class QuantoEngine
             option, underlying, context, process, foreignRiskFreeRate, exchangeRateVolatility, correlation, engine);
     }
 
+    /// <summary>Prices a quanto barrier option: QuantLib's <c>QuantoEngine&lt;BarrierOption, Engine&gt;</c>.</summary>
+    /// <param name="option">The option.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <param name="process">The underlying's process, in its own currency.</param>
+    /// <param name="foreignRiskFreeRate">The underlying currency's risk-free curve.</param>
+    /// <param name="exchangeRateVolatility">The exchange rate's volatility.</param>
+    /// <param name="correlation">The correlation of the underlying and the exchange rate.</param>
+    /// <param name="engine">The barrier engine run on the quanto process, such as
+    /// <c>AnalyticBarrierEngine.Calculate</c>.</param>
+    /// <returns>The option's results, with the quanto sensitivities where the barrier engine gives a dividend
+    /// rho.</returns>
+    /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
+    /// <exception cref="NanoQLException">The spot isn't positive, or the inner engine refuses.</exception>
+    /// <remarks>
+    /// The barrier engine prices the option's terms as a <see cref="BarrierOption"/> of its own (the S-bar plan's BR2
+    /// (iii)); it reads the quanto curve at the option's expiry alone, as the analytic barrier engine does, so the
+    /// derived Greeks' terms at expiry are its own.
+    /// </remarks>
+    public static QuantoOptionResults Calculate(
+        QuantoBarrierOption option,
+        EvaluationContext context,
+        GeneralizedBlackScholesProcess process,
+        YieldTermStructure foreignRiskFreeRate,
+        BlackVolTermStructure exchangeRateVolatility,
+        double correlation,
+        Func<BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, OneAssetOptionResults> engine)
+    {
+        ArgumentNullException.ThrowIfNull(option);
+        var underlying = new BarrierOption(
+            option.BarrierType, option.Barrier, option.Rebate, (StrikedTypePayoff)option.Payoff!, option.Exercise);
+        return (QuantoOptionResults)Calculate(
+            option, underlying, context, process, foreignRiskFreeRate, exchangeRateVolatility, correlation, engine);
+    }
+
     /// <summary>
     /// Prices a quanto forward-start option: QuantLib's <c>QuantoEngine&lt;ForwardVanillaOption, Engine&gt;</c>, the
     /// drift read at the forward engine's strike (ED30).

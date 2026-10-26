@@ -17,7 +17,7 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// Immutable, a <see cref="LocalVolTermStructure"/> implementing <see cref="ICalibratedModel"/> over its arguments (the
-/// S-van plan's VD22, the S-bar plan's SBR2): <see cref="WithParams"/> returns a copy on its own fixed surface, which a
+/// S-van plan's VD22, the S-bond plan's SBR2): <see cref="WithParams"/> returns a copy on its own fixed surface, which a
 /// calibration reads, where QuantLib's model regenerates its surface in place. QuantLib's <c>update()</c>, which
 /// forwards a notification to both its bases, has no counterpart: nothing here changes.
 /// </remarks>

@@ -22,7 +22,8 @@ namespace NanoQL.Tests.Conventions;
 /// keeps no sample; the same of <see cref="EuropeanGJRGARCHPathPricer"/> on a <see cref="GJRGARCHProcess"/> and of
 /// <see cref="HestonHullWhitePathPricer"/> on a <see cref="HybridHestonHullWhiteProcess"/> under both discretizations,
 /// its step terms in double-double at a·dt 0.005; and a rollback of <see cref="FdmBackwardSolver"/> on
-/// <see cref="FdmHestonOp"/>, plain and with a quanto helper and a leverage function, on <see cref="FdmBatesOp"/> and
+/// <see cref="FdmHestonOp"/>, plain, with a quanto helper and a leverage function, and with the FD Heston barrier
+/// engines' Dirichlet boundaries at one barrier and at both (the S-bar plan's BR1), on <see cref="FdmBatesOp"/> and
 /// on <see cref="FdmHestonHullWhiteOp"/>, under the engines' default scheme, Hundsdorfer's; and a step of the forward
 /// operators the stochastic-local volatility calibration evolves, <see cref="FdmHestonFwdOp"/> under each
 /// transformation, with and without a leverage function, and <see cref="FdmSquareRootFwdOp"/>, on Hundsdorfer's scheme
@@ -73,6 +74,23 @@ public class HestonAllocationTests
             RiskFree, new FlatForward(Today, 0.03, A365), new BlackConstantVol(Today, new NullCalendar(), 0.15, A365), -0.4, 1.0);
         RollbackAllocatesNothing(
             new FdmHestonOp(mesher, process, helper, new LocalConstantVol(Today, 1.2, A365), 0.9), mesher);
+    }
+
+    [Fact]
+    public void AHestonBarrierStepOnHundsdorferAllocatesNothing()
+    {
+        // the FD Heston barrier engines' rollback: Dirichlet values at a lower barrier, and at both of a corridor
+        var process = new HestonProcess(RiskFree, Dividends, 100.0, 0.04, 1.5, 0.04, 0.5, -0.7);
+        FdmMesherComposite mesher = Mesher(process);
+        var op = new FdmHestonOp(mesher, process, null, new LocalConstantVol(Today, 1.2, A365), 0.9);
+        RollbackAllocatesNothing(op, mesher, [new FdmDirichletBoundary(mesher, 2.0, 0, BoundaryConditionSide.Lower)]);
+        RollbackAllocatesNothing(
+            op,
+            mesher,
+            [
+                new FdmDirichletBoundary(mesher, 2.0, 0, BoundaryConditionSide.Lower),
+                new FdmDirichletBoundary(mesher, 2.0, 0, BoundaryConditionSide.Upper),
+            ]);
     }
 
     [Fact]
@@ -238,7 +256,8 @@ public class HestonAllocationTests
         }
     }
 
-    private static void RollbackAllocatesNothing(FdmLinearOpComposite op, FdmMesher mesher)
+    private static void RollbackAllocatesNothing(
+        FdmLinearOpComposite op, FdmMesher mesher, ImmutableArray<BoundaryCondition<FdmLinearOp>> boundaries = default)
     {
         double[] initial = new double[mesher.Layout.Size];
         FdmLinearOpIterator iter = mesher.Layout.Begin();
@@ -248,7 +267,8 @@ public class HestonAllocationTests
             initial[i] = x > 0.0 ? x : 0.0;
         }
 
-        var solver = new FdmBackwardSolver(op, ImmutableArray<BoundaryCondition<FdmLinearOp>>.Empty, null, FdmSchemeDesc.Hundsdorfer());
+        var solver = new FdmBackwardSolver(
+            op, boundaries.IsDefault ? ImmutableArray<BoundaryCondition<FdmLinearOp>>.Empty : boundaries, null, FdmSchemeDesc.Hundsdorfer());
         double[] warm = [.. initial];
         solver.Rollback(warm, 1.0, 0.0, 20, 0);
 

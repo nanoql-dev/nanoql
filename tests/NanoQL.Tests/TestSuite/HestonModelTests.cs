@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/hestonmodel.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testFdBarrierVsCached, which waits for S-bar's FdHestonBarrierEngine; testAllIntegrationMethods and testCosHestonCumulants, which wait for S-core's exp-sinh integral and numerical differentiation
+// Partial: testAllIntegrationMethods and testCosHestonCumulants, which wait for S-core's exp-sinh integral and numerical differentiation
 
 using System.Numerics;
 using NanoQL.Instruments;
@@ -319,6 +319,50 @@ public class HestonModelTests
         Assert.False(
             errorEstimate > tolerance,
             $"failed to reproduce error estimate\n    calculated: {errorEstimate}\n    expected:   {tolerance}");
+    }
+
+    [Fact]
+    public void TestFdBarrierVsCached()
+    {
+        // Testing FD barrier Heston engine against cached values...
+
+        DayCounter dc = new Actual360();
+
+        // the evaluation date QuantLib's test runner sets globally (playbook section 9.2)
+        var today = new Date(16, Month.September, 2015);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Real s0 = 100.0;
+        YieldTermStructure rTS = new FlatForward(today, 0.08, dc);
+        YieldTermStructure qTS = new FlatForward(today, 0.04, dc);
+
+        Date exDate = today + 180;
+        var exercise = new EuropeanExercise(exDate);
+
+        var payoff = new PlainVanillaPayoff(OptionType.Call, 90.0);
+
+        var process = new HestonProcess(rTS, qTS, s0, 0.25 * 0.25, 1.0, 0.25 * 0.25, 0.001, 0.0);
+        var model = new HestonModel(process);
+
+        var option = new BarrierOption(BarrierType.DownOut, 95.0, 3.0, payoff, exercise);
+
+        Real calculated = FdHestonBarrierEngine.Calculate(option, context, model, 200, 400, 100).NPV!.Value;
+        Real expected = 9.0246;
+        Real error = Math.Abs(calculated - expected);
+        Assert.False(
+            error > 1.0e-3,
+            $"failed to reproduce cached price with FD Barrier engine: calculated {calculated}, expected {expected}, "
+            + $"error {error:E}");
+
+        option = new BarrierOption(BarrierType.DownIn, 95.0, 3.0, payoff, exercise);
+
+        calculated = FdHestonBarrierEngine.Calculate(option, context, model, 200, 400, 100).NPV!.Value;
+        expected = 7.7627;
+        error = Math.Abs(calculated - expected);
+        Assert.False(
+            error > 1.0e-3,
+            $"failed to reproduce cached price with FD Barrier engine: calculated {calculated}, expected {expected}, "
+            + $"error {error:E}");
     }
 
     [Fact]

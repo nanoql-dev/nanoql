@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/fdheston.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testFdmHestonBarrierVsBlackScholes, testFdmHestonBarrier and testMethodOfLinesAndCN, which wait for S-bar's FdHestonBarrierEngine
 // Not ported: testFdmHestonIntradayPricing (QL_HIGH_RESOLUTION_DATE, which the default build leaves out)
 
 using NanoQL.Instruments;
@@ -82,6 +81,171 @@ public class FdHestonTests
         Assert.False(
             Math.Abs(volaEstExpected - volaEstCalculated) > 0.001,
             $"Failed to reproduce Heston local volatility variance estimate\n    calculated: {calculatedVol}\n    expected:   {expectedVol}\n    difference  {Math.Abs(volaEstExpected - volaEstCalculated):E}\n    tolerance:  {tol:E}");
+    }
+
+    [Fact]
+    public void TestFdmHestonBarrierVsBlackScholes()
+    {
+        // Testing FDM with barrier option in Heston model...
+
+        NewBarrierOptionData[] values =
+        [
+            /* The data below are from
+              "Option pricing formulas", E.G. Haug, McGraw-Hill 1998 pag. 72
+            */
+            //     barrierType, barrier, rebate,         type, strike,     s,    q,    r,    t,    v
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Call, 90, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Call, 100, 100.0, 0.00, 0.08, 1.00, 0.30),
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Call, 110, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Call, 90, 100.0, 0.00, 0.08, 0.25, 0.25),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Call, 100, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Call, 110, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Call, 90, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Call, 100, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Call, 110, 100.0, 0.04, 0.08, 0.50, 0.25),
+
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Call, 90, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Call, 100, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Call, 110, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Call, 90, 100.0, 0.00, 0.08, 0.25, 0.25),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Call, 100, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Call, 110, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Call, 90, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Call, 100, 100.0, 0.00, 0.08, 0.40, 0.25),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Call, 110, 100.0, 0.04, 0.08, 0.50, 0.15),
+
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Call, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Call, 100, 100.0, 0.00, 0.08, 0.40, 0.35),
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Call, 110, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Call, 90, 100.0, 0.04, 0.08, 0.50, 0.15),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Call, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Call, 110, 100.0, 0.00, 0.00, 1.00, 0.20),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Call, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Call, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Call, 110, 100.0, 0.04, 0.08, 0.50, 0.30),
+
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Call, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Call, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Call, 110, 100.0, 0.00, 0.08, 1.00, 0.30),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Call, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Call, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Call, 110, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Call, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Call, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Call, 110, 100.0, 0.04, 0.08, 0.50, 0.30),
+
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 0.50, 0.25),
+
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.25),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Put, 110, 100.0, 0.00, 0.04, 1.00, 0.15),
+
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownOut, 100.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.UpOut, 105.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 0.50, 0.30),
+
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownIn, 95.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.DownIn, 100.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 1.00, 0.15),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Put, 90, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Put, 100, 100.0, 0.04, 0.08, 0.50, 0.30),
+            new(BarrierType.UpIn, 105.0, 3.0, OptionType.Put, 110, 100.0, 0.04, 0.08, 0.50, 0.30),
+        ];
+
+        DayCounter dc = new Actual365Fixed();
+        var todaysDate = new Date(28, Month.March, 2004);
+        var context = new EvaluationContext { EvaluationDate = todaysDate };
+
+        foreach (NewBarrierOptionData value in values)
+        {
+            Date exDate = todaysDate + TimeToDays(value.T, 365);
+            var exercise = new EuropeanExercise(exDate);
+
+            YieldTermStructure qTS = FlatRate(value.Q, dc, context);
+            YieldTermStructure rTS = FlatRate(value.R, dc, context);
+            BlackVolTermStructure volTS = FlatVol(value.V, dc, context);
+            var bsProcess = new BlackScholesMertonProcess(value.S, qTS, rTS, volTS);
+
+            var payoff = new PlainVanillaPayoff(value.Type, value.Strike);
+
+            var barrierOption = new BarrierOption(value.BarrierType, value.Barrier, value.Rebate, payoff, exercise);
+
+            Real v0 = value.V * value.V;
+            var hestonProcess = new HestonProcess(rTS, qTS, value.S, v0, 1.0, v0, 0.005, 0.0);
+
+            Real calculatedHE = FdHestonBarrierEngine.Calculate(
+                barrierOption, context, new HestonModel(hestonProcess), 200, 101, 3).NPV!.Value;
+
+            Real expected = AnalyticBarrierEngine.Calculate(barrierOption, context, bsProcess).NPV!.Value;
+
+            const Real tol = 0.0025;
+            Assert.False(
+                Math.Abs(calculatedHE - expected) / expected > tol,
+                $"Failed to reproduce expected Heston npv\n    calculated: {calculatedHE}\n    expected:   {expected}\n    tolerance:  {tol}");
+        }
+    }
+
+    [Fact]
+    public void TestFdmHestonBarrier()
+    {
+        // Testing FDM with barrier option for Heston model vs Black-Scholes model...
+        var context = new EvaluationContext { EvaluationDate = new Date(28, Month.March, 2004) };
+
+        Real s0 = 100.0;
+
+        YieldTermStructure rTS = FlatRate(0.05, new Actual365Fixed(), context);
+        YieldTermStructure qTS = FlatRate(0.0, new Actual365Fixed(), context);
+
+        var hestonProcess = new HestonProcess(rTS, qTS, s0, 0.04, 2.5, 0.04, 0.66, -0.8);
+
+        var exerciseDate = new Date(28, Month.March, 2005);
+
+        var exercise = new EuropeanExercise(exerciseDate);
+
+        var payoff = new PlainVanillaPayoff(OptionType.Call, 100);
+
+        var barrierOption = new BarrierOption(BarrierType.UpOut, 135, 0.0, payoff, exercise);
+
+        OneAssetOptionResults results = FdHestonBarrierEngine.Calculate(
+            barrierOption, context, new HestonModel(hestonProcess), 50, 400, 100);
+
+        const Real tol = 0.01;
+        const Real npvExpected = 9.1530;
+        const Real deltaExpected = 0.5218;
+        const Real gammaExpected = -0.0354;
+
+        Assert.False(
+            Math.Abs(results.NPV!.Value - npvExpected) > tol,
+            $"Failed to reproduce expected npv\n    calculated: {results.NPV}\n    expected:   {npvExpected}\n    tolerance:  {tol}");
+        Assert.False(
+            Math.Abs(results.Delta!.Value - deltaExpected) > tol,
+            $"Failed to reproduce expected delta\n    calculated: {results.Delta}\n    expected:   {deltaExpected}\n    tolerance:  {tol}");
+        Assert.False(
+            Math.Abs(results.Gamma!.Value - gammaExpected) > tol,
+            $"Failed to reproduce expected gamma\n    calculated: {results.Gamma}\n    expected:   {gammaExpected}\n    tolerance:  {tol}");
     }
 
     [Fact]
@@ -322,6 +486,79 @@ public class FdHestonTests
     }
 
     [Fact]
+    public void TestMethodOfLinesAndCN()
+    {
+        // Testing method of lines to solve Heston PDEs...
+
+        DayCounter dc = new Actual365Fixed();
+        var today = new Date(21, Month.February, 2018);
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        Real spot = 100.0;
+        YieldTermStructure qTS = new FlatForward(today, 0.0, dc);
+        YieldTermStructure rTS = new FlatForward(today, 0.0, dc);
+
+        const Real v0 = 0.09;
+        const Real kappa = 1.0;
+        const Real theta = v0;
+        const Real sigma = 0.4;
+        const Real rho = -0.75;
+
+        Date maturity = today + new Period(3, TimeUnit.Months);
+
+        var model = new HestonModel(new HestonProcess(rTS, qTS, spot, v0, kappa, theta, sigma, rho));
+
+        const int xGrid = 21;
+        const int vGrid = 7;
+
+        var payoff = new PlainVanillaPayoff(OptionType.Put, spot);
+
+        var option = new VanillaOption(payoff, new AmericanExercise(maturity));
+
+        Real calculatedMoL = FdHestonVanillaEngine.Calculate(
+            option, context, model, 10, xGrid, vGrid, 0, FdmSchemeDesc.MethodOfLines()).NPV!.Value;
+
+        Real expected = FdHestonVanillaEngine.Calculate(option, context, model, 10, xGrid, vGrid, 0).NPV!.Value;
+
+        const Real tol = 0.005;
+        Real diffMoL = Math.Abs(expected - calculatedMoL);
+
+        Assert.False(
+            diffMoL > tol,
+            $"Failed to reproduce european option values with MOL\n    calculated: {calculatedMoL}\n    expected:   {expected}\n    difference: {diffMoL}\n    tolerance:  {tol}");
+
+        Real calculatedCN = FdHestonVanillaEngine.Calculate(
+            option, context, model, 10, xGrid, vGrid, 0, FdmSchemeDesc.CrankNicolson()).NPV!.Value;
+        Real diffCN = Math.Abs(expected - calculatedCN);
+
+        Assert.False(
+            diffCN > tol,
+            $"Failed to reproduce european option values with Crank-Nicolson\n    calculated: {calculatedCN}\n    expected:   {expected}\n    difference: {diffCN}\n    tolerance:  {tol}");
+
+        var barrierOption = new BarrierOption(BarrierType.DownOut, 85.0, 10.0, payoff, new EuropeanExercise(maturity));
+
+        Real expectedBarrier = FdHestonBarrierEngine.Calculate(barrierOption, context, model, 100, 31, 11).NPV!.Value;
+
+        Real calculatedBarrierMoL = FdHestonBarrierEngine.Calculate(
+            barrierOption, context, model, 100, 31, 11, 0, FdmSchemeDesc.MethodOfLines()).NPV!.Value;
+
+        const Real barrierTol = 0.01;
+        Real barrierDiffMoL = Math.Abs(expectedBarrier - calculatedBarrierMoL);
+
+        Assert.False(
+            barrierDiffMoL > barrierTol,
+            $"Failed to reproduce barrier option values with MOL\n    calculated: {calculatedBarrierMoL}\n    expected:   {expectedBarrier}\n    difference: {barrierDiffMoL}\n    tolerance:  {barrierTol}");
+
+        Real calculatedBarrierCN = FdHestonBarrierEngine.Calculate(
+            barrierOption, context, model, 100, 31, 11, 0, FdmSchemeDesc.CrankNicolson()).NPV!.Value;
+        Real barrierDiffCN = Math.Abs(expectedBarrier - calculatedBarrierCN);
+
+        Assert.False(
+            barrierDiffCN > barrierTol,
+            $"Failed to reproduce barrier option values with Crank-Nicolson\n    calculated: {calculatedBarrierCN}\n    expected:   {expectedBarrier}\n    difference: {barrierDiffCN}\n    tolerance:  {barrierTol}");
+    }
+
+    [Fact]
     public void TestSpuriousOscillations()
     {
         // Testing for spurious oscillations when solving the Heston PDEs...
@@ -467,6 +704,27 @@ public class FdHestonTests
     // The test suite's flatRate(forward, dc): a flat forward from the evaluation date.
     private static YieldTermStructure FlatRate(Rate forward, DayCounter dc, EvaluationContext context) =>
         FlatForward.Create(0, new NullCalendar(), forward, dc, context);
+
+    // The test suite's flatVol(volatility, dc): a constant volatility from the evaluation date.
+    private static BlackVolTermStructure FlatVol(Volatility volatility, DayCounter dc, EvaluationContext context) =>
+        new BlackConstantVol(context.EvaluationDate, new NullCalendar(), volatility, dc);
+
+    // The test suite's timeToDays: Integer(std::lround(t * daysPerYear)).
+    private static int TimeToDays(double t, int daysPerYear) =>
+        (int)Math.Round(t * daysPerYear, MidpointRounding.AwayFromZero);
+
+    // The test suite's NewBarrierOptionData, as testFdmHestonBarrierVsBlackScholes reads it.
+    private sealed record NewBarrierOptionData(
+        BarrierType BarrierType,
+        double Barrier,
+        double Rebate,
+        OptionType Type,
+        double Strike,
+        double S,
+        double Q,
+        double R,
+        double T,
+        double V);
 
     // The test suite's HestonTestData.
     private readonly record struct HestonTestData(Real Kappa, Real Theta, Real Sigma, Real Rho, Real R, Real Q, Real T, Real K);

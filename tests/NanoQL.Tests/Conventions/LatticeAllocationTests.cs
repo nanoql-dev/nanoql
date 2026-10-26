@@ -22,7 +22,8 @@ namespace NanoQL.Tests.Conventions;
 /// wider at an earlier time than at the asset's initial one, and buffers sized at the initial step would grow. A
 /// Bermudan swaption's swap keeps one discount bond for its coupon events, where QuantLib's builds one per event, its
 /// buffers reserved at the widest step of the swap's own rollback. The callable bond's rollback, its callabilities
-/// applied and its coupons added in place, allocates nothing either. Each rollback is measured on a fresh asset, after
+/// applied and its coupons added in place, allocates nothing either, nor does a barrier option's, its barrier checked in
+/// place on its own and its vanilla's buffers, Derman and Kani's adjustment among them. Each rollback is measured on a fresh asset, after
 /// a warm-up on another (<see cref="AllocationAssert"/>).
 /// </summary>
 public class LatticeAllocationTests
@@ -193,6 +194,56 @@ public class LatticeAllocationTests
         var american = new VanillaOption(payoff, exercise);
         Assert.Equal(
             BinomialCRRVanillaEngine.Calculate(american, context, process, 101).NPV!.Value, option.PresentValue(), 1e-12);
+    }
+
+    [Fact]
+    public void ABarrierOptionsRollbackAllocatesNothing()
+    {
+        var today = new Date(15, Month.January, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual365Fixed();
+        var process = new BlackScholesMertonProcess(
+            100.0, new FlatForward(today, 0.03, dc), Curve, new BlackConstantVol(today, null, 0.25, dc));
+        var option = new BarrierOption(
+            BarrierType.DownOut, 90.0, 2.0, new PlainVanillaPayoff(OptionType.Call, 100.0), new EuropeanExercise(today + 365));
+        double maturity = dc.YearFraction(today, today + 365);
+        var tree = new JarrowRudd(process, maturity, 101, 100.0);
+        var lattice = new BlackScholesLattice<JarrowRudd>(tree, 0.04, maturity, 101);
+        var grid = new TimeGrid(maturity, 101);
+
+        // the barrier check at each step reads the lattice's grid into the option's and its vanilla's buffers
+        var warm = new DiscretizedBarrierOption(option, process, grid);
+        warm.Initialize(lattice, maturity);
+        warm.Rollback(0.0);
+        DiscretizedBarrierOption plain = AllocationAssert.AllocatesNothing(
+            () =>
+            {
+                var fresh = new DiscretizedBarrierOption(option, process, grid);
+                fresh.Initialize(lattice, maturity);
+                return fresh;
+            },
+            fresh => fresh.Rollback(0.0));
+        var warmEnhanced = new DiscretizedDermanKaniBarrierOption(option, process, grid);
+        warmEnhanced.Initialize(lattice, maturity);
+        warmEnhanced.Rollback(0.0);
+        DiscretizedDermanKaniBarrierOption enhanced = AllocationAssert.AllocatesNothing(
+            () =>
+            {
+                var fresh = new DiscretizedDermanKaniBarrierOption(option, process, grid);
+                fresh.Initialize(lattice, maturity);
+                return fresh;
+            },
+            fresh => fresh.Rollback(0.0));
+
+        // the binomial barrier engine's values on the same tree
+        Assert.Equal(
+            BinomialBarrierEngine.Calculate<JarrowRudd, DiscretizedBarrierOption>(option, context, process, 101).NPV!.Value,
+            plain.PresentValue(),
+            1e-12);
+        Assert.Equal(
+            BinomialBarrierEngine.Calculate<JarrowRudd, DiscretizedDermanKaniBarrierOption>(option, context, process, 101).NPV!.Value,
+            enhanced.PresentValue(),
+            1e-12);
     }
 
     private static OneFactorModelShortRateTree Tree()

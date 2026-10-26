@@ -7,13 +7,15 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/barrieroption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testHaugValues' binomial checks, which wait for S-bar's BinomialBarrierEngine; testBabsiriValues' and testBeagleholeValues' Monte Carlo checks, which wait for S-bar's MCBarrierEngine; testDividendBarrierOption's and testDividendBarrierOptionWithDividendsPastMaturity's Heston checks, which wait for batch 4's FdHestonBarrierEngine; testLocalVolAndHestonComparison, which waits for batch 4's local volatility and Heston barrier engines; testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast and testPerturbativeOrder2FullResolution, which wait for S-xeq's PerturbativeBarrierOptionEngine
+// Partial: testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast and testPerturbativeOrder2FullResolution, which wait for S-xeq's PerturbativeBarrierOptionEngine
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
 using NanoQL.Experimental;
 using NanoQL.Instruments;
 using NanoQL.Methods;
+using NanoQL.Models;
+using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
 using NanoQL.Quotes;
@@ -424,7 +426,41 @@ public class BarrierOptionTests
                     barrierOption, RunnerContext, stochProcess, tGrid: 200, xGrid: 400));
             }
 
-            // the binomial engines' checks wait for S-bar's BinomialBarrierEngine
+            if (!useZeroSpot && !useTriggeredBarrier)
+            {
+                double calculated = BinomialBarrierEngine.Calculate<CoxRossRubinstein, DiscretizedBarrierOption>(
+                    barrierOption, RunnerContext, stochProcess, 400).NPV!.Value;
+                double expected = value.Result;
+                double error = Math.Abs(calculated - expected);
+                double tol = 1.1e-2;
+                Assert.True(
+                    error <= tol, Failure("Binomial (Boyle-lau) value", value, today, expected, calculated, error, tol));
+            }
+            else
+            {
+                AssertThrown(() => BinomialBarrierEngine.Calculate<CoxRossRubinstein, DiscretizedBarrierOption>(
+                    barrierOption, RunnerContext, stochProcess, 400));
+            }
+
+            // Note: here, to test Derman convergence, we force maxTimeSteps to
+            // timeSteps, effectively disabling Boyle-Lau barrier adjustment.
+            // Production code should always enable Boyle-Lau. In most cases it
+            // gives very good convergence with only a modest timeStep increment.
+            if (!useZeroSpot && !useTriggeredBarrier)
+            {
+                double calculated = BinomialBarrierEngine.Calculate<CoxRossRubinstein, DiscretizedDermanKaniBarrierOption>(
+                    barrierOption, RunnerContext, stochProcess, 400).NPV!.Value;
+                double expected = value.Result;
+                double error = Math.Abs(calculated - expected);
+                double tol = 4e-2;
+                Assert.True(
+                    error <= tol, Failure("Binomial (Derman) value", value, today, expected, calculated, error, tol));
+            }
+            else
+            {
+                AssertThrown(() => BinomialBarrierEngine.Calculate<CoxRossRubinstein, DiscretizedDermanKaniBarrierOption>(
+                    barrierOption, RunnerContext, stochProcess, 400));
+            }
         }
 
         foreach (NewBarrierOptionData value in values)
@@ -493,7 +529,22 @@ public class BarrierOptionTests
                 $"{BarrierTypeFunctions.ToString(value.Type)} barrier {value.Barrier}, volatility {value.Volatility}: "
                 + $"expected {expected}, calculated {calculated}, error {error}");
 
-            // the Monte Carlo check waits for S-bar's MCBarrierEngine
+            double maxMcRelativeErrorAllowed = 2.0e-2;
+
+            Func<BarrierOption, EvaluationContext, OneAssetOptionResults> mcEngine =
+                new MakeMCBarrierEngine<LowDiscrepancy, GeneralStatistics>(stochProcess, 5)
+                    .WithStepsPerYear(1)
+                    .WithBrownianBridge()
+                    .WithSamples(131071) // 2^17-1
+                    .WithMaxSamples(1048575) // 2^20-1
+                    .ToEngine();
+
+            calculated = mcEngine(barrierCallOption, RunnerContext).NPV!.Value;
+            error = Math.Abs(calculated - expected) / expected;
+            Assert.True(
+                error <= maxMcRelativeErrorAllowed,
+                $"{BarrierTypeFunctions.ToString(value.Type)} barrier {value.Barrier}, volatility {value.Volatility}: "
+                + $"expected {expected}, calculated {calculated}, relative error {error}");
         }
     }
 
@@ -546,8 +597,134 @@ public class BarrierOptionTests
                 $"{BarrierTypeFunctions.ToString(value.Type)} barrier {value.Barrier}: expected {expected}, "
                 + $"calculated {calculated}, error {error}");
 
-            // the Monte Carlo check waits for S-bar's MCBarrierEngine
+            double maxMcRelativeErrorAllowed = 0.01;
+            Func<BarrierOption, EvaluationContext, OneAssetOptionResults> mcEngine =
+                new MakeMCBarrierEngine<LowDiscrepancy, GeneralStatistics>(stochProcess, 10)
+                    .WithStepsPerYear(1)
+                    .WithBrownianBridge()
+                    .WithSamples(131071) // 2^17-1
+                    .WithMaxSamples(1048575) // 2^20-1
+                    .ToEngine();
+
+            calculated = mcEngine(barrierCallOption, RunnerContext).NPV!.Value;
+            error = Math.Abs(calculated - expected) / expected;
+            Assert.True(
+                error <= maxMcRelativeErrorAllowed,
+                $"{BarrierTypeFunctions.ToString(value.Type)} barrier {value.Barrier}: expected {expected}, "
+                + $"calculated {calculated}, relative error {error}");
         }
+    }
+
+    [Fact]
+    public void TestLocalVolAndHestonComparison()
+    {
+        // Testing local volatility and Heston FD engines for barrier options...
+
+        var settlementDate = new Date(5, July, 2002);
+        var context = new EvaluationContext { EvaluationDate = settlementDate };
+
+        DayCounter dayCounter = new Actual365Fixed();
+        Calendar calendar = new TARGET();
+
+        Integer[] t = [13, 41, 75, 165, 256, 345, 524, 703];
+        Rate[] r = [0.0357, 0.0349, 0.0341, 0.0355, 0.0359, 0.0368, 0.0386, 0.0401];
+
+        List<Rate> rates = [0.0357];
+        List<Date> dates = [settlementDate];
+        for (Size i = 0; i < 8; ++i)
+        {
+            dates.Add(settlementDate + t[i]);
+            rates.Add(r[i]);
+        }
+
+        YieldTermStructure rTS = new ZeroCurve(dates, rates, dayCounter);
+        YieldTermStructure qTS = FlatRate(settlementDate, 0.0, dayCounter);
+
+        Real s0 = 4500.00;
+
+        Real[] strikes =
+        [
+            100, 500, 2000, 3400, 3600, 3800, 4000, 4200, 4400, 4500,
+            4600, 4800, 5000, 5200, 5400, 5600, 7500, 10000, 20000, 30000,
+        ];
+
+        Volatility[] v =
+        [
+            1.015873, 1.015873, 1.015873, 0.89729, 0.796493, 0.730914, 0.631335, 0.568895,
+            0.711309, 0.711309, 0.711309, 0.641309, 0.635593, 0.583653, 0.508045, 0.463182,
+            0.516034, 0.500534, 0.500534, 0.500534, 0.448706, 0.416661, 0.375470, 0.353442,
+            0.516034, 0.482263, 0.447713, 0.387703, 0.355064, 0.337438, 0.316966, 0.306859,
+            0.497587, 0.464373, 0.430764, 0.374052, 0.344336, 0.328607, 0.310619, 0.301865,
+            0.479511, 0.446815, 0.414194, 0.361010, 0.334204, 0.320301, 0.304664, 0.297180,
+            0.461866, 0.429645, 0.398092, 0.348638, 0.324680, 0.312512, 0.299082, 0.292785,
+            0.444801, 0.413014, 0.382634, 0.337026, 0.315788, 0.305239, 0.293855, 0.288660,
+            0.428604, 0.397219, 0.368109, 0.326282, 0.307555, 0.298483, 0.288972, 0.284791,
+            0.420971, 0.389782, 0.361317, 0.321274, 0.303697, 0.295302, 0.286655, 0.282948,
+            0.413749, 0.382754, 0.354917, 0.316532, 0.300016, 0.292251, 0.284420, 0.281164,
+            0.400889, 0.370272, 0.343525, 0.307904, 0.293204, 0.286549, 0.280189, 0.277767,
+            0.390685, 0.360399, 0.334344, 0.300507, 0.287149, 0.281380, 0.276271, 0.274588,
+            0.383477, 0.353434, 0.327580, 0.294408, 0.281867, 0.276746, 0.272655, 0.271617,
+            0.379106, 0.349214, 0.323160, 0.289618, 0.277362, 0.272641, 0.269332, 0.268846,
+            0.377073, 0.347258, 0.320776, 0.286077, 0.273617, 0.269057, 0.266293, 0.266265,
+            0.399925, 0.369232, 0.338895, 0.289042, 0.265509, 0.255589, 0.249308, 0.249665,
+            0.423432, 0.406891, 0.373720, 0.314667, 0.281009, 0.263281, 0.246451, 0.242166,
+            0.453704, 0.453704, 0.453704, 0.381255, 0.334578, 0.305527, 0.268909, 0.251367,
+            0.517748, 0.517748, 0.517748, 0.416577, 0.364770, 0.331595, 0.287423, 0.264285,
+        ];
+
+        var blackVolMatrix = new Matrix(strikes.Length, dates.Count - 1);
+        for (Size i = 0; i < strikes.Length; ++i)
+        {
+            for (Size j = 1; j < dates.Count; ++j)
+            {
+                blackVolMatrix[i, j - 1] = v[(i * (dates.Count - 1)) + j - 1];
+            }
+        }
+
+        BlackVarianceSurface volTS = new BlackVarianceSurface(
+                settlementDate, calendar, dates.Skip(1), strikes, blackVolMatrix, dayCounter)
+            .SetInterpolation<Bicubic>();
+        GeneralizedBlackScholesProcess localVolProcess = new BlackScholesMertonProcess(s0, qTS, rTS, volTS);
+
+        Real v0 = 0.195662;
+        Real kappa = 5.6628;
+        Real theta = 0.0745911;
+        Real sigma = 1.1619;
+        Real rho = -0.511493;
+
+        var hestonProcess = new HestonProcess(rTS, qTS, s0, v0, kappa, theta, sigma, rho);
+
+        var hestonModel = new HestonModel(hestonProcess);
+
+        Real strike = s0;
+        Real barrier = 3000;
+        Real rebate = 100;
+        Date exDate = settlementDate + new Period(20, TimeUnit.Months);
+
+        StrikedTypePayoff payoff = new PlainVanillaPayoff(OptionType.Put, strike);
+
+        Exercise exercise = new EuropeanExercise(exDate);
+
+        var barrierOption = new BarrierOption(BarrierType.DownOut, barrier, rebate, payoff, exercise);
+
+        Real expectedHestonNPV = 111.5;
+        Real calculatedHestonNPV =
+            FdHestonBarrierEngine.Calculate(barrierOption, context, hestonModel, 100, 400, 50).NPV!.Value;
+
+        Real expectedLocalVolNPV = 132.8;
+        Real calculatedLocalVolNPV = FdBlackScholesBarrierEngine.Calculate(
+            barrierOption, context, localVolProcess, [], 100, 400, 0, FdmSchemeDesc.Douglas(), true, 0.35).NPV!.Value;
+
+        Real tol = 0.01;
+
+        Assert.True(
+            Math.Abs(expectedHestonNPV - calculatedHestonNPV) <= tol * expectedHestonNPV,
+            $"Failed to reproduce Heston barrier price for strike {strike}, barrier {barrier}, maturity {exDate}: "
+            + $"calculated {calculatedHestonNPV}, expected {expectedHestonNPV}");
+        Assert.True(
+            Math.Abs(expectedLocalVolNPV - calculatedLocalVolNPV) <= tol * expectedLocalVolNPV,
+            $"Failed to reproduce Heston barrier price for strike {strike}, barrier {barrier}, maturity {exDate}: "
+            + $"calculated {calculatedLocalVolNPV}, expected {expectedLocalVolNPV}");
     }
 
     [Fact]
@@ -588,7 +765,15 @@ public class BarrierOptionTests
             FdmSchemeDesc.Hundsdorfer(), FdmSchemeDesc.MethodOfLines(),
         ];
 
-        // the Heston engine waits for batch 4's FdHestonBarrierEngine
+        var hestonModel = new HestonModel(new HestonProcess(rTS, qTS, spot, v * v, 1.0, v * v, 0.005, 0.0));
+
+        // the six schemes' engines, then the Heston engine
+        Func<BarrierOption, double>[] engines =
+        [
+            .. schemes.Select<FdmSchemeDesc, Func<BarrierOption, double>>(scheme => o => FdBlackScholesBarrierEngine.Calculate(
+                o, context, bsProcess, dividends, 100, 100, 0, scheme).NPV!.Value),
+            o => FdHestonBarrierEngine.Calculate(o, context, hestonModel, dividends, 50, 101, 3).NPV!.Value,
+        ];
 
         var payoff = new PlainVanillaPayoff(OptionType.Put, strike);
         var exercise = new EuropeanExercise(maturity);
@@ -605,15 +790,14 @@ public class BarrierOptionTests
         double relTol = 2e-4;
         for (int i = 0; i < barriers.Length; ++i)
         {
-            for (int j = 0; j < schemes.Length; ++j)
+            for (int j = 0; j < engines.Length; ++j)
             {
                 double barrier = barriers[i];
                 BarrierType barrierType = barrierTypes[i];
 
                 var barrierOption = new BarrierOption(barrierType, barrier, rebate, payoff, exercise);
 
-                double calculated = FdBlackScholesBarrierEngine.Calculate(
-                    barrierOption, context, bsProcess, dividends, 100, 100, 0, schemes[j]).NPV!.Value;
+                double calculated = engines[j](barrierOption);
                 double diff = Math.Abs(calculated - expected[i]);
                 Assert.True(
                     diff <= relTol * expected[i],
@@ -653,31 +837,39 @@ public class BarrierOptionTests
         Date divDate = today + new Period(18, TimeUnit.Months);
         ImmutableArray<Dividend> dividends = DividendFunctions.DividendVector([divDate], [divAmount]);
 
-        // the Heston engine waits for batch 4's FdHestonBarrierEngine
+        var hestonModel = new HestonModel(new HestonProcess(
+            FlatRate(today, r, dc), FlatRate(today, q, dc), spot, v * v, 1.0, v * v, 0.005, 0.0));
+
+        Func<BarrierOption, ImmutableArray<Dividend>, double>[] engines =
+        [
+            (o, d) => FdBlackScholesBarrierEngine.Calculate(o, context, bsProcess, d, 100, 100, 0, FdmSchemeDesc.Douglas()).NPV!.Value,
+            (o, d) => FdHestonBarrierEngine.Calculate(o, context, hestonModel, d, 50, 101, 3).NPV!.Value,
+        ];
 
         var payoff = new PlainVanillaPayoff(OptionType.Put, strike);
         var exercise = new EuropeanExercise(maturity);
 
         for (int i = 0; i < barriers.Length; ++i)
         {
-            double barrier = barriers[i];
-            BarrierType barrierType = barrierTypes[i];
+            for (int j = 0; j < engines.Length; ++j)
+            {
+                double barrier = barriers[i];
+                BarrierType barrierType = barrierTypes[i];
 
-            var barrierOption = new BarrierOption(barrierType, barrier, rebate, payoff, exercise);
+                var barrierOption = new BarrierOption(barrierType, barrier, rebate, payoff, exercise);
 
-            double withoutDividends = FdBlackScholesBarrierEngine.Calculate(
-                barrierOption, context, bsProcess, [], 100, 100, 0, FdmSchemeDesc.Douglas()).NPV!.Value;
+                double withoutDividends = engines[j](barrierOption, []);
 
-            double withDividends = FdBlackScholesBarrierEngine.Calculate(
-                barrierOption, context, bsProcess, dividends, 100, 100, 0, FdmSchemeDesc.Douglas()).NPV!.Value;
+                double withDividends = engines[j](barrierOption, dividends);
 
-            double diff = Math.Abs(withDividends - withoutDividends);
-            double tolerance = 1e-12;
-            Assert.True(
-                diff <= tolerance,
-                $"Dividends past maturity affected option price: engine 0, strike {strike}, barrier {barrier}, "
-                + $"maturity {maturity}, without dividend {withoutDividends}, with dividend {withDividends}, "
-                + $"difference {diff:E}");
+                double diff = Math.Abs(withDividends - withoutDividends);
+                double tolerance = 1e-12;
+                Assert.True(
+                    diff <= tolerance,
+                    $"Dividends past maturity affected option price: engine {j}, strike {strike}, barrier {barrier}, "
+                    + $"maturity {maturity}, without dividend {withoutDividends}, with dividend {withDividends}, "
+                    + $"difference {diff:E}");
+            }
         }
     }
 

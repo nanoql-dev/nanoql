@@ -423,6 +423,20 @@ Facts:
 - `ACallWhoseSeedLeavesKToInfinityIsPricedOnTheEquationsRoot`
 - `JusEngineSharesTheRoot`
 
+## BarrierClosedFormMismatchedTimesTests
+
+[`Divergences/BarrierClosedFormMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/BarrierClosedFormMismatchedTimesTests.cs)
+
+The barrier family's closed forms on structures that measure time differently (the S-bar plan's BR5 (i), fixed under R8, S-rx's class carried). QuantLib's double-barrier, double-barrier binary, partial-time, soft and two-asset engines read each rate as its curve's zero rate over the risk-free curve's time and the volatility over the same time, and combine them as though every structure shared that clock, so on an Actual/360 risk-free curve beside an Actual/365 Fixed volatility they are off their own values on the market restated onto one clock with the same discounts and variances by date (the planner's P7: −3.33%, +0.88% and +1.64% on the double barrier, the partial-time and the soft barrier). nanoql reads each rate on the volatility's clock, the curve's zero rate times its own time over the volatility's, and each time on it, as the analytic barrier engine reads them; the two-asset engine on the clock across both processes, the first's risk-free day counter (the S-exo plan's ED10). QuantLib's check: its own engine on the market restated onto that clock, each flat structure's rate or volatility scaled so its discounts or variances by date are unchanged, which nanoql's engine prices with QuantLib's bits (the vectors).
+
+Facts:
+
+- `TheDoubleBarrierPricesAsOnTheRestatedMarket`
+- `TheDoubleBarrierBinaryPricesAsOnTheRestatedMarket`
+- `ThePartialTimeBarrierPricesAsOnTheRestatedMarket`
+- `TheSoftBarrierPricesAsOnTheRestatedMarket`
+- `TheTwoAssetBarrierPricesAsOnTheRestatedMarket`
+
 ## BarrierMismatchedTimesTests
 
 [`Divergences/BarrierMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/BarrierMismatchedTimesTests.cs)
@@ -463,6 +477,21 @@ Facts:
 - `ANegativeRebateIsPricedAsQuantLibsFiniteDifferenceEngineDoes`
 - `AVannaVolgaKnockOutsNegativeRebateIsLinearThroughZero`
 - `AnImpliedVolatilityWithANegativeRebateRepricesItsTarget`
+
+## BarrierUpstreamFixesTests
+
+[`Divergences/BarrierUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/BarrierUpstreamFixesTests.cs)
+
+The fixes QuantLib's master made to the barrier family after the pin, which nanoql takes (the S-bar plan's BR6), each with the master's own case. #2876 (`5f4811e7e`): a start-window knock-in put prices the European on the call payoff and process the put-call symmetry builds, where 1.44 prices the put's, so in-out parity fails off the money. #2880 (`ca8e70946`): Dr78's degenerate correlations, taken with S-exo's bivariate normal; the partial-time engine finite where d2 is near 0 on a term-structure market. #2881 (`014321f39`): double knock-outs struck outside the corridor integrate only over terminal spots inside it, and price 0 beyond the far barrier; and a one-term series at low volatility. #2883 (`b9bb7bedb`): the soft barrier against the average of single-barrier options with barriers in [L, U], by Simpson's rule over QuantLib's analytic barrier engine; the master refuses the directions Haug's form doesn't cover, which nanoql prices by the average (BR7 (b)), so the case asserts the average there too. #2878 (`eaeac5651`): the binomial barrier asset's American window bounded by `isOnTime` at both ends, so the exercise at expiry isn't skipped.
+
+Facts:
+
+- `TestInOutParity`
+- `TestAnalyticEngineNearZeroD2`
+- `TestStrikesOutsideCorridor`
+- `TestLowVolatility`
+- `TestSoftBarrierDirection`
+- `TestBinomialExerciseAtMaturity`
 
 ## BarrierZeroVolatilityTests
 
@@ -539,6 +568,39 @@ Facts:
 
 - `ASystemSolvedInTheLastIterationIsSolved`
 - `ABreakdownShortOfTheToleranceIsRefused`
+
+## BinaryBarrierRebateTests
+
+[`Divergences/BinaryBarrierRebateTests.cs`](../tests/NanoQL.Tests/Divergences/BinaryBarrierRebateTests.cs)
+
+The binary barrier engine's rebate (fixed under R8; the S-bar run's own find). The option takes a rebate and QuantLib's engine never reads it: a down-and-out cash-or-nothing call, cash 10, strike 100, barrier 90 at r 5%, q 1%, σ 20% over a year prices 3.678406488567 at rebates 0 and 5. nanoql prices it by the analytic barrier engine's rebate terms, a knock-out's paid at the hit and a knock-in's at expiry if never hit. Checks: QuantLib's routes for the same payments, a one-touch at the hit by its analytic digital American engine (2.786734823341 below 90, 3.267438031090 above 110 for 5) and a strike-0 cash-or-nothing knock-out by this engine (2.060934934335 and 1.600028420441) (the S-bar run's `c1_ta_bb.py`). A knock-out already hit is worth its rebate, paid now, where QuantLib's engine prices 0 (the S-bar code review's B1-1): its check QuantLib's one-touch at the same spot, 5.000000000000 on and beyond the barrier, and the engine's own value a hair inside, 5.000015883 at 90.0001.
+
+Facts:
+
+- `AKnockOutsRebateIsAOneTouchAtTheHit`
+- `AKnockInsRebateIsANoTouchAtExpiry`
+- `AKnockOutAlreadyHitIsWorthItsRebate`
+
+## BinaryBarrierZeroVolatilityTests
+
+[`Divergences/BinaryBarrierZeroVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/BinaryBarrierZeroVolatilityTests.cs)
+
+The binary barrier engine below machine-epsilon variance (the S-bar plan's BR5 (xv), fixed under R8). QuantLib's indicators read the spot and its power of the barrier overflows to 0, so a down-and-out cash-or-nothing call whose forward stays above the barrier prices 0 at σ of 0 and 1e-8, where its limit is cash × D = 9.512294 and σ 1e-4 gives 9.51229425 (the planner's P8). nanoql follows the forward, which hits the barrier, if at all, when it reaches it, as QuantLib's master prices the analytic barrier engine (#2853). Checks: the engine at σ 1e-4, and #2853's rule on a forward that falls through the barrier.
+
+Facts:
+
+- `TheUnderlyingFollowsItsForward`
+
+## BinomialBarrierMismatchedTimesTests
+
+[`Divergences/BinomialBarrierMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/BinomialBarrierMismatchedTimesTests.cs)
+
+The binomial barrier engine's tree on structures that measure time differently (the S-bar plan's BR5 (ii), fixed under R8). QuantLib flattens each curve from the risk-free curve's reference date on its own day counter and runs the tree over the risk-free curve's time (`binomialbarrierengine.hpp:99-125`), so a volatility on another day counter integrates the wrong variance. nanoql's tree is `BinomialVanillaEngine`'s: on the risk-free curve's day counter from the earliest reference date, each structure on another day counter flattened on it from its variance or discount at maturity. QuantLib's check: its own engine on the market restated onto the risk-free curve's day counter, the volatility scaled so its variances by date are unchanged; and a risk-free curve settling two days after the others, flattened from its own date on the tree from the earliest, where QuantLib's tree starts at the risk-free curve's date (QuantLib's values from the S-bar run's `c1_clock_later.py`).
+
+Facts:
+
+- `AnAct365VolatilityBesideAnAct360CurvePricesAsOnTheRestatedMarket`
+- `ARiskFreeCurveSettlingLaterIsReadFromItsDateOnTheEarliestClock`
 
 ## BinomialEvenStepsTests
 
@@ -1822,6 +1884,113 @@ Facts:
 - `ADividendCurveSettlingWithTheRiskFreeCurveIsReadByDate`
 - `ADividendCurveOnAnotherDayCounterIsReadPerTheRiskFreeCurvesTime`
 
+## DoubleBarrierLowVolatilityTests
+
+[`Divergences/DoubleBarrierLowVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBarrierLowVolatilityTests.cs)
+
+The analytic double-barrier engine at low volatility (the S-bar plan's BR5 (xvi), fixed under R8). The series' powers (U/L)^(n·μ₁) overflow where μ₁ = 2b/σ² + 1 is large, and the product with a vanishing normal difference is NaN, which QuantLib's `std::max(0, ·)` turns into 0: a knock-out call whose forward stays inside the corridor prices 0 at σ = 1e-4 and at every σ below about 1.6% at a 4% carry. nanoql takes each term's power and normal difference in logs where the power overflows, QuantLib's technique in the binary barrier engine, each difference of same-signed arguments from the small tail, and follows the forward below machine-epsilon variance. Checks: the deterministic limit D·(F − K), and continuity with QuantLib's finite values above the overflow; and the image series in 50 digits where the small tail keeps the digits a plain difference cancels, a call at 101 on [98, 102] at spot 100.5, r 4%, q 1%, σ 0.7% over a year (the reviewer's r3d case, F3-1): 0.00590299270662953, where QuantLib's five terms give 0.0059033353, 5.8e-5 off, and its 50 terms 0, by overflow (the S-bar run's `c1_f31_knockout.py`).
+
+Facts:
+
+- `AKnockOutWhoseForwardStaysInsideIsWorthItsForwardPayoff`
+- `TheValueIsContinuousThroughTheOverflow`
+- `TheSmallTailKeepsTheDigitsAPlainDifferenceCancels`
+
+## DoubleBarrierRebateTests
+
+[`Divergences/DoubleBarrierRebateTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBarrierRebateTests.cs)
+
+The analytic double-barrier engine's rebate (the S-bar plan's BR5 (xlvi), fixed under R8). QuantLib's engine never reads `DoubleBarrierOption`'s rebate, where its finite-difference Heston double-barrier engine pays a knock-out's at the hit (`fdhestondoublebarrierengine.cpp:96-99`): a knock-out call on [80, 120] prices 1.420391 at rebates 0 and 5, where the FD engine at a vanishing vol of vol gives 1.426200 and 3.920732 (the planner's P16). nanoql takes QuantLib's single-barrier convention: a knock-out's rebate paid at the first touch of either barrier, R × (KIKO + KOKI) at unit cash through the double-barrier binary engine, and a knock-in's paid at expiry where neither is touched, R × the binary knock-out at unit cash and strike 0. Checks: the survival route on QuantLib's image series (the reviewer's r3a, 0.60784983008 per unit rebate on [80, 120] at 20% over a year), QuantLib's FD Heston engine on a corridor its grid resolves, and QuantLib's binary engine.
+
+Facts:
+
+- `AKnockOutsRebateIsPaidAtTheFirstTouch`
+- `AKnockInsRebateIsPaidAtExpiryWhereNeitherBarrierIsTouched`
+
+## DoubleBarrierSeriesTests
+
+[`Divergences/DoubleBarrierSeriesTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBarrierSeriesTests.cs)
+
+The analytic double-barrier engine's series length (the S-bar plan's BR5 (xliii), fixed under R8). QuantLib sums n from −`series` to `series`, five by default (`analyticdoublebarrierengine.cpp:176`), unconverged on narrow corridors and long terms: [95, 105] at a volatility of 50% over two years prices a knock-out 3.3e-3 where 50 terms and QuantLib's binomial double-barrier engine give about 0 (the reviewer's a12). nanoql takes `series` as the minimum and adds terms while the next pair exceeds machine epsilon of the sum, QuantLib's value wherever five have converged. Checks: 50 terms; QuantLib's binomial engine, 5.5e-88 (the wheel's, recorded by a12).
+
+Facts:
+
+- `ANarrowCorridorOverTwoYearsIsWorthItsConvergedSeries`
+
+## DoubleBinaryHuiCheckTests
+
+[`Divergences/DoubleBinaryHuiCheckTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBinaryHuiCheckTests.cs)
+
+The double-barrier binary's convergence check on Hui's series (the S-bar plan's BR5 (xlviii), fixed under R8). QuantLib checks only its 99th term, |term| < 1e-8 (`analyticdoublebarrierbinaryengine.cpp:98-110`), and that term carries sin(99πx/Z), so at x/Z = j/99 the check passes unconverged: on [80, 125] at 5%, r 3%, q 2.7%, two days, the spot at x/Z = 1/9 gets a unit-cash knock-out of 1.000413699, above its discounted cash 0.9998356, which no knock-out can exceed. nanoql decides Hui's convergence by a bound on the dropped tail free of its sines, the terms' envelope, and takes QuantLib's image series where it fails. Check: the image series at x/Z = j/99 (the reviewer's r4b, 0.9998356299486).
+
+Facts:
+
+- `ASpotWhereTheLastSineVanishesIsPricedConverged`
+
+## DoubleBinaryKikoTests
+
+[`Divergences/DoubleBinaryKikoTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBinaryKikoTests.cs)
+
+The double-barrier binary's KIKO and KOKI options (the S-bar plan's BR5 (xlvii) and BR9, fixed under R8). QuantLib sums their series to i = 999 and checks only the last term, |term| < 1e-8 (`analyticdoublebarrierbinaryengine.cpp:156-169`), while the terms decay as 1/i³: at small variance it passes its check unconverged (a KOKI 8.4% low on [95, 105] at a volatility of 1% over two years) or refuses ("serie did not converge sufficiently fast"). nanoql keeps QuantLib's sum, its value and bits, wherever Abel's bound on the dropped tail is within 1e-11 of the sum, and elsewhere integrates the absorption flux of QuantLib's own image-series killed density at the barrier, each image paired with its reflection, in log time between the roots that bound its mass, on the adaptive Gauss-Kronrod rule scaled by a first estimate (SD24). Checks (the plan's §C0 constants): Kummer's transformation of QuantLib's series in 40 or 50 digits (the planner's P17, the reviewer's r5b and r6b), the survival route on QuantLib's image series (the reviewer's r3c, r4d, r5e), and the flux in 30 digits (r6b).
+
+Facts:
+
+- `QuantLibsTruncatedKokiIsTheSeriesSum`
+- `TheCaseQuantLibRefusesIsPriced`
+- `AtTheKummerFormsResonanceTheFluxMatchesTheSurvivalRoute`
+- `OnAPegLikeMarketTheFluxMatchesThe50DigitValue`
+- `TheSpotJustAboveTheLowerBarrierMatchesKummer`
+- `ACorridorNarrowAgainstItsVarianceMatchesKummer`
+- `QuantLibsOwnCaseOutsideAbelsBoundMovesByItsTruncation`
+- `ADriftDominatedMarketMatchesTheFluxIn30Digits`
+
+## DoubleBinaryKnockedInTests
+
+[`Divergences/DoubleBinaryKnockedInTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBinaryKnockedInTests.cs)
+
+A double-barrier binary knock-in already knocked in (the S-bar plan's BR5 (vi), fixed under R8). It pays its cash at expiry, where the payoff is in the money, as QuantLib's own header says ("the Double Knock In pays at end", `analyticdoublebarrierbinaryengine.hpp:38-41`); QuantLib's degenerate branch pays the cash undiscounted, 10.0 at a spot beyond the barrier where its formula's limit just inside is cash × D(T), and whatever the payoff's strike and type (`.cpp:237-246`). nanoql prices it as the European cash-or-nothing it is, at the payoff's strike and type: cash × D(T) at QuantLib's strike-0 call. QuantLib's check: its analytic European engine on the payoff, and the engine's own value a hair inside the corridor. QuantLib's `testHaugValues` checks at lines 171-172 move here.
+
+Facts:
+
+- `QuantLibsStrikeZeroCallPaysTheCashDiscounted`
+- `AStruckPutKnockedInIsItsEuropean`
+
+## DoubleBinaryRebateTests
+
+[`Divergences/DoubleBinaryRebateTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBinaryRebateTests.cs)
+
+The double-barrier binary engine's rebate (the S-bar plan's BR5 (xlvi), its reach found by the S-bar code review's B1-2). QuantLib's engine never reads `DoubleBarrierOption`'s rebate: a cash-or-nothing call, cash 10, strike 100, knocked out on [80, 120], prices 1.574843057685 at rebates 0 and 5 at r 5%, q 1%, σ 20% over a year, and 0 already knocked out. The facts run on `DoubleBarrierRebateTests`' market (q 2%). nanoql prices it as the double barrier engine does (`DoubleBarrierRebateTests`): a knock-out's paid at the first touch of either barrier, now where one is already touched, R × (KIKO + KOKI) at unit cash; a knock-in's at expiry where neither is touched, R × the unit-cash knock-out at strike 0, and none once knocked in. A KIKO's or KOKI's, which no convention fixes (at the knock-out's touch, or at expiry if the knock-in never comes), is refused. Checks: the survival route on QuantLib's image series (the reviewer's r3a, 0.60784983008 per unit rebate on [80, 120] at 20% over a year), and the double barrier engine's own rebate on the same option.
+
+Facts:
+
+- `AKnockOutsRebateIsPaidAtTheFirstTouch`
+- `AKnockInsRebateIsPaidAtExpiryWhereNeitherBarrierIsTouched`
+- `AKnockOutAlreadyTouchedIsWorthItsRebateAndAKnockInNone`
+- `AKikoOrKokiRebateIsRefused`
+
+## DoubleBinarySmallVarianceTests
+
+[`Divergences/DoubleBinarySmallVarianceTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBinarySmallVarianceTests.cs)
+
+The double-barrier binary knock-out at small variance (the S-bar plan's BR8 (c), a refusal lifted under the user's rule of 2026-10-20). QuantLib refuses "serie did not converge sufficiently fast" where the corridor is wide against σ√T, where Hui's eigenfunction series converges slowest (`analyticdoublebarrierbinaryengine.cpp:110`). nanoql takes the cash-or-nothing part of QuantLib's own double-barrier image series there (its `AnalyticDoubleBarrierEngine::callKO`), which converges fastest exactly there, its terms in logs and its normal differences from the small tail. Checks: Hui's value where it converges, and the image series in 50 digits where it doesn't (the reviewer's r2c2), which QuantLib's finite-difference Heston double-barrier engine gives to ten digits on [95, 105] at 2% over a day.
+
+Facts:
+
+- `WhereHuisSeriesConvergesItsValueStands`
+- `WhereQuantLibRefusesTheImageSeriesPrices`
+
+## DoubleBinaryStrikeTests
+
+[`Divergences/DoubleBinaryStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBinaryStrikeTests.cs)
+
+The double-barrier binary's payoff strike and type (the S-bar plan's BR5 (xxxviii), fixed under R8). Hui's series integrates the killed density over the whole corridor and never reads the payoff's strike or type (`analyticdoublebarrierbinaryengine.cpp:78`, "this is not used ?"), so a knock-out with L 80, U 120, cash 10 prices 6.69467 for every strike and both types, a put struck at 0 among them. nanoql integrates over the payoff's region, [max(K, L), U] for a call and [L, min(K, U)] for a put, in closed form, QuantLib's value standing for a call at K ≤ L and a put at K ≥ U. Checks: an independent Crank-Nicolson solve (the planner's P14: the call and put at K 100, 3.046527 and 3.648146, the full corridor 6.694673, extrapolated to N = 4,000), QuantLib's finite-difference Heston double-barrier engine at a vanishing vol of vol, and call + put = the full corridor.
+
+Facts:
+
+- `TheCallAndThePutAtTheMoneyMatchAnIndependentSolve`
+- `TheFiniteDifferenceHestonEngineAgreesAtAVanishingVolOfVol`
+- `CallPlusPutIsTheFullCorridor`
+
 ## ECBNoKnownDatesTests
 
 [`Divergences/ECBNoKnownDatesTests.cs`](../tests/NanoQL.Tests/Divergences/ECBNoKnownDatesTests.cs)
@@ -2063,6 +2232,29 @@ Facts:
 
 - `AsTheRatesVolatilityVanishesItIsTheBlackScholesQuanto`
 
+## FdHestonBarrierMismatchedTimesTests
+
+[`Divergences/FdHestonBarrierMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/FdHestonBarrierMismatchedTimesTests.cs)
+
+The finite-difference Heston barrier engines on structures that measure time differently (the S-bar plan's BR5 (iv), the S-hes plan's HR7 form, fixed under R8). QuantLib reads the process's time, the risk-free curve's, and the dividend curve at it (`fdhestonbarrierengine.cpp:72`), as though the two curves shared a clock. nanoql's times run on `FdmHestonOp.Clock`, each curve read at the instants they denote. QuantLib's check: its own engine on the market restated onto the risk-free curve's day counter, the dividend rate scaled so its discounts by date are unchanged; and a risk-free curve settling two days after the dividend curve, read from its own date on the clock from the earliest, where QuantLib's times start at the risk-free curve's date (QuantLib's values from the S-bar run's `c1_clock_later.py`).
+
+Facts:
+
+- `AnAct365DividendCurveBesideAnAct360CurvePricesAsOnTheRestatedMarket`
+- `ARiskFreeCurveSettlingLaterIsReadFromItsDateOnTheEarliestClock`
+
+## FdHestonDoubleKnockInTests
+
+[`Divergences/FdHestonDoubleKnockInTests.cs`](../tests/NanoQL.Tests/Divergences/FdHestonDoubleKnockInTests.cs)
+
+The FD Heston double knock-in (the S-bar plan's BR8 (b), a refusal lifted under the user's rule of 2026-10-20). QuantLib refuses "only Knock-Out double barrier options are supported" (`fdhestondoublebarrierengine.cpp:52`), where its single-barrier FD Heston engine prices knock-ins as vanilla + rebate − knock-out (`fdhestonbarrierengine.cpp:165-196`). nanoql prices the double knock-in so: QuantLib's FD Heston vanilla less its double knock-out without a rebate, plus the rebate, paid at expiry where no barrier is touched, as R × the engine's cash-or-nothing knock-out at strike 0 (BR5 (xlvi)'s convention), every leg with the knock-out's leverage function and mixing factor (Revision 6, F3-2). Checks: at a vanishing vol of vol, QuantLib's own legs, 11.124212 − 1.897300 = 9.226912, and its analytic double knock-in 9.242178, the FD grid's 0.17% (the reviewer's r2b); the binary leg against QuantLib's analytic double-barrier binary engine; and parity on a stochastic-local model.
+
+Facts:
+
+- `WithoutARebateTheKnockInIsTheVanillaLessTheKnockOut`
+- `TheRebateIsTheBinaryKnockOut`
+- `EveryLegReadsTheLeverageFunction`
+
 ## FdHestonHighCarryTests
 
 [`Divergences/FdHestonHighCarryTests.cs`](../tests/NanoQL.Tests/Divergences/FdHestonHighCarryTests.cs)
@@ -2111,6 +2303,16 @@ The FD Heston-Hull-White engine's multiple strikes after a reference whose payof
 Facts:
 
 - `AfterANonPlainReferenceEachStrikeIsSolvedAlone`
+
+## FdHestonKnockInLeverageTests
+
+[`Divergences/FdHestonKnockInLeverageTests.cs`](../tests/NanoQL.Tests/Divergences/FdHestonKnockInLeverageTests.cs)
+
+The FD Heston knock-in's legs (the S-bar plan's BR5 (xviii), fixed under R8). QuantLib prices a knock-in as the vanilla, plus the rebate, less the knock-out, and prices the vanilla and the rebate legs without the leverage function and mixing factor the knock-out leg uses (`fdhestonbarrierengine.cpp:173-194`), so a stochastic-local knock-in mixes pure Heston into it: on the market below the pure-Heston vanilla is 8.782 for the stochastic-local 7.419. nanoql prices every leg on the model it is given. Check: in-out parity on the stochastic-local model against QuantLib's FD Heston vanilla and rebate engines with the leverage function.
+
+Facts:
+
+- `EveryLegReadsTheLeverageFunction`
 
 ## FdHestonMismatchedTimesTests
 
@@ -3616,6 +3818,38 @@ Facts:
 
 - `ARecalibratedCopysOutputsAreAFreshModels`
 
+## McBarrierExerciseTests
+
+[`Divergences/McBarrierExerciseTests.cs`](../tests/NanoQL.Tests/Divergences/McBarrierExerciseTests.cs)
+
+The Monte Carlo barrier engine's exercise (the S-bar code review's B1-3). QuantLib's engine never reads the exercise's type and prices any exercise to its last date: a down-and-out put struck at 100, barrier 80, on spot 100, r 5%, q 1%, σ 20% over a year, 20 steps, 20,000 pseudo-random samples at seed 42, prices 1.670455625787 for an American exercise, its European value, where QuantLib's binomial engine (Cox-Ross-Rubinstein, Derman and Kani's asset, 400 steps) prices the American at 6.364401494576 and the European at 1.674490747474 (the review's `r14_exercise_ql.py`). nanoql refuses a non-European exercise, as the family's European engines do: the paths price a European exercise only, early exercise wanting a regression. The binomial engine prices American barrier options and stays.
+
+Facts:
+
+- `ANonEuropeanExerciseIsRefused`
+
+## McBarrierMismatchedTimesTests
+
+[`Divergences/McBarrierMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/McBarrierMismatchedTimesTests.cs)
+
+The Monte Carlo barrier engine's grid on structures that measure time differently (the S-bar plan's BR5 (iii), batch 4's rule, fixed under R8). QuantLib's grid runs on the risk-free curve's time and its process reads the other structures at it, as though they shared that clock. nanoql's paths and discounts run on the engine's clock, `FdmBlackScholesOp.Clock`, each structure read at the instants its times denote. QuantLib's check: its own engine on the market restated onto the clock, the dividend rate and the volatility scaled so their discounts and variances by date are unchanged, on the same seed: the paths draw the same numbers, so the prices agree to rounding; and a risk-free curve settling two days after the others, read from its own date on the clock from the earliest, where QuantLib's grid starts at the risk-free curve's date (QuantLib's values from the S-bar run's `c1_clock_later.py`).
+
+Facts:
+
+- `Act365StructuresBesideAnAct360CurvePriceAsOnTheRestatedMarket`
+- `ARiskFreeCurveSettlingLaterIsReadFromItsDateOnTheEarliestClock`
+
+## McBarrierSeed5Tests
+
+[`Divergences/McBarrierSeed5Tests.cs`](../tests/NanoQL.Tests/Divergences/McBarrierSeed5Tests.cs)
+
+The Monte Carlo barrier engine at seed 5 (the S-bar plan's BR5 (v), fixed under R8). QuantLib's bridge draws its uniforms from a constant MT(5) of the path's dimension, so on pseudo-random paths at seed 5 each step's increment and its extreme read the same uniforms: a down-and-out call at 100, barrier 95, r 5%, σ 30% over a year on 10 steps and 200,000 samples prices 6.860215 ± 0.042713, +31.9 standard errors above the analytic 5.498097, where seeds 4 and 6 are within 1.6 (the planner's P3b; the S-bar run's `c1_seed5.py`). nanoql's bridge reads MT(6) at seed 5 on the Mersenne Twister traits. Low-discrepancy paths share nothing with MT(5), so they keep QuantLib's stream and its values, `testBabsiriValues`' among them (Revision 2, O1-3). Checks: the analytic barrier engine, and QuantLib's low-discrepancy values at seed 5.
+
+Facts:
+
+- `PseudoRandomPathsAtSeedFiveAreUnbiased`
+- `LowDiscrepancyPathsAtSeedFiveKeepQuantLibsValues`
+
 ## McBasketMismatchedTimesTests
 
 [`Divergences/McBasketMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/McBasketMismatchedTimesTests.cs)
@@ -3987,6 +4221,59 @@ Facts:
 
 - `AnIndexOutOfRangeIsRefused`
 - `ParametersBeforeTheyAreSetAreZero`
+
+## PartialTimeCoverTodayTests
+
+[`Divergences/PartialTimeCoverTodayTests.cs`](../tests/NanoQL.Tests/Divergences/PartialTimeCoverTodayTests.cs)
+
+The partial-time barrier engine with the cover event on the evaluation date (the S-bar plan's BR5 (xiii), fixed under R8). QuantLib's formulas take t₁ = 0 into Drezner's bivariate normal with infinite arguments and fail ("case not handled", the planner's P2). nanoql takes the formulas' limit: the start window monitors only the spot, so a knock-out is the vanilla and a knock-in 0; the end windows monitor the barrier from today to expiry, so B1 is the standard knock-out on the spot's side of the barrier and B2 the standard knock-out on its own side, out at once with the spot beyond it, the knock-ins by in-out parity. A cover event before the evaluation date stays refused as QuantLib refuses it ("negative time"). Checks: QuantLib's analytic European and barrier engines, and the engine's own values at a cover event a day out.
+
+Facts:
+
+- `TheStartWindowIsTheVanillaOrNothing`
+- `TheEndWindowsAreTheStandardBarrierOption`
+
+## PartialTimeEndKnockInTests
+
+[`Divergences/PartialTimeEndKnockInTests.cs`](../tests/NanoQL.Tests/Divergences/PartialTimeEndKnockInTests.cs)
+
+The partial-time end-window knock-ins (the S-bar plan's BR8 (a), a refusal lifted under the user's rule of 2026-10-20). QuantLib refuses "Down-and-in partial-time end barrier is not implemented" and its up twin (`analyticpartialtimebarrieroptionengine.cpp:66`, `:91`), where it prices the start window's knock-in as its European less its knock-out (`CIA`). nanoql applies the same parity to QuantLib's end-window knock-out: B1 at any strike, B2 wherever QuantLib prices its knock-out. Checks: the parity on QuantLib's own engines, and an independent Monte Carlo for a call at 100, barrier 90, window [6 months, 1 year], r 5%, q 2%, σ 25%: 0.934510 ± 0.019692 (the reviewer's r2b), against parity's 11.123762 − 10.161263 = 0.962499.
+
+Facts:
+
+- `AB1KnockInIsTheEuropeanLessItsKnockOut`
+- `AB2KnockInIsTheEuropeanLessItsKnockOut`
+
+## PartialTimeExerciseTests
+
+[`Divergences/PartialTimeExerciseTests.cs`](../tests/NanoQL.Tests/Divergences/PartialTimeExerciseTests.cs)
+
+The partial-time barrier engine's exercise (the S-bar code review's B1-3). QuantLib's engine never reads the exercise's type: on spot 100, r 5%, q 1%, σ 20% over a year, a call struck at 100, barrier 90, cover event at 182 days, its start-window and end-window B1 down-and-outs price an American exercise at their European values, 8.258475774804 and 9.269946137985, and its start-window down-and-in crashes ("Boost assertion failed: px != 0", the European leg built on a null exercise) (the review's `r14_exercise_ql.py`). nanoql refuses a non-European exercise, as the family's European engines do: Heynen and Kat's formulas price a European exercise only. The European values stand, within ER7's measured 3.3e-5 of QuantLib's (West's bivariate normal for Drezner's).
+
+Facts:
+
+- `ANonEuropeanExerciseIsRefused`
+
+## PartialTimeRebateTests
+
+[`Divergences/PartialTimeRebateTests.cs`](../tests/NanoQL.Tests/Divergences/PartialTimeRebateTests.cs)
+
+The partial-time barrier engine's rebate (the S-bar plan's BR5 (xii), fixed under R8). The instrument takes a rebate and no formula of QuantLib's engine reads it: 11.116881 at rebates 0 and 5 (the planner's P2). nanoql prices a start-window knock-out's rebate, paid at the hit before the cover event, as QuantLib's analytic barrier engine prices a knock-out's rebate to the cover event; no formula covers the end windows' or the knock-ins' rebates, which are refused ("rebate not supported for this partial-time barrier"). Check: QuantLib's analytic barrier engine with the cover event as expiry.
+
+Facts:
+
+- `AStartWindowKnockOutsRebateIsTheBarrierEnginesToTheCoverEvent`
+- `AnEndWindowsOrAKnockInsRebateIsRefused`
+
+## PartialTimeTouchedTests
+
+[`Divergences/PartialTimeTouchedTests.cs`](../tests/NanoQL.Tests/Divergences/PartialTimeTouchedTests.cs)
+
+A start-window partial-time barrier with the spot beyond its barrier (the S-bar plan's BR5 (xiv), refused under R8). QuantLib checks no trigger and prices −4.174446 for a down-and-out call at spot 80, barrier 85 (the planner's P2), where the family's analytic, binomial and Monte Carlo engines refuse "barrier touched". nanoql refuses it so; the end windows, whose monitoring starts at the cover event, are unaffected.
+
+Facts:
+
+- `AStartWindowSpotBeyondTheBarrierIsRefused`
 
 ## PathGeneratorProcessTests
 
@@ -4553,6 +4840,80 @@ Facts:
 - `SkipToTheLastIndexIsRefusedWithTheGrayCode`
 - `TheDrawThatWouldReachTheLastCounterThrowsWithTheGrayCode`
 
+## SoftBarrierBandAverage
+
+[`Divergences/SoftBarrierBandAverage.cs`](../tests/NanoQL.Tests/Divergences/SoftBarrierBandAverage.cs)
+
+The soft barrier's definition as #2883's test states it, "the average of the single-barrier options with barriers in [L, U]", computed independently of the engine: composite Simpson's rule over QuantLib's analytic barrier engine's knock-ins, the barriers on the spot's far side knocked in (the vanilla), the band split at the spot and the strike, so each piece's integrand is smooth. The soft-barrier divergence facts check the engine against it.
+
+## SoftBarrierCoincidentBarriersTests
+
+[`Divergences/SoftBarrierCoincidentBarriersTests.cs`](../tests/NanoQL.Tests/Divergences/SoftBarrierCoincidentBarriersTests.cs)
+
+The soft barrier with coincident or nearly coincident barriers (the S-bar plan's BR5 (xi), fixed under R8). Where U − L < 1e-4 QuantLib prices its analytic barrier engine on flat Actual/360 curves rebuilt from TARGET's adjusted evaluation date (`analyticsoftbarrierengine.cpp:250-282`), so a process on Actual/365 Fixed prices 10.187731 where the analytic engine on it gives 10.159379; and the switch is absolute in price units, so the same contract changes value with the underlying's scale: a down-in call struck at the spot on the band [0.990, 0.995] × spot prices 0.1027057 × spot at spots 100 and 1 and 0.1063173 × spot at 0.02 and 0.01, a 0.5% band taken as a hard barrier (the reviewer's r2a). Haug's own difference quotient cancels as the band narrows, beyond 1e-12 below a relative width of about 1e-3 (the planner's P15). nanoql prices the single barrier at U = L only, through the analytic barrier engine on the process itself, Haug's form where (U − L)/U ≥ 3e-3, and the band average below it. Checks: QuantLib's analytic barrier engine on the same process at U = L, and homogeneity, the contract scaled to spot 100.
+
+Facts:
+
+- `CoincidentBarriersAreTheSingleBarrierOnTheProcessItself`
+- `ABandNarrowerThan1e4IsTheBandAverage`
+- `ANarrowBandAtASmallSpotIsTheContractScaled`
+- `ABandBelowTheRelativeCutAtASmallSpotIsTheContractScaled`
+
+## SoftBarrierDomainTests
+
+[`Divergences/SoftBarrierDomainTests.cs`](../tests/NanoQL.Tests/Divergences/SoftBarrierDomainTests.cs)
+
+Haug's soft-barrier form outside its domain (the S-bar plan's BR5 (xlv), fixed under R8). The closed form integrates the standard knock-in's branch for a barrier at or below the strike, so it is the average only for a down barrier on a call with U ≤ K, or an up barrier on a put with L ≥ K, the spot outside the band; QuantLib's cases all hold S 100, X 100, U 95. With the band reaching above the strike it is high by up to 1.5%, and with the spot inside the band, the barriers above it already knocked in, it prices 12.286 for 8.803 (the reviewer's a4, a6b, a16). nanoql takes the band average wherever the band reaches across the strike or the spot is inside it. Check: the band average of QuantLib's analytic barrier engine by Simpson's rule (`SoftBarrierBandAverage`), and a deep out-of-the-money average, a call at 300 with the spot inside the band, below 2.2e-4, which an unscaled tolerance would refuse at construction (SD24).
+
+Facts:
+
+- `ABandAcrossTheStrikeIsTheBandAverage`
+- `ASpotInsideTheBandIsTheBandAverage`
+- `ADeepOutOfTheMoneyAverageIsPriced`
+
+## SoftBarrierExerciseTests
+
+[`Divergences/SoftBarrierExerciseTests.cs`](../tests/NanoQL.Tests/Divergences/SoftBarrierExerciseTests.cs)
+
+The soft barrier engine's exercise (the S-bar run's own find). QuantLib's engine never reads the exercise's type and prices any exercise to its last date: a down-and-in call at 90 on the band [85, 90], an American exercise to a year, prices 2.906045178994 on the vectors' first market, its European value (the S-bar run's `analyticsoftbarrierengine.py`); its own implied volatility refuses a non-European soft barrier ("engine not available for non-European soft barrier option"). nanoql refuses a non-European exercise, as the family's European engines do: the soft barrier's average, the route off Haug's domain, runs on the analytic barrier engine, which prices European options only.
+
+Facts:
+
+- `ANonEuropeanExerciseIsRefused`
+
+## SoftBarrierLowVolatilityTests
+
+[`Divergences/SoftBarrierLowVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/SoftBarrierLowVolatilityTests.cs)
+
+The soft barrier at small volatility (the S-bar plan's BR5 (xvii), fixed under R8). Haug's form is NaN from σ = 0.02 down at a 4% carry over a year, where its powers overflow (the planner's P11, P12). nanoql takes the band average wherever Haug's value isn't finite, its adaptive Gauss-Kronrod rule split at the strike, the spot, the forward and their transition widths (SD24). Checks: the band average by Simpson's rule (`SoftBarrierBandAverage`); the deterministic limit, the knocked-in fraction of the band times the forward payoff (P12's market A: a down-in call at 80 on [90, 99], r 1%, q 5%, 5.166684728565), which the average approaches as σ², 1.0e-5 below it at σ 1e-4 (QUADPACK's P12 value) and 1.0e-7 at 1e-5 (a 200,000-interval Simpson's rule across the step at the forward agreeing with the engine to 6e-14 [executed at the run], where P12's QUADPACK, missing the step's width, met the limit itself), so within 1e-10 from σ 1e-7; and QUADPACK's average at σ 1% on the same market, 5.2810970596, where a first-estimate scale at 1e-12 never ends (the reviewer's r6e).
+
+Facts:
+
+- `WhereHaugsFormIsNotANumberTheValueIsTheBandAverage`
+- `AtVanishingVolatilityTheValueIsTheDeterministicLimit`
+- `AtOnePercentTheValueIsQuadpacksAverage`
+
+## SoftBarrierRateLimitsTests
+
+[`Divergences/SoftBarrierRateLimitsTests.cs`](../tests/NanoQL.Tests/Divergences/SoftBarrierRateLimitsTests.cs)
+
+The soft barrier's rate limits (the S-bar plan's BR8 (d), a refusal lifted under the user's rule of 2026-10-20). QuantLib refuses "Interest rate must be between -5% and 100%" and "Dividend yield must be between -10% and 100%" (`analyticsoftbarrierengine.cpp:174-175`), limits no formula needs. nanoql doesn't port them: every rate takes the engine's routes, here the band average, Haug's form being NaN at b + σ² = 2.5e-3 and σ 1.0. Check: the band average by Simpson's rule (`SoftBarrierBandAverage`), and the reviewer's r2a, 3.761756955001.
+
+Facts:
+
+- `ADividendYieldAbove100PercentIsPriced`
+
+## SoftBarrierSingularCarryTests
+
+[`Divergences/SoftBarrierSingularCarryTests.cs`](../tests/NanoQL.Tests/Divergences/SoftBarrierSingularCarryTests.cs)
+
+The soft barrier at Haug's singular carries (the S-bar plan's BR5 (x), fixed under R8). Haug's term 1 divides by 2(μ + ½), zero at b = −σ² (`analyticsoftbarrierengine.cpp:141-142`): 47.207 at r 0, q 4%, σ 20% where both sides give 1.37353; around both singular points, b = 0 and b = −σ², its double cancels beyond R7 out to about 1e-5 of the carry, and QuantLib's nudge at |r − q| < 1e-10, r moved by 1e-6, is itself off by 1.2e-6 to 4.2e-6 (the planner's P13). nanoql takes the band average, the soft barrier's definition, wherever |b| or |b + σ²| is below 2e-3, superseding the nudge. Check: the band average of QuantLib's analytic barrier engine, by Simpson's rule (`SoftBarrierBandAverage`).
+
+Facts:
+
+- `AtACarryOfMinusTheVarianceRateTheValueIsTheBandAverage`
+- `AtZeroCarryTheValueIsTheBandAverage`
+
 ## SouthKoreaElection2025Tests
 
 [`Divergences/SouthKoreaElection2025Tests.cs`](../tests/NanoQL.Tests/Divergences/SouthKoreaElection2025Tests.cs)
@@ -5033,6 +5394,48 @@ Facts:
 
 - `ATreesIndicesOutOfRangeAreRefused`
 - `StatePricesBeyondTheGridAreRefused`
+
+## TwoAssetBarrierDividendTests
+
+[`Divergences/TwoAssetBarrierDividendTests.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetBarrierDividendTests.cs)
+
+The two-asset knock-in's vanilla (the S-bar plan's BR5 (viii), fixed under R8). QuantLib's `call()` and `put()` drop asset 1's dividend yield, S₁N(d₁) for S₁e^((b₁−r)T)N(d₁), so its knock-in breaks in-out parity: a down-and-in call at 100, barrier 90 on asset 2, prices 6.497953 and 6.961125 at q₁ of 3% and 8% where vanilla − knock-out is 4.785982 and 3.270239, above the vanilla itself at 8% (the planner's P2); an up-and-in put at barrier 110 prices 1.466729 at 8% for 5.464209 (the S-bar run's `c1_ta_bb.py`). nanoql carries the dividends. Check: in-out parity against QuantLib's knock-out and its analytic European engine on process 1. At q₁ 3% QuantLib's put is NaN: its d₂ is −5.6e-17, where Drezner's 1978 algorithm returns NaN (the S-bar run's `c1_dr78_zero.py`), and nanoql's bivariate normal is We04DP (BR4 (e)).
+
+Facts:
+
+- `ACallKnockInIsTheVanillaLessTheKnockOut`
+- `APutKnockInIsTheVanillaLessTheKnockOut`
+
+## TwoAssetBarrierExerciseTests
+
+[`Divergences/TwoAssetBarrierExerciseTests.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetBarrierExerciseTests.cs)
+
+The two-asset barrier engine's exercise (the S-bar code review's B1-3). QuantLib's engine never reads the exercise's type and prices any exercise to its last date: a down-and-out call struck at 100 on the first asset (spot 100, r 5%, q 1%, σ 20%), barrier 90 on the second (q 2%, σ 30%), ρ 0.5, over a year prices 4.219587870592 for an American exercise, its European value (the review's `r14_exercise_ql.py`). nanoql refuses a non-European exercise, as the family's European engines do: the formula prices a European exercise only. The European value stands, within ER7's measured 3.3e-5 of QuantLib's (West's bivariate normal for Drezner's).
+
+Facts:
+
+- `ANonEuropeanExerciseIsRefused`
+
+## TwoAssetBarrierSmileTests
+
+[`Divergences/TwoAssetBarrierSmileTests.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetBarrierSmileTests.cs)
+
+The two-asset barrier's read of asset 2's volatility (the S-bar plan's BR5 (ix), fixed under R8; the S-exo plan's ER5 class). QuantLib reads it at asset 1's strike, a level on another price scale: asset 2 at 5,000 on a smile, the barrier at 4,500, a down-and-out call at strikes 90, 100 and 110 prices 6.054081, 4.647889 and 2.965222 on volatilities read at 90 to 110, where the smile's volatility at the barrier is 34.37% (the planner's P2). nanoql reads it at the barrier, asset 2's own level; the read is a choice inside a constant-volatility formula, so its check is that it reads one level consistently (Revision 69). Checks: QuantLib's values on flat volatilities, 5.893116254296, 4.038304931649 and 2.557384709654 on QuantLib's Dr78 (the S-bar run's `c1_ta_bb.py`), to its six decimal places on the formula's terms of weight 100 (BR4 (e)); and on the smile, the engine equals itself with asset 2's volatility flat at its barrier level.
+
+Facts:
+
+- `OnFlatVolatilitiesTheEngineIsQuantLibs`
+- `OnASmileAssetTwoIsReadAtItsBarrier`
+
+## TwoAssetBarrierTwoCurvesTests
+
+[`Divergences/TwoAssetBarrierTwoCurvesTests.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetBarrierTwoCurvesTests.cs)
+
+The two-asset barrier's second risk-free curve (the S-bar plan's BR5 (vii), fixed under R8; the S-exo plan's ED27). QuantLib takes asset 2's carry from process 1's rate, b₂ = r₁ − q₂, so the price ignores process 2's curve: a down-and-out call at 100, barrier 90 on asset 2, r₁ 5%, q₂ 1%, prices 4.547879 at r₂ of 0, 5% and 10% (the planner's P2). nanoql reads b₂ = r₂ − q₂ and discounts on process 1's curve. Check: QuantLib's engine on the market restated onto process 1's curve, asset 2's dividend yield q₂ + r₁ − r₂: 4.045769328445, 4.547878997954 and 5.044213261884 on QuantLib's Dr78 (the S-bar run's `c1_ta_bb.py`), to its six decimal places on the formula's terms of weight 100 (BR4 (e)).
+
+Facts:
+
+- `AssetTwosCarryReadsItsOwnCurve`
 
 ## TwoAssetCorrelationBivariateTests
 

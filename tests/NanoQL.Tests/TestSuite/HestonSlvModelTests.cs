@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/hestonslvmodel.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testMoustacheGraph, which waits for S-bar's FdHestonDoubleBarrierEngine and AnalyticDoubleBarrierBinaryEngine, and testDiffusionAndDriftSlvProcess, which waits for S-core's Sobol Brownian bridge sequences
 
 using System.Collections.Immutable;
 using NanoQL.Instruments;
@@ -1104,6 +1103,260 @@ public class HestonSlvModelTests
                 "Failed to reproduce maximum calibration error"
                 + $"\n maximum calibration error : {maxQualityFactor}bp\n tolerance                 : 15.0bp");
         }
+    }
+
+    [Fact]
+    public void TestMoustacheGraph()
+    {
+        // Testing double no touch pricing with SLV and mixing...
+
+        /*
+         A more detailed description of this test case can found on
+         https://hpcquantlib.wordpress.com/2016/01/10/monte-carlo-calibration-of-the-heston-stochastic-local-volatiltiy-model/
+
+         The comparison of Black-Scholes and SLV prices is derived
+         from figure 8.8 in Iain J. Clark's book,
+         Foreign Exchange Option Pricing: A Practitioner’s Guide
+        */
+
+        DayCounter dc = new ActualActual(ActualActualConvention.ISDA);
+        var todaysDate = new Date(5, Month.January, 2016);
+        Date maturityDate = todaysDate + new Period(1, TimeUnit.Years);
+        var context = new EvaluationContext { EvaluationDate = todaysDate };
+
+        const double s0 = 100;
+        const double r = 0.02;
+        const double q = 0.01;
+
+        // parameter of the "calibrated" Heston model
+        const double kappa = 1.0;
+        const double theta = 0.06;
+        const double rho = -0.8;
+        const double sigma = 0.8;
+        const double v0 = 0.09;
+
+        YieldTermStructure rTS = FlatForward.Create(0, new NullCalendar(), r, dc, context);
+        YieldTermStructure qTS = FlatForward.Create(0, new NullCalendar(), q, dc, context);
+
+        var hestonModel = new HestonModel(new HestonProcess(rTS, qTS, s0, v0, kappa, theta, sigma, rho));
+
+        var europeanExercise = new EuropeanExercise(maturityDate);
+
+        var vanillaOption = new VanillaOption(new PlainVanillaPayoff(OptionType.Call, s0), europeanExercise);
+
+        double implVol = vanillaOption.ImpliedVolatility(
+            AnalyticHestonEngine.Calculate(vanillaOption, context, hestonModel).NPV!.Value,
+            new GeneralizedBlackScholesProcess(
+                s0, qTS, rTS, BlackConstantVol.Create(0, new NullCalendar(), Math.Sqrt(theta), dc, context)),
+            context);
+
+        var analyticProcess = new GeneralizedBlackScholesProcess(
+            s0, qTS, rTS, BlackConstantVol.Create(0, new NullCalendar(), implVol, dc, context));
+
+        List<double> expiries = [];
+        var timeStepPeriod = new Period(1, TimeUnit.Weeks);
+        for (Date expiry = todaysDate + timeStepPeriod; expiry <= maturityDate; expiry += timeStepPeriod)
+        {
+            expiries.Add(dc.YearFraction(todaysDate, expiry));
+        }
+
+        var timeGrid = new TimeGrid([.. expiries]);
+
+        // first build the true local vol surface from another Heston model
+        LocalVolTermStructure localVol = GetFixedLocalVolFromHeston(hestonModel, timeGrid);
+
+        var sobolGeneratorFactory = new SobolBrownianGeneratorFactory(
+            SobolBrownianGeneratorBaseOrdering.Diagonal, 1234, SobolRsgDirectionIntegers.JoeKuoD7);
+
+        const int xGrid = 100;
+        const int nSim = 20000;
+
+        const double eta = 0.90;
+
+        var modHestonModel = new HestonModel(new HestonProcess(rTS, qTS, s0, v0, kappa, theta, eta * sigma, rho));
+
+        LocalVolTermStructure leverageFct = new HestonSLVMCModel(
+            localVol, modHestonModel, sobolGeneratorFactory, maturityDate, 182, xGrid, nSim).LeverageFunction;
+
+        double[] expected =
+        [
+            0.0334, 0.1141, 0.1319, 0.0957, 0.0464, 0.0058, -0.0192,
+            -0.0293, -0.0297, -0.0251, -0.0192, -0.0134, -0.0084, -0.0045,
+            -0.0015, 0.0005, 0.0017, 0.0020,
+        ];
+        const double tol = 1e-2;
+
+        for (int i = 0; i < 18; ++i)
+        {
+            double dist = 10.0 + (5.0 * i);
+
+            double barrierLo = Max(s0 - dist, 1e-2);
+            double barrierHi = s0 + dist;
+            var doubleBarrier = new DoubleBarrierOption(
+                DoubleBarrierType.KnockOut,
+                barrierLo,
+                barrierHi,
+                0.0,
+                new CashOrNothingPayoff(OptionType.Call, 0.0, 1.0),
+                europeanExercise);
+
+            double bsNPV = AnalyticDoubleBarrierBinaryEngine.Calculate(doubleBarrier, context, analyticProcess).NPV!.Value;
+
+            double slvNPV = FdHestonDoubleBarrierEngine.Calculate(
+                doubleBarrier, context, modHestonModel, 51, 101, 31, 0, FdmSchemeDesc.Hundsdorfer(), leverageFct).NPV!.Value;
+
+            double diff = slvNPV - bsNPV;
+            Assert.False(
+                Math.Abs(diff - expected[i]) > tol,
+                "Failed to reproduce price difference for a Double-No-Touch option between Black-Scholes and Heston "
+                + $"Stochastic Local Volatility model\n Barrier Low        : {barrierLo}\n Barrier High       : {barrierHi}"
+                + $"\n Black-Scholes Price: {bsNPV}\n Heston SLV Price   : {slvNPV}\n diff               : {diff}"
+                + $"\n expected diff      : {expected[i]}\n tolerance          : {tol}");
+        }
+    }
+
+    [Fact]
+    public void TestDiffusionAndDriftSlvProcess()
+    {
+        // Testing diffusion and drift of the SLV process...
+
+        var todaysDate = new Date(6, Month.June, 2020);
+        var context = new EvaluationContext { EvaluationDate = todaysDate };
+
+        DayCounter dc = new Actual365Fixed();
+        Date maturityDate = todaysDate + new Period(6, TimeUnit.Months);
+        double maturity = dc.YearFraction(todaysDate, maturityDate);
+
+        const double s0 = 100;
+        const double r = -0.005;
+        const double q = 0.04;
+
+        var rTS = new FlatForward(todaysDate, r, dc);
+        var qTS = new FlatForward(todaysDate, q, dc);
+
+        LocalVolTermStructure localVol = GetFixedLocalVolFromHeston(
+            new HestonModel(new HestonProcess(rTS, qTS, s0, 0.1, 1.0, 0.13, 0.8, 0.4)), new TimeGrid(maturity, 20));
+
+        const double kappa = 2.5;
+        const double theta = 1.0;
+        const double rho = -0.75;
+        const double sigma = 2.4;
+        const double v0 = 1.0;
+
+        var hestonProcess = new HestonProcess(rTS, qTS, s0, v0, kappa, theta, sigma, rho);
+
+        var hestonModel = new HestonModel(hestonProcess);
+
+        var slvProcess = new HestonSLVProcess(hestonProcess, localVol);
+
+        var option = new VanillaOption(new PlainVanillaPayoff(OptionType.Call, s0), new EuropeanExercise(maturityDate));
+
+        double expected = FdHestonVanillaEngine.Calculate(
+            option, context, hestonModel, 26, 201, 101, 0, FdmSchemeDesc.ModifiedCraigSneyd(), localVol).NPV!.Value;
+
+        const int nSims = 16733;
+        const int nTimeSteps = 40;
+        double df = rTS.Discount(maturity);
+
+        var rsg = new SobolBrownianBridgeRsg(
+            2, nTimeSteps, SobolBrownianGeneratorBaseOrdering.Diagonal, 12345, SobolRsgDirectionIntegers.JoeKuoD7);
+
+        var stats = new GeneralStatistics();
+
+        double dt = maturity / nTimeSteps;
+        double sqrtDt = Math.Sqrt(dt);
+
+        for (int i = 0; i < nSims; ++i)
+        {
+            double t = 0.0;
+            var x = new Vector([s0, v0]);
+
+            ReadOnlySpan<double> n = rsg.NextSequence().Value.Span;
+
+            for (int j = 0; j < nTimeSteps; ++j, t += dt)
+            {
+                var dw = new Vector([n[j], n[j + nTimeSteps]]);
+
+                // full truncation scheme
+                var xt = new Vector([x[0], (x[1] > 0) ? x[1] : 0.0]);
+
+                x = slvProcess.Apply(x, (slvProcess.Diffusion(t, xt) * sqrtDt * dw) + (slvProcess.Drift(t, xt) * dt));
+            }
+
+            stats.Add(df * option.Payoff!.Evaluate(x[0]));
+        }
+
+        double calculated = stats.Mean();
+        double errorEstimate = stats.ErrorEstimate();
+
+        double diff = Math.Abs(expected - calculated);
+
+        Assert.False(
+            diff > 2.35 * errorEstimate,
+            "Failed to reproduce call option price with HestonSLVProcess diffusion and drift discretization scheme"
+            + $"\n expected   : {expected}\n calculated : {calculated}\n error est. : {errorEstimate}\n diff       : {diff}");
+    }
+
+    // The test suite's getFixedLocalVolFromHeston: the Heston model's local volatility, from its implied volatility
+    // surface, sampled on the strikes of a local-volatility density calculator's meshers at each time of the grid.
+    private static FixedLocalVolSurface GetFixedLocalVolFromHeston(HestonModel hestonModel, TimeGrid timeGrid)
+    {
+        var trueImpliedVolSurf = new HestonBlackVolSurface(
+            hestonModel, AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, FourierIntegration.GaussLaguerre(32));
+
+        HestonProcess hestonProcess = hestonModel.Process;
+
+        var localVol = new NoExceptLocalVolSurface(
+            trueImpliedVolSurf,
+            hestonProcess.RiskFreeRate,
+            hestonProcess.DividendYield,
+            hestonProcess.S0,
+            Math.Sqrt(hestonProcess.Theta));
+
+        var localVolRND = new LocalVolRNDCalculator(
+            hestonProcess.S0, hestonProcess.RiskFreeRate, hestonProcess.DividendYield, localVol, timeGrid);
+
+        List<double[]> strikes = [];
+        for (int i = 1; i < timeGrid.Size; ++i)
+        {
+            double t = timeGrid[i];
+            Fdm1dMesher fdm1dMesher = localVolRND.Mesher(t);
+
+            ImmutableArray<double> logStrikes = fdm1dMesher.Locations();
+            double[] strikeSlice = new double[logStrikes.Length];
+
+            for (int j = 0; j < logStrikes.Length; ++j)
+            {
+                strikeSlice[j] = Math.Exp(logStrikes[j]);
+            }
+
+            strikes.Add(strikeSlice);
+        }
+
+        int nStrikes = strikes[0].Length;
+        var localVolMatrix = new Matrix(nStrikes, timeGrid.Size - 1);
+        for (int i = 1; i < timeGrid.Size; ++i)
+        {
+            double t = timeGrid[i];
+            double[] strikeSlice = strikes[i - 1];
+
+            for (int j = 0; j < nStrikes; ++j)
+            {
+                double s = strikeSlice[j];
+                localVolMatrix[j, i - 1] = localVol.LocalVol(t, s, true);
+            }
+        }
+
+        Date todaysDate = hestonProcess.RiskFreeRate.ReferenceDate;
+        DayCounter dc = hestonProcess.RiskFreeRate.DayCounter;
+
+        List<double> expiries = [];
+        for (int i = 1; i < timeGrid.Size; ++i)
+        {
+            expiries.Add(timeGrid[i]);
+        }
+
+        return new FixedLocalVolSurface(todaysDate, expiries, strikes, localVolMatrix, dc);
     }
 
     private static double FokkerPlanckPrice1D(

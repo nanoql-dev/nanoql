@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/quantooption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBarrierValues (S-bar's quanto barrier option); testDoubleBarrierValues (S-xeq's quanto double-barrier option)
+// Partial: testDoubleBarrierValues (S-xeq's quanto double-barrier option)
 
 using NanoQL.Instruments;
 using NanoQL.Methods;
@@ -184,6 +184,53 @@ public class QuantoOptionTests
         ];
 
         CheckForwardValues(values, ForwardPerformanceVanillaEngine.Calculate);
+    }
+
+    [Fact]
+    public void TestBarrierValues()
+    {
+        // Testing quanto-barrier option values...
+
+        QuantoBarrierOptionData[] values =
+        [
+            // TODO:  Bench results against an existing prop calculator
+            // barrierType, barrier, rebate, type, spot, strike,
+            // q, r, T, vol, fx risk-free rate, fx vol, corr, result, tol
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Call, 100, 90, 0.04, 0.0212, 0.50, 0.25, 0.05, 0.2, 0.3, 8.247, 0.5),
+            new(BarrierType.DownOut, 95.0, 3.0, OptionType.Put, 100, 90, 0.04, 0.0212, 0.50, 0.25, 0.05, 0.2, 0.3, 2.274, 0.5),
+            new(BarrierType.DownIn, 95.0, 0, OptionType.Put, 100, 90, 0.04, 0.0212, 0.50, 0.25, 0.05, 0.2, 0.3, 2.85, 0.5),
+        ];
+
+        DayCounter dc = new Actual360();
+        Date today = Date.TodaysDate();
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        foreach (QuantoBarrierOptionData value in values)
+        {
+            var payoff = new PlainVanillaPayoff(value.Type, value.Strike);
+
+            Date exDate = today + TimeToDays(value.T);
+            var exercise = new EuropeanExercise(exDate);
+
+            Market market = Market.On(today, dc, value.S, value.Q, value.R, value.V, value.Fxr, value.Fxv);
+
+            var option = new QuantoBarrierOption(value.BarrierType, value.Barrier, value.Rebate, payoff, exercise);
+
+            Real calculated = QuantoEngine.Calculate(
+                option, context, market.Process, market.ForeignTS, market.FxVolTS, value.Corr,
+                AnalyticBarrierEngine.Calculate).NPV!.Value;
+            Real error = Math.Abs(calculated - value.Result);
+            Real tolerance = value.Tol;
+
+            Assert.False(
+                error > tolerance,
+                $"Quanto {BarrierTypeFunctions.ToString(value.BarrierType)} {exercise.Type} {payoff.OptionType} option "
+                + $"with {payoff.Name} payoff: spot value {value.S}, strike {payoff.Strike}, barrier {value.Barrier}, "
+                + $"rebate {value.Rebate}, dividend yield {value.Q}, risk-free rate {value.R}, fx risk-free rate "
+                + $"{value.Fxr}, reference date {today}, maturity {exercise.LastDate()}, volatility {value.V}, fx "
+                + $"volatility {value.Fxv}, correlation {value.Corr}: expected value {value.Result}, calculated value "
+                + $"{calculated}, error {error}, tolerance {tolerance}");
+        }
     }
 
     [Fact]
@@ -709,6 +756,10 @@ public class QuantoOptionTests
     private readonly record struct QuantoOptionData(
         OptionType Type, Real Strike, Real S, Rate Q, Rate R, double T, Volatility V, Rate Fxr, Volatility Fxv, Real Corr,
         Real Result, Real Tol);
+
+    private readonly record struct QuantoBarrierOptionData(
+        BarrierType BarrierType, Real Barrier, Real Rebate, OptionType Type, Real S, Real Strike, Rate Q, Rate R, double T,
+        Volatility V, Rate Fxr, Volatility Fxv, Real Corr, Real Result, Real Tol);
 
     private readonly record struct QuantoForwardOptionData(
         OptionType Type, Real Moneyness, Real S, Rate Q, Rate R, double Start, double T, Volatility V, Rate Fxr,

@@ -32,6 +32,26 @@ internal static class BarrierInputs
             ExerciseOf(exercise, context));
 
     /// <summary>
+    /// The double barrier option a double barrier spec of
+    /// <c>tools/vectors/gen/pricingengines/barrier/analyticdoublebarrierengine.py</c>, a payoff spec and an exercise spec
+    /// describe.
+    /// </summary>
+    /// <param name="barrier">The double barrier spec: {"barrierType", "barrierLo", "barrierHi", "rebate"}.</param>
+    /// <param name="payoff">The payoff spec.</param>
+    /// <param name="exercise">The exercise spec.</param>
+    /// <param name="context">The case's evaluation context.</param>
+    /// <returns>The option.</returns>
+    public static DoubleBarrierOption DoubleOptionOf(
+        JsonElement barrier, JsonElement payoff, JsonElement exercise, EvaluationContext context) =>
+        new(
+            (DoubleBarrierType)barrier.GetProperty("barrierType").GetInt32(),
+            barrier.GetProperty("barrierLo").GetDouble(),
+            barrier.GetProperty("barrierHi").GetDouble(),
+            barrier.GetProperty("rebate").GetDouble(),
+            PayoffOf(payoff),
+            ExerciseOf(exercise, context));
+
+    /// <summary>
     /// Prices a pricing spec of tools/vectors/gen/pricingengines/barrier/fdblackscholesbarrierengine.py with
     /// <see cref="FdBlackScholesBarrierEngine"/> or <see cref="FdBlackScholesRebateEngine"/>.
     /// </summary>

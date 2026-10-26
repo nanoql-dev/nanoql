@@ -33,6 +33,12 @@ namespace NanoQL.PricingEngines;
 /// closed form has no real λ (<c>λ² = μ² + 2r/σ² &lt; 0</c>, at negative rates), where QuantLib's is NaN, is the
 /// rebate's present value at the hit, integrated over the barrier's first-passage density.
 /// </para>
+/// <para>
+/// The formulas are first-passage closed forms in one equivalent-constant carry and volatility, the variance and
+/// discounts to expiry: no exact closed form exists for a first passage under general deterministic term structures,
+/// and on shaped markets they miss QuantLib's finite-difference barrier engine by -1.6% to +0.6% (the S-bar plan's BR4
+/// (d)); the term-structure-exact routes are <see cref="FdBlackScholesBarrierEngine"/> and the Monte Carlo engines.
+/// </para>
 /// <para>QuantLib's references: Haug's formulas, and its <c>testHaugValues</c> table.</para>
 /// </remarks>
 public static class AnalyticBarrierEngine
@@ -92,6 +98,37 @@ public static class AnalyticBarrierEngine
 
         return new OneAssetOptionResults { NPV = new Formulas(option, process, payoff, spot).Value() };
     }
+
+    // A curve's zero rate to a date re-expressed on a volatility's clock: its own continuous rate to the date times its
+    // own time over the volatility's, the rate at which its discount accrues per unit of the volatility's time; 0 where
+    // the curve accrues nothing (a date on or before its reference date); the curve's own rate where the volatility's
+    // time is 0, as there is no other clock to read it on. The barrier family's closed forms read their rates through
+    // it (the S-rx plan's SRXR3 (iii), the S-bar plan's BR5 (i)).
+    internal static double RateOnVolatilityClock(YieldTermStructure curve, BlackVolTermStructure volatility, Date date)
+    {
+        double curveTime = curve.AccrualTimeTo(date);
+        double volTime = volatility.AccrualTimeTo(date);
+        if (volTime == 0.0)
+        {
+            return date < curve.ReferenceDate
+                ? 0.0
+                : curve.ZeroRate(date, curve.DayCounter, Compounding.Continuous, Frequency.NoFrequency).Rate;
+        }
+
+        if (curveTime == 0.0)
+        {
+            return 0.0;
+        }
+
+        double rate = curve.ZeroRate(date, curve.DayCounter, Compounding.Continuous, Frequency.NoFrequency).Rate;
+        return rate * (curveTime / volTime);
+    }
+
+    // The rebate's value alone, the formulas' rebate terms with the variance read at the given strike: a knock-in's paid
+    // at expiry where the barrier is never hit (E), a knock-out's at the hit (F); with no variance, the forward's.
+    // The binary barrier engine prices the rebate QuantLib's drops through it.
+    internal static double RebateValue(BarrierOption option, GeneralizedBlackScholesProcess process, double strike) =>
+        new Formulas(option, process, new PlainVanillaPayoff(OptionType.Call, strike), process.X0).RebateValue();
 
     // QuantLib's engine's members, each read once: every value is the expression QuantLib's member computes.
     private sealed class Formulas
@@ -167,30 +204,39 @@ public static class AnalyticBarrierEngine
             };
         }
 
+        internal double RebateValue()
+        {
+            bool down = barrierType is BarrierType.DownIn or BarrierType.DownOut;
+            bool knockIn = barrierType is BarrierType.DownIn or BarrierType.UpIn;
+            if (variance < NumericLimits.QL_EPSILON)
+            {
+                double forward = underlying * dividendDiscount / riskFreeDiscount;
+                bool hit = (underlying == barrier) || (down ? forward <= barrier : forward >= barrier);
+                if (knockIn)
+                {
+                    return hit ? 0.0 : rebate * riskFreeDiscount;
+                }
+
+                if (!hit)
+                {
+                    return 0.0;
+                }
+
+                double logHS = Math.Log(barrier / underlying);
+                double hitTime = (logHS == 0.0) ? 0.0 : logHS / (riskFreeRate - dividendYield);
+                return rebate * Math.Exp(-riskFreeRate * hitTime);
+            }
+
+            double eta = down ? 1.0 : -1.0;
+            return knockIn ? E(eta) : F(eta);
+        }
+
         // A curve's zero rate re-expressed on the volatility's clock: its own continuous rate to the exercise times its
         // own time over the volatility's, the rate at which its discount accrues per unit of the volatility's time; 0
         // where the curve accrues nothing (an exercise on or before its reference date); the curve's own rate where
         // the volatility's time is 0, as there is no other clock to read it on.
-        private double OnVolatilityClock(YieldTermStructure curve)
-        {
-            double curveTime = curve.AccrualTimeTo(lastDate);
-            double volTime = volatilityStructure.AccrualTimeTo(lastDate);
-            if (volTime == 0.0)
-            {
-                return lastDate < curve.ReferenceDate
-                    ? 0.0
-                    : curve.ZeroRate(lastDate, curve.DayCounter, Compounding.Continuous, Frequency.NoFrequency).Rate;
-            }
-
-            if (curveTime == 0.0)
-            {
-                return 0.0;
-            }
-
-            double rate = curve.ZeroRate(
-                lastDate, curve.DayCounter, Compounding.Continuous, Frequency.NoFrequency).Rate;
-            return rate * (curveTime / volTime);
-        }
+        private double OnVolatilityClock(YieldTermStructure curve) =>
+            RateOnVolatilityClock(curve, volatilityStructure, lastDate);
 
         // QuantLib's master (e29c64126): with no variance the underlying follows its forward, and hits the barrier, if
         // at all, when the forward reaches it; a spot on the barrier hits it now
