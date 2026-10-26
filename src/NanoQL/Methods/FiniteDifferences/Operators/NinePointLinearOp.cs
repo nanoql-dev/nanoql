@@ -238,4 +238,27 @@ public class NinePointLinearOp : FdmLinearOp
             a22[i] = m.a22[i] * s;
         }
     }
+
+    /// <summary>
+    /// Sets this operator's coefficients, in place, to another's with each row scaled: QuantLib's
+    /// <c>op = m.mult(u)</c>, by the same arithmetic, so that a time step allocates nothing.
+    /// </summary>
+    /// <param name="m">The operator scaled, on this one's directions and mesher.</param>
+    /// <param name="u">The rows' scales, one per point.</param>
+    internal void SetMult(NinePointLinearOp m, ReadOnlySpan<double> u)
+    {
+        for (int i = 0; i < N; ++i)
+        {
+            double s = u[i];
+            a11[i] = m.a11[i] * s;
+            a00[i] = m.a00[i] * s;
+            a01[i] = m.a01[i] * s;
+            a02[i] = m.a02[i] * s;
+            a10[i] = m.a10[i] * s;
+            a20[i] = m.a20[i] * s;
+            a21[i] = m.a21[i] * s;
+            a12[i] = m.a12[i] * s;
+            a22[i] = m.a22[i] * s;
+        }
+    }
 }

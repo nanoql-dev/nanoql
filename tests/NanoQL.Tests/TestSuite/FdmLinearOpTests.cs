@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/fdmlinearop.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testDerivativeWeightsOnNonUniformGrids, testBiCGstab, testGMRES (S-core); testFdmHestonHullWhiteOp (S-exo)
+// Partial: testDerivativeWeightsOnNonUniformGrids, testBiCGstab, testGMRES (S-core)
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -778,6 +778,133 @@ public class FdmLinearOpTests
     }
 
     [Fact]
+    public void TestFdmHestonHullWhiteOp()
+    {
+        // Testing FDM with Heston Hull-White model...
+
+        var today = new Date(28, Month.March, 2004);
+
+        var exerciseDate = new Date(28, Month.March, 2012);
+        double maturity = new Actual365Fixed().YearFraction(today, exerciseDate);
+
+        Size[] dim = [51, 31, 31];
+
+        HybridHestonHullWhiteProcess jointProcess = CreateHestonHullWhite(today, maturity);
+        FdmSolverDesc desc = CreateSolverDesc(dim, jointProcess);
+        FdmMesher mesher = desc.Mesher;
+
+        HullWhiteForwardProcess hwFwdProcess = jointProcess.HullWhiteProcess;
+
+        var hwProcess = new HullWhiteProcess(
+            jointProcess.HestonProcess.RiskFreeRate, hwFwdProcess.A, hwFwdProcess.Sigma);
+
+        FdmLinearOpComposite linearOp = new FdmHestonHullWhiteOp(
+            mesher, jointProcess.HestonProcess, hwProcess, jointProcess.Eta);
+
+        Real[] rhs = new Real[mesher.Layout.Size];
+        FdmLinearOpIterator iter = mesher.Layout.Begin();
+        for (int n = 0; n < mesher.Layout.Size; ++n, iter.Increment())
+        {
+            rhs[iter.Index] = desc.Calculator.AvgInnerValue(iter, maturity);
+        }
+
+        Real theta = 0.5 + (Math.Sqrt(3.0) / 6.0);
+        var hsEvolver = new HundsdorferScheme(theta, 0.5, linearOp);
+        var hsModel = new FiniteDifferenceModel<HundsdorferScheme>(hsEvolver);
+
+        hsModel.Rollback(rhs, maturity, 0.0, desc.TimeSteps);
+
+        List<Real> tx = [], ty = [], tr = [], y = [];
+        iter = mesher.Layout.Begin();
+        for (int n = 0; n < mesher.Layout.Size; ++n, iter.Increment())
+        {
+            if (iter.Coordinates[1] == 0 && iter.Coordinates[2] == 0)
+            {
+                tx.Add(mesher.Location(iter, 0));
+            }
+
+            if (iter.Coordinates[0] == 0 && iter.Coordinates[2] == 0)
+            {
+                ty.Add(mesher.Location(iter, 1));
+            }
+
+            if (iter.Coordinates[0] == 0 && iter.Coordinates[1] == 0)
+            {
+                tr.Add(mesher.Location(iter, 2));
+            }
+        }
+
+        const Real x0 = 100;
+        Real v0 = jointProcess.HestonProcess.V0;
+        const Real r0 = 0;
+        for (Size k = 0; k < dim[2]; ++k)
+        {
+            var ret = new Matrix(dim[0], dim[1]);
+            for (Size i = 0; i < dim[0]; ++i)
+            {
+                for (Size j = 0; j < dim[1]; ++j)
+                {
+                    ret[i, j] = rhs[i + (j * dim[0]) + (k * dim[0] * dim[1])];
+                }
+            }
+
+            y.Add(new BicubicSpline([.. ty], [.. tx], ret).Evaluate(v0, Math.Log(x0)));
+        }
+
+        Real directCalc = new MonotonicCubicNaturalSpline([.. tr], [.. y]).Evaluate(r0);
+
+        Real[] x = [Math.Log(x0), v0, r0];
+
+        var solver3d = new Fdm3DimSolver(desc, FdmSchemeDesc.Hundsdorfer(), linearOp);
+        Real solverCalc = solver3d.InterpolateAt(x[0], x[1], x[2]);
+        Real solverTheta = solver3d.ThetaAt(x[0], x[1], x[2])!.Value;
+
+        if (Math.Abs(directCalc - solverCalc) > 1e-4)
+        {
+            Assert.Fail("Error in calculating PV for Heston Hull White Option");
+        }
+
+        var solverNd = new FdmNdimSolver(desc, FdmSchemeDesc.Hundsdorfer(), linearOp);
+        Real solverNdCalc = solverNd.InterpolateAt(x);
+        Real solverNdTheta = solverNd.ThetaAt(x)!.Value;
+
+        if (Math.Abs(solverNdCalc - solverCalc) > 1e-4)
+        {
+            Assert.Fail("Error in calculating PV for Heston Hull White Option");
+        }
+
+        if (Math.Abs(solverNdTheta - solverTheta) > 1e-4)
+        {
+            Assert.Fail("Error in calculating PV for Heston Hull White Option");
+        }
+
+        var option = new VanillaOption(
+            new PlainVanillaPayoff(OptionType.Call, 160.0), new EuropeanExercise(exerciseDate));
+
+        const Real tol = 0.025;
+
+        // QuantLib sets the engine and prices nothing with it
+        Func<VanillaOption, EvaluationContext, OneAssetOptionResults> engine =
+            new MakeMCHestonHullWhiteEngine<PseudoRandom, GeneralStatistics>(jointProcess, 42)
+                .WithSteps(200)
+                .WithAntitheticVariate()
+                .WithControlVariate()
+                .WithAbsoluteTolerance(tol)
+                .ToEngine();
+        _ = (option, engine);
+
+        // the following takes far too long
+        // const Real expected = option.NPV();
+        // use precalculated value instead
+        const Real expected = 4.73;
+
+        if (Math.Abs(directCalc - expected) > 3 * tol)
+        {
+            Assert.Fail("Error in calculating MC PV for Heston Hull White Option");
+        }
+    }
+
+    [Fact]
     public void TestCrankNicolsonWithDamping()
     {
         // Testing Crank-Nicolson with initial implicit damping steps for a digital option...
@@ -1100,5 +1227,63 @@ public class FdmLinearOpTests
 
         public override double Evaluate(double price) =>
             ((price >= 100.0) ? 108.0 : 100.0) - ((price <= 75.0) ? 100.0 - price : 0.0);
+    }
+
+    // fdmlinearop.cpp's createHestonHullWhite (lines 133-167), at the evaluation date it sets.
+    private static HybridHestonHullWhiteProcess CreateHestonHullWhite(Date today, double maturity)
+    {
+        DayCounter dc = new Actual365Fixed();
+        const Real s0 = 100.0;
+
+        List<Date> dates = [];
+        List<Rate> rates = [], divRates = [];
+
+        for (Size i = 0; i <= 25; ++i)
+        {
+            dates.Add(today + new Period(i, TimeUnit.Years));
+            rates.Add(0.05);
+            divRates.Add(0.02);
+        }
+
+        YieldTermStructure rTS = new ZeroCurve(dates, rates, dc);
+        YieldTermStructure qTS = new ZeroCurve(dates, divRates, dc);
+
+        const Real v0 = 0.04;
+        var hestonProcess = new HestonProcess(rTS, qTS, s0, v0, 1.0, v0 * 0.75, 0.4, -0.7);
+
+        HullWhiteForwardProcess hwFwdProcess = new HullWhiteForwardProcess(rTS, 0.00883, 0.01)
+            .WithForwardMeasureTime(maturity);
+
+        const Real equityShortRateCorr = -0.7;
+
+        return new HybridHestonHullWhiteProcess(hestonProcess, hwFwdProcess, equityShortRateCorr);
+    }
+
+    // fdmlinearop.cpp's createSolverDesc (lines 169-213).
+    private static FdmSolverDesc CreateSolverDesc(Size[] dim, HybridHestonHullWhiteProcess process)
+    {
+        double maturity = process.HullWhiteProcess.ForwardMeasureTime;
+
+        Fdm1dMesher[] mesher1d =
+        [
+            new Uniform1dMesher(Math.Log(22.0), Math.Log(440.0), dim[0]),
+            new FdmHestonVarianceMesher(dim[1], process.HestonProcess, maturity),
+            new Uniform1dMesher(-0.15, 0.15, dim[2]),
+        ];
+
+        FdmMesher mesher = new FdmMesherComposite(mesher1d);
+
+        ImmutableArray<BoundaryCondition<FdmLinearOp>> boundaries = [];
+
+        var conditions = new FdmStepConditionComposite([], []);
+
+        StrikedTypePayoff payoff = new PlainVanillaPayoff(OptionType.Call, 160.0);
+
+        FdmInnerValueCalculator calculator = new FdmLogInnerValue(payoff, mesher, 0);
+
+        const Size tGrid = 100;
+        const Size dampingSteps = 0;
+
+        return new FdmSolverDesc(mesher, boundaries, conditions, calculator, maturity, tGrid, dampingSteps);
     }
 }

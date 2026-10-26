@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/matrices.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testHouseholderTransformation, testHouseholderReflection (S-exo's Householder transformation); testOrthogonalProjection (S-mm); testQRDecomposition, testQRSolve (S-core); testMoorePenroseInverse (S-xrt)
+// Partial: testOrthogonalProjection (S-mm); testQRDecomposition, testQRSolve (S-core); testMoorePenroseInverse (S-xrt)
 // Moved: testSparseMatrixMemory line 755 (Divergences/SparseMatrixProductTests.cs)
 
 using NanoQL.Numerics;
@@ -21,6 +21,10 @@ public class MatricesTests
 {
     // QL_EPSILON (qldefines.hpp): machine epsilon.
     private const double QL_EPSILON = 2.220446049250313e-16;
+
+    // M_PI and M_SQRT2 (mathconstants.hpp).
+    private const double M_PI = 3.141592653589793238462643383280;
+    private const double M_SQRT2 = 1.41421356237309504880;
 
     private const Size N = 3;
 
@@ -678,6 +682,103 @@ public class MatricesTests
         Assert.Empty(errors);
     }
 
+    [Fact]
+    public void TestHouseholderTransformation()
+    {
+        // Testing Householder Transformation...
+
+        var rng = new MersenneTwisterUniformRng(1234);
+
+        static Matrix I(Size i)
+        {
+            var id = new Matrix(i, i, 0.0);
+            for (Size j = 0; j < i; ++j)
+            {
+                id[j, j] = 1.0;
+            }
+
+            return id;
+        }
+
+        for (Size i = 1; i < 10; ++i)
+        {
+            Vector v = new(i), x = new(i);
+            for (Size j = 0; j < i; ++j)
+            {
+                v[j] = rng.Next().Value - 0.5;
+                x[j] = rng.Next().Value - 0.5;
+            }
+
+            Vector expected = (I(i) - (2.0 * OuterProduct(v, v))) * x;
+            Vector calculated = new HouseholderTransformation(v).Evaluate(x);
+            CheckCloseArrayTol(calculated, expected, 1e4 * QL_EPSILON);
+        }
+
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public void TestHouseholderReflection()
+    {
+        // Testing Householder Reflection...
+
+        const double tol = 1e4 * QL_EPSILON;
+
+        static Vector E(Size n, Size m = 0)
+        {
+            var e = new Vector(n, 0.0);
+            e[m] = 1.0;
+            return e;
+        }
+
+        for (Size i = 0; i < 5; ++i)
+        {
+            CheckCloseArrayTol(
+                new HouseholderReflection(E(5)).Evaluate(E(5, i)), E(5), tol);
+            CheckCloseArrayTol(
+                new HouseholderReflection(E(5)).Evaluate(M_PI * E(5, i)), M_PI * E(5), tol);
+            CheckCloseArrayTol(
+                new HouseholderReflection(E(5)).Evaluate(
+                    E(5, i) + E(5)),
+                ((i == 0) ? 2.0 : M_SQRT2) * E(5),
+                tol);
+        }
+
+        // limits
+        for (Real x = 10; x > 1e-50; x *= 0.1)
+        {
+            CheckCloseArrayTol(
+                new HouseholderReflection(E(3)).Evaluate(
+                    new Vector([10.0, x, 0])),
+                Math.Sqrt((10.0 * 10.0) + (x * x)) * E(3),
+                tol);
+
+            CheckCloseArrayTol(
+                new HouseholderReflection(E(3)).Evaluate(
+                    new Vector([10.0, x, 1e-3])),
+                Math.Sqrt((10.0 * 10.0) + (x * x) + (1e-3 * 1e-3)) * E(3),
+                tol);
+        }
+
+        var rng = new MersenneTwisterUniformRng(1234);
+
+        for (Size i = 0; i < 100; ++i)
+        {
+            Vector v = new Vector([rng.Next().Value, rng.Next().Value, rng.Next().Value]) - 0.5;
+            Matrix u = new HouseholderTransformation(v / ArrayFunctions.Norm2(v)).GetMatrix();
+
+            Vector eu = u * E(3, i % 3);
+            Vector a = new Vector([rng.Next().Value, rng.Next().Value, rng.Next().Value]) - 0.5;
+
+            Matrix h = new HouseholderTransformation(
+                new HouseholderReflection(eu).ReflectionVector(a)).GetMatrix();
+
+            CheckCloseArrayTol(u * h * a, ArrayFunctions.Norm2(a) * E(3, i % 3), tol);
+        }
+
+        Assert.Empty(errors);
+    }
+
     private static Func<Vector, Vector> MatrixMult(Matrix m)
     {
         Matrix m_ = m.Clone();
@@ -764,6 +865,16 @@ public class MatricesTests
                     errors.Add($"difference between {a:R} and {e:R} exceeds {tol:R}%");
                 }
             }
+        }
+    }
+
+    // matrices.cpp's QL_CHECK_CLOSE_ARRAY_TOL (lines 916-922): the sizes required equal, then each difference small.
+    private void CheckCloseArrayTol(Vector actual, Vector expected, double tol)
+    {
+        Assert.True(actual.Size == expected.Size, "critical check actual.size() == expected.size() has failed");
+        for (int i = 0; i < actual.Size; i++)
+        {
+            CheckSmall(actual[i] - expected[i], tol);
         }
     }
 

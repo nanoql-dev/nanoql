@@ -90,12 +90,27 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
         double? illegalLocalVolOverwrite = null,
         int direction = 0,
         FdmQuantoHelper? quantoHelper = null)
+        : this(mesher, bsProcess, strike, localVol, illegalLocalVolOverwrite, direction, quantoHelper, null)
+    {
+    }
+
+    // The operator on a clock given, the basket engines' across their processes (the S-exo plan's ED10), or on the
+    // process's own (Clock) where none is given.
+    internal FdmBlackScholesOp(
+        FdmMesher mesher,
+        GeneralizedBlackScholesProcess bsProcess,
+        double strike,
+        bool localVol,
+        double? illegalLocalVolOverwrite,
+        int direction,
+        FdmQuantoHelper? quantoHelper,
+        TermStructure? clock)
     {
         ArgumentNullException.ThrowIfNull(mesher);
         ArgumentNullException.ThrowIfNull(bsProcess);
         this.mesher = mesher;
         rTS = bsProcess.RiskFreeRate;
-        clock = Clock(bsProcess, quantoHelper);
+        this.clock = clock ?? Clock(bsProcess, quantoHelper);
         qTS = bsProcess.DividendYield;
         volTS = bsProcess.BlackVolatility;
         this.localVol = localVol ? bsProcess.LocalVolatility : null;
@@ -283,6 +298,31 @@ public sealed class FdmBlackScholesOp : FdmLinearOpComposite
             if (structure.ReferenceDate < origin)
             {
                 origin = structure.ReferenceDate;
+            }
+        }
+
+        return origin == rTS.ReferenceDate ? rTS : new FlatForward(origin, 0.0, rTS.DayCounter);
+    }
+
+    // The clock of an engine reading several Black-Scholes processes (the S-exo plan's ER5 (i), ED10): Clock's form
+    // over all of them, the earliest reference date of every process's curves, volatilities and local volatility, on
+    // the first process's risk-free day counter; the first process's risk-free curve itself where none is dated
+    // before it, so a market on one clock keeps QuantLib's bits.
+    internal static TermStructure ClockAcross(IReadOnlyList<GeneralizedBlackScholesProcess> processes)
+    {
+        YieldTermStructure rTS = processes[0].RiskFreeRate;
+        Date origin = rTS.ReferenceDate;
+        foreach (GeneralizedBlackScholesProcess process in processes)
+        {
+            Date earliest = process.EarliestReferenceDate();
+            if (earliest < origin)
+            {
+                origin = earliest;
+            }
+
+            if (process.LocalVolatility.ReferenceDate < origin)
+            {
+                origin = process.LocalVolatility.ReferenceDate;
             }
         }
 

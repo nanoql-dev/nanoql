@@ -333,6 +333,17 @@ Facts:
 - `ThePricesAreOnTheSectionsOwnLevel`
 - `TheRecentredPricesAreOnTheSectionsOwnLevel`
 
+## AverageBasketPayoffWeightCountTests
+
+[`Divergences/AverageBasketPayoffWeightCountTests.cs`](../tests/NanoQL.Tests/Divergences/AverageBasketPayoffWeightCountTests.cs)
+
+The average basket payoff on a number of prices other than its weights'. QuantLib's `inner_product` runs over the weights and reads the prices unchecked (`basketoption.hpp:77-81`): on two assets, three weights read past the shorter array, so its Monte Carlo and finite-difference engines price a run-dependent value (the 2-D engine 2.4177 on one run, the Monte Carlo 11.902 and 11.896 on two), and one weight prices asset 1 alone (the 2-D engine 13.1679), where its Choi, Deng-Li-Zhou and single-factor engines refuse ("wrong number of weights arguments in payoff", `choibasketengine.cpp:97-98`). nanoql's payoff refuses a price count other than its weights' with that text (the S-exo plan's ER5 (v)): QuantLib's own check, everywhere.
+
+Facts:
+
+- `MoreWeightsThanAssetsAreRefused`
+- `FewerWeightsThanAssetsAreRefused`
+
 ## BMANullIndexTests
 
 [`Divergences/BMANullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/BMANullIndexTests.cs)
@@ -415,6 +426,38 @@ The analytic barrier engine at zero volatility (the S-rx plan's SRXR3 (i), taken
 Facts:
 
 - `TestZeroVolatility`
+
+## BasketExpiryBeforeReferenceDateTests
+
+[`Divergences/BasketExpiryBeforeReferenceDateTests.cs`](../tests/NanoQL.Tests/Divergences/BasketExpiryBeforeReferenceDateTests.cs)
+
+The basket engines that read their structures by date on an option expiring before a later structure's date. QuantLib reads each discount, variance and deviation by date from the structure's own reference date (`vectorbsmprocessextractor.cpp:48`, `:71`, `:80`, `:89-90`, which Choi's, the single-factor and the n-dimensional engines read, and `choibasketengine.cpp:174-188`, Choi's nodes), so an option expiring before a risk-free curve's or a volatility's date is refused with "negative time". Each read here accrues nothing before its structure's date (the playbook's dates row, the S-exo plan's ER5 (i) class, round 1's B1-1): the option is priced as QuantLib prices the market restated from the evaluation date, a curve's discount 1 and a volatility's variance 0 up to its date, and as nanoql's 2-D finite-difference engine prices it on its clock.
+
+Facts:
+
+- `ARiskFreeCurveDatedAfterExpiryDiscountsNothing`
+- `AVolatilityDatedAfterExpiryAccruesNoVariance`
+
+## BasketPayoffEmptyTests
+
+[`Divergences/BasketPayoffEmptyTests.cs`](../tests/NanoQL.Tests/Divergences/BasketPayoffEmptyTests.cs)
+
+The minimum and maximum basket payoffs on no prices. QuantLib dereferences `std::min_element` and `std::max_element` of the empty range, its end (`basketoption.hpp:56-58`, `:65-67`), undefined. nanoql refuses an empty basket (master §2.2's undefined-path row).
+
+Facts:
+
+- `AnEmptyBasketIsRefused`
+
+## BasketZeroVolatilitiesTests
+
+[`Divergences/BasketZeroVolatilitiesTests.cs`](../tests/NanoQL.Tests/Divergences/BasketZeroVolatilitiesTests.cs)
+
+Choi's and the n-dimensional finite-difference basket engines where every volatility is 0. QuantLib's fails on paths it doesn't intend: Choi's single-factor nodes take their intrinsic branch, which sets no root (`singlefactorbsmbasketengine.cpp:186`), and its read of the node's "d" throws "invalid map<K, T> key" (`choibasketengine.cpp:217`); the n-dimensional engine meshes every principal direction at √0 (`fdndimblackscholesvanillaengine.cpp:155-165`) and fails with "vector too long". At volatilities of 1e-8 both give the deterministic value, the discounted payoff at the forward basket. Here Choi's nodes take the root's limit, ±∞ by the side of the strike the forward basket is on, and the n-dimensional mesh is floored at QL_EPSILON² (the S-exo plan's ER5 (iii) and (vi) at their own boundary, R8, round 1's B1-2): the deterministic value, the single-factor engine's intrinsic and QuantLib's engines at 1e-8 are the checks.
+
+Facts:
+
+- `ChoiPricesTheDeterministicValue`
+- `TheNdimEnginePricesTheDeterministicValue`
 
 ## BatesDetJumpSmallReversionTests
 
@@ -1779,6 +1822,28 @@ Facts:
 - `TheCopyKeepsItsTypeAndItsValues`
 - `ANullReceiverThrows`
 
+## Fd2dMismatchedTimesTests
+
+[`Divergences/Fd2dMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/Fd2dMismatchedTimesTests.cs)
+
+The two-dimensional finite-difference basket engine on structures that measure time differently. QuantLib's engine runs on the first process's risk-free times (`fd2dblackscholesvanillaengine.cpp:58-67`) and reads the second process's curves and volatility at them (`fdm2dblackscholesop.cpp:53-54`, `:96-107`), each of which measures time from its own reference date in its own day counter: with asset 2's curves and volatility on Act/360, their discounts and variances by date unchanged, a spread call prices 0.22% below the same market restated on Act/365, and on a risk-free curve settling two business days after the other structures 0.53% below. nanoql's grid runs on the clock spanning both processes' structures, from their earliest reference date on the first process's risk-free day counter, each structure read at the instants its times denote and accruing nothing before its own date (master §2.2's mismatched-dates row, the S-exo plan's ER5 (i)), so it prices the restated market: QuantLib's engine on that market is the check. A market on one clock keeps QuantLib's arithmetic.
+
+Facts:
+
+- `TheSecondAssetsCurvesOnAnotherDayCounterPriceTheRestatedMarket`
+- `ARiskFreeCurveSettlingLaterIsPricedFromTheEarliestDate`
+- `TheSecondAssetsVolatilityOnItsOwnClockPricesTheRestatedMarket`
+
+## Fd2dTwoRiskFreeCurvesTests
+
+[`Divergences/Fd2dTwoRiskFreeCurvesTests.cs`](../tests/NanoQL.Tests/Divergences/Fd2dTwoRiskFreeCurvesTests.cs)
+
+The two-dimensional finite-difference basket engine on two risk-free curves. Each asset's operator discounts at its own risk-free rate, and QuantLib's mixed term adds back the first process's (`fdm2dblackscholesop.cpp:106-116`), so its price discounts at the second's, where every analytic two-asset engine discounts on the first's curve: a spread call with asset 2 on a curve at 8% and asset 1 at 5% prices 2.96% below the same market restated onto the first curve (asset 2's dividend yield q₂ + r₁ − r₂, the same forward). nanoql's mixed term adds back the second's rate (the S-exo plan's ER5 (ii)), so the price discounts on the first process's curve: QuantLib's engine on the restated market is the check, within the scheme's splitting error, the two curves' rates sitting in the two directions' operators where the restated market's sit in one (6e-6 relative here). On one risk-free curve the two read the same rate.
+
+Facts:
+
+- `TheMixedTermAddsBackTheSecondRateSoThePriceDiscountsOnTheFirstCurve`
+
 ## FdBarrierMismatchedTimesTests
 
 [`Divergences/FdBarrierMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/FdBarrierMismatchedTimesTests.cs)
@@ -1924,6 +1989,40 @@ Facts:
 - `ACashOrNothingReferenceGetsEachStrikeSolvedAlone`
 - `AnAssetOrNothingReferenceGetsEachStrikeSolvedAlone`
 
+## FdNdimMismatchedTimesTests
+
+[`Divergences/FdNdimMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/FdNdimMismatchedTimesTests.cs)
+
+The n-dimensional finite-difference basket engine on structures that measure time differently. QuantLib's engine takes its maturity from the first process's risk-free times and reads every inner value's discounts at them (`fdndimblackscholesvanillaengine.cpp:58-63`, `:134-136`): with asset 2's dividend curve and volatility on Act/360, their discounts and variances by date unchanged, a spread call prices 0.16% below the same market restated on Act/365, and an American average put on a risk-free curve settling two business days after the other structures 0.19% below. nanoql runs on the clock spanning every process's structures, each read at the instants its times denote and accruing nothing before its own date (the S-exo plan's ER5 (i)), so it prices the restated market: QuantLib's engine on that market is the check. A market on one clock keeps QuantLib's arithmetic.
+
+Facts:
+
+- `TheSecondAssetsStructuresOnAnotherDayCounterPriceTheRestatedMarket`
+- `ARiskFreeCurveSettlingLaterIsPricedFromTheEarliestDate`
+
+## FdNdimSingularCovarianceTests
+
+[`Divergences/FdNdimSingularCovarianceTests.cs`](../tests/NanoQL.Tests/Divergences/FdNdimSingularCovarianceTests.cs)
+
+The n-dimensional finite-difference basket engine on a singular covariance. QuantLib meshes each principal direction over 1.3√λ·√T standard normal quantiles (`fdndimblackscholesvanillaengine.cpp:144-163`): an eigenvalue of 0 (a correlation of 1, a zero volatility) meshes its direction at one point, which its spline refuses ("Dimension 1 : invalid data"), and a rounding negative eigenvalue meshes NaN, while its price is continuous towards the singular case (an eigenvalue of 1e-10 prices 10.3739, its Monte Carlo engine 10.3459 ± 0.0506 at ρ = 1). nanoql floors the mesh's eigenvalue at the largest one's times machine epsilon, the operator keeping QuantLib's (the S-exo plan's ER5 (vi)): QuantLib's own value at near-singular covariances and the Monte Carlo engine are the checks.
+
+Facts:
+
+- `ACorrelationOfOnePricesTheLimit`
+- `AZeroVolatilityPricesTheLimit`
+
+## FdNdimTwoRiskFreeCurvesTests
+
+[`Divergences/FdNdimTwoRiskFreeCurvesTests.cs`](../tests/NanoQL.Tests/Divergences/FdNdimTwoRiskFreeCurvesTests.cs)
+
+The n-dimensional finite-difference basket engine on two risk-free curves. QuantLib's American branch builds every asset's forward on the first process's curve (`fdndimblackscholesvanillaengine.cpp:60-68`, `:175-187`), so with asset 2 on a curve at 8% and asset 1 at 5% an American average put prices 9.3498 whatever asset 2's rate, 5.2% above the same market restated onto the first curve (asset 2's dividend yield q₂ + r₁ − r₂, the same forward), and its European branch refuses two curves through its final discount ("interest rates need to be the same for all underlyings", `vectorbsmprocessextractor.cpp:52-57`). nanoql reads each forward on its own process's curves and discounts on the first's in both branches (the S-exo plan's ER5 (xxxi), ED27), as QuantLib's spread and Monte Carlo basket engines read two curves: QuantLib's engine on the restated market is the check, and the two-dimensional engine, which drifts each asset on its own curve, prices the American within the grids' error. On one risk-free curve the reads are QuantLib's.
+
+Facts:
+
+- `TheAmericanBranchReadsEachForwardOnItsOwnCurve`
+- `TheEuropeanBranchPricesWhereQuantLibRefuses`
+- `TheAmericanMeetsTheTwoDimensionalEngine`
+
 ## FdSabrZeroNuTests
 
 [`Divergences/FdSabrZeroNuTests.cs`](../tests/NanoQL.Tests/Divergences/FdSabrZeroNuTests.cs)
@@ -2034,6 +2133,16 @@ Facts:
 - `AnEmptyLayoutIsRefused`
 - `MoreMeshersThanDimensionsAreRefused`
 - `BandsOfDifferentSizesAreRefused`
+
+## FdmWienerOpDirectionTests
+
+[`Divergences/FdmWienerOpDirectionTests.cs`](../tests/NanoQL.Tests/Divergences/FdmWienerOpDirectionTests.cs)
+
+The Wiener operator in a direction past its count. QuantLib's `apply_direction` and `solve_splitting` read `ops_[direction]` unchecked (`fdmwienerop.cpp:71-79`), past its operators' vector, undefined. nanoql refuses such a direction (master §2.2's undefined-path row).
+
+Facts:
+
+- `ADirectionPastTheOperatorsIsRefused`
 
 ## FellerConstraintSizeTests
 
@@ -2676,6 +2785,27 @@ Facts:
 - `ExponentialFittingIsContinuousAsKappaFalls`
 - `BelowTheFloorTheInverseDistributionInverts`
 
+## HouseholderOppositeTests
+
+[`Divergences/HouseholderOppositeTests.cs`](../tests/NanoQL.Tests/Divergences/HouseholderOppositeTests.cs)
+
+The Householder reflection of a vector on the side opposite its unit vector e. QuantLib's reflection vector takes its near-parallel branches by ε = |a − (a·e)e|²/(a·e)² alone (`householder.cpp:47-72`): for a = −|a|e, ε is 0 and the zero vector maps a to itself, −|a|e, and near −e the series branch, derived for a ≈ |a|e, maps a to neither, where the reflection maps a to |a|e, as QuantLib's test holds for vectors on e's side (`matrices.cpp:951-1002`). nanoql takes QuantLib's general branch, (a − |a|e)/|a − |a|e|, wherever a·e is negative, which has no cancellation there (the S-exo plan's ER5 (iv)): QuantLib's general branch is the check.
+
+Facts:
+
+- `AVectorOppositeEReflectsOntoE`
+
+## HouseholderZeroVectorTests
+
+[`Divergences/HouseholderZeroVectorTests.cs`](../tests/NanoQL.Tests/Divergences/HouseholderZeroVectorTests.cs)
+
+The Householder transformation's matrix for the zero vector. QuantLib's divides the vector by its norm (`householder.cpp:32-42`), so the matrix is NaN, where the transformation the zero vector defines, x ↦ x − 2(v·x)v, is the identity. Choi's basket engine reaches it at a zero volatility, where the reflection onto e₁ of a vector already along e₁ is the zero vector, and its integration orders `lround(NaN)` then fail with `bad array new length` (`choibasketengine.cpp:136-167`), while Choi's price is continuous down to a volatility of 1e-16. nanoql's matrix of the zero vector is the identity (the S-exo plan's ER5 (iii)): QuantLib's own transformation of the zero vector, and Choi's limit, are the checks.
+
+Facts:
+
+- `TheZeroVectorsMatrixIsTheIdentity`
+- `ChoiAtAZeroVolatilityPricesItsLimit`
+
 ## HullWhiteForwardProcessSmallReversionTests
 
 [`Divergences/HullWhiteForwardProcessSmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/HullWhiteForwardProcessSmallReversionTests.cs)
@@ -3232,6 +3362,17 @@ Facts:
 
 - `ARecalibratedCopysOutputsAreAFreshModels`
 
+## McBasketMismatchedTimesTests
+
+[`Divergences/McBasketMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/McBasketMismatchedTimesTests.cs)
+
+The Monte Carlo European basket engine on structures that measure time differently. QuantLib's engine evolves every process on the first's times (`mceuropeanbasketengine.hpp:169-170`; `stochasticprocessarray.cpp`'s time), each process reading its structures at them: with asset 2's dividend curve and volatility on Act/360, their discounts and variances by date unchanged, a spread call prices 0.58% below the same market restated on Act/365 on the same seed, and on a risk-free curve settling two business days after the other structures 0.53% below. nanoql's paths run on the clock spanning every process's structures, each read at the instants its times denote and accruing nothing before its own date (the S-exo plan's ER5 (i)), so on the same seed they price the restated market: QuantLib's engine on that market is the check, well inside its error estimate. A market on one clock keeps QuantLib's draws and arithmetic.
+
+Facts:
+
+- `TheSecondAssetsStructuresOnAnotherDayCounterPriceTheRestatedMarket`
+- `ARiskFreeCurveSettlingLaterIsPricedFromTheEarliestDate`
+
 ## McDigitalSeed76Tests
 
 [`Divergences/McDigitalSeed76Tests.cs`](../tests/NanoQL.Tests/Divergences/McDigitalSeed76Tests.cs)
@@ -3373,6 +3514,18 @@ Facts:
 - `AnEmptyPathsEndsAreRefused`
 - `APathGeneratorOfNoStepIsRefused`
 - `AnEmptyMultiPathsPathSizeIsRefused`
+
+## MultiCubicSplineBoundaryTests
+
+[`Divergences/MultiCubicSplineBoundaryTests.cs`](../tests/NanoQL.Tests/Divergences/MultiCubicSplineBoundaryTests.cs)
+
+The multi-cubic spline at and beyond a dimension's last grid point, and at a coordinate that isn't a number. QuantLib treats the last point as extrapolation (`multicubicspline.hpp:550`), so it refuses it, its documented bug ("cannot interpolate at the grid points on the boundary surface", `:463-464`); with extrapolation allowed, its flat value there and beyond takes the last interval's index past it and reads one value past the data (`:553-554` with `:295`), undefined; and a NaN coordinate fails both of its range comparisons, so its search returns the grid's end and reads past it (`:557-558`). nanoql interpolates the last point on its last interval, its value the node's, reads the last value beyond it with no read past the data (the S-exo plan's ER5 (vii)), and refuses a NaN coordinate: the node's value and QuantLib's just inside are the checks.
+
+Facts:
+
+- `TheLastGridPointIsInterpolatedOnItsLastInterval`
+- `BeyondTheGridTheLastValueIsReadWithNoReadPastTheData`
+- `ACoordinateThatIsntANumberIsRefused`
 
 ## MultipleResetsFairSpreadTests
 

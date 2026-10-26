@@ -6,12 +6,16 @@ identity mapping (the payoff at the location) and FdmZeroInnerValue, their inner
 averaged over each point's cell, by QuantLib's Simpson integration where the payoff isn't smooth inside it) at every
 layout point at t = 0.5, for plain-vanilla calls and puts, cash-or-nothing, asset-or-nothing and gap payoffs, on a
 Black-Scholes mesher, a uniform mesher in the spot and a two-dimensional mesher with the underlying in the second
-direction.
+direction; and FdmLogBasketInnerValue (a basket payoff at the exponentials of every direction's location, its average
+the same) for minimum, maximum, average and spread payoffs on two Black-Scholes meshers and on three uniform log
+meshers, at t = 0.5.
 
 The specs are tools/vectors/gen/methods/finitedifferences/solvers/fdmbackwardsolver.py's calculators on
 fdmmeshercomposite.py's composites. The wheel's calls, by QuantLib-SWIG 1.44's fdm.i: the three C++ constructors
-(FdmCellAveragingInnerValue's without a mapping), and innerValue and avgInnerValue, the C++ members, at the layout's
-iterator. Read back by tests/NanoQL.Tests/Vectors/Methods/FiniteDifferences/Utilities/FdmInnerValueCalculatorVectorTests.cs."""
+(FdmCellAveragingInnerValue's without a mapping), FdmLogBasketInnerValue(payoff, mesher) on
+tools/vectors/gen/instruments/basketoption.py's payoffs, and innerValue and avgInnerValue, the C++ members, at the
+layout's iterator. Read back by
+tests/NanoQL.Tests/Vectors/Methods/FiniteDifferences/Utilities/FdmInnerValueCalculatorVectorTests.cs."""
 import importlib.util
 import math
 import os
@@ -35,6 +39,7 @@ def _load(name, rel):
 
 
 fbs = _load("fdmbackwardsolver", "methods/finitedifferences/solvers/fdmbackwardsolver.py")
+bo = _load("basketoption", "instruments/basketoption.py")
 mc, bsm, bsp, bc = fbs.mc, fbs.bsm, fbs.bsp, fbs.bc
 FLAT = bsp.PROCESSES[0][1]
 LOG_MESHERS = [("Black-Scholes", mc.composite_spec(bsm.bs_spec(21, FLAT, 1.0, 100.0)), 0),
@@ -81,6 +86,23 @@ def cases():
     inner, avg = values(fbs.calculator(cspec, mesher), mesher, 0.5)
     out.append({"name": "Zero", "inputs": {"settings": st, "mesher": mspec, "calculator": cspec, "t": 0.5},
                 "expected": {"innerValue": inner, "avgInnerValue": avg}})
+    two = mc.composite_spec(bsm.bs_spec(11, FLAT, 1.0, 100.0), bsm.bs_spec(9, bsp.PROCESSES[1][1], 1.0, 100.0))
+    three = mc.composite_spec(*[{"type": "Uniform", "start": math.log(a), "end": math.log(b), "size": n}
+                                for a, b, n in ((60.0, 150.0, 5), (70.0, 140.0, 4), (50.0, 160.0, 6))])
+    call, put = PAYOFFS[0][1], PAYOFFS[1][1]
+    baskets = [("two dimensions, minimum call", two, bo.payoff_spec("Min", call)),
+               ("two dimensions, spread put", two, bo.payoff_spec("Spread", put)),
+               ("two dimensions, average call", two, bo.payoff_spec("Average", call, weights=[0.7, 0.3])),
+               ("three dimensions, maximum put", three, bo.payoff_spec("Max", put)),
+               ("three dimensions, equal average call", three, bo.payoff_spec("Average", call, n=3))]
+    for name, mspec, payoff in baskets:
+        mesher, keep = mc.composite(mspec)
+        cspec = {"type": "LogBasket", "payoff": payoff}
+        p = bo.payoff(payoff)
+        inner, avg = values(ql.FdmLogBasketInnerValue(p, mesher), mesher, 0.5)
+        out.append({"name": f"LogBasket, {name}", "inputs": {"settings": st, "mesher": mspec, "calculator": cspec,
+                                                             "t": 0.5},
+                    "expected": {"innerValue": inner, "avgInnerValue": avg}})
     return out
 
 

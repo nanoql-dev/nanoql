@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 504 | 60 |
-| partial | 22 | 30 |
-| ported | 734 | 90 |
+| not started | 488 | 59 |
+| partial | 21 | 31 |
+| ported | 751 | 90 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -623,7 +623,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `averagetype` | not started |  | no nanoql type: AverageType |
 | `barrieroption` | ported | Instruments/BarrierOption.cs |  |
 | `barriertype` | ported | Instruments/BarrierType.cs, Instruments/BarrierTypeFunctions.cs |  |
-| `basketoption` | not started |  | no nanoql type: BasketPayoff, MinBasketPayoff, MaxBasketPayoff, AverageBasketPayoff, SpreadBasketPayoff, BasketOption |
+| `basketoption` | ported | Instruments/BasketOption/AverageBasketPayoff.cs, Instruments/BasketOption/BasketOption.cs, Instruments/BasketOption/BasketPayoff.cs, Instruments/BasketOption/MaxBasketPayoff.cs, Instruments/BasketOption/MinBasketPayoff.cs, Instruments/BasketOption/SpreadBasketPayoff.cs |  |
 | `bmaswap` | ported | Instruments/BMASwap.cs, Instruments/BMASwapResults.cs |  |
 | `bond` | ported | Instruments/Bond/Bond.cs, Instruments/Bond/BondPrice.cs, Instruments/Bond/BondPriceType.cs, Instruments/Bond/BondResults.cs |  |
 | `bondforward` | ported | Instruments/BondForward.cs |  |
@@ -667,7 +667,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `makevanillaswap` | ported | Instruments/MakeVanillaSwap.cs |  |
 | `makeyoyinflationcapfloor` | ported | Instruments/MakeYoYInflationCapFloor.cs |  |
 | `margrabeoption` | not started |  | no nanoql type: MargrabeOption, MargrabeOptionResults |
-| `multiassetoption` | not started |  | no nanoql type: MultiAssetOption, MultiAssetOptionResults |
+| `multiassetoption` | ported | Instruments/MultiAssetOption.cs, Instruments/MultiAssetOptionResults.cs |  |
 | `multipleresetsswap` | ported | Instruments/MultipleResetsSwap.cs |  |
 | `nonstandardswap` | ported | Instruments/NonstandardSwap.cs, Instruments/NonstandardSwapArguments.cs | no nanoql type: NonstandardSwapResults |
 | `nonstandardswaption` | ported | Instruments/NonstandardSwaption.cs |  |
@@ -855,7 +855,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `linearinterpolation` | ported | Numerics/Interpolations/Linear.cs, Numerics/Interpolations/LinearInterpolation.cs |  |
 | `loginterpolation` | ported | Numerics/Interpolations/LogInterpolation/FritschButlandLogCubic.cs, Numerics/Interpolations/LogInterpolation/HarmonicLogCubic.cs, Numerics/Interpolations/LogInterpolation/KrugerLog.cs, Numerics/Interpolations/LogInterpolation/KrugerLogCubic.cs, Numerics/Interpolations/LogInterpolation/KrugerLogMixedLinearCubic.cs, Numerics/Interpolations/LogInterpolation/LogCubic.cs, Numerics/Interpolations/LogInterpolation/LogCubicInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/LogInterpolationImpl.cs, Numerics/Interpolations/LogInterpolation/LogLinear.cs, Numerics/Interpolations/LogInterpolation/LogLinearInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogMixedLinearCubic.cs, Numerics/Interpolations/LogInterpolation/LogMixedLinearCubicInterpolation.cs, Numerics/Interpolations/LogInterpolation/LogMixedLinearCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/LogParabolic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogCubic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogCubicNaturalSpline.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogMixedLinearCubic.cs, Numerics/Interpolations/LogInterpolation/MonotonicLogParabolic.cs | no nanoql type: DefaultLogCubic, DefaultLogMixedLinearCubic |
 | `mixedinterpolation` | ported | Numerics/Interpolations/MixedInterpolation/MixedInterpolationBehavior.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearCubic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearCubicInterpolation.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearCubicNaturalSpline.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearFritschButlandCubic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearKrugerCubic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearMonotonicCubicNaturalSpline.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearMonotonicParabolic.cs, Numerics/Interpolations/MixedInterpolation/MixedLinearParabolic.cs |  |
-| `multicubicspline` | not started |  | no nanoql type: MultiCubicSpline |
+| `multicubicspline` | ported | Numerics/Interpolations/MultiCubicSpline.cs |  |
 | `sabrinterpolation` | ported | Numerics/Interpolations/SabrInterpolation/SABR.cs, Numerics/Interpolations/SabrInterpolation/SABRInterpolation.cs, Numerics/Interpolations/SabrInterpolation/SABRSpecs.cs, Numerics/Interpolations/SabrInterpolation/SABRWrapper.cs |  |
 | `xabrinterpolation` | ported | Numerics/Interpolations/XabrInterpolation/IXabrInterpolation.cs, Numerics/Interpolations/XabrInterpolation/IXabrModelInstance.cs, Numerics/Interpolations/XabrInterpolation/IXabrSpecs.cs, Numerics/Interpolations/XabrInterpolation/XabrFit.cs |  |
 | `zabrinterpolation` | ported | Numerics/Interpolations/ZabrInterpolation/ZabrInterpolation{TEvaluation}.cs, Numerics/Interpolations/ZabrInterpolation/ZabrSpecs{TEvaluation}.cs, Numerics/Interpolations/ZabrInterpolation/Zabr{TEvaluation}.cs |  |
@@ -870,9 +870,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `choleskydecomposition` | ported | Numerics/MatrixUtilities/CholeskyDecompositionFunctions.cs |  |
 | `expm` | not started |  |  |
 | `factorreduction` | not started |  |  |
-| `getcovariance` | not started |  | no nanoql type: CovarianceDecomposition |
+| `getcovariance` | ported | Numerics/MatrixUtilities/GetCovariance/CovarianceDecomposition.cs, Numerics/MatrixUtilities/GetCovariance/GetCovarianceFunctions.cs |  |
 | `gmres` | ported | Numerics/MatrixUtilities/GMRES.cs, Numerics/MatrixUtilities/GMRESResult.cs |  |
-| `householder` | not started |  | no nanoql type: HouseholderTransformation, HouseholderReflection |
+| `householder` | ported | Numerics/MatrixUtilities/Householder/HouseholderReflection.cs, Numerics/MatrixUtilities/Householder/HouseholderTransformation.cs |  |
 | `pseudosqrt` | ported | Numerics/MatrixUtilities/PseudoSqrtFunctions.cs, Numerics/MatrixUtilities/SalvagingAlgorithmType.cs |  |
 | `qrdecomposition` | not started |  |  |
 | `sparseilupreconditioner` | not started |  | no nanoql type: SparseILUPreconditioner |
@@ -959,7 +959,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `brent` | ported | Numerics/Solvers1D/Brent.cs |  |
 | `falseposition` | not started |  | no nanoql type: FalsePosition |
 | `finitedifferencenewtonsafe` | ported | Numerics/Solvers1D/FiniteDifferenceNewtonSafe.cs |  |
-| `halley` | not started |  | no nanoql type: Halley |
+| `halley` | ported | Numerics/Solvers1D/Halley/Halley.cs, Numerics/Solvers1D/Halley/ISecondDerivativeSolver1DFunction.cs |  |
 | `newton` | ported | Numerics/Solvers1D/Newton.cs |  |
 | `newtonsafe` | ported | Numerics/Solvers1D/NewtonSafe.cs |  |
 | `ridder` | ported | Numerics/Solvers1D/Ridder.cs |  |
@@ -1034,7 +1034,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `fdm2dblackscholesop` | not started |  | no nanoql type: Fdm2dBlackScholesOp |
+| `fdm2dblackscholesop` | ported | Methods/FiniteDifferences/Operators/Fdm2dBlackScholesOp.cs |  |
 | `fdmbatesop` | ported | Methods/FiniteDifferences/Operators/FdmBatesOp.cs |  |
 | `fdmblackscholesfwdop` | ported | Methods/FiniteDifferences/Operators/FdmBlackScholesFwdOp.cs |  |
 | `fdmblackscholesop` | ported | Methods/FiniteDifferences/Operators/FdmBlackScholesOp.cs |  |
@@ -1053,7 +1053,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmornsteinuhlenbeckop` | not started |  | no nanoql type: FdmOrnsteinUhlenbeckOp |
 | `fdmsabrop` | ported | Methods/FiniteDifferences/Operators/FdmSabrOp.cs |  |
 | `fdmsquarerootfwdop` | ported | Methods/FiniteDifferences/Operators/FdmSquareRootFwdOp.cs, Methods/FiniteDifferences/Operators/FdmSquareRootFwdOpTransformationType.cs |  |
-| `fdmwienerop` | not started |  | no nanoql type: FdmWienerOp |
+| `fdmwienerop` | ported | Methods/FiniteDifferences/Operators/FdmWienerOp.cs |  |
 | `firstderivativeop` | ported | Methods/FiniteDifferences/Operators/FirstDerivativeOp.cs |  |
 | `modtriplebandlinearop` | ported | Methods/FiniteDifferences/Operators/ModTripleBandLinearOp.cs |  |
 | `ninepointlinearop` | ported | Methods/FiniteDifferences/Operators/NinePointLinearOp.cs |  |
@@ -1085,7 +1085,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `fdm1dimsolver` | ported | Methods/FiniteDifferences/Solvers/Fdm1DimSolver.cs |  |
-| `fdm2dblackscholessolver` | not started |  | no nanoql type: Fdm2dBlackScholesSolver |
+| `fdm2dblackscholessolver` | ported | Methods/FiniteDifferences/Solvers/Fdm2dBlackScholesSolver.cs |  |
 | `fdm2dimsolver` | ported | Methods/FiniteDifferences/Solvers/Fdm2DimSolver.cs |  |
 | `fdm3dimsolver` | ported | Methods/FiniteDifferences/Solvers/Fdm3DimSolver.cs |  |
 | `fdmbackwardsolver` | ported | Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmBackwardSolver.cs, Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmSchemeDesc.cs, Methods/FiniteDifferences/Solvers/FdmBackwardSolver/FdmSchemeDescFdmSchemeType.cs |  |
@@ -1096,7 +1096,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmhestonhullwhitesolver` | ported | Methods/FiniteDifferences/Solvers/FdmHestonHullWhiteSolver.cs |  |
 | `fdmhestonsolver` | ported | Methods/FiniteDifferences/Solvers/FdmHestonSolver.cs |  |
 | `fdmhullwhitesolver` | ported | Methods/FiniteDifferences/Solvers/FdmHullWhiteSolver.cs |  |
-| `fdmndimsolver` | not started |  | no nanoql type: FdmNdimSolver |
+| `fdmndimsolver` | ported | Methods/FiniteDifferences/Solvers/FdmNdimSolver.cs |  |
 | `fdmsimple2dbssolver` | ported | Methods/FiniteDifferences/Solvers/FdmSimple2dBSSolver.cs |  |
 | `fdmsolverdesc` | ported | Methods/FiniteDifferences/Solvers/FdmSolverDesc.cs |  |
 
@@ -1130,7 +1130,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdmescrowedloginnervaluecalculator` | ported | Methods/FiniteDifferences/Utilities/FdmEscrowedLogInnerValueCalculator.cs |  |
 | `fdmhestongreensfct` | ported | Methods/FiniteDifferences/Utilities/FdmHestonGreensFct.cs, Methods/FiniteDifferences/Utilities/FdmHestonGreensFctAlgorithm.cs |  |
 | `fdmindicesonboundary` | ported | Methods/FiniteDifferences/Utilities/FdmIndicesOnBoundary.cs |  |
-| `fdminnervaluecalculator` | partial | Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmCellAveragingInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmLogInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmZeroInnerValue.cs | partial: FdmLogBasketInnerValue, which waits for S-exo with the basket option's payoff; no nanoql type: FdmLogBasketInnerValue |
+| `fdminnervaluecalculator` | ported | Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmCellAveragingInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmInnerValueCalculator.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmLogBasketInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmLogInnerValue.cs, Methods/FiniteDifferences/Utilities/FdmInnerValueCalculator/FdmZeroInnerValue.cs |  |
 | `fdmmesherintegral` | ported | Methods/FiniteDifferences/Utilities/FdmMesherIntegral.cs |  |
 | `fdmquantohelper` | ported | Methods/FiniteDifferences/Utilities/FdmQuantoHelper.cs |  |
 | `fdmshoutloginnervaluecalculator` | ported | Methods/FiniteDifferences/Utilities/FdmShoutLogInnerValueCalculator.cs |  |
@@ -1518,20 +1518,20 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `bjerksundstenslandspreadengine` | not started |  | no nanoql type: BjerksundStenslandSpreadEngine |
-| `choibasketengine` | not started |  | no nanoql type: ChoiBasketEngine |
+| `choibasketengine` | ported | PricingEngines/Basket/ChoiBasketEngine.cs |  |
 | `denglizhoubasketengine` | not started |  | no nanoql type: DengLiZhouBasketEngine |
-| `fd2dblackscholesvanillaengine` | not started |  | no nanoql type: Fd2dBlackScholesVanillaEngine |
-| `fdndimblackscholesvanillaengine` | not started |  | no nanoql type: FdndimBlackScholesVanillaEngine |
+| `fd2dblackscholesvanillaengine` | ported | PricingEngines/Basket/Fd2dBlackScholesVanillaEngine.cs |  |
+| `fdndimblackscholesvanillaengine` | ported | PricingEngines/Basket/FdndimBlackScholesVanillaEngine.cs |  |
 | `gaussiancopulaspreadengine` | not started |  | no nanoql type: GaussianCopulaSpreadEngine |
 | `kirkengine` | not started |  | no nanoql type: KirkEngine |
 | `mcamericanbasketengine` | not started |  | no nanoql type: MCAmericanBasketEngine, MakeMCAmericanBasketEngine, AmericanBasketPathPricer |
-| `mceuropeanbasketengine` | not started |  | no nanoql type: MCEuropeanBasketEngine, MakeMCEuropeanBasketEngine, EuropeanMultiPathPricer |
+| `mceuropeanbasketengine` | ported | PricingEngines/Basket/MCEuropeanBasketEngine/EuropeanMultiPathPricer.cs, PricingEngines/Basket/MCEuropeanBasketEngine/MCEuropeanBasketEngine.cs, PricingEngines/Basket/MCEuropeanBasketEngine/MakeMCEuropeanBasketEngine{TRng,TStats}.cs |  |
 | `operatorsplittingspreadengine` | not started |  | no nanoql type: OperatorSplittingSpreadEngine, OperatorSplittingSpreadEngineOrder |
 | `pearsonspreadengine` | not started |  | no nanoql type: PearsonSpreadEngine |
-| `singlefactorbsmbasketengine` | not started |  | no nanoql type: SingleFactorBsmBasketEngine |
+| `singlefactorbsmbasketengine` | ported | PricingEngines/Basket/SingleFactorBsmBasketEngine/SingleFactorBsmBasketEngine.cs, PricingEngines/Basket/SingleFactorBsmBasketEngine/SumExponentialsRootSolver.cs |  |
 | `spreadblackscholesvanillaengine` | not started |  | no nanoql type: SpreadBlackScholesVanillaEngine |
 | `stulzengine` | not started |  | no nanoql type: StulzEngine |
-| `vectorbsmprocessextractor` | not started |  |  |
+| `vectorbsmprocessextractor` | ported | PricingEngines/Basket/VectorBsmProcessExtractor.cs |  |
 
 ### `ql/pricingengines/bond/`
 
@@ -2071,7 +2071,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `barrieroption` | partial | TestSuite/BarrierOptionTests.cs | 10 of 15 cases; not yet: testLocalVolAndHestonComparison, testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast, testPerturbativeOrder2FullResolution |
 | `basismodels` | not started |  | 4 cases |
 | `basisswapratehelpers` | ported | TestSuite/BasisSwapRateHelpersTests.cs | 24 of 24 cases; moved: testOvernightIborAveragingAndTelescopicValueDates line 767 to Divergences/TelescopicValueDatesTests.cs; testOvernightOvernightTelescopicValueDatesWithSimpleAveraging line 920 to Divergences/TelescopicValueDatesTests.cs |
-| `basketoption` | not started |  | 25 cases |
+| `basketoption` | partial | TestSuite/BasketOptionTests.cs | 8 of 25 cases; not yet: testEuroTwoValues, testBarraquandThreeValues, testTavellaValues, testOddSamples, test2DPDEGreeks, testBjerksundStenslandSpreadEngine, testOperatorSplittingSpreadEngine, testStrangSplittingSpreadEngineVsMathematica, testPDEvsApproximations, testDengLiZhouVsPDE, testDengLiZhouWithNegativeStrike, testSpreadAndBasketBenchmarks, testNoDivByZeroOperatorSplitting, testPearsonSpreadEngine, testGaussianCopulaSpreadEngineFlatVol, testGaussianCopulaSpreadEngineSVI, testGaussianCopulaSpreadEngineParityAcrossVols |
 | `batesmodel` | ported | TestSuite/BatesModelTests.cs | 4 of 4 cases |
 | `bermudanswaption` | ported | TestSuite/BermudanSwaptionTests.cs | 6 of 6 cases |
 | `binaryoption` | not started |  | 3 cases |
@@ -2131,7 +2131,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdcev` | ported | TestSuite/FdCevTests.cs | 2 of 2 cases |
 | `fdcir` | ported | TestSuite/FdCirTests.cs | 1 of 1 cases; moved: testFdmCIRConvergence line 105 to Divergences/FdCirModelTests.cs |
 | `fdheston` | partial | TestSuite/FdHestonTests.cs | 8 of 12 cases; not ported: testFdmHestonIntradayPricing (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); not yet: testFdmHestonBarrierVsBlackScholes, testFdmHestonBarrier, testMethodOfLinesAndCN |
-| `fdmlinearop` | partial | TestSuite/FdmLinearOpTests.cs | 15 of 19 cases; not yet: testDerivativeWeightsOnNonUniformGrids, testFdmHestonHullWhiteOp, testBiCGstab, testGMRES |
+| `fdmlinearop` | partial | TestSuite/FdmLinearOpTests.cs | 16 of 19 cases; not yet: testDerivativeWeightsOnNonUniformGrids, testBiCGstab, testGMRES |
 | `fdsabr` | partial | TestSuite/FdSabrTests.cs | 3 of 5 cases; not yet: testFdmSabrOp, testOosterleeTestCaseIV |
 | `fittedbonddiscountcurve` | ported | TestSuite/FittedBondDiscountCurveTests.cs | 5 of 5 cases |
 | `floatfloatswap` | ported | TestSuite/FloatFloatSwapTests.cs | 6 of 6 cases |
@@ -2160,7 +2160,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `integrals` | partial | TestSuite/IntegralsTests.cs | 17 of 21 cases; not yet: testExpSinh, testTwoDimensionalIntegration, testFolinIntegration, testPiecewiseIntegral |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
-| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 32 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testMultiSpline, testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLaplaceInterpolation |
+| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 33 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation, testNoArbSabrInterpolation, testTransformations, testLaplaceInterpolation |
 | `jumpdiffusion` | ported | TestSuite/JumpDiffusionTests.cs | 2 of 2 cases |
 | `lazyobject` | not ported: tests LazyObject, which is replaced |  |  |
 | `libormarketmodel` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
@@ -2176,7 +2176,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `marketmodel_smmcapletcalibration` | not started |  | 1 cases |
 | `marketmodel_smmcaplethomocalibration` | not started |  | 3 cases |
 | `markovfunctional` | ported | TestSuite/MarkovFunctionalTests.cs | 7 of 7 cases |
-| `matrices` | partial | TestSuite/MatricesTests.cs | 14 of 20 cases; not yet: testQRDecomposition, testQRSolve, testOrthogonalProjection, testMoorePenroseInverse, testHouseholderTransformation, testHouseholderReflection; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
+| `matrices` | partial | TestSuite/MatricesTests.cs | 16 of 20 cases; not yet: testQRDecomposition, testQRSolve, testOrthogonalProjection, testMoorePenroseInverse; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
 | `mclongstaffschwartzengine` | ported | TestSuite/McLongstaffSchwartzEngineTests.cs | 2 of 2 cases |
 | `mersennetwister` | ported | TestSuite/MersenneTwisterTests.cs | 1 of 1 cases |
 | `money` | ported | TestSuite/MoneyTests.cs | 4 of 4 cases |
@@ -2223,7 +2223,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `shortratemodels` | ported | TestSuite/ShortRateModelsTests.cs | 9 of 9 cases; replaced: testHullWhiteUpdatesR0WhenTermStructureRelinks by Conventions/ModelRebuildTests.cs; testExtendedCoxIngersollRossUpdatesWhenTermStructureRelinks by Conventions/ModelRebuildTests.cs |
 | `sofrfutures` | ported | TestSuite/SofrFuturesTests.cs | 5 of 6 cases; not ported: testOvernightIndexFutureRateHelperNotification (observer notifications, which an immutable helper has no use for, R1) |
 | `softbarrieroption` | not started |  | 1 cases |
-| `solvers` | partial | TestSuite/SolversTests.cs | 5 of 9 cases; not yet: testBisection, testFalsePosition, testSecant, testHalley |
+| `solvers` | partial | TestSuite/SolversTests.cs | 6 of 9 cases; not yet: testBisection, testFalsePosition, testSecant |
 | `squarerootclvmodel` | not started |  | 3 cases |
 | `stats` | partial | TestSuite/StatsTests.cs | 2 of 4 cases; not yet: testSequenceStatistics, testConvergenceStatistics |
 | `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |

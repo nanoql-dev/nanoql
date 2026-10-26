@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/solvers.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBisection, testFalsePosition, testSecant (S-core's solvers); testHalley (S-exo)
+// Partial: testBisection, testFalsePosition, testSecant (S-core's solvers)
 
 using System.Runtime.CompilerServices;
 using NanoQL.Numerics;
@@ -50,6 +50,13 @@ public class SolversTests
     {
         // Testing Ridder solver...
         TestSolver(new Ridder(), "Ridder", 1.0e-6);
+    }
+
+    [Fact]
+    public void TestHalley()
+    {
+        // Testing Halley solver...
+        TestSolver(new Halley(), "Halley", 1.0e-6);
     }
 
     private static void TestNotBracketed<TSelf, TFunction, TF>(
@@ -162,6 +169,9 @@ public class SolversTests
     private static void TestSolver(Ridder solver, string name, Real? accuracy) =>
         TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
 
+    private static void TestSolver(Halley solver, string name, Real? accuracy) =>
+        TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
+
     private static void TestSolver<TSelf, TFunction, TF1, TF2, TF3, TProbe>(
         Solver1D<TSelf, TFunction> solver,
         string name,
@@ -202,8 +212,8 @@ public class SolversTests
         }
     }
 
-    // secondDerivative, which the ported solvers don't call, is kept for Halley's case (S-exo).
-    private readonly struct F1 : IDerivativeSolver1DFunction
+    // secondDerivative, which Halley's solver calls.
+    private readonly struct F1 : ISecondDerivativeSolver1DFunction
     {
         public Real Evaluate(Real x) => (x * x) - 1.0;
 
@@ -212,7 +222,7 @@ public class SolversTests
         public Real SecondDerivative(Real x) => 2.0;
     }
 
-    private readonly struct F2 : IDerivativeSolver1DFunction
+    private readonly struct F2 : ISecondDerivativeSolver1DFunction
     {
         public Real Evaluate(Real x) => 1.0 - (x * x);
 
@@ -221,7 +231,7 @@ public class SolversTests
         public Real SecondDerivative(Real x) => -2.0;
     }
 
-    private readonly struct F3 : IDerivativeSolver1DFunction
+    private readonly struct F3 : ISecondDerivativeSolver1DFunction
     {
         public Real Evaluate(Real x) => Math.Atan(x - 1);
 
@@ -236,7 +246,7 @@ public class SolversTests
 
     // QuantLib's Probe holds a Real& to the test's argument, which it sets on each call, and the argument's value when
     // it is built; the box is the reference.
-    private readonly struct Probe : IDerivativeSolver1DFunction
+    private readonly struct Probe : ISecondDerivativeSolver1DFunction
     {
         private readonly StrongBox<Real> result;
         private readonly Real previous;

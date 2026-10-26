@@ -8,9 +8,10 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testMultiSpline (S-exo); testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (S-core); testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
+// Partial: testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (S-core); testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
 // Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs); testBicubicUpdate (Conventions/InterpolationConstructionTests.cs)
 
+using System.Collections.Immutable;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
 using NanoQL.Utilities;
@@ -27,6 +28,123 @@ public class InterpolationsTests
 
     // QuantLib's Null<Real>(), the largest float, which the tests pass as the ignored value of a not-a-knot condition.
     private const Real NullReal = 3.4028234663852886e38;
+
+    [Fact]
+    public void TestMultiSpline()
+    {
+        // Testing N-dimensional cubic spline...
+
+        Size[] dim = [6, 5, 5, 6, 4];
+
+        Real[] args = new Real[5], offsets = [1.005, 14.0, 33.005, 35.025, 19.025];
+        offsets.CopyTo(args, 0);
+
+        Size i, j, k, l, m;
+
+        var grid = new List<Real>[5];
+
+        Real r = 0.15;
+
+        for (i = 0; i < 5; ++i)
+        {
+            grid[i] = [];
+            Real temp = offsets[i];
+            for (j = 0; j < dim[i]; temp += r, ++j)
+            {
+                grid[i].Add(temp);
+            }
+        }
+
+        // MultiCubicSpline<5>::data_table, flattened with the first dimension slowest
+        Real[] y5 = new Real[dim[0] * dim[1] * dim[2] * dim[3] * dim[4]];
+        int Index(Size a, Size b, Size c, Size d, Size e) =>
+            ((((((((a * dim[1]) + b) * dim[2]) + c) * dim[3]) + d) * dim[4]) + e);
+
+        for (i = 0; i < dim[0]; ++i)
+        {
+            for (j = 0; j < dim[1]; ++j)
+            {
+                for (k = 0; k < dim[2]; ++k)
+                {
+                    for (l = 0; l < dim[3]; ++l)
+                    {
+                        for (m = 0; m < dim[4]; ++m)
+                        {
+                            y5[Index(i, j, k, l, m)] =
+                                Multif(grid[0][i], grid[1][j], grid[2][k], grid[3][l], grid[4][m]);
+                        }
+                    }
+                }
+            }
+        }
+
+        var cs = new MultiCubicSpline([.. grid.Select(g => g.ToImmutableArray())], y5);
+        /* it would fail with
+        for (i = 0; i < dim[0]; ++i)
+            for (j = 0; j < dim[1]; ++j)
+                for (k = 0; k < dim[2]; ++k)
+                    for (l = 0; l < dim[3]; ++l)
+                        for (m = 0; m < dim[4]; ++m) {
+        */
+        var errors = new List<string>();
+        for (i = 1; i < dim[0] - 1; ++i)
+        {
+            for (j = 1; j < dim[1] - 1; ++j)
+            {
+                for (k = 1; k < dim[2] - 1; ++k)
+                {
+                    for (l = 1; l < dim[3] - 1; ++l)
+                    {
+                        for (m = 1; m < dim[4] - 1; ++m)
+                        {
+                            args[0] = grid[0][i];
+                            args[1] = grid[1][j];
+                            args[2] = grid[2][k];
+                            args[3] = grid[3][l];
+                            args[4] = grid[4][m];
+                            Real interpolated = cs.Evaluate(args);
+                            Real expected = y5[Index(i, j, k, l, m)];
+                            Real error = Math.Abs(interpolated - expected);
+                            Real tolerance = 1e-16;
+                            if (error > tolerance)
+                            {
+                                errors.Add(
+                                    $"\n  At ({args[0]},{args[1]},{args[2]},{args[3]},{args[4]}):"
+                                    + $"\n    interpolated: {interpolated}\n    actual value: {expected}"
+                                    + $"\n       error: {error}\n    tolerance: {tolerance}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        long seed = 42;
+        var rsg = new SobolRsg(5, seed);
+
+        Real tolerance2 = 1.7e-4;
+        // actually tested up to 2^21-1=2097151 Sobol draws
+        for (i = 0; i < 1023; ++i)
+        {
+            ReadOnlySpan<Real> next = rsg.NextSequence().Value.Span;
+            for (int d = 0; d < 5; ++d)
+            {
+                args[d] = grid[d][0] + (next[d] * (grid[d][^1] - grid[d][0]));
+            }
+
+            Real interpolated = cs.Evaluate(args), expected = Multif(args[0], args[1], args[2], args[3], args[4]);
+            Real error = Math.Abs(interpolated - expected);
+            if (error > tolerance2)
+            {
+                errors.Add(
+                    $"\n  At ({args[0]},{args[1]},{args[2]},{args[3]},{args[4]}):"
+                    + $"\n    interpolated: {interpolated}\n    actual value: {expected}"
+                    + $"\n    error:        {error}\n    tolerance:    {tolerance2}");
+            }
+        }
+
+        Assert.Empty(errors);
+    }
 
     [Fact]
     public void TestSplineErrorOnGaussianValues()
@@ -1939,4 +2057,8 @@ public class InterpolationsTests
 
     // The test suite's lagrangeTestFct: |x| + x/2 - x squared.
     private static Real LagrangeTestFct(Real x) => Math.Abs(x) + (0.5 * x) - (x * x);
+
+    // interpolations.cpp's multif (lines 193-197).
+    private static Real Multif(Real s, Real t, Real u, Real v, Real w) =>
+        Math.Sqrt((s * Math.Sinh(Math.Log(t))) + Math.Exp(Math.Sin(u) * Math.Sin(3 * v)) + Math.Sinh(Math.Log(v * w)));
 }

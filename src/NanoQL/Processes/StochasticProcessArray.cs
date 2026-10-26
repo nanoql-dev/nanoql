@@ -58,6 +58,14 @@ public sealed class StochasticProcessArray : StochasticProcess
         this.processes = processes;
     }
 
+    // The array on other processes with this one's correlation root, as it stands: the basket engines' processes on
+    // their clock (the S-exo plan's ED10), with no second pseudo square root, so the root's bits are the array's.
+    private StochasticProcessArray(Matrix sqrtCorrelation, ImmutableArray<StochasticProcess1D> processes)
+    {
+        this.processes = processes;
+        this.sqrtCorrelation = sqrtCorrelation;
+    }
+
     /// <inheritdoc/>
     public override int Size => processes.Length;
 
@@ -71,6 +79,17 @@ public sealed class StochasticProcessArray : StochasticProcess
         }
 
         return tmp;
+    }
+
+    /// <summary>The initial values, each process's, written into the caller's span; nothing is allocated.</summary>
+    /// <param name="result">The values, of the array's <see cref="Size"/> at least.</param>
+    /// <exception cref="IndexOutOfRangeException"><paramref name="result"/> is shorter than the array.</exception>
+    public override void InitialValues(Span<double> result)
+    {
+        for (int i = 0; i < Size; ++i)
+        {
+            result[i] = processes[i].X0;
+        }
     }
 
     /// <inheritdoc/>
@@ -177,6 +196,63 @@ public sealed class StochasticProcessArray : StochasticProcess
         }
 
         return tmp;
+    }
+
+    /// <summary>
+    /// The state after a time interval, written into the caller's span with nothing allocated: the allocating form's
+    /// arithmetic, the correlated increments written row by row into <paramref name="result"/> in the order of the
+    /// matrix product, then each process evolved on its own entry in place.
+    /// </summary>
+    /// <param name="t0">The start of the interval.</param>
+    /// <param name="x0">The state at its start, one element per process.</param>
+    /// <param name="dt">The interval's length.</param>
+    /// <param name="dw">The independent Brownian increments, one per process.</param>
+    /// <param name="result">The state at the interval's end, of the array's size at least; it mustn't overlap
+    /// <paramref name="x0"/> or <paramref name="dw"/>.</param>
+    /// <exception cref="ArgumentException"><paramref name="dw"/>'s length isn't the correlation's.</exception>
+    public override void Evolve(double t0, ReadOnlySpan<double> x0, double dt, ReadOnlySpan<double> dw, Span<double> result)
+    {
+        int n = sqrtCorrelation.Columns;
+        if (!(dw.Length == n))
+        {
+            throw new ArgumentException(
+                $"vectors and matrices with different sizes ({dw.Length}, {sqrtCorrelation.Rows}x{n}) cannot be multiplied",
+                nameof(dw));
+        }
+
+        // dz = sqrtCorrelation * dw, Matrix * Vector's sums
+        for (int i = 0; i < Size; ++i)
+        {
+            ReadOnlySpan<double> row = sqrtCorrelation.Row(i);
+            double sum = 0.0;
+            for (int k = 0; k < n; ++k)
+            {
+                sum = sum + (dw[k] * row[k]);
+            }
+
+            result[i] = sum;
+        }
+
+        for (int i = 0; i < Size; ++i)
+        {
+            result[i] = processes[i].Evolve(t0, x0[i], dt, result[i]);
+        }
+    }
+
+    // The array with each Black-Scholes process on a clock (GeneralizedBlackScholesProcess.OnClock) and the other
+    // processes as they stand, its correlation root kept: the basket engines' paths on the clock spanning every
+    // process's structures (the S-exo plan's ER5 (i), ED10); the array itself where no process moves.
+    internal StochasticProcessArray OnClock(TermStructure clock)
+    {
+        StochasticProcess1D[] onClock = new StochasticProcess1D[processes.Length];
+        bool moved = false;
+        for (int i = 0; i < processes.Length; ++i)
+        {
+            onClock[i] = processes[i] is GeneralizedBlackScholesProcess bs ? bs.OnClock(clock) : processes[i];
+            moved |= !ReferenceEquals(onClock[i], processes[i]);
+        }
+
+        return moved ? new StochasticProcessArray(sqrtCorrelation, [.. onClock]) : this;
     }
 
     /// <summary>The changed state, each process applying its own element's change.</summary>

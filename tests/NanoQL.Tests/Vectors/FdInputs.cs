@@ -153,6 +153,7 @@ internal static class FdInputs
             "Log" => new FdmLogInnerValue(PayoffOf(spec.GetProperty("payoff")), mesher, spec.GetProperty("direction").GetInt32()),
             "CellAveraging" => new FdmCellAveragingInnerValue(
                 PayoffOf(spec.GetProperty("payoff")), mesher, spec.GetProperty("direction").GetInt32()),
+            "LogBasket" => new FdmLogBasketInnerValue(BasketInputs.BasketPayoffOf(spec.GetProperty("payoff")), mesher),
             string t => throw new InvalidOperationException($"unknown calculator '{t}'"),
             null => throw new InvalidOperationException("no calculator type"),
         };
