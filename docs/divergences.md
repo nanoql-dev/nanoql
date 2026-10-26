@@ -1288,6 +1288,17 @@ Facts:
 - `TheCoxIngersollRossTreeConvergesToTheAnalyticPrice`
 - `TheExtendedCoxIngersollRossTreeConvergesToTheAnalyticPrice`
 
+## CliquetThetaTests
+
+[`Divergences/CliquetThetaTests.cs`](../tests/NanoQL.Tests/Divergences/CliquetThetaTests.cs)
+
+The cliquet and performance engines' theta. QuantLib's reads each period's rate over the period after its reset (`analyticcliquetengine.cpp:92-94`, `analyticperformanceengine.cpp:91-93`), where the period's value decays with its weight over the time before the reset: a one-period cliquet's theta 0.2813 where QuantLib's forward engine's is 0.0 on a dividend curve flat at zero before the reset. nanoql reads the rate to each reset (the S-exo plan's ER5 (xxii)). The check is QuantLib's forward and forward-performance engines on each period's forward-start option: the values and thetas summed period by period, on the rising market, whose dividends are 0 to three months.
+
+Facts:
+
+- `TheCliquetThetaIsTheForwardEnginesPeriodByPeriod`
+- `ThePerformanceThetaIsTheForwardPerformanceEnginesPeriodByPeriod`
+
 ## CmsCalibrationFixedReversionTests
 
 [`Divergences/CmsCalibrationFixedReversionTests.cs`](../tests/NanoQL.Tests/Divergences/CmsCalibrationFixedReversionTests.cs)
@@ -1332,6 +1343,28 @@ Facts:
 - `AnEmptyOrRaggedQuoteTableIsRefused`
 - `WeightsOfAnotherShapeAreRefused`
 
+## ComplexChooserEqualTermsTests
+
+[`Divergences/ComplexChooserEqualTermsTests.cs`](../tests/NanoQL.Tests/Divergences/ComplexChooserEqualTermsTests.cs)
+
+QuantLib's fix after v1.44 to the complex chooser engine (#2891, `bc3a54105`): its maturities measured from the evaluation date, where 1.44 measures them from the choosing date and its critical value from twice it (`analyticcomplexchooserengine.cpp:45-46`, `:88`, `:96`), −12% on a flat market; 1.44's own case passes by placing its maturities after the choosing date (`ChooserOptionTests`' moved line). nanoql takes the fix (the S-exo plan's ER6 (ii)). The check is master's case, `testComplexChooserWithEqualTermsMatchesSimpleChooser`: a complex chooser with equal strikes and maturities is the simple chooser, within 1e-5, here until the pin moves.
+
+Facts:
+
+- `TestComplexChooserWithEqualTermsMatchesSimpleChooser`
+
+## ComplexChooserTermStructureTests
+
+[`Divergences/ComplexChooserTermStructureTests.cs`](../tests/NanoQL.Tests/Divergences/ComplexChooserTermStructureTests.cs)
+
+The complex chooser engine on term structures. QuantLib evaluates Rubinstein's formula on one zero rate, dividend yield and volatility per maturity and solves its critical value on the times between the dates (`analyticcomplexchooserengine.cpp:161-179`), so on a rising market it is −19.5% off with #2891's defect; nanoql reads the variances to each date, the correlations from their ratios and the discounts by date, its critical spot solving the forward Black values from the choosing date, on West's bivariate normal (the S-exo plan's ER4, ER7). The check is the option's exact value at the choosing date, the larger of the call and the put there over the lognormal spot, within the critical value's accuracy, 1e-4 (QuantLib's Newton stops at 0.001 in the difference of the two); on a flat market, the exact value likewise and Haug's, QuantLib's master case, within its 1e-4.
+
+Facts:
+
+- `ARisingMarketMeetsTheExactValue`
+- `AFallingMarketMeetsTheExactValue`
+- `AFlatMarketMeetsTheExactValueAndHaugs`
+
 ## CompositeClockTests
 
 [`Divergences/CompositeClockTests.cs`](../tests/NanoQL.Tests/Divergences/CompositeClockTests.cs)
@@ -1342,6 +1375,31 @@ Facts:
 
 - `ASecondCurveOnAnotherDayCounterIsReadAtTheInstant`
 - `ASecondCurveDatedEarlierIsReadAtTheInstant`
+
+## CompoundNoCriticalSpotTests
+
+[`Divergences/CompoundNoCriticalSpotTests.cs`](../tests/NanoQL.Tests/Divergences/CompoundNoCriticalSpotTests.cs)
+
+The compound engine where the daughter is a put whose largest value, K_D·D(T_M, T_D) (95.123 here), doesn't exceed the mother's strike. QuantLib's Brent bracket [1e-6, 1000·K_D] holds no root and it refuses ("root not bracketed", `analyticcompoundoptionengine.cpp:91-95`), where the mother is never exercised (a call on the put is worth 0) or always (a put on the put is worth K_M·D(T_M) less the put today). nanoql prices those limits (the S-exo plan's ER5 (xxxviii)). The checks: the limits, exact; and just inside the domain (K_M 95), QuantLib's values within Drezner's accuracy, the put on the put within 0.06 of its limit at that strike.
+
+Facts:
+
+- `ACallOnThePutIsWorthNothing`
+- `APutOnThePutIsTheDiscountedStrikeLessThePut`
+
+## CompoundTermStructureTests
+
+[`Divergences/CompoundTermStructureTests.cs`](../tests/NanoQL.Tests/Divergences/CompoundTermStructureTests.cs)
+
+The compound engine on term structures. QuantLib solves its critical spot on the volatility at a date as far from the curves' start as the daughter's maturity from the mother's and on the discounts over that span, then reads the daughter's volatility at its maturity and the mother's at the mother's strike (`analyticcompoundoptionengine.cpp:73-95`, `:185-188`, `:258-262`), so on a rising market a put on a call is +1,090% off and its Greeks miss its own bumped values by −45% (delta) to +2,908% (vega); nanoql reads Geske's formula with the variances to each maturity at the daughter's strike, the correlation √(V_M/V_D) and the discounts by date, its critical spot solving the daughter's forward Black value over the mother's period, on West's bivariate normal, and takes the form's own Greeks (the S-exo plan's ER4, ER7). The checks: the option's exact value at the mother's maturity, the mother's payoff on the daughter's Black value over the lognormal spot, within Brent's accuracy, 1e-6; on a flat market, QuantLib's value, delta and theta within Drezner's accuracy, the value nearer the exact one, and its gamma and vega, which read no bivariate normal, within its last bits; and on rising and falling markets, the delta and gamma against bumps of the spot, the vega against a parallel shift of the volatilities and the theta against the evaluation date moved with each date's zero rate and volatility held.
+
+Facts:
+
+- `ARisingMarketMeetsTheExactValue`
+- `AFallingMarketMeetsTheExactValue`
+- `AFlatMarketIsQuantLibsWithinDreznersAccuracy`
+- `TheGreeksOnARisingMarketMeetBumps`
+- `TheGreeksOnAFallingMarketMeetBumps`
 
 ## ConvertibleClockTests
 
@@ -1835,6 +1893,26 @@ Facts:
 
 - `AnIndexOutOfRangeIsRefused`
 - `ASwaptionOnAnExerciseWithNoDatesIsRefusedWhereItsDateIsRead`
+
+## ExoticMismatchedTimesTests
+
+[`Divergences/ExoticMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/ExoticMismatchedTimesTests.cs)
+
+C3's engines on structures counted or dated apart (the playbook's dates row; the S-exo plan's ER5 (xxiv)). QuantLib's closed forms read each curve's rate on its own day counter and every time on the risk-free curve's, so with the dividend curve on Act/360 (its rate restated, the same discounts by date) the compound option moves +0.21%, the complex chooser +0.02%, the holder- and writer-extensible options +0.13% and +0.12%, and the simple chooser refuses ("Risk-free rate and dividend yield must have the same day counter"); with the risk-free curve settling two days on, against its restatement from the evaluation date, −0.36%, −0.41%, −0.24%, −0.23% and +0.01%. Its forward engine's theta reads the dividend rate on that curve's own day counter (−1.4% on Act/360) and its dividend rho the reset on the risk-free curve's time (−0.10% at T+2); its Monte Carlo grids run on the risk-free curve's time, the forward engine's +0.16% on Act/360 dividends and +0.01% at T+2, the performance engine's +0.10% on Act/360. nanoql's forms read discounts and variances by date and every time on the process's clock, and the forward engines' reset terms in the dividend rho and the performance rho on the shifted curve's own time (C3's review, B3-1). The checks: nanoql on the market restated onto one clock, which on structures dated and counted alike keeps QuantLib's bits; for the reset terms, the cliquet and performance engines on the same one-period option and the prices bumped in the curve's own zero rate.
+
+Facts:
+
+- `TheClosedFormsReadADividendCurveOnItsOwnDays`
+- `TheClosedFormsPriceARiskFreeCurveSettlingLaterFromTheEvaluationDate`
+- `TheForwardAndCliquetEnginesReadEveryTimeOnTheClock`
+- `TheMonteCarloGridsRunOnTheClock`
+- `TheForwardEnginesResetTermsReadTheShiftedCurvesOwnTime`
+
+## ExoticTermStructureMarkets
+
+[`Divergences/ExoticTermStructureMarkets.cs`](../tests/NanoQL.Tests/Divergences/ExoticTermStructureMarkets.cs)
+
+The markets and the independent check of the S-exo plan's ER4 facts: a flat market, a rising one (zero rates 1% to 6% and dividends 0 to 3% from three months to a year, volatilities 0.15, 0.30, 0.30 at three months, a year and two) and a falling one (the rates reversed, volatilities 0.30, 0.25, 0.25), the planner's P4b and EP31 markets; and the exact value of an option at its first date under deterministic rates, dividends and volatility, its payoff there integrated over the lognormal spot by Gauss-Lobatto at an absolute accuracy of 1e-13, split at the payoff's kinks.
 
 ## ExpectedShortfallNoLossTests
 
@@ -2355,6 +2433,17 @@ Facts:
 
 - `AnUnsetForwardMeasureTimeIsRefused`
 
+## ForwardNonPlainPayoffTests
+
+[`Divergences/ForwardNonPlainPayoffTests.cs`](../tests/NanoQL.Tests/Divergences/ForwardNonPlainPayoffTests.cs)
+
+The forward and forward-performance engines on a payoff that isn't plain vanilla. QuantLib builds the inner option's plain vanilla payoff from the payoff's type alone (`forwardengine.hpp:84-86`), so a cash-or-nothing forward start prices 10.456, the plain vanilla's, where its value is 5.003. nanoql refuses it, with the text of QuantLib's Monte Carlo forward engines (the S-exo plan's ER5 (xxiii)): the refusal's type and text are the facts.
+
+Facts:
+
+- `TheForwardEngineRefusesACashOrNothingPayoff`
+- `TheForwardPerformanceEngineRefusesACashOrNothingPayoff`
+
 ## ForwardRateAgreementExpiredTests
 
 [`Divergences/ForwardRateAgreementExpiredTests.cs`](../tests/NanoQL.Tests/Divergences/ForwardRateAgreementExpiredTests.cs)
@@ -2376,6 +2465,21 @@ Facts:
 
 - `TheSpreadIsIntegratedFromTheReferenceDate`
 - `QuantLibsBackwardFlatZeroRateLeavesOutTheFlatSpread`
+
+## ForwardVegaTermStructureTests
+
+[`Divergences/ForwardVegaTermStructureTests.cs`](../tests/NanoQL.Tests/Divergences/ForwardVegaTermStructureTests.cs)
+
+The forward-start family's vega off a flat volatility. QuantLib's forward engine returns the inner engine's vega on the implied volatility from the reset (`forwardengine.hpp:160-161`) and the cliquet and performance engines Black's per period (`analyticcliquetengine.cpp:106-107`, `analyticperformanceengine.cpp:106-107`): each the derivative in the period's forward volatility σ_f, where a parallel shift ε of the volatilities moves it by (σ₂t₂ − σ₁t₁)/(σ_f·Δt)·ε. On a variance curve with its nodes at the dates, rising (0.10, 0.30, 0.30 at one, two and three years), QuantLib's forward vega misses its own price under that shift by −17.5%, the cliquet's by −9.6%, the performance engine's by −9.8% and the quanto forward's by −18.4%; falling (0.30, 0.25, 0.25), by −6.5%, −3.3%, −3.4% and −6.8%. nanoql scales each period's vega by that factor (the S-exo plan's ER5 (xxxvii)): exactly 1 where the period's two volatilities are equal, zero among them, so QuantLib's bits stand there; at a zero forward variance between unequal volatilities the one-sided limit, infinite at the forward and 0 off it. The checks: QuantLib's prices under a parallel shift of 1e-6 each way (its tests' bump), the forward-performance engine, which the wheel lacks, against its own; on a flat zero volatility, QuantLib's bits; at equal total variances, the one-sided bumps.
+
+Facts:
+
+- `TheForwardVegaIsThePriceUnderAParallelShift`
+- `TheCliquetVegaIsThePriceUnderAParallelShift`
+- `ThePerformanceVegasAreThePricesUnderAParallelShift`
+- `TheQuantoForwardVegaIsThePriceUnderAParallelShift`
+- `AFlatZeroVolatilityKeepsQuantLibsBits`
+- `AtEqualTotalVariancesTheVegaIsTheOneSidedLimit`
 
 ## FranceMoveableFeastTests
 
@@ -2856,6 +2960,28 @@ Facts:
 - `BelowTheFloorTheDensityIsQuantLibsAtTheFloor`
 - `ExponentialFittingIsContinuousAsKappaFalls`
 - `BelowTheFloorTheInverseDistributionInverts`
+
+## HolderExtensibleCriticalPricesTests
+
+[`Divergences/HolderExtensibleCriticalPricesTests.cs`](../tests/NanoQL.Tests/Divergences/HolderExtensibleCriticalPricesTests.cs)
+
+QuantLib's fix after v1.44 to the holder-extensible engine (#2892, `453e6605c`): the put's correlation sign, the Newton seeds at the strike, the put's derivative, the empty extension region and the call's with dividends (`analyticholderextensibleoptionengine.cpp:87-88`, `:96-197`); 1.44 prices a put −1.063 where its value is 7.428. nanoql takes the fix (the S-exo plan's ER6 (iii)). The check is master's case, `testHolderExtensibleOptionCriticalPrices`: options whose extension region is empty or unbounded against values from numerical integration at the first expiry, within 1e-4, here until the pin moves.
+
+Facts:
+
+- `TestHolderExtensibleOptionCriticalPrices`
+
+## HolderExtensibleTermStructureTests
+
+[`Divergences/HolderExtensibleTermStructureTests.cs`](../tests/NanoQL.Tests/Divergences/HolderExtensibleTermStructureTests.cs)
+
+The holder-extensible engine on term structures. QuantLib evaluates Longstaff's formula on one zero rate, dividend yield and volatility, read at the first maturity, for both periods (`analyticholderextensibleoptionengine.cpp:279-297`), so on a rising market the call is −3.5% off; nanoql reads the variances to each date, the correlation from their ratio and the discounts by date, its critical prices solving the forward Black values from the first maturity, on West's bivariate normal (the S-exo plan's ER4, ER7, with #2892's fixes). The check is the option's exact value at the first maturity, the larger of the vanilla's payoff, the extended option less the premium and nothing, over the lognormal spot, within the critical prices' accuracy, 1e-4 (QuantLib's Newton loops stop at 0.001); on a flat market, QuantLib's call within Drezner's accuracy and nearer the exact value.
+
+Facts:
+
+- `ARisingMarketMeetsTheExactValue`
+- `AFallingMarketMeetsTheExactValue`
+- `AFlatMarketIsQuantLibsWithinDreznersAccuracy`
 
 ## HouseholderOppositeTests
 
@@ -3530,6 +3656,16 @@ Facts:
 - `AVolatilityOnAnotherDayCounterIsReadAtItsOwnTimes`
 - `OnOneClockTheBitsAreQuantLibs`
 
+## McPerformanceResetTodayTests
+
+[`Divergences/McPerformanceResetTodayTests.cs`](../tests/NanoQL.Tests/Divergences/McPerformanceResetTodayTests.cs)
+
+The Monte Carlo performance engine on a cliquet with a reset today. Its grid takes the resets as mandatory times (`mcperformanceengine.hpp:141-149`) and the time grid merges a reset at time 0 into its start, so QuantLib's path pricer refuses on its count check ("discounts/options mismatch", `mcperformanceengine.cpp:33`), where the analytic engine prices 0.125531. nanoql's path pricer reads each reset's index from the grid, as QuantLib's Monte Carlo forward engines do (the S-exo plan's ER5 (xxxix)). The checks: the analytic engine (QuantLib's bits) within two of the Monte Carlo error estimates; with the first reset a day later, QuantLib's Monte Carlo value, bit for bit.
+
+Facts:
+
+- `AResetTodayIsPricedFromTheGridsStart`
+
 ## McSimulationUndefinedTests
 
 [`Divergences/McSimulationUndefinedTests.cs`](../tests/NanoQL.Tests/Divergences/McSimulationUndefinedTests.cs)
@@ -3920,6 +4056,30 @@ Facts:
 - `QdPlusReadsTheVolatilitysOwnVariance`
 - `QdFixedPointReadsTheVolatilitysOwnVariance`
 
+## QuantoGreeksTermStructureTests
+
+[`Divergences/QuantoGreeksTermStructureTests.cs`](../tests/NanoQL.Tests/Divergences/QuantoGreeksTermStructureTests.cs)
+
+The quanto engine's derived Greeks (C3's review, B3-2). QuantLib takes the rho, vega, qrho, qvega and qlambda from the inner dividend rho by one factor at expiry each (`quantoengine.hpp:140-171`), assuming the input moves the quanto zero rate in parallel. With the dividend curve on Act/360, whose clock the quanto curve keeps, a shift of the risk-free rate moves it by the ratio of the two curves' times: rho −18.4754 where the price under the shift moves −17.2347, the quanto Greeks 1.4% off. For a forward-start quanto, whose forward engine reads the quanto curve at the reset and at expiry, an input whose contribution varies in time moves the two unevenly: on a volatility curve (0.10, 0.20, 0.30 at one, two and three years) QuantLib's qvega and qlambda are 25.5% short of its own price bumped in the FX volatility and the correlation, and under an FX volatility curve the vega 3.5% over. nanoql reads each input's change to the quanto curve's log discount by date at the dates the inner engine reads (ER5 (xxiv), R8). The checks: on Act/360 dividends, the market restated onto Act/365, where QuantLib's formula is exact; on the curves, QuantLib's own prices bumped by 1e-5 each way in each input.
+
+Facts:
+
+- `ADividendCurveOnItsOwnDaysMovesTheDriftByDate`
+- `AForwardStartQuantoOnAVolatilityCurveMeetsQuantLibsBumps`
+- `AForwardStartQuantoOnAnExchangeRateVolatilityCurveMeetsQuantLibsBumps`
+
+## QuantoSmileTests
+
+[`Divergences/QuantoSmileTests.cs`](../tests/NanoQL.Tests/Divergences/QuantoSmileTests.cs)
+
+The quanto engine on a skew. QuantLib reads the underlying's volatility for the drift at the payoff's strike, but for `qvega` and `qlambda` at the spot (`quantoengine.hpp:155-166`), so on a skew of 0.30 at strike 60 to 0.10 at 140 (FX volatility 10%, correlation 0.3, a year) they miss its own price bumped in the FX volatility and the correlation by −27.6% at strike 70 and +56.9% at 130, calls and puts alike, exact at 100; and for a quanto forward-start option it reads the drift at the payoff's strike, which the forward engine never uses, where it strikes at the moneyness times the spot (3.1098 at payoff strike 0, 3.2384 at 100, 3.2452 at 105, the moneyness times the spot). nanoql reads both at the drift's strike, the forward's at the moneyness times the spot (the S-exo plan's ER5 (xxxvi), ED30). The checks: the price bumped in each quote, the prices QuantLib's bits; QuantLib's quanto forward with its payoff struck at the moneyness times the spot, bit for bit, from any payoff strike.
+
+Facts:
+
+- `QvegaIsThePriceBumpedInTheExchangeRateVolatility`
+- `QlambdaIsThePriceBumpedInTheCorrelation`
+- `TheQuantoForwardDriftIsReadAtTheForwardEnginesStrike`
+
 ## QuantoTermStructureDayCounterTests
 
 [`Divergences/QuantoTermStructureDayCounterTests.cs`](../tests/NanoQL.Tests/Divergences/QuantoTermStructureDayCounterTests.cs)
@@ -4248,6 +4408,18 @@ Facts:
 
 - `AShoutNowIsTheIntrinsicValueAndACallStruckAtTheSpot`
 - `TheValueIsABinomialProgrammesOfTheStoppingProblem`
+
+## SimpleChooserTermStructureTests
+
+[`Divergences/SimpleChooserTermStructureTests.cs`](../tests/NanoQL.Tests/Divergences/SimpleChooserTermStructureTests.cs)
+
+The simple chooser engine on term structures. QuantLib evaluates Rubinstein's formula on the zero rates and the volatility at maturity, its times from the evaluation date (`analyticsimplechooserengine.cpp:49-60`), so on a rising market it is +22% off; nanoql prices Rubinstein's decomposition at the choosing date, C(K, T) + D_q(t, T)·P(K·D_r(t, T)/D_q(t, T), t), each by the analytic European engine (the S-exo plan's ER4). The checks: the option's exact value at the choosing date, the larger of the call and the put there over the lognormal spot, within 1e-9; the European engine's two options, bit for bit; and QuantLib's value on a flat market.
+
+Facts:
+
+- `ARisingMarketMeetsTheExactValueAndTheEuropeanEngine`
+- `AFallingMarketMeetsTheExactValueAndTheEuropeanEngine`
+- `AFlatMarketIsQuantLibs`
 
 ## SimplexEmptyInitialValueTests
 
@@ -4943,6 +5115,18 @@ A weighted index with a null component. QuantLib's `StubIborCoupon::WeightedInde
 Facts:
 
 - `ANullComponentIsRefusedBeforeItIsRead`
+
+## WriterExtensibleTermStructureTests
+
+[`Divergences/WriterExtensibleTermStructureTests.cs`](../tests/NanoQL.Tests/Divergences/WriterExtensibleTermStructureTests.cs)
+
+The writer-extensible engine on term structures. QuantLib evaluates Longstaff's formula on one zero rate, dividend yield and volatility, read at the first exercise, for both periods (`analyticwriterextensibleoptionengine.cpp:61-87`), so on a rising market the call is −2.4% off; nanoql reads the variances to each date, the correlation from their ratio and the discounts by date (the S-exo plan's ER4). The check is the option's exact value at the first exercise, the vanilla's payoff in the money and the extended option's Black value out of it, over the lognormal spot, within 1e-9; on a flat market, QuantLib's values within its last bits.
+
+Facts:
+
+- `ARisingMarketMeetsTheExactValue`
+- `AFallingMarketMeetsTheExactValue`
+- `AFlatMarketIsQuantLibs`
 
 ## XabrTransformEdgeTests
 

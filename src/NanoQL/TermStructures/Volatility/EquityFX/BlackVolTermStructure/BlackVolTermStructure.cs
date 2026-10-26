@@ -286,6 +286,11 @@ public abstract class BlackVolTermStructure : VolatilityTermStructure
     // read throws: BlackVariance on and after that date.
     internal double AccruedVariance(Date d, double strike) => d < ReferenceDate ? 0.0 : BlackVariance(d, strike);
 
+    // The variance accrued between two dates: QuantLib's BlackForwardVariance from the reference date on, and before it
+    // the variance accrued by the second date.
+    internal double AccruedForwardVariance(Date d1, Date d2, double strike) =>
+        d1 >= ReferenceDate ? BlackForwardVariance(d1, d2, strike) : AccruedVariance(d2, strike);
+
     // The variance accrued between the instants two times on another structure's clock denote, from the structure's own
     // reference date (TermStructure.AccrualTime): QuantLib's BlackForwardVariance where the two share their times;
     // otherwise between the instants' accrual times.

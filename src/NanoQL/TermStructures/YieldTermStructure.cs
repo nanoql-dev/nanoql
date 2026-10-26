@@ -348,6 +348,11 @@ public abstract class YieldTermStructure : TermStructure
     // QuantLib's read throws: Discount on and after that date.
     internal double AccruedDiscount(Date d) => d < ReferenceDate ? 1.0 : Discount(d);
 
+    // The discount accrued by a date on an engine's clock: AccruedDiscount on and after the clock's date, and before
+    // it QuantLib's read, which refuses a date before the curve's ("negative time"), as an engine reading a date in the
+    // past refuses it.
+    internal double AccruedDiscountOn(TermStructure clock, Date d) => d < clock.ReferenceDate ? Discount(d) : AccruedDiscount(d);
+
     // The discount the curve has accrued at the instant a time on another structure's clock denotes, from its own
     // reference date (TermStructure.AccrualTime): QuantLib's read where the two share their times.
     internal double DiscountAt(TermStructure clock, double t, bool extrapolate = false) =>

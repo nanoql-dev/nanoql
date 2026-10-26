@@ -27,8 +27,12 @@ public sealed class PlainVanillaPayoff : StrikedTypePayoff
     /// <summary>The payoff at the given price: the call's max(price − strike, 0) or the put's max(strike − price, 0).</summary>
     /// <param name="price">The underlying's price.</param>
     /// <returns>The payoff.</returns>
-    public override double Evaluate(double price) =>
-        OptionType == OptionType.Call ? Max(price - Strike, 0.0) : Max(Strike - price, 0.0);
+    public override double Evaluate(double price) => Value(OptionType, Strike, price);
+
+    // The payoff of a type and strike at a price, for the path pricers whose strike is each path's, where QuantLib
+    // builds a payoff per path; the type checked by the caller.
+    internal static double Value(OptionType type, double strike, double price) =>
+        type == OptionType.Call ? Max(price - strike, 0.0) : Max(strike - price, 0.0);
 
     // std::max's semantics, which keep or drop a NaN by position where Math.Max propagates it.
     private static double Max(double a, double b) => a < b ? b : a;

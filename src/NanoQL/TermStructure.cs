@@ -145,6 +145,18 @@ public abstract class TermStructure : Extrapolator
     internal double AccrualTimeTo(Date date, DayCounter dayCounter) =>
         Math.Max(dayCounter.YearFraction(ReferenceDate, date), 0.0);
 
+    // The year fraction between two dates on a day counter, of the part after the structure's reference date:
+    // QuantLib's dayCounter.YearFraction(d1, d2) from that date on.
+    internal double AccrualYearFraction(DayCounter dayCounter, Date d1, Date d2)
+    {
+        if (d1 >= ReferenceDate)
+        {
+            return dayCounter.YearFraction(d1, d2);
+        }
+
+        return d2 > ReferenceDate ? dayCounter.YearFraction(ReferenceDate, d2) : 0.0;
+    }
+
     // This structure's accrual time elapsed per unit of another structure's between two times on that one's clock,
     // the rate at which a rate or variance read at its own times accrues per unit of the clock's (AccrualTime); a
     // zero-length interval widened as QuantLib widens a forward rate's.

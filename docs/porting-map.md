@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 471 | 57 |
-| partial | 21 | 30 |
-| ported | 768 | 93 |
+| not started | 447 | 52 |
+| partial | 21 | 31 |
+| ported | 792 | 97 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -630,10 +630,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `callabilityschedule` | ported | Instruments/CallabilitySchedule/Callability.cs, Instruments/CallabilitySchedule/CallabilityType.cs | no nanoql type: CallabilitySchedule |
 | `capfloor` | ported | Instruments/CapFloor/Cap.cs, Instruments/CapFloor/CapFloor.cs, Instruments/CapFloor/CapFloorArguments.cs, Instruments/CapFloor/CapFloorType.cs, Instruments/CapFloor/Collar.cs, Instruments/CapFloor/Floor.cs |  |
 | `claim` | ported | Instruments/Claim/Claim.cs, Instruments/Claim/FaceValueAccrualClaim.cs, Instruments/Claim/FaceValueClaim.cs |  |
-| `cliquetoption` | not started |  | no nanoql type: CliquetOption |
-| `complexchooseroption` | not started |  | no nanoql type: ComplexChooserOption |
+| `cliquetoption` | ported | Instruments/CliquetOption.cs |  |
+| `complexchooseroption` | ported | Instruments/ComplexChooserOption.cs |  |
 | `compositeinstrument` | not started |  | no nanoql type: CompositeInstrument |
-| `compoundoption` | not started |  | no nanoql type: CompoundOption |
+| `compoundoption` | ported | Instruments/CompoundOption.cs |  |
 | `constnotionalcrosscurrencybasisswap` | ported | Instruments/ConstNotionalCrossCurrencyBasisSwap.cs, Instruments/ConstNotionalCrossCurrencyBasisSwapResults.cs |  |
 | `constnotionalcrosscurrencyfixedvsfloatingswap` | ported | Instruments/ConstNotionalCrossCurrencyFixedVsFloatingSwap.cs, Instruments/ConstNotionalCrossCurrencyFixedVsFloatingSwapResults.cs |  |
 | `constnotionalcrosscurrencyswap` | ported | Instruments/ConstNotionalCrossCurrencySwap.cs | no nanoql type: ConstNotionalCrossCurrencySwapResults |
@@ -651,10 +651,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `floatfloatswaption` | ported | Instruments/FloatFloatSwaption.cs |  |
 | `forward` | ported | Instruments/Forward/Forward.cs, Instruments/Forward/ForwardResults.cs, Instruments/Forward/ForwardTypePayoff.cs |  |
 | `forwardrateagreement` | ported | Instruments/ForwardRateAgreement.cs, Instruments/ForwardRateAgreementResults.cs |  |
-| `forwardvanillaoption` | not started |  | no nanoql type: ForwardOptionArguments, ForwardVanillaOption |
+| `forwardvanillaoption` | ported | Instruments/ForwardVanillaOption.cs | no nanoql type: ForwardOptionArguments |
 | `futures` | ported | Instruments/FuturesType.cs |  |
 | `fxforward` | ported | Instruments/FxForward.cs, Instruments/FxForwardResults.cs |  |
-| `holderextensibleoption` | not started |  | no nanoql type: HolderExtensibleOption |
+| `holderextensibleoption` | ported | Instruments/HolderExtensibleOption.cs |  |
 | `impliedvolatility` | ported | Instruments/ImpliedVolatilityHelper.cs |  |
 | `inflationcapfloor` | ported | Instruments/InflationCapFloor/InflationCapFloorFunctions.cs, Instruments/InflationCapFloor/YoYInflationCap.cs, Instruments/InflationCapFloor/YoYInflationCapFloor.cs, Instruments/InflationCapFloor/YoYInflationCapFloorArguments.cs, Instruments/InflationCapFloor/YoYInflationCapFloorType.cs, Instruments/InflationCapFloor/YoYInflationCollar.cs, Instruments/InflationCapFloor/YoYInflationFloor.cs |  |
 | `lookbackoption` | not started |  | no nanoql type: ContinuousFloatingLookbackOption, ContinuousFixedLookbackOption, ContinuousPartialFloatingLookbackOption, ContinuousPartialFixedLookbackOption |
@@ -678,9 +678,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `payoffs` | ported | Instruments/Payoffs/AssetOrNothingPayoff.cs, Instruments/Payoffs/CashOrNothingPayoff.cs, Instruments/Payoffs/FloatingTypePayoff.cs, Instruments/Payoffs/GapPayoff.cs, Instruments/Payoffs/NullPayoff.cs, Instruments/Payoffs/PercentageStrikePayoff.cs, Instruments/Payoffs/PlainVanillaPayoff.cs, Instruments/Payoffs/StrikedTypePayoff.cs, Instruments/Payoffs/SuperFundPayoff.cs, Instruments/Payoffs/SuperSharePayoff.cs, Instruments/Payoffs/TypePayoff.cs |  |
 | `perpetualfutures` | not started |  | no nanoql type: PerpetualFutures, PerpetualFuturesPayoffType, PerpetualFuturesFundingType |
 | `quantobarrieroption` | not started |  | no nanoql type: QuantoBarrierOption |
-| `quantoforwardvanillaoption` | not started |  | no nanoql type: QuantoForwardVanillaOption |
-| `quantovanillaoption` | not started |  | no nanoql type: QuantoOptionResults, QuantoVanillaOption |
-| `simplechooseroption` | not started |  | no nanoql type: SimpleChooserOption |
+| `quantoforwardvanillaoption` | ported | Instruments/QuantoForwardVanillaOption.cs |  |
+| `quantovanillaoption` | ported | Instruments/QuantoVanillaOption/QuantoOptionResults.cs, Instruments/QuantoVanillaOption/QuantoVanillaOption.cs |  |
+| `simplechooseroption` | ported | Instruments/SimpleChooserOption.cs |  |
 | `simplifynotificationgraph` | not ported: observer plumbing, removed |  |  |
 | `softbarrieroption` | not started |  | no nanoql type: SoftBarrierOption |
 | `stickyratchet` | ported | Instruments/StickyRatchet/DoubleStickyRatchetPayoff.cs, Instruments/StickyRatchet/RatchetMaxPayoff.cs, Instruments/StickyRatchet/RatchetMinPayoff.cs, Instruments/StickyRatchet/RatchetPayoff.cs, Instruments/StickyRatchet/StickyMaxPayoff.cs, Instruments/StickyRatchet/StickyMinPayoff.cs, Instruments/StickyRatchet/StickyPayoff.cs |  |
@@ -694,7 +694,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `vanillaswap` | ported | Instruments/VanillaSwap.cs |  |
 | `vanillaswingoption` | ported | Instruments/VanillaSwingOption/SwingExercise.cs, Instruments/VanillaSwingOption/VanillaForwardPayoff.cs, Instruments/VanillaSwingOption/VanillaSwingOption.cs |  |
 | `varianceswap` | ported | Instruments/VarianceSwap.cs, Instruments/VarianceSwapResults.cs |  |
-| `writerextensibleoption` | not started |  | no nanoql type: WriterExtensibleOption |
+| `writerextensibleoption` | ported | Instruments/WriterExtensibleOption.cs |  |
 | `yearonyearinflationswap` | ported | Instruments/YearOnYearInflationSwap.cs, Instruments/YearOnYearInflationSwapResults.cs |  |
 | `zerocouponinflationswap` | ported | Instruments/ZeroCouponInflationSwap.cs |  |
 | `zerocouponswap` | ported | Instruments/ZeroCouponSwap.cs, Instruments/ZeroCouponSwapResults.cs |  |
@@ -1465,7 +1465,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackcalculator` | ported | PricingEngines/BlackCalculator.cs |  |
 | `blackdeltacalculator` | ported | PricingEngines/BlackDeltaCalculator.cs | no nanoql type: BlackDeltaPremiumAdjustedSolverClass, BlackDeltaPremiumAdjustedMaxStrikeClass |
 | `blackformula` | ported | PricingEngines/BlackFormulaFunctions.cs |  |
-| `blackscholescalculator` | not started |  | no nanoql type: BlackScholesCalculator |
+| `blackscholescalculator` | ported | PricingEngines/BlackScholesCalculator.cs |  |
 | `genericmodelengine` | replaced: static engines: the model is an engine argument |  |  |
 | `greeks` | ported | PricingEngines/GreeksFunctions.cs |  |
 | `latticeshortratemodelengine` | ported | PricingEngines/LatticeShortRateModelEngine.cs |  |
@@ -1562,9 +1562,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `analyticcliquetengine` | not started |  | no nanoql type: AnalyticCliquetEngine |
-| `analyticperformanceengine` | not started |  | no nanoql type: AnalyticPerformanceEngine |
-| `mcperformanceengine` | not started |  | no nanoql type: MCPerformanceEngine, MakeMCPerformanceEngine, PerformanceOptionPathPricer |
+| `analyticcliquetengine` | ported | PricingEngines/Cliquet/AnalyticCliquetEngine.cs |  |
+| `analyticperformanceengine` | ported | PricingEngines/Cliquet/AnalyticPerformanceEngine.cs |  |
+| `mcperformanceengine` | ported | PricingEngines/Cliquet/MCPerformanceEngine/MCPerformanceEngine.cs, PricingEngines/Cliquet/MCPerformanceEngine/MakeMCPerformanceEngine{TRng,TStats}.cs, PricingEngines/Cliquet/MCPerformanceEngine/PerformanceOptionPathPricer.cs |  |
 
 ### `ql/pricingengines/credit/`
 
@@ -1581,13 +1581,13 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `analyticamericanmargrabeengine` | ported | PricingEngines/Exotic/AnalyticAmericanMargrabeEngine.cs |  |
-| `analyticcomplexchooserengine` | not started |  | no nanoql type: AnalyticComplexChooserEngine |
-| `analyticcompoundoptionengine` | not started |  | no nanoql type: AnalyticCompoundOptionEngine |
+| `analyticcomplexchooserengine` | ported | PricingEngines/Exotic/AnalyticComplexChooserEngine.cs |  |
+| `analyticcompoundoptionengine` | ported | PricingEngines/Exotic/AnalyticCompoundOptionEngine.cs |  |
 | `analyticeuropeanmargrabeengine` | ported | PricingEngines/Exotic/AnalyticEuropeanMargrabeEngine.cs |  |
-| `analyticholderextensibleoptionengine` | not started |  | no nanoql type: AnalyticHolderExtensibleOptionEngine |
-| `analyticsimplechooserengine` | not started |  | no nanoql type: AnalyticSimpleChooserEngine |
+| `analyticholderextensibleoptionengine` | ported | PricingEngines/Exotic/AnalyticHolderExtensibleOptionEngine.cs |  |
+| `analyticsimplechooserengine` | ported | PricingEngines/Exotic/AnalyticSimpleChooserEngine.cs |  |
 | `analytictwoassetcorrelationengine` | ported | PricingEngines/Exotic/AnalyticTwoAssetCorrelationEngine.cs |  |
-| `analyticwriterextensibleoptionengine` | not started |  | no nanoql type: AnalyticWriterExtensibleOptionEngine |
+| `analyticwriterextensibleoptionengine` | ported | PricingEngines/Exotic/AnalyticWriterExtensibleOptionEngine.cs |  |
 
 ### `ql/pricingengines/forward/`
 
@@ -1595,11 +1595,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `discountingfxforwardengine` | ported | PricingEngines/Forward/DiscountingFxForwardEngine.cs |  |
-| `forwardengine` | not started |  | no nanoql type: ForwardVanillaEngine |
-| `forwardperformanceengine` | not started |  | no nanoql type: ForwardPerformanceVanillaEngine |
-| `mcforwardeuropeanbsengine` | not started |  | no nanoql type: MCForwardEuropeanBSEngine, MakeMCForwardEuropeanBSEngine, ForwardEuropeanBSPathPricer |
-| `mcforwardeuropeanhestonengine` | not started |  | no nanoql type: MCForwardEuropeanHestonEngine, MakeMCForwardEuropeanHestonEngine, ForwardEuropeanHestonPathPricer |
-| `mcforwardvanillaengine` | not started |  | no nanoql type: MCForwardVanillaEngine |
+| `forwardengine` | ported | PricingEngines/Forward/ForwardVanillaEngine.cs |  |
+| `forwardperformanceengine` | ported | PricingEngines/Forward/ForwardPerformanceVanillaEngine.cs |  |
+| `mcforwardeuropeanbsengine` | ported | PricingEngines/Forward/MCForwardEuropeanBSEngine/ForwardEuropeanBSPathPricer.cs, PricingEngines/Forward/MCForwardEuropeanBSEngine/MCForwardEuropeanBSEngine.cs, PricingEngines/Forward/MCForwardEuropeanBSEngine/MakeMCForwardEuropeanBSEngine{TRng,TStats}.cs |  |
+| `mcforwardeuropeanhestonengine` | ported | PricingEngines/Forward/MCForwardEuropeanHestonEngine/ForwardEuropeanHestonPathPricer.cs, PricingEngines/Forward/MCForwardEuropeanHestonEngine/MCForwardEuropeanHestonEngine.cs, PricingEngines/Forward/MCForwardEuropeanHestonEngine/MakeMCForwardEuropeanHestonEngine{TRng,TStats}.cs |  |
+| `mcforwardvanillaengine` | ported | PricingEngines/Forward/MCForwardVanillaEngine{TMc,TPath,TStats}.cs |  |
 | `mcvarianceswapengine` | not started |  | no nanoql type: MCVarianceSwapEngine, MakeMCVarianceSwapEngine, VariancePathPricer |
 | `replicatingvarianceswapengine` | ported | PricingEngines/Forward/ReplicatingVarianceSwapEngine.cs |  |
 
@@ -1633,7 +1633,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `quantoengine` | not started |  | no nanoql type: QuantoEngine |
+| `quantoengine` | ported | PricingEngines/Quanto/QuantoEngine.cs |  |
 
 ### `ql/pricingengines/swap/`
 
@@ -2091,14 +2091,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `catbonds` | not started |  | 9 cases |
 | `cdo` | not started |  | 0 cases |
 | `cdsoption` | not started |  | 1 cases |
-| `chooseroption` | not started |  | 2 cases |
-| `cliquetoption` | not started |  | 4 cases |
+| `chooseroption` | ported | TestSuite/ChooserOptionTests.cs | 2 of 2 cases; moved: testAnalyticComplexChooserEngine line 138 to Divergences/ComplexChooserEqualTermsTests.cs |
+| `cliquetoption` | ported | TestSuite/CliquetOptionTests.cs | 4 of 4 cases |
 | `cms` | ported | TestSuite/CmsTests.cs | 5 of 5 cases |
 | `cms_normal` | ported | TestSuite/CmsNormalTests.cs | 3 of 3 cases |
 | `cmsspread` | partial | TestSuite/CmsSpreadTests.cs | 1 of 2 cases; not yet: testCouponPricing |
 | `commodityunitofmeasure` | not started |  | 2 cases |
 | `compiledboostversion` | not ported: tests the C++ platform |  |  |
-| `compoundoption` | not started |  | 2 cases |
+| `compoundoption` | ported | TestSuite/CompoundOptionTests.cs | 2 of 2 cases |
 | `constnotionalcrosscurrencybasisswap` | ported | TestSuite/ConstNotionalCrossCurrencyBasisSwapTests.cs | 2 of 2 cases |
 | `constnotionalcrosscurrencyfixedvsfloatingswap` | ported | TestSuite/ConstNotionalCrossCurrencyFixedVsFloatingSwapTests.cs | 1 of 1 cases |
 | `constnotionalcrosscurrencyswap` | ported | TestSuite/ConstNotionalCrossCurrencySwapTests.cs | 3 of 3 cases |
@@ -2126,7 +2126,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `exchangerate` | ported | TestSuite/ExchangeRateTests.cs | 5 of 5 cases |
 | `extendedblackvariancesurface` | not started |  | 1 cases |
 | `extendedtrees` | not started |  | 7 cases |
-| `extensibleoptions` | not started |  | 2 cases |
+| `extensibleoptions` | ported | TestSuite/ExtensibleOptionsTests.cs | 2 of 2 cases |
 | `fastfouriertransform` | not started |  | 3 cases |
 | `fdcev` | ported | TestSuite/FdCevTests.cs | 2 of 2 cases |
 | `fdcir` | ported | TestSuite/FdCirTests.cs | 1 of 1 cases; moved: testFdmCIRConvergence line 105 to Divergences/FdCirModelTests.cs |
@@ -2135,7 +2135,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdsabr` | partial | TestSuite/FdSabrTests.cs | 3 of 5 cases; not yet: testFdmSabrOp, testOosterleeTestCaseIV |
 | `fittedbonddiscountcurve` | ported | TestSuite/FittedBondDiscountCurveTests.cs | 5 of 5 cases |
 | `floatfloatswap` | ported | TestSuite/FloatFloatSwapTests.cs | 6 of 6 cases |
-| `forwardoption` | not started |  | 8 cases |
+| `forwardoption` | partial | TestSuite/ForwardOptionTests.cs | 6 of 8 cases; not yet: testHestonMCPrices, testHestonAnalyticalVsMCPrices |
 | `forwardrateagreement` | ported | TestSuite/ForwardRateAgreementTests.cs | 1 of 1 cases |
 | `functions` | ported | TestSuite/FunctionsTests.cs | 9 of 9 cases |
 | `fxforward` | ported | TestSuite/FxForwardTests.cs | 13 of 13 cases |
@@ -2210,7 +2210,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `quantlibbenchmark` | not ported: a timing runner |  |  |
 | `quantlibglobalfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `quantlibtestsuite` | replaced: test infrastructure: xUnit and the vector harness |  |  |
-| `quantooption` | partial | TestSuite/QuantoOptionTests.cs | 2 of 10 cases; not yet: testValues, testGreeks, testForwardValues, testForwardGreeks, testForwardPerformanceValues, testBarrierValues, testPDEOptionValues, testDoubleBarrierValues |
+| `quantooption` | partial | TestSuite/QuantoOptionTests.cs | 8 of 10 cases; not yet: testBarrierValues, testDoubleBarrierValues |
 | `quotes` | not started |  | 6 cases |
 | `rangeaccrual` | ported | TestSuite/RangeAccrualTests.cs | 3 of 3 cases |
 | `riskneutraldensitycalculator` | ported | TestSuite/RiskNeutralDensityCalculatorTests.cs | 14 of 14 cases |

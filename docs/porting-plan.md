@@ -134,6 +134,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/FdHestonTests.cs`: `testFdmHestonBarrierVsBlackScholes`, `testFdmHestonBarrier` and `testMethodOfLinesAndCN`, which wait for S-bar's `FdHestonBarrierEngine`.
 - `tests/NanoQL.Tests/TestSuite/FdSabrTests.cs`: `testFdmSabrOp` and `testOosterleeTestCaseIV`, which wait for S-core's Richardson extrapolation and Sobol Brownian bridge sequences.
 - `tests/NanoQL.Tests/TestSuite/FdmLinearOpTests.cs`: `testDerivativeWeightsOnNonUniformGrids`, `testBiCGstab` and `testGMRES`, which wait for S-core.
+- `tests/NanoQL.Tests/TestSuite/ForwardOptionTests.cs`: `testHestonMCPrices` and `testHestonAnalyticalVsMCPrices`, which wait for S-xeq's analytic Heston forward engine.
 - `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testMomentBasedGaussianPolynomial` and `testGaussLaguerreCosinePolynomial`, which wait for S-core; `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/HestonModelTests.cs`: `testFdBarrierVsCached` (S-bar), and `testAllIntegrationMethods` and `testCosHestonCumulants` (S-core).
 - `tests/NanoQL.Tests/TestSuite/HestonSlvModelTests.cs`: `testMoustacheGraph`, which waits for S-bar's `FdHestonDoubleBarrierEngine` and `AnalyticDoubleBarrierBinaryEngine`, and `testDiffusionAndDriftSlvProcess`, which waits for S-core's Sobol Brownian bridge sequences.
@@ -147,7 +148,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing, L-BFGS-B, differential evolution and CMA-ES cases, whose optimizers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/PiecewiseBlackVarianceSurfaceTests.cs`: `testSabrEquivalence`, which waits for S-xeq's `SABRVolTermStructure`.
 - `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: `testDefaultInstantiation`'s ConvexMonotone curve (S-core); `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (S-core); `testConvexMonotoneForwardConsistency`, `testLocalBootstrapConsistency` and `testGlobalBootstrapVariables` (S-core).
-- `tests/NanoQL.Tests/TestSuite/QuantoOptionTests.cs`: the analytic and forward cases and `testPDEOptionValues`, which wait for S-exo's quanto engines; the barrier case, which waits for S-bar's quanto barrier option; and `testDoubleBarrierValues`, which waits for S-xeq's quanto double-barrier option.
+- `tests/NanoQL.Tests/TestSuite/QuantoOptionTests.cs`: the barrier case, which waits for S-bar's quanto barrier option; and `testDoubleBarrierValues`, which waits for S-xeq's quanto double-barrier option.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position and secant cases, whose solvers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/StatsTests.cs`: `testSequenceStatistics` and `testConvergenceStatistics`, which wait for S-mmp's sequence and convergence statistics.
