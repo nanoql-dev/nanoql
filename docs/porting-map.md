@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 422 | 42 |
+| not started | 416 | 41 |
 | partial | 21 | 31 |
-| ported | 817 | 107 |
+| ported | 823 | 108 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -657,7 +657,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `holderextensibleoption` | ported | Instruments/HolderExtensibleOption.cs |  |
 | `impliedvolatility` | ported | Instruments/ImpliedVolatilityHelper.cs |  |
 | `inflationcapfloor` | ported | Instruments/InflationCapFloor/InflationCapFloorFunctions.cs, Instruments/InflationCapFloor/YoYInflationCap.cs, Instruments/InflationCapFloor/YoYInflationCapFloor.cs, Instruments/InflationCapFloor/YoYInflationCapFloorArguments.cs, Instruments/InflationCapFloor/YoYInflationCapFloorType.cs, Instruments/InflationCapFloor/YoYInflationCollar.cs, Instruments/InflationCapFloor/YoYInflationFloor.cs |  |
-| `lookbackoption` | not started |  | no nanoql type: ContinuousFloatingLookbackOption, ContinuousFixedLookbackOption, ContinuousPartialFloatingLookbackOption, ContinuousPartialFixedLookbackOption |
+| `lookbackoption` | ported | Instruments/LookbackOption/ContinuousFixedLookbackOption.cs, Instruments/LookbackOption/ContinuousFloatingLookbackOption.cs, Instruments/LookbackOption/ContinuousPartialFixedLookbackOption.cs, Instruments/LookbackOption/ContinuousPartialFloatingLookbackOption.cs |  |
 | `makecapfloor` | ported | Instruments/MakeCapFloor.cs |  |
 | `makecds` | ported | Instruments/MakeCreditDefaultSwap.cs |  |
 | `makecms` | ported | Instruments/MakeCms.cs |  |
@@ -1622,11 +1622,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `analyticcontinuousfixedlookback` | not started |  | no nanoql type: AnalyticContinuousFixedLookbackEngine |
-| `analyticcontinuousfloatinglookback` | not started |  | no nanoql type: AnalyticContinuousFloatingLookbackEngine |
-| `analyticcontinuouspartialfixedlookback` | not started |  | no nanoql type: AnalyticContinuousPartialFixedLookbackEngine |
-| `analyticcontinuouspartialfloatinglookback` | not started |  | no nanoql type: AnalyticContinuousPartialFloatingLookbackEngine |
-| `mclookbackengine` | not started |  | no nanoql type: MCLookbackEngine, MakeMCLookbackEngine |
+| `analyticcontinuousfixedlookback` | ported | PricingEngines/Lookback/AnalyticContinuousFixedLookbackEngine.cs |  |
+| `analyticcontinuousfloatinglookback` | ported | PricingEngines/Lookback/AnalyticContinuousFloatingLookbackEngine.cs |  |
+| `analyticcontinuouspartialfixedlookback` | ported | PricingEngines/Lookback/AnalyticContinuousPartialFixedLookbackEngine.cs |  |
+| `analyticcontinuouspartialfloatinglookback` | ported | PricingEngines/Lookback/AnalyticContinuousPartialFloatingLookbackEngine.cs |  |
+| `mclookbackengine` | ported | PricingEngines/Lookback/MCLookbackEngine/MCLookbackEngine.cs, PricingEngines/Lookback/MCLookbackEngine/MakeMCLookbackEngine{TOption,TRng,TStats}.cs |  |
 
 ### `ql/pricingengines/quanto/`
 
@@ -2166,7 +2166,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `libormarketmodel` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
 | `libormarketmodelprocess` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
 | `linearleastsquaresregression` | not started |  | 3 cases |
-| `lookbackoptions` | not started |  | 5 cases |
+| `lookbackoptions` | ported | TestSuite/LookbackOptionsTests.cs | 5 of 5 cases |
 | `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 6 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy, testSobolBurleySkipping, testBurley2020SobolRsgOutputBounds |
 | `margrabeoption` | ported | TestSuite/MargrabeOptionTests.cs | 3 of 3 cases; moved: testEuroExchangeTwoAssets line 250 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 259 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 268 to Divergences/MargrabeGreeksQuantityTests.cs |
 | `marketmodel` | not started |  | 19 cases |

@@ -3766,6 +3766,92 @@ Facts:
 - `ABermudanOrAWindowExercisesOnlyAtItsExerciseTimes`
 - `OnOneStepPerDateTheBitsAreQuantLibs`
 
+## LookbackExtremeBeyondSpotTests
+
+[`Divergences/LookbackExtremeBeyondSpotTests.cs`](../tests/NanoQL.Tests/Divergences/LookbackExtremeBeyondSpotTests.cs)
+
+A running extremum beyond the spot (the S-bar plan's BR5 (xxii), fixed under R8). The spot is observed, so a running maximum below it or a minimum above it is impossible; QuantLib's engines price it as given: on spot 100, r 5%, q 0, σ 20% over a year, a fixed call struck at 90 with a running maximum of 80 at 30.175098740702154, where the spot as the maximum gives 28.67991950233946, and a floating put with that maximum at 19.69144860119077 for 14.29056770740371 (the planner's P2, rerun as the S-bar run's `c2_lb_facts.py`). nanoql reads the extremum as max(minmax, S) or min(minmax, S), in the analytic and Monte Carlo engines. Check: QuantLib's value at minmax = S.
+
+Facts:
+
+- `AFixedLookbacksExtremumIsTheSpotWhereItLiesBeyondIt`
+- `AFloatingLookbacksExtremumIsTheSpotWhereItLiesBeyondIt`
+
+## LookbackMismatchedTimesTests
+
+[`Divergences/LookbackMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/LookbackMismatchedTimesTests.cs)
+
+The analytic lookback engines on structures that measure time differently (the S-bar plan's BR5 (xix), the dates class, fixed under R8). QuantLib's engines read each rate as its curve's zero rate over the risk-free curve's time, and the volatility over the same time, so on an Actual/360 risk-free curve beside an Actual/365 Fixed volatility they are off their own values on the market restated onto one clock with the same discounts by date: on spot 100, r 5% (Actual/360), q 2%, σ 25% over a year, the floating call +0.468%, the fixed call +0.599%, the partial floating call +0.435% and the partial fixed call +0.563% (the S-bar run's `c2_lb_facts.py`). nanoql reads each rate on the volatility's clock, the curve's zero rate times its own time over the volatility's, and each time on it, as the analytic barrier engine reads them. QuantLib's check: its own engine on the restated market, the risk-free rate scaled to Actual/365 Fixed so its discounts by date are unchanged, which nanoql's engines price with QuantLib's bits (the vectors).
+
+Facts:
+
+- `TheFloatingLookbackPricesAsOnTheRestatedMarket`
+- `TheFixedLookbackPricesAsOnTheRestatedMarket`
+- `ThePartialFloatingLookbackPricesAsOnTheRestatedMarket`
+- `ThePartialFixedLookbackPricesAsOnTheRestatedMarket`
+
+## LookbackPartialWindowTodayTests
+
+[`Divergences/LookbackPartialWindowTodayTests.cs`](../tests/NanoQL.Tests/Divergences/LookbackPartialWindowTodayTests.cs)
+
+The partial lookbacks' windows opening or closing today or before it (the S-bar code review's B2-2, BR5 (xiii)'s class for the partial-time barrier, fixed under R8). QuantLib's partial formulas take f₁ = 0/0 for a window date today at the money and √t₁ of a negative time before it: on spot 100, r 5%, q 1%, σ 20% over a year, its partial fixed call struck at 100 opening today and its partial floating call closing today are NaN, and a window dated yesterday throws the bivariate normal's "rho must be >= -1.0 (NaN not allowed)"; its Monte Carlo engine prices a window opened before today as opening today and folds today's spot into a window that has closed (the S-bar run's `c2_window_today.py`; the reviewer's `q12_ql.py`). nanoql takes each limit: a fixed window opening today is the full fixed lookback with the spot as its maximum; a floating window closing today the European at λ times the minimum (or maximum) with the spot, and one closed before today the European at λ times the extremum as given; a fixed window opened before today is refused, the option holding no extremum observed since. Checks: QuantLib's full fixed engine and its analytic European engine, and the partial engine a day out. "Before today" is before the evaluation date and "today" runs from it to the clock's origin, inclusive (the review's B2-3): on a market settling two days after the evaluation date, a window dated on it or a day after takes today's limit, where reading a clock's time refused the fixed window and dropped the spot from the floating one, 24% low; the checks the full fixed engine and the European engine on that market, the Monte Carlo's full fixed lookback on the same paths to the bit.
+
+Facts:
+
+- `AFixedWindowOpeningTodayIsTheFullLookback`
+- `AFloatingWindowClosingTodayIsTheEuropean`
+- `AFixedWindowOpenedBeforeTodayIsRefused`
+- `AFloatingWindowClosedBeforeTodayIsTheEuropeanAtItsExtremum`
+- `OnALaterMarketAFixedWindowOpeningBeforeTheClocksOriginIsTheFullLookback`
+- `OnALaterMarketAFloatingWindowClosingBeforeTheClocksOriginIsTheEuropeanWithTheSpot`
+- `OnALaterMarketAWindowDatedBeforeTheEvaluationDateIsPast`
+
+## LookbackSmallCarryTests
+
+[`Divergences/LookbackSmallCarryTests.cs`](../tests/NanoQL.Tests/Divergences/LookbackSmallCarryTests.cs)
+
+The analytic lookback engines near zero carry (the S-bar plan's BR5 (xxiii), the user's ruling (b) of 2026-10-26). As the carry b = r − q vanishes, each formula's terms over 2b/σ² cancel: over a year at σ 20%, QuantLib's floating call (spot 100, minimum 95) is off its 50-digit value by 2.0e-9 at b = 1e-7 and 1.4e-4 at 1e-12, its partial fixed call (strike 100, the window from half a year) by 1.4e-9 and 1.9e-4, and every engine is NaN at b = 0 (#2856 takes the full engines' limit below |λ| of 1e-7; the partial engines stay NaN). nanoql evaluates the full engines' formulas in double-double below u = |2b√T/σ| of 1e-3, the cubic through double-double values below 1e-18, and #2856's limit at 0; and the partial engines' as the cubic in b through QuantLib's double values at ±c and ±2c, c the carry at a cut of 6e-4 to 2e-3 in u. Checks: the formulas at 50 digits, the bivariate normal by quadrature (the S-bar run's `c2_smallcarry_refs.py`), within 1e-12 of max(|value|, 1); over the run's fit, corner and holdout grids the worst is 1.6e-13 for the full engines and 1.1e-12 for the partial ones (`c2_smallcarry_cut.py`, `c2_smallcarry_rule.py`, and the engines on the holdout grid).
+
+Facts:
+
+- `TheFloatingLookbackHoldsItsDigits`
+- `TheFixedLookbackHoldsItsDigits`
+- `ThePartialFloatingLookbackHoldsItsDigitsAndPricesZeroCarry`
+- `ThePartialFixedLookbackHoldsItsDigitsAndPricesZeroCarry`
+
+## LookbackSmallVolatilityTests
+
+[`Divergences/LookbackSmallVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/LookbackSmallVolatilityTests.cs)
+
+The analytic lookback engines at small, non-zero volatilities (the S-bar code review's B2-1, BR5 (xxiv)'s class, fixed under R8). λ = 2b/σ² grows as σ falls, so QuantLib's s^(−λ) overflows to +∞ while its normal or bivariate factor underflows to 0, and their product is NaN where the value is finite: on spot 100, r 5%, q 1% over a year, a fixed call struck at 105 with a running maximum of 110 is 4.75614712250357 at σ 0.3% and NaN in QuantLib, as is every engine from about σ 0.3% at a moneyness of 1.1 (σ² below 2|b ln s|/709). nanoql takes such a product in logs, exp(a ln s + ln P), ln P finite in the tails (`LookbackTails`), where QuantLib's isn't finite, QuantLib's product and bits elsewhere. Check: QuantLib's formulas at 80 digits, the bivariate normal by quadrature outward from its peak (the S-bar run's `c2_smallvol_refs2.py` and `c2_tiny_refs.py`; the reviewer's agree on the full engines), within 1e-12 of max(|value|, 1), and the values far below 1 to 1e-9 relative. The partial fixed call at 110 is the full one's to 20 digits, its window's opening, half a year in, unreached at these volatilities. The rows at σ 1e-4 and 1e-6 hold the bivariate normal's arguments of order 1e4 and 1e5, where its exponent's terms of order h² and h must cancel analytically.
+
+Facts:
+
+- `TheFixedLookbackIsFinite`
+- `TheFloatingLookbackIsFinite`
+- `ThePartialFixedLookbackIsFinite`
+- `ThePartialFloatingLookbackIsFinite`
+
+## LookbackUpstreamFixesTests
+
+[`Divergences/LookbackUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/LookbackUpstreamFixesTests.cs)
+
+The fix QuantLib's master made to the lookback family after the pin, which nanoql takes (the S-bar plan's BR6 (v)), with the master's own case. #2856 (`9c44b7345`): the full fixed and floating lookbacks at zero carry, where 1.44's formulas are 0/0, take their limit; the master switches to it below |λ| of 1e-7, nanoql at zero carry alone, the formula in double-double around it (BR5 (xxiii), `LookbackSmallCarryTests`).
+
+Facts:
+
+- `TestAnalyticContinuousLookbackZeroCarry`
+
+## LookbackZeroVolatilityTests
+
+[`Divergences/LookbackZeroVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/LookbackZeroVolatilityTests.cs)
+
+The analytic lookback engines at zero volatility (the S-bar plan's BR5 (xxiv), #2853's class). Each of QuantLib's formulas divides by the volatility and is NaN at σ = 0: on spot 100, r 5%, q 1% over a year, its floating call is NaN, 3.8820409248455316 at σ = 1e-8 (the planner's P8, rerun as the S-bar run's `c2_zerovol.py`). nanoql takes each engine's limit below machine-epsilon variance, the payoff on the forward path, which is monotone, so its extremum over the window lies at an end: the floating call's minimum the spot, the fixed call's maximum the forward, the partial fixed call's the forward, the partial floating call's minimum over [0, t₁] the spot. Check: QuantLib's values at σ = 1e-8.
+
+Facts:
+
+- `EachEngineTakesTheForwardPathsPayoff`
+
 ## MakeSwaptionNullIndexTests
 
 [`Divergences/MakeSwaptionNullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/MakeSwaptionNullIndexTests.cs)
@@ -3912,6 +3998,49 @@ The Monte Carlo Hull-White cap engine on a collar: QuantLib's path pricer reads 
 Facts:
 
 - `TheCollarIsItsCapLessItsFloor`
+
+## McLookbackLambdaTests
+
+[`Divergences/McLookbackLambdaTests.cs`](../tests/NanoQL.Tests/Divergences/McLookbackLambdaTests.cs)
+
+The Monte Carlo partial floating lookback's λ (the S-bar plan's BR5 (xxi), fixed under R8). QuantLib's pricer pays S_T − min where the instrument's payoff, and QuantLib's analytic engine, is S_T − λ min: a partial floating call at λ 1.2 (running minimum 100) whose window ends 90 days into 360, on spot 100, r 5%, q 2%, σ 20%, 4 steps, 100,000 antithetic samples at seed 42, prices at 7.747172763156529, its value at λ 1 (the S-bar run's probe harness, `probe_mc_ql.py`). nanoql pays λ times the minimum. Check: the discrete payoff's exact value on the engine's window {0, 90 days}, the quadrature `McLookbackWindowTests` takes: 3.042965056630764, within three of the engine's error estimates.
+
+Facts:
+
+- `ThePartialFloatingPayoffReadsLambda`
+
+## McLookbackMismatchedTimesTests
+
+[`Divergences/McLookbackMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/McLookbackMismatchedTimesTests.cs)
+
+The Monte Carlo lookback engine's grid on structures that measure time differently (the S-bar plan's BR5 (xix), batch 4's rule, fixed under R8). QuantLib's grid runs on the risk-free curve's time and its process reads the other structures at it, as though they shared that clock. nanoql's paths and discount run on the engine's clock, `FdmBlackScholesOp.Clock`, each structure read at the instants its times denote. Check: the engine on the market restated onto the clock, the dividend rate and the volatility scaled so their discounts and variances by date are unchanged, on the same seed: the paths draw the same numbers, so the prices agree to rounding; and a risk-free curve settling two days after the others, read from its own date on the clock from the earliest, where QuantLib's grid starts at the risk-free curve's date, against the market restated with every structure today.
+
+Facts:
+
+- `Act365StructuresBesideAnAct360CurvePriceAsOnTheRestatedMarket`
+- `ARiskFreeCurveSettlingLaterIsReadFromItsDateOnTheEarliestClock`
+
+## McLookbackSeasonedTests
+
+[`Divergences/McLookbackSeasonedTests.cs`](../tests/NanoQL.Tests/Divergences/McLookbackSeasonedTests.cs)
+
+The Monte Carlo lookback engine on seasoned options (the S-bar plan's BR5 (xx), fixed under R8). QuantLib's pricers take the extremum from the path's second node and never read the running extremum, so a seasoned option prices as a new one: on spot 100, r 6%, q 0, σ 10% over a year, 2,000 steps, 20,000 antithetic samples at seed 1, a fixed call struck at 100 with a running maximum of 115 at 11.196910337699553 and a floating call with a running minimum of 90 at 10.747874194538674, their values with the extremum at the spot, where the analytic engines give 16.195934579797157 and 15.741880586612329 (the S-bar run's probe harness, `probe_mc_ql.py`). nanoql folds the observed extremum into the path's. Check: QuantLib's analytic engines on the seasoned options, which the Monte Carlo converges to, within QuantLib's own Monte Carlo test's 0.1.
+
+Facts:
+
+- `ASeasonedFixedLookbackReadsItsRunningMaximum`
+- `ASeasonedFloatingLookbackReadsItsRunningMinimum`
+
+## McLookbackWindowTests
+
+[`Divergences/McLookbackWindowTests.cs`](../tests/NanoQL.Tests/Divergences/McLookbackWindowTests.cs)
+
+The Monte Carlo partial lookbacks' window (the S-bar plan's BR5 (xx), Revision 2's F1-5, fixed under R8). QuantLib's partial pricers snap the window's date to the closest time of a regular grid that doesn't carry it, and the partial fixed pricer drops the window's first node: a partial floating call (running minimum 100, λ 1) whose window ends 37 days into a year, on spot 100, r 5%, q 2%, σ 20%, 4 steps, 100,000 antithetic samples at seed 42, snaps its window to the first node and reads the spot a quarter on, at 7.805558043540716 (the S-bar run's probe harness, `probe_mc_ql.py`). nanoql makes the window's date a time of the grid, its start node included, so on this grid the window is {0, 37 days}. Check: the discrete payoff's exact value on that window, e^(−rT) E[(S_T − λ min(m, S_t₁))⁺], a quadrature over S_t₁ of the Black call on S_T given it: 10.221335405994491, within three of the engine's error estimates (the continuous window's analytic value, 11.617971695171292, lies above both, the discrete minimum over two nodes missing the path's dips between them). And a partial fixed call struck at 100 whose window opens 300 days into the year, on the same paths, snaps its window to the grid's node at three quarters and drops it, so it reads the terminal spot alone, a vanilla call, at 9.179431603675994; nanoql's window is {300 days, a year}, its exact value e^(−rT) E[(max(S_t₁, S_T) − K)⁺] 10.686101666470105, the engine within three of its error estimates.
+
+Facts:
+
+- `APartialWindowsDateIsATimeOfTheGrid`
+- `APartialFixedWindowReadsItsFirstNode`
 
 ## McMismatchedTimesTests
 
