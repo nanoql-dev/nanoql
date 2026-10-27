@@ -125,6 +125,7 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Utilities/DataParsers/DateParser.cs`: `parseFormatted`, not ported: a `DateOnly`'s `ParseExact` does its job.
 - `tests/NanoQL.Tests/TestSuite/AndreasenHugeVolatilityInterplTests.cs`: `testDifferentOptimizers`, which waits for S-core's BFGS.
+- `tests/NanoQL.Tests/TestSuite/AsianOptionsTests.cs`: `testVecerEngine` and `testAnalyticContinuousGeometricAveragePriceHeston`, which wait for S-xeq's `VecerEngine` and `AnalyticContinuousGeometricAveragePriceAsianHestonEngine`.
 - `tests/NanoQL.Tests/TestSuite/BarrierOptionTests.cs`: the four perturbative cases, which wait for S-xeq's `PerturbativeBarrierOptionEngine`.
 - `tests/NanoQL.Tests/TestSuite/BrownianBridgeTests.cs`: `testPathGeneration`, which waits for S-mmp's `SequenceStatistics`.
 - `tests/NanoQL.Tests/TestSuite/CmsSpreadTests.cs`: `testCouponPricing`, which waits for S-xrt's `LognormalCmsSpreadPricer`.

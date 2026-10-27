@@ -322,6 +322,60 @@ Facts:
 - `AWindowOpeningOnTheReferenceDateIsQuantLibs`
 - `ANodesRefusalRefusesTheWindow`
 
+## AsianDuplicateFixingsTests
+
+[`Divergences/AsianDuplicateFixingsTests.cs`](../tests/NanoQL.Tests/Divergences/AsianDuplicateFixingsTests.cs)
+
+A fixing date given twice (the S-bar plan's BR5 (xxviii), fixed under R8). The average counts it twice, as QuantLib's analytic engines count it, where QuantLib's finite-difference condition weighs every node by the first duplicate's count and its Monte Carlo grid keeps the time once, so its pricers count it once: on spot 100, q 3%, r 6%, σ 20% (Act/360), a call at 100 fixing at 90, 180, 180, 270 and 360 days prices 6.624103653021713 by QuantLib's FD engine (100 × 100 × 50) where the contract is worth 6.0461 ± 0.0032, its arithmetic Monte Carlo 6.115069708532511 (the schedule counted once, 6.1358), and its geometric Monte Carlo 5.934198148917606 ± 0.0144 against its analytic geometric engine's 5.884809360030421, 3.4σ (the S-bar run's `c3_div_ql_a.py`). nanoql weighs each node by its fixings' count. Checks: an exact Monte Carlo of the average with the date counted twice, QuantLib's Mersenne twister and inverse normal, the FD engine within its error and the grid's own, measured on the schedule without the duplicate; and the geometric engine.
+
+Facts:
+
+- `TheFiniteDifferenceEngineCountsTheDateTwice`
+- `TheMonteCarloEnginesCountTheDateTwice`
+
+## AsianLateSettlementTests
+
+[`Divergences/AsianLateSettlementTests.cs`](../tests/NanoQL.Tests/Divergences/AsianLateSettlementTests.cs)
+
+The Asian engines on a market whose structures settle after the evaluation date (the S-bar code review's B3-1, the lookbacks' B2-3 class, fixed under R8). The option splits its fixings by the evaluation date, and QuantLib's engines read each fixing to come on the process's time from the structures' date, so a fixing today or tomorrow has a negative time: on a market settling two days on (spot 100, r 5%, q 1%, σ 20%, Act/365 Fixed), a call at 100 fixing today, tomorrow and every 30 days to 360 days prices 5.541332629516704 by the analytic geometric engine and 5.490134556097302 ± 0.055 by its Monte Carlo, the average losing two of its fourteen fixings, 18% high, and 5.687334138697442 ± 0.057 by the arithmetic Monte Carlo, 17% high; Turnbull-Wakeman refuses it with "negative time (-0.00547945) given", Choi with "first fixing date is in the past" and the FD engine with "Fixing dates must not contain past date"; and Levy refuses an averaging from today with "current average required for seasoned option" (the S-bar run's `c3_late_settlement_ql.py`). nanoql takes such a fixing at the clock's origin, the spot with no variance and no discount accrued, so a past fixing at the spot, and Levy's span before the origin at the spot. Check: the seasoned equivalent, the first two fixings past at the spot, which each engine prices as it, and which QuantLib prices 4.694309394952492, 4.6519094182914005, 4.874857833169246, 4.935628853043604, 4.921817927818181 and 4.954431596530007, and Levy with a current average at the spot 5.3936726841449385, each within R7. Where only the volatility, or only the curves, settle two days on (the S-bar code review's B3-2), Turnbull-Wakeman and Choi, which read each structure on its own, take the fixings before the latest structure's date at the spot, where QuantLib refuses them ("negative time", "first fixing date is in the past"); the check QuantLib's engines on the seasoned option, 4.945115990140009 and 4.9312430644836445, and 4.964671374839958 and 4.951052106848293 (`c3_mixed_settlement_ql.py`).
+
+Facts:
+
+- `TheAnalyticGeometricEngineKeepsEveryFixing`
+- `TheGeometricMonteCarloKeepsEveryFixing`
+- `TheArithmeticMonteCarloKeepsEveryFixing`
+- `TurnbullWakemanPricesTodaysFixings`
+- `ChoiPricesTodaysFixings`
+- `TurnbullWakemanPricesTodaysFixingsWhereTheStructuresSettleApart`
+- `ChoiPricesTodaysFixingsWhereTheStructuresSettleApart`
+- `TheFiniteDifferenceEnginePricesTodaysFixings`
+- `LevyPricesAnAveragingFromToday`
+- `TheHestonGeometricEngineKeepsEveryFixing`
+
+## AsianMismatchedTimesTests
+
+[`Divergences/AsianMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/AsianMismatchedTimesTests.cs)
+
+The Asian engines on structures that measure time differently (the S-bar plan's BR5 (xxvi), batch 4's dates class, fixed under R8). QuantLib's engines read each structure on its own day counter's time as though they shared one clock, so on an Actual/360 risk-free curve (r 5%) beside Actual/365 Fixed dividends (2%) and volatility (25%) they are off their own values on the market restated onto one clock with the discounts and variances by date unchanged: a call at 100 on twelve fixings every 30 days by the FD engine +0.478%, by the arithmetic Monte Carlo +0.469%, Levy's continuous call over a year +0.482%, and the Heston geometric call (v₀ = θ 0.04, κ 2, vol of vol 0.5, ρ −0.5) −0.174% (the S-bar run's `c3_mismatch_ql.py`). nanoql runs the FD and Monte Carlo engines on `FdmBlackScholesOp.Clock`, Levy on the volatility's clock, and the Heston engine on `FdmHestonOp.Clock`, each structure read at the instants its times denote. Check: each engine on the restated market, to rounding for the grids and paths (the same numbers drawn) and within R7 for the integrals.
+
+Facts:
+
+- `TheFiniteDifferenceEnginePricesAsOnTheRestatedMarket`
+- `TheMonteCarloEnginePricesAsOnTheRestatedMarket`
+- `LevyPricesAsOnTheRestatedMarket`
+- `TheHestonGeometricEnginePricesAsOnTheRestatedMarket`
+
+## AsianUnsortedDatesTests
+
+[`Divergences/AsianUnsortedDatesTests.cs`](../tests/NanoQL.Tests/Divergences/AsianUnsortedDatesTests.cs)
+
+The all-past-fixings constructor's date order (the S-bar plan's BR5 (xl), fixed under R8). QuantLib sorts the first constructor's fixing dates and keeps the second's in the caller's order, then splits them at the evaluation date by counting, so reversed dates read the wrong dates as past and the engines integrate them backwards: on spot 100, q 3%, r 6%, σ 20% (Act/360), a call at 100 fixing 60 and 30 days ago at 95 and 105 and monthly over a year prices 6.156224656227607 by Turnbull-Wakeman and 6.605506555285245 by the FD engine on the dates reversed, where sorted they price 4.69672540647389 and 4.71727034815397 (the S-bar run's `c3_div_ql_a.py`). nanoql sorts both constructors' dates, stably. Check: the sorted dates' route, bit for bit.
+
+Facts:
+
+- `TurnbullWakemanPricesReversedDatesAsSorted`
+- `TheFiniteDifferenceEnginePricesReversedDatesAsSorted`
+
 ## AssetSwapNonParRepaymentTests
 
 [`Divergences/AssetSwapNonParRepaymentTests.cs`](../tests/NanoQL.Tests/Divergences/AssetSwapNonParRepaymentTests.cs)
@@ -1350,6 +1404,16 @@ Facts:
 - `PastQuantLibsRangeTheSeriesIsUpstreams`
 - `ASeriesStoppedUnconvergedAboveDfIsRefused`
 - `ASeriesStoppedUnconvergedInTheLargeDfWindowIsRefused`
+
+## ChoiCertainExerciseTests
+
+[`Divergences/ChoiCertainExerciseTests.cs`](../tests/NanoQL.Tests/Divergences/ChoiCertainExerciseTests.cs)
+
+Choi's engine at a negative effective strike (the S-bar plan's BR7 (a), a refusal lifted). QuantLib's Choi engine refuses it ("effective strike should to be positive", `choiasianengine.cpp:92`), where its Turnbull-Wakeman engine prices the certain exercise in closed form, the discounted forward of the average less the strike: on spot 100, q 3%, r 6%, σ 20% (Act/360), six past fixings summing to 900 and six monthly fixings to come, a call at 60 prices 63.505838672811066 by Turnbull-Wakeman where QuantLib's Choi throws (the S-bar run's `c3_div_ql_a.py`). nanoql's Choi engine prices it by Turnbull-Wakeman's branch, its value alone, as its other branches set. Check: Turnbull-Wakeman's value.
+
+Facts:
+
+- `ChoiPricesTheCertainExerciseAsTurnbullWakeman`
 
 ## CirFellerConstraintTests
 
@@ -2892,6 +2956,50 @@ Facts:
 
 - `NoDimensionIsRefused`
 
+## GeometricAsianProductRangeTests
+
+[`Divergences/GeometricAsianProductRangeTests.cs`](../tests/NanoQL.Tests/Divergences/GeometricAsianProductRangeTests.cs)
+
+The geometric running product outside double's range (the S-bar plan's BR5 (xli), fixed under R8). QuantLib's Monte Carlo geometric pricers guard the product against overflow only (`mc_discr_geom_av_price.cpp:45-57`), so 252 daily fixings at spot 0.01 price 0 where the analytic engine gives 0.059 × the spot; and the all-past-fixings constructor multiplies the past fixings into the running product (`asianoption.cpp:95`), so 120 past fixings at 1,000 make the analytic and Monte Carlo engines price ∞ (the planner's BP30, BP35). nanoql flushes the product into the average where the next factor would underflow it, as where it would overflow, and carries the past fixings' log-sum beside QuantLib's product, its readers taking the log where the product isn't finite and normal. Check: homogeneity, the same contract with the market and the fixings scaled into range and the price scaled back (r 5%, q 0, σ 20%, Act/365 Fixed).
+
+Facts:
+
+- `TheMonteCarloAtASmallSpotIsTheScaledPrice`
+- `TheAnalyticEngineOnALargeSeasonedProductIsTheScaledPrice`
+- `TheMonteCarloOnALargeSeasonedProductIsTheScaledPrice`
+
+## GeometricAsianTermStructureTests
+
+[`Divergences/GeometricAsianTermStructureTests.cs`](../tests/NanoQL.Tests/Divergences/GeometricAsianTermStructureTests.cs)
+
+The geometric Asian engines on term structures (the S-bar plan's BR4 (a), the user's ER4 ruling carried to S-bar). QuantLib's discrete and continuous average-price engines read one Black volatility at the exercise date and the zero rates to it for every fixing (`analytic_discr_geom_av_price.cpp:92-108`, `analytic_cont_geom_av_price.cpp:57-78`), and the average-strike engine one volatility at the spot: on P5's rising market (forward rates 1%, 3%, 6%, dividends 0%, 1%, 3%, forward volatilities 15%, 25%, 35% to half a year, a year and two) a call at 100 on twelve fixings every 46 days prices 7.937526857004053, continuously over 548 days 7.38232785034412 and on the average strike 7.943289362148803, and on the falling market (each reversed) 7.896230538510976, 7.377847985865606 and 7.895540021985099 (the S-bar run's `c3_p5_ql.py`): +37.4% and −18.9% off the exact discrete price, +39.4% and −19.2% off the continuous one (the planner's BP20). nanoql prices the average exactly under deterministic structures, each fixing's forward and variance read by date, and takes the form's own Greeks. Checks: the exact law of ln G (and of ln S_T beside it) computed here, the continuous one's integrals by Gauss-Lobatto split at the structures' nodes; the Greeks against bumps of the spot, of the strike, of every volatility in parallel and of each curve's zero rates; and the continuous form at a variance integral below 2.2e-4 and at a mean whose integrand is rounding noise, each against the flat closed form.
+
+Facts:
+
+- `TheDiscreteFormOnARisingMarketIsExact`
+- `TheDiscreteFormOnAFallingMarketIsExact`
+- `TheContinuousFormOnARisingMarketIsExact`
+- `TheContinuousFormOnAFallingMarketIsExact`
+- `TheAverageStrikeOnARisingMarketIsExact`
+- `TheAverageStrikeOnAFallingMarketIsExact`
+- `TheDiscreteGreeksOnARisingMarketMeetBumps`
+- `TheDiscreteGreeksOnAFallingMarketMeetBumps`
+- `TheContinuousGreeksOnARisingMarketMeetBumps`
+- `TheContinuousGreeksOnAFallingMarketMeetBumps`
+- `AShortAveragingAtLowVolatilityIsTheClosedForm`
+- `AMeanOfRoundingNoiseIsTheClosedForm`
+
+## GeometricAverageStrikeForwardStartTests
+
+[`Divergences/GeometricAverageStrikeForwardStartTests.cs`](../tests/NanoQL.Tests/Divergences/GeometricAverageStrikeForwardStartTests.cs)
+
+The geometric average-strike engine on a forward-starting average (the S-bar plan's BR5 (xxxiii), fixed under R8). QuantLib measures the fixing times from the first fixing (`analytic_discr_geom_av_strike.cpp:57-101`), so it prices a forward-starting average as one starting today and misses e^(−q t₁): on spot 100, q 3%, r 6%, σ 20% (Act/360), QuantLib's own case, a call on ten fixings every 36 days from 36 days on, exercised at the last, prices 4.971092526326882, the value of the same average started today (the S-bar run's `c3_div_ql_a.py`; QuantLib's test expects 4.97109). nanoql measures every time from the evaluation date, in BR4 (a)'s exact form, and prices 4.956201596311162. Checks: the forward start's value e^(−q t₁) times the value today on a flat market, and an exact Monte Carlo.
+
+Facts:
+
+- `TheForwardStartIsTheValueTodayCarriedByTheDividends`
+- `AnExactMonteCarloMeetsTheForwardStart`
+
 ## GjrGarchExpiryTests
 
 [`Divergences/GjrGarchExpiryTests.cs`](../tests/NanoQL.Tests/Divergences/GjrGarchExpiryTests.cs)
@@ -3067,6 +3175,113 @@ Facts:
 
 - `TheHelpersMarketValueReadsTheDividendCurveByDate`
 - `OptimalAlphasDateFormReadsTheForwardByDate`
+
+## HestonGeometricAsianCutoffTests
+
+[`Divergences/HestonGeometricAsianCutoffTests.cs`](../tests/NanoQL.Tests/Divergences/HestonGeometricAsianCutoffTests.cs)
+
+The Heston geometric Asian engine's Fourier cutoff (the S-bar plan's BR5 (xxxiv), fixed under R8). QuantLib integrates on (0, ξ_max], ξ_max 100, by Gauss-Legendre at 128 points (`analytic_discr_geom_av_price_heston.cpp:48-55`, `:62`), cut before the integrand decays at short maturities and small variance: on P9's market (r 5%, q 0, κ 2, ρ −0.5, six fixings), ten days at v₀ = θ 0.0025 and vol of vol 0.1 price 0.11843188016798013 and thirty days 0.37302951787635213, where the integrals converge to 0.24347 and 0.50345, and QuantLib's Monte Carlo geometric Heston engine gives 0.24341 ± 0.0005 and 0.50309 ± 0.0009; the ten-day call at 200 at v₀ 0.04 and vol of vol 0.5 prices −0.06101169378323358 (the S-bar run's `c3_heston_div_refs.py`). nanoql cuts where Phi's modulus has decayed to 1e-14 of its value on the contour's axis, or at ξ_max where that is later. Checks: QuantLib's Monte Carlo engine within three standard errors, QUADPACK on two contours at R7 on BR12's scale, and the integral run to four times its decay point.
+
+Facts:
+
+- `TheShortMarketReachesItsIntegral`
+- `TheSmallVarianceMarketReachesItsIntegral`
+- `TheDeepCallIsItsIntegralToFourTimesTheDecayPoint`
+
+## HestonGeometricAsianExplosionTests
+
+[`Divergences/HestonGeometricAsianExplosionTests.cs`](../tests/NanoQL.Tests/Divergences/HestonGeometricAsianExplosionTests.cs)
+
+The Heston geometric Asian engine near the moment explosion (the S-bar plan's BR5 (xxxiv) (a)–(d), Revision 17, fixed under R8). QuantLib integrates its undamped form on (0, 100], so it neither finds where E[Gˢ] explodes nor needs to; the damped contour does, and a test of F's sign at each interval's end admits contours past the explosion and prices the ten-year call at K = 1.5 F_G (vol of vol 1, ρ −0.9) at 0, the call strip shrinks to nothing where s* nears 1 (no end under the cap), Phi(1, 0) is 0/0 for one fixing at 30 years and vol of vol 2 (s* − 1 = 0 in double; ZeroDivisionError), and QuantLib's Phi is 0/0 at κ = 0 (sinh(0)/0, NaN), all on the planner's route (BP52, BP53). nanoql takes the explosions by the closed-form first zero of the Riccati factors, runs the out-of-the-money option on its own strip or Lewis's middle strip, takes F_G exact where every fixing time is one, the forms' limits at γ = 0, and floors each price at its lower bound. Checks, at R7 on BR12's scale: QuantLib's `AnalyticHestonEngine` at 1e-15 at one fixing; QUADPACK on two strips elsewhere; κ = 0 against κ 1e-12; and spot 0.01 against spot 100 scaled, never below its floor. Markets: r 5%, q 0, v₀ = θ 0.04, κ 0.5 unless given.
+
+Facts:
+
+- `TheClosedFormTestKeepsTheCallItsExplosionAdmits`
+- `TheTwoStripsAgreeAtThirtyYearsOfSixFixings`
+- `TheMiddleStripPricesTheMoneyWhereSStarNearsOne`
+- `TheMiddleStripPricesTheWingWhereSStarNearsOne`
+- `TheExactForwardPricesWhereSStarIsOne`
+- `BothNarrowStripsGiveWayToTheMiddleOne`
+- `KappaZeroIsKappaToZero`
+- `ASmallSpotIsSpotOneHundredScaledAndNeverBelowItsFloor`
+
+## HestonGeometricAsianIntrinsicTests
+
+[`Divergences/HestonGeometricAsianIntrinsicTests.cs`](../tests/NanoQL.Tests/Divergences/HestonGeometricAsianIntrinsicTests.cs)
+
+The Heston geometric Asian engine's switch to the intrinsic value (the S-bar plan's BR5 (xxxiv), Revision 12, BR12, fixed under R8). Without it the quadrature reaches its cap where the integrand oscillates over thousands of periods before it decays (an hour at v₀ 0.0025 at the calls at 120 and 200), and at v₀ = θ = 0 the integrand overflows (the planner's BP46). nanoql prices the point mass at v₀ = θ = 0, and the discounted intrinsic where a Chernoff bound on the extrinsic value, from Phi at real s up to the moment explosion, is at or below 1e-12 × max(the discounted intrinsic, D·F_G/100); a switch on the strike's distance in standard deviations of ln G would price the one-year call at 50 at its intrinsic, 2.4e-3 off (BP47). Checks: the bound's value 0 at the hour (the S-bar run's `c3_heston_div_refs.py`), the point mass's own value, and QUADPACK on two contours at R7 on BR12's scale. P9's market: r 5%, q 0, κ 2, ρ −0.5, six fixings.
+
+Facts:
+
+- `TheHoursDeepCallsAreTheirIntrinsic`
+- `ZeroVarianceIsThePointMass`
+- `TheYearsDeepCallKeepsItsExtrinsicValue`
+
+## HestonGeometricAsianLowerEndTests
+
+[`Divergences/HestonGeometricAsianLowerEndTests.cs`](../tests/NanoQL.Tests/Divergences/HestonGeometricAsianLowerEndTests.cs)
+
+The Heston geometric Asian engine's integral near ξ = 0 (the S-bar plan's BR5 (xlix), fixed under R8). QuantLib maps ξ ∈ [−1, 1] to (0.5 + 1e-8 + 0.5ξ)·ξ_max (`analytic_discr_geom_av_price_heston.cpp:49`), so it leaves out [0, 1e-8·ξ_max], where the real integrand is finite and flat, and every price carries −D × the prefactor × 1e-8·ξ_max·f(0⁺)/π: on P9's one-year market (r 5%, q 0, v₀ = θ 0.04, κ 2, vol of vol 0.5, ρ −0.5, six fixings every 60 days) the call at 200 prices −1.8234540127607532e-05 and the call at 100 6.189850115518784, 2.3e-7 low (the S-bar run's `c3_heston_div_refs.py`). nanoql's damped contour is regular at 0 and runs from it. Checks, at R7 on BR12's scale: QuantLib's undamped integrand by QUADPACK from 1e-12·ξ_max with the left-out stretch as its rectangle, the deep call not negative; and the starts at 1e-9·ξ_max and 1e-12·ξ_max agreeing on the money.
+
+Facts:
+
+- `TheDeepCallIsTheIntegralFromNearZero`
+- `TheMoneyIsTheIntegralFromEitherStart`
+
+## HestonGeometricAsianMarkets
+
+[`Divergences/HestonGeometricAsianMarkets.cs`](../tests/NanoQL.Tests/Divergences/HestonGeometricAsianMarkets.cs)
+
+The markets and the tolerance of the S-bar plan's Heston geometric Asian facts: flat curves on Actual/365 Fixed (r 5%, q 0 unless given), the fixing and exercise dates as days from the evaluation date, the strike given; and R7 at the engine's own scale (BR12), 1e-10 × max(the price, the lower bound D·max(±(F_G − K), 0), D·F_G/100). The references come from the S-bar run's `c3_heston_div_refs.py` on the planner's route machinery: QuantLib's `AnalyticHestonEngine` at 1e-15 at one fixing, QUADPACK on the route's contour and on a second, and QuantLib's formula in 40 digits. A market whose fixings fall within a day is restated on days by the model's time change: over c times the time, r, q, v₀, κ, θ and the vol of vol each over c and ρ kept, which leaves the average's law and the discount unchanged.
+
+## HestonGeometricAsianSingularityTests
+
+[`Divergences/HestonGeometricAsianSingularityTests.cs`](../tests/NanoQL.Tests/Divergences/HestonGeometricAsianSingularityTests.cs)
+
+The Heston geometric Asian engine at a vanishing square root (the S-bar plan's BR5 (xxxii), fixed under R8). QuantLib's `F` tests |κ² − 2σ²| < 1e-8 for the root √(κ² − 2z₁σ²), dropping z₁, and returns 1 + ½(κ − z₂σ²) without τ (`analytic_discr_geom_av_price_heston.cpp:77-87`): on r 5%, q 0, v₀ = θ 0.04, κ 1, ρ −0.5, twelve fixings every 30 days, the call at 100 prices −7.9379393764773996 at vol of vol 0.70710678 and −7.937939339862728 at √½, where 0.7071068 gives 5.567081837356833 (the S-bar run's `c3_heston_div_refs.py`). nanoql takes the limit 1 + ½(κ − z₂σ²)τ where |κ² − 2z₁σ²| is below 1e-8, and the forms' limits at γ = 0. Check: QUADPACK on the route's contour either side and at the point, at R7 on BR12's scale; QuantLib's own cases, at vol of vol 0.39 to 1, are unchanged (the test suite's).
+
+Facts:
+
+- `TheVanishingRootIsContinuous`
+
+## HestonGeometricAsianSmallParameterTests
+
+[`Divergences/HestonGeometricAsianSmallParameterTests.cs`](../tests/NanoQL.Tests/Divergences/HestonGeometricAsianSmallParameterTests.cs)
+
+The Heston geometric Asian engine at small and long parameters (the S-bar plan's BR5 (l), Revisions 13, 15 and 17, fixed under R8). QuantLib's Phi adds κ²θT/σ² and subtracts (2κθ/σ²)·Σ ln Fᵢ, and its ω̃ subtracts 2F̃/(σ²F) from κ/σ², terms of order 1/σ² that nearly cancel at small vol of vol (`analytic_discr_geom_av_price_heston.cpp:165`, `:187`, `:197`): on a year of six fixings its formula in double is 1.0e-9 off its own value in 30 digits at vol of vol 1e-3 and 1.5e-7 at 1e-4; its cosh and sinh pass 709 before the cut at 30 years and vol of vol 2, where a cut short of the overflow leaves the price moving with α by up to 12%; QuantLib's undamped integrand never ends on NanoQL's rule at small variance near the forward; and the deterministic variance's (1 − e^(−κt))/κ is 1.1e-7 off at κ 1e-9 (the planner's BP48 to BP51). nanoql takes the stable form, ω̃ through tanh and term3 − term4 through log1p, a cubic in σ below 1e-4 through the Black-Scholes limit (its variance by expm1) and the stable form at 1e-4, 2e-4 and 3e-4, and the damped contour. Checks, at R7 on BR12's scale: QuantLib's formula in 40 digits (with BR5 (xxxii)'s limit), QUADPACK on the route's contour and on a second, and the price the same across two strips. Markets: r 5%, q 0; a year is 360 days of six fixings every 60, v₀ = θ 0.04, κ 2, ρ −0.5, unless given.
+
+Facts:
+
+- `AtVolOfVolAThousandthTheStableFormIsTheFormula`
+- `AtVolOfVolTenToTheMinusSevenTheBridgeIsTheFormula`
+- `ADayAtVarianceAMillionthIsPricedOnTheDampedContour`
+- `ThirtyYearsAtVolOfVolTwoReachTheCutPastTheOverflow`
+- `AtKappaTenToTheMinusNineTheBridgesVarianceIsExact`
+
+## HestonGeometricAsianStrikeScaleTests
+
+[`Divergences/HestonGeometricAsianStrikeScaleTests.cs`](../tests/NanoQL.Tests/Divergences/HestonGeometricAsianStrikeScaleTests.cs)
+
+The Heston geometric Asian engine across strikes and spots (the S-bar plan's BR5 (xxxiv) (e)–(l), Revisions 18 to 22, BR12, fixed under R8). On the damped contour, a strip chosen by width alone sends a deep out-of-the-money option on the other side through parity from a large in-the-money integral (no end under the cap: puts at K/F 0.01 and 0.001, calls at K/F 30 to 1,000); R7 at scale 1 asks a small price at spot 1e4 for 5e-14 of the forward (no end at spot 1e4 and 1e6); the halfway α leaves the integrand on the forward's scale at large spots; a single breakpoint set accepts a panel whose two rules alias the oscillation and agree by chance (1.88 R7 off at spot 1e4); and distinct dates on one 30/360 time put Phi(1, 0) at its one-date 0/0 (the planner's BP54 to BP59). nanoql runs the out-of-the-money option on its own strip where that strip is at least 0.5 wide and on the middle strip where it isn't, the other by parity; Lord and Kahl's α; R7 at max(the price, the lower bound, D·F_G/100), every spot computing spot 100's contract scaled; two breakpoint sets that must agree, a third on disagreement; F_G exact where every fixing time is one. Checks, at R7 on BR12's scale: QuantLib's `AnalyticHestonEngine` at 1e-15 at one fixing, itself checked against QUADPACK on the route's contour at two α, QUADPACK the reference where they part by more than 0.5 R7 (the K/F 1e5 call, 11.8 R7 off QuantLib); spot 100's price scaled; QUADPACK elsewhere. Markets: r 5%, q 0, v₀ = θ 0.04 unless given.
+
+Facts:
+
+- `AtSpotAMillionTheTwiceForwardCallIsQuantLibs`
+- `AtSpotAMillionTheThriceForwardCallIsQuantLibs`
+- `AtSpotTenMillionTheThriceForwardCallIsSpotOneHundredsScaled`
+- `TheDeepPutIsQuantLibs`
+- `TheThousandTimesForwardCallIsQuantLibs`
+- `TheThreeHundredTimesForwardCallIsQuantLibs`
+- `TheTailAtSpotTenThousandIsQuadpacks`
+- `TwoDatesOnOneThirtyThreeSixtyTimeTakeTheExactForward`
+- `TheMoneyIsPricedWhereTheCallStripIsEmpty`
+- `TheAliasedCallAtSpotOneHundredIsQuantLibs`
+- `TheAliasedCallAtSpotTenThousandIsQuantLibs`
+- `TheSmallVarianceCallAtSpotTenThousandIsQuantLibs`
+- `TheSmallVarianceCallAtSpotAMillionIsQuantLibs`
+- `TheSmallVariancePutAtSpotTenThousandIsQuantLibs`
+- `TheSmallVariancePutAtSpotAMillionIsQuantLibs`
+- `TheHundredThousandTimesForwardCallIsQuadpacks`
 
 ## HestonGreensFctSemiAnalyticalTests
 
@@ -3621,6 +3836,32 @@ Facts:
 - `TheStandardErrorsTakeNMinusPDegreesOfFreedom`
 - `ForAStraightLineTheErrorsAreQuantLibs`
 
+## LevyEffectiveStrikeTests
+
+[`Divergences/LevyEffectiveStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/LevyEffectiveStrikeTests.cs)
+
+Levy's engine at an effective strike at or below zero (the S-bar plan's BR5 (xxxi), fixed under R8). A seasoned option's effective strike is X = K − ((T − T₂)/T)·A; QuantLib takes log(X) and prices NaN wherever X ≤ 0 (the planner's BP17; the S-bar run's `c3_div_ql_a.py`: on spot 100, q 5%, r 10%, σ 15% (Act/360), averaging from 180 days ago to 90 days on, the current average 300 or 285 with the call at 95 or 100, every value NaN). nanoql prices the certain exercise, the call Se − X·e^(−rT₂) and the put 0, the formula's own limit as X → 0⁺. Check: the formula at a tiny positive X, where N(d₁) and N(d₂) are 1 in double.
+
+Facts:
+
+- `AnEffectiveStrikeAtOrBelowZeroIsTheCertainExercise`
+
+## LevyTermStructureTests
+
+[`Divergences/LevyTermStructureTests.cs`](../tests/NanoQL.Tests/Divergences/LevyTermStructureTests.cs)
+
+Levy's engine on term structures and at its closed form's singular points (the S-bar plan's BR4 (b), BR5 (xxxix), fixed under R8). QuantLib reads one volatility and the zero rates at maturity (`continuousarithmeticasianlevyengine.cpp:81-90`), +38.5% and −17.2% off a Monte Carlo on P5's rising and falling markets (the planner's BP20); and its closed form, taken wherever |b| > 1000·QL_EPSILON, cancels near the carries b = 0, −σ²/2 and −σ² and at small volatility: on spot 100, the call at 100 over a year from today (r 5%, σ 20%, Act/365 Fixed), it prices 1.4982854223412403 at b = 3e-13 (−65.8% off its own formula in 50 digits) and NaN at b = −σ²/2 and −σ², and NaN at σ 1e-8 and b 3% (the S-bar run's `c3_levy_refs.py`). nanoql integrates the two moments under the structures by date, the covariance on QuantLib's adaptive Gauss-Lobatto rule, the log-variance through log1p of the normalized covariance, so nothing cancels, and at zero variance takes the average as its forward. The plan's Kronrod rule for the covariance missed the exact value by −8.9e-9 and +4.3e-9 on P5's markets, fooled by the kinks at the structures' nodes (Gauss-Lobatto by the user's ruling of 2026-10-26). Checks: the exact value, Levy's formula on the moments in 30 digits (5.7995941086251922 rising, 9.6602716681694337 falling, the S-bar run's `c3_levy_p5.py`), within R7, and the same formula on the moments computed here by Gauss-Lobatto split at the nodes, and a Monte Carlo, on P5's markets; QuantLib's formula in 50 digits at the singular points and at small volatility, within R7; the forward's payoff at σ = 0.
+
+Facts:
+
+- `ARisingMarketIsLevysFormulaOnItsMoments`
+- `AFallingMarketIsLevysFormulaOnItsMoments`
+- `ACarryOfZeroIsTheFormulaInFiftyDigits`
+- `ACarryOfMinusHalfTheVarianceIsTheFormulaInFiftyDigits`
+- `ACarryOfMinusTheVarianceIsTheFormulaInFiftyDigits`
+- `ASmallVolatilityIsTheFormulaInFiftyDigits`
+- `ZeroVolatilityIsTheForwardsPayoff`
+
 ## LineSearchReturnTests
 
 [`Divergences/LineSearchReturnTests.cs`](../tests/NanoQL.Tests/Divergences/LineSearchReturnTests.cs)
@@ -3903,6 +4144,18 @@ The Markov-functional model's outputs after a recalculation (the S-g1d plan's G1
 Facts:
 
 - `ARecalibratedCopysOutputsAreAFreshModels`
+
+## McAsianControlVariateTests
+
+[`Divergences/McAsianControlVariateTests.cs`](../tests/NanoQL.Tests/Divergences/McAsianControlVariateTests.cs)
+
+The arithmetic Monte Carlo engine's geometric control variate (the S-bar plan's BR5 (xxvii), (xli), fixed under R8). QuantLib's control path pricer discounts at the last fixing's time (`mc_discr_arith_av_price.hpp:175-178`) where its analytic control engine discounts at the exercise date, so the controlled price is biased when the exercise follows the last fixing: on spot 100, r 8%, q 0, σ 25% (Act/365 Fixed), a call at 100 on twelve fixings every 30 days prices 7.70961 controlled for 7.86180 ± 0.024 uncontrolled with the exercise 90 days after the last fixing, and 6.810 for 7.402 at 365 days (200,000 samples, seed 42, the planner's BP18). And the control's running product underflows at small spots while its analytic value doesn't: at spot 0.01 with 252 daily fixings the controlled price is +99% to +103% off the uncontrolled one (BP35). nanoql discounts the control path at the exercise date and flushes the product into the average where the next factor would underflow it. Checks: the engine without the control within the two estimates' errors, on QuantLib's own pricers and analytic geometric engine; and the controlled price at spot 0.01 against the same contract at spot 100, scaled.
+
+Facts:
+
+- `TheControlMeetsTheUncontrolledPriceNinetyDaysAfterTheLastFixing`
+- `TheControlMeetsTheUncontrolledPriceAYearAfterTheLastFixing`
+- `AtASmallSpotTheControlledPriceIsTheScaledOne`
 
 ## McBarrierExerciseTests
 
@@ -4797,6 +5050,17 @@ Facts:
 
 - `AZeroSmileWithVegaWeightsIsRefused`
 
+## SeasonedAsianSmileTests
+
+[`Divergences/SeasonedAsianSmileTests.cs`](../tests/NanoQL.Tests/Divergences/SeasonedAsianSmileTests.cs)
+
+The seasoned arithmetic Asians on a smile (the S-bar plan's BR5 (xxx), fixed under R8). With f future fixings of m, an accrued sum A and the strike K, max(avg − K, 0) = (f/m)·max(avg_f − K_f, 0) with K_f = (K − A/m)·m/f, so a seasoned price is exactly (f/m) times the unseasoned price at K_f. QuantLib's Turnbull-Wakeman engine reads its variances at K − A/m and its Choi engine its correlations at K − A/m and its volatilities at K (`turnbullwakemanasianengine.cpp:94-95`, `choiasianengine.cpp:104-122`), so on a smile whose skew decays with maturity (0.22 + skewⱼ·(100 − K)/100, skews 0.30, 0.18 and 0.08 at 60, 120 and 240 days; spot 100, r 5%, q 0) they break the identity, Turnbull-Wakeman by +42% and +1,302% and Choi by −2.6% to +306% on six past fixings and six monthly ones to come (the planner's BP22). nanoql reads both at the future average's own strike K_f. Check: the identity, against each engine's own unseasoned value at K_f.
+
+Facts:
+
+- `TurnbullWakemanKeepsTheSeasoningIdentity`
+- `ChoiKeepsTheSeasoningIdentity`
+
 ## SeedZeroTests
 
 [`Divergences/SeedZeroTests.cs`](../tests/NanoQL.Tests/Divergences/SeedZeroTests.cs)
@@ -5523,6 +5787,16 @@ Facts:
 
 - `ATreesIndicesOutOfRangeAreRefused`
 - `StatePricesBeyondTheGridAreRefused`
+
+## TurnbullWakemanPastFixingsTests
+
+[`Divergences/TurnbullWakemanPastFixingsTests.cs`](../tests/NanoQL.Tests/Divergences/TurnbullWakemanPastFixingsTests.cs)
+
+Turnbull-Wakeman with every fixing past (the S-bar plan's BR5 (xxix), fixed under R8). Where the effective strike is positive, QuantLib's engine reads `times.back()` of an empty vector of fixing times and crashes the process (0xC0000005, the planner's BP19); its certain-exercise branch covers only an effective strike at or below zero. nanoql prices the known payoff discounted, as QuantLib's Choi engine prices it (`choiasianengine.cpp:71-77`): on spot 100, q 3%, r 6%, σ 20% (Act/360), a put at 110 on two past fixings at 95 and 105, exercised in a month. Check: Choi's engine, and the payoff on the average discounted.
+
+Facts:
+
+- `EveryFixingPastPricesTheKnownPayoff`
 
 ## TwoAssetBarrierDividendTests
 

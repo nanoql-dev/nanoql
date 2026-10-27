@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 416 | 41 |
-| partial | 21 | 31 |
-| ported | 823 | 108 |
+| not started | 399 | 40 |
+| partial | 21 | 32 |
+| ported | 840 | 108 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -145,7 +145,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `analytic_cont_geom_av_price_heston` | not started |  | no nanoql type: AnalyticContinuousGeometricAveragePriceAsianHestonEngine |
-| `analytic_discr_geom_av_price_heston` | not started |  | no nanoql type: AnalyticDiscreteGeometricAveragePriceAsianHestonEngine |
+| `analytic_discr_geom_av_price_heston` | ported | Experimental/Asian/AnalyticDiscreteGeometricAveragePriceAsianHestonEngine.cs |  |
 
 ### `ql/experimental/averageois/`
 
@@ -618,9 +618,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `asianoption` | not started |  | no nanoql type: ContinuousAveragingAsianOption, DiscreteAveragingAsianOption |
+| `asianoption` | ported | Instruments/AsianOption/ContinuousAveragingAsianOption.cs, Instruments/AsianOption/DiscreteAveragingAsianArguments.cs, Instruments/AsianOption/DiscreteAveragingAsianOption.cs |  |
 | `assetswap` | ported | Instruments/AssetSwap.cs, Instruments/AssetSwapResults.cs |  |
-| `averagetype` | not started |  | no nanoql type: AverageType |
+| `averagetype` | ported | Instruments/AverageType.cs |  |
 | `barrieroption` | ported | Instruments/BarrierOption.cs |  |
 | `barriertype` | ported | Instruments/BarrierType.cs, Instruments/BarrierTypeFunctions.cs |  |
 | `basketoption` | ported | Instruments/BasketOption/AverageBasketPayoff.cs, Instruments/BasketOption/BasketOption.cs, Instruments/BasketOption/BasketPayoff.cs, Instruments/BasketOption/MaxBasketPayoff.cs, Instruments/BasketOption/MinBasketPayoff.cs, Instruments/BasketOption/SpreadBasketPayoff.cs |  |
@@ -1106,7 +1106,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `fdmamericanstepcondition` | ported | Methods/FiniteDifferences/StepConditions/FdmAmericanStepCondition.cs |  |
-| `fdmarithmeticaveragecondition` | not started |  | no nanoql type: FdmArithmeticAverageCondition |
+| `fdmarithmeticaveragecondition` | ported | Methods/FiniteDifferences/StepConditions/FdmArithmeticAverageCondition.cs |  |
 | `fdmbermudanstepcondition` | ported | Methods/FiniteDifferences/StepConditions/FdmBermudanStepCondition.cs |  |
 | `fdmsimplestoragecondition` | not started |  | no nanoql type: FdmSimpleStorageCondition |
 | `fdmsimpleswingcondition` | ported | Methods/FiniteDifferences/StepConditions/FdmSimpleSwingCondition.cs |  |
@@ -1477,19 +1477,19 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `analytic_cont_geom_av_price` | not started |  | no nanoql type: AnalyticContinuousGeometricAveragePriceAsianEngine |
-| `analytic_discr_geom_av_price` | not started |  | no nanoql type: AnalyticDiscreteGeometricAveragePriceAsianEngine |
-| `analytic_discr_geom_av_strike` | not started |  | no nanoql type: AnalyticDiscreteGeometricAverageStrikeAsianEngine |
-| `choiasianengine` | not started |  | no nanoql type: ChoiAsianEngine |
-| `continuousarithmeticasianlevyengine` | not started |  | no nanoql type: ContinuousArithmeticAsianLevyEngine |
-| `fdblackscholesasianengine` | not started |  | no nanoql type: FdBlackScholesAsianEngine |
-| `mc_discr_arith_av_price` | not started |  | no nanoql type: MCDiscreteArithmeticAPEngine, ArithmeticAPOPathPricer, MakeMCDiscreteArithmeticAPEngine |
-| `mc_discr_arith_av_price_heston` | not started |  | no nanoql type: MCDiscreteArithmeticAPHestonEngine, MakeMCDiscreteArithmeticAPHestonEngine, ArithmeticAPOHestonPathPricer |
-| `mc_discr_arith_av_strike` | not started |  | no nanoql type: MCDiscreteArithmeticASEngine, ArithmeticASOPathPricer, MakeMCDiscreteArithmeticASEngine |
-| `mc_discr_geom_av_price` | not started |  | no nanoql type: MCDiscreteGeometricAPEngine, GeometricAPOPathPricer, MakeMCDiscreteGeometricAPEngine |
-| `mc_discr_geom_av_price_heston` | not started |  | no nanoql type: MCDiscreteGeometricAPHestonEngine, MakeMCDiscreteGeometricAPHestonEngine, GeometricAPOHestonPathPricer |
-| `mcdiscreteasianenginebase` | not started |  | no nanoql type: MCDiscreteAveragingAsianEngineBase |
-| `turnbullwakemanasianengine` | not started |  | no nanoql type: TurnbullWakemanAsianEngine |
+| `analytic_cont_geom_av_price` | ported | PricingEngines/Asian/AnalyticContinuousGeometricAveragePriceAsianEngine.cs |  |
+| `analytic_discr_geom_av_price` | ported | PricingEngines/Asian/AnalyticDiscreteGeometricAveragePriceAsianEngine.cs |  |
+| `analytic_discr_geom_av_strike` | ported | PricingEngines/Asian/AnalyticDiscreteGeometricAverageStrikeAsianEngine.cs |  |
+| `choiasianengine` | ported | PricingEngines/Asian/ChoiAsianEngine.cs |  |
+| `continuousarithmeticasianlevyengine` | ported | PricingEngines/Asian/ContinuousArithmeticAsianLevyEngine.cs |  |
+| `fdblackscholesasianengine` | ported | PricingEngines/Asian/FdBlackScholesAsianEngine.cs |  |
+| `mc_discr_arith_av_price` | ported | PricingEngines/Asian/MCDiscreteArithmeticAPEngine/ArithmeticAPOPathPricer.cs, PricingEngines/Asian/MCDiscreteArithmeticAPEngine/MCDiscreteArithmeticAPEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticAPEngine/MakeMCDiscreteArithmeticAPEngine{TRng,TStats}.cs |  |
+| `mc_discr_arith_av_price_heston` | ported | PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/ArithmeticAPOHestonPathPricer.cs, PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/MCDiscreteArithmeticAPHestonEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/MakeMCDiscreteArithmeticAPHestonEngine{TRng,TStats}.cs |  |
+| `mc_discr_arith_av_strike` | ported | PricingEngines/Asian/MCDiscreteArithmeticASEngine/ArithmeticASOPathPricer.cs, PricingEngines/Asian/MCDiscreteArithmeticASEngine/MCDiscreteArithmeticASEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticASEngine/MakeMCDiscreteArithmeticASEngine{TRng,TStats}.cs |  |
+| `mc_discr_geom_av_price` | ported | PricingEngines/Asian/MCDiscreteGeometricAPEngine/GeometricAPOPathPricer.cs, PricingEngines/Asian/MCDiscreteGeometricAPEngine/MCDiscreteGeometricAPEngine.cs, PricingEngines/Asian/MCDiscreteGeometricAPEngine/MakeMCDiscreteGeometricAPEngine{TRng,TStats}.cs |  |
+| `mc_discr_geom_av_price_heston` | ported | PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/GeometricAPOHestonPathPricer.cs, PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/MCDiscreteGeometricAPHestonEngine.cs, PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/MakeMCDiscreteGeometricAPHestonEngine{TRng,TStats}.cs |  |
+| `mcdiscreteasianenginebase` | ported | PricingEngines/Asian/MCDiscreteAveragingAsianEngineBase/MCDiscreteAveragingAsianEngineBase{TMc,TPath,TStats}.cs |  |
+| `turnbullwakemanasianengine` | ported | PricingEngines/Asian/TurnbullWakemanAsianEngine.cs |  |
 
 ### `ql/pricingengines/barrier/`
 
@@ -2064,7 +2064,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `amortizingbond` | ported | TestSuite/AmortizingBondTests.cs | 3 of 3 cases |
 | `andreasenhugevolatilityinterpl` | partial | TestSuite/AndreasenHugeVolatilityInterplTests.cs | 13 of 14 cases; not yet: testDifferentOptimizers |
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
-| `asianoptions` | not started |  | 23 cases |
+| `asianoptions` | partial | TestSuite/AsianOptionsTests.cs | 21 of 23 cases; not yet: testVecerEngine, testAnalyticContinuousGeometricAveragePriceHeston; moved: testAnalyticDiscreteGeometricAverageStrike line 488 to Divergences/GeometricAverageStrikeForwardStartTests.cs |
 | `assetswap` | ported | TestSuite/AssetSwapTests.cs | 9 of 9 cases |
 | `autocovariances` | not started |  | 3 cases |
 | `bacheliercalculator` | ported | TestSuite/BachelierCalculatorTests.cs | 8 of 8 cases; moved: testBachelierCalculatorGreeks line 173 to Divergences/BachelierGreeksTests.cs; testBachelierCalculatorGreeks line 213 to Divergences/BachelierGreeksTests.cs |

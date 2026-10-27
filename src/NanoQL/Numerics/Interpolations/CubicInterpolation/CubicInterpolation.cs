@@ -480,7 +480,8 @@ public class CubicInterpolation : Interpolation
         tmp[n - 1] = tmp[n - 2] + (D[n - 2] * dx[n - 2]) + ((D[n - 1] - D[n - 2]) * dx[n - 2] / 2.0);
     }
 
-    private static void HymanFilter(int n, double[] dx, double[] S, Vector tmp, bool[] monotonicityAdjustments)
+    // Also the finite-difference Asian condition's held-buffer spline (FdmArithmeticAverageCondition).
+    internal static void HymanFilter(int n, double[] dx, double[] S, Vector tmp, bool[] monotonicityAdjustments)
     {
         double correction;
         double pm, pu, pd, M;

@@ -713,6 +713,20 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses an average type outside <see cref="AverageType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "Unrecognised average
+    /// type, must be Average::Arithmetic or Average::Geometric" (<c>asianoption.cpp:49</c>).</exception>
+    internal static void Check(AverageType value, string paramName)
+    {
+        if (value is < AverageType.Arithmetic or > AverageType.Geometric)
+        {
+            throw new ArgumentOutOfRangeException(
+                paramName, value, "Unrecognised average type, must be Average::Arithmetic or Average::Geometric");
+        }
+    }
+
     /// <summary>Refuses a double barrier type outside <see cref="DoubleBarrierType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>
