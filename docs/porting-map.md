@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 399 | 40 |
-| partial | 21 | 32 |
-| ported | 840 | 108 |
+| not started | 389 | 35 |
+| partial | 21 | 31 |
+| ported | 850 | 114 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -60,7 +60,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `optional` | not ported: C++ platform header |  |  |
 | `payoff` | ported | Payoff.cs |  |
 | `position` | ported | PositionType.cs |  |
-| `prices` | not started |  | no nanoql type: PriceType, IntervalPrice, IntervalPriceType |
+| `prices` | ported | Prices/IntervalPrice.cs, Prices/IntervalPriceType.cs, Prices/PriceType.cs, Prices/PricesFunctions.cs |  |
 | `pricingengine` | replaced: static engines |  |  |
 | `qldefines` | not ported: C++ platform header |  |  |
 | `quantlib` | not ported: C++ platform header |  |  |
@@ -76,7 +76,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `types` | replaced: global type aliases | Types.cs |  |
 | `userconfig` | not ported: C++ platform header |  |  |
 | `version` | not ported: C++ platform header |  |  |
-| `volatilitymodel` | not started |  | no nanoql type: LocalVolatilityEstimator, VolatilityCompositor |
+| `volatilitymodel` | ported | VolatilityModel/LocalVolatilityEstimator{T}.cs, VolatilityModel/VolatilityCompositor.cs |  |
 
 ### `ql/cashflows/`
 
@@ -749,7 +749,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `abcdmathfunction` | ported | Numerics/AbcdMathFunction.cs |  |
 | `all` | not ported: include-only header |  |  |
 | `array` | ported | Numerics/ArrayFunctions.cs, Numerics/Vector.cs |  |
-| `autocovariance` | not started |  |  |
+| `autocovariance` | ported | Numerics/AutocovarianceFunctions.cs |  |
 | `bernsteinpolynomial` | ported | Numerics/BernsteinPolynomial.cs |  |
 | `beta` | ported | Numerics/BetaFunctions.cs |  |
 | `bspline` | ported | Numerics/BSpline.cs |  |
@@ -757,7 +757,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `errorfunction` | ported | Numerics/ErrorFunction.cs |  |
 | `expm1` | ported | Numerics/Expm1Functions.cs |  |
 | `factorial` | ported | Numerics/Factorial.cs |  |
-| `fastfouriertransform` | not started |  | no nanoql type: FastFourierTransform |
+| `fastfouriertransform` | ported | Numerics/FastFourierTransform.cs |  |
 | `functional` | ported | Numerics/FunctionalFunctions.cs |  |
 | `generallinearleastsquares` | ported | Numerics/GeneralLinearLeastSquares.cs |  |
 | `incompletegamma` | ported | Numerics/IncompleteGammaFunctions.cs |  |
@@ -906,7 +906,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `endcriteria` | ported | Numerics/Optimization/EndCriteria/EndCriteria.cs, Numerics/Optimization/EndCriteria/EndCriteriaCheck.cs, Numerics/Optimization/EndCriteria/EndCriteriaType.cs |  |
 | `goldstein` | not started |  | no nanoql type: GoldsteinLineSearch |
 | `lbfgsb` | not started |  | no nanoql type: LBFGSB |
-| `leastsquare` | not started |  | no nanoql type: LeastSquareProblem, LeastSquareFunction, NonLinearLeastSquare |
+| `leastsquare` | ported | Numerics/Optimization/LeastSquare/LeastSquareFunction.cs, Numerics/Optimization/LeastSquare/LeastSquareProblem.cs, Numerics/Optimization/LeastSquare/NonLinearLeastSquare.cs, Numerics/Optimization/LeastSquare/NonLinearLeastSquareResults.cs |  |
 | `levenbergmarquardt` | ported | Numerics/Optimization/LevenbergMarquardt.cs |  |
 | `linesearch` | ported | Numerics/Optimization/LineSearch.cs |  |
 | `linesearchbasedmethod` | ported | Numerics/Optimization/LineSearchBasedMethod.cs |  |
@@ -1438,10 +1438,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `constantestimator` | not started |  | no nanoql type: ConstantEstimator |
-| `garch` | not started |  | no nanoql type: Garch11, Garch11Mode |
-| `garmanklass` | not started |  | no nanoql type: GarmanKlassAbstract, GarmanKlassSimpleSigma, GarmanKlassOpenClose, GarmanKlassSigma1, ParkinsonSigma, GarmanKlassSigma3, GarmanKlassSigma4, GarmanKlassSigma5, GarmanKlassSigma6 |
-| `simplelocalestimator` | not started |  | no nanoql type: SimpleLocalEstimator |
+| `constantestimator` | ported | Models/Volatility/ConstantEstimator.cs |  |
+| `garch` | ported | Models/Volatility/Garch/Garch11.cs, Models/Volatility/Garch/Garch11Calibration.cs, Models/Volatility/Garch/Garch11Mode.cs |  |
+| `garmanklass` | ported | Models/Volatility/GarmanKlass/GarmanKlassAbstract.cs, Models/Volatility/GarmanKlass/GarmanKlassSigma1.cs, Models/Volatility/GarmanKlass/GarmanKlassSigma3.cs, Models/Volatility/GarmanKlass/GarmanKlassSigma4.cs, Models/Volatility/GarmanKlass/GarmanKlassSigma5.cs, Models/Volatility/GarmanKlass/GarmanKlassSigma6.cs, Models/Volatility/GarmanKlass/GarmanKlassSimpleSigma.cs, Models/Volatility/GarmanKlass/ParkinsonSigma.cs |  |
+| `simplelocalestimator` | ported | Models/Volatility/SimpleLocalEstimator.cs |  |
 
 ### `ql/patterns/`
 
@@ -1721,7 +1721,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `batesprocess` | ported | Processes/BatesProcess.cs |  |
 | `blackscholesprocess` | ported | Processes/BlackScholesProcess/BlackProcess.cs, Processes/BlackScholesProcess/BlackScholesMertonProcess.cs, Processes/BlackScholesProcess/BlackScholesProcess.cs, Processes/BlackScholesProcess/GarmanKohlagenProcess.cs, Processes/BlackScholesProcess/GeneralizedBlackScholesProcess.cs |  |
 | `coxingersollrossprocess` | ported | Processes/CoxIngersollRossProcess.cs |  |
-| `endeulerdiscretization` | not started |  | no nanoql type: EndEulerDiscretization |
+| `endeulerdiscretization` | ported | Processes/EndEulerDiscretization.cs |  |
 | `eulerdiscretization` | ported | Processes/EulerDiscretization.cs |  |
 | `forwardmeasureprocess` | ported | Processes/ForwardMeasureProcess/ForwardMeasureProcess.cs, Processes/ForwardMeasureProcess/ForwardMeasureProcess1D.cs |  |
 | `g2process` | ported | Processes/G2Process/G2ForwardProcess.cs, Processes/G2Process/G2Process.cs |  |
@@ -2066,7 +2066,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
 | `asianoptions` | partial | TestSuite/AsianOptionsTests.cs | 21 of 23 cases; not yet: testVecerEngine, testAnalyticContinuousGeometricAveragePriceHeston; moved: testAnalyticDiscreteGeometricAverageStrike line 488 to Divergences/GeometricAverageStrikeForwardStartTests.cs |
 | `assetswap` | ported | TestSuite/AssetSwapTests.cs | 9 of 9 cases |
-| `autocovariances` | not started |  | 3 cases |
+| `autocovariances` | ported | TestSuite/AutocovariancesTests.cs | 3 of 3 cases |
 | `bacheliercalculator` | ported | TestSuite/BachelierCalculatorTests.cs | 8 of 8 cases; moved: testBachelierCalculatorGreeks line 173 to Divergences/BachelierGreeksTests.cs; testBachelierCalculatorGreeks line 213 to Divergences/BachelierGreeksTests.cs |
 | `barrieroption` | partial | TestSuite/BarrierOptionTests.cs | 11 of 15 cases; not yet: testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast, testPerturbativeOrder2FullResolution |
 | `basismodels` | not started |  | 4 cases |
@@ -2127,7 +2127,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `extendedblackvariancesurface` | not started |  | 1 cases |
 | `extendedtrees` | not started |  | 7 cases |
 | `extensibleoptions` | ported | TestSuite/ExtensibleOptionsTests.cs | 2 of 2 cases |
-| `fastfouriertransform` | not started |  | 3 cases |
+| `fastfouriertransform` | ported | TestSuite/FastFourierTransformTests.cs | 3 of 3 cases |
 | `fdcev` | ported | TestSuite/FdCevTests.cs | 2 of 2 cases |
 | `fdcir` | ported | TestSuite/FdCirTests.cs | 1 of 1 cases; moved: testFdmCIRConvergence line 105 to Divergences/FdCirModelTests.cs |
 | `fdheston` | ported | TestSuite/FdHestonTests.cs | 11 of 12 cases; not ported: testFdmHestonIntradayPricing (QL_HIGH_RESOLUTION_DATE, which the default build leaves out) |
@@ -2140,7 +2140,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `functions` | ported | TestSuite/FunctionsTests.cs | 9 of 9 cases |
 | `fxforward` | ported | TestSuite/FxForwardTests.cs | 13 of 13 cases |
 | `g2process` | ported | TestSuite/G2ProcessTests.cs | 8 of 8 cases; replaced: testG2ProcessObservesTermStructure by Conventions/ModelRebuildTests.cs |
-| `garch` | not started |  | 2 cases |
+| `garch` | ported | TestSuite/GarchTests.cs | 2 of 2 cases |
 | `gaussianquadratures` | partial | TestSuite/GaussianQuadraturesTests.cs | 8 of 12 cases; not yet: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial, testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes |
 | `gjrgarchmodel` | ported | TestSuite/GjrGarchModelTests.cs | 2 of 2 cases |
 | `gsr` | ported | TestSuite/GsrTests.cs | 13 of 13 cases |
@@ -2206,7 +2206,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 33 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency, testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency, testGlobalBootstrapVariables |
 | `piecewisezerospreadedtermstructure` | ported | TestSuite/PiecewiseZeroSpreadedTermStructureTests.cs | 10 of 10 cases; replaced: testQuoteChanging by TestSuite/PiecewiseZeroSpreadedTermStructureTests.cs |
 | `preconditions` | replaced: test infrastructure: xUnit and the vector harness |  |  |
-| `prices` | not started |  | 6 cases |
+| `prices` | ported | TestSuite/PricesTests.cs | 6 of 6 cases |
 | `quantlibbenchmark` | not ported: a timing runner |  |  |
 | `quantlibglobalfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `quantlibtestsuite` | replaced: test infrastructure: xUnit and the vector harness |  |  |
@@ -2236,7 +2236,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `swingoption` | partial | TestSuite/SwingOptionTests.cs | 1 of 6 cases; not yet: testExtendedOrnsteinUhlenbeckProcess, testFdmExponentialJump1dMesher, testExtOUJumpVanillaEngine, testExtOUJumpSwingOption, testKlugeChFVanillaPricing |
 | `termstructures` | ported | TestSuite/TermStructuresTests.cs | 15 of 15 cases; replaced: testReferenceChange by Vectors/TermStructures/FlatForwardVectorTests.cs; testImpliedObs by TestSuite/TermStructuresTests.cs; testFSpreadedObs by TestSuite/TermStructuresTests.cs; testZSpreadedObs by TestSuite/TermStructuresTests.cs; testCreateWithNullUnderlying by Conventions/ZeroSpreadedTermStructureTests.cs; testLinkToNullUnderlying by Conventions/ZeroSpreadedTermStructureTests.cs; moved: testBackwardFlatInterpolationZeroRate line 508 to Divergences/ForwardSpreadFirstDateTests.cs |
 | `timegrid` | ported | TestSuite/TimeGridTests.cs | 10 of 10 cases |
-| `timeseries` | partial | TestSuite/TimeSeriesTests.cs | 5 of 6 cases; not yet: testIntervalPrice |
+| `timeseries` | ported | TestSuite/TimeSeriesTests.cs | 6 of 6 cases |
 | `toplevelfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `tqreigendecomposition` | ported | TestSuite/TqrEigenDecompositionTests.cs | 3 of 3 cases |
 | `tracing` | not ported: tests the C++ platform |  |  |
@@ -2248,7 +2248,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `variancegamma` | not started |  | 2 cases |
 | `varianceoption` | not started |  | 1 cases |
 | `varianceswaps` | ported | TestSuite/VarianceSwapsTests.cs | 2 of 2 cases |
-| `volatilitymodels` | not started |  | 1 cases |
+| `volatilitymodels` | ported | TestSuite/VolatilityModelsTests.cs | 1 of 1 cases |
 | `vpp` | not started |  | 6 cases |
 | `xoshiro256starstar` | not started |  | 3 cases |
 | `zabr` | ported | TestSuite/ZabrTests.cs | 1 of 1 cases |

@@ -2847,6 +2847,44 @@ Facts:
 - `ThePerfectlyCorrelatedStepIsBounded`
 - `TheZeroStepIsItsLimit`
 
+## GarchConvergenceTests
+
+[`Divergences/GarchConvergenceTests.cs`](../tests/NanoQL.Tests/Divergences/GarchConvergenceTests.cs)
+
+GARCH's minimizer convergence (the S-bar plan's BR6 (vi): QuantLib's master, #2844, taken). QuantLib 1.44 reads the minimizer's point whatever its end criterion (`garch.cpp:534-536`, "TODO: check return value from minimize()"), so a calibration stopped by its iterations returns a point short of the optimum as calibrated. nanoql refuses it, "GARCH(1,1) calibration did not converge: optimizer stopped with end criterion …", and the mode-based calibration catches the refusal and falls back to its initial guess, as master does; QuantLib's own cases, whose dummy optimizer returns `None`, expect that guess. Check: five Simplex iterations on QuantLib's calibration series, refused from a given guess, and from the moment-matching guess its values, 0.265749, 0.156956 and 0.230964 (QuantLib's `testCalibration`).
+
+Facts:
+
+- `AMinimizerStoppedByItsIterationsIsRefusedOrFallsBackToTheGuess`
+
+## GarchDemeanedVarianceTests
+
+[`Divergences/GarchDemeanedVarianceTests.cs`](../tests/NanoQL.Tests/Divergences/GarchDemeanedVarianceTests.cs)
+
+GARCH's calibrations on squared returns less their mean (the S-bar plan's BR5 (xxxvi), refused). QuantLib's two `calibrate_r2` overloads that subtract the mean from the squared returns (`garch.cpp:512-523`, `:544-556`) feed the cost negative "squared returns", so the conditional variance can fall below zero, whose log the likelihood takes, NaN; QuantLib calls neither. nanoql's cost refuses a conditional variance that isn't positive, which only those overloads can produce under the constraint (ω > 0, α, β ≥ 0 on squared returns). Check: on QuantLib's calibration series from (ω, α, β) = (0.01, 0.5, 0), each overload refused with its text, the constraint GARCH's own or a given one.
+
+Facts:
+
+- `ANonPositiveConditionalVarianceIsRefused`
+- `ANonPositiveConditionalVarianceIsRefusedUnderAGivenConstraint`
+
+## GarchGradientTests
+
+[`Divergences/GarchGradientTests.cs`](../tests/NanoQL.Tests/Divergences/GarchGradientTests.cs)
+
+GARCH's cost gradient (the S-bar plan's BR5 (xlii), fixed under R8). QuantLib's `Garch11CostFunction::gradient` and `valueAndGradient` take ∂σ²ₜ/∂θ as its direct term (1, u²ₜ₋₁, σ²ₜ₋₁), dropping β·∂σ²ₜ₋₁/∂θ (`garch.cpp:95-138`), so against central differences of its own value it runs at 0.13 to 0.80 times the true gradient and a gradient method stops short of the optimum: L-BFGS-B from QuantLib's start at cost 0.46017717 where the exact gradient reaches Nelder-Mead's optimum, 0.46008564 (the planner's BP30). QuantLib's own paths, the Simplex and the ACF fit, never read it, so its cases don't move. nanoql's gradient is the recursive one, ∂σ²ₜ/∂θ = (1, u²ₜ₋₁, σ²ₜ₋₁) + β ∂σ²ₜ₋₁/∂θ. Checks, on QuantLib's own calibration series: the conjugate gradient from (ω, α, β) = (0.2, 0.2, 0.2) ends where the cost's central differences vanish, and at the Simplex's optimum.
+
+Facts:
+
+- `TheConjugateGradientEndsWhereTheCostIsStationary`
+- `TheConjugateGradientReachesTheSimplexOptimum`
+
+## GarchSeries
+
+[`Divergences/GarchSeries.cs`](../tests/NanoQL.Tests/Divergences/GarchSeries.cs)
+
+The series of the S-bar plan's GARCH facts: QuantLib's own calibration case, 50,000 daily returns from 7 July 1962 simulated by GARCH(1,1) at α 0.2, β 0.3 and V_L 0.4 on QuantLib's Mersenne twister at seed 48 and inverse normal, as `garch.cpp`'s `testCalibration` builds it.
+
 ## Gaussian1dCapFloorDiscountTests
 
 [`Divergences/Gaussian1dCapFloorDiscountTests.cs`](../tests/NanoQL.Tests/Divergences/Gaussian1dCapFloorDiscountTests.cs)
@@ -5967,6 +6005,19 @@ Facts:
 
 - `TheZeroBondJustAboveTheCutoff`
 - `TheBondOptionAtSmallReversion`
+
+## VolatilityShortSeriesTests
+
+[`Divergences/VolatilityShortSeriesTests.cs`](../tests/NanoQL.Tests/Divergences/VolatilityShortSeriesTests.cs)
+
+The volatility estimators on series too short for them (the S-bar plan's BR5 (xxxv), §2.2's undefined row, refused). QuantLib's `Garch11::calculate` on fewer than two points reads before the series' start (`garch.cpp:385-388`), `SimpleLocalEstimator` and the open-close Garman-Klass estimators increment an empty series' begin, and `ConstantEstimator` advances past the end when its window is longer than the series. nanoql refuses each before the read, with an `ArgumentException` naming the series. Check: each refusal's type, parameter and text.
+
+Facts:
+
+- `GarchOnOnePointIsRefused`
+- `AConstantWindowLongerThanTheSeriesIsRefused`
+- `TheSimpleLocalEstimatorOnAnEmptySeriesIsRefused`
+- `AnOpenCloseGarmanKlassEstimatorOnAnEmptySeriesIsRefused`
 
 ## WeekendOnDateHolidayListTests
 

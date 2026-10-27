@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/timeseries.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testIntervalPrice, which waits for IntervalPrice (ql/prices, S-bar)
 
 using NanoQL.Time;
 using static NanoQL.Time.Month;
@@ -52,6 +51,17 @@ public class TimeSeriesTests
         {
             Assert.Fail($"set value operator not match{cur.Value}\n");
         }
+    }
+
+    [Fact]
+    public void TestIntervalPrice()
+    {
+        // Testing time series interval price...
+        Date[] date = [new(25, March, 2005), new(29, March, 2005)];
+        Real[] open = [1.3, 2.3], close = [2.3, 3.4], high = [3.4, 3.5], low = [3.4, 3.2];
+
+        TimeSeries<IntervalPrice> tsiq = IntervalPrice.MakeSeries(date, open, close, high, low);
+        Assert.Equal(2, tsiq.Size);
     }
 
     [Fact]

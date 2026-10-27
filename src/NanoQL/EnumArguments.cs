@@ -727,6 +727,31 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a GARCH(1,1) mode outside <see cref="Models.Garch11Mode"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(Models.Garch11Mode value, string paramName)
+    {
+        if (value is < Models.Garch11Mode.MomentMatchingGuess or > Models.Garch11Mode.DoubleOptimization)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown GARCH(1,1) mode");
+        }
+    }
+
+    /// <summary>Refuses an interval price type outside <see cref="IntervalPriceType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's "Unknown price type"
+    /// (<c>prices.cpp:75</c>).</exception>
+    internal static void Check(IntervalPriceType value, string paramName)
+    {
+        if (value is < IntervalPriceType.Open or > IntervalPriceType.Low)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "Unknown price type");
+        }
+    }
+
     /// <summary>Refuses a double barrier type outside <see cref="DoubleBarrierType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>
