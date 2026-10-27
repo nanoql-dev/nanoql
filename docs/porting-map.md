@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 271 | 26 |
-| partial | 20 | 29 |
-| ported | 969 | 125 |
+| not started | 257 | 25 |
+| partial | 19 | 28 |
+| ported | 984 | 127 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -632,7 +632,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `claim` | ported | Instruments/Claim/Claim.cs, Instruments/Claim/FaceValueAccrualClaim.cs, Instruments/Claim/FaceValueClaim.cs |  |
 | `cliquetoption` | ported | Instruments/CliquetOption.cs |  |
 | `complexchooseroption` | ported | Instruments/ComplexChooserOption.cs |  |
-| `compositeinstrument` | not started |  | no nanoql type: CompositeInstrument |
+| `compositeinstrument` | ported | Instruments/CompositeInstrument/CompositeInstrument.cs, Instruments/CompositeInstrument/CompositeInstrumentComponent.cs |  |
 | `compoundoption` | ported | Instruments/CompoundOption.cs |  |
 | `constnotionalcrosscurrencybasisswap` | ported | Instruments/ConstNotionalCrossCurrencyBasisSwap.cs, Instruments/ConstNotionalCrossCurrencyBasisSwapResults.cs |  |
 | `constnotionalcrosscurrencyfixedvsfloatingswap` | ported | Instruments/ConstNotionalCrossCurrencyFixedVsFloatingSwap.cs, Instruments/ConstNotionalCrossCurrencyFixedVsFloatingSwapResults.cs |  |
@@ -842,7 +842,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bicubicsplineinterpolation` | ported | Numerics/Interpolations/Bicubic.cs, Numerics/Interpolations/BicubicSpline.cs |  |
 | `bilinearinterpolation` | ported | Numerics/Interpolations/Bilinear.cs, Numerics/Interpolations/BilinearInterpolation.cs |  |
 | `chebyshevinterpolation` | ported | Numerics/Interpolations/ChebyshevInterpolation.cs, Numerics/Interpolations/ChebyshevInterpolationPointsType.cs |  |
-| `convexmonotoneinterpolation` | not started |  | no nanoql type: ConvexMonotoneInterpolation, ConvexMonotone |
+| `convexmonotoneinterpolation` | ported | Numerics/Interpolations/ConvexMonotoneInterpolation/ComboHelper.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/ConstantGradHelper.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/ConvexMonotone.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/ConvexMonotone2Helper.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/ConvexMonotone3Helper.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/ConvexMonotone4Helper.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/ConvexMonotone4MinHelper.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/ConvexMonotoneInterpolation.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/EverywhereConstantHelper.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/QuadraticHelper.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/QuadraticMinHelper.cs, Numerics/Interpolations/ConvexMonotoneInterpolation/SectionHelper.cs |  |
 | `cubicinterpolation` | ported | Numerics/Interpolations/CubicInterpolation/AkimaCubicInterpolation.cs, Numerics/Interpolations/CubicInterpolation/Cubic.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolation.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolationBoundaryCondition.cs, Numerics/Interpolations/CubicInterpolation/CubicInterpolationDerivativeApprox.cs, Numerics/Interpolations/CubicInterpolation/CubicNaturalSpline.cs, Numerics/Interpolations/CubicInterpolation/CubicSplineOvershootingMinimization1.cs, Numerics/Interpolations/CubicInterpolation/CubicSplineOvershootingMinimization2.cs, Numerics/Interpolations/CubicInterpolation/FritschButlandCubic.cs, Numerics/Interpolations/CubicInterpolation/HarmonicCubic.cs, Numerics/Interpolations/CubicInterpolation/KrugerCubic.cs, Numerics/Interpolations/CubicInterpolation/MonotonicCubicNaturalSpline.cs, Numerics/Interpolations/CubicInterpolation/MonotonicParabolic.cs, Numerics/Interpolations/CubicInterpolation/Parabolic.cs |  |
 | `extrapolation` | ported | Numerics/Interpolations/Extrapolator.cs, Numerics/Interpolations/ExtrapolatorExtensions.cs |  |
 | `flatextrapolation` | ported | Numerics/Interpolations/FlatExtrapolator.cs |  |
@@ -1571,7 +1571,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `integralcdsengine` | not started |  | no nanoql type: IntegralCdsEngine |
+| `integralcdsengine` | ported | PricingEngines/Credit/IntegralCdsEngine.cs |  |
 | `isdacdsengine` | ported | PricingEngines/Credit/IsdaCdsEngine/IsdaCdsEngine.cs, PricingEngines/Credit/IsdaCdsEngine/IsdaCdsEngineAccrualBias.cs, PricingEngines/Credit/IsdaCdsEngine/IsdaCdsEngineForwardsInCouponPeriod.cs, PricingEngines/Credit/IsdaCdsEngine/IsdaCdsEngineNumericalFix.cs |  |
 | `midpointcdsengine` | ported | PricingEngines/Credit/MidPointCdsEngine.cs |  |
 
@@ -1745,16 +1745,16 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `compositequote` | not started |  | no nanoql type: CompositeQuote |
+| `compositequote` | ported | Quotes/CompositeQuote.cs |  |
 | `deltavolquote` | ported | Quotes/DeltaVolQuote/DeltaVolQuote.cs, Quotes/DeltaVolQuote/DeltaVolQuoteAtmType.cs, Quotes/DeltaVolQuote/DeltaVolQuoteDeltaType.cs |  |
-| `derivedquote` | not started |  | no nanoql type: DerivedQuote |
-| `eurodollarfuturesquote` | not started |  | no nanoql type: EurodollarFuturesImpliedStdDevQuote |
-| `forwardswapquote` | not started |  | no nanoql type: ForwardSwapQuote |
-| `forwardvaluequote` | not started |  | no nanoql type: ForwardValueQuote |
-| `futuresconvadjustmentquote` | not started |  | no nanoql type: FuturesConvAdjustmentQuote |
-| `impliedstddevquote` | not started |  | no nanoql type: ImpliedStdDevQuote |
-| `lastfixingquote` | not started |  | no nanoql type: LastFixingQuote |
-| `multicompositequote` | not started |  | no nanoql type: MultiCompositeQuote |
+| `derivedquote` | ported | Quotes/DerivedQuote.cs |  |
+| `eurodollarfuturesquote` | ported | Quotes/EurodollarFuturesImpliedStdDevQuote.cs |  |
+| `forwardswapquote` | ported | Quotes/ForwardSwapQuote.cs |  |
+| `forwardvaluequote` | ported | Quotes/ForwardValueQuote.cs |  |
+| `futuresconvadjustmentquote` | ported | Quotes/FuturesConvAdjustmentQuote.cs |  |
+| `impliedstddevquote` | ported | Quotes/ImpliedStdDevQuote.cs |  |
+| `lastfixingquote` | ported | Quotes/LastFixingQuote.cs |  |
+| `multicompositequote` | ported | Quotes/MultiCompositeQuote.cs |  |
 | `simplequote` | replaced: double |  |  |
 
 ### `ql/termstructures/`
@@ -1765,12 +1765,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `bootstraperror` | not ported: deprecated (D5): QuantLib's [[deprecated]] attribute alone |  |  |
 | `bootstraphelper` | ported | TermStructures/BootstrapHelper/BootstrapHelperExtensions.cs, TermStructures/BootstrapHelper/BootstrapHelperFunctions.cs, TermStructures/BootstrapHelper/BootstrapHelper{TTermStructure}.cs, TermStructures/BootstrapHelper/IBootstrapHelper.cs, TermStructures/BootstrapHelper/PillarChoice.cs, TermStructures/BootstrapHelper/RelativeDateBootstrapHelper{TTermStructure}.cs |  |
 | `defaulttermstructure` | ported | TermStructures/DefaultProbabilityTermStructure.cs |  |
-| `globalbootstrap` | partial | TermStructures/GlobalBootstrap/GlobalBootstrap.cs, TermStructures/GlobalBootstrap/IMultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrapContributor.cs | partial: AdditionalBootstrapVariables, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for S-core with SimpleQuoteVariables and its user; no nanoql type: AdditionalBootstrapVariables |
-| `globalbootstrapvars` | not started |  | no nanoql type: SimpleQuoteVariables |
+| `globalbootstrap` | ported | TermStructures/GlobalBootstrap/AdditionalBootstrapVariables.cs, TermStructures/GlobalBootstrap/GlobalBootstrap.cs, TermStructures/GlobalBootstrap/IMultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrap.cs, TermStructures/GlobalBootstrap/MultiCurveBootstrapContributor.cs |  |
+| `globalbootstrapvars` | ported | TermStructures/SimpleQuoteVariables.cs |  |
 | `inflationtermstructure` | ported | TermStructures/InflationTermStructure/InflationTermStructure.cs, TermStructures/InflationTermStructure/InflationTermStructureExtensions.cs, TermStructures/InflationTermStructure/InflationTermStructureFunctions.cs, TermStructures/InflationTermStructure/YoYInflationTermStructure.cs, TermStructures/InflationTermStructure/ZeroInflationTermStructure.cs |  |
 | `interpolatedcurve` | ported | TermStructures/IInterpolatedCurve{TTraits,TInterpolator}.cs, TermStructures/InterpolatedCurve{TInterpolator}.cs |  |
 | `iterativebootstrap` | ported | TermStructures/IterativeBootstrap/BootstrapState{TTermStructure}.cs, TermStructures/IterativeBootstrap/IBootstrap.cs, TermStructures/IterativeBootstrap/IBootstrapState.cs, TermStructures/IterativeBootstrap/IterativeBootstrap.cs |  |
-| `localbootstrap` | not started |  | no nanoql type: PenaltyFunction, LocalBootstrap |
+| `localbootstrap` | ported | TermStructures/LocalBootstrap/ILocalInterpolator.cs, TermStructures/LocalBootstrap/LocalBootstrap.cs | no nanoql type: PenaltyFunction |
 | `multicurve` | ported | TermStructures/MultiCurve/MultiCurve.cs, TermStructures/MultiCurve/MultiCurveMember.cs | no nanoql type: MultiCurveBootstrapProvider |
 | `voltermstructure` | partial | TermStructures/VolatilityTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (bdc, dc) (not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead, as the local volatility structures do) |
 | `yieldtermstructure` | partial | TermStructures/YieldTermStructure.cs | partial: the constructors taking a day counter only, for structures that manage their own reference date, which no curve ported so far uses |
@@ -1929,7 +1929,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `overnightindexfutureratehelper` | ported | TermStructures/Yield/OvernightIndexFutureRateHelper.cs, TermStructures/Yield/SofrFutureRateHelper.cs |  |
 | `piecewiseforwardspreadedtermstructure` | ported | TermStructures/Yield/InterpolatedPiecewiseForwardSpreadedTermStructure{TInterpolator}.cs |  |
 | `piecewisespreadyieldcurve` | ported | TermStructures/Yield/PiecewiseSpreadYieldCurve{TInterpolator,TBootstrap}.cs |  |
-| `piecewiseyieldcurve` | ported | TermStructures/Yield/PiecewiseYieldCurve/GlobalLinearSimpleZeroCurve.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseSplineCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearSimpleZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseYieldCurve{TTraits,TInterpolator,TBootstrap}.cs |  |
+| `piecewiseyieldcurve` | ported | TermStructures/Yield/PiecewiseYieldCurve/GlobalLinearSimpleZeroCurve.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseConvexMonotoneForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseConvexMonotoneZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/GlobalPiecewiseSplineCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseConvexMonotoneForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseConvexMonotoneZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseCubicZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseFlatForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseKrugerLogDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearForward.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearSimpleZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLinearZero.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogLinearDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseLogMixedLinearCubicDiscount.cs, TermStructures/Yield/PiecewiseYieldCurve/PiecewiseYieldCurve{TTraits,TInterpolator,TBootstrap}.cs |  |
 | `piecewisezerospreadedtermstructure` | ported | TermStructures/Yield/InterpolatedPiecewiseZeroSpreadedTermStructure{TInterpolator}.cs, TermStructures/Yield/PiecewiseZeroSpreadedTermStructure.cs |  |
 | `quantotermstructure` | ported | TermStructures/Yield/QuantoTermStructure.cs |  |
 | `ratehelpers` | ported | TermStructures/Yield/RateHelpers/BMASwapRateHelper.cs, TermStructures/Yield/RateHelpers/DepositRateHelper.cs, TermStructures/Yield/RateHelpers/FraRateHelper.cs, TermStructures/Yield/RateHelpers/FuturesRateHelper.cs, TermStructures/Yield/RateHelpers/FxSwapRateHelper.cs, TermStructures/Yield/RateHelpers/RateHelper.cs, TermStructures/Yield/RateHelpers/RelativeDateRateHelper.cs, TermStructures/Yield/RateHelpers/SwapRateHelper.cs |  |
@@ -2156,7 +2156,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcpicapfloor` | not started |  | 2 cases |
 | `inflationcpiswap` | ported | TestSuite/CPISwapTests.cs | 5 of 5 cases |
 | `inflationvolatility` | not started |  | 3 cases |
-| `instruments` | partial | TestSuite/InstrumentsTests.cs | 0 of 2 cases; not ported: testObservable (observer notifications and freezing, which an immutable instrument has no use for, R1); not yet: testCompositeWhenShiftingDates |
+| `instruments` | ported | TestSuite/InstrumentsTests.cs | 1 of 2 cases; not ported: testObservable (observer notifications and freezing, which an immutable instrument has no use for, R1) |
 | `integrals` | partial | TestSuite/IntegralsTests.cs | 17 of 21 cases; not yet: testExpSinh, testTwoDimensionalIntegration, testFolinIntegration, testPiecewiseIntegral |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
@@ -2203,7 +2203,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `period` | ported | TestSuite/PeriodTests.cs | 9 of 9 cases |
 | `perpetualfutures` | ported | TestSuite/PerpetualFuturesTests.cs | 1 of 1 cases |
 | `piecewiseblackvariancesurface` | partial | TestSuite/PiecewiseBlackVarianceSurfaceTests.cs | 17 of 20 cases; not ported: testObserver (observer notifications, which an immutable surface has no use for, R1); testSmileSectionRequiresSharedPtr (QuantLib's shared_ptr requirement, which a .NET reference has no counterpart for); not yet: testSabrEquivalence |
-| `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 33 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency, testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency, testGlobalBootstrapVariables |
+| `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 36 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency |
 | `piecewisezerospreadedtermstructure` | ported | TestSuite/PiecewiseZeroSpreadedTermStructureTests.cs | 10 of 10 cases; replaced: testQuoteChanging by TestSuite/PiecewiseZeroSpreadedTermStructureTests.cs |
 | `preconditions` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `prices` | ported | TestSuite/PricesTests.cs | 6 of 6 cases |
@@ -2211,7 +2211,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `quantlibglobalfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `quantlibtestsuite` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `quantooption` | partial | TestSuite/QuantoOptionTests.cs | 9 of 10 cases; not yet: testDoubleBarrierValues |
-| `quotes` | not started |  | 6 cases |
+| `quotes` | ported | TestSuite/QuoteTests.cs | 4 of 6 cases; not ported: testObservable (observer notifications, which values have no use for, R1); testObservableHandle (relinkable handles' notifications, which values have no use for, R1) |
 | `rangeaccrual` | ported | TestSuite/RangeAccrualTests.cs | 3 of 3 cases |
 | `riskneutraldensitycalculator` | ported | TestSuite/RiskNeutralDensityCalculatorTests.cs | 14 of 14 cases |
 | `riskstats` | ported | TestSuite/RiskStatsTests.cs | 1 of 1 cases |

@@ -57,6 +57,14 @@ case on its BMA swap helpers, re-dated.
   linear simple-zero curve, which QuantLib refuses, its maximum date its last pillar, and the log-linear discount
   curve, which builds (DS12); and 3 curves built 15 TARGET days after the evaluation date their FRA and FX swap
   helpers were built on, which re-date them.
+- Then, appended last, 5 cases of convex-monotone curves (ql/math/interpolations/convexmonotoneinterpolation.hpp) on
+  the fixture's helpers, one per evaluation date and one more: forward rates and zero rates on QuantLib's default
+  ConvexMonotone, and forward rates at quadraticities of 1 and 0.5 (monotonicity 0.9), and of 0 without forcing
+  positivity, the fixture's rates positive, so that no section reaches the S-core plan's CR7 (i)-(iii) fixes; and the
+  wheel's four named convex-monotone curves (PiecewiseConvexMonotoneForward, PiecewiseConvexMonotoneZero,
+  GlobalPiecewiseConvexMonotoneForward, GlobalPiecewiseConvexMonotoneZero) on the fixture's helpers on the first
+  evaluation date, with a fixed reference date and on 2 TARGET settlement days, each built through its class by nanoql,
+  the global ones on QuantLib's default GlobalBootstrap.
 
 A curve's outputs are whether it builds, QuantLib's refusals recorded as its throw; its nodes' dates and data, its
 maximum date, its discounts at 40 dates (35 from its reference date to its maximum date, the earlier ones closer
@@ -77,7 +85,9 @@ Null<Real>(); a named curve adds "class", the named class nanoql builds it throu
 "Linear" | "LogLinear" | "BackwardFlat" | "KrugerLog" | "MonotonicLogCubic"}, or {"type": "Cubic" | "LogCubic",
 "derivativeApprox", "monotonic", "leftCondition", "leftConditionValue", "rightCondition", "rightConditionValue"}, or
 {"type": "LogMixedLinearCubic", "n", "behavior", and those six}, every parameter named, since the wheel's defaults for
-LogCubic and LogMixedLinearCubic aren't QuantLib's (a null "leftConditionValue" is Null<Real>()).
+LogCubic and LogMixedLinearCubic aren't QuantLib's (a null "leftConditionValue" is Null<Real>()), or {"type":
+"ConvexMonotone", "quadraticity", "monotonicity", "forcePositive"}; a "global" bootstrap is QuantLib's default
+GlobalBootstrap, the named global classes' own.
 
 The wheel names each pair's class (PiecewiseLogLinearDiscount, PiecewiseLogCubicDiscount, PiecewiseKrugerLogDiscount,
 PiecewiseLinearZero, PiecewiseCubicZero, PiecewiseFlatForward, PiecewiseLinearForward, PiecewiseLinearSimpleZero,
@@ -164,6 +174,14 @@ WHEEL = {
     ("ForwardRate", "Linear"): ql.PiecewiseLinearForward,
     ("SimpleZeroYield", "Linear"): ql.PiecewiseLinearSimpleZero,
     ("Discount", "LogMixedLinearCubic"): ql.PiecewiseLogMixedLinearCubicDiscount,
+    ("ForwardRate", "ConvexMonotone"): ql.PiecewiseConvexMonotoneForward,
+    ("ZeroYield", "ConvexMonotone"): ql.PiecewiseConvexMonotoneZero,
+}
+
+# The wheel's class for each pair on the global bootstrap, by the named class.
+GLOBAL_WHEEL = {
+    "GlobalPiecewiseConvexMonotoneForward": ql.GlobalPiecewiseConvexMonotoneForward,
+    "GlobalPiecewiseConvexMonotoneZero": ql.GlobalPiecewiseConvexMonotoneZero,
 }
 
 
@@ -181,6 +199,8 @@ def make_interpolator(traits, spec):
             assert spec == SPLINE_CUBIC, spec
             return ql.SplineCubic()
         return ql.Cubic(*args) if t == "Cubic" else ql.LogCubic(*args)
+    if t == "ConvexMonotone":
+        return ql.ConvexMonotone(spec["quadraticity"], spec["monotonicity"], spec["forcePositive"])
     return {"Linear": ql.Linear, "LogLinear": ql.LogLinear, "BackwardFlat": ql.BackwardFlat,
             "KrugerLog": ql.KrugerLog, "MonotonicLogCubic": ql.MonotonicLogCubic}[t]()
 
@@ -218,14 +238,19 @@ def curve_spec(traits, interpolator, dc, today, moving=False, jumps=None, jump_d
 def make_curve(spec, helpers):
     """The wheel's curve for a spec on the given helpers, built under the settings already set."""
     traits, t = spec["traits"], spec["interpolator"]["type"]
-    cls = WHEEL[(traits, t)]
-    assert spec.get("class", cls.__name__) == cls.__name__, spec
     if spec["form"] == "referenceDate":
         head = (ql.Date(spec["referenceDate"]),)
     else:
         head = (spec["settlementDays"], irx.calendar(spec["calendar"]))
     jumps = [ql.QuoteHandle(ql.SimpleQuote(x)) for x in spec["jumps"] or []]
     jump_dates = [ql.Date(x) for x in spec["jumpDates"] or []]
+    if spec["bootstrap"] == "global":
+        # the wheel's global classes take the bootstrap before the jumps
+        cls = GLOBAL_WHEEL[spec["class"]]
+        return cls(*head, helpers, irx.day_counter(spec["dayCounter"]), ql.GlobalBootstrap(), jumps, jump_dates,
+                   make_interpolator(traits, spec["interpolator"]))
+    cls = WHEEL[(traits, t)]
+    assert spec.get("class", cls.__name__) == cls.__name__, spec
     return cls(*head, helpers, irx.day_counter(spec["dayCounter"]), jumps, jump_dates,
                make_interpolator(traits, spec["interpolator"]), make_bootstrap(spec["bootstrap"]))
 
@@ -244,7 +269,9 @@ def curve_outputs(curve, helpers, quote_errors=True):
     dates, flags = discount_dates(curve)
     out = {"built": True, "dates": v.enc(list(curve.dates())), "data": list(curve.data()),
            "maxDate": v.enc(curve.maxDate()),
-           "discounts": [curve.discount(d, x) for d, x in zip(dates, flags)]}
+           # a zero-rate convex-monotone curve's extrapolation reads its interpolation's derivative, which QuantLib
+           # refuses
+           "discounts": [v.attempt(lambda d=d, x=x: curve.discount(d, x)) for d, x in zip(dates, flags)]}
     if quote_errors:
         # a helper the bootstraps drop as expired is never bound, and QuantLib refuses its quote error
         out["quoteErrors"] = [v.attempt(h.quoteError) for h in helpers]
@@ -599,9 +626,42 @@ def bma_moved_cases():
                            quote_errors=False, extra={"helpersEvaluationDate": today.serialNumber()})]
 
 
+def convex_monotone(quadraticity=0.3, monotonicity=0.7, force_positive=True):
+    return {"type": "ConvexMonotone", "quadraticity": quadraticity, "monotonicity": monotonicity,
+            "forcePositive": force_positive}
+
+
+CM_ROWS = [("ForwardRate", convex_monotone(), A360), ("ZeroYield", convex_monotone(), A365),
+           ("ForwardRate", convex_monotone(1.0), A365), ("ForwardRate", convex_monotone(0.5, 0.9), A360),
+           ("ForwardRate", convex_monotone(0.0, 0.7, False), A365)]
+CM_NAMED = [("PiecewiseConvexMonotoneForward", "ForwardRate"), ("PiecewiseConvexMonotoneZero", "ZeroYield"),
+            ("GlobalPiecewiseConvexMonotoneForward", "ForwardRate"), ("GlobalPiecewiseConvexMonotoneZero", "ZeroYield")]
+
+
+def convex_monotone_cases():
+    """Convex-monotone curves on the fixture's helpers, one case per evaluation date, and the four named classes."""
+    out = []
+    for k, today in enumerate(EVALUATION_DATES):
+        with v.case_settings(today) as st:
+            specs = [curve_spec(traits, interpolator, dc, today, k == 2) for traits, interpolator, dc in CM_ROWS]
+            out.append(group_case(f"{today.ISO()} convex-monotone curves on fixture helpers", st, "curves", specs,
+                                  fixture()))
+    today = EVALUATION_DATES[0]
+    for moving in (False, True):
+        with v.case_settings(today) as st:
+            specs = [curve_spec(traits, convex_monotone(), A360, today, moving, named=named,
+                                bootstrap="global" if named.startswith("Global") else None)
+                     for named, traits in CM_NAMED]
+            form = " on settlement days" if moving else ""
+            out.append(group_case(f"{today.ISO()} named convex-monotone classes{form} on fixture helpers", st,
+                                  "curves", specs, fixture()))
+    return out
+
+
 def cases():
     out = grid_cases() + jump_cases() + fallback_cases() + bumped_cases() + moved_cases()
     out += named_cases() + log_mixed_cases() + more_cases() + bma_moved_cases()
+    out += convex_monotone_cases()
     check_rows(out)
     return out
 

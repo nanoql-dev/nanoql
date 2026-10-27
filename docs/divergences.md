@@ -1427,6 +1427,23 @@ Facts:
 
 - `AnEmptyScheduleIsRefusedBeforeItsFirstDateIsRead`
 
+## CdsEngineReferenceDateTests
+
+[`Divergences/CdsEngineReferenceDateTests.cs`](../tests/NanoQL.Tests/Divergences/CdsEngineReferenceDateTests.cs)
+
+The CDS engines' reads before a curve's reference date (the S-core plan's CR7 (xxxiv)), on curves that settle after the evaluation date and on curves dated the evaluation date alike: QuantLib's integral engine integrates the default leg from the evaluation date, reading the discount and the default probability before a T+2 curve's reference date, both engines read the survival at a coupon paying before a T+2 hazard curve's date and the mid-point engine its default date or its period's end there, and both read a live coupon's past period (one paid after a weekend that ended it) before curves dated the evaluation date, where QuantLib's curves refuse a negative time. nanoql's engines read nothing accrued before a curve's reference date: a discount of 1, a survival of 1 and a default probability of 0, QuantLib's own premise for its two-date default probability. Each value is QuantLib's on the market restated from the evaluation date, a curve dated then that accrues nothing up to the T+2 date and is the T+2 curve after it (the planner's `r1_cdshazard.cpp`, `r1_cdsshort.cpp` and the reviewer's `r8d.cpp`, `r8g.cpp`, rerun by the planner), or, for curves dated the evaluation date, restated alike from the past period's start (the reviewer's `r8j.cpp`); QuantLib's refusals, with their times, are its values on the curves given.
+
+Facts:
+
+- `TheIntegralEngineOnAT2DiscountCurveIsQuantLibsOnTheRestatedCurve`
+- `TheMidPointEngineOnAT2DiscountCurveIsQuantLibs`
+- `TheMidPointEngineOnAShortFirstPeriodIsQuantLibsOnTheRestatedCurve`
+- `TheIntegralEngineOnAT2HazardCurveIsQuantLibsOnTheRestatedCurve`
+- `ACouponPayingBeforeAT2HazardCurveIsQuantLibsOnTheRestatedCurve`
+- `ACouponPayingAfterAT2HazardCurveIsQuantLibs`
+- `ALiveCouponWhosePeriodEndedBeforeCurvesDatedTheEvaluationDateIsQuantLibsOnTheRestatedCurves`
+- `QuantLibsReadsBeforeTheReferenceDateAreRefused`
+
 ## CdsExpiredAccrualRebateTests
 
 [`Divergences/CdsExpiredAccrualRebateTests.cs`](../tests/NanoQL.Tests/Divergences/CdsExpiredAccrualRebateTests.cs)
@@ -1704,6 +1721,20 @@ Facts:
 
 - `AVolatilityOnAnotherDayCounterIsFlattenedOnTheRiskFreeClock`
 - `TheNPVIsTheValueAtSettlement`
+
+## ConvexMonotoneTests
+
+[`Divergences/ConvexMonotoneTests.cs`](../tests/NanoQL.Tests/Divergences/ConvexMonotoneTests.cs)
+
+The convex-monotone interpolation's sections (the S-core plan's CR7 (i)–(iii)). Hagan and West's method defines a section's forwards by two properties: the section averages its value, and the forwards are continuous at the nodes. QuantLib's split of a section's quadratic to keep it non-negative breaks both where it splits a quadratic that never dips below 0 inside the section (i); its averages' discriminant, 0 in exact arithmetic beside a floored end forward, rounds a hair below 0, and the unsplit quadratic dips below 0 (ii); and positivity forced on negative averages floors their sections and end forwards at 0, breaking the averages (iii). nanoql splits only where the quadratic dips, takes a discriminant within 1e-12 bAv² of 0 as 0, and forces no positivity on a section of negative average or the end forward beside one. QuantLib's values are its own class's, from this run's `probes\c1_facts.cpp` (`c1_facts.out`); each section is read through its own helper, as QuantLib's lookup takes the next section's helper at the node itself: its average by its primitive just before its right end, and its forward there as the limit of two readings before it.
+
+Facts:
+
+- `AQuadraticIsSplitOnlyWhereItDipsBelowZero`
+- `EverySectionKeepsItsAverageAndTheForwardsTheirContinuity`
+- `ADiscriminantRoundedBelowZeroIsZero`
+- `NegativeAveragesKeepTheirAverages`
+- `ANegativeRateCurveReadsNoSpuriousForward`
 
 ## CosHestonLargeKappaTests
 
@@ -3238,6 +3269,16 @@ Facts:
 - `ARiskFreeCurveSettlingLaterIsReadFromItsDateOnTheEarliestClock`
 - `AnOptionExpiringBeforeTheRiskFreeCurvesDatePrices`
 
+## GlobalBootstrapVariablesTests
+
+[`Divergences/GlobalBootstrapVariablesTests.cs`](../tests/NanoQL.Tests/Divergences/GlobalBootstrapVariablesTests.cs)
+
+Where a global bootstrap's additional variables end up (the S-core plan's CR3 (b)): QuantLib's bootstrap writes the optimizer's values into the quotes its variables manage (`globalbootstrap.hpp:450-451`, `globalbootstrapvars.cpp:34-38`), so they hold the optimum after the curve is built. nanoql's variables are immutable and its curve keeps the optimum, `PiecewiseYieldCurve{TTraits, TInterpolator, TBootstrap}.AdditionalVariables`: on QuantLib's testGlobalBootstrapVariables, the volatility QuantLib's quote holds after the bootstrap, 0.09861506355792292 (the C++ harness's vector, `cxx/termstructures/globalbootstrapvars.json`, "QuantLib's case"). A curve on a bootstrap with no variables keeps none.
+
+Facts:
+
+- `TheCurveKeepsTheOptimum`
+
 ## GmresBreakdownTests
 
 [`Divergences/GmresBreakdownTests.cs`](../tests/NanoQL.Tests/Divergences/GmresBreakdownTests.cs)
@@ -3729,6 +3770,16 @@ Facts:
 
 - `NegativeFixingDaysAreRefused`
 
+## ImpliedStdDevQuoteTests
+
+[`Divergences/ImpliedStdDevQuoteTests.cs`](../tests/NanoQL.Tests/Divergences/ImpliedStdDevQuoteTests.cs)
+
+`ImpliedStdDevQuote`'s solve after its inputs move (the S-core plan's CR1 (d)): QuantLib's quote starts each solve after the first from the last one's result (`impliedstddevquote.cpp:34`, `:59`); nanoql's quote is immutable, a new forward or price is a new quote solved from its caller's guess, which may be the last quote's value. QuantLib's call at a 4% forward and strike, priced 2%, solved from 0.15 to 1e-6, gives 1.3489795003921468; its forward moved to 5%, the second solve, from that value, gives 0.83176179858025456, and a fresh quote from 0.15 gives 0.83176159858703613, two roots within the accuracy (this run's `probes\c1_facts.cpp`).
+
+Facts:
+
+- `AMovedForwardIsSolvedFromTheCallersGuess`
+
 ## ImpliedTermStructureClockTests
 
 [`Divergences/ImpliedTermStructureClockTests.cs`](../tests/NanoQL.Tests/Divergences/ImpliedTermStructureClockTests.cs)
@@ -4041,6 +4092,16 @@ Facts:
 
 - `ANodeAtZeroGivesItsValue`
 - `DescendingNodesGiveTheirValues`
+
+## LastFixingQuoteTests
+
+[`Divergences/LastFixingQuoteTests.cs`](../tests/NanoQL.Tests/Divergences/LastFixingQuoteTests.cs)
+
+`LastFixingQuote`'s reference date on a store holding later fixings (the S-core plan's CR7 (xxxv)): QuantLib's is the earlier of the store's last date and the evaluation date (`lastfixingquote.cpp:40-43`), the evaluation date itself on a store holding later fixings, as a backtest on one full history does, whose fixing is refused on a non-fixing day or forecast where it is missing. nanoql's is the last stored date on or before the evaluation date: Euribor 6M fixed through 30 April 2021, on Saturday 13 March 2021 and Good Friday 2 April 2021, where QuantLib refuses the evaluation date's fixing (the reviewer's `r8a.cpp`), nanoql's quote is the last fixing available, on the 12th and the 1st, and is QuantLib's own quote on the store cut at the evaluation date.
+
+Facts:
+
+- `TheReferenceDateIsTheLastStoredFixingOnOrBeforeTheEvaluationDate`
 
 ## LeastSquaresStandardErrorTests
 

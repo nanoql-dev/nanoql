@@ -19,9 +19,21 @@ namespace NanoQL.PricingEngines;
 /// its start and the evaluation date.
 /// </summary>
 /// <remarks>
+/// <para>
 /// A static class: <see cref="Calculate"/> takes the engine's inputs and returns the results, in place of QuantLib's
 /// engine object (D14). An expired swap's results are <see cref="CreditDefaultSwap.SetupExpired"/>'s, as QuantLib's
 /// instrument gives them before it calls the engine; otherwise the swap is validated and priced.
+/// </para>
+/// <para>
+/// A curve accrues nothing before its reference date: the discount at a default date before the discount curve's
+/// reference date is 1, and the survival at a payment date before the probability curve's reference date is 1, its
+/// default probability over a period ending before it 0, where QuantLib's reads refuse them ("negative time"): on a
+/// curve that settles after the evaluation date, and on curves dated the evaluation date for a live coupon whose period
+/// ended before it (one paid after the weekend that ended it). No default before the reference date is QuantLib's own
+/// premise for its two-date default probability, which excuses the period's start and not its end
+/// (<c>defaulttermstructure.cpp:112-120</c>). A documented divergence (the S-core plan's CR7 (xxxiv)); wherever
+/// QuantLib's reads succeed, its values, bit for bit.
+/// </para>
 /// </remarks>
 public static class MidPointCdsEngine
 {
@@ -126,8 +138,8 @@ public static class MidPointCdsEngine
             // mid-point
             Date defaultDate = effectiveStartDate + ((endDate - effectiveStartDate) / 2);
 
-            double s = probability.SurvivalProbability(paymentDate);
-            double p = probability.DefaultProbability(effectiveStartDate, endDate);
+            double s = probability.AccruedSurvivalProbability(paymentDate);
+            double p = probability.AccruedDefaultProbability(effectiveStartDate, endDate);
 
             // on one side, we add the fixed rate payments in case of
             // survival...
@@ -138,7 +150,8 @@ public static class MidPointCdsEngine
             {
                 if (cds.PaysAtDefaultTime)
                 {
-                    couponLegNPV += p * coupon.AccruedAmount(defaultDate, context) * discountCurve.Discount(defaultDate);
+                    couponLegNPV +=
+                        p * coupon.AccruedAmount(defaultDate, context) * discountCurve.AccruedDiscount(defaultDate);
                 }
                 else
                 {
@@ -151,7 +164,7 @@ public static class MidPointCdsEngine
             double claim = cds.Claim.Amount(defaultDate, cds.Notional, recoveryRate, context);
             if (cds.PaysAtDefaultTime)
             {
-                defaultLegNPV += p * claim * discountCurve.Discount(defaultDate);
+                defaultLegNPV += p * claim * discountCurve.AccruedDiscount(defaultDate);
             }
             else
             {

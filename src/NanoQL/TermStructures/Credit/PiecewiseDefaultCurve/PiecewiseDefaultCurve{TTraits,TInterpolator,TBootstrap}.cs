@@ -51,6 +51,7 @@ public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
     // Non-null only while the constructor bootstraps the curve; the frozen nodes are written once, by Calculate.
     private BootstrapState<DefaultProbabilityTermStructure>? state;
     private ImmutableArray<Date> dates;
+    private ImmutableArray<double> additionalVariables = [];
     private InterpolatedCurve<TInterpolator>? curve;
 
     /// <summary>
@@ -115,6 +116,7 @@ public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
         Bootstrap.Calculate<DefaultProbabilityTermStructure, TTraits, TInterpolator>(s, Interpolator, context);
         dates = [.. s.Dates];
         curve = new InterpolatedCurve<TInterpolator>([.. s.Times], [.. s.Data], Interpolator, s.Interpolation!, s.MaxDate);
+        additionalVariables = s.AdditionalVariables;
         state = null;
     }
 
@@ -184,6 +186,14 @@ public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
     /// <inheritdoc/>
     /// <remarks>On the working state while the curve is built.</remarks>
     public ImmutableArray<double> Data() => state is { } s ? [.. s.Data] : curve!.Data();
+
+    /// <summary>
+    /// Gets the values of its global bootstrap's additional variables at the curve's optimum
+    /// (<see cref="GlobalBootstrap.AdditionalVariables"/>), which QuantLib leaves in its quotes; empty for another
+    /// bootstrap, or for one with no variables.
+    /// </summary>
+    /// <remarks>On the working state while the curve is built.</remarks>
+    public ImmutableArray<double> AdditionalVariables => state is { } s ? s.AdditionalVariables : additionalVariables;
 
     /// <inheritdoc/>
     /// <remarks>On the working state while the curve is built.</remarks>

@@ -196,6 +196,19 @@ public abstract class DefaultProbabilityTermStructure : TermStructure
         return p2 - p1;
     }
 
+    // The survival the curve has accrued by a date: 1 before its reference date, where QuantLib's read throws ("negative
+    // time"). No default before the reference date is QuantLib's own premise for its two-date default probability,
+    // which excuses its first date; the CDS engines read every survival and default probability through these (the
+    // S-core plan's CR7 (xxxiv)).
+    internal double AccruedSurvivalProbability(Date d) => d < ReferenceDate ? 1.0 : SurvivalProbability(d);
+
+    // The default probability accrued by a date: 0 before the reference date.
+    internal double AccruedDefaultProbability(Date d) => d < ReferenceDate ? 0.0 : DefaultProbability(d);
+
+    // The default probability between two dates, the second as the first is excused: 0 where it precedes the reference
+    // date, the earlier one then preceding it too; QuantLib's two-date form otherwise.
+    internal double AccruedDefaultProbability(Date d1, Date d2) => d2 < ReferenceDate ? 0.0 : DefaultProbability(d1, d2);
+
     /// <summary>The probability of default between two times.</summary>
     /// <param name="t1">The initial time, which may be negative: the probability of default before the reference date
     /// is taken as null.</param>

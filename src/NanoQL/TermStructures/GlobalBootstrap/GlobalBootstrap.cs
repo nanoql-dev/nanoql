@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/globalbootstrap.hpp ql/termstructures/globalbootstrap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: AdditionalBootstrapVariables, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for S-core with SimpleQuoteVariables and its user
 
 using System.Collections.Immutable;
 using NanoQL.Numerics;
@@ -38,6 +37,19 @@ namespace NanoQL.TermStructures;
 /// takes the times and data, and prices nothing.
 /// </para>
 /// <para>
+/// The additional variables (<see cref="AdditionalVariables"/>) are optimized beside the nodes, the argument's values
+/// for the nodes first and then the variables', from their guesses (the S-core plan's CR3 (b)). The helpers that read
+/// them are built by <see cref="VariableHelpers"/> from their values: once at their guesses when the curve is built,
+/// which gives their pillars and latest relevant dates, and again at each evaluation of the cost function, as
+/// QuantLib's helpers read their quotes then. They follow the curve's helpers, in the order the function returns them:
+/// the alive ones add their pillars and their quote errors, after the curve's helpers' and before the penalties, and
+/// the instrument weights cover the curve's helpers and then these, one weight each, as QuantLib's error vector reads
+/// its instruments in their order, the variables' helpers among them. A later build whose helpers' pillars differ from
+/// the first's is refused, as QuantLib fixes the pillars when the bootstrap starts. The curve keeps the variables'
+/// values at the optimum (<see cref="BootstrapState{TTermStructure}.AdditionalVariables"/>), where QuantLib leaves them
+/// in its quotes.
+/// </para>
+/// <para>
 /// The guess is the initial-guess function's when given, which is called once per curve built and sees no data, as
 /// QuantLib's sees none on a curve with no previous state; otherwise the traits' guess for the whole curve
 /// (<see cref="IBootstrapTraits{TTermStructure}.GlobalGuess"/>) when they give one, or each node's guess in turn. The
@@ -66,6 +78,8 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
     private readonly ImmutableArray<Date> additionalDates;
     private readonly Func<IBootstrapState, EvaluationContext, Vector>? additionalPenalties;
     private readonly Func<IBootstrapState, EvaluationContext, Vector>? initialGuessFn;
+    private readonly AdditionalBootstrapVariables? additionalVariables;
+    private readonly Func<ImmutableArray<double>, EvaluationContext, ImmutableArray<IBootstrapHelper>>? variableHelpers;
 
     /// <summary>Initializes a new instance of the <see cref="GlobalBootstrap"/> struct.</summary>
     /// <param name="accuracy">
@@ -95,6 +109,12 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
     /// reference a bootstrapped member added after its own curve, or a curve that reads one, whose curve isn't set up
     /// yet.
     /// </param>
+    /// <param name="additionalVariables">The variables optimized beside the nodes, or <see langword="null"/> for
+    /// none.</param>
+    /// <param name="variableHelpers">
+    /// The helpers that read the variables, from their values and the context, after the curve's helpers; of the
+    /// curve's kind of term structure. <see langword="null"/> for none.
+    /// </param>
     /// <exception cref="ArgumentException">
     /// An additional helper is <see langword="null"/>, or an additional date is <c>default(Date)</c>.
     /// </exception>
@@ -106,7 +126,9 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
         IEnumerable<IBootstrapHelper>? additionalHelpers = null,
         IEnumerable<Date>? additionalDates = null,
         Func<IBootstrapState, EvaluationContext, Vector>? additionalPenalties = null,
-        Func<IBootstrapState, EvaluationContext, Vector>? initialGuessFn = null)
+        Func<IBootstrapState, EvaluationContext, Vector>? initialGuessFn = null,
+        AdditionalBootstrapVariables? additionalVariables = null,
+        Func<ImmutableArray<double>, EvaluationContext, ImmutableArray<IBootstrapHelper>>? variableHelpers = null)
     {
         this.accuracy = accuracy;
         this.optimizer = optimizer;
@@ -141,17 +163,29 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
 
         this.additionalPenalties = additionalPenalties;
         this.initialGuessFn = initialGuessFn;
+        this.additionalVariables = additionalVariables;
+        this.variableHelpers = variableHelpers;
     }
+
+    /// <summary>Gets the variables optimized beside the nodes, or <see langword="null"/> for none.</summary>
+    public AdditionalBootstrapVariables? AdditionalVariables => additionalVariables;
+
+    /// <summary>
+    /// Gets the function building the helpers that read the variables, from their values and the context, or
+    /// <see langword="null"/> for none.
+    /// </summary>
+    public Func<ImmutableArray<double>, EvaluationContext, ImmutableArray<IBootstrapHelper>>? VariableHelpers =>
+        variableHelpers;
 
     /// <inheritdoc/>
     /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">
-    /// The instrument weights don't match the curve's helpers in number, the curve has fewer nodes than the interpolation
-    /// requires, the guess function gives fewer values than the curve has nodes after the first, or the optimizer fails
-    /// to minimize to the required accuracy.
+    /// The instrument weights don't match the curve's helpers and the variables' helpers in number, the curve has fewer
+    /// nodes than the interpolation requires, the guess function gives fewer values than the curve has nodes after the
+    /// first, the variables moved a helper's pillar, or the optimizer fails to minimize to the required accuracy.
     /// </exception>
     /// <exception cref="InvalidCastException">
-    /// An additional helper isn't a helper of the curve's kind of term structure.
+    /// An additional helper or a variable helper isn't a helper of the curve's kind of term structure.
     /// </exception>
     public void Calculate<TTermStructure, TTraits, TInterpolator>(
         BootstrapState<TTermStructure> state, TInterpolator interpolator, EvaluationContext context)
@@ -207,6 +241,12 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
         private BootstrapHelper<TTermStructure>[] aliveInstruments = [];
         private double[] aliveInstrumentWeights = [];
 
+        // The variables' helpers, after the curve's: built at the variables' guesses when the curve is, and again at
+        // each argument; the alive ones' indices, and their pillars at the first build, which later builds must keep.
+        private BootstrapHelper<TTermStructure>[] builtVariableHelpers;
+        private int[] aliveVariableHelpers = [];
+        private Date?[] variablePillars = [];
+
         public Contributor(
             GlobalBootstrap bootstrap,
             BootstrapState<TTermStructure> state,
@@ -225,9 +265,13 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
             Optimizer = bootstrap.optimizer ?? new LevenbergMarquardt(acc, acc, acc);
             Criteria = bootstrap.endCriteria ?? new EndCriteria(1000, 10, acc, acc, acc);
 
+            // the variables' helpers at the variables' guesses, after the curve's helpers, among which QuantLib's curve
+            // holds them
+            builtVariableHelpers = BuildVariableHelpers(GuessValues());
+
             // check number of instrument weights
             ImmutableArray<double> weights = bootstrap.instrumentWeights.IsDefault ? [] : bootstrap.instrumentWeights;
-            int n = s.Instruments.Length;
+            int n = s.Instruments.Length + builtVariableHelpers.Length;
             if (!(weights.IsEmpty || weights.Length == n))
             {
                 throw new NanoQLException(
@@ -260,6 +304,19 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
                 }
             }
 
+            // and the variables' alive helpers, after the curve's
+            var aliveVariable = new List<int>();
+            for (int k = 0; k < builtVariableHelpers.Length; ++k)
+            {
+                if (Later(builtVariableHelpers[k].PillarDate, firstDate))
+                {
+                    aliveVariable.Add(k);
+                }
+            }
+
+            aliveVariableHelpers = [.. aliveVariable];
+            variablePillars = [.. builtVariableHelpers.Select(h => h.PillarDate)];
+
             // set up alive additional helpers, each re-dated for the curve's evaluation date as the curve's helpers are
             ImmutableArray<IBootstrapHelper> given = bootstrap.additionalHelpers.IsDefault ? [] : bootstrap.additionalHelpers;
             var additional = new BootstrapHelper<TTermStructure>[given.Length];
@@ -279,6 +336,11 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
             foreach (int i in alive)
             {
                 dates.Add(s.Instruments[i].PillarDate!.Value);
+            }
+
+            foreach (int k in aliveVariableHelpers)
+            {
+                dates.Add(builtVariableHelpers[k].PillarDate!.Value);
             }
 
             foreach (Date d in bootstrap.additionalDates.IsDefault ? [] : bootstrap.additionalDates)
@@ -318,6 +380,11 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
                 maxDate = Max(maxDate, s.Instruments[i].LatestRelevantDate);
             }
 
+            foreach (int k in aliveVariableHelpers)
+            {
+                maxDate = Max(maxDate, builtVariableHelpers[k].LatestRelevantDate);
+            }
+
             foreach (int i in aliveAdditional)
             {
                 maxDate = Max(maxDate, additional[i].LatestRelevantDate);
@@ -332,13 +399,20 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
 
             // setup helpers: QuantLib's check for a valid quote has no counterpart, a quote being a value
             aliveInstruments = new BootstrapHelper<TTermStructure>[alive.Count];
-            aliveInstrumentWeights = new double[alive.Count];
+            aliveInstrumentWeights = new double[alive.Count + aliveVariableHelpers.Length];
             for (int k = 0; k < alive.Count; ++k)
             {
                 int i = alive[k];
                 s.Instruments[i] = s.Bind(s.Instruments[i]);
                 aliveInstruments[k] = s.Instruments[i];
                 aliveInstrumentWeights[k] = instrumentWeights[i];
+            }
+
+            for (int k = 0; k < aliveVariableHelpers.Length; ++k)
+            {
+                int i = aliveVariableHelpers[k];
+                builtVariableHelpers[i] = s.Bind(builtVariableHelpers[i]);
+                aliveInstrumentWeights[alive.Count + k] = instrumentWeights[s.Instruments.Length + i];
             }
 
             // setup additional helpers
@@ -356,7 +430,20 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
             interpolator.CheckPoints(s.Points);
             s.Rebuild(interpolator);
 
-            return MakeInitialGuess();
+            // Initial guess. We have guesses for the curve values first (numberPillars), followed by guesses for the
+            // additional variables.
+            Vector guess = MakeInitialGuess();
+            s.AdditionalVariables = GuessValues();
+            if (bootstrap.additionalVariables is { } variables)
+            {
+                Vector additionalGuesses = variables.Initialize(false);
+                var all = new Vector(guess.Size + additionalGuesses.Size);
+                guess.AsSpan().CopyTo(all.AsSpan());
+                additionalGuesses.AsSpan().CopyTo(all.AsSpan().Slice(guess.Size));
+                guess = all;
+            }
+
+            return guess;
         }
 
         public override void SetCostFunctionArgument(ReadOnlySpan<double> x)
@@ -374,23 +461,92 @@ public readonly struct GlobalBootstrap : IBootstrap, IMultiCurveBootstrap
             }
 
             s.Rebuild(interpolator);
+
+            // the variables' values, and their helpers built on them
+            if (bootstrap.additionalVariables is { } variables)
+            {
+                ImmutableArray<double> values = variables.Values(x[(s.Times.Length - 1)..]);
+                s.AdditionalVariables = values;
+                if (bootstrap.variableHelpers is not null)
+                {
+                    BootstrapHelper<TTermStructure>[] rebuilt = BuildVariableHelpers(values);
+                    if (rebuilt.Length != variablePillars.Length)
+                    {
+                        throw new NanoQLException("the additional variables moved a pillar");
+                    }
+
+                    for (int k = 0; k < rebuilt.Length; ++k)
+                    {
+                        if (rebuilt[k].PillarDate != variablePillars[k])
+                        {
+                            throw new NanoQLException("the additional variables moved a pillar");
+                        }
+                    }
+
+                    foreach (int k in aliveVariableHelpers)
+                    {
+                        rebuilt[k] = s.Bind(rebuilt[k]);
+                    }
+
+                    builtVariableHelpers = rebuilt;
+                }
+            }
         }
 
         public override Vector EvaluateCostFunction()
         {
             Vector? additionalErrors = bootstrap.additionalPenalties?.Invoke(s, context);
             int nAdditional = additionalErrors?.Size ?? 0;
-            var result = new Vector(aliveInstruments.Length + nAdditional);
+            int nAlive = aliveInstruments.Length + aliveVariableHelpers.Length;
+            var result = new Vector(nAlive + nAdditional);
             for (int i = 0; i < aliveInstruments.Length; ++i)
             {
                 result[i] = aliveInstruments[i].QuoteError(context) * aliveInstrumentWeights[i];
             }
 
-            additionalErrors?.AsSpan().CopyTo(result.AsSpan().Slice(aliveInstruments.Length));
+            for (int k = 0; k < aliveVariableHelpers.Length; ++k)
+            {
+                int i = aliveInstruments.Length + k;
+                result[i] = builtVariableHelpers[aliveVariableHelpers[k]].QuoteError(context) * aliveInstrumentWeights[i];
+            }
+
+            additionalErrors?.AsSpan().CopyTo(result.AsSpan().Slice(nAlive));
             return result;
         }
 
         public override void SetToValid() => setToValid?.Invoke();
+
+        // The variables' values at their guesses, none without variables.
+        private ImmutableArray<double> GuessValues() =>
+            bootstrap.additionalVariables is { } variables ? variables.Values(variables.Initialize(false).AsSpan()) : [];
+
+        // The variables' helpers on their values, re-dated for the curve's evaluation date as the curve's helpers are.
+        private BootstrapHelper<TTermStructure>[] BuildVariableHelpers(ImmutableArray<double> values)
+        {
+            if (bootstrap.variableHelpers is not { } build)
+            {
+                return [];
+            }
+
+            ImmutableArray<IBootstrapHelper> given = build(values, context);
+            if (given.IsDefault)
+            {
+                return [];
+            }
+
+            var helpers = new BootstrapHelper<TTermStructure>[given.Length];
+            for (int i = 0; i < given.Length; ++i)
+            {
+                if (given[i] is null)
+                {
+                    throw new ArgumentException("null rate helper", "variableHelpers");
+                }
+
+                helpers[i] = ((BootstrapHelper<TTermStructure>)given[i]).RedatedFor(s.Context);
+            }
+
+            return helpers;
+        }
 
         // The guesses for the curve's values, every node's but the first's.
         private Vector MakeInitialGuess()

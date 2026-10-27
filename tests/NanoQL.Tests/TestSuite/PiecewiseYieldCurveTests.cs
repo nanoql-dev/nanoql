@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/piecewiseyieldcurve.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testDefaultInstantiation's ConvexMonotone curve (S-core); testConstructionWithExplicitBootstrap's LocalBootstrap curve (S-core); testConvexMonotoneForwardConsistency, testLocalBootstrapConsistency and testGlobalBootstrapVariables (S-core)
 // Replaced: testObservability (Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs)
 
+using System.Collections.Immutable;
 using NanoQL.Coupons;
 using NanoQL.Currencies;
 using NanoQL.Experimental;
@@ -13,6 +13,7 @@ using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
+using NanoQL.Quotes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 using NanoQL.Utilities;
@@ -176,6 +177,25 @@ public class PiecewiseYieldCurveTests
 
         TestCurveConsistency<ForwardRate, BackwardFlat, IterativeBootstrap>(vars);
         TestBMACurveConsistency<ForwardRate, BackwardFlat, IterativeBootstrap>(vars);
+    }
+
+    [Fact]
+    public void TestConvexMonotoneForwardConsistency()
+    {
+        // Testing consistency of convex monotone forward-rate curve...
+        var vars = new CommonVars();
+        TestCurveConsistency<ForwardRate, ConvexMonotone, IterativeBootstrap>(vars);
+
+        TestBMACurveConsistency<ForwardRate, ConvexMonotone, IterativeBootstrap>(vars);
+    }
+
+    [Fact]
+    public void TestLocalBootstrapConsistency()
+    {
+        // Testing consistency of local-bootstrap algorithm...
+        var vars = new CommonVars();
+        TestCurveConsistency<ForwardRate, ConvexMonotone, LocalBootstrap>(vars, default(ConvexMonotone), 1.0e-6);
+        TestBMACurveConsistency<ForwardRate, ConvexMonotone, LocalBootstrap>(vars, default(ConvexMonotone), 1.0e-7);
     }
 
     // Adapted: the curve's handle linked after the curve is built (line 806) becomes the index and the FRAs on the
@@ -367,7 +387,7 @@ public class PiecewiseYieldCurveTests
     // constructors bootstrap them. SplineLogCubic, a test-local subclass of LogCubic with a default constructor, is the
     // LogCubic it constructs, passed to the curve. The ForwardFlat curve (line 1093) is compiled and not invoked, as in
     // QuantLib: no iterative bootstrap can build it, since a forward-flat curve's discount at a node never reads that
-    // node's forward. The ConvexMonotone curve (line 1094) is on the partial line.
+    // node's forward.
     [Fact]
     public void TestDefaultInstantiation()
     {
@@ -395,6 +415,8 @@ public class PiecewiseYieldCurveTests
         Func<PiecewiseYieldCurve<ForwardRate, ForwardFlat, IterativeBootstrap>> forwardFlat =
             () => new(vars.Settlement, vars.Instruments, new Actual360(), vars.Context);
         Assert.NotNull(forwardFlat);
+        _ = new PiecewiseYieldCurve<ForwardRate, ConvexMonotone, IterativeBootstrap>(
+            vars.Settlement, vars.Instruments, new Actual360(), vars.Context);
     }
 
     // Adapted: the helpers built under the test runner's evaluation date, the curve's first bootstrap under
@@ -517,8 +539,8 @@ public class PiecewiseYieldCurveTests
         }
     }
 
-    // Adapted: the check that discounting doesn't throw (line 1227) becomes a check that construction, which
-    // bootstraps, doesn't throw; the LocalBootstrap curve (lines 1229-1235) is on the partial line.
+    // Adapted: the checks that discounting doesn't throw (lines 1227, 1235) become checks that construction, which
+    // bootstraps, doesn't throw.
     [Fact]
     public void TestConstructionWithExplicitBootstrap()
     {
@@ -530,6 +552,12 @@ public class PiecewiseYieldCurveTests
             vars.Settlement, vars.Instruments, new Actual360(), vars.Context, i: default(Linear), bootstrap: new IterativeBootstrap());
 
         // Check anything to show that the construction succeeded
+        _ = yts.Discount(1.0, true);
+
+        // With an explicit LocalBootstrap object
+        yts = new PiecewiseYieldCurve<ForwardRate, ConvexMonotone, LocalBootstrap>(
+            vars.Settlement, vars.Instruments, new Actual360(), vars.Context, i: default(ConvexMonotone), bootstrap: new LocalBootstrap());
+
         _ = yts.Discount(1.0, true);
     }
 
@@ -750,6 +778,86 @@ public class PiecewiseYieldCurveTests
     }
 
     // ---- the private helpers, before TestCurveConsistency ----
+
+    // Adapted: QuantLib's volatility quote, which its bootstrap optimizes and its futures helpers read through their
+    // convexity-adjustment quotes (lines 1503-1528), is the additional variable's value, from which the variable
+    // helpers build the futures at each evaluation (the S-core plan's CR3 (b)); they follow the curve's helpers, as the
+    // futures follow the deposits and swaps in QuantLib's helper vector. The penalty reads the first swap from the
+    // working state's additional helpers, the copy the bootstrap has bound to the curve (line 1530 reads the fixture's
+    // own, which QuantLib's bootstrap binds).
+    [Fact]
+    public void TestGlobalBootstrapVariables()
+    {
+        // Use fixed evaluationDate to make the test stable. It works for any date,
+        // but the tolerance varies and also depends on usingAtParCoupons().
+        var vars = new CommonVars(new Date(25, September, 2019));
+
+        // First, build the curve without futures.
+        var curve = new PiecewiseYieldCurve<Discount, LogLinear, GlobalBootstrap>(
+            vars.Settlement, vars.Instruments, new Actual365Fixed(), vars.Context, i: default(LogLinear));
+
+        // Now build the curve with futures adjusted to the same level as swaps.
+        // Remove the first swap from helpers so it does not create a pillar.
+        var helpers = new List<RateHelper>(vars.Instruments);
+        RateHelper firstSwap = helpers[vars.Deposits];
+        helpers.RemoveAt(vars.Deposits);
+
+        var euribor3m = new Euribor3M();
+        Date immDate = vars.Today;
+        var immDates = new Date[vars.ImmFuts];
+        for (int i = 0; i < vars.ImmFuts; i++)
+        {
+            immDate = IMM.NextDate(vars.Context, immDate);
+
+            // if the fixing is before today, jump forward by one future maturity
+            if (euribor3m.FixingDate(immDate) < vars.Today)
+            {
+                immDate = IMM.NextDate(vars.Context, immDate);
+            }
+
+            immDates[i] = immDate;
+        }
+
+        // We will optimize vol as an additional variable during bootstrapping.
+        double mr = 0.03;
+        ImmutableArray<IBootstrapHelper> Futures(ImmutableArray<double> vol, EvaluationContext context)
+        {
+            var futures = ImmutableArray.CreateBuilder<IBootstrapHelper>(vars.ImmFuts);
+            for (int i = 0; i < vars.ImmFuts; i++)
+            {
+                double r = vars.ImmFutPrices[i];
+                var convAdj = new FuturesConvAdjustmentQuote(euribor3m, immDates[i], r, vol[0], mr, context);
+                futures.Add(new FuturesRateHelper(r, immDates[i], euribor3m, convAdj.Value, FuturesType.IMM));
+            }
+
+            return futures.MoveToImmutable();
+        }
+
+        static Vector Penalties(IBootstrapState state, EvaluationContext context) =>
+            new(1, 1e4 * state.AdditionalHelpers[0].QuoteError(context));
+
+        var curveFutures = new PiecewiseYieldCurve<Discount, LogLinear, GlobalBootstrap>(
+            vars.Settlement,
+            helpers,
+            new Actual365Fixed(),
+            vars.Context,
+            i: default(LogLinear),
+            bootstrap: new GlobalBootstrap(
+                accuracy: 1e-12,
+                additionalHelpers: [firstSwap],
+                additionalPenalties: Penalties,
+                additionalVariables: new SimpleQuoteVariables(1, [1.0], [0.0]),
+                variableHelpers: Futures));
+
+        // Check that the pillars are not the same.
+        Assert.False(curve.Dates().SequenceEqual(curveFutures.Dates()));
+
+        // Check that all deposit and swap rates are the same in both curves.
+        foreach (RateHelper helper in vars.Instruments)
+        {
+            CheckClose(curve.Discount(helper.PillarDate!.Value), curveFutures.Discount(helper.PillarDate!.Value), 1e-6);
+        }
+    }
 
     // Adapted: the penalties read the fixture's instruments from the working state, whose additional helpers are the
     // copies the bootstrap has bound to the curve (lines 1571-1573 read the fixture's own, which QuantLib's bootstrap

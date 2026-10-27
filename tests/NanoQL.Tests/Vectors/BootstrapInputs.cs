@@ -105,6 +105,15 @@ internal static class BootstrapInputs
             InterpolationInputs.Condition(i, "rightCondition"),
             InterpolationInputs.Number(i.GetProperty("rightConditionValue")));
 
+    /// <summary>The convex-monotone factory an interpolator spec of type <c>"ConvexMonotone"</c> describes.</summary>
+    /// <param name="i">The spec.</param>
+    /// <returns>The factory.</returns>
+    public static ConvexMonotone ConvexMonotoneOf(JsonElement i) =>
+        new(
+            i.GetProperty("quadraticity").GetDouble(),
+            i.GetProperty("monotonicity").GetDouble(),
+            i.GetProperty("forcePositive").GetBoolean());
+
     /// <summary>The log-mixed-linear-cubic factory an interpolator spec of type <c>"LogMixedLinearCubic"</c> describes.</summary>
     /// <param name="i">The spec.</param>
     /// <returns>The factory.</returns>
@@ -187,6 +196,7 @@ internal static class BootstrapInputs
             "Cubic" => Build<TTraits, Cubic>(spec, CubicOf(i), helpers, context),
             "LogCubic" => Build<TTraits, LogCubic>(spec, LogCubicOf(i), helpers, context),
             "LogMixedLinearCubic" => Build<TTraits, LogMixedLinearCubic>(spec, LogMixedLinearCubicOf(i), helpers, context),
+            "ConvexMonotone" => Build<TTraits, ConvexMonotone>(spec, ConvexMonotoneOf(i), helpers, context),
             var t => throw new InvalidOperationException($"unknown interpolator {t}"),
         };
     }
@@ -241,6 +251,44 @@ internal static class BootstrapInputs
                     Of(new PiecewiseLogMixedLinearCubicDiscount(r, h, dc, x, j, jd, LogMixedLinearCubicOf(i), b)),
                 (sd, cal, dc, j, jd, b) => Of(PiecewiseLogMixedLinearCubicDiscount.Create(
                     sd, cal, h, dc, x, j, jd, LogMixedLinearCubicOf(i), b))),
+            "PiecewiseConvexMonotoneForward" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseConvexMonotoneForward(r, h, dc, x, j, jd, ConvexMonotoneOf(i), b)),
+                (sd, cal, dc, j, jd, b) =>
+                    Of(PiecewiseConvexMonotoneForward.Create(sd, cal, h, dc, x, j, jd, ConvexMonotoneOf(i), b))),
+            "PiecewiseConvexMonotoneZero" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseConvexMonotoneZero(r, h, dc, x, j, jd, ConvexMonotoneOf(i), b)),
+                (sd, cal, dc, j, jd, b) =>
+                    Of(PiecewiseConvexMonotoneZero.Create(sd, cal, h, dc, x, j, jd, ConvexMonotoneOf(i), b))),
+            "GlobalPiecewiseConvexMonotoneForward" => spec.GetProperty("form").GetString() == "referenceDate"
+                ? Of(new GlobalPiecewiseConvexMonotoneForward(
+                    new Date(spec.GetProperty("referenceDate").GetInt32()),
+                    h,
+                    CashFlowInputs.DayCounterOf(spec.GetProperty("dayCounter")),
+                    x,
+                    i: ConvexMonotoneOf(i)))
+                : Of(GlobalPiecewiseConvexMonotoneForward.Create(
+                    spec.GetProperty("settlementDays").GetInt32(),
+                    CashFlowInputs.CalendarOf(spec.GetProperty("calendar")),
+                    h,
+                    CashFlowInputs.DayCounterOf(spec.GetProperty("dayCounter")),
+                    x,
+                    i: ConvexMonotoneOf(i))),
+            "GlobalPiecewiseConvexMonotoneZero" => spec.GetProperty("form").GetString() == "referenceDate"
+                ? Of(new GlobalPiecewiseConvexMonotoneZero(
+                    new Date(spec.GetProperty("referenceDate").GetInt32()),
+                    h,
+                    CashFlowInputs.DayCounterOf(spec.GetProperty("dayCounter")),
+                    x,
+                    i: ConvexMonotoneOf(i)))
+                : Of(GlobalPiecewiseConvexMonotoneZero.Create(
+                    spec.GetProperty("settlementDays").GetInt32(),
+                    CashFlowInputs.CalendarOf(spec.GetProperty("calendar")),
+                    h,
+                    CashFlowInputs.DayCounterOf(spec.GetProperty("dayCounter")),
+                    x,
+                    i: ConvexMonotoneOf(i))),
             _ => throw new InvalidOperationException($"unknown named curve {named}"),
         };
     }
@@ -276,9 +324,10 @@ internal static class BootstrapInputs
                 : [.. jumpDatesSpec.EnumerateArray().Select(d => new Date(d.GetInt32()))]);
     }
 
-    private static Built Of<TTraits, TInterpolator>(PiecewiseYieldCurve<TTraits, TInterpolator, IterativeBootstrap> curve)
+    private static Built Of<TTraits, TInterpolator, TBootstrap>(PiecewiseYieldCurve<TTraits, TInterpolator, TBootstrap> curve)
         where TTraits : struct, IYieldTraits
-        where TInterpolator : struct, IInterpolator =>
+        where TInterpolator : struct, IInterpolator
+        where TBootstrap : struct, IBootstrap =>
         new(curve, curve.Dates(), curve.Data(), curve.Times(), curve.Nodes());
 
     private static Built Build<TTraits, TInterpolator>(

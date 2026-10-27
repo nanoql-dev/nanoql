@@ -60,6 +60,7 @@ public class PiecewiseZeroInflationCurve<TInterpolator, TBootstrap, TTraits>
     // are written by Freeze.
     private BootstrapState<ZeroInflationTermStructure>? state;
     private ImmutableArray<Date> dates;
+    private ImmutableArray<double> additionalVariables = [];
     private InterpolatedCurve<TInterpolator>? curve;
 
     /// <summary>
@@ -207,6 +208,14 @@ public class PiecewiseZeroInflationCurve<TInterpolator, TBootstrap, TTraits>
     /// <remarks>On the working state while the curve is built.</remarks>
     public ImmutableArray<double> Data() => state is { } s ? [.. s.Data] : curve!.Data();
 
+    /// <summary>
+    /// Gets the values of its global bootstrap's additional variables at the curve's optimum
+    /// (<see cref="GlobalBootstrap.AdditionalVariables"/>), which QuantLib leaves in its quotes; empty for another
+    /// bootstrap, or for one with no variables.
+    /// </summary>
+    /// <remarks>On the working state while the curve is built.</remarks>
+    public ImmutableArray<double> AdditionalVariables => state is { } s ? s.AdditionalVariables : additionalVariables;
+
     /// <inheritdoc/>
     /// <remarks>On the working state while the curve is built.</remarks>
     public ImmutableArray<KeyValuePair<Date, double>> Nodes()
@@ -282,6 +291,7 @@ public class PiecewiseZeroInflationCurve<TInterpolator, TBootstrap, TTraits>
         Bootstrap.Calculate<ZeroInflationTermStructure, TTraits, TInterpolator>(s, Interpolator, context);
         dates = [.. s.Dates];
         curve = new InterpolatedCurve<TInterpolator>([.. s.Times], [.. s.Data], Interpolator, s.Interpolation!, s.MaxDate);
+        additionalVariables = s.AdditionalVariables;
         state = null;
     }
 }

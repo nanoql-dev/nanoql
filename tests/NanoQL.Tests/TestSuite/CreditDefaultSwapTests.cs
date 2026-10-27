@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/creditdefaultswap.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCachedValue's integral-engine checks (lines 119-165), which wait for S-core's IntegralCdsEngine
 
 using NanoQL.Coupons;
 using NanoQL.Currencies;
@@ -21,7 +20,7 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class CreditDefaultSwapTests
 {
-    // Adapted: the swap is priced by calling the engine. The integral engine's checks wait (the Partial line).
+    // Adapted: the swap is priced by calling each engine.
     [Fact]
     public void TestCachedValue()
     {
@@ -71,6 +70,26 @@ public class CreditDefaultSwapTests
             Math.Abs(calculatedFairRate - fairRate) > tolerance,
             "Failed to reproduce fair rate with mid-point engine\n"
             + $"    calculated fair rate: {calculatedFairRate:G10}\n    expected fair rate:   {fairRate:G10}");
+
+        (Period Step, string Name)[] steps = [(new Period(1, TimeUnit.Days), "1 day"), (new Period(1, TimeUnit.Weeks), "1 week")];
+        foreach ((Period step, string name) in steps)
+        {
+            results = IntegralCdsEngine.Calculate(cds, context, step, probabilityCurve, recoveryRate, discountCurve);
+
+            calculatedNpv = results.NPV!.Value;
+            calculatedFairRate = results.FairSpread!.Value;
+            tolerance = 1.0e-5;
+
+            Assert.False(
+                Math.Abs(calculatedNpv - npv) > notional * tolerance * 10,
+                $"Failed to reproduce NPV with integral engine (step = {name})\n"
+                + $"    calculated NPV: {calculatedNpv:G10}\n    expected NPV:   {npv:G10}");
+
+            Assert.False(
+                Math.Abs(calculatedFairRate - fairRate) > tolerance,
+                $"Failed to reproduce fair rate with integral engine (step = {name})\n"
+                + $"    calculated fair rate: {calculatedFairRate:G10}\n    expected fair rate:   {fairRate:G10}");
+        }
     }
 
     [Fact]

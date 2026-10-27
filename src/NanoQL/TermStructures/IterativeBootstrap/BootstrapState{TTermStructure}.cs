@@ -7,6 +7,7 @@
 // Upstream: ql/termstructures/iterativebootstrap.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
+using System.Collections.Immutable;
 using NanoQL.Numerics;
 using NanoQL.Time;
 
@@ -81,6 +82,13 @@ public sealed class BootstrapState<TTermStructure> : IBootstrapState
 
     /// <summary>Gets or sets the curve's data at its nodes, as its traits read them (discount factors, rates).</summary>
     public double[] Data { get; set; } = [];
+
+    /// <summary>
+    /// Gets or sets the values of a global bootstrap's additional variables
+    /// (<see cref="GlobalBootstrap.AdditionalVariables"/>) at its last evaluation, the optimum when it returns, which
+    /// the curve keeps. Empty for another bootstrap.
+    /// </summary>
+    public ImmutableArray<double> AdditionalVariables { get; set; } = [];
 
     /// <summary>Gets or sets the interpolation the curve answers from, over its first nodes.</summary>
     public Interpolation? Interpolation { get; set; }

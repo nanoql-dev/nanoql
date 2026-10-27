@@ -108,7 +108,6 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/TermStructures/Credit/DefaultDensityStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the default density, which waits for S-xcr's curves, its only users.
 - `src/NanoQL/TermStructures/Credit/HazardRateStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-xcr's curves, its only users.
 - `src/NanoQL/TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseDefaultCurve{TTraits,TInterpolator,TBootstrap}.cs`: the constructor on a one-factor affine model, which waits for S-xcr's `AffineHazardRate` traits, the only traits whose curve takes a model.
-- `src/NanoQL/TermStructures/GlobalBootstrap/GlobalBootstrap.cs`: `AdditionalBootstrapVariables`, the variables a global bootstrap adds to its optimization (a quote the optimizer writes and a helper reads), which waits for S-core with `SimpleQuoteVariables` and its user.
 - `src/NanoQL/TermStructures/Volatility/CapFloor/CapFloorTermVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: no QuantLib class calls it.
 - `src/NanoQL/TermStructures/Volatility/EquityFX/BlackVolTermStructure/BlackVarianceTermStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead.
 - `src/NanoQL/TermStructures/Volatility/EquityFX/BlackVolTermStructure/BlackVolTermStructure.cs`: the constructor for a structure managing its own reference date, `(bdc, dc)`, not ported: its QuantLib users follow another structure, and pass its reference date to the reference-date constructor instead.
@@ -127,7 +126,6 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/AsianOptionsTests.cs`: `testVecerEngine` and `testAnalyticContinuousGeometricAveragePriceHeston`, which wait for S-xeq's `VecerEngine` and `AnalyticContinuousGeometricAveragePriceAsianHestonEngine`.
 - `tests/NanoQL.Tests/TestSuite/BarrierOptionTests.cs`: the four perturbative cases, which wait for S-xeq's `PerturbativeBarrierOptionEngine`.
 - `tests/NanoQL.Tests/TestSuite/CmsSpreadTests.cs`: `testCouponPricing`, which waits for S-xrt's `LognormalCmsSpreadPricer`.
-- `tests/NanoQL.Tests/TestSuite/CreditDefaultSwapTests.cs`: `testCachedValue`'s integral-engine checks, which wait for S-core's `IntegralCdsEngine`.
 - `tests/NanoQL.Tests/TestSuite/DistributionsTests.cs`: the Student t and stochastic-collocation cases, whose distributions aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/DoubleBarrierOptionTests.cs`: `testEuropeanHaugValues`' Suo-Wang and binomial checks, which wait for S-xeq's `SuoWangDoubleBarrierEngine` and `BinomialDoubleBarrierEngine`; `testVannaVolgaDoubleBarrierValues`, which waits for S-xeq's `VannaVolgaDoubleBarrierEngine`; and `testMonteCarloDoubleBarrierWithAnalytical`, which waits for S-xeq's `MCDoubleBarrierEngine`.
 - `tests/NanoQL.Tests/TestSuite/DoubleBinaryOptionTests.cs`: `testHaugValues`' binomial checks, which wait for S-xeq's `BinomialDoubleBarrierEngine`.
@@ -137,7 +135,6 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/ForwardOptionTests.cs`: `testHestonMCPrices` and `testHestonAnalyticalVsMCPrices`, which wait for S-xeq's analytic Heston forward engine.
 - `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testMomentBasedGaussianPolynomial` and `testGaussLaguerreCosinePolynomial`, which wait for S-core; `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/HestonModelTests.cs`: `testAllIntegrationMethods` and `testCosHestonCumulants` (S-core).
-- `tests/NanoQL.Tests/TestSuite/InstrumentsTests.cs`: `testCompositeWhenShiftingDates`, which waits for S-core's `CompositeInstrument`.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (S-core); and `testPiecewiseIntegral` (S-xrt).
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace).
 - `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice and Faure cases and the discrepancy cases, whose generators and statistics aren't ported yet.
@@ -146,7 +143,6 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/OdeTests.cs`: `testMatrixExponential` and `testMatrixExponentialOfZero`, which wait for S-core's `Expm`.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing, L-BFGS-B, differential evolution and CMA-ES cases, whose optimizers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/PiecewiseBlackVarianceSurfaceTests.cs`: `testSabrEquivalence`, which waits for S-xeq's `SABRVolTermStructure`.
-- `tests/NanoQL.Tests/TestSuite/PiecewiseYieldCurveTests.cs`: `testDefaultInstantiation`'s ConvexMonotone curve (S-core); `testConstructionWithExplicitBootstrap`'s LocalBootstrap curve (S-core); `testConvexMonotoneForwardConsistency`, `testLocalBootstrapConsistency` and `testGlobalBootstrapVariables` (S-core).
 - `tests/NanoQL.Tests/TestSuite/QuantoOptionTests.cs`: `testDoubleBarrierValues`, which waits for S-xeq's quanto double-barrier option.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position and secant cases, whose solvers aren't ported yet.
