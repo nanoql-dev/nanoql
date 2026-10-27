@@ -7,10 +7,11 @@
 // A matrix is an array of equal-length arrays of reals, a row each. A correlation is {"type": "Exponential",
 // "rateTimes", "longTermCorr", "beta", "gamma", "times"} (QuantLib's ExponentialForwardCorrelation, times empty for its
 // default) or {"type": "TimeHomogeneous", "fwdCorrelation", "rateTimes"}. A model is {"type": "FlatVol", "vols",
-// "corr", "rateTimes", "evolutionTimes", "factors", "initialRates", "displacements"}, its evolution
-// EvolutionDescription(rateTimes, evolutionTimes). A Brownian generator factory is {"type": "MT", "seed"}, {"type":
-// "Sobol", "ordering", "seed"} (QuantLib's SobolBrownianGeneratorFactory with Jaeckel's direction integers) or {"type":
-// "Burley", "ordering", "seed", "scrambleSeed"} (Burley2020SobolBrownianGeneratorFactory, Jaeckel's too).
+// "corr", "rateTimes", "evolutionTimes", "factors", "initialRates", "displacements"} or {"type": "AbcdVol", "abcd" (a,
+// b, c and d), "ks", and the rest as FlatVol's}, its evolution EvolutionDescription(rateTimes, evolutionTimes). A
+// Brownian generator factory is {"type": "MT", "seed"}, {"type": "Sobol", "ordering", "seed"} (QuantLib's
+// SobolBrownianGeneratorFactory with Jaeckel's direction integers) or {"type": "Burley", "ordering", "seed",
+// "scrambleSeed"} (Burley2020SobolBrownianGeneratorFactory, Jaeckel's too).
 
 #ifndef NANOQL_CXX_MODELS_MARKETMODELS_MARKETMODELSPEC_HPP
 #define NANOQL_CXX_MODELS_MARKETMODELS_MARKETMODELSPEC_HPP
@@ -59,7 +60,8 @@ namespace harness::marketmodels {
 
     struct ModelSpec {
         std::string type;
-        Vec vols;
+        Vec vols;  // FlatVol's volatilities, AbcdVol's ks
+        Vec abcd;
         CorrelationSpec corr;
         Vec rateTimes, evolutionTimes;
         QuantLib::Size factors = 0;

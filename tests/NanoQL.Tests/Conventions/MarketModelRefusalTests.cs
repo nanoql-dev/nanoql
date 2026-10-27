@@ -218,6 +218,61 @@ public class MarketModelRefusalTests
         Check<ArgumentOutOfRangeException>(() => e.SetConstraintType([0, 1, 3], [1, 2, 4]), "startIndexOfSwapRate", "the constrained rate must be one of the rates");
     }
 
+    [Fact]
+    public void TheModelsVariancesAndAdaptersRefusals()
+    {
+        var corr = new ExponentialForwardCorrelation(Times);
+        var evolution = new EvolutionDescription(Times);
+        double[] rates = [0.03, 0.03, 0.03], d = [0.0, 0.0, 0.0];
+        Check<ArgumentException>(() => new AbcdVol(-0.06, 0.17, 0.54, 0.17, [1.0, 1.0], corr, evolution, 3, rates, d), "ks", "mismatch between number of rates (3) and ks (2)");
+        Check<ArgumentException>(() => new AbcdVol(-0.06, 0.17, 0.54, 0.17, [1.0, 1.0, 1.0], corr, evolution, 4, rates, d), "numberOfFactors", "number of factors (4) cannot be greater than numberOfRates (3)");
+        Check<ArgumentException>(() => new AbcdVol(-0.06, 0.17, 0.54, 0.17, [1.0, 1.0, 1.0], corr, evolution, 0, rates, d), "numberOfFactors", "number of factors (0) must be greater than zero");
+
+        Check<ArgumentException>(() => new PiecewiseConstantAbcdVariance(-0.06, 0.17, 0.54, 0.17, 0, [1.0]), "rateTimes", "Rate times must contain at least two values");
+        Check<ArgumentException>(() => new PiecewiseConstantAbcdVariance(-0.06, 0.17, 0.54, 0.17, 0, []), "times", "at least one time is required");
+        Check<ArgumentOutOfRangeException>(() => new PiecewiseConstantAbcdVariance(-0.06, 0.17, 0.54, 0.17, 2, [1.0, 2.0, 3.0]), "resetIndex", "resetIndex (2) must be less than rateTimes.size()-1 (2)");
+        var variance = new PiecewiseConstantAbcdVariance(-0.06, 0.17, 0.54, 0.17, 1, [1.0, 2.0, 3.0]);
+        Check<ArgumentOutOfRangeException>(() => variance.Variance(2), "i", "invalid step index");
+        Check<ArgumentOutOfRangeException>(() => variance.TotalVolatility(-1), "i", "invalid step index");
+
+        double[] small = [0.5, 1.0, 1.5, 2.0, 2.5];
+        PiecewiseConstantAbcdVariance[] longs = [new(-0.06, 0.17, 0.54, 0.17, 0, [0.5, 1.5, 2.5]), new(-0.06, 0.17, 0.54, 0.17, 1, [0.5, 1.5, 2.5])];
+        Check<ArgumentException>(() => new VolatilityInterpolationSpecifierabcd(2, 0, longs[..1], small), "originalVariances", "size mismatch in VolatilityInterpolationSpecifierabcd");
+        PiecewiseConstantAbcdVariance[] off = [new(-0.06, 0.17, 0.54, 0.17, 0, [0.5, 1.4, 2.5]), new(-0.06, 0.17, 0.54, 0.17, 1, [0.5, 1.4, 2.5])];
+        Check<ArgumentException>(() => new VolatilityInterpolationSpecifierabcd(2, 0, off, small), "originalVariances", "rate times in variances passed in don't match small times in VolatilityInterpolationSpecifierabcd");
+        Check<ArgumentOutOfRangeException>(() => new VolatilityInterpolationSpecifierabcd(0, 0, longs, small), "period", "");
+        Check<ArgumentOutOfRangeException>(() => new VolatilityInterpolationSpecifierabcd(2, -1, longs, small), "offset", "");
+        Check<ArgumentException>(() => new VolatilityInterpolationSpecifierabcd(2, 0, [], small), "originalVariances", "at least one long rate's variance is required");
+        Check<ArgumentException>(() => new VolatilityInterpolationSpecifierabcd(2, 0, longs, []), "timesForSmallRates", "at least one short rate time is required");
+        var spec = new VolatilityInterpolationSpecifierabcd(2, 0, longs, small);
+        Check<ArgumentException>(() => spec.WithScalingFactors([1.0]), "scales", "inappropriate number of scales passed in to VolatilityInterpolationSpecifierabcd::setScalingFactors ");
+
+        var model = new FlatVol([0.2, 0.2, 0.2], corr, evolution, 3, rates, d);
+        Check<ArgumentOutOfRangeException>(() => new FwdPeriodAdapter(model, 0, 0, []), "period", "period must  be greater than zero in fwdperiodadapter");
+        Check<ArgumentException>(() => new FwdPeriodAdapter(model, 2, 2, []), "offset", "period must be greater than offset in fwdperiodadapter");
+        Check<ArgumentException>(() => new FwdPeriodAdapter(model, 2, 0, [0.01, 0.01]), "newDisplacements", "newDisplacements should be empty,1, or number of new rates in fwdperiodadapter");
+        Check<ArgumentException>(() => new FwdPeriodAdapter(model, 5, 4, []), "period", "no long forward of period 5 fits the 3 rates from offset 4 in fwdperiodadapter");
+        var skipping = new FlatVol([0.2, 0.2, 0.2], corr, new EvolutionDescription(Times, [1.0, 1.5]), 3, rates, d);
+        double[] four = [0.5, 1.0, 1.5, 2.0, 2.5];
+        var fourSkipping = new FlatVol(
+            [0.2, 0.2, 0.2, 0.2], new ExponentialForwardCorrelation(four), new EvolutionDescription(four, [1.0, 1.5, 2.0]), 4, [0.03, 0.03, 0.03, 0.03], [0.0, 0.0, 0.0, 0.0]);
+        Check<ArgumentException>(() => new FwdPeriodAdapter(fourSkipping, 2, 0, []), "largeModel", "every new rate time except last must be an evolution time in fwdperiod adapter");
+        Check<ArgumentException>(() => new FwdPeriodAdapter(skipping, 2, 0, []), "largeModel", "the short model's evolution has no time at or before the last long reset (0.5) in fwdperiodadapter");
+        Check<ArgumentOutOfRangeException>(() => new FwdPeriodAdapter(model, 2, 0, []).PseudoRoot(1), "i", "the index 1 is invalid: it must be less than number of steps (1)");
+
+        var displaced = new FlatVol([0.2, 0.2, 0.2], corr, evolution, 3, rates, [0.0, 0.01, 0.0]);
+        Check<ArgumentException>(() => new FwdToCotSwapAdapter(displaced), "fwdModel", "2nd displacement (0.01) not equal to the previous ones (0)");
+        Check<ArgumentException>(() => new CotSwapToFwdAdapter(displaced), "ctModel", "2nd displacement (0.01) not equal to the previous ones (0)");
+        Check<ArgumentException>(() => new FwdToCotSwapAdapter(skipping), "fwdModel", "skipping 1st rate time");
+        Check<ArgumentException>(() => new CotSwapToFwdAdapter(skipping), "ctModel", "skipping 1st rate time");
+        Check<ArgumentOutOfRangeException>(() => new FwdToCotSwapAdapter(model).PseudoRoot(3), "i", "the index 3 is invalid: it must be less than number of steps (3)");
+        Check<ArgumentOutOfRangeException>(() => new CotSwapToFwdAdapter(model).PseudoRoot(3), "i", "the index 3 is invalid: it must be less than number of steps (3)");
+
+        var two = new LMMCurveState([0.5, 1.0, 1.5]);
+        two.SetOnForwardRates([0.03, 0.03]);
+        Check<ArgumentException>(() => new CotSwapFromFwdCorrelation(corr, two, 0.0), "curveState", "mismatch between number of rates in fwdCorr (3) and curveState (2)");
+    }
+
     // A volatility process drawing no variates, which the SVD-DD evolver refuses (QuantLib divides by them).
     private sealed class NoVariates : MarketModelVolProcess
     {

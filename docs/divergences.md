@@ -2868,6 +2868,18 @@ Facts:
 
 - `ACustomFuturesHelperWithNoEndDateRefusesItsImpliedQuote`
 
+## FwdPeriodAdapterTests
+
+[`Divergences/FwdPeriodAdapterTests.cs`](../tests/NanoQL.Tests/Divergences/FwdPeriodAdapterTests.cs)
+
+The period adapter's default displacements (the S-mm plan's MR3 (ii), fixed under R8) and its pseudo-roots on the fixed Y matrix (MR3 (i)'s reach). With no displacements given, QuantLib's k-th long rate's is the running sum of the first (k + 1)·period short ones over the period, its `sum` never reset and its index from 0, not the offset (`fwdperiodadapter.cpp:54-64`): on twelve semi-annual rates displaced 1%, 0.01, 0.02, … 0.06 in periods of 2, and on displacements 0.1% to 1.2%, 0.0015, 0.005, 0.0105 … where the periods' means are 0.0015, 0.0035, 0.0055 … (the C++ harness's `FwdPeriodAdapter`, this run's probe; the planner's MP3). nanoql takes each period's own short displacements' mean, from the offset. And the adapter's pseudo-roots are the Y matrix times the short model's, where QuantLib's Y is MR3 (i)'s, its long forwards' variances 3 times too high on quarterly forwards in periods of 4 (the planner's MP2). Checks: equal short displacements give QuantLib's own model for that one displacement given (the one-displacement branch), bit for bit; the means; and each step's long covariance the short covariance through the long forwards' elasticities by central bumps of QuantLib's restricted state.
+
+Facts:
+
+- `EqualDisplacementsAreTheOneGiven`
+- `EachLongDisplacementIsItsPeriodsMean`
+- `TheLongCovariancesAreTheShortOnesThroughTheElasticities`
+
 ## FxResetTodaysFixingTests
 
 [`Divergences/FxResetTodaysFixingTests.cs`](../tests/NanoQL.Tests/Divergences/FxResetTodaysFixingTests.cs)
@@ -4254,7 +4266,7 @@ Facts:
 
 [`Divergences/MarketModelUndefinedReadsTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelUndefinedReadsTests.cs)
 
-The market-model framework's inputs whose QuantLib path is undefined, each refused before the undefined step (the S-mm plan's MR3 (xx), and those this run's C1 found, under the playbook's row for undefined behaviour). The refusals' types, texts and parameters are asserted by `Conventions/MarketModelRefusalTests.cs`.
+The market-model framework's inputs whose QuantLib path is undefined, each refused before the undefined step (the S-mm plan's MR3 (xx), and those this run's C1, C2 and C3 found, under the playbook's row for undefined behaviour). The refusals' types, texts and parameters are asserted by `Conventions/MarketModelRefusalTests.cs`.
 
 Facts:
 
@@ -4266,6 +4278,8 @@ Facts:
 - `TheEvolvedMatricesReadPastANarrowMatrixIsRefused`
 - `TheConversionsWritesPastTheirBuffersAreRefused`
 - `TheIndexesQuantLibsUnsignedArithmeticWrapsAreRefused`
+- `TheEvolversAndTheVolatilityProcessesReadsPastTheirStateAreRefused`
+- `TheModelsVariancesAndAdaptersReadsPastTheirInputsAreRefused`
 
 ## MarkovFunctionalOutputsTests
 
@@ -6189,6 +6203,16 @@ Facts:
 
 - `TheZeroBondJustAboveTheCutoff`
 - `TheBondOptionAtSmallReversion`
+
+## VolatilityInterpolationSpecifierOffsetTests
+
+[`Divergences/VolatilityInterpolationSpecifierOffsetTests.cs`](../tests/NanoQL.Tests/Divergences/VolatilityInterpolationSpecifierOffsetTests.cs)
+
+The abcd specifier's in-between short rates at an offset (the S-mm plan's MR3 (iii), fixed under R8). QuantLib builds the variance of the short rate in slot `i + j·period + offset` on reset index `i + j·period`, an earlier rate's (`volatilityinterpolationspecifierabcd.cpp:169-170`): in periods of 2 at offset 1 over twelve semi-annual short rates, slots 1 to 4 reset at indexes 0 to 3, each slot's variance ending a step early (the C++ harness's `VolatilityInterpolationSpecifierabcd`, this run's probe; the planner's MP3). nanoql resets each slot at its own index. Checks: each in-between slot's variance is QuantLib's own `PiecewiseConstantAbcdVariance` on the two long rates' mean abcd at that index, bit for bit; at offset 0, QuantLib's tested case, the vectors' bits.
+
+Facts:
+
+- `EachInBetweenSlotResetsAtItsOwnIndex`
 
 ## VolatilityShortSeriesTests
 

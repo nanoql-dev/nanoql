@@ -11,7 +11,8 @@ namespace NanoQL.Tests.Conventions;
 /// with and without factor reduction at full factors; the constant-maturity state and drifts spanning one forward
 /// against the LIBOR ones; the three curve states on one curve; the coterminal Jacobian against central bumps; and the
 /// Euler and iterative predictor-corrector evolvers' caplets converging to the predictor-corrector's as the steps
-/// refine (Balland's in <c>Divergences/BallandGeometricMeanTests.cs</c>).
+/// refine (Balland's in <c>Divergences/BallandGeometricMeanTests.cs</c>); the coterminal adapters' round trip; and
+/// FlatVol as the AbcdVol of a constant abcd function.
 /// </summary>
 public class MarketModelTwoRouteTests
 {
@@ -185,6 +186,60 @@ public class MarketModelTwoRouteTests
         }
 
         return [.. Enumerable.Range(0, n).Select(i => (sums[1, i] - sums[0, i]) / sums[0, i])];
+    }
+
+    [Fact]
+    public void TheCoterminalAdaptersRoundTrip()
+    {
+        double[] times = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5];
+        var model = new FlatVol(
+            [0.2, 0.21, 0.22, 0.23, 0.24, 0.25],
+            new ExponentialForwardCorrelation(times, 0.5, 0.2),
+            new EvolutionDescription(times),
+            6,
+            [0.03, 0.032, 0.034, 0.033, 0.036, 0.035],
+            [0.01, 0.01, 0.01, 0.01, 0.01, 0.01]);
+        var back = new CotSwapToFwdAdapter(new FwdToCotSwapAdapter(model));
+        for (int i = 0; i < 6; ++i)
+        {
+            Assert.Equal(model.InitialRates[i], back.InitialRates[i], 1e-15);
+        }
+
+        for (int k = 0; k < model.NumberOfSteps; ++k)
+        {
+            Matrix expected = model.Covariance(k), actual = back.Covariance(k);
+            int alive = model.Evolution.FirstAliveRate[k];
+            for (int i = alive; i < 6; ++i)
+            {
+                for (int j = alive; j < 6; ++j)
+                {
+                    Assert.Equal(expected[i, j], actual[i, j], 1e-14);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void FlatVolIsTheAbcdVolOfAConstantFunction()
+    {
+        double[] times = [0.3, 0.8, 1.0, 1.75, 2.5, 4.0, 4.6];
+        double[] vols = [0.18, 0.19, 0.2, 0.21, 0.22, 0.23];
+        var corr = new ExponentialForwardCorrelation(times, 0.5, 0.2);
+        var evolution = new EvolutionDescription(times);
+        double[] rates = [0.03, 0.031, 0.032, 0.033, 0.034, 0.035], d = new double[6];
+        var flat = new FlatVol(vols, corr, evolution, 6, rates, d);
+        var abcd = new AbcdVol(0.0, 0.0, 1.0, 1.0, vols, corr, evolution, 6, rates, d);
+        for (int k = 0; k < flat.NumberOfSteps; ++k)
+        {
+            Matrix expected = flat.Covariance(k), actual = abcd.Covariance(k);
+            for (int i = 0; i < 6; ++i)
+            {
+                for (int j = 0; j < 6; ++j)
+                {
+                    Assert.Equal(expected[i, j], actual[i, j], 1e-15);
+                }
+            }
+        }
     }
 
     private static Matrix Pseudo(int factors)

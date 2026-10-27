@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 357 | 32 |
+| not started | 348 | 32 |
 | partial | 19 | 33 |
-| ported | 884 | 115 |
+| ported | 893 | 115 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -1260,7 +1260,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `cotswapfromfwdcorrelation` | not started |  | no nanoql type: CotSwapFromFwdCorrelation |
+| `cotswapfromfwdcorrelation` | ported | Models/MarketModels/Correlations/CotSwapFromFwdCorrelation.cs |  |
 | `expcorrelations` | ported | Models/MarketModels/Correlations/ExpCorrelationsFunctions.cs, Models/MarketModels/Correlations/ExponentialForwardCorrelation.cs |  |
 | `timehomogeneousforwardcorrelation` | ported | Models/MarketModels/Correlations/TimeHomogeneousForwardCorrelation.cs |  |
 
@@ -1311,7 +1311,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `abcdvol` | not started |  | no nanoql type: AbcdVol |
+| `abcdvol` | ported | Models/MarketModels/Models/AbcdVol.cs |  |
 | `all` | not ported: include-only header |  |  |
 | `alphafinder` | not started |  | no nanoql type: AlphaFinder |
 | `alphaform` | not started |  | no nanoql type: AlphaForm |
@@ -1320,16 +1320,16 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `capletcoterminalmaxhomogeneity` | not started |  | no nanoql type: CTSMMCapletMaxHomogeneityCalibration |
 | `capletcoterminalperiodic` | not started |  |  |
 | `capletcoterminalswaptioncalibration` | not started |  | no nanoql type: CTSMMCapletOriginalCalibration |
-| `cotswaptofwdadapter` | not started |  | no nanoql type: CotSwapToFwdAdapter, CotSwapToFwdAdapterFactory |
+| `cotswaptofwdadapter` | ported | Models/MarketModels/Models/CotSwapToFwdAdapter/CotSwapToFwdAdapter.cs, Models/MarketModels/Models/CotSwapToFwdAdapter/CotSwapToFwdAdapterFactory.cs |  |
 | `ctsmmcapletcalibration` | not started |  | no nanoql type: CTSMMCapletCalibration |
 | `flatvol` | ported | Models/MarketModels/Models/FlatVol/FlatVol.cs, Models/MarketModels/Models/FlatVol/FlatVolFactory.cs, Models/MarketModels/Models/FlatVol/FlatVolFunctions.cs |  |
-| `fwdperiodadapter` | not started |  | no nanoql type: FwdPeriodAdapter |
-| `fwdtocotswapadapter` | not started |  | no nanoql type: FwdToCotSwapAdapter, FwdToCotSwapAdapterFactory |
-| `piecewiseconstantabcdvariance` | not started |  | no nanoql type: PiecewiseConstantAbcdVariance |
-| `piecewiseconstantvariance` | not started |  | no nanoql type: PiecewiseConstantVariance |
+| `fwdperiodadapter` | ported | Models/MarketModels/Models/FwdPeriodAdapter.cs |  |
+| `fwdtocotswapadapter` | ported | Models/MarketModels/Models/FwdToCotSwapAdapter/FwdToCotSwapAdapter.cs, Models/MarketModels/Models/FwdToCotSwapAdapter/FwdToCotSwapAdapterFactory.cs |  |
+| `piecewiseconstantabcdvariance` | ported | Models/MarketModels/Models/PiecewiseConstantAbcdVariance/AbcdCoefficients.cs, Models/MarketModels/Models/PiecewiseConstantAbcdVariance/PiecewiseConstantAbcdVariance.cs |  |
+| `piecewiseconstantvariance` | ported | Models/MarketModels/Models/PiecewiseConstantVariance.cs |  |
 | `pseudorootfacade` | not started |  | no nanoql type: PseudoRootFacade |
-| `volatilityinterpolationspecifier` | not started |  | no nanoql type: VolatilityInterpolationSpecifier |
-| `volatilityinterpolationspecifierabcd` | not started |  | no nanoql type: VolatilityInterpolationSpecifierabcd |
+| `volatilityinterpolationspecifier` | ported | Models/MarketModels/Models/VolatilityInterpolationSpecifier.cs |  |
+| `volatilityinterpolationspecifierabcd` | ported | Models/MarketModels/Models/VolatilityInterpolationSpecifierabcd.cs |  |
 
 ### `ql/models/marketmodels/pathwisegreeks/`
 
@@ -2169,7 +2169,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `lookbackoptions` | ported | TestSuite/LookbackOptionsTests.cs | 5 of 5 cases |
 | `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 8 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy |
 | `margrabeoption` | ported | TestSuite/MargrabeOptionTests.cs | 3 of 3 cases; moved: testEuroExchangeTwoAssets line 250 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 259 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 268 to Divergences/MargrabeGreeksQuantityTests.cs |
-| `marketmodel` | partial | TestSuite/MarketModelTests.cs | 1 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported); not yet: testOneStepForwardsAndOptionlets, testOneStepNormalForwardsAndOptionlets, testInverseFloater, testAllMultiStepProducts, testPeriodAdapter, testCallableSwapNaif, testCallableSwapLS, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas, testAbcdVolatilityIntegration, testAbcdVolatilityFit, testStochVolForwardsAndOptionlets, testDriftCalculator, testAbcdDegenerateCases, testCovariance |
+| `marketmodel` | partial | TestSuite/MarketModelTests.cs | 6 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported); not yet: testOneStepForwardsAndOptionlets, testOneStepNormalForwardsAndOptionlets, testInverseFloater, testAllMultiStepProducts, testPeriodAdapter, testCallableSwapNaif, testCallableSwapLS, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas, testStochVolForwardsAndOptionlets |
 | `marketmodel_cms` | not started |  | 1 cases |
 | `marketmodel_smm` | not started |  | 1 cases |
 | `marketmodel_smmcapletalphacalibration` | not started |  | 1 cases |

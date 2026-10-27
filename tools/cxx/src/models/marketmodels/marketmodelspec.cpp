@@ -8,6 +8,7 @@
 #include <ql/models/marketmodels/correlations/expcorrelations.hpp>
 #include <ql/models/marketmodels/correlations/timehomogeneousforwardcorrelation.hpp>
 #include <ql/models/marketmodels/evolutiondescription.hpp>
+#include <ql/models/marketmodels/models/abcdvol.hpp>
 #include <ql/models/marketmodels/models/flatvol.hpp>
 
 #include <cstdint>
@@ -137,11 +138,20 @@ namespace harness::marketmodels {
         const json::object& o = object(v, what);
         ModelSpec m;
         m.type = text(key(o, "type", what));
-        if (m.type != "FlatVol")
+        if (m.type == "FlatVol") {
+            onlyKeys(o, {"type", "vols", "corr", "rateTimes", "evolutionTimes", "factors", "initialRates",
+                         "displacements"}, what);
+            m.vols = reals(key(o, "vols", what));
+        } else if (m.type == "AbcdVol") {
+            onlyKeys(o, {"type", "abcd", "ks", "corr", "rateTimes", "evolutionTimes", "factors", "initialRates",
+                         "displacements"}, what);
+            m.abcd = reals(key(o, "abcd", what));
+            if (m.abcd.size() != 4)
+                throw InvalidParams("an AbcdVol's abcd is four reals");
+            m.vols = reals(key(o, "ks", what));
+        } else {
             throw InvalidParams("unknown model type " + m.type);
-        onlyKeys(o, {"type", "vols", "corr", "rateTimes", "evolutionTimes", "factors", "initialRates",
-                     "displacements"}, what);
-        m.vols = reals(key(o, "vols", what));
+        }
         m.corr = correlation(key(o, "corr", what));
         m.rateTimes = reals(key(o, "rateTimes", what));
         m.evolutionTimes = reals(key(o, "evolutionTimes", what));
@@ -153,6 +163,9 @@ namespace harness::marketmodels {
 
     ext::shared_ptr<MarketModel> makeModel(const ModelSpec& m) {
         EvolutionDescription evolution(m.rateTimes, m.evolutionTimes);
+        if (m.type == "AbcdVol")
+            return ext::make_shared<AbcdVol>(m.abcd[0], m.abcd[1], m.abcd[2], m.abcd[3], m.vols, makeCorrelation(m.corr),
+                                             evolution, m.factors, m.initialRates, m.displacements);
         return ext::make_shared<FlatVol>(m.vols, makeCorrelation(m.corr), evolution, m.factors, m.initialRates,
                                          m.displacements);
     }

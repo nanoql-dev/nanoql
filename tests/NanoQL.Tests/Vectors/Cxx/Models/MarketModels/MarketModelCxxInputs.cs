@@ -66,13 +66,30 @@ internal static class MarketModelCxxInputs
         null => throw new ArgumentException("a correlation spec needs a type", nameof(spec)),
     };
 
-    /// <summary>The model a spec describes, on the evolution of its rate and evolution times.</summary>
+    /// <summary>The model a spec describes, FlatVol or AbcdVol, on the evolution of its rate and evolution
+    /// times.</summary>
     /// <param name="spec">The spec.</param>
     /// <returns>The model.</returns>
     public static MarketModel ModelOf(JsonElement spec)
     {
-        Assert.Equal("FlatVol", spec.GetProperty("type").GetString());
         var evolution = new EvolutionDescription(Reals(spec.GetProperty("rateTimes")), Reals(spec.GetProperty("evolutionTimes")));
+        if (spec.GetProperty("type").GetString() == "AbcdVol")
+        {
+            double[] abcd = Reals(spec.GetProperty("abcd"));
+            return new AbcdVol(
+                abcd[0],
+                abcd[1],
+                abcd[2],
+                abcd[3],
+                Reals(spec.GetProperty("ks")),
+                CorrelationOf(spec.GetProperty("corr")),
+                evolution,
+                spec.GetProperty("factors").GetInt32(),
+                Reals(spec.GetProperty("initialRates")),
+                Reals(spec.GetProperty("displacements")));
+        }
+
+        Assert.Equal("FlatVol", spec.GetProperty("type").GetString());
         return new FlatVol(
             Reals(spec.GetProperty("vols")),
             CorrelationOf(spec.GetProperty("corr")),
