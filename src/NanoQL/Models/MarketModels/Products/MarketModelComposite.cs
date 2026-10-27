@@ -232,6 +232,11 @@ public abstract class MarketModelComposite : MarketModelMultiProduct
         return parts[i].Multiplier;
     }
 
+    /// <summary>Whether the part at an index has finished on the current path.</summary>
+    /// <param name="i">The index.</param>
+    /// <returns><see langword="true"/> where the part has finished.</returns>
+    internal bool IsPartDone(int i) => parts[i].Done;
+
     /// <summary>Refuses a composite that isn't finalized, QuantLib's check.</summary>
     /// <exception cref="NanoQLException">The composite isn't finalized.</exception>
     protected void ThrowIfNotFinalized()

@@ -584,6 +584,16 @@ Facts:
 
 - `TestZeroVolatility`
 
+## BasisSystemFunctionCountTests
+
+[`Divergences/BasisSystemFunctionCountTests.cs`](../tests/NanoQL.Tests/Divergences/BasisSystemFunctionCountTests.cs)
+
+The basis systems' function counts (the S-mmp plan's MMPR4 (xv), fixed under R8). QuantLib adjusts only the last exercise's count (`swapbasissystem.cpp:46`, `swapforwardbasissystem.cpp:53`, `:56`), so an earlier exercise in the last periods reports more functions than its own values give: on six semi-annual rates, a swap basis system exercised at 2.6 and 2.8 counts 3 and 2 where its values give 2 and 2, and a swap-forward basis system at every rate time but the last counts 10 at its fifth exercise where its values give 6 (this run's `probes\c3_facts.cpp`; the planner's MPP10). nanoql counts each exercise's functions from its own rate, as its values decide, which the node-data collection and the Longstaff-Schwartz strategy size their buffers by. Check: QuantLib's values' lengths.
+
+Facts:
+
+- `EachExercisesCountIsItsValues`
+
 ## BasketExpiryBeforeReferenceDateTests
 
 [`Divergences/BasketExpiryBeforeReferenceDateTests.cs`](../tests/NanoQL.Tests/Divergences/BasketExpiryBeforeReferenceDateTests.cs)
@@ -1127,6 +1137,27 @@ Facts:
 
 - `ACalibrationAtSmallReversionReportsTheCostOfItsParameters`
 - `AFarStartReachesTheBoundaryMinimum`
+
+## CallSpecifiedEndTests
+
+[`Divergences/CallSpecifiedEndTests.cs`](../tests/NanoQL.Tests/Divergences/CallSpecifiedEndTests.cs)
+
+The call-specified product's end (the S-mmp plan's MMPR4 (vii), option (1), ruled by the user, with Revision 4's (b)). QuantLib's ends with its underlying (`callspecifiedmultiproduct.cpp:167`), so its tested Bermudan, a call-specified product on `MultiStepNothing` done at its first step, ends at once alone and is worth its value only inside a composite that steps a finished part again: on six semi-annual rates, 8,191 Sobol paths, `testCallableSwapNaif`'s Bermudan 0.0069062 in QuantLib's composite and 0.0053606 alone (this run's `probes\c3_facts.cpp`; the planner's MPP14, MPP21). nanoql keeps QuantLib's end but on an underlying with no possible cash-flow times, which can't end it while an exercise time remains, stops stepping a finished underlying, and, once ended with its underlying, stays ended, with no call and no cash flow. Checks: QuantLib's composite values, bit for bit, alone and inside; QuantLib's callable identity.
+
+Facts:
+
+- `ABermudanOnNothingIsWorthItsValueAloneAndInside`
+- `ACallableEndedWithItsUnderlyingStaysEnded`
+
+## CallSpecifiedIdleStepTests
+
+[`Divergences/CallSpecifiedIdleStepTests.cs`](../tests/NanoQL.Tests/Divergences/CallSpecifiedIdleStepTests.cs)
+
+The call-specified product's counts at an idle step (the S-mmp plan's MMPR4 (xvi), Revision 2's O1-2, fixed under R8). At a step where neither its underlying nor its rebate steps, an exercise, strategy or rebate time off the underlying's grid, QuantLib's product writes no counts (`callspecifiedmultiproduct.cpp:144-167`, `pathwiseproductcallspecified.cpp:136-153`), and the accounting engine adds the previous step's flows again: a 2% receiver swap on six semi-annual rates callable 0.1 before each rate time and never called, 8,191 paths, QuantLib −0.061168 ± 0.00039 against the swap's exact −0.033604 (this run's `probes\c3_facts.cpp`; the planner's MPP21). nanoql zeroes every count at each step's start, as QuantLib's composites zero the parts they don't step. Checks: QuantLib's bits on schedules on the grid (QuantLib's cases, the vectors); off it, the swap's exact value.
+
+Facts:
+
+- `AnUncalledProductOffTheGridIsItsUnderlying`
 
 ## CallabilityTypeAfterSettledCallabilityTests
 
@@ -3119,6 +3150,17 @@ Facts:
 Facts:
 
 - `NoDimensionIsRefused`
+
+## GenericLSRegressionBasisSizeTests
+
+[`Divergences/GenericLSRegressionBasisSizeTests.cs`](../tests/NanoQL.Tests/Divergences/GenericLSRegressionBasisSizeTests.cs)
+
+The regression's basis size (the S-mmp plan's MMPR4 (xix), Revision 2's O1-5, fixed under R8). QuantLib takes the number of basis functions from path 0, valid or not (`genericlsregression.cpp:39`), and the node-data collection leaves an invalid path's values empty, so a path ended before an exercise, first among the paths, makes QuantLib copy every valid path's values past a one-entry buffer: a crash (the round-1 review's probe). nanoql takes the first valid path's, and refuses an exercise no path reaches with the parametric optimisation's text, "no valid paths". Check: QuantLib's regression on the same data with the invalid path moved last, bit for bit at the exercise the path misses, within the reordered sums' rounding at the one before (this run's `probes\c3_facts.cpp`; the planner's MPP22).
+
+Facts:
+
+- `AnInvalidFirstPathIsSkipped`
+- `AnExerciseNoPathReachesIsRefused`
 
 ## GeometricAsianProductRangeTests
 
@@ -6302,6 +6344,21 @@ The ultimate-forward curve's kernel at small α (the S-sr plan's SSR6 (xviii)). 
 Facts:
 
 - `ASmallAlphaGivesTheLimit`
+
+## UpperBoundEngineTests
+
+[`Divergences/UpperBoundEngineTests.cs`](../tests/NanoQL.Tests/Divergences/UpperBoundEngineTests.cs)
+
+The upper-bound engine's exercise values (the S-mmp plan's MMPR4 (vii), option (1), ruled by the user, with Revision 4's (a) and (b)). QuantLib's engine reads each exercise value at every exercise date from an `ExerciseAdapter` done at its first, relying on its composite to step a finished part again (`upperboundengine.cpp`'s warning); under the composites' ruled end that adapter stops, so nanoql's two exercise-value parts pay the exercise value at every exercise date, done at their last step. On a hedge that ends before the last exercise date (a TARN's knock-out) the decorated hedge stops with it, so nanoql treats no date after the step at which the hedge ends as an exercise date, and a call-specified product stays ended after its underlying. On six semi-annual rates, FlatVol 20%, the money-market-plus measure (this run's `probes\c3_facts.cpp`; the planner's MPP21, MPP23): QuantLib's tested callable receiver swap and a Bermudan whose nothing-underlying ends at the last step, QuantLib's values bit for bit; a callable TARN with a cash rebate growing from 1% to 6%, against the same engine on the TARN made inert after its end, where QuantLib's engine is right: QuantLib's engine on the plain TARN +0.0226 ± 0.0007 (34 standard errors), nanoql's within 4. Checks: QuantLib's engine on its tested configurations and on the inert TARN, bit for bit; the paired difference.
+
+Facts:
+
+- `OnQuantLibsTestedCallableSwapTheBoundIsQuantLibs`
+- `ABermudanOnANothingUnderlyingIsQuantLibs`
+- `OnAHedgeOfSixProductsTheBoundIsQuantLibs`
+- `ACallableTarnPairsWithItsInertTwin`
+- `OnCoterminalAndCmsEvolversTheBoundIsQuantLibs`
+- `OnANormalEvolverEveryPathsGapIsAtLeastZero`
 
 ## VannaVolgaMismatchedTimesTests
 

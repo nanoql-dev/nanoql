@@ -6,7 +6,9 @@
 #include <ql/instruments/payoffs.hpp>
 #include <ql/models/marketmodels/evolutiondescription.hpp>
 #include <ql/models/marketmodels/products/multiproductcomposite.hpp>
+#include <ql/models/marketmodels/products/multistep/callspecifiedmultiproduct.hpp>
 #include <ql/models/marketmodels/products/multistep/cashrebate.hpp>
+#include <ql/models/marketmodels/products/multistep/exerciseadapter.hpp>
 #include <ql/models/marketmodels/products/multistep/multistepforwards.hpp>
 #include <ql/models/marketmodels/products/multistep/multistepnothing.hpp>
 #include <ql/models/marketmodels/products/multistep/multistepoptionlets.hpp>
@@ -24,6 +26,7 @@
 #include <ql/models/marketmodels/products/onestep/onestepcoterminalswaps.hpp>
 #include <ql/models/marketmodels/products/onestep/onestepforwards.hpp>
 #include <ql/models/marketmodels/products/onestep/onestepoptionlets.hpp>
+#include <ql/models/marketmodels/products/pathwise/pathwiseproductcallspecified.hpp>
 #include <ql/models/marketmodels/products/pathwise/pathwiseproductcaplet.hpp>
 #include <ql/models/marketmodels/products/pathwise/pathwiseproductcashrebate.hpp>
 #include <ql/models/marketmodels/products/pathwise/pathwiseproductinversefloater.hpp>
@@ -278,6 +281,23 @@ namespace harness::marketmodels {
                 p.parts.emplace_back(product(key(part, "product", "a composite's part")),
                                      real(key(part, "multiplier", "a composite's part")));
             }
+        } else if (p.type == "CallSpecifiedMultiProduct") {
+            onlyKeys(o, {"type", "underlying", "strategy", "rebate"}, what);
+            p.underlying = std::make_shared<ProductSpec>(product(key(o, "underlying", what)));
+            p.strategy = std::make_shared<StrategySpec>(strategy(key(o, "strategy", what)));
+            const json::value& r = key(o, "rebate", what);
+            if (!r.is_null())
+                p.rebateProduct = std::make_shared<ProductSpec>(product(r));
+            std::unique_ptr<MarketModelMultiProduct> u = makeProduct(*p.underlying);
+            if (p.rebateProduct != nullptr &&
+                makeProduct(*p.rebateProduct)->numberOfProducts() != u->numberOfProducts())
+                throw InvalidParams("the rebate's products must be the underlying's");
+        } else if (p.type == "ExerciseAdapter") {
+            onlyKeys(o, {"type", "exercise", "numberOfProducts"}, what);
+            p.exercise = std::make_shared<ExerciseValueSpec>(exerciseValue(key(o, "exercise", what)));
+            p.numberOfProducts = size(key(o, "numberOfProducts", what));
+            if (p.numberOfProducts == 0)
+                throw InvalidParams("the adapter pays its first product");
         } else if (otherKeys().count(p.type) != 0) {
             readKeys(o, otherKeys().at(p.type), p, what);
             if (p.type != "MultiProductPathwiseWrapper")
@@ -359,6 +379,18 @@ namespace harness::marketmodels {
             return std::make_unique<OneStepCoterminalSwaps>(p.rateTimes, v.at("fixedAccruals"),
                                                             v.at("floatingAccruals"), v.at("paymentTimes"),
                                                             r.at("fixedRate"));
+        if (p.type == "CallSpecifiedMultiProduct") {
+            std::unique_ptr<MarketModelMultiProduct> u = makeProduct(*p.underlying);
+            std::unique_ptr<ExerciseStrategy<CurveState>> s = makeStrategy(*p.strategy);
+            if (p.rebateProduct == nullptr)
+                return std::make_unique<CallSpecifiedMultiProduct>(*u, *s);
+            std::unique_ptr<MarketModelMultiProduct> rb = makeProduct(*p.rebateProduct);
+            return std::make_unique<CallSpecifiedMultiProduct>(*u, *s, *rb);
+        }
+        if (p.type == "ExerciseAdapter") {
+            std::unique_ptr<MarketModelExerciseValue> e = makeExerciseValue(*p.exercise);
+            return std::make_unique<ExerciseAdapter>(*e, p.numberOfProducts);
+        }
         if (p.type == "MultiProductPathwiseWrapper") {
             std::unique_ptr<MarketModelPathwiseMultiProduct> inner = makePathwiseProduct(*p.inner);
             return std::make_unique<MultiProductPathwiseWrapper>(*inner);
@@ -382,6 +414,19 @@ namespace harness::marketmodels {
         const json::object& o = object(v, what);
         ProductSpec p;
         p.type = text(key(o, "type", what));
+        if (p.type == "CallSpecifiedPathwiseMultiProduct") {
+            onlyKeys(o, {"type", "underlying", "strategy", "rebate"}, what);
+            p.underlying = std::make_shared<ProductSpec>(pathwiseProduct(key(o, "underlying", what)));
+            p.strategy = std::make_shared<StrategySpec>(strategy(key(o, "strategy", what)));
+            const json::value& r = key(o, "rebate", what);
+            if (!r.is_null())
+                p.rebateProduct = std::make_shared<ProductSpec>(pathwiseProduct(r));
+            std::unique_ptr<MarketModelPathwiseMultiProduct> u = makePathwiseProduct(*p.underlying);
+            if (p.rebateProduct != nullptr &&
+                makePathwiseProduct(*p.rebateProduct)->numberOfProducts() != u->numberOfProducts())
+                throw InvalidParams("the rebate's products must be the underlying's");
+            return p;
+        }
         if (pathwiseKeys().count(p.type) == 0)
             throw InvalidParams("unknown pathwise product type " + p.type);
         readKeys(o, pathwiseKeys().at(p.type), p, what);
@@ -392,6 +437,14 @@ namespace harness::marketmodels {
     std::unique_ptr<MarketModelPathwiseMultiProduct> makePathwiseProduct(const ProductSpec& p) {
         const auto& v = p.vecs;
         const auto& r = p.reals;
+        if (p.type == "CallSpecifiedPathwiseMultiProduct") {
+            std::unique_ptr<MarketModelPathwiseMultiProduct> u = makePathwiseProduct(*p.underlying);
+            std::unique_ptr<ExerciseStrategy<CurveState>> s = makeStrategy(*p.strategy);
+            if (p.rebateProduct == nullptr)
+                return std::make_unique<CallSpecifiedPathwiseMultiProduct>(*u, *s);
+            std::unique_ptr<MarketModelPathwiseMultiProduct> rb = makePathwiseProduct(*p.rebateProduct);
+            return std::make_unique<CallSpecifiedPathwiseMultiProduct>(*u, *s, *rb);
+        }
         if (p.type == "MarketModelPathwiseMultiCaplet")
             return std::make_unique<MarketModelPathwiseMultiCaplet>(p.rateTimes, v.at("accruals"), v.at("paymentTimes"),
                                                                     v.at("strikes"));

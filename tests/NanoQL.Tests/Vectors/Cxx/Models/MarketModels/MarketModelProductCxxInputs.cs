@@ -109,6 +109,15 @@ internal static class MarketModelProductCxxInputs
                     V("rateTimes"), V("fixedAccruals"), V("floatingAccruals"), V("paymentTimes"), R("fixedRate"));
             case "MultiProductPathwiseWrapper":
                 return new MultiProductPathwiseWrapper(PathwiseProductOf(spec.GetProperty("inner")));
+            case "CallSpecifiedMultiProduct":
+                JsonElement rebate = spec.GetProperty("rebate");
+                return new CallSpecifiedMultiProduct(
+                    ProductOf(spec.GetProperty("underlying")),
+                    MarketModelCallabilityCxxInputs.StrategyOf(spec.GetProperty("strategy")),
+                    rebate.ValueKind == JsonValueKind.Null ? null : ProductOf(rebate));
+            case "ExerciseAdapter":
+                return new ExerciseAdapter(
+                    MarketModelCallabilityCxxInputs.ExerciseValueOf(spec.GetProperty("exercise")), I("numberOfProducts"));
             default:
                 MarketModelComposite c = type == "MultiProductComposite" ? new MultiProductComposite() : new SingleProductComposite();
                 foreach (JsonElement part in spec.GetProperty("parts").EnumerateArray())
@@ -130,6 +139,10 @@ internal static class MarketModelProductCxxInputs
         double R(string name) => spec.GetProperty(name).GetDouble();
         return spec.GetProperty("type").GetString() switch
         {
+            "CallSpecifiedPathwiseMultiProduct" => new CallSpecifiedPathwiseMultiProduct(
+                PathwiseProductOf(spec.GetProperty("underlying")),
+                MarketModelCallabilityCxxInputs.StrategyOf(spec.GetProperty("strategy")),
+                spec.GetProperty("rebate").ValueKind == JsonValueKind.Null ? null : PathwiseProductOf(spec.GetProperty("rebate"))),
             "MarketModelPathwiseMultiCaplet" =>
                 new MarketModelPathwiseMultiCaplet(V("rateTimes"), V("accruals"), V("paymentTimes"), V("strikes")),
             "MarketModelPathwiseMultiDeflatedCaplet" => spec.TryGetProperty("strikes", out _)

@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Immutable;
 using NanoQL.Instruments;
+using NanoQL.Methods;
 using NanoQL.Models;
 using NanoQL.Numerics;
 
@@ -13,7 +15,8 @@ namespace NanoQL.Tests.Conventions;
 /// numeraire and the accumulation into the statistics) allocates nothing, on the framework's products in a
 /// multi-product composite and in a single-product composite, in the terminal and the money-market measures; and on
 /// every product family: the multi-step swaps, options and structured products, the one-step products, and the
-/// pathwise products through the wrapper.
+/// pathwise products through the wrapper; and the call-specified product with each strategy, the swap-rate trigger,
+/// the Longstaff-Schwartz strategy and the parametric exercise adapter.
 /// </summary>
 public class MarketModelProductAllocationTests
 {
@@ -26,6 +29,9 @@ public class MarketModelProductAllocationTests
     [InlineData("multiStep", "terminal")]
     [InlineData("oneStep", "terminal")]
     [InlineData("pathwise", "moneyMarket")]
+    [InlineData("callTrigger", "moneyMarket")]
+    [InlineData("callLongstaffSchwartz", "moneyMarket")]
+    [InlineData("callAdapter", "terminal")]
     public void AnAccountingEnginePathAllocatesNothing(string composite, string measure) =>
         AllocationAssert.AllocatesNothing(
             () =>
@@ -49,6 +55,11 @@ public class MarketModelProductAllocationTests
                 break;
             case "pathwise":
                 AddPathwise(composite);
+                break;
+            case "callTrigger":
+            case "callLongstaffSchwartz":
+            case "callAdapter":
+                AddCallable(composite, kind, measure);
                 break;
             default:
                 AddFramework(composite);
@@ -123,6 +134,41 @@ public class MarketModelProductAllocationTests
         {
             composite.Add(new MultiProductPathwiseWrapper(p));
         }
+    }
+
+    private static void AddCallable(MarketModelComposite composite, string kind, string measure)
+    {
+        double[] rt = Market.RateTimes, exercises = rt[..^1];
+        var receiver = new MultiStepSwap(rt, Market.Accruals, Market.Accruals, Market.PaymentTimes, 0.032, false);
+        var nullValue = new NothingExerciseValue(rt);
+        ExerciseStrategy<CurveState> strategy;
+        if (kind == "callTrigger")
+        {
+            strategy = new SwapRateTrigger(rt, [.. Enumerable.Repeat(0.032, 6)], exercises);
+        }
+        else if (kind == "callLongstaffSchwartz")
+        {
+            var basis = new SwapBasisSystem(rt, exercises);
+            EvolutionDescription evolution = receiver.Evolution;
+            int[] numeraires = measure == "terminal"
+                ? [.. EvolutionDescriptionFunctions.TerminalMeasure(evolution)]
+                : [.. EvolutionDescriptionFunctions.MoneyMarketMeasure(evolution)];
+            NodeData[][] data = CollectNodeDataFunctions.CollectNodeData(
+                new LogNormalFwdRatePc(Market.FlatVol(evolution, 3), new MTBrownianGeneratorFactory(7), numeraires),
+                receiver, basis, nullValue, new NothingExerciseValue(rt), 64);
+            strategy = new LongstaffSchwartzExerciseStrategy(
+                basis, GenericLSRegressionFunctions.GenericLongstaffSchwartzRegression(data).BasisCoefficients, evolution,
+                numeraires, nullValue, nullValue);
+        }
+        else
+        {
+            strategy = new ParametricExerciseAdapter(
+                new TriggeredSwapExercise(rt, exercises, [.. Enumerable.Repeat(0.032, 6)]),
+                [.. Enumerable.Repeat(ImmutableArray.Create(0.032), 6)]);
+        }
+
+        composite.Add(new CallSpecifiedMultiProduct(receiver, strategy, new ExerciseAdapter(nullValue)));
+        composite.Add(new CallSpecifiedMultiProduct(new MultiStepNothing(receiver.Evolution), strategy, receiver));
     }
 
     private static Payoff[] Calls() => [.. Market.Forwards.Select(f => (Payoff)new PlainVanillaPayoff(OptionType.Call, f))];

@@ -141,7 +141,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (S-core); and `testPiecewiseIntegral` (S-xrt).
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace).
 - `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice and Faure cases and the discrepancy cases, whose generators and statistics aren't ported yet.
-- `tests/NanoQL.Tests/TestSuite/MarketModelTests.cs`: the callable-swap and Greek cases, which wait for S-mmp's callability and Greeks.
+- `tests/NanoQL.Tests/TestSuite/MarketModelTests.cs`: the Greek cases, which wait for S-mmp's Greeks.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the QR and Moore-Penrose cases, whose matrix utilities aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/NthOrderDerivativeOpTests.cs`: every case but `testSparseMatrixApply`, which wait for S-core's `NthOrderDerivativeOp`.
 - `tests/NanoQL.Tests/TestSuite/OdeTests.cs`: `testMatrixExponential` and `testMatrixExponentialOfZero`, which wait for S-core's `Expm`.

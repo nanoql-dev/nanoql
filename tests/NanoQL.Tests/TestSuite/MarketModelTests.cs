@@ -8,10 +8,12 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/marketmodel.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testCallableSwapNaif, testCallableSwapLS, testCallableSwapAnderson, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas (S-mmp)
+// Partial: testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas (S-mmp)
 // Not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported)
 
+using System.Collections.Immutable;
 using NanoQL.Instruments;
+using NanoQL.Methods;
 using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
@@ -677,6 +679,266 @@ public class MarketModelTests
     }
 
     [Fact]
+    public void TestCallableSwapNaif()
+    {
+        // Pricing callable swap with naif exercise strategy in a LIBOR market model...
+        var vars = new CommonVars();
+
+        double fixedRate = 0.04;
+
+        // 0. a payer swap
+        var payerSwap = new MultiStepSwap(vars.RateTimes, vars.Accruals, vars.Accruals, vars.PaymentTimes, fixedRate, true);
+
+        // 1. the equivalent receiver swap
+        var receiverSwap = new MultiStepSwap(vars.RateTimes, vars.Accruals, vars.Accruals, vars.PaymentTimes, fixedRate, false);
+
+        // exercise schedule
+        double[] exerciseTimes = vars.RateTimes[..^1];
+
+        // naif exercise strategy
+        double[] swapTriggers = [.. Enumerable.Repeat(fixedRate, exerciseTimes.Length)];
+        var naifStrategy = new SwapRateTrigger(vars.RateTimes, swapTriggers, exerciseTimes);
+
+        // Longstaff-Schwartz exercise strategy
+        var nullRebate = new NothingExerciseValue(vars.RateTimes);
+
+        var dummyProduct = new CallSpecifiedMultiProduct(receiverSwap, naifStrategy, new ExerciseAdapter(nullRebate));
+
+        EvolutionDescription evolution = dummyProduct.Evolution;
+
+        string[] marketModels = ["ExponentialCorrelationFlatVolatility", "ExponentialCorrelationAbcdVolatility"];
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [4, vars.TodaysForwards.Length];
+            foreach (int factors in testedFactors)
+            {
+                MeasureType[] measures = [MeasureType.MoneyMarketPlus];
+                foreach (MeasureType measure in measures)
+                {
+                    int[] numeraires = vars.MakeMeasure(dummyProduct, measure);
+
+                    bool logNormal = true;
+                    MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                    EvolverType[] evolvers = [EvolverType.Pc, EvolverType.Balland, EvolverType.Ipc];
+                    int stop = EvolutionDescriptionFunctions.IsInTerminalMeasure(evolution, numeraires) ? 0 : 1;
+                    for (int i = 0; i < evolvers.Length - stop; i++)
+                    {
+                        for (int n = 0; n < 1; n++)
+                        {
+                            var generatorFactory = new SobolBrownianGeneratorFactory(
+                                SobolBrownianGeneratorBaseOrdering.Diagonal, CommonVars.Seed);
+
+                            MarketModelEvolver evolver =
+                                CommonVars.MakeMarketModelEvolver(marketModel, numeraires, generatorFactory, evolvers[i]);
+                            string config = $"{j}, {factors} factors, {measure}, {evolvers[i]}, MT BGF";
+
+                            // use the naif strategy
+
+                            // 2. bermudan swaption to enter into the payer swap
+                            var bermudanProduct = new CallSpecifiedMultiProduct(new MultiStepNothing(evolution), naifStrategy, payerSwap);
+
+                            // 3. callable receiver swap
+                            var callableProduct = new CallSpecifiedMultiProduct(receiverSwap, naifStrategy, new ExerciseAdapter(nullRebate));
+
+                            // lower bound: evolve all 4 products togheter
+                            SequenceStatisticsInc stats = vars.Simulate(
+                                evolver, CommonVars.AllProducts(payerSwap, receiverSwap, bermudanProduct, callableProduct));
+                            CommonVars.CheckCallableSwap(stats, config);
+
+                            // upper bound
+                            vars.UpperBound(
+                                marketModel, numeraires, evolvers[i], evolution, receiverSwap, nullRebate, naifStrategy);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestCallableSwapLS()
+    {
+        // Pricing callable swap with Longstaff-Schwartz exercise strategy in a LIBOR market model...
+        var vars = new CommonVars();
+
+        double fixedRate = 0.04;
+
+        // 0. a payer swap
+        var payerSwap = new MultiStepSwap(vars.RateTimes, vars.Accruals, vars.Accruals, vars.PaymentTimes, fixedRate, true);
+
+        // 1. the equivalent receiver swap
+        var receiverSwap = new MultiStepSwap(vars.RateTimes, vars.Accruals, vars.Accruals, vars.PaymentTimes, fixedRate, false);
+
+        // exercise schedule
+        double[] exerciseTimes = vars.RateTimes[..^1];
+
+        // naif exercise strategy
+        double[] swapTriggers = [.. Enumerable.Repeat(fixedRate, exerciseTimes.Length)];
+        var naifStrategy = new SwapRateTrigger(vars.RateTimes, swapTriggers, exerciseTimes);
+
+        // Longstaff-Schwartz exercise strategy
+        var control = new NothingExerciseValue(vars.RateTimes);
+        var basisSystem = new SwapBasisSystem(vars.RateTimes, exerciseTimes);
+        var nullRebate = new NothingExerciseValue(vars.RateTimes);
+
+        var dummyProduct = new CallSpecifiedMultiProduct(receiverSwap, naifStrategy, new ExerciseAdapter(nullRebate));
+
+        EvolutionDescription evolution = dummyProduct.Evolution;
+
+        string[] marketModels = ["ExponentialCorrelationFlatVolatility", "ExponentialCorrelationAbcdVolatility"];
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [4, vars.TodaysForwards.Length];
+            foreach (int factors in testedFactors)
+            {
+                MeasureType[] measures = [MeasureType.MoneyMarket];
+                foreach (MeasureType measure in measures)
+                {
+                    int[] numeraires = vars.MakeMeasure(dummyProduct, measure);
+
+                    bool logNormal = true;
+                    MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                    EvolverType[] evolvers = [EvolverType.Pc, EvolverType.Balland, EvolverType.Ipc];
+                    int stop = EvolutionDescriptionFunctions.IsInTerminalMeasure(evolution, numeraires) ? 0 : 1;
+                    for (int i = 0; i < evolvers.Length - stop; i++)
+                    {
+                        for (int n = 0; n < 1; n++)
+                        {
+                            var generatorFactory = new SobolBrownianGeneratorFactory(
+                                SobolBrownianGeneratorBaseOrdering.Diagonal, CommonVars.Seed);
+
+                            MarketModelEvolver evolver =
+                                CommonVars.MakeMarketModelEvolver(marketModel, numeraires, generatorFactory, evolvers[i]);
+                            string config = $"{j}, {factors} factors, {measure}, {evolvers[i]}, MT BGF";
+
+                            // calculate the exercise strategy's coefficients
+                            NodeData[][] collectedData = CollectNodeDataFunctions.CollectNodeData(
+                                evolver, receiverSwap, basisSystem, nullRebate, control, CommonVars.TrainingPaths);
+                            GenericLSRegressionResults regression =
+                                GenericLSRegressionFunctions.GenericLongstaffSchwartzRegression(collectedData);
+                            var exerciseStrategy = new LongstaffSchwartzExerciseStrategy(
+                                basisSystem, regression.BasisCoefficients, evolution, numeraires, nullRebate, control);
+
+                            // 2. bermudan swaption to enter into the payer swap
+                            var bermudanProduct = new CallSpecifiedMultiProduct(new MultiStepNothing(evolution), exerciseStrategy, payerSwap);
+
+                            // 3. callable receiver swap
+                            var callableProduct = new CallSpecifiedMultiProduct(receiverSwap, exerciseStrategy, new ExerciseAdapter(nullRebate));
+
+                            // lower bound: evolve all 4 products togheter
+                            SequenceStatisticsInc stats = vars.Simulate(
+                                evolver, CommonVars.AllProducts(payerSwap, receiverSwap, bermudanProduct, callableProduct));
+                            CommonVars.CheckCallableSwap(stats, config);
+
+                            // upper bound
+                            vars.UpperBound(
+                                marketModel, numeraires, evolvers[i], evolution, receiverSwap, nullRebate, exerciseStrategy);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // QuantLib's nested suite CallableSwapAnderson (marketmodel.cpp:1692-1874), its six slices a theory's rows; a
+    // testedFactor of 0 is every rate's.
+    [Trait("Oracle", "QuantLib")]
+    public class CallableSwapAnderson
+    {
+        [Theory]
+        [InlineData("ExponentialCorrelationFlatVolatility", 4)]
+        [InlineData("ExponentialCorrelationFlatVolatility", 8)]
+        [InlineData("ExponentialCorrelationFlatVolatility", 0)]
+        [InlineData("ExponentialCorrelationAbcdVolatility", 4)]
+        [InlineData("ExponentialCorrelationAbcdVolatility", 8)]
+        [InlineData("ExponentialCorrelationAbcdVolatility", 0)]
+        public void TestCallableSwapAnderson(string marketModelType, int sliceFactor)
+        {
+            var vars = new CommonVars();
+
+            int testedFactor = sliceFactor != 0 ? sliceFactor : vars.TodaysForwards.Length;
+
+            // Pricing callable swap with Anderson exercise strategy in a LIBOR market model for test factor
+            // <testedFactor> and model type <marketModelType>...
+            double fixedRate = 0.04;
+
+            // 0. a payer swap
+            var payerSwap = new MultiStepSwap(vars.RateTimes, vars.Accruals, vars.Accruals, vars.PaymentTimes, fixedRate, true);
+
+            // 1. the equivalent receiver swap
+            var receiverSwap = new MultiStepSwap(vars.RateTimes, vars.Accruals, vars.Accruals, vars.PaymentTimes, fixedRate, false);
+
+            // exercise schedule
+            double[] exerciseTimes = vars.RateTimes[..^1];
+
+            // naif exercise strategy
+            double[] swapTriggers = [.. Enumerable.Repeat(fixedRate, exerciseTimes.Length)];
+            var naifStrategy = new SwapRateTrigger(vars.RateTimes, swapTriggers, exerciseTimes);
+
+            // Anderson parametric exercise strategy
+            var control = new NothingExerciseValue(vars.RateTimes);
+            var nullRebate = new NothingExerciseValue(vars.RateTimes);
+            var parametricForm = new TriggeredSwapExercise(
+                vars.RateTimes, exerciseTimes, [.. Enumerable.Repeat(fixedRate, exerciseTimes.Length)]);
+
+            var dummyProduct = new CallSpecifiedMultiProduct(receiverSwap, naifStrategy, new ExerciseAdapter(nullRebate));
+
+            EvolutionDescription evolution = dummyProduct.Evolution;
+
+            int factors = testedFactor;
+
+            MeasureType[] measures = [MeasureType.Terminal];
+            foreach (MeasureType measure in measures)
+            {
+                int[] numeraires = vars.MakeMeasure(dummyProduct, measure);
+                bool logNormal = true;
+                MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, marketModelType);
+                EvolverType[] evolvers = [EvolverType.Pc, EvolverType.Balland, EvolverType.Ipc];
+                int stop = EvolutionDescriptionFunctions.IsInTerminalMeasure(evolution, numeraires) ? 0 : 1;
+                for (int i = 0; i < evolvers.Length - stop; i++)
+                {
+                    for (int n = 0; n < 1; n++)
+                    {
+                        var generatorFactory = new SobolBrownianGeneratorFactory(
+                            SobolBrownianGeneratorBaseOrdering.Diagonal, CommonVars.Seed);
+                        MarketModelEvolver evolver =
+                            CommonVars.MakeMarketModelEvolver(marketModel, numeraires, generatorFactory, evolvers[i]);
+                        string config = $"{marketModelType}, {factors} factors, {measure}, {evolvers[i]}, MT BGF";
+
+                        NodeData[][] collectedData = CollectNodeDataFunctions.CollectNodeData(
+                            evolver, receiverSwap, parametricForm, nullRebate, control, CommonVars.TrainingPaths);
+                        var om = new Simplex(0.01);
+                        var ec = new EndCriteria(1000, 100, 1e-8, 1e-16, 1e-8);
+                        int initialNumeraire = evolver.Numeraires[0];
+                        double initialNumeraireValue = vars.TodaysDiscounts[initialNumeraire];
+                        GenericEarlyExerciseOptimizationResults optimization =
+                            ParametricExerciseFunctions.GenericEarlyExerciseOptimization(collectedData, parametricForm, ec, om);
+                        _ = optimization.BiasedEstimate * initialNumeraireValue;
+                        var exerciseStrategy = new ParametricExerciseAdapter(parametricForm, optimization.Parameters.AsSpan());
+
+                        // 2. bermudan swaption to enter into the payer swap
+                        var bermudanProduct = new CallSpecifiedMultiProduct(new MultiStepNothing(evolution), exerciseStrategy, payerSwap);
+
+                        // 3. callable receiver swap
+                        var callableProduct = new CallSpecifiedMultiProduct(receiverSwap, exerciseStrategy, new ExerciseAdapter(nullRebate));
+
+                        // lower bound: evolve all 4 products togheter
+                        SequenceStatisticsInc stats = vars.Simulate(
+                            evolver, CommonVars.AllProducts(payerSwap, receiverSwap, bermudanProduct, callableProduct));
+                        CommonVars.CheckCallableSwap(stats, config);
+
+                        // upper bound
+                        vars.UpperBound(
+                            marketModel, numeraires, evolvers[i], evolution, receiverSwap, nullRebate, exerciseStrategy);
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
     public void TestStochVolForwardsAndOptionlets()
     {
         // Testing exact repricing of forwards and optionlets in a stochastic vol displaced diffusion forward rate
@@ -1209,6 +1471,93 @@ public class MarketModelTests
                     new PlainVanillaPayoff(OptionType.Call, TodaysForwards[i] + Displacement), RateTimes[i]);
 
             return trueValue * Accruals[i] * TodaysDiscounts[i + 1];
+        }
+
+        // The callable cases' four products in one composite, QuantLib's allProducts: the payer and receiver swaps, the
+        // Bermudan to enter the payer swap and the callable receiver swap.
+        public static MultiProductComposite AllProducts(
+            MarketModelMultiProduct payerSwap,
+            MarketModelMultiProduct receiverSwap,
+            MarketModelMultiProduct bermudanProduct,
+            MarketModelMultiProduct callableProduct)
+        {
+            var allProducts = new MultiProductComposite();
+            allProducts.Add(payerSwap);
+            allProducts.Add(receiverSwap);
+            allProducts.Add(bermudanProduct);
+            allProducts.Add(callableProduct);
+            allProducts.FinalizeComposite();
+            return allProducts;
+        }
+
+        // QuantLib's checkCallableSwap (marketmodel.cpp:654-697): the payer and receiver swaps opposite, the Bermudan
+        // not negative, the callable receiver worth at least the receiver, and the receiver plus the Bermudan the
+        // callable, within 1.1e-15.
+        public static void CheckCallableSwap(SequenceStatisticsInc stats, string config)
+        {
+            ImmutableArray<double> mean = stats.Mean();
+            double payerNPV = mean[0];
+            double receiverNPV = mean[1];
+            double bermudanNPV = mean[2];
+            double callableNPV = mean[3];
+            const double tolerance = 1.1e-15;
+            double swapError = Math.Abs(receiverNPV + payerNPV);
+            double callableError = Math.Abs(receiverNPV + bermudanNPV - callableNPV);
+
+            Assert.True(
+                swapError <= tolerance,
+                $"{config}\nagreement between payer and receiver swap failed:\n    payer swap:    {payerNPV}\n"
+                + $"    receiver swap: {receiverNPV}\n    error:         {swapError}\n    tolerance:     {tolerance}");
+            Assert.True(bermudanNPV >= 0.0, $"{config}\nnegative bermudan option value:\n    bermudan:          {bermudanNPV}");
+            Assert.True(
+                callableNPV >= receiverNPV,
+                $"{config}\ncallable receiver less valuable than plain receiver:\n    receiver swap:     {receiverNPV}\n"
+                + $"    callable:          {callableNPV}");
+            Assert.True(
+                callableError <= tolerance,
+                $"{config}\nagreement between receiver+bermudan and callable failed:\n    receiver swap:     {receiverNPV}\n"
+                + $"    bermudan:          {bermudanNPV}\n    receiver+bermudan: {receiverNPV + bermudanNPV}\n"
+                + $"    callable:          {callableNPV}\n    error:             {callableError}\n"
+                + $"    tolerance:         {tolerance}");
+        }
+
+        // The callable cases' upper bound (marketmodel.cpp:1491-1525): Sobol outer paths on seed + 142, an inner
+        // Mersenne-twister evolver on seed + s from each exercise step s, 255 outer paths of 256 inner ones. QuantLib
+        // prints the bound and asserts nothing; the port computes it as QuantLib does (the S-mmp plan's SMD13), its
+        // facts in Divergences/UpperBoundEngineTests.cs.
+        public (double Delta, double DeltaError) UpperBound(
+            MarketModel marketModel,
+            int[] numeraires,
+            EvolverType evolverType,
+            EvolutionDescription evolution,
+            MarketModelMultiProduct receiverSwap,
+            MarketModelExerciseValue nullRebate,
+            ExerciseStrategy<CurveState> strategy)
+        {
+            var uFactory = new SobolBrownianGeneratorFactory(SobolBrownianGeneratorBaseOrdering.Diagonal, Seed + 142);
+            MarketModelEvolver evolver = MakeMarketModelEvolver(marketModel, numeraires, uFactory, evolverType);
+
+            var innerEvolvers = new List<MarketModelEvolver>();
+
+            ImmutableArray<bool> isExerciseTime =
+                UtilitiesFunctions.IsInSubset(evolution.EvolutionTimes.AsSpan(), strategy.ExerciseTimes().AsSpan());
+            for (int s = 0; s < isExerciseTime.Length; ++s)
+            {
+                if (isExerciseTime[s])
+                {
+                    var iFactory = new MTBrownianGeneratorFactory(Seed + s);
+                    innerEvolvers.Add(MakeMarketModelEvolver(marketModel, numeraires, iFactory, evolverType, s));
+                }
+            }
+
+            int initialNumeraire = evolver.Numeraires[0];
+            double initialNumeraireValue = TodaysDiscounts[initialNumeraire];
+
+            var uEngine = new UpperBoundEngine(
+                evolver, [.. innerEvolvers], receiverSwap, nullRebate, receiverSwap, nullRebate, strategy, initialNumeraireValue);
+            var uStats = new GeneralStatistics();
+            uEngine.MultiplePathValues(uStats, 255, 256);
+            return (uStats.Mean(), uStats.ErrorEstimate());
         }
 
         // QuantLib's simulate: the accounting engine on the evolver, its initial numeraire's discount the initial

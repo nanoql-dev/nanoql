@@ -23,12 +23,17 @@
 // (each [start, end]), {"type": "MarketModelPathwiseCashRebate", "rateTimes", "evolutionTimes", "paymentTimes",
 // "amounts", "numberOfProducts"}, the inverse floater and swap under their parameters' names, or
 // {"type": "MarketModelPathwiseCoterminalSwaptionsDeflated", "rateTimes", "strikes"} and its numerical twin with
-// "bumpSize". Where QuantLib reads past an input that doesn't fit its rates, the spec is refused (InvalidParams).
+// "bumpSize". The callable products are {"type": "CallSpecifiedMultiProduct", "underlying", "strategy", "rebate"}
+// (the rebate a product spec or null for QuantLib's default, the strategy callabilitySpec.hpp's), {"type":
+// "ExerciseAdapter", "exercise", "numberOfProducts"} (the exercise an exercise value) and, pathwise, {"type":
+// "CallSpecifiedPathwiseMultiProduct", "underlying", "strategy", "rebate"} (the underlying and rebate pathwise specs).
+// Where QuantLib reads past an input that doesn't fit its rates, the spec is refused (InvalidParams).
 
 #ifndef NANOQL_CXX_MODELS_MARKETMODELS_PRODUCTS_PRODUCTSPEC_HPP
 #define NANOQL_CXX_MODELS_MARKETMODELS_PRODUCTS_PRODUCTSPEC_HPP
 
 #include "convert.hpp"
+#include "models/marketmodels/callability/callabilityspec.hpp"
 #include "models/marketmodels/marketmodelspec.hpp"
 
 #include <ql/models/marketmodels/multiproduct.hpp>
@@ -57,6 +62,10 @@ namespace harness::marketmodels {
         std::map<std::string, std::vector<std::pair<int, QuantLib::Real>>> payoffLists;
         std::vector<std::pair<QuantLib::Size, QuantLib::Size>> startsAndEnds;
         std::shared_ptr<ProductSpec> inner;
+        // the callable products' parts
+        std::shared_ptr<ProductSpec> underlying, rebateProduct;
+        std::shared_ptr<StrategySpec> strategy;
+        std::shared_ptr<ExerciseValueSpec> exercise;
     };
     ProductSpec product(const json::value& v);
     std::unique_ptr<QuantLib::MarketModelMultiProduct> makeProduct(const ProductSpec& p);

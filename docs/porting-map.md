@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 299 | 26 |
+| not started | 278 | 26 |
 | partial | 20 | 30 |
-| ported | 941 | 124 |
+| ported | 962 | 124 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -1163,16 +1163,16 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `brownianbridge` | ported | Methods/MonteCarlo/BrownianBridge.cs |  |
 | `earlyexercisepathpricer` | ported | Methods/MonteCarlo/IEarlyExercisePathPricer{TPath,TState}.cs | no nanoql type: EarlyExerciseTraits, EarlyExercisePathPricer |
-| `exercisestrategy` | not started |  | no nanoql type: ExerciseStrategy |
-| `genericlsregression` | not started |  |  |
+| `exercisestrategy` | ported | Methods/MonteCarlo/ExerciseStrategy{TState}.cs |  |
+| `genericlsregression` | ported | Methods/MonteCarlo/GenericLSRegressionFunctions.cs, Methods/MonteCarlo/GenericLSRegressionResults.cs |  |
 | `longstaffschwartzpathpricer` | ported | Methods/MonteCarlo/LongstaffSchwartzPathPricer{TPath,TState}.cs |  |
 | `lsmbasissystem` | ported | Methods/MonteCarlo/LsmBasisSystem.cs, Methods/MonteCarlo/LsmBasisSystemPolynomialType.cs |  |
 | `mctraits` | ported | Methods/MonteCarlo/McTraits/IMcTraits{TPath}.cs, Methods/MonteCarlo/McTraits/MultiVariate{TRng}.cs, Methods/MonteCarlo/McTraits/SingleVariate{TRng}.cs |  |
 | `montecarlomodel` | ported | Methods/MonteCarlo/IPathGenerator{TPath}.cs, Methods/MonteCarlo/MonteCarloModel{TPath,TStats}.cs |  |
 | `multipath` | ported | Methods/MonteCarlo/MultiPath.cs |  |
 | `multipathgenerator` | ported | Methods/MonteCarlo/MultiPathGenerator/GaussianMultiPathGenerator.cs, Methods/MonteCarlo/MultiPathGenerator/GaussianSobolMultiPathGenerator.cs, Methods/MonteCarlo/MultiPathGenerator/MultiPathGenerator{TGsg}.cs |  |
-| `nodedata` | not started |  | no nanoql type: NodeData |
-| `parametricexercise` | not started |  | no nanoql type: ParametricExercise |
+| `nodedata` | ported | Methods/MonteCarlo/NodeData.cs |  |
+| `parametricexercise` | ported | Methods/MonteCarlo/ParametricExercise/GenericEarlyExerciseOptimizationResults.cs, Methods/MonteCarlo/ParametricExercise/IParametricExercise.cs, Methods/MonteCarlo/ParametricExercise/ParametricExerciseFunctions.cs |  |
 | `path` | ported | Methods/MonteCarlo/MonteCarloPath.cs |  |
 | `pathgenerator` | ported | Methods/MonteCarlo/GaussianSobolPathGenerator.cs, Methods/MonteCarlo/InvCumulativeMersenneTwisterPathGenerator.cs, Methods/MonteCarlo/PathGenerator{TGsg}.cs |  |
 | `pathpricer` | ported | Methods/MonteCarlo/PathPricer{TPath}.cs |  |
@@ -1240,20 +1240,20 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `bermudanswaptionexercisevalue` | not started |  | no nanoql type: BermudanSwaptionExerciseValue |
-| `collectnodedata` | not started |  |  |
-| `exercisevalue` | not started |  | no nanoql type: MarketModelExerciseValue |
-| `lsstrategy` | not started |  | no nanoql type: LongstaffSchwartzExerciseStrategy |
-| `marketmodelbasissystem` | not started |  | no nanoql type: MarketModelBasisSystem |
-| `marketmodelparametricexercise` | not started |  | no nanoql type: MarketModelParametricExercise |
-| `nodedataprovider` | not started |  | no nanoql type: MarketModelNodeDataProvider |
-| `nothingexercisevalue` | not started |  | no nanoql type: NothingExerciseValue |
-| `parametricexerciseadapter` | not started |  | no nanoql type: ParametricExerciseAdapter |
-| `swapbasissystem` | not started |  | no nanoql type: SwapBasisSystem |
-| `swapforwardbasissystem` | not started |  | no nanoql type: SwapForwardBasisSystem |
-| `swapratetrigger` | not started |  | no nanoql type: SwapRateTrigger |
-| `triggeredswapexercise` | not started |  | no nanoql type: TriggeredSwapExercise |
-| `upperboundengine` | not started |  | no nanoql type: UpperBoundEngine |
+| `bermudanswaptionexercisevalue` | ported | Models/MarketModels/Callability/BermudanSwaptionExerciseValue.cs |  |
+| `collectnodedata` | ported | Models/MarketModels/Callability/CollectNodeDataFunctions.cs |  |
+| `exercisevalue` | ported | Models/MarketModels/Callability/MarketModelExerciseValue.cs |  |
+| `lsstrategy` | ported | Models/MarketModels/Callability/LongstaffSchwartzExerciseStrategy.cs |  |
+| `marketmodelbasissystem` | ported | Models/MarketModels/Callability/MarketModelBasisSystem.cs |  |
+| `marketmodelparametricexercise` | ported | Models/MarketModels/Callability/MarketModelParametricExercise.cs |  |
+| `nodedataprovider` | ported | Models/MarketModels/Callability/MarketModelNodeDataProvider.cs |  |
+| `nothingexercisevalue` | ported | Models/MarketModels/Callability/NothingExerciseValue.cs |  |
+| `parametricexerciseadapter` | ported | Models/MarketModels/Callability/ParametricExerciseAdapter.cs |  |
+| `swapbasissystem` | ported | Models/MarketModels/Callability/SwapBasisSystem.cs |  |
+| `swapforwardbasissystem` | ported | Models/MarketModels/Callability/SwapForwardBasisSystem.cs |  |
+| `swapratetrigger` | ported | Models/MarketModels/Callability/SwapRateTrigger.cs |  |
+| `triggeredswapexercise` | ported | Models/MarketModels/Callability/TriggeredSwapExercise.cs |  |
+| `upperboundengine` | ported | Models/MarketModels/Callability/UpperBoundEngine.cs |  |
 
 ### `ql/models/marketmodels/correlations/`
 
@@ -1357,9 +1357,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `callspecifiedmultiproduct` | not started |  | no nanoql type: CallSpecifiedMultiProduct |
+| `callspecifiedmultiproduct` | ported | Models/MarketModels/Products/MultiStep/CallSpecifiedMultiProduct.cs |  |
 | `cashrebate` | ported | Models/MarketModels/Products/MultiStep/MarketModelCashRebate.cs |  |
-| `exerciseadapter` | not started |  | no nanoql type: ExerciseAdapter |
+| `exerciseadapter` | ported | Models/MarketModels/Products/MultiStep/ExerciseAdapter.cs |  |
 | `multistepcoinitialswaps` | ported | Models/MarketModels/Products/MultiStep/MultiStepCoinitialSwaps.cs |  |
 | `multistepcoterminalswaps` | ported | Models/MarketModels/Products/MultiStep/MultiStepCoterminalSwaps.cs |  |
 | `multistepcoterminalswaptions` | ported | Models/MarketModels/Products/MultiStep/MultiStepCoterminalSwaptions.cs |  |
@@ -1389,7 +1389,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `pathwiseproductcallspecified` | not started |  | no nanoql type: CallSpecifiedPathwiseMultiProduct |
+| `pathwiseproductcallspecified` | ported | Models/MarketModels/Products/Pathwise/CallSpecifiedPathwiseMultiProduct.cs |  |
 | `pathwiseproductcaplet` | ported | Models/MarketModels/Products/Pathwise/PathwiseProductCaplet/MarketModelPathwiseMultiCaplet.cs, Models/MarketModels/Products/Pathwise/PathwiseProductCaplet/MarketModelPathwiseMultiDeflatedCap.cs, Models/MarketModels/Products/Pathwise/PathwiseProductCaplet/MarketModelPathwiseMultiDeflatedCaplet.cs, Models/MarketModels/Products/Pathwise/PathwiseProductCaplet/PathwiseCapletChecks.cs |  |
 | `pathwiseproductcashrebate` | ported | Models/MarketModels/Products/Pathwise/MarketModelPathwiseCashRebate.cs |  |
 | `pathwiseproductinversefloater` | ported | Models/MarketModels/Products/Pathwise/MarketModelPathwiseInverseFloater.cs |  |
@@ -2169,7 +2169,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `lookbackoptions` | ported | TestSuite/LookbackOptionsTests.cs | 5 of 5 cases |
 | `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 8 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy |
 | `margrabeoption` | ported | TestSuite/MargrabeOptionTests.cs | 3 of 3 cases; moved: testEuroExchangeTwoAssets line 250 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 259 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 268 to Divergences/MargrabeGreeksQuantityTests.cs |
-| `marketmodel` | partial | TestSuite/MarketModelTests.cs | 12 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported); not yet: testCallableSwapNaif, testCallableSwapLS, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas |
+| `marketmodel` | partial | TestSuite/MarketModelTests.cs | 14 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported); not yet: testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas |
 | `marketmodel_cms` | ported | TestSuite/MarketModelCmsTests.cs | 1 of 1 cases |
 | `marketmodel_smm` | ported | TestSuite/MarketModelSmmTests.cs | 1 of 1 cases |
 | `marketmodel_smmcapletalphacalibration` | ported | TestSuite/MarketModelSmmCapletAlphaCalibrationTests.cs | 1 of 1 cases |
