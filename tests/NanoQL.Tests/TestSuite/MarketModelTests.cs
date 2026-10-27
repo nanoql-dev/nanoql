@@ -8,11 +8,14 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/marketmodel.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testOneStepForwardsAndOptionlets, testOneStepNormalForwardsAndOptionlets, testInverseFloater, testAllMultiStepProducts, testPeriodAdapter, testCallableSwapNaif, testCallableSwapLS, testCallableSwapAnderson, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas, testStochVolForwardsAndOptionlets (S-mmp)
+// Partial: testOneStepForwardsAndOptionlets, testOneStepNormalForwardsAndOptionlets, testInverseFloater, testAllMultiStepProducts, testPeriodAdapter, testCallableSwapNaif, testCallableSwapLS, testCallableSwapAnderson, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas (S-mmp)
 // Not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported)
 
+using NanoQL.Instruments;
 using NanoQL.Models;
 using NanoQL.Numerics;
+using NanoQL.PricingEngines;
+using NanoQL.Processes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 using NanoQL.Utilities;
@@ -292,13 +295,133 @@ public class MarketModelTests
         }
     }
 
+    // QuantLib's MeasureType (marketmodel.cpp:362-363).
+    private enum MeasureType
+    {
+        ProductSuggested,
+        Terminal,
+        MoneyMarket,
+        MoneyMarketPlus,
+    }
+
+    [Fact]
+    public void TestStochVolForwardsAndOptionlets()
+    {
+        // Testing exact repricing of forwards and optionlets in a stochastic vol displaced diffusion forward rate
+        // market model...
+
+        var vars = new CommonVars();
+
+        double[] forwardStrikes = new double[vars.TodaysForwards.Length];
+        Payoff[] optionletPayoffs = new Payoff[vars.TodaysForwards.Length];
+        for (int i = 0; i < vars.TodaysForwards.Length; ++i)
+        {
+            forwardStrikes[i] = vars.TodaysForwards[i] + 0.01;
+            optionletPayoffs[i] = new PlainVanillaPayoff(OptionType.Call, vars.TodaysForwards[i]);
+        }
+
+        var forwards = new MultiStepForwards(vars.RateTimes, vars.Accruals, vars.PaymentTimes, forwardStrikes);
+        var optionlets = new MultiStepOptionlets(vars.RateTimes, vars.Accruals, vars.PaymentTimes, optionletPayoffs);
+
+        var product = new MultiProductComposite();
+        product.Add(forwards);
+        product.Add(optionlets);
+        product.FinalizeComposite();
+
+        EvolutionDescription evolution = product.Evolution;
+
+        string[] marketModels = ["ExponentialCorrelationFlatVolatility"];
+
+        const int firstVolatilityFactor = 2;
+        const int volatilityFactorStep = 2;
+
+        const double meanLevel = 1.0;
+        const double reversionSpeed = 1.0;
+
+        const double volVar = 1;
+        const double v0 = 1.0;
+        const int numberSubSteps = 8;
+        const double w1 = 0.5;
+        const double w2 = 0.5;
+        const double cutPoint = 1.5;
+
+        var volProcess = new SquareRootAndersen(
+            meanLevel, reversionSpeed, volVar, v0, evolution.EvolutionTimes.AsSpan(), numberSubSteps, w1, w2, cutPoint);
+
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [1, 2, vars.TodaysForwards.Length];
+            foreach (int factors in testedFactors)
+            {
+                MeasureType[] measures = [MeasureType.MoneyMarket, MeasureType.Terminal];
+
+                foreach (MeasureType measure in measures)
+                {
+                    int[] numeraires = vars.MakeMeasure(product, measure);
+
+                    MarketModel marketModel = vars.MakeMarketModel(evolution, factors, j);
+
+                    for (int n = 0; n < 1; n++)
+                    {
+                        var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+
+                        MarketModelEvolver evolver = new SVDDFwdRatePc(
+                            marketModel, generatorFactory, volProcess, firstVolatilityFactor, volatilityFactorStep,
+                            numeraires);
+
+                        SequenceStatisticsInc stats = vars.Simulate(evolver, product);
+
+                        double[] results = [.. stats.Mean()];
+                        double[] errors = [.. stats.ErrorEstimate()];
+
+                        // check forwards
+                        for (int i = 0; i < vars.Accruals.Length; ++i)
+                        {
+                            double trueValue = vars.TodaysDiscounts[i]
+                                - (vars.TodaysDiscounts[i + 1] * (1 + (forwardStrikes[i] * vars.Accruals[i])));
+                            double error = results[i] - trueValue;
+                            double errorSds = error / errors[i];
+
+                            if (Math.Abs(errorSds) > 3.5)
+                            {
+                                Assert.Fail(
+                                    $"error in sds: {errorSds} for forward {i} in SV LMM test. True value:{trueValue}, "
+                                    + $"actual value: {results[i]} , standard error {errors[i]}");
+                            }
+                        }
+
+                        for (int i = 0; i < vars.Accruals.Length; ++i)
+                        {
+                            double trueValue = vars.HestonCaplet(i, meanLevel, reversionSpeed, volVar, v0);
+                            double error = results[i + vars.Accruals.Length] - trueValue;
+
+                            // the forward's standard error, as QuantLib's (marketmodel.cpp:4450)
+                            double errorSds = error / errors[i];
+
+                            if (Math.Abs(errorSds) > 4)
+                            {
+                                Assert.Fail(
+                                    $"error in sds: {errorSds} for caplet {i} in SV LMM test. True value:{trueValue}, "
+                                    + $"actual value: {results[i + vars.Accruals.Length]} , standard error {errors[i]}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Adapted: setup()'s evaluation date (marketmodel.cpp:161), the day QuantLib's suite runs, is 15 October 2026; its
     // schedule and SimpleDayCounter give the same semi-annual times on any day but the month's last few. Only the
-    // members C3's cases read are kept, and makeMarketModel's volatility and correlation models of the legacy LIBOR
-    // model (lines 303-307), which neither of its two models reads, are left out.
+    // members the ported cases read are kept, and makeMarketModel's volatility and correlation models of the legacy
+    // LIBOR model (lines 303-307), which neither of its two models reads, are left out. The paths are QuantLib's
+    // release counts (lines 264-265), not its _DEBUG ones.
     private sealed class CommonVars
     {
         public const int MeasureOffset = 5;
+        public const long Seed = 42;
+        public const int Paths = 32767;
+        public const int TrainingPaths = 8191;
         public const double LongTermCorrelation = 0.5;
         public const double Beta = 0.2;
         public const double Displacement = 0.0;
@@ -321,17 +444,36 @@ public class MarketModelTests
                 todaysDate, endDate, new Period(Frequency.Semiannual), calendar, BusinessDayConvention.Following,
                 BusinessDayConvention.Following, DateGenerationRule.Backward, false, context);
             RateTimes = new double[dates.Size - 1];
+            PaymentTimes = new double[RateTimes.Length - 1];
+            Accruals = new double[RateTimes.Length - 1];
             var dayCounter = new SimpleDayCounter();
             for (int i = 1; i < dates.Size; ++i)
             {
                 RateTimes[i - 1] = dayCounter.YearFraction(todaysDate, dates[i]);
             }
 
+            Array.Copy(RateTimes, 1, PaymentTimes, 0, PaymentTimes.Length);
+            for (int i = 1; i < RateTimes.Length; ++i)
+            {
+                Accruals[i - 1] = RateTimes[i] - RateTimes[i - 1];
+            }
+
+            TodaysDate = todaysDate;
+            DayCounter = dayCounter;
+
             // Rates & displacement
             TodaysForwards = new double[RateTimes.Length - 1];
             for (int i = 0; i < TodaysForwards.Length; ++i)
             {
                 TodaysForwards[i] = 0.03 + (0.0010 * i);
+            }
+
+            // Discount factors
+            TodaysDiscounts = new double[RateTimes.Length];
+            TodaysDiscounts[0] = 0.95;
+            for (int i = 1; i < RateTimes.Length; ++i)
+            {
+                TodaysDiscounts[i] = TodaysDiscounts[i - 1] / (1.0 + (TodaysForwards[i - 1] * Accruals[i - 1]));
             }
 
             // Cap/Floor Volatilities
@@ -346,11 +488,95 @@ public class MarketModelTests
 
         public double[] RateTimes { get; }
 
+        public double[] PaymentTimes { get; }
+
+        public double[] Accruals { get; }
+
         public double[] TodaysForwards { get; }
+
+        public double[] TodaysDiscounts { get; }
+
+        public Date TodaysDate { get; }
+
+        public DayCounter DayCounter { get; }
 
         public double[] Volatilities { get; }
 
         public double[] BlackVols { get; }
+
+        // The test suite's flatRate(forward, dayCounter): a flat curve from the evaluation date.
+        public YieldTermStructure FlatRate(double forward) => new FlatForward(TodaysDate, forward, DayCounter);
+
+        // testStochVolForwardsAndOptionlets' true caplet value (marketmodel.cpp:4413-4440): Heston's price of the
+        // at-the-money caplet on the forward, its variance process the volatility process scaled by the forward's
+        // volatility, times its accrual and its payment's discount.
+        public double HestonCaplet(int i, double meanLevel, double reversionSpeed, double volVar, double v0)
+        {
+            double volCoeff = Volatilities[i];
+            double theta = volCoeff * volCoeff * meanLevel;
+            double kappa = reversionSpeed;
+            double sigma = volCoeff * volVar;
+            double rho = 0.0;
+            double v1 = v0 * volCoeff * volCoeff;
+
+            double trueValue = new AnalyticHestonEngine(
+                    new HestonModel(new HestonProcess(
+                        FlatRate(0.0), FlatRate(0.0), TodaysForwards[i] + Displacement, v1, kappa, theta, sigma, rho)),
+                    AnalyticHestonEngineComplexLogFormula.Gatheral,
+                    FourierIntegration.GaussLaguerre(128))
+                .PriceVanillaPayoff(
+                    new PlainVanillaPayoff(OptionType.Call, TodaysForwards[i] + Displacement), RateTimes[i]);
+
+            return trueValue * Accruals[i] * TodaysDiscounts[i + 1];
+        }
+
+        // QuantLib's simulate: the accounting engine on the evolver, its initial numeraire's discount the initial
+        // value, over the paths.
+        public SequenceStatisticsInc Simulate(MarketModelEvolver evolver, MarketModelMultiProduct product)
+        {
+            int initialNumeraire = evolver.Numeraires[0];
+            double initialNumeraireValue = TodaysDiscounts[initialNumeraire];
+
+            var engine = new AccountingEngine(evolver, product, initialNumeraireValue);
+            var stats = new SequenceStatisticsInc(product.NumberOfProducts);
+            engine.MultiplePathValues(stats, Paths);
+            return stats;
+        }
+
+        // QuantLib's makeMeasure: each measure's numeraires, checked as QuantLib checks them.
+        public int[] MakeMeasure(MarketModelMultiProduct product, MeasureType measureType)
+        {
+            int[] result;
+            EvolutionDescription evolution = product.Evolution;
+            switch (measureType)
+            {
+                case MeasureType.ProductSuggested:
+                    result = [.. product.SuggestedNumeraires()];
+                    break;
+                case MeasureType.Terminal:
+                    result = [.. EvolutionDescriptionFunctions.TerminalMeasure(evolution)];
+                    Assert.True(
+                        EvolutionDescriptionFunctions.IsInTerminalMeasure(evolution, result),
+                        $"\nfailure in verifying Terminal measure:\n{string.Join(", ", result)}");
+                    break;
+                case MeasureType.MoneyMarket:
+                    result = [.. EvolutionDescriptionFunctions.MoneyMarketMeasure(evolution)];
+                    Assert.True(
+                        EvolutionDescriptionFunctions.IsInMoneyMarketMeasure(evolution, result),
+                        $"\nfailure in verifying MoneyMarket measure:\n{string.Join(", ", result)}");
+                    break;
+                default:
+                    result = [.. EvolutionDescriptionFunctions.MoneyMarketPlusMeasure(evolution, MeasureOffset)];
+                    Assert.True(
+                        EvolutionDescriptionFunctions.IsInMoneyMarketPlusMeasure(evolution, result, MeasureOffset),
+                        $"\nfailure in verifying MoneyMarketPlus({MeasureOffset}) measure:\n"
+                        + $"{string.Join(", ", result)}");
+                    break;
+            }
+
+            EvolutionDescriptionFunctions.CheckCompatibility(evolution, result);
+            return result;
+        }
 
         // QuantLib's makeMarketModel, log-normal and unbumped, for its two exponential-correlation models.
         public MarketModel MakeMarketModel(EvolutionDescription evolution, int numberOfFactors, string marketModelType)

@@ -4299,6 +4299,41 @@ Facts:
 - `EachGammaIsItsDeltasDerivative`
 - `TheThetaIsTheValuesDecay`
 
+## MarketModelCompositeEndTests
+
+[`Divergences/MarketModelCompositeEndTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelCompositeEndTests.cs)
+
+The composites' ends (the S-mmp plan's MMPR4 (vii), option (1), ruled by the user). QuantLib's composites never record a part's end: `compositeproduct.cpp:43` resets the flag `multiproductcomposite.cpp:49` and `singleproductcomposite.cpp:46` test, which nothing sets, so a finished part steps again at each of its later times; and a composite's path ends when the parts it stepped at a step are finished, whatever the others' later times. Forwards beside a 1% rebate at 1.0, 1.5 and 2.0, which finishes at each step: QuantLib's composite pays the rebate three times, 0.0276525, where alone it pays once; forwards struck 50 bp low beside a 1% rebate at 0.75: QuantLib's composite ends the path at 0.75, its later forwards 0 (this run's `probes\c1_facts.cpp`; the planner's MPP21). nanoql's composites record each part's end, step only unfinished parts, end a path when every part is finished or at their last step, and the single composite's count is 0 at a step where no part steps (`singleproductcomposite.cpp:63` writes it only for a stepped part). Checks: QuantLib's own composite values, bit for bit, on the parts it steps the same; each forward's exact value; and the single composite's cash flows, those of the multi composite's products, bit for bit.
+
+Facts:
+
+- `AFinishedPartIsntSteppedAgain`
+- `APathEndsOnlyWhenEveryPartHasEnded`
+- `AStepWhereNoPartStepsPaysNothing`
+
+## MarketModelDifferencesTests
+
+[`Divergences/MarketModelDifferencesTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelDifferencesTests.cs)
+
+The market-model differences (the S-mmp plan's MMPR4 (xiii) and (xiv), fixed under R8). QuantLib's `rateVolDifferences` divides rate i's variance difference by the i-th evolution time (`marketmodeldifferences.cpp:50`), not the rate's reset time: FlatVol at 25% against 20% on quarterly steps over semi-annual rates gives 0.2121 for every rate where the volatilities differ by √(25%² − 20%²) = 15%, √2 too high, and reads past the evolution times where the rates outnumber the steps. Its `rateInstVolDifferences` checks the rate's index against the number of steps (`:68`): on three steps rate 4 of 6 is refused, "the index given is greater than the number of steps", and on fine steps an index past the rates reads past the covariance (this run's `probes\c1_facts.cpp`; the planner's MPP10 (g)). nanoql divides by the rate's reset time, or by the evolution's last time where that comes first, since the total covariance accrues nothing past it: on an evolution ending at 1.5 over resets to 3.0, the reset time alone gives 0.1299, 0.1162 and 0.1061 on the last three rates. It checks the index against the number of rates. Checks: FlatVol's √(σ₁² − σ₂²); QuantLib's bits where the evolution times are the rate times.
+
+Facts:
+
+- `ARatesVolatilityIsOverTheTimeItsVarianceAccrues`
+- `OnTheRateTimesTheDifferencesAreQuantLibs`
+- `ARatesIndexIsCheckedAgainstTheRates`
+
+## MarketModelDiscounterBracketTests
+
+[`Divergences/MarketModelDiscounterBracketTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelDiscounterBracketTests.cs)
+
+The discounter's bracket (the S-mmp plan's MMPR4 (ix), fixed under R8). QuantLib's `MarketModelDiscounter` takes the first rate time at or after the payment as its period's start (`discounter.cpp:31`, `lower_bound`), so a payment strictly inside a period but the last is extrapolated from the next period, against the class's own names (`before_`, `beforeWeight_`) and its weight's [0, 1] form: on forwards rising 0.5% a period, in the last bond, a payment at 1.25 is worth 1.10935174 bonds and one at 0.75 1.12738126 (this run's `probes\c1_facts.cpp`), each 1.2e-3 from its own period's log-linear interpolation, the next period's line carried back. nanoql takes the last rate time at or before the payment, clamped to the periods as QuantLib clamps. Checks: the bracketing bonds' log-linear interpolation, its weight in [0, 1]; and QuantLib's bits on a rate time, before the first and after the last, and in the last period.
+
+Facts:
+
+- `APaymentInsideAPeriodInterpolatesItsOwnPeriod`
+- `APaymentOnARateTimeOrOutsideThePeriodsIsQuantLibs`
+
 ## MarketModelTextTests
 
 [`Divergences/MarketModelTextTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelTextTests.cs)
@@ -5384,6 +5419,16 @@ Facts:
 
 - `ASimplexWithNoVariablesIsRefused`
 
+## SingleProductCompositeBufferTests
+
+[`Divergences/SingleProductCompositeBufferTests.cs`](../tests/NanoQL.Tests/Divergences/SingleProductCompositeBufferTests.cs)
+
+The single composite's buffer (the S-mmp plan's MMPR4 (viii), fixed under R8). QuantLib's `SingleProductComposite::maxNumberOfCashFlowsPerProductPerStep` sums its parts' maxima per product, ignoring their numbers of products (`singleproductcomposite.cpp:32`), so a part of several products paying at one step writes past the buffer the accounting engine sizes by it: a rebate of three products, each paying at every step, gives 1 for 3 cash flows a step (this run's `probes\c1_facts.cpp`), and the planner's coterminal swaps corrupt the heap (MPP11). nanoql counts each part's maximum times its products. Checks: the multi composite's products, summed.
+
+Facts:
+
+- `APartOfSeveralProductsFitsTheBuffer`
+
 ## SinkingNotionalsTests
 
 [`Divergences/SinkingNotionalsTests.cs`](../tests/NanoQL.Tests/Divergences/SinkingNotionalsTests.cs)
@@ -5620,6 +5665,7 @@ Facts:
 
 - `TheFirstStepHasCirsMoments`
 - `TheStochasticVolatilityCapletsAreHestonsAtAnyStartingVariance`
+- `QuantLibsTestRoutePricesHestonsCapletsAtAnyStartingVariance`
 
 ## SquareRootAndersenSmallReversionTests
 

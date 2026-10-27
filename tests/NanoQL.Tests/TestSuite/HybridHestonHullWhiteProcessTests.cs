@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/hybridhestonhullwhiteprocess.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testZeroBondPricing (S-core's Heston-Hull-White units)
 
 using System.Collections.Immutable;
 using NanoQL.Instruments;
@@ -198,6 +197,121 @@ public class HybridHestonHullWhiteProcessTests
                 }
             }
         }
+    }
+
+    [Fact]
+    public void TestZeroBondPricing()
+    {
+        // Testing Monte-Carlo zero bond pricing...
+        DayCounter dc = new Actual360();
+        Date today = Date.TodaysDate();
+
+        // construct a strange yield curve to check drifts and discounting
+        // of the joint stochastic process
+
+        var dates = new List<Date>();
+        var times = new List<double>();
+        var rates = new List<Rate>();
+
+        dates.Add(today);
+        rates.Add(0.02);
+        times.Add(0.0);
+        for (int i = 120; i < 240; ++i)
+        {
+            dates.Add(today + new Period(i, TimeUnit.Months));
+            rates.Add(0.02 + (0.0002 * Math.Exp(Math.Sin(i / 8.0))));
+            times.Add(dc.YearFraction(today, dates[^1]));
+        }
+
+        Date maturity = dates[^1] + new Period(10, TimeUnit.Years);
+        dates.Add(maturity);
+        rates.Add(0.04);
+        times.Add(dc.YearFraction(today, dates[^1]));
+
+        const Real s0 = 100;
+
+        YieldTermStructure ts = new ZeroCurve(dates, rates, dc);
+        YieldTermStructure ds = new FlatForward(today, 0.0, dc);
+
+        var hestonProcess = new HestonProcess(ts, ds, s0, 0.02, 1.0, 0.2, 0.5, -0.8);
+        HullWhiteForwardProcess hwProcess = new HullWhiteForwardProcess(ts, 0.05, 0.05)
+            .WithForwardMeasureTime(dc.YearFraction(today, maturity));
+        var hwModel = new HullWhite(ts, 0.05, 0.05);
+
+        var jointProcess = new HybridHestonHullWhiteProcess(hestonProcess, hwProcess, -0.4);
+
+        var grid = new TimeGrid(times.ToArray().AsSpan(0, times.Count - 1));
+
+        int factors = jointProcess.Factors;
+        int steps = grid.Size - 1;
+
+        // QuantLib's rsg_type(factors, steps): the diagonal ordering and seed 0 by default, a seed from the clock
+        // (S2R4), which the Sobol sequence reads only past its tabulated dimensions (sobolrsg.cpp's random
+        // initialization); these 3 factors over the grid's steps read none, so a fixed seed draws QuantLib's numbers.
+        var rsg = new SobolBrownianBridgeRsg(factors, steps, SobolBrownianGeneratorBaseOrdering.Diagonal, 42);
+        var generator = new MultiPathGenerator<SobolBrownianBridgeRsg>(jointProcess, grid, rsg, false);
+
+        const int m = 90;
+        GeneralStatistics[] zeroStat = [.. Enumerable.Range(0, m).Select(_ => new GeneralStatistics())];
+        GeneralStatistics[] optionStat = [.. Enumerable.Range(0, m).Select(_ => new GeneralStatistics())];
+
+        const int nrTrails = 8191;
+        const int optionTenor = 24;
+        const DiscountFactor strike = 0.5;
+
+        for (int i = 0; i < nrTrails; ++i)
+        {
+            MultiPath path = generator.Next().Value;
+
+            for (int j = 1; j < m; ++j)
+            {
+                double t = grid[j];            // zero end and option maturity
+                double T = grid[j + optionTenor]; // maturity of zero bond of option
+
+                var states = new Vector(3);
+                var optionStates = new Vector(3);
+                for (int k = 0; k < jointProcess.Size; ++k)
+                {
+                    states[k] = path[k][j];
+                    optionStates[k] = path[k][j + optionTenor];
+                }
+
+                DiscountFactor zeroBond = 1.0 / jointProcess.Numeraire(t, states);
+                DiscountFactor zeroOption = zeroBond * Math.Max(0.0, hwModel.DiscountBond(t, T, states[2]) - strike);
+
+                zeroStat[j].Add(zeroBond);
+                optionStat[j].Add(zeroOption);
+            }
+        }
+
+        var errors = new List<string>();
+        for (int j = 1; j < m; ++j)
+        {
+            double t = grid[j];
+            Real calculated = zeroStat[j].Mean();
+            Real expected = ts.Discount(t);
+
+            if (Math.Abs(calculated - expected) > 0.03)
+            {
+                errors.Add(
+                    $"Failed to reproduce expected zero bond prices\n   t:          {t}\n   calculated: {calculated}\n"
+                    + $"   expected:   {expected}");
+            }
+
+            double T = grid[j + optionTenor];
+
+            calculated = optionStat[j].Mean();
+            expected = hwModel.DiscountBondOption(OptionType.Call, strike, t, T);
+
+            if (Math.Abs(calculated - expected) > 0.0035)
+            {
+                errors.Add(
+                    $"Failed to reproduce expected zero bond option prices\n   t:          {t}\n   T:          {T}\n"
+                    + $"   calculated: {calculated}\n   expected:   {expected}");
+            }
+        }
+
+        Assert.Empty(errors);
     }
 
     [Fact]

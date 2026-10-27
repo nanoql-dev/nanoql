@@ -6,11 +6,12 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/stats.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSequenceStatistics, testConvergenceStatistics (S-mmp's sequence and convergence statistics)
 
+using System.Collections.Immutable;
 using System.Globalization;
 using NanoQL.Numerics;
 using static NanoQL.Numerics.ComparisonFunctions;
+using static NanoQL.Utilities.DataFormattersFunctions;
 
 namespace NanoQL.Tests.TestSuite;
 
@@ -30,6 +31,24 @@ public class StatsTests
 
         Check<IncrementalStatistics>("IncrementalStatistics");
         Check<GeneralStatistics>("Statistics");
+    }
+
+    [Fact]
+    public void TestSequenceStatistics()
+    {
+        // Testing sequence statistics...
+
+        CheckSequence<IncrementalStatistics>("IncrementalStatistics", 5);
+        CheckSequence<GeneralStatistics>("Statistics", 5);
+    }
+
+    [Fact]
+    public void TestConvergenceStatistics()
+    {
+        // Testing convergence statistics...
+
+        CheckConvergence<IncrementalStatistics>("IncrementalStatistics");
+        CheckConvergence<GeneralStatistics>("Statistics");
     }
 
     [Fact]
@@ -173,6 +192,171 @@ public class StatsTests
         if (Math.Abs(calculated - expected) > tolerance)
         {
             Assert.Fail($"{name}: wrong kurtosis\n    calculated: {calculated}\n    expected:   {expected}");
+        }
+    }
+
+    private static void CheckSequence<S>(string name, Size dimension)
+        where S : IStatistics, new()
+    {
+        var ss = new GenericSequenceStatistics<S>(dimension);
+        Size i;
+        for (i = 0; i < Data.Length; i++)
+        {
+            Real[] temp = [.. Enumerable.Repeat(Data[i], dimension)];
+            ss.Add(temp, Weights[i]);
+        }
+
+        ImmutableArray<Real> calculated;
+        Real expected, tolerance;
+
+        if (ss.Samples != Data.Length)
+        {
+            Assert.Fail(
+                $"SequenceStatistics<{name}>: wrong number of samples\n    calculated: {ss.Samples}\n    expected:   "
+                + $"{Data.Length}");
+        }
+
+        // std::accumulate, in order
+        expected = 0.0;
+        foreach (Real w in Weights)
+        {
+            expected += w;
+        }
+
+        if (ss.WeightSum() != expected)
+        {
+            Assert.Fail(
+                $"SequenceStatistics<{name}>: wrong sum of weights\n    calculated: {ss.WeightSum()}\n    expected:   "
+                + $"{expected}");
+        }
+
+        expected = Data.Min();
+        calculated = ss.Min();
+        for (i = 0; i < dimension; i++)
+        {
+            if (calculated[i] != expected)
+            {
+                Assert.Fail(
+                    $"SequenceStatistics<{name}>: {Ordinal(i + 1)} dimension: wrong minimum value\n    calculated: "
+                    + $"{calculated[i]}\n    expected:   {expected}");
+            }
+        }
+
+        expected = Data.Max();
+        calculated = ss.Max();
+        for (i = 0; i < dimension; i++)
+        {
+            if (calculated[i] != expected)
+            {
+                Assert.Fail(
+                    $"SequenceStatistics<{name}>: {Ordinal(i + 1)} dimension: wrong maximun value\n    calculated: "
+                    + $"{calculated[i]}\n    expected:   {expected}");
+            }
+        }
+
+        expected = 4.3;
+        tolerance = 1.0e-9;
+        CheckEach(name, "mean value", ss.Mean(), expected, tolerance, dimension);
+
+        expected = 2.23333333333;
+        CheckEach(name, "variance", ss.Variance(), expected, tolerance, dimension);
+
+        expected = 1.4944341181;
+        CheckEach(name, "standard deviation", ss.StandardDeviation(), expected, tolerance, dimension);
+
+        expected = 0.359543071407;
+        CheckEach(name, "skewness", ss.Skewness(), expected, tolerance, dimension);
+
+        expected = -0.151799637209;
+        CheckEach(name, "kurtosis", ss.Kurtosis(), expected, tolerance, dimension);
+    }
+
+    private static void CheckEach(
+        string name, string what, ImmutableArray<Real> calculated, Real expected, Real tolerance, Size dimension)
+    {
+        for (Size i = 0; i < dimension; i++)
+        {
+            if (Math.Abs(calculated[i] - expected) > tolerance)
+            {
+                Assert.Fail(
+                    $"SequenceStatistics<{name}>: {Ordinal(i + 1)} dimension: wrong {what}\n    calculated: "
+                    + $"{calculated[i]}\n    expected:   {expected}");
+            }
+        }
+    }
+
+    private static void CheckConvergence<S>(string name)
+        where S : IStatistics, new()
+    {
+        var stats = new ConvergenceStatistics<S, DoublingConvergenceSteps>();
+
+        stats.Add(1.0);
+        stats.Add(2.0);
+        stats.Add(3.0);
+        stats.Add(4.0);
+        stats.Add(5.0);
+        stats.Add(6.0);
+        stats.Add(7.0);
+        stats.Add(8.0);
+
+        const Size expectedSize1 = 3;
+        Size calculatedSize = stats.ConvergenceTable.Length;
+        if (calculatedSize != expectedSize1)
+        {
+            Assert.Fail(
+                $"ConvergenceStatistics<{name}>: \nwrong convergence-table size\n    calculated: {calculatedSize}\n    "
+                + $"expected:   {expectedSize1}");
+        }
+
+        const Real expectedValue1 = 4.0;
+        const Real tolerance = 1.0e-9;
+        Real calculatedValue = stats.ConvergenceTable[^1].Mean;
+        if (Math.Abs(calculatedValue - expectedValue1) > tolerance)
+        {
+            Assert.Fail(
+                $"wrong last value in convergence table\n    calculated: {calculatedValue}\n    expected:   "
+                + $"{expectedValue1}");
+        }
+
+        const Size expectedSampleSize1 = 7;
+        Size calculatedSamples = stats.ConvergenceTable[^1].Samples;
+        if (calculatedSamples != expectedSampleSize1)
+        {
+            Assert.Fail(
+                $"wrong number of samples in convergence table\n    calculated: {calculatedSamples}\n    expected:   "
+                + $"{expectedSampleSize1}");
+        }
+
+        stats.Reset();
+        stats.Add(1.0);
+        stats.Add(2.0);
+        stats.Add(3.0);
+        stats.Add(4.0);
+
+        const Size expectedSize2 = 2;
+        calculatedSize = stats.ConvergenceTable.Length;
+        if (calculatedSize != expectedSize2)
+        {
+            Assert.Fail(
+                $"wrong convergence-table size\n    calculated: {calculatedSize}\n    expected:   {expectedSize2}");
+        }
+
+        const Real expectedValue2 = 2.0;
+        calculatedValue = stats.ConvergenceTable[^1].Mean;
+        if (Math.Abs(calculatedValue - expectedValue2) > tolerance)
+        {
+            Assert.Fail(
+                $"wrong last value in convergence table\n    calculated: {calculatedValue}\n    expected:   "
+                + $"{expectedValue2}");
+        }
+
+        const Size expectedSampleSize2 = 3;
+        calculatedSamples = stats.ConvergenceTable[^1].Samples;
+        if (calculatedSamples != expectedSampleSize2)
+        {
+            Assert.Fail(
+                $"wrong number of samples in convergence table\n    calculated: {calculatedSamples}\n    expected:   "
+                + $"{expectedSampleSize2}");
         }
     }
 

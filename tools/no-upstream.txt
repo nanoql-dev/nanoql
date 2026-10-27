@@ -5,6 +5,7 @@
 # identifier, and no Upstream line. tools/check-upstream.py reads this list.
 # One path or glob per line, relative to the repository root, with forward slashes; "**" matches any depth.
 src/NanoQL/EnumArguments.cs
+src/NanoQL/Models/MarketModels/Products/MultiStep/MultiStepProductChecks.cs
 src/NanoQL/MsvcConversions.cs
 src/NanoQL/NanoQLException.cs
 src/NanoQL/NumericLimits.cs

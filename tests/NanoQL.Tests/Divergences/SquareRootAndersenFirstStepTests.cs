@@ -117,4 +117,61 @@ public class SquareRootAndersenFirstStepTests
             Assert.True(Math.Abs(z) < 4.0, $"caplet {i}: {z} standard errors");
         }
     }
+
+    [Theory]
+    [InlineData(1.0, 1.0)]
+    [InlineData(1.0, 0.25)]
+    [InlineData(1.0, 2.0)]
+    [InlineData(0.5, 1.0)]
+    public void QuantLibsTestRoutePricesHestonsCapletsAtAnyStartingVariance(double meanLevel, double v0)
+    {
+        // QuantLib's testStochVolForwardsAndOptionlets on its own route (marketmodel.cpp:4283-4460): forwards and
+        // optionlets in a multi-product composite through the accounting engine, the terminal measure, its full
+        // factors; each caplet checked against its own standard error (the S-mmp plan's SMD12), where QuantLib's test
+        // divides by its forward's (marketmodel.cpp:4450)
+        const int n = 9, paths = 32767;
+        const double reversionSpeed = 1.0, volVar = 1.0;
+        double[] rateTimes = [.. Enumerable.Range(1, n + 1).Select(i => 0.5 * i)];
+        double[] accruals = [.. Enumerable.Range(0, n).Select(i => rateTimes[i + 1] - rateTimes[i])];
+        double[] paymentTimes = rateTimes[1..];
+        double[] fwds = [.. Enumerable.Range(0, n).Select(i => 0.03 + (0.0010 * i))];
+        double[] disc = new double[n + 1];
+        disc[0] = 0.95;
+        for (int i = 1; i <= n; ++i)
+        {
+            disc[i] = disc[i - 1] / (1.0 + (fwds[i - 1] * accruals[i - 1]));
+        }
+
+        double[] vols = [0.15541283, 0.18719678, 0.20890740, 0.22318179, 0.23212717, 0.23731450, 0.23988649, 0.24066384, 0.24023111];
+        var forwards = new MultiStepForwards(rateTimes, accruals, paymentTimes, [.. fwds.Select(f => f + 0.01)]);
+        var optionlets = new MultiStepOptionlets(
+            rateTimes, accruals, paymentTimes, [.. fwds.Select(f => (Payoff)new PlainVanillaPayoff(OptionType.Call, f))]);
+        var product = new MultiProductComposite();
+        product.Add(forwards);
+        product.Add(optionlets);
+        product.FinalizeComposite();
+        EvolutionDescription evolution = product.Evolution;
+        Matrix c = ExpCorrelationsFunctions.ExponentialCorrelations(rateTimes, 0.5, 0.2);
+        var model = new FlatVol(vols, new TimeHomogeneousForwardCorrelation(c, rateTimes), evolution, n, fwds, new double[n]);
+        var volProcess = new SquareRootAndersen(meanLevel, reversionSpeed, volVar, v0, evolution.EvolutionTimes.AsSpan(), 8, 0.5, 0.5, 1.5);
+        int[] numeraires = [.. EvolutionDescriptionFunctions.TerminalMeasure(evolution)];
+        var evolver = new SVDDFwdRatePc(model, new MTBrownianGeneratorFactory(42), volProcess, 2, 2, numeraires);
+        var engine = new AccountingEngine(evolver, product, disc[numeraires[0]]);
+        var stats = new SequenceStatisticsInc(product.NumberOfProducts);
+        engine.MultiplePathValues(stats, paths);
+        double[] results = [.. stats.Mean()], errors = [.. stats.ErrorEstimate()];
+
+        var dc = new Actual365Fixed();
+        var flat = new FlatForward(new Date(15, Month.October, 2026), 0.0, dc);
+        for (int i = 0; i < n; ++i)
+        {
+            double volCoeff = vols[i];
+            var heston = new HestonModel(new HestonProcess(
+                flat, flat, fwds[i], v0 * volCoeff * volCoeff, reversionSpeed, volCoeff * volCoeff * meanLevel, volCoeff * volVar, 0.0));
+            double trueValue = new AnalyticHestonEngine(heston, AnalyticHestonEngineComplexLogFormula.Gatheral, FourierIntegration.GaussLaguerre(128))
+                .PriceVanillaPayoff(new PlainVanillaPayoff(OptionType.Call, fwds[i]), rateTimes[i]) * accruals[i] * disc[i + 1];
+            double z = (results[i + n] - trueValue) / errors[i + n];
+            Assert.True(Math.Abs(z) < 4.0, $"caplet {i}: {z} of its own standard errors");
+        }
+    }
 }
