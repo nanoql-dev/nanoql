@@ -1,0 +1,186 @@
+// SPDX-FileCopyrightText: 2026 The nanoql Authors
+// SPDX-License-Identifier: Apache-2.0
+
+using System.Collections.Immutable;
+using NanoQL.Models;
+using NanoQL.Numerics;
+
+namespace NanoQL.Tests.Conventions;
+
+/// <summary>
+/// The market-model framework's refusals: each one's exception type, text and parameter, QuantLib's texts where
+/// QuantLib refuses (the vectors record only that it throws), nanoql's where it refuses QuantLib's undefined paths
+/// (<c>Divergences/MarketModelUndefinedReadsTests.cs</c>) and the inputs the user ruled refused (the S-mm plan's MR4).
+/// </summary>
+public class MarketModelRefusalTests
+{
+    private static readonly double[] Times = [0.5, 1.0, 1.5, 2.0];
+
+    [Fact]
+    public void TheCurveStatesRefusals()
+    {
+        var cs = new LMMCurveState(Times);
+        Assert.Equal("curve state not initialized yet", Assert.Throws<NanoQLException>(() => cs.ForwardRate(0)).Message);
+        Check<ArgumentException>(() => cs.SetOnForwardRates([0.03, 0.03]), "fwdRates", "rates mismatch: 3 required, 2 provided");
+        Check<ArgumentOutOfRangeException>(() => cs.SetOnForwardRates([0.03, 0.03, 0.03], 3), "firstValidIndex", "first valid index must be less than 3: 3 not allowed");
+        Check<ArgumentException>(() => cs.SetOnDiscountRatios([1.0, 0.99]), "discRatios", "too many discount ratios: 4 required, 2 provided");
+        cs.SetOnForwardRates([0.03, 0.03, 0.03], 1);
+        Check<ArgumentOutOfRangeException>(() => cs.ForwardRate(0), "i", "invalid index");
+        Check<ArgumentOutOfRangeException>(() => cs.ForwardRate(3), "i", "invalid index");
+        Check<ArgumentOutOfRangeException>(() => cs.DiscountRatio(1, 4), "j", "invalid index");
+        Check<ArgumentOutOfRangeException>(() => cs.CoterminalSwapAnnuity(0, 1), "numeraire", "invalid numeraire");
+        Check<ArgumentOutOfRangeException>(() => cs.CmSwapRates(-1), "spanningForwards", "");
+        Check<ArgumentException>(() => cs.SwapRate(2, 2), "end", "empty range specified");
+        Check<ArgumentException>(() => cs.SwapRate(1, 4), "end", "taus/end mismatch");
+
+        var cot = new CoterminalSwapCurveState(Times);
+        Check<ArgumentException>(() => cot.SetOnCoterminalSwapRates([0.03]), "swapRates", "rates mismatch: 3 required, 1 provided");
+        var cms = new CMSwapCurveState(Times, 2);
+        Check<ArgumentException>(() => cms.SetOnCMSwapRates([0.03]), "cmSwapRates", "rates mismatch: 3 required, 1 provided");
+        Check<ArgumentOutOfRangeException>(() => new CMSwapCurveState(Times, -1), "spanningForwards", "");
+        Check<ArgumentException>(() => new LMMCurveState([1.0]), "times", "at least two times are required, 1 provided");
+    }
+
+    [Fact]
+    public void TheConversionsRefusals()
+    {
+        Check<ArgumentException>(() => CurveStateFunctions.ForwardsFromDiscountRatios(0, [1.0, 0.99], [0.5, 0.5], new double[1]), "taus", "taus.size()!=fwds.size()");
+        Check<ArgumentException>(() => CurveStateFunctions.CoterminalFromDiscountRatios(0, [1.0], [], [], []), "cotSwapRates", "at least one coterminal swap rate is required");
+        Check<ArgumentOutOfRangeException>(
+            () => CurveStateFunctions.ConstantMaturityFromDiscountRatios(1, 2, [1.0, 0.99, 0.98], [0.5, 0.5], new double[2], new double[2]),
+            "firstValidIndex",
+            "first valid index (2) must be less than the number of swap rates (2)");
+    }
+
+    [Fact]
+    public void TheEvolutionsRefusals()
+    {
+        Check<ArgumentException>(() => new EvolutionDescription(Times, [], [(0, 3)]), "relevanceRates", "relevanceRates / evolutionTimes mismatch");
+        Check<ArgumentException>(() => new EvolutionDescription(Times, [1.0, 0.5]), "times", "non increasing rate times: times[0]=1, times[1]=0.5");
+        var e = new EvolutionDescription(Times);
+        Check<ArgumentException>(() => EvolutionDescriptionFunctions.CheckCompatibility(e, [3, 3]), "numeraires", "Size mismatch between numeraires (2) and evolution times (3)");
+        Check<ArgumentException>(
+            () => EvolutionDescriptionFunctions.CheckCompatibility(e, [3, 0, 3]),
+            "numeraires",
+            "2nd step, evolution time 1: the numeraire (0), corresponding to rate time 0.5, is expired");
+        Check<ArgumentOutOfRangeException>(
+            () => EvolutionDescriptionFunctions.CheckCompatibility(e, [9, 3, 3]),
+            "numeraires",
+            "1st step: the numeraire (9) is not the index of a rate time (0 to 3)");
+        Check<ArgumentOutOfRangeException>(() => EvolutionDescriptionFunctions.CheckCompatibility(e, [3, 3, -1]), "numeraires", "negative numeraire (-1)");
+        Check<ArgumentException>(() => EvolutionDescriptionFunctions.IsInTerminalMeasure(e, []), "numeraires", "no numeraires given");
+        Check<ArgumentException>(() => EvolutionDescriptionFunctions.IsInMoneyMarketMeasure(e, [1]), "numeraires", "fewer numeraires (1) than evolution times (3)");
+        Check<ArgumentException>(() => EvolutionDescriptionFunctions.MoneyMarketPlusMeasure(e, 4), "offset", "offset (4) is greater than the max allowed value for numeraire (3)");
+        Check<ArgumentOutOfRangeException>(() => EvolutionDescriptionFunctions.MoneyMarketPlusMeasure(e, -1), "offset", "");
+        Check<ArgumentException>(() => UtilitiesFunctions.MergeTimes([ImmutableArray.Create(1.0, double.NaN)]), "times", "1st set of times holds a NaN");
+        Check<ArgumentException>(() => UtilitiesFunctions.MergeTimes([ImmutableArray.Create(1.0), ImmutableArray.Create(2.0, 1.0)]), "times", "2nd set of times isn't sorted");
+        Check<ArgumentException>(() => UtilitiesFunctions.IsInSubset([1.0], [1.0, 2.0]), "subset", "set is required to be larger or equal than subset");
+        Check<ArgumentException>(() => UtilitiesFunctions.CheckIncreasingTimes([]), "times", "at least one time is required");
+        Check<ArgumentException>(() => UtilitiesFunctions.CheckIncreasingTimes([0.0]), "times", "first time (0) must be greater than zero");
+    }
+
+    [Fact]
+    public void TheDriftCalculatorsRefusals()
+    {
+        var pseudo = new Matrix(3, 2, 0.1);
+        double[] z = new double[3], taus = [0.5, 0.5, 0.5];
+        Check<ArgumentException>(() => new LMMDriftCalculator(pseudo, z, [], 3, 0), "taus", "Dim out of range");
+        Check<ArgumentException>(() => new LMMDriftCalculator(pseudo, [0.0], taus, 3, 0), "displacements", "Displacements out of range");
+        Check<ArgumentException>(() => new LMMDriftCalculator(new Matrix(2, 2, 0.1), z, taus, 3, 0), "pseudo", "pseudo.rows() not consistent with dim");
+        Check<ArgumentException>(() => new LMMDriftCalculator(new Matrix(3, 4, 0.1), z, taus, 3, 0), "pseudo", "pseudo.rows() not consistent with pseudo.columns()");
+        Check<ArgumentException>(() => new LMMDriftCalculator(pseudo, z, taus, 3, 3), "alive", "Alive out of bounds");
+        Check<ArgumentException>(() => new LMMDriftCalculator(pseudo, z, taus, 4, 0), "numeraire", "Numeraire larger than dim");
+        Check<ArgumentException>(() => new LMMDriftCalculator(pseudo, z, taus, 1, 2), "numeraire", "Numeraire smaller than alive");
+        Check<ArgumentOutOfRangeException>(() => new LMMDriftCalculator(pseudo, z, taus, -1, 0), "numeraire", "");
+        var lmm = new LMMDriftCalculator(pseudo, z, taus, 3, 0);
+        Check<ArgumentException>(() => lmm.Compute([0.03, 0.03], new double[3]), "fwds", "numberOfRates <> dim");
+        Check<ArgumentException>(() => lmm.ComputeReduced([0.03, 0.03, 0.03], new double[2]), "drifts", "drifts.size() <> dim");
+        var normal = new LMMNormalDriftCalculator(pseudo, taus, 3, 0);
+        Check<ArgumentException>(() => normal.ComputePlain([0.03, 0.03], new double[3]), "fwds", "numberOfRates <> dim");
+        var smm = new SMMDriftCalculator(pseudo, z, taus, 3, 0);
+        var cot = new CoterminalSwapCurveState(Times);
+        cot.SetOnCoterminalSwapRates([0.03, 0.03, 0.03]);
+        Check<ArgumentException>(() => smm.Compute(cot, new double[2]), "drifts", "drifts.size() <> numberOfRates");
+        Check<ArgumentOutOfRangeException>(() => new CMSMMDriftCalculator(pseudo, z, taus, 3, 0, 0), "spanningFwds", "at least one spanning forward is required");
+    }
+
+    [Fact]
+    public void TheModelsAndCorrelationsRefusals()
+    {
+        var e = new EvolutionDescription(Times);
+        var corr = new ExponentialForwardCorrelation(Times);
+        double[] v = [0.2, 0.2, 0.2], r = [0.03, 0.03, 0.03], d = [0.0, 0.0, 0.0];
+        Check<ArgumentException>(() => new FlatVol(v, corr, e, 3, [0.03], d), "initialRates", "mismatch between number of rates (1) and rate times");
+        Check<ArgumentException>(() => new FlatVol(v, corr, e, 0, r, d), "numberOfFactors", "number of rates (3) greater than number of factors (0) times number of steps (3)");
+        Check<ArgumentException>(() => new FlatVol(v, corr, e, 4, r, d), "numberOfFactors", "number of factors (4) cannot be greater than numberOfRates (3)");
+        Check<ArgumentException>(
+            () => new FlatVol(v, new TimeHomogeneousForwardCorrelation(new Matrix(3, 3, 0.5), [0.25, 0.5, 0.75, 1.0]), e, 3, r, d),
+            "corr",
+            "the correlation times end (0.75) before the last evolution time (1.5)");
+        Check<ArgumentException>(
+            () => new FlatVol(v, new ExponentialForwardCorrelation([0.5, 1.0, 1.5], 0.5, 0.2, 0.5, [0.5, 1.0, 1.5]), e, 3, r, d),
+            "corr",
+            "the 1st correlation matrix (2x2) is smaller than the rates (3)");
+        var m = new FlatVol(v, corr, e, 3, r, d);
+        Check<ArgumentOutOfRangeException>(() => m.PseudoRoot(3), "i", "the index 3 is invalid: it must be less than number of steps (3)");
+        Check<ArgumentOutOfRangeException>(() => m.Covariance(3), "i", "i (3) must be less than covariance_.size() (3)");
+        Check<ArgumentOutOfRangeException>(() => m.TotalCovariance(-1), "endIndex", "endIndex (-1) must be less than covariance_.size() (3)");
+        Check<ArgumentOutOfRangeException>(() => m.TimeDependentVolatility(3), "i", "index (3) must less than number of rates (3)");
+        Check<ArgumentException>(() => FlatVolFunctions.FlatVolCovariance(1.0, 0.5, 2.0, 2.0, 0.2, 0.2), "t2", "integrations bounds (1,0.5) are in reverse order");
+
+        Check<ArgumentOutOfRangeException>(() => corr.Correlation(3), "i", "index (3) must be less than correlations vector size (3)");
+        Check<ArgumentException>(() => new ExponentialForwardCorrelation([1.0]), "rateTimes", "Rate times must contain at least two values");
+        Check<ArgumentException>(
+            () => new ExponentialForwardCorrelation(Times, 0.5, 0.2, 1.0, [0.5, 1.0]),
+            "times",
+            "corr times ( 0.5 1 ) must be equal to (all) rate times (but the last) ( 0.5 1 1.5 )");
+        Check<ArgumentException>(() => new ExponentialForwardCorrelation(Times, 0.5, 0.2, 0.5, [0.5, 1.5]), "times", "corr times ( 0.5 1.5 ) skip the 2nd rate time (1)");
+        Check<ArgumentException>(() => ExpCorrelationsFunctions.ExponentialCorrelations(Times, 1.5), "longTermCorr", "Long term correlation (1.5) outside [0;1] interval");
+        Check<ArgumentException>(() => ExpCorrelationsFunctions.ExponentialCorrelations(Times, 0.5, -0.1), "beta", "beta (-0.1) must be greater than zero");
+        Check<ArgumentException>(() => ExpCorrelationsFunctions.ExponentialCorrelations(Times, 0.5, 0.2, 1.5), "gamma", "gamma (1.5) outside [0;1] interval");
+        Check<ArgumentException>(
+            () => new TimeHomogeneousForwardCorrelation(new Matrix(2, 3, 0.5), Times),
+            "fwdCorrelation",
+            "mismatch between number of rates (3) and fwdCorrelation rows (2)");
+        Check<ArgumentException>(
+            () => TimeHomogeneousForwardCorrelation.EvolvedMatrices(new Matrix(4, 2, 0.5)),
+            "fwdCorrelation",
+            "fwdCorrelation's columns (2) fewer than its rows (4) less one");
+    }
+
+    [Fact]
+    public void TheMappingsAndEvolversRefusals()
+    {
+        var cs = new LMMCurveState(Times);
+        cs.SetOnForwardRates([0.03, 0.03, 0.03]);
+        Check<ArgumentException>(() => ForwardForwardMappings.RestrictCurveState(cs, 2, 2), "offset", "offset  must be less than period in  forward forward mappings");
+        Check<ArgumentOutOfRangeException>(() => ForwardForwardMappings.ForwardForwardJacobian(cs, 5, 4), "offset", "offset (4) must be at most the number of rates (3)");
+        Check<ArgumentException>(() => ForwardForwardMappings.YMatrix(cs, [0.0], [0.0], 1, 0), "shortDisplacements", "shortDisplacements must be of size equal to number of rates");
+        Check<ArgumentOutOfRangeException>(() => SwapForwardMappings.Annuity(cs, 0, 4, 3), "endIndex", "end index (4) must be at most the number of rates (3)");
+        Check<ArgumentOutOfRangeException>(() => SwapForwardMappings.CmSwapForwardJacobian(cs, -1), "spanningForwards", "");
+
+        var m = new FlatVol([0.2, 0.2, 0.2], new ExponentialForwardCorrelation(Times), new EvolutionDescription(Times, [1.0, 1.5]), 3, [0.03, 0.03, 0.03], [0.0, 0.01, 0.0]);
+        Check<ArgumentException>(() => SwapForwardMappings.SwaptionImpliedVolatility(m, 1, 1), "startIndex", "start index must be before end index in swaptionImpliedVolatility");
+        Check<ArgumentOutOfRangeException>(() => SwapForwardMappings.SwaptionImpliedVolatility(m, 0, 4), "endIndex", "end index (4) must be at most the number of rates (3)");
+        Check<ArgumentException>(() => SwapForwardMappings.SwaptionImpliedVolatility(m, 1, 2), "volStructure", "2nd displacement (0.01) not equal to the previous ones (0)");
+        var equal = new FlatVol([0.2, 0.2, 0.2], new ExponentialForwardCorrelation(Times), new EvolutionDescription(Times, [1.0, 1.5]), 3, [0.03, 0.03, 0.03], [0.0, 0.0, 0.0]);
+        Check<ArgumentException>(() => SwapForwardMappings.SwaptionImpliedVolatility(equal, 0, 2), "volStructure", "skipping 1st rate time");
+
+        var factory = new MTBrownianGeneratorFactory(42);
+        Check<ArgumentOutOfRangeException>(() => new LogNormalFwdRateEuler(equal, factory, [3, 3], 2), "initialStep", "initial step (2) must be less than the number of steps (2)");
+        Check<ArgumentException>(() => new LogNormalFwdRatePc(equal, factory, [3]), "numeraires", "Size mismatch between numeraires (1) and evolution times (2)");
+        var euler = new LogNormalFwdRateEuler(equal, factory, [3, 3]);
+        var other = new LMMCurveState([0.5, 1.0]);
+        other.SetOnForwardRates([0.03]);
+        Check<ArgumentException>(() => euler.SetInitialState(other), "forwards", "mismatch between forwards and rateTimes");
+    }
+
+    // The refusal's type exactly, its parameter, and its text (an ArgumentException's own suffix after it).
+    private static void Check<T>(Action a, string paramName, string text)
+        where T : ArgumentException
+    {
+        T e = Assert.Throws<T>(a);
+        Assert.Equal(paramName, e.ParamName);
+        Assert.StartsWith(text, e.Message, StringComparison.Ordinal);
+    }
+}

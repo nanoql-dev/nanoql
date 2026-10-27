@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 389 | 35 |
-| partial | 21 | 31 |
-| ported | 850 | 114 |
+| not started | 368 | 32 |
+| partial | 21 | 33 |
+| ported | 871 | 115 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -1208,24 +1208,24 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `accountingengine` | not started |  | no nanoql type: AccountingEngine |
 | `all` | not ported: include-only header |  |  |
 | `browniangenerator` | ported | Models/MarketModels/BrownianGenerator.cs, Models/MarketModels/BrownianGeneratorFactory.cs |  |
-| `constrainedevolver` | not started |  | no nanoql type: ConstrainedEvolver |
-| `curvestate` | not started |  | no nanoql type: CurveState |
+| `constrainedevolver` | ported | Models/MarketModels/ConstrainedEvolver.cs |  |
+| `curvestate` | ported | Models/MarketModels/CurveState.cs, Models/MarketModels/CurveStateFunctions.cs |  |
 | `discounter` | not started |  | no nanoql type: MarketModelDiscounter |
-| `evolutiondescription` | not started |  | no nanoql type: EvolutionDescription |
-| `evolver` | not started |  | no nanoql type: MarketModelEvolver |
-| `forwardforwardmappings` | not started |  |  |
+| `evolutiondescription` | ported | Models/MarketModels/EvolutionDescription.cs, Models/MarketModels/EvolutionDescriptionFunctions.cs |  |
+| `evolver` | ported | Models/MarketModels/MarketModelEvolver.cs |  |
+| `forwardforwardmappings` | ported | Models/MarketModels/ForwardForwardMappings.cs |  |
 | `historicalforwardratesanalysis` | not started |  | no nanoql type: HistoricalForwardRatesAnalysis, HistoricalForwardRatesAnalysisImpl |
 | `historicalratesanalysis` | not started |  | no nanoql type: HistoricalRatesAnalysis |
-| `marketmodel` | not started |  | no nanoql type: MarketModel, MarketModelFactory |
+| `marketmodel` | ported | Models/MarketModels/MarketModel.cs, Models/MarketModels/MarketModelFactory.cs |  |
 | `marketmodeldifferences` | not started |  |  |
 | `multiproduct` | not started |  | no nanoql type: MarketModelMultiProduct, MarketModelMultiProductCashFlow |
 | `pathwiseaccountingengine` | not started |  | no nanoql type: PathwiseAccountingEngine, PathwiseVegasAccountingEngine, PathwiseVegasOuterAccountingEngine |
 | `pathwisediscounter` | not started |  | no nanoql type: MarketModelPathwiseDiscounter |
 | `pathwisemultiproduct` | not started |  | no nanoql type: MarketModelPathwiseMultiProduct, MarketModelPathwiseMultiProductCashFlow |
-| `piecewiseconstantcorrelation` | not started |  | no nanoql type: PiecewiseConstantCorrelation |
+| `piecewiseconstantcorrelation` | ported | Models/MarketModels/PiecewiseConstantCorrelation.cs |  |
 | `proxygreekengine` | not started |  | no nanoql type: ProxyGreekEngine |
-| `swapforwardmappings` | not started |  | no nanoql type: SwapForwardMappings |
-| `utilities` | not started |  |  |
+| `swapforwardmappings` | ported | Models/MarketModels/SwapForwardMappings.cs |  |
+| `utilities` | ported | Models/MarketModels/MergedTimes.cs, Models/MarketModels/UtilitiesFunctions.cs |  |
 
 ### `ql/models/marketmodels/browniangenerators/`
 
@@ -1261,27 +1261,27 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `cotswapfromfwdcorrelation` | not started |  | no nanoql type: CotSwapFromFwdCorrelation |
-| `expcorrelations` | not started |  | no nanoql type: ExponentialForwardCorrelation |
-| `timehomogeneousforwardcorrelation` | not started |  | no nanoql type: TimeHomogeneousForwardCorrelation |
+| `expcorrelations` | ported | Models/MarketModels/Correlations/ExpCorrelationsFunctions.cs, Models/MarketModels/Correlations/ExponentialForwardCorrelation.cs |  |
+| `timehomogeneousforwardcorrelation` | ported | Models/MarketModels/Correlations/TimeHomogeneousForwardCorrelation.cs |  |
 
 ### `ql/models/marketmodels/curvestates/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `cmswapcurvestate` | not started |  | no nanoql type: CMSwapCurveState |
-| `coterminalswapcurvestate` | not started |  | no nanoql type: CoterminalSwapCurveState |
-| `lmmcurvestate` | not started |  | no nanoql type: LMMCurveState |
+| `cmswapcurvestate` | ported | Models/MarketModels/CurveStates/CMSwapCurveState.cs |  |
+| `coterminalswapcurvestate` | ported | Models/MarketModels/CurveStates/CoterminalSwapCurveState.cs |  |
+| `lmmcurvestate` | ported | Models/MarketModels/CurveStates/LMMCurveState.cs |  |
 
 ### `ql/models/marketmodels/driftcomputation/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `cmsmmdriftcalculator` | not started |  | no nanoql type: CMSMMDriftCalculator |
-| `lmmdriftcalculator` | not started |  | no nanoql type: LMMDriftCalculator |
-| `lmmnormaldriftcalculator` | not started |  | no nanoql type: LMMNormalDriftCalculator |
-| `smmdriftcalculator` | not started |  | no nanoql type: SMMDriftCalculator |
+| `cmsmmdriftcalculator` | ported | Models/MarketModels/DriftComputation/CMSMMDriftCalculator.cs |  |
+| `lmmdriftcalculator` | ported | Models/MarketModels/DriftComputation/LMMDriftCalculator.cs |  |
+| `lmmnormaldriftcalculator` | ported | Models/MarketModels/DriftComputation/LMMNormalDriftCalculator.cs |  |
+| `smmdriftcalculator` | ported | Models/MarketModels/DriftComputation/SMMDriftCalculator.cs |  |
 
 ### `ql/models/marketmodels/evolvers/`
 
@@ -1291,11 +1291,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `lognormalcmswapratepc` | not started |  | no nanoql type: LogNormalCmSwapRatePc |
 | `lognormalcotswapratepc` | not started |  | no nanoql type: LogNormalCotSwapRatePc |
 | `lognormalfwdrateballand` | not started |  | no nanoql type: LogNormalFwdRateBalland |
-| `lognormalfwdrateeuler` | not started |  | no nanoql type: LogNormalFwdRateEuler |
+| `lognormalfwdrateeuler` | ported | Models/MarketModels/Evolvers/LogNormalFwdRateEuler.cs |  |
 | `lognormalfwdrateeulerconstrained` | not started |  | no nanoql type: LogNormalFwdRateEulerConstrained |
 | `lognormalfwdrateiballand` | not started |  | no nanoql type: LogNormalFwdRateiBalland |
 | `lognormalfwdrateipc` | not started |  | no nanoql type: LogNormalFwdRateIpc |
-| `lognormalfwdratepc` | not started |  | no nanoql type: LogNormalFwdRatePc |
+| `lognormalfwdratepc` | ported | Models/MarketModels/Evolvers/LogNormalFwdRatePc.cs |  |
 | `marketmodelvolprocess` | not started |  | no nanoql type: MarketModelVolProcess |
 | `normalfwdratepc` | not started |  | no nanoql type: NormalFwdRatePc |
 | `svddfwdratepc` | not started |  | no nanoql type: SVDDFwdRatePc |
@@ -1322,7 +1322,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `capletcoterminalswaptioncalibration` | not started |  | no nanoql type: CTSMMCapletOriginalCalibration |
 | `cotswaptofwdadapter` | not started |  | no nanoql type: CotSwapToFwdAdapter, CotSwapToFwdAdapterFactory |
 | `ctsmmcapletcalibration` | not started |  | no nanoql type: CTSMMCapletCalibration |
-| `flatvol` | not started |  | no nanoql type: FlatVol, FlatVolFactory |
+| `flatvol` | ported | Models/MarketModels/Models/FlatVol/FlatVol.cs, Models/MarketModels/Models/FlatVol/FlatVolFactory.cs, Models/MarketModels/Models/FlatVol/FlatVolFunctions.cs |  |
 | `fwdperiodadapter` | not started |  | no nanoql type: FwdPeriodAdapter |
 | `fwdtocotswapadapter` | not started |  | no nanoql type: FwdToCotSwapAdapter, FwdToCotSwapAdapterFactory |
 | `piecewiseconstantabcdvariance` | not started |  | no nanoql type: PiecewiseConstantAbcdVariance |
@@ -2108,7 +2108,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `creditdefaultswap` | ported | TestSuite/CreditDefaultSwapTests.cs | 10 of 10 cases |
 | `crosscurrencyratehelpers` | ported | TestSuite/CrossCurrencyRateHelpersTests.cs | 30 of 30 cases |
 | `currency` | ported | TestSuite/CurrencyTests.cs | 1 of 1 cases |
-| `curvestates` | not started |  | 3 cases |
+| `curvestates` | ported | TestSuite/CurveStatesTests.cs | 3 of 3 cases |
 | `dates` | ported | TestSuite/DatesTests.cs | 14 of 15 cases; replaced: nullDate by Divergences/NullDateTests.cs; parseDates by Conventions/DateParserFormatTests.cs; not ported: intraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out) |
 | `daycounters` | ported | TestSuite/DayCountersTests.cs | 20 of 22 cases; not ported: testIntraday (QL_HIGH_RESOLUTION_DATE, which the default build leaves out); testYearFractionToDateForLinearDayCounter (QL_HIGH_RESOLUTION_DATE, which the default build leaves out) |
 | `defaultprobabilitycurves` | ported | TestSuite/DefaultProbabilityCurvesTests.cs | 10 of 10 cases |
@@ -2169,7 +2169,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `lookbackoptions` | ported | TestSuite/LookbackOptionsTests.cs | 5 of 5 cases |
 | `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 6 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy, testSobolBurleySkipping, testBurley2020SobolRsgOutputBounds |
 | `margrabeoption` | ported | TestSuite/MargrabeOptionTests.cs | 3 of 3 cases; moved: testEuroExchangeTwoAssets line 250 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 259 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 268 to Divergences/MargrabeGreeksQuantityTests.cs |
-| `marketmodel` | not started |  | 19 cases |
+| `marketmodel` | partial | TestSuite/MarketModelTests.cs | 1 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported); not yet: testOneStepForwardsAndOptionlets, testOneStepNormalForwardsAndOptionlets, testInverseFloater, testAllMultiStepProducts, testPeriodAdapter, testCallableSwapNaif, testCallableSwapLS, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas, testAbcdVolatilityIntegration, testAbcdVolatilityFit, testStochVolForwardsAndOptionlets, testDriftCalculator, testAbcdDegenerateCases, testCovariance |
 | `marketmodel_cms` | not started |  | 1 cases |
 | `marketmodel_smm` | not started |  | 1 cases |
 | `marketmodel_smmcapletalphacalibration` | not started |  | 1 cases |
@@ -2228,7 +2228,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `stats` | partial | TestSuite/StatsTests.cs | 2 of 4 cases; not yet: testSequenceStatistics, testConvergenceStatistics |
 | `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |
 | `swap` | ported | TestSuite/SwapTests.cs | 15 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs |
-| `swapforwardmappings` | not started |  | 3 cases |
+| `swapforwardmappings` | partial | TestSuite/SwapForwardMappingsTests.cs | 1 of 3 cases; not yet: testForwardCoterminalMappings, testSwaptionImpliedVolatility |
 | `swaption` | ported | TestSuite/SwaptionTests.cs | 13 of 13 cases; replaced: testBlackEngineCaching by Vectors/Instruments/SwaptionVectorTests.cs |
 | `swaptionvolatilitycube` | ported | TestSuite/SwaptionVolatilityCubeTests.cs | 17 of 17 cases; replaced: testObservability by Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs; testZabrObservability by Vectors/TermStructures/ZabrSwaptionVolatilityCubeVectorTests.cs |
 | `swaptionvolatilitymatrix` | ported | TestSuite/SwaptionVolatilityMatrixTests.cs | 2 of 2 cases; replaced: testSwaptionVolMatrixObservability by Vectors/TermStructures/SwaptionVolMatrixVectorTests.cs |

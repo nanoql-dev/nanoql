@@ -1504,6 +1504,16 @@ Facts:
 - `AnEmptyOrRaggedQuoteTableIsRefused`
 - `WeightsOfAnotherShapeAreRefused`
 
+## CoinitialZedMatrixTests
+
+[`Divergences/CoinitialZedMatrixTests.cs`](../tests/NanoQL.Tests/Divergences/CoinitialZedMatrixTests.cs)
+
+The coinitial Z matrix (the S-mm plan's MR3 (xxii), fixed under R8). QuantLib's `SwapForwardMappings::coinitialSwapZedMatrix` scales each row from its diagonal rightward (`for (Size j=i; j<n; ++j)`, `swapforwardmappings.cpp:152-153`), the coterminal version's loop, though a coinitial swap's row is nonzero left of its diagonal, so those entries stay raw derivatives, blind to the displacement: on six semi-annual rates at 3% + 0.4% i, entry [5][0] is 0.174871 at displacements 0 and 2%, where the elasticity of S₅ + d in f₀ + d is 0.131951 and 0.146315 (the planner's MP26, `probes\round1.out.txt`). No QuantLib code calls it. nanoql scales every entry. Checks: each row is QuantLib's own `cmSwapZedMatrix(cs, i + 1, d)`'s first row, the same calls in the same order, bit for bit; and the bumped elasticity.
+
+Facts:
+
+- `EachRowIsTheConstantMaturityFirstRow`
+
 ## ComplexChooserEqualTermsTests
 
 [`Divergences/ComplexChooserEqualTermsTests.cs`](../tests/NanoQL.Tests/Divergences/ComplexChooserEqualTermsTests.cs)
@@ -2203,6 +2213,18 @@ Facts:
 
 - `AnExpiredBondsSpreadFamilyIsRefused`
 
+## ExponentialCorrelationTests
+
+[`Divergences/ExponentialCorrelationTests.cs`](../tests/NanoQL.Tests/Divergences/ExponentialCorrelationTests.cs)
+
+The exponential forward correlation's three departures. One rate is accepted (the S-mm plan's MR3 (xiv)): QuantLib requires `numberOfRates_ > 1` under the text "Rate times must contain at least two values", so it refuses one rate when given two times (`expcorrelations.cpp:82-83`), where its own time-homogeneous correlation accepts one. At an exponent other than 1, correlation times that skip a rate time but the last are refused (MR4 (b)): QuantLib's FIXME asks for the check (`:105-106`), and without it each period's matrix is taken at the period's midpoint, after a rate that is alive at the period's start has fixed, so the models give that rate no variance there: on nine rates fixing 0.5 … 4.5 and times {2.0, 4.5}, FlatVol's total variance of rate 0 is 0 against σ²T 0.02, rate 4's 0.08 against 0.10 (the planner's MP26, `probes\round1.out.txt`). And a last correlation time past the last rate time is refused with a text naming the time it checks, where QuantLib's calls it the next-to-last (MR3 (xv); `:107-110`).
+
+Facts:
+
+- `OneRateIsTheTimeHomogeneousCorrelationOfOneRate`
+- `TimesSkippingARateTimeAreRefusedAtAnExponentOtherThanOne`
+- `ALastTimePastTheLastRateTimeIsNamedAsTheLast`
+
 ## ExponentialSplinesFixedKappaTests
 
 [`Divergences/ExponentialSplinesFixedKappaTests.cs`](../tests/NanoQL.Tests/Divergences/ExponentialSplinesFixedKappaTests.cs)
@@ -2723,6 +2745,18 @@ The forward-flat interpolation's primitive past its last node. QuantLib's `primi
 Facts:
 
 - `ThePrimitivePastTheLastNodeGrowsAtTheValueThere`
+
+## ForwardForwardMappingsTests
+
+[`Divergences/ForwardForwardMappingsTests.cs`](../tests/NanoQL.Tests/Divergences/ForwardForwardMappingsTests.cs)
+
+The forward-forward Jacobian and Y matrix (the S-mm plan's MR3 (i), fixed under R8). QuantLib's `ForwardForwardJacobian` is 1/τ_long minus the long forward's derivative (`value = df*tau[m]*P(m+1)/P(m) - 1`, then `-value/bigTau`, `forwardforwardmappings.cpp:51-53`), and `YMatrix`'s long forward is (P_end/P_start − 1)/τ_long, the negative of g/(1 + τ_long g) (`:86`): on twelve semi-annual forwards at 5% + 0.1% i in periods of 2, QuantLib's J[0][0] is 0.48725 where the derivative is 0.5125, and its Y[0][0] −0.50077 where the elasticity is +0.5013; on quarterly forwards in periods of 4, J[0][0] 0.74012 where the derivative is 0.2599 (this run's `probes\c1_facts.cpp`; the planner's MP2). nanoql's derivative is (P_start/P_end) τ_m (P_{m+1}/P_m)/τ_long and its long forward (P_start/P_end − 1)/τ_long, QuantLib's own `RestrictCurveState` forward. Checks: central bumps of that forward, and of its logarithm against the short forwards' for Y, undisplaced and with long displacements other than the short ones, Y's scaling by (f_j + d_j)/(g_l + D_l).
+
+Facts:
+
+- `TheJacobianIsTheLongForwardsDerivative`
+- `TheYMatrixIsTheLongForwardsElasticity`
+- `TheDisplacedYMatrixIsTheDisplacedLongForwardsElasticity`
 
 ## ForwardMeasureTimeUnsetTests
 
@@ -4173,6 +4207,34 @@ Facts:
 - `EachGammaIsItsDeltasDerivative`
 - `TheThetaIsTheValuesDecay`
 
+## MarketModelTextTests
+
+[`Divergences/MarketModelTextTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelTextTests.cs)
+
+Refusals whose QuantLib text names another value than its check reads (the S-mm plan's MR3 (xv), fixed under R8). `EvolutionDescription` checks the last evolution time against the last fixing time, `rateTimes[rateTimes.size()-2]`, and prints `rateTimes[numberOfRates_-2]`, the time before it, a read before the vector at one rate (`evolutiondescription.cpp:51-54`; the planner's MP5: −1.29e-231 at one rate, 0.5 for a check of 1.0 at two). `LMMCurveState::setOnDiscountRatios` checks the first valid index against the number of rates and prints one more as its bound (`lmmcurvestate.cpp:76-79`), found at this run's C1. The exponential correlation's text is in `ExponentialCorrelationTests`.
+
+Facts:
+
+- `TheLastEvolutionTimesRefusalNamesTheLastFixingTime`
+- `TheDiscountRatiosFirstIndexRefusalNamesItsBound`
+
+## MarketModelUndefinedReadsTests
+
+[`Divergences/MarketModelUndefinedReadsTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelUndefinedReadsTests.cs)
+
+The market-model framework's inputs whose QuantLib path is undefined, each refused before the undefined step (the S-mm plan's MR3 (xx), and those this run's C1 found, under the playbook's row for undefined behaviour). The refusals' types, texts and parameters are asserted by `Conventions/MarketModelRefusalTests.cs`.
+
+Facts:
+
+- `ACurveStatesRateReadAtTheNumberOfRatesIsRefused`
+- `TheNumerairesFunctionsReadsPastTheirInputsAreRefused`
+- `FlatVolsReadsPastItsCorrelationAreRefused`
+- `TheConstantMaturityDriftsOnNoSpanningForwardsAreRefused`
+- `MergeTimesSortAndSearchOfInvalidSetsAreRefused`
+- `TheEvolvedMatricesReadPastANarrowMatrixIsRefused`
+- `TheConversionsWritesPastTheirBuffersAreRefused`
+- `TheIndexesQuantLibsUnsignedArithmeticWrapsAreRefused`
+
 ## MarkovFunctionalOutputsTests
 
 [`Divergences/MarkovFunctionalOutputsTests.cs`](../tests/NanoQL.Tests/Divergences/MarkovFunctionalOutputsTests.cs)
@@ -5260,6 +5322,16 @@ Facts:
 
 - `TheEndpointsTakeTheInteriorsMoneyness`
 
+## SmmDriftAliveTests
+
+[`Divergences/SmmDriftAliveTests.cs`](../tests/NanoQL.Tests/Divergences/SmmDriftAliveTests.cs)
+
+The coterminal swap market model's drifts on a curve state set from the step's first alive rate (the S-mm plan's MR3 (xvi), fixed under R8). QuantLib's `SMMDriftCalculator::compute` reads every annuity from the first rate (`smmdriftcalculator.cpp:86-89`), so a state set from its first alive rate on, all the drifts read, is refused ("invalid index"; the planner's MP24, and this run's `probes\c1_facts.cpp`). nanoql reads them from the first alive rate. Check: the drifts on the same curve set from the first rate, QuantLib's arithmetic (its vectors), bit for bit, and QuantLib's own numbers there.
+
+Facts:
+
+- `TheDriftsOfAStateSetFromTheFirstAliveRateAreThoseOfTheWholeCurve`
+
 ## SobolPeriodEndTests
 
 [`Divergences/SobolPeriodEndTests.cs`](../tests/NanoQL.Tests/Divergences/SobolPeriodEndTests.cs)
@@ -5617,6 +5689,18 @@ When a swaption helper reads the at-par switch. QuantLib's helper builds its swa
 Facts:
 
 - `TheAtParSwitchIsReadAtConstruction`
+
+## SwaptionImpliedVolatilityGridTests
+
+[`Divergences/SwaptionImpliedVolatilityGridTests.cs`](../tests/NanoQL.Tests/Divergences/SwaptionImpliedVolatilityGridTests.cs)
+
+The frozen-coefficient swaption volatility on an evolution that doesn't hold its expiry (the S-mm plan's MR4 (a), a refusal the user ruled). QuantLib's `SwapForwardMappings::swaptionImpliedVolatility` sums every step starting before the expiry (`swapforwardmappings.cpp:194`, `:216-217`), so a step straddling it adds the later variance: FlatVol at 20% on eleven semi-annual rates at 4%, yearly steps, swaption (0, 2) 0.221024 against 0.197607 on every fixing (+11.9%), (0, 10) +34.3%, (2, 10) +12.0% (the planner's MP26, `probes\round1.out.txt`); and it reads the first displacement alone (`:183`). QuantLib's frozen-coefficient adapters refuse both ("skipping … rate time", "not equal to the previous ones", `fwdtocotswapadapter.cpp:44`, `:50-57`), and so does nanoql here. A grid that holds the expiry keeps QuantLib's value: (1, 4) on yearly steps is the every-fixing value, 0.195828.
+
+Facts:
+
+- `AnExpiryOffTheEvolutionIsRefused`
+- `AnExpiryOnTheEvolutionKeepsTheEveryFixingValue`
+- `UnequalDisplacementsAreRefused`
 
 ## SwaptionImpliedVolatilityTests
 

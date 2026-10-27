@@ -144,6 +144,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (S-core); and `testPiecewiseIntegral` (S-xrt).
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace).
 - `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice, Faure and Burley 2020 cases and the discrepancy cases, whose generators and statistics aren't ported yet.
+- `tests/NanoQL.Tests/TestSuite/MarketModelTests.cs`: the abcd, drift-calculator and covariance cases, which wait for S-mm's models (its C3), and the product, callable-swap, Greek and stochastic-volatility cases, which wait for S-mmp's products and accounting engines.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the orthogonal-projection, QR and Moore-Penrose cases, whose matrix utilities aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/NthOrderDerivativeOpTests.cs`: every case but `testSparseMatrixApply`, which wait for S-core's `NthOrderDerivativeOp`.
 - `tests/NanoQL.Tests/TestSuite/OdeTests.cs`: `testMatrixExponential` and `testMatrixExponentialOfZero`, which wait for S-core's `Expm`.
@@ -154,4 +155,5 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.
 - `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position and secant cases, whose solvers aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/StatsTests.cs`: `testSequenceStatistics` and `testConvergenceStatistics`, which wait for S-mmp's sequence and convergence statistics.
+- `tests/NanoQL.Tests/TestSuite/SwapForwardMappingsTests.cs`: `testSwaptionImpliedVolatility`, which waits for S-mmp's products and accounting engine.
 - `tests/NanoQL.Tests/TestSuite/SwingOptionTests.cs`: every case but `testFdBSSwingOption`, which wait for S-xeq's extended Ornstein-Uhlenbeck processes, jump mesher and engines.
