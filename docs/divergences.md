@@ -1280,6 +1280,17 @@ Facts:
 
 - `AnEmptyMatrixReachesQuantLibsChecks`
 
+## CapPseudoDerivativeBracketTests
+
+[`Divergences/CapPseudoDerivativeBracketTests.cs`](../tests/NanoQL.Tests/Divergences/CapPseudoDerivativeBracketTests.cs)
+
+The cap pseudo-derivative's implied volatility (the S-mmp plan's MMPR4 (xviii), ruled by the user). QuantLib solves for the flat undisplaced Black volatility in [0.99, 1.01] times its least displaced and greatest scaled caplet volatility (`swaptionpseudojacobian.cpp:331`), which away from the money on a displaced model misses the root: on six semi-annual rates, FlatVol 20%, 3 factors, displacement 2%, the cap from rate 1 to 5, its bracket [0.198, 0.332323] refuses strikes 0.5%, 1% and 2% "root not bracketed" (this run's `probes\c4_facts.cpp`; the planner's MPP22). nanoql solves by Brent's bracketing from QuantLib's guess there. Checks: the volatility reprices the model's cap through the class's undisplaced Black sum; QuantLib's bits where its bracket holds the root (3.2%).
+
+Facts:
+
+- `AwayFromTheMoneyTheVolatilityRepricesTheCap`
+- `WhereQuantLibsBracketHoldsTheRootTheVolatilityIsQuantLibs`
+
 ## CapletCoterminalPeriodicTests
 
 [`Divergences/CapletCoterminalPeriodicTests.cs`](../tests/NanoQL.Tests/Divergences/CapletCoterminalPeriodicTests.cs)
@@ -4376,6 +4387,7 @@ Facts:
 
 - `APaymentInsideAPeriodInterpolatesItsOwnPeriod`
 - `APaymentOnARateTimeOrOutsideThePeriodsIsQuantLibs`
+- `ThePathwiseDiscounterInterpolatesItsOwnPeriodToo`
 
 ## MarketModelPathwiseDeflatedCapletTests
 
@@ -4386,6 +4398,7 @@ The deflated caplets' deflator derivative (the S-mmp plan's MMPR4 (vi), fixed un
 Facts:
 
 - `TheDeflatorsDerivativeIsOverTheRatesPeriod`
+- `ThroughThePathwiseEngineTheDeflatedDeltasAreTheUndeflated`
 - `WhereTheAccrualsAreThePeriodsTheAmountsAreQuantLibs`
 
 ## MarketModelPathwiseSwapStrikeTests
@@ -4992,6 +5005,27 @@ Facts:
 
 - `AProcessThatIsNotOneDimensionalIsRefused`
 
+## PathwiseDeltaTests
+
+[`Divergences/PathwiseDeltaTests.cs`](../tests/NanoQL.Tests/Divergences/PathwiseDeltaTests.cs)
+
+The pathwise delta engine's recursion and layout (the S-mmp plan's MMPR4 (i)–(iii), ruled by the user). QuantLib's Euler-step Jacobian reads the drift's derivative at the step's end, where the Euler drift is taken at its start (`pathwiseaccountingengine.cpp:167`), and drops the displacement from the rates' ratios and the drift term (`:169-170`, `:285`); its results put product i's deltas at (i + 1)·P + j, which overwrites another product's when P ≠ R (`:306`). On caplets at the forwards, FlatVol 20%, 3 factors, the money-market measure, the Mersenne twister (seed 42), 1,023 paths: six semi-annual rates at displacements 0 and 2%, six unequal periods at 2%, and the semi-annual rates paid 0.2 before their periods' ends, which takes MMPR4 (ix)'s bracket through the engine (this run's `probes\c4_facts.cpp`, `c4_facts2.cpp`; the planner's MPP6, MPP9): nanoql's deltas are the same-path differences of the engine's price, whose bits are QuantLib's where the payments are on rate times; QuantLib's are off by its recursion. Checks: same-path central differences of the price; each product alone.
+
+Facts:
+
+- `TheDeltasAreThePricesSamePathDifferences`
+- `TwoCapsOnNineRatesEachHoldTheirOwnDeltas`
+
+## PathwiseVegaTests
+
+[`Divergences/PathwiseVegaTests.cs`](../tests/NanoQL.Tests/Divergences/PathwiseVegaTests.cs)
+
+The pathwise vega engines (the S-mmp plan's MMPR4 (i), (ii), (iv), (v), ruled by the user): the delta engine's recursion, the pseudo-root Jacobian's drift sum and displacement, and the Jacobian's one-step discount factors, which QuantLib's engines take at the step's end (`pathwiseaccountingengine.cpp:494`, `:910`) where its own test takes them at the start (`marketmodel.cpp:2899-2900`). On caplets at the forwards, FlatVol 20%, 3 factors, the money-market measure, the Mersenne twister (seed 42), 1,023 paths, one bump a step (factor 0 of every alive rate): six semi-annual rates at displacements 0 and 2%, six unequal periods at 2%, and the semi-annual rates paid 0.2 before their periods' ends (this run's `probes\c4_facts.cpp`, `c4_facts2.cpp`; the planner's MPP8): nanoql's vegas, from both engines, are the same-path differences of the price in the pseudo-roots; QuantLib's are off. Checks: same-path central differences of the price, the pseudo-roots bumped along the bump; the two engines against each other.
+
+Facts:
+
+- `TheVegasAreThePricesSamePathDifferences`
+
 ## PearsonNegativeStrikePutTests
 
 [`Divergences/PearsonNegativeStrikePutTests.cs`](../tests/NanoQL.Tests/Divergences/PearsonNegativeStrikePutTests.cs)
@@ -5085,6 +5119,17 @@ Facts:
 - `TheBlackScholesProcessReadsEachStructureAtItsInstants`
 - `TheHestonProcessReadsTheDividendCurveAtItsInstants`
 - `EachStructureAccruesNothingBeforeItsOwnDate`
+
+## ProxyGreekVegaTests
+
+[`Divergences/ProxyGreekVegaTests.cs`](../tests/NanoQL.Tests/Divergences/ProxyGreekVegaTests.cs)
+
+The proxy Greeks (the S-mmp plan's MMPR3, ruled by the user, and SMD13). QuantLib's constrained evolver weighs a path by the shifted Gaussians' density ratio alone (`lognormalfwdrateeulerconstrained.cpp:200-212`), which misses the transition densities' ratio of step deviations a volatility bump changes: `testGreeks`' proxy vegas, which it prints and doesn't assert, take the wrong sign, 81 to 131 standard errors off Black's (the planner's MPP13). nanoql's evolver takes the unbumped model as its reference and carries √(var_reference / var_own). On six semi-annual rates, FlatVol 20%, 3 factors, digital caplets paying 1% at the forwards, the money-market measure, 8,191 Sobol paths (seed 42), each step's forward constrained, forwards bumped 1e-6 and volatilities 1e-4: nanoql's deltas, gammas and vegas within 4 standard errors of Black's; QuantLib's weight, the evolvers' own models as references, its vegas far off. Checks: Black's formula on each caplet's total variance; QuantLib's accounting engine on the volatility-bumped models, the same paths, on plain caplets; QuantLib's weight bit for bit where the reference is the evolver's own model (the evolvers' and the proxy engine's vectors).
+
+Facts:
+
+- `TheProxyGreeksAreBlacksWithinTheirErrors`
+- `TheProxyVegasAreTheAccountingEnginesSamePathDifferences`
 
 ## PseudoSqrtEmptyMatrixTests
 
@@ -5219,6 +5264,16 @@ Facts:
 
 - `AHelperGivenANullIndexIsRefused`
 - `AFuturesFraOrOisHelperGivenANullIndexIsRefused`
+
+## RatePseudoRootJacobianTests
+
+[`Divergences/RatePseudoRootJacobianTests.cs`](../tests/NanoQL.Tests/Divergences/RatePseudoRootJacobianTests.cs)
+
+The analytic pseudo-root Jacobians (the S-mmp plan's MMPR4 (iv), ruled by the user). The derivative of an Euler step's end rate j along rate k's root carries the drift's sum e_j = Σ_{k<j} τ_k (f_k + d_k) P_k a_k and the displaced rate f_j + d_j; QuantLib's sums the terms without τ_k and multiplies by τ_j, right on equal periods only, and carries f_j (`ratepseudorootjacobian.cpp:183`, `:191`, `:197`, `:280`, `:294`, `:298`). On six unequal periods, FlatVol 20%, 3 factors, displacement 2%, the money-market measure, step 0 from the forwards with Gaussians 0.3, −0.5, 1.1, every element bumped 1e-6 (this run's `probes\c4_facts.cpp`; the planner's MPP7, MPP8): nanoql's analytic Jacobians meet the numerical within QuantLib's own test's 5e-11; QuantLib's misses by 1.98e-4. Checks: QuantLib's `RatePseudoRootJacobianNumerical`, its bits.
+
+Facts:
+
+- `TheAnalyticJacobiansAreTheNumerical`
 
 ## RendistatoUnsolvedSwapsTests
 
@@ -6408,6 +6463,26 @@ Facts:
 
 - `TheZeroBondJustAboveTheCutoff`
 - `TheBondOptionAtSmallReversion`
+
+## VegaBumpCollectionCheckTests
+
+[`Divergences/VegaBumpCollectionCheckTests.cs`](../tests/NanoQL.Tests/Divergences/VegaBumpCollectionCheckTests.cs)
+
+The vega bump collection's checks (the S-mmp plan's MMPR4 (xii), ruled by the user). QuantLib's `isFull` and `isNonOverlapping` are true where an element fails (`vegabumpcluster.cpp:179`, `:218`): on six semi-annual rates, FlatVol 20%, 3 factors, its own default collection, given as its clusters, reports not full, overlapping and not sensible (this run's `probes\c4_facts.cpp`); half its clusters report full and one cluster given twice non-overlapping (the planner's MPP10 (f)). nanoql's are true where no element fails. Checks: QuantLib's default collection's flags, true.
+
+Facts:
+
+- `TheChecksAreTrueWhereNoElementFails`
+
+## VolatilityBumpInstrumentJacobianTests
+
+[`Divergences/VolatilityBumpInstrumentJacobianTests.cs`](../tests/NanoQL.Tests/Divergences/VolatilityBumpInstrumentJacobianTests.cs)
+
+The bump instrument Jacobian's refusal (the S-mmp plan's MMPR4 (xx), ruled by the user; SMD7). QuantLib marks an instrument computed before computing it (`bumpinstrumentjacobian.cpp:53`), so after its pseudo-derivative refuses, a second read returns the zero-filled vector: on six semi-annual rates, FlatVol 20%, 3 factors, displacement −1%, a cap from rate 1 to 5, refused by Black's formula's check, QuantLib's second read returns 63 zeros and the bump matrix a row it never wrote (`Matrix(rows, columns)` leaves its storage uninitialized: 1.6e-311 and 3.0e-311 in two runs; this run's `probes\c4_facts.cpp`). nanoql's per-instrument cache refuses at every read. Checks: QuantLib's first read's refusal.
+
+Facts:
+
+- `ARefusalIsRefusedAtEveryRead`
 
 ## VolatilityInterpolationSpecifierOffsetTests
 

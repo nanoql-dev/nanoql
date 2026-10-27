@@ -34,7 +34,7 @@ public class ConstrainedEulerCovarianceTests
             factors,
             Rates,
             [0.0, 0.0, 0.0, 0.0, 0.0]);
-        var e = new LogNormalFwdRateEulerConstrained(model, new MTBrownianGeneratorFactory(42), [5, 5, 5, 5, 5]);
+        var e = new LogNormalFwdRateEulerConstrained(model, model, new MTBrownianGeneratorFactory(42), [5, 5, 5, 5, 5]);
         e.SetConstraintType([0, 1, 2, 3, 4], [1, 2, 3, 4, 5]);
         double[] constraints = [.. Rates.Select(r => r + 0.002)];
         e.SetThisConstraint(constraints, [true, true, true, true, true]);

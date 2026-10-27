@@ -23,7 +23,7 @@ public class LogNormalFwdRateEulerConstrainedCxxVectorTests
     public void LogNormalFwdRateEulerConstrainedCxxVector() =>
         LogNormalFwdRateEulerCxxVectorTests.CheckEvolutions(
             "cxx/models/marketmodels/evolvers/lognormalfwdrateeulerconstrained",
-            (_, m, f, numeraires, initial) => new LogNormalFwdRateEulerConstrained(m, f, numeraires, initial),
+            (_, m, f, numeraires, initial) => new LogNormalFwdRateEulerConstrained(m, m, f, numeraires, initial),
             prepare: (c, e) =>
             {
                 var constrained = (LogNormalFwdRateEulerConstrained)e;

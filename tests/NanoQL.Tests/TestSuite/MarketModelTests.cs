@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/marketmodel.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas (S-mmp)
 // Not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported)
 
 using System.Collections.Immutable;
@@ -939,6 +938,1626 @@ public class MarketModelTests
     }
 
     [Fact]
+    public void TestGreeks()
+    {
+        // Testing caplet greeks in a lognormal forward rate market model using partial proxy simulation...
+        var vars = new CommonVars();
+
+        Payoff[] payoffs = new Payoff[vars.TodaysForwards.Length];
+        for (int i = 0; i < vars.TodaysForwards.Length; ++i)
+        {
+            payoffs[i] = new CashOrNothingPayoff(OptionType.Call, vars.TodaysForwards[i], 0.01);
+        }
+
+        var product = new MultiStepOptionlets(vars.RateTimes, vars.Accruals, vars.PaymentTimes, payoffs);
+
+        EvolutionDescription evolution = product.Evolution;
+
+        string[] marketModels = ["ExponentialCorrelationAbcdVolatility"];
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [4, 8, vars.TodaysForwards.Length];
+            foreach (int factors in testedFactors)
+            {
+                MeasureType[] measures = [MeasureType.MoneyMarket];
+                foreach (MeasureType measure in measures)
+                {
+                    int[] numeraires = vars.MakeMeasure(product, measure);
+
+                    for (int n = 0; n < 1; n++)
+                    {
+                        var generatorFactory = new SobolBrownianGeneratorFactory(
+                            SobolBrownianGeneratorBaseOrdering.Diagonal, CommonVars.Seed);
+
+                        bool logNormal = true;
+                        MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                        // Adapted: the constrained evolvers take the unbumped model as their reference (the S-mmp plan's MMPR3)
+                        MarketModel originalModel = marketModel;
+
+                        var evolver = new LogNormalFwdRateEuler(marketModel, generatorFactory, numeraires);
+                        var stats = new SequenceStatisticsInc(product.NumberOfProducts);
+
+                        int[] startIndexOfConstraint = new int[evolution.EvolutionTimes.Length];
+                        int[] endIndexOfConstraint = new int[evolution.EvolutionTimes.Length];
+                        for (int i = 0; i < evolution.EvolutionTimes.Length; ++i)
+                        {
+                            startIndexOfConstraint[i] = i;
+                            endIndexOfConstraint[i] = i + 1;
+                        }
+
+                        var constrainedEvolvers = new List<ConstrainedEvolver[]>();
+                        var diffWeights = new List<double[][]>();
+                        var greekStats = new List<SequenceStatisticsInc[]>();
+
+                        double[][] deltaGammaWeights = [new double[3], new double[3]];
+                        SequenceStatisticsInc[] deltaGammaStats =
+                            [new(product.NumberOfProducts), new(product.NumberOfProducts)];
+
+                        const double forwardBump = 1.0e-6;
+                        marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j, -forwardBump);
+                        var down = new LogNormalFwdRateEulerConstrained(marketModel, originalModel, generatorFactory, numeraires);
+                        down.SetConstraintType(startIndexOfConstraint, endIndexOfConstraint);
+                        marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j, forwardBump);
+                        var up = new LogNormalFwdRateEulerConstrained(marketModel, originalModel, generatorFactory, numeraires);
+                        up.SetConstraintType(startIndexOfConstraint, endIndexOfConstraint);
+                        ConstrainedEvolver[] deltaGammaEvolvers = [down, up];
+
+                        deltaGammaWeights[0][0] = 0.0;
+                        deltaGammaWeights[0][1] = -1.0 / (2.0 * forwardBump);
+                        deltaGammaWeights[0][2] = 1.0 / (2.0 * forwardBump);
+
+                        deltaGammaWeights[1][0] = -2.0 / (forwardBump * forwardBump);
+                        deltaGammaWeights[1][1] = 1.0 / (forwardBump * forwardBump);
+                        deltaGammaWeights[1][2] = 1.0 / (forwardBump * forwardBump);
+
+                        double[][] vegaWeights = [new double[3]];
+                        SequenceStatisticsInc[] vegaStats = [new(product.NumberOfProducts)];
+
+                        const double volBump = 1.0e-4;
+                        marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j, 0.0, -volBump);
+                        var volDown = new LogNormalFwdRateEulerConstrained(marketModel, originalModel, generatorFactory, numeraires);
+                        volDown.SetConstraintType(startIndexOfConstraint, endIndexOfConstraint);
+                        marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j, 0.0, volBump);
+                        var volUp = new LogNormalFwdRateEulerConstrained(marketModel, originalModel, generatorFactory, numeraires);
+                        volUp.SetConstraintType(startIndexOfConstraint, endIndexOfConstraint);
+                        ConstrainedEvolver[] vegaEvolvers = [volDown, volUp];
+
+                        vegaWeights[0][0] = 0.0;
+                        vegaWeights[0][1] = -1.0 / (2.0 * volBump);
+                        vegaWeights[0][2] = 1.0 / (2.0 * volBump);
+
+                        constrainedEvolvers.Add(deltaGammaEvolvers);
+                        diffWeights.Add(deltaGammaWeights);
+                        greekStats.Add(deltaGammaStats);
+
+                        constrainedEvolvers.Add(vegaEvolvers);
+                        diffWeights.Add(vegaWeights);
+                        greekStats.Add(vegaStats);
+
+                        int initialNumeraire = evolver.Numeraires[0];
+                        double initialNumeraireValue = vars.TodaysDiscounts[initialNumeraire];
+
+                        var engine = new ProxyGreekEngine(
+                            evolver, constrainedEvolvers, diffWeights, startIndexOfConstraint, endIndexOfConstraint, product,
+                            initialNumeraireValue);
+
+                        engine.MultiplePathValues(stats, greekStats, CommonVars.Paths);
+
+                        // QuantLib's test prints the values and Greeks beside Black's and asserts nothing: nanoql's facts
+                        // assert them (Divergences/ProxyGreekVegaTests.cs; the S-mmp plan's SMD13)
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestPathwiseGreeks()
+    {
+        // Testing caplet deltas in a lognormal forward rate market model using pathwise method...
+        var vars = new CommonVars();
+
+        Payoff[] payoffs = new Payoff[vars.TodaysForwards.Length];
+        StrikedTypePayoff[] displacedPayoffs = new StrikedTypePayoff[vars.TodaysForwards.Length];
+        for (int i = 0; i < vars.TodaysForwards.Length; ++i)
+        {
+            payoffs[i] = new PlainVanillaPayoff(OptionType.Call, vars.TodaysForwards[i]);
+            displacedPayoffs[i] = new PlainVanillaPayoff(OptionType.Call, vars.TodaysForwards[i] + CommonVars.Displacement);
+        }
+
+        for (int whichProduct = 0; whichProduct < 2; ++whichProduct)
+        {
+            var product1 = new MarketModelPathwiseMultiDeflatedCaplet(vars.RateTimes, vars.Accruals, vars.PaymentTimes, vars.TodaysForwards);
+
+            var product2 = new MarketModelPathwiseMultiCaplet(vars.RateTimes, vars.Accruals, vars.PaymentTimes, vars.TodaysForwards);
+
+            MarketModelPathwiseMultiProduct product = whichProduct == 0 ? product2 : product1;
+
+            var productDummy = new MultiStepOptionlets(vars.RateTimes, vars.Accruals, vars.PaymentTimes, payoffs);
+
+            EvolutionDescription evolution = product.Evolution;
+
+            string[] marketModels = ["ExponentialCorrelationAbcdVolatility"];
+            foreach (string j in marketModels)
+            {
+                int[] testedFactors = [2];
+                foreach (int factors in testedFactors)
+                {
+                    MeasureType[] measures = [MeasureType.MoneyMarket];
+                    foreach (MeasureType measure in measures)
+                    {
+                        int[] numeraires = vars.MakeMeasure(productDummy, measure);
+
+                        for (int n = 0; n < 1; n++)
+                        {
+                            var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+
+                            bool logNormal = true;
+                            MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                            var evolver = new LogNormalFwdRateEuler(marketModel, generatorFactory, numeraires);
+                            var stats = new SequenceStatisticsInc(product.NumberOfProducts * (vars.TodaysForwards.Length + 1));
+
+                            const double forwardBump = 1.0e-6;
+
+                            int initialNumeraire = evolver.Numeraires[0];
+                            double initialNumeraireValue = vars.TodaysDiscounts[initialNumeraire];
+
+                            {
+                                var accountingengine = new PathwiseAccountingEngine(evolver, product, marketModel, initialNumeraireValue);
+
+                                accountingengine.MultiplePathValues(stats, CommonVars.Paths);
+                            }
+
+                            ImmutableArray<double> valuesAndDeltas = stats.Mean();
+                            ImmutableArray<double> errors = stats.ErrorEstimate();
+
+                            double[] prices = new double[product.NumberOfProducts];
+                            double[] priceErrors = new double[product.NumberOfProducts];
+
+                            var deltas = new Matrix(product.NumberOfProducts, vars.TodaysForwards.Length);
+                            var deltasErrors = new Matrix(product.NumberOfProducts, vars.TodaysForwards.Length);
+
+                            double[] modelPrices = new double[product.NumberOfProducts];
+
+                            for (int i = 0; i < product.NumberOfProducts; ++i)
+                            {
+                                prices[i] = valuesAndDeltas[i];
+                                priceErrors[i] = errors[i];
+                                modelPrices[i] = new BlackCalculator(
+                                    displacedPayoffs[i],
+                                    vars.TodaysForwards[i],
+                                    vars.Volatilities[i] * Math.Sqrt(vars.RateTimes[i]),
+                                    vars.TodaysDiscounts[i + 1] * (vars.RateTimes[i + 1] - vars.RateTimes[i])).Value;
+
+                                for (int k = 0; k < vars.TodaysForwards.Length; ++k)
+                                {
+                                    deltas[i, k] = valuesAndDeltas[((i + 1) * product.NumberOfProducts) + k];
+                                    deltasErrors[i, k] = errors[((i + 1) * product.NumberOfProducts) + k];
+                                }
+                            }
+
+                            var modelDeltas = new Matrix(product.NumberOfProducts, vars.TodaysForwards.Length);
+
+                            double[] discPlus = [.. Enumerable.Repeat(vars.TodaysDiscounts[0], vars.TodaysForwards.Length + 1)];
+                            double[] discMinus = [.. Enumerable.Repeat(vars.TodaysDiscounts[0], vars.TodaysForwards.Length + 1)];
+                            double[] fwdPlus = new double[vars.TodaysForwards.Length];
+                            double[] fwdMinus = new double[vars.TodaysForwards.Length];
+
+                            for (int i = 0; i < vars.TodaysForwards.Length; ++i)
+                            {
+                                for (int k = 0; k < vars.TodaysForwards.Length; ++k)
+                                {
+                                    if (i != k)
+                                    {
+                                        fwdPlus[k] = vars.TodaysForwards[k];
+                                        fwdMinus[k] = vars.TodaysForwards[k];
+                                    }
+                                    else
+                                    {
+                                        fwdPlus[k] = vars.TodaysForwards[k] + forwardBump;
+                                        fwdMinus[k] = vars.TodaysForwards[k] - forwardBump;
+                                    }
+
+                                    double tau = vars.RateTimes[k + 1] - vars.RateTimes[k];
+                                    discPlus[k + 1] = discPlus[k] / (1.0 + (fwdPlus[k] * tau));
+                                    discMinus[k + 1] = discMinus[k] / (1.0 + (fwdMinus[k] * tau));
+                                }
+
+                                for (int k = 0; k < product.NumberOfProducts; ++k)
+                                {
+                                    double tau = vars.RateTimes[k + 1] - vars.RateTimes[k];
+                                    double priceUp = new BlackCalculator(
+                                        displacedPayoffs[k], fwdPlus[k], vars.Volatilities[k] * Math.Sqrt(vars.RateTimes[k]), discPlus[k + 1] * tau).Value;
+                                    double priceDown = new BlackCalculator(
+                                        displacedPayoffs[k], fwdMinus[k], vars.Volatilities[k] * Math.Sqrt(vars.RateTimes[k]), discMinus[k + 1] * tau).Value;
+                                    modelDeltas[k, i] = (priceUp - priceDown) / (2 * forwardBump);
+                                }
+                            }
+
+                            int numberErrors = 0;
+                            for (int i = 0; i < product.NumberOfProducts; ++i)
+                            {
+                                double thisPrice = prices[i];
+                                double thisModelPrice = modelPrices[i];
+                                double priceErrorInSds = (thisPrice - thisModelPrice) / priceErrors[i];
+                                const double errorTheshold = 3.5;
+                                if (Math.Abs(priceErrorInSds) > errorTheshold)
+                                {
+                                    ++numberErrors;
+                                }
+
+                                const double threshold = 1e-10;
+                                for (int k = 0; k < vars.TodaysForwards.Length; ++k)
+                                {
+                                    double delta = deltas[i, k];
+                                    double modelDelta = modelDeltas[i, k];
+
+                                    double deltaErrorInSds = 100;
+                                    if (deltasErrors[i, k] > 0.0)
+                                    {
+                                        deltaErrorInSds = (delta - modelDelta) / deltasErrors[i, k];
+                                    }
+                                    else if (Math.Abs(modelDelta - delta) < threshold)
+                                    {
+                                        // to cope with zero over zero
+                                        deltaErrorInSds = 0.0;
+                                    }
+
+                                    if (Math.Abs(deltaErrorInSds) > errorTheshold)
+                                    {
+                                        ++numberErrors;
+                                    }
+                                }
+                            }
+
+                            if (numberErrors > 0)
+                            {
+                                Assert.Fail($"Pathwise greeks test has {numberErrors}\n");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestPathwiseVegas()
+    {
+        // Testing pathwise vegas in a lognormal forward rate market model...
+        var vars = new CommonVars();
+
+        Payoff[] payoffs = new Payoff[vars.TodaysForwards.Length];
+        StrikedTypePayoff[] displacedPayoffs = new StrikedTypePayoff[vars.TodaysForwards.Length];
+        for (int i = 0; i < vars.TodaysForwards.Length; ++i)
+        {
+            payoffs[i] = new PlainVanillaPayoff(OptionType.Call, vars.TodaysForwards[i]);
+            displacedPayoffs[i] = new PlainVanillaPayoff(OptionType.Call, vars.TodaysForwards[i] + CommonVars.Displacement);
+        }
+
+        var product = new MultiStepOptionlets(vars.RateTimes, vars.Accruals, vars.PaymentTimes, payoffs);
+
+        var caplets = new MarketModelPathwiseMultiCaplet(vars.RateTimes, vars.Accruals, vars.PaymentTimes, vars.TodaysForwards);
+
+        var capletsDeflated = new MarketModelPathwiseMultiDeflatedCaplet(vars.RateTimes, vars.Accruals, vars.PaymentTimes, vars.TodaysForwards);
+
+        EvolutionDescription evolution = product.Evolution;
+
+        int steps = evolution.NumberOfSteps;
+        int numberRates = evolution.NumberOfRates;
+        const double bumpSizeNumericalDifferentiation = 1E-6;
+        const double vegaBumpSize = 1e-2;
+
+        // for the numerical differentiation test we are requiring equality on each path so this is actually quite strict
+        const int pathsToDo = 10;
+
+        const int pathsToDoSimulation = CommonVars.Paths;
+        int bumpIncrement = 1 + (evolution.NumberOfSteps / 3);
+
+        const double numericalBumpSizeForSwaptionPseudo = 1E-7;
+
+        // how many times the bump size squared, the numerical differentation is allowed to differ by
+        const double multiplier = 50;
+        double maxError = 0.0;
+
+        int numberSwaptionPseudoFailures = 0;
+        int numberCapPseudoFailures = 0;
+        int numberCapImpVolFailures = 0;
+        int numberCapVolPseudoFailures = 0;
+        const double swaptionPseudoTolerance = 1e-8;
+        const double impVolTolerance = 1e-5;
+        double capStrike = vars.MeanForward;
+        const double initialNumeraireValue = 0.95;
+
+        string[] marketModels = ["ExponentialCorrelationAbcdVolatility"];
+
+        // test swaption pseudo-root derivatives
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [Math.Min(3, vars.TodaysForwards.Length)];
+            foreach (int factors in testedFactors)
+            {
+                bool logNormal = true;
+                MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                int startIndex = Math.Min(1, evolution.NumberOfRates - 2);
+                int endIndex = evolution.NumberOfRates - 1;
+
+                var derivative = new SwaptionPseudoDerivative(marketModel, startIndex, endIndex);
+
+                Matrix[] pseudoRoots = [.. Enumerable.Range(0, marketModel.NumberOfSteps).Select(marketModel.PseudoRoot)];
+
+                for (int step = 0; step < evolution.NumberOfSteps; ++step)
+                {
+                    for (int l = 0; l < evolution.NumberOfRates; ++l)
+                    {
+                        for (int f = 0; f < factors; ++f)
+                        {
+                            pseudoRoots[step][l, f] += numericalBumpSizeForSwaptionPseudo;
+                            var bumpedUp = new PseudoRootFacade(pseudoRoots, vars.RateTimes, marketModel.InitialRates.AsSpan(), marketModel.Displacements.AsSpan());
+                            double upImpVol = SwapForwardMappings.SwaptionImpliedVolatility(bumpedUp, startIndex, endIndex);
+
+                            pseudoRoots[step][l, f] -= numericalBumpSizeForSwaptionPseudo;
+                            pseudoRoots[step][l, f] -= numericalBumpSizeForSwaptionPseudo;
+                            var bumpedDown = new PseudoRootFacade(pseudoRoots, vars.RateTimes, marketModel.InitialRates.AsSpan(), marketModel.Displacements.AsSpan());
+                            double downImpVol = SwapForwardMappings.SwaptionImpliedVolatility(bumpedDown, startIndex, endIndex);
+                            pseudoRoots[step][l, f] += numericalBumpSizeForSwaptionPseudo;
+
+                            double volDeriv = (upImpVol - downImpVol) / (2.0 * numericalBumpSizeForSwaptionPseudo);
+                            double modelVal = derivative.VolatilityDerivative(step)[l, f];
+
+                            double error = volDeriv - modelVal;
+                            if (Math.Abs(error) > swaptionPseudoTolerance)
+                            {
+                                ++numberSwaptionPseudoFailures;
+                            }
+                        }
+                    }
+                }
+
+                if (numberSwaptionPseudoFailures > 0)
+                {
+                    Assert.Fail($"swaption pseudo test failed {numberSwaptionPseudoFailures} times");
+                }
+            }
+        }
+
+        // test cap pseudo-root derivatives
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [Math.Min(3, vars.TodaysForwards.Length)];
+            foreach (int factors in testedFactors)
+            {
+                bool logNormal = true;
+                MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                for (int startIndex = 1; startIndex < evolution.NumberOfRates - 1; ++startIndex)
+                {
+                    for (int endIndex = startIndex + 1; endIndex < evolution.NumberOfRates; ++endIndex)
+                    {
+                        var derivative = new CapPseudoDerivative(marketModel, capStrike, startIndex, endIndex, initialNumeraireValue);
+
+                        Matrix[] pseudoRoots = [.. Enumerable.Range(0, marketModel.NumberOfSteps).Select(marketModel.PseudoRoot)];
+
+                        for (int step = 0; step < evolution.NumberOfSteps; ++step)
+                        {
+                            for (int l = 0; l < evolution.NumberOfRates; ++l)
+                            {
+                                for (int f = 0; f < factors; ++f)
+                                {
+                                    pseudoRoots[step][l, f] += numericalBumpSizeForSwaptionPseudo;
+                                    var bumpedUp = new PseudoRootFacade(pseudoRoots, vars.RateTimes, marketModel.InitialRates.AsSpan(), marketModel.Displacements.AsSpan());
+                                    Matrix totalCovUp = bumpedUp.TotalCovariance(marketModel.NumberOfSteps - 1);
+
+                                    pseudoRoots[step][l, f] -= numericalBumpSizeForSwaptionPseudo;
+                                    pseudoRoots[step][l, f] -= numericalBumpSizeForSwaptionPseudo;
+                                    var bumpedDown = new PseudoRootFacade(pseudoRoots, vars.RateTimes, marketModel.InitialRates.AsSpan(), marketModel.Displacements.AsSpan());
+                                    Matrix totalCovDown = bumpedDown.TotalCovariance(marketModel.NumberOfSteps - 1);
+
+                                    pseudoRoots[step][l, f] += numericalBumpSizeForSwaptionPseudo;
+
+                                    double priceDeriv = 0.0;
+                                    for (int k = startIndex; k < endIndex; ++k)
+                                    {
+                                        double upSd = Math.Sqrt(totalCovUp[k, k]);
+                                        double downSd = Math.Sqrt(totalCovDown[k, k]);
+                                        double annuity = vars.TodaysDiscounts[k + 1] * marketModel.Evolution.RateTaus[k];
+                                        double forward = vars.TodaysForwards[k];
+
+                                        double upPrice = BlackFormulaFunctions.BlackFormula(
+                                            OptionType.Call, capStrike, forward, upSd, annuity, marketModel.Displacements[k]);
+
+                                        double downPrice = BlackFormulaFunctions.BlackFormula(
+                                            OptionType.Call, capStrike, forward, downSd, annuity, marketModel.Displacements[k]);
+
+                                        priceDeriv += (upPrice - downPrice) / (2.0 * numericalBumpSizeForSwaptionPseudo);
+                                    }
+
+                                    double modelVal = derivative.PriceDerivative(step)[l, f];
+
+                                    double error = priceDeriv - modelVal;
+                                    if (Math.Abs(error) > swaptionPseudoTolerance)
+                                    {
+                                        ++numberCapPseudoFailures;
+                                    }
+                                }
+                            }
+                        }
+
+                        double impVol = derivative.ImpliedVolatility;
+                        Matrix totalCov = marketModel.TotalCovariance(evolution.NumberOfSteps - 1);
+
+                        double priceConstVol = 0.0;
+                        double priceVarVol = 0.0;
+                        for (int m = startIndex; m < endIndex; ++m)
+                        {
+                            double annuity = vars.TodaysDiscounts[m + 1] * marketModel.Evolution.RateTaus[m];
+                            double expiry = vars.RateTimes[m];
+                            double forward = vars.TodaysForwards[m];
+
+                            priceConstVol += BlackFormulaFunctions.BlackFormula(
+                                OptionType.Call, capStrike, forward, impVol * Math.Sqrt(expiry), annuity, marketModel.Displacements[m]);
+
+                            priceVarVol += BlackFormulaFunctions.BlackFormula(
+                                OptionType.Call, capStrike, forward, Math.Sqrt(totalCov[m, m]), annuity, marketModel.Displacements[m]);
+                        }
+
+                        if (Math.Abs(priceVarVol - priceConstVol) > impVolTolerance)
+                        {
+                            ++numberCapImpVolFailures;
+                        }
+                    }
+                }
+
+                if (numberCapPseudoFailures > 0)
+                {
+                    Assert.Fail($"cap pseudo test failed for prices {numberCapPseudoFailures} times");
+                }
+
+                if (numberCapImpVolFailures > 0)
+                {
+                    Assert.Fail($"cap pseudo test failed for implied vols {numberCapImpVolFailures} times");
+                }
+            }
+
+            foreach (int factors in testedFactors)
+            {
+                bool logNormal = true;
+                MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                for (int startIndex = 1; startIndex < evolution.NumberOfRates - 1; ++startIndex)
+                {
+                    for (int endIndex = startIndex + 1; endIndex < evolution.NumberOfRates; ++endIndex)
+                    {
+                        var derivative = new CapPseudoDerivative(marketModel, capStrike, startIndex, endIndex, initialNumeraireValue);
+
+                        Matrix[] pseudoRoots = [.. Enumerable.Range(0, marketModel.NumberOfSteps).Select(marketModel.PseudoRoot)];
+
+                        for (int step = 0; step < evolution.NumberOfSteps; ++step)
+                        {
+                            for (int l = 0; l < evolution.NumberOfRates; ++l)
+                            {
+                                for (int f = 0; f < factors; ++f)
+                                {
+                                    pseudoRoots[step][l, f] += numericalBumpSizeForSwaptionPseudo;
+                                    var bumpedUp = new PseudoRootFacade(pseudoRoots, vars.RateTimes, marketModel.InitialRates.AsSpan(), marketModel.Displacements.AsSpan());
+                                    var upDerivative = new CapPseudoDerivative(bumpedUp, capStrike, startIndex, endIndex, initialNumeraireValue);
+                                    double volUp = upDerivative.ImpliedVolatility;
+
+                                    pseudoRoots[step][l, f] -= numericalBumpSizeForSwaptionPseudo;
+                                    pseudoRoots[step][l, f] -= numericalBumpSizeForSwaptionPseudo;
+                                    var bumpedDown = new PseudoRootFacade(pseudoRoots, vars.RateTimes, marketModel.InitialRates.AsSpan(), marketModel.Displacements.AsSpan());
+                                    var downDerivative = new CapPseudoDerivative(bumpedDown, capStrike, startIndex, endIndex, initialNumeraireValue);
+                                    double volDown = downDerivative.ImpliedVolatility;
+
+                                    pseudoRoots[step][l, f] += numericalBumpSizeForSwaptionPseudo;
+
+                                    double volDeriv = (volUp - volDown) / (2.0 * numericalBumpSizeForSwaptionPseudo);
+
+                                    double modelVal = derivative.VolatilityDerivative(step)[l, f];
+
+                                    double error = volDeriv - modelVal;
+                                    if (Math.Abs(error) > impVolTolerance * 10)
+                                    {
+                                        ++numberCapVolPseudoFailures;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (numberCapVolPseudoFailures > 0)
+                {
+                    Assert.Fail($"cap pseudo test failed for implied vols {numberCapVolPseudoFailures} times");
+                }
+            }
+        }
+
+        for (int j = 0; j < marketModels.Length; j++)
+        {
+            int[] testedFactors = [Math.Min(1, vars.TodaysForwards.Length)];
+            foreach (int factors in testedFactors)
+            {
+                // doing all possible vegas is combinatorially explosive
+                int factorsToTest = Math.Min(2, factors);
+
+                MeasureType[] measures = [MeasureType.MoneyMarket];
+
+                // we test the pseudo-root jacobians by bumping each element and comparing analytic with numerical
+                var pseudoBumps = new List<Matrix>();
+                var pseudoBumpsDown = new List<Matrix>();
+                for (int k = 0; k < evolution.NumberOfRates; ++k)
+                {
+                    for (int f = 0; f < factors; ++f)
+                    {
+                        var bump = new Matrix(evolution.NumberOfRates, factors, 0.0);
+                        bump[k, f] = bumpSizeNumericalDifferentiation;
+                        pseudoBumps.Add(bump.Clone());
+                        bump[k, f] = -bumpSizeNumericalDifferentiation;
+                        pseudoBumpsDown.Add(bump);
+                    }
+                }
+
+                // we do one bump for each rate and each step
+                var vegaBumps = new List<List<Matrix>>();
+                var modelBump = new Matrix(evolution.NumberOfRates, factors, 0.0);
+                for (int l = 0; l < evolution.NumberOfSteps; ++l)
+                {
+                    vegaBumps.Add([]);
+                    for (int k = 0; k < evolution.NumberOfRates; k += bumpIncrement)
+                    {
+                        for (int f = 0; f < factorsToTest; ++f)
+                        {
+                            for (int m = 0; m < evolution.NumberOfSteps; ++m)
+                            {
+                                if (l == m && k >= l)
+                                {
+                                    modelBump[k, f] = vegaBumpSize;
+                                }
+
+                                vegaBumps[l].Add(modelBump.Clone());
+                                modelBump[k, f] = 0.0;
+                            }
+                        }
+                    }
+                }
+
+                foreach (MeasureType measure in measures)
+                {
+                    int[] numeraires = vars.MakeMeasure(product, measure);
+
+                    var testees = new List<RatePseudoRootJacobian>();
+                    var testees2 = new List<RatePseudoRootJacobianAllElements>();
+                    var testers = new List<RatePseudoRootJacobianNumerical>();
+                    var testersDown = new List<RatePseudoRootJacobianNumerical>();
+
+                    var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+
+                    bool logNormal = true;
+                    MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, marketModels[j]);
+
+                    for (int l = 0; l < evolution.NumberOfSteps; ++l)
+                    {
+                        Matrix pseudoRoot = marketModel.PseudoRoot(l);
+
+                        testees.Add(new RatePseudoRootJacobian(
+                            pseudoRoot, evolution.FirstAliveRate[l], numeraires[l], evolution.RateTaus.AsSpan(), pseudoBumps,
+                            marketModel.Displacements.AsSpan()));
+
+                        testees2.Add(new RatePseudoRootJacobianAllElements(
+                            pseudoRoot, evolution.FirstAliveRate[l], numeraires[l], evolution.RateTaus.AsSpan(), marketModel.Displacements.AsSpan()));
+
+                        testers.Add(new RatePseudoRootJacobianNumerical(
+                            pseudoRoot, evolution.FirstAliveRate[l], numeraires[l], evolution.RateTaus.AsSpan(), pseudoBumps,
+                            marketModel.Displacements.AsSpan()));
+
+                        testersDown.Add(new RatePseudoRootJacobianNumerical(
+                            pseudoRoot, evolution.FirstAliveRate[l], numeraires[l], evolution.RateTaus.AsSpan(), pseudoBumpsDown,
+                            marketModel.Displacements.AsSpan()));
+                    }
+
+                    BrownianGenerator generator = generatorFactory.Create(factors, steps);
+                    var evolver = new LogNormalFwdRateEuler(marketModel, generatorFactory, numeraires);
+
+                    double[] oldRates = new double[evolution.NumberOfRates];
+                    double[] newRates = new double[evolution.NumberOfRates];
+                    double[] gaussians = new double[factors];
+
+                    int[] numberCashFlowsThisStep = new int[product.NumberOfProducts];
+                    var cashFlowsGenerated = new MarketModelMultiProductCashFlow[product.NumberOfProducts][];
+                    for (int i = 0; i < product.NumberOfProducts; ++i)
+                    {
+                        cashFlowsGenerated[i] = new MarketModelMultiProductCashFlow[product.MaxNumberOfCashFlowsPerProductPerStep];
+                    }
+
+                    var b = new Matrix(pseudoBumps.Count, evolution.NumberOfRates);
+                    var b2 = new Matrix(pseudoBumps.Count, evolution.NumberOfRates);
+                    var b3 = new Matrix(pseudoBumps.Count, evolution.NumberOfRates);
+                    var b4 = new Matrix(pseudoBumps.Count, evolution.NumberOfRates);
+
+                    Matrix[] globalB = [.. Enumerable.Range(0, steps).Select(_ => new Matrix(evolution.NumberOfRates, factors))];
+
+                    double[] oneStepDFs = new double[evolution.NumberOfRates + 1];
+                    oneStepDFs[0] = 1.0;
+
+                    int numberFailures = 0;
+                    int numberFailures2 = 0;
+
+                    for (int l = 0; l < pathsToDo; ++l)
+                    {
+                        evolver.StartNewPath();
+                        product.Reset();
+                        generator.NextPath();
+                        bool done;
+                        marketModel.InitialRates.AsSpan().CopyTo(newRates);
+                        int currentStep = 0;
+                        do
+                        {
+                            newRates.CopyTo(oldRates, 0);
+                            evolver.AdvanceStep();
+                            done = product.NextTimeStep(evolver.CurrentState, numberCashFlowsThisStep, cashFlowsGenerated);
+                            evolver.CurrentState.ForwardRates().CopyTo(newRates);
+
+                            for (int i = 1; i <= evolution.NumberOfRates; ++i)
+                            {
+                                oneStepDFs[i] = 1.0 / (1 + (oldRates[i - 1] * evolution.RateTaus[i - 1]));
+                            }
+
+                            generator.NextStep(gaussians);
+
+                            testees[currentStep].GetBumps(oldRates, oneStepDFs, newRates, gaussians, b);
+
+                            testees2[currentStep].GetBumps(oldRates, oneStepDFs, newRates, gaussians, globalB);
+
+                            testers[currentStep].GetBumps(oldRates, oneStepDFs, newRates, gaussians, b2);
+
+                            testersDown[currentStep].GetBumps(oldRates, oneStepDFs, newRates, gaussians, b3);
+
+                            for (int i1 = 0; i1 < pseudoBumps.Count; ++i1)
+                            {
+                                int j1 = 0;
+                                for (; j1 < evolution.FirstAliveRate[i1]; ++j1)
+                                {
+                                    b4[i1, j1] = 0.0;
+                                }
+
+                                for (; j1 < numberRates; ++j1)
+                                {
+                                    double sum = 0.0;
+                                    for (int k1 = evolution.FirstAliveRate[i1]; k1 < numberRates; ++k1)
+                                    {
+                                        for (int f1 = 0; f1 < factors; ++f1)
+                                        {
+                                            sum += pseudoBumps[i1][k1, f1] * globalB[j1][k1, f1];
+                                        }
+                                    }
+
+                                    b4[i1, j1] = sum;
+                                }
+                            }
+
+                            for (int jj = 0; jj < b.Rows; ++jj)
+                            {
+                                for (int k = 0; k < b.Columns; ++k)
+                                {
+                                    double analytic = b[jj, k] / bumpSizeNumericalDifferentiation;
+                                    double analytic2 = b4[jj, k] / bumpSizeNumericalDifferentiation;
+                                    double numerical = (b2[jj, k] - b3[jj, k]) / (2 * bumpSizeNumericalDifferentiation);
+                                    double errorSize = (analytic - numerical) / (bumpSizeNumericalDifferentiation * bumpSizeNumericalDifferentiation);
+                                    double errorSize2 = (analytic2 - numerical) / (bumpSizeNumericalDifferentiation * bumpSizeNumericalDifferentiation);
+                                    maxError = Math.Max(maxError, Math.Abs(errorSize));
+
+                                    if (Math.Abs(errorSize) > multiplier)
+                                    {
+                                        ++numberFailures;
+                                    }
+
+                                    if (Math.Abs(errorSize2) > multiplier)
+                                    {
+                                        ++numberFailures2;
+                                    }
+                                }
+                            }
+
+                            ++currentStep;
+                        }
+                        while (!done);
+                    }
+
+                    if (numberFailures > 0)
+                    {
+                        Assert.Fail($"Pathwise rate pseudoroot jacobian test fails : {numberFailures}\n");
+                    }
+
+                    if (numberFailures2 > 0)
+                    {
+                        Assert.Fail($"Pathwise rate pseudoroot jacobian all elements test fails : {numberFailures2}\n");
+                    }
+                }
+
+                // end of k loop over measures
+
+                // we now test the pathwise vega engine against the analytic vegas
+                int numberDeflatedErrors = 0;
+                int numberUndeflatedErrors = 0;
+                double biggestError = 0.0;
+
+                for (int deflate = 0; deflate < 2; ++deflate)
+                {
+                    MarketModelPathwiseMultiProduct productToUse = deflate == 0 ? caplets : capletsDeflated;
+
+                    foreach (MeasureType measure in measures)
+                    {
+                        int[] numeraires = vars.MakeMeasure(product, measure);
+
+                        var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+
+                        bool logNormal = true;
+                        MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, marketModels[j]);
+
+                        var evolver = new LogNormalFwdRateEuler(marketModel, generatorFactory, numeraires);
+
+                        int initialNumeraire = evolver.Numeraires[0];
+                        double initialNumeraireValueThis = vars.TodaysDiscounts[initialNumeraire];
+
+                        double[] values;
+                        double[] errors;
+
+                        {
+                            // Adapted: QuantLib's engine resizes the caller's vectors; nanoql's writes spans of its size
+                            var accountingengine = new PathwiseVegasAccountingEngine(
+                                new LogNormalFwdRateEuler(marketModel, generatorFactory, numeraires), productToUse, marketModel, vegaBumps,
+                                initialNumeraireValueThis);
+                            values = new double[accountingengine.NumberOfResults];
+                            errors = new double[accountingengine.NumberOfResults];
+                            accountingengine.MultiplePathValues(values, errors, pathsToDoSimulation);
+                        }
+
+                        var vegasMatrix = new Matrix(caplets.NumberOfProducts, vegaBumps[0].Count);
+                        var standardErrors = new Matrix(caplets.NumberOfProducts, vegaBumps[0].Count);
+                        var deltasMatrix = new Matrix(caplets.NumberOfProducts, numberRates);
+                        var deltasErrors = new Matrix(caplets.NumberOfProducts, numberRates);
+                        double[] prices = new double[caplets.NumberOfProducts];
+                        double[] priceErrors = new double[caplets.NumberOfProducts];
+
+                        int entriesPerProduct = 1 + numberRates + vegaBumps[0].Count;
+
+                        for (int i = 0; i < caplets.NumberOfProducts; ++i)
+                        {
+                            prices[i] = values[i * entriesPerProduct];
+                            priceErrors[i] = errors[i * entriesPerProduct];
+
+                            for (int k = 0; k < vegaBumps[0].Count; ++k)
+                            {
+                                vegasMatrix[i, k] = values[(i * entriesPerProduct) + numberRates + 1 + k];
+                                standardErrors[i, k] = errors[(i * entriesPerProduct) + numberRates + 1 + k];
+                            }
+
+                            for (int k = 0; k < numberRates; ++k)
+                            {
+                                deltasMatrix[i, k] = values[(i * entriesPerProduct) + 1 + k];
+                                deltasErrors[i, k] = errors[(i * entriesPerProduct) + 1 + k];
+                            }
+                        }
+
+                        Matrix totalCovariance = marketModel.TotalCovariance(marketModel.NumberOfSteps - 1);
+
+                        double[] truePrices = new double[caplets.NumberOfProducts];
+                        for (int r = 0; r < truePrices.Length; ++r)
+                        {
+                            truePrices[r] = new BlackCalculator(
+                                displacedPayoffs[r], vars.TodaysForwards[r], Math.Sqrt(totalCovariance[r, r]),
+                                vars.TodaysDiscounts[r + 1] * (vars.RateTimes[r + 1] - vars.RateTimes[r])).Value;
+                        }
+
+                        for (int bIndex = 0; bIndex < vegaBumps[0].Count; ++bIndex)
+                        {
+                            double[] bumpedPrices = new double[truePrices.Length];
+                            double[] variances = new double[truePrices.Length];
+                            double[] vegas = new double[truePrices.Length];
+
+                            for (int step = 0; step < marketModel.NumberOfSteps; ++step)
+                            {
+                                Matrix pseudoRoot = marketModel.PseudoRoot(step);
+                                pseudoRoot += vegaBumps[step][bIndex];
+
+                                for (int rate = step; rate < marketModel.NumberOfRates; ++rate)
+                                {
+                                    double variance = 0.0;
+                                    for (int f = 0; f < marketModel.NumberOfFactors; ++f)
+                                    {
+                                        variance += pseudoRoot[rate, f] * pseudoRoot[rate, f];
+                                    }
+
+                                    variances[rate] += variance;
+                                }
+                            }
+
+                            for (int r = 0; r < truePrices.Length; ++r)
+                            {
+                                bumpedPrices[r] = new BlackCalculator(
+                                    displacedPayoffs[r], vars.TodaysForwards[r], Math.Sqrt(variances[r]),
+                                    vars.TodaysDiscounts[r + 1] * (vars.RateTimes[r + 1] - vars.RateTimes[r])).Value;
+                                vegas[r] = bumpedPrices[r] - truePrices[r];
+                            }
+
+                            for (int s = 0; s < truePrices.Length; ++s)
+                            {
+                                double mcVega = vegasMatrix[s, bIndex];
+                                double analyticVega = vegas[s];
+                                double thisError = mcVega - analyticVega;
+                                double thisSE = standardErrors[s, bIndex];
+                                if (Math.Abs(thisError) > 0.0)
+                                {
+                                    double errorInSEs = thisError / thisSE;
+                                    biggestError = Math.Max(Math.Abs(errorInSEs), biggestError);
+                                    if (Math.Abs(errorInSEs) > 4.5)
+                                    {
+                                        if (deflate == 0)
+                                        {
+                                            ++numberUndeflatedErrors;
+                                        }
+                                        else
+                                        {
+                                            ++numberDeflatedErrors;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // check the pathwise vega engine's prices and deltas against the pathwise delta engine's
+                        MarketModelPathwiseMultiProduct productToUse2 = deflate == 0 ? caplets : capletsDeflated;
+
+                        var stats = new SequenceStatisticsInc(productToUse2.NumberOfProducts * (vars.TodaysForwards.Length + 1));
+                        {
+                            var accountingengine = new PathwiseAccountingEngine(evolver, productToUse2, marketModel, initialNumeraireValueThis);
+
+                            accountingengine.MultiplePathValues(stats, pathsToDoSimulation);
+                        }
+
+                        ImmutableArray<double> valuesAndDeltas2 = stats.Mean();
+                        ImmutableArray<double> errors2 = stats.ErrorEstimate();
+
+                        double[] prices2 = new double[productToUse2.NumberOfProducts];
+                        double[] priceErrors2 = new double[productToUse2.NumberOfProducts];
+                        var deltas2 = new Matrix(productToUse2.NumberOfProducts, vars.TodaysForwards.Length);
+                        var deltasErrors2 = new Matrix(productToUse2.NumberOfProducts, vars.TodaysForwards.Length);
+
+                        for (int i = 0; i < productToUse2.NumberOfProducts; ++i)
+                        {
+                            prices2[i] = valuesAndDeltas2[i];
+                            priceErrors2[i] = errors2[i];
+                            for (int k = 0; k < vars.TodaysForwards.Length; ++k)
+                            {
+                                deltas2[i, k] = valuesAndDeltas2[((i + 1) * productToUse2.NumberOfProducts) + k];
+                                deltasErrors2[i, k] = errors2[((i + 1) * productToUse2.NumberOfProducts) + k];
+                            }
+                        }
+
+                        for (int i = 0; i < productToUse2.NumberOfProducts; ++i)
+                        {
+                            double priceDiff = prices2[i] - prices[i];
+
+                            // two sets of standard error
+                            if (Math.Abs(priceDiff) > 5 * priceErrors2[i])
+                            {
+                                Assert.Fail(
+                                    "pathwise accounting engine and pathwise vegas accounting engine not in perfect agreement for price.\n"
+                                    + $" product {i},  vega computed price: {prices[i]} previous price {prices2[i]}, deflate {deflate}\n");
+                            }
+
+                            for (int k = 0; k < vars.TodaysForwards.Length; ++k)
+                            {
+                                double error = deltas2[i, k] - deltasMatrix[i, k];
+
+                                // two sets of standard error
+                                if (Math.Abs(error) > 5 * deltasErrors2[i, k])
+                                {
+                                    Assert.Fail(
+                                        "pathwise accounting engine and pathwise vegas accounting engine not in perfect agreement for dealts.\n"
+                                        + $" product {i}, rate {k} vega computed delta: {deltasMatrix[i, k]} previous delta {deltas2[i, k]}\n");
+                                }
+                            }
+                        }
+                    }
+
+                    // end of k loop over measures
+                }
+
+                // end of loop over deflation
+                if (numberDeflatedErrors + numberUndeflatedErrors > 0)
+                {
+                    Assert.Fail(
+                        $"Model pathwise vega test for caplets fails : {numberDeflatedErrors} deflated errors and {numberUndeflatedErrors}"
+                        + $"  undeflated errors , biggest error in SEs is {biggestError}\n");
+                }
+
+                // ok now try with caps
+                {
+                    var caps = new List<VolatilityBumpInstrumentJacobianCap>();
+
+                    double capStrikeCaps = vars.TodaysForwards[0];
+
+                    for (int i = 0; i + 2 < numberRates; i += 3)
+                    {
+                        caps.Add(new VolatilityBumpInstrumentJacobianCap(i + 2, i + 3, capStrikeCaps));
+                    }
+
+                    (int, int)[] startsAndEnds = [.. caps.Select(c => (c.StartIndex, c.EndIndex))];
+
+                    var capsDeflated = new MarketModelPathwiseMultiDeflatedCap(
+                        vars.RateTimes, vars.Accruals, vars.PaymentTimes, capStrikeCaps, startsAndEnds);
+
+                    foreach (MeasureType measure in measures)
+                    {
+                        int[] numeraires = vars.MakeMeasure(product, measure);
+
+                        var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+                        var generatorFactory2 = new MTBrownianGeneratorFactory(CommonVars.Seed);
+
+                        bool logNormal = true;
+                        MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, marketModels[j]);
+
+                        var evolver = new LogNormalFwdRateEuler(marketModel, generatorFactory, numeraires);
+
+                        var evolver2 = new LogNormalFwdRateEuler(marketModel, generatorFactory2, numeraires);
+
+                        int initialNumeraire = evolver.Numeraires[0];
+                        double initialNumeraireValueThis = vars.TodaysDiscounts[initialNumeraire];
+
+                        double[] values;
+                        double[] errors;
+                        double[] values2;
+                        double[] errors2;
+
+                        {
+                            var accountingengine = new PathwiseVegasOuterAccountingEngine(
+                                evolver2, capsDeflated, marketModel, vegaBumps, initialNumeraireValueThis);
+                            values2 = new double[accountingengine.NumberOfResults];
+                            errors2 = new double[accountingengine.NumberOfResults];
+                            accountingengine.MultiplePathValues(values2, errors2, pathsToDoSimulation);
+                        }
+
+                        {
+                            var accountingengine = new PathwiseVegasAccountingEngine(
+                                evolver, capsDeflated, marketModel, vegaBumps, initialNumeraireValueThis);
+                            values = new double[accountingengine.NumberOfResults];
+                            errors = new double[accountingengine.NumberOfResults];
+                            accountingengine.MultiplePathValues(values, errors, pathsToDoSimulation);
+                        }
+
+                        {
+                            const double tol = 1E-8;
+                            int numberMeanFailures = 0;
+                            for (int i = 0; i < values.Length; ++i)
+                            {
+                                if (Math.Abs(values[i] - values2[i]) > tol)
+                                {
+                                    ++numberMeanFailures;
+                                }
+                            }
+
+                            if (numberMeanFailures > 0)
+                            {
+                                Assert.Fail(
+                                    "Comparison of Pathwise vegas accounting engine and PathwiseVegasOuterAccountingEngine yields discrepancies:"
+                                    + $"{numberMeanFailures}  out of {values.Length}");
+                            }
+                        }
+
+                        var vegasMatrix = new Matrix(capsDeflated.NumberOfProducts, vegaBumps[0].Count);
+                        var standardErrors = new Matrix(capsDeflated.NumberOfProducts, vegaBumps[0].Count);
+
+                        int entriesPerProduct = 1 + numberRates + vegaBumps[0].Count;
+
+                        for (int i = 0; i < capsDeflated.NumberOfProducts; ++i)
+                        {
+                            for (int k = 0; k < vegaBumps[0].Count; ++k)
+                            {
+                                vegasMatrix[i, k] = values[(i * entriesPerProduct) + numberRates + 1 + k];
+                                standardErrors[i, k] = errors[(i * entriesPerProduct) + numberRates + 1 + k];
+                            }
+                        }
+
+                        Matrix totalCovariance = marketModel.TotalCovariance(marketModel.NumberOfSteps - 1);
+
+                        double[] trueCapletPrices = new double[numberRates];
+
+                        StrikedTypePayoff dispayoff = new PlainVanillaPayoff(OptionType.Call, capStrikeCaps + CommonVars.Displacement);
+
+                        for (int r = 0; r < trueCapletPrices.Length; ++r)
+                        {
+                            trueCapletPrices[r] = new BlackCalculator(
+                                dispayoff, vars.TodaysForwards[r], Math.Sqrt(totalCovariance[r, r]),
+                                vars.TodaysDiscounts[r + 1] * (vars.RateTimes[r + 1] - vars.RateTimes[r])).Value;
+                        }
+
+                        double[] trueCapPrices = new double[capsDeflated.NumberOfProducts];
+                        double[] vegaCaps = new double[capsDeflated.NumberOfProducts];
+                        for (int s = 0; s < capsDeflated.NumberOfProducts; ++s)
+                        {
+                            trueCapPrices[s] = 0.0;
+                            for (int t = caps[s].StartIndex; t < caps[s].EndIndex; ++t)
+                            {
+                                trueCapPrices[s] += trueCapletPrices[t];
+                            }
+                        }
+
+                        int numberErrors = 0;
+
+                        for (int bIndex = 0; bIndex < vegaBumps[0].Count; ++bIndex)
+                        {
+                            double[] bumpedCapletPrices = new double[trueCapletPrices.Length];
+                            double[] variances = new double[trueCapletPrices.Length];
+                            double[] vegasCaplets = new double[trueCapletPrices.Length];
+
+                            for (int step = 0; step < marketModel.NumberOfSteps; ++step)
+                            {
+                                Matrix pseudoRoot = marketModel.PseudoRoot(step);
+                                pseudoRoot += vegaBumps[step][bIndex];
+
+                                for (int rate = step; rate < marketModel.NumberOfRates; ++rate)
+                                {
+                                    double variance = 0.0;
+                                    for (int f = 0; f < marketModel.NumberOfFactors; ++f)
+                                    {
+                                        variance += pseudoRoot[rate, f] * pseudoRoot[rate, f];
+                                    }
+
+                                    variances[rate] += variance;
+                                }
+                            }
+
+                            for (int r = 0; r < trueCapletPrices.Length; ++r)
+                            {
+                                bumpedCapletPrices[r] = new BlackCalculator(
+                                    dispayoff, vars.TodaysForwards[r], Math.Sqrt(variances[r]),
+                                    vars.TodaysDiscounts[r + 1] * (vars.RateTimes[r + 1] - vars.RateTimes[r])).Value;
+                                vegasCaplets[r] = bumpedCapletPrices[r] - trueCapletPrices[r];
+                            }
+
+                            for (int s = 0; s < capsDeflated.NumberOfProducts; ++s)
+                            {
+                                vegaCaps[s] = 0.0;
+                                for (int t = caps[s].StartIndex; t < caps[s].EndIndex; ++t)
+                                {
+                                    vegaCaps[s] += vegasCaplets[t];
+                                }
+                            }
+
+                            for (int s = 0; s < capsDeflated.NumberOfProducts; ++s)
+                            {
+                                double mcVega = vegasMatrix[s, bIndex];
+                                double analyticVega = vegaCaps[s];
+                                double thisError = mcVega - analyticVega;
+                                double thisSE = standardErrors[s, bIndex];
+                                if (Math.Abs(thisError) > 0.0)
+                                {
+                                    double errorInSEs = Math.Abs(thisError / thisSE);
+                                    if (errorInSEs > 4.0)
+                                    {
+                                        ++numberErrors;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (numberErrors > 0)
+                        {
+                            Assert.Fail($"caps Pathwise vega test fails : {numberErrors}\n");
+                        }
+                    }
+
+                    // end of k loop over measures
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestPathwiseMarketVegas()
+    {
+        // Testing pathwise market vegas in a lognormal forward rate market model...
+        var vars = new CommonVars();
+
+        var cs = new LMMCurveState(vars.RateTimes);
+        cs.SetOnForwardRates(vars.TodaysForwards);
+
+        Payoff[] payoffs = new Payoff[vars.TodaysForwards.Length];
+        for (int i = 0; i < vars.TodaysForwards.Length; ++i)
+        {
+            payoffs[i] = new PlainVanillaPayoff(OptionType.Call, cs.CoterminalSwapRate(i));
+        }
+
+        var dummyProduct = new MultiStepOptionlets(vars.RateTimes, vars.Accruals, vars.PaymentTimes, payoffs);
+
+        const double bumpSizeNumericalDifferentiation = 1E-6;
+
+        var swaptionsDeflated = new MarketModelPathwiseCoterminalSwaptionsDeflated(vars.RateTimes, cs.CoterminalSwapRates());
+
+        var swaptionsDeflated2 = new MarketModelPathwiseCoterminalSwaptionsNumericalDeflated(
+            vars.RateTimes, cs.CoterminalSwapRates(), bumpSizeNumericalDifferentiation);
+
+        EvolutionDescription evolution = dummyProduct.Evolution;
+
+        int steps = evolution.NumberOfSteps;
+        int numberRates = evolution.NumberOfRates;
+
+        // for the numerical differentiation test we are requiring equality on each path so this is actually quite strict
+        const int pathsToDo = 10;
+
+        const int pathsToDoSimulation = CommonVars.Paths;
+
+        // how many times the bump size squared, the numerical differentation is allowed to differ by
+        const double multiplier = 50;
+
+        const double tolerance = 1E-6;
+        const double initialNumeraireValue = 0.95;
+
+        bool allowFactorwiseBumping = true;
+
+        var caps = new List<VolatilityBumpInstrumentJacobianCap>();
+
+        double capStrike = vars.TodaysForwards[0];
+
+        for (int i = 0; i + 2 < numberRates; i += 3)
+        {
+            caps.Add(new VolatilityBumpInstrumentJacobianCap(i, i + 3, capStrike));
+        }
+
+        (int, int)[] startsAndEnds = [.. caps.Select(c => (c.StartIndex, c.EndIndex))];
+
+        var capsDeflated = new MarketModelPathwiseMultiDeflatedCap(vars.RateTimes, vars.Accruals, vars.PaymentTimes, capStrike, startsAndEnds);
+
+        VolatilityBumpInstrumentJacobianSwaption[] swaptions =
+            [.. Enumerable.Range(0, numberRates).Select(i => new VolatilityBumpInstrumentJacobianSwaption(i, numberRates))];
+
+        string[] marketModels = ["ExponentialCorrelationAbcdVolatility"];
+
+        // first we check the bumps' implied volatility derivatives
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [Math.Min(1, vars.TodaysForwards.Length)];
+            foreach (int factors in testedFactors)
+            {
+                bool logNormal = true;
+                MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                var possibleBumps = new VegaBumpCollection(marketModel, allowFactorwiseBumping);
+
+                var bumpFinder = new OrthogonalizedBumpFinder(possibleBumps, swaptions, caps, multiplier, tolerance);
+
+                Matrix[][] theBumps = bumpFinder.GetVegaBumps();
+
+                {
+                    var swaptionVegasMatrix = new Matrix(swaptionsDeflated.NumberOfProducts, theBumps[0].Length);
+
+                    for (int i = 0; i < swaptionsDeflated.NumberOfProducts; ++i)
+                    {
+                        var thisPseudoDerivative = new SwaptionPseudoDerivative(marketModel, swaptions[i].StartIndex, swaptions[i].EndIndex);
+
+                        for (int jj = 0; jj < theBumps[0].Length; ++jj)
+                        {
+                            swaptionVegasMatrix[i, jj] = 0;
+                            for (int k = 0; k < steps; ++k)
+                            {
+                                Matrix volatilityDerivative = thisPseudoDerivative.VolatilityDerivative(k);
+                                for (int l = 0; l < numberRates; ++l)
+                                {
+                                    for (int m = 0; m < factors; ++m)
+                                    {
+                                        swaptionVegasMatrix[i, jj] += theBumps[k][jj][l, m] * volatilityDerivative[l, m];
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    int numberDiagonalFailures = 0;
+                    int offDiagonalFailures = 0;
+
+                    for (int i = 0; i < swaptions.Length; ++i)
+                    {
+                        for (int jj = 0; jj < theBumps[0].Length; ++jj)
+                        {
+                            if (i == jj)
+                            {
+                                double thisError = swaptionVegasMatrix[i, i] - 0.01;
+                                if (Math.Abs(thisError) > 1e-8)
+                                {
+                                    ++numberDiagonalFailures;
+                                }
+                            }
+                            else
+                            {
+                                double thisError = swaptionVegasMatrix[i, jj];
+                                if (Math.Abs(thisError) > 1e-8)
+                                {
+                                    ++offDiagonalFailures;
+                                }
+                            }
+                        }
+                    }
+
+                    if (numberDiagonalFailures + offDiagonalFailures > 0)
+                    {
+                        Assert.Fail(
+                            $"Pathwise market vega analytic test fails for  swaptions : {offDiagonalFailures} off diagonal failures \n "
+                            + $" and {numberDiagonalFailures} on the diagonal.");
+                    }
+                }
+
+                var capsVegasMatrix = new Matrix(caps.Count, theBumps[0].Length);
+
+                for (int i = 0; i < caps.Count; ++i)
+                {
+                    var thisPseudoDerivative = new CapPseudoDerivative(
+                        marketModel, caps[i].Strike, caps[i].StartIndex, caps[i].EndIndex, initialNumeraireValue);
+
+                    for (int jj = 0; jj < theBumps[0].Length; ++jj)
+                    {
+                        capsVegasMatrix[i, jj] = 0;
+                        for (int k = 0; k < steps; ++k)
+                        {
+                            Matrix volatilityDerivative = thisPseudoDerivative.VolatilityDerivative(k);
+                            for (int l = 0; l < numberRates; ++l)
+                            {
+                                for (int m = 0; m < factors; ++m)
+                                {
+                                    capsVegasMatrix[i, jj] += theBumps[k][jj][l, m] * volatilityDerivative[l, m];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                {
+                    int numberDiagonalFailures = 0;
+                    int offDiagonalFailures = 0;
+
+                    for (int i = 0; i < caps.Count; ++i)
+                    {
+                        for (int jj = 0; jj < theBumps[0].Length; ++jj)
+                        {
+                            if (i + swaptions.Length == jj)
+                            {
+                                double thisError = capsVegasMatrix[i, jj] - 0.01;
+                                if (Math.Abs(thisError) > 1e-8)
+                                {
+                                    ++numberDiagonalFailures;
+                                }
+                            }
+                            else
+                            {
+                                double thisError = capsVegasMatrix[i, jj];
+                                if (Math.Abs(thisError) > 1e-8)
+                                {
+                                    ++offDiagonalFailures;
+                                }
+                            }
+                        }
+                    }
+
+                    if (numberDiagonalFailures + offDiagonalFailures > 0)
+                    {
+                        Assert.Fail(
+                            $"Pathwise market vega analytic test fails for caps : {offDiagonalFailures} off diagonal failures \n "
+                            + $" and {numberDiagonalFailures} on the diagonal.");
+                    }
+                }
+            }
+        }
+
+        // check the swaptions' pathwise derivatives against their numerical twin's
+        int[] numberCashFlowsThisStep1 = new int[swaptionsDeflated.NumberOfProducts];
+        var cashFlowsGenerated1 = new MarketModelPathwiseMultiProductCashFlow[swaptionsDeflated.NumberOfProducts][];
+        int[] numberCashFlowsThisStep2 = new int[swaptionsDeflated.NumberOfProducts];
+        var cashFlowsGenerated2 = new MarketModelPathwiseMultiProductCashFlow[swaptionsDeflated.NumberOfProducts][];
+        for (int i = 0; i < swaptionsDeflated.NumberOfProducts; ++i)
+        {
+            cashFlowsGenerated1[i] = new MarketModelPathwiseMultiProductCashFlow[swaptionsDeflated.MaxNumberOfCashFlowsPerProductPerStep];
+            cashFlowsGenerated2[i] = new MarketModelPathwiseMultiProductCashFlow[swaptionsDeflated.MaxNumberOfCashFlowsPerProductPerStep];
+            for (int k = 0; k < swaptionsDeflated.MaxNumberOfCashFlowsPerProductPerStep; ++k)
+            {
+                cashFlowsGenerated1[i][k] = new MarketModelPathwiseMultiProductCashFlow(numberRates + 1);
+                cashFlowsGenerated2[i][k] = new MarketModelPathwiseMultiProductCashFlow(numberRates + 1);
+            }
+        }
+
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [Math.Min(1, vars.TodaysForwards.Length)];
+            foreach (int factors in testedFactors)
+            {
+                var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+
+                bool logNormal = true;
+                MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                var evolver1 = new LogNormalFwdRateEuler(marketModel, generatorFactory, swaptionsDeflated.SuggestedNumeraires().AsSpan());
+                var evolver2 = new LogNormalFwdRateEuler(marketModel, generatorFactory, swaptionsDeflated.SuggestedNumeraires().AsSpan());
+
+                for (int p = 0; p < pathsToDo; ++p)
+                {
+                    evolver1.StartNewPath();
+                    swaptionsDeflated.Reset();
+
+                    evolver2.StartNewPath();
+                    swaptionsDeflated2.Reset();
+
+                    int step = 0;
+                    bool done;
+                    do
+                    {
+                        evolver1.AdvanceStep();
+                        done = swaptionsDeflated.NextTimeStep(evolver1.CurrentState, numberCashFlowsThisStep1, cashFlowsGenerated1);
+
+                        evolver2.AdvanceStep();
+                        bool done2 = swaptionsDeflated2.NextTimeStep(evolver2.CurrentState, numberCashFlowsThisStep2, cashFlowsGenerated2);
+
+                        if (done != done2)
+                        {
+                            Assert.Fail("numerical swaptions derivative and swaptions disagree on termination");
+                        }
+
+                        for (int prod = 0; prod < swaptionsDeflated.NumberOfProducts; ++prod)
+                        {
+                            if (numberCashFlowsThisStep1[prod] != numberCashFlowsThisStep2[prod])
+                            {
+                                Assert.Fail("numerical swaptions derivative and swaptions disagree on number of cash flows");
+                            }
+
+                            for (int cf = 0; cf < numberCashFlowsThisStep1[prod]; ++cf)
+                            {
+                                for (int rate = 0; rate <= numberRates; ++rate)
+                                {
+                                    if (Math.Abs(cashFlowsGenerated1[prod][cf].Amount[rate] - cashFlowsGenerated2[prod][cf].Amount[rate]) > tolerance)
+                                    {
+                                        Assert.Fail(
+                                            $"numerical swaptions derivative and swaptions disagree on cash flow size. cf = {cf}step {step}, rate {rate},"
+                                            + $" amount1 {cashFlowsGenerated1[prod][cf].Amount[rate]} ,amount2 {cashFlowsGenerated2[prod][cf].Amount[rate]}\n");
+                                    }
+                                }
+                            }
+                        }
+
+                        ++step;
+                    }
+                    while (!done);
+                }
+            }
+        }
+
+        // the swaptions' market vegas
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [Math.Min(1, vars.TodaysForwards.Length)];
+            foreach (int factors in testedFactors)
+            {
+                var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+
+                bool logNormal = true;
+                MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                var evolver = new LogNormalFwdRateEuler(marketModel, generatorFactory, swaptionsDeflated.SuggestedNumeraires().AsSpan());
+
+                int initialNumeraire = evolver.Numeraires[0];
+                double initialNumeraireValueThis = vars.TodaysDiscounts[initialNumeraire];
+
+                var possibleBumps = new VegaBumpCollection(marketModel, allowFactorwiseBumping);
+
+                var bumpFinder = new OrthogonalizedBumpFinder(possibleBumps, swaptions, caps, multiplier, tolerance);
+
+                Matrix[][] theBumps = bumpFinder.GetVegaBumps();
+
+                double[] values;
+                double[] errors;
+
+                {
+                    // Adapted: QuantLib's engine resizes the caller's vectors; nanoql's writes spans of its size
+                    var accountingEngine = new PathwiseVegasAccountingEngine(
+                        evolver, swaptionsDeflated, marketModel, theBumps, initialNumeraireValueThis);
+                    values = new double[accountingEngine.NumberOfResults];
+                    errors = new double[accountingEngine.NumberOfResults];
+                    accountingEngine.MultiplePathValues(values, errors, pathsToDoSimulation);
+                }
+
+                var vegasMatrix = new Matrix(swaptionsDeflated.NumberOfProducts, theBumps[0].Length);
+                var standardErrors = new Matrix(swaptionsDeflated.NumberOfProducts, theBumps[0].Length);
+
+                int entriesPerProduct = 1 + numberRates + theBumps[0].Length;
+
+                for (int i = 0; i < swaptionsDeflated.NumberOfProducts; ++i)
+                {
+                    for (int jj = 0; jj < theBumps[0].Length; ++jj)
+                    {
+                        vegasMatrix[i, jj] = values[(i * entriesPerProduct) + numberRates + 1 + jj];
+                        standardErrors[i, jj] = errors[(i * entriesPerProduct) + numberRates + 1 + jj];
+                    }
+                }
+
+                double[] impliedVols = new double[swaptions.Length];
+                for (int i = 0; i < swaptions.Length; ++i)
+                {
+                    impliedVols[i] = SwapForwardMappings.SwaptionImpliedVolatility(marketModel, swaptions[i].StartIndex, swaptions[i].EndIndex);
+                }
+
+                double[] analyticVegas = new double[swaptions.Length];
+
+                for (int i = 0; i < swaptions.Length; ++i)
+                {
+                    double swapRate = cs.CoterminalSwapRates()[i];
+                    double annuity = cs.CoterminalSwapAnnuity(0, i) * initialNumeraireValueThis;
+                    double expiry = vars.RateTimes[i];
+                    double sd = impliedVols[i] * Math.Sqrt(expiry);
+                    const double swapDisplacement = 0.0;
+                    double vega = BlackFormulaFunctions.BlackFormulaVolDerivative(swapRate, swapRate, sd, expiry, annuity, swapDisplacement);
+
+                    // one percent move
+                    analyticVegas[i] = vega * 0.01;
+                }
+
+                int numberDiagonalFailures = 0;
+                int offDiagonalFailures = 0;
+
+                for (int i = 0; i < swaptions.Length; ++i)
+                {
+                    double thisError = vegasMatrix[i, i] - analyticVegas[i];
+
+                    // silly to penalize for tiny standard error
+                    double thisErrorInSds = thisError / (standardErrors[i, i] + 1E-6);
+                    if (Math.Abs(thisErrorInSds) > 4)
+                    {
+                        ++numberDiagonalFailures;
+                    }
+                }
+
+                for (int i = 0; i < swaptions.Length; ++i)
+                {
+                    for (int jj = 0; jj < theBumps[0].Length; ++jj)
+                    {
+                        if (i != jj)
+                        {
+                            // true value is zero
+                            double thisError = vegasMatrix[i, jj];
+                            double thisErrorInSds = thisError / (standardErrors[i, jj] + 1E-6);
+                            if (Math.Abs(thisErrorInSds) > 3.5)
+                            {
+                                ++offDiagonalFailures;
+                            }
+                        }
+                    }
+                }
+
+                if (offDiagonalFailures + numberDiagonalFailures > 0)
+                {
+                    Assert.Fail(
+                        $"Pathwise market vega test fails for coterminal swaptions : {offDiagonalFailures} off diagonal failures \n "
+                        + $" and {numberDiagonalFailures} on the diagonal.");
+                }
+            }
+        }
+
+        // the caps' market vegas
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [Math.Min(2, vars.TodaysForwards.Length)];
+            foreach (int factors in testedFactors)
+            {
+                var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+
+                bool logNormal = true;
+                MarketModel marketModel = vars.MakeMarketModel(logNormal, evolution, factors, j);
+
+                var evolver = new LogNormalFwdRateEuler(marketModel, generatorFactory, capsDeflated.SuggestedNumeraires().AsSpan());
+
+                int initialNumeraire = evolver.Numeraires[0];
+                double initialNumeraireValueThis = vars.TodaysDiscounts[initialNumeraire];
+
+                var possibleBumps = new VegaBumpCollection(marketModel, allowFactorwiseBumping);
+
+                var bumpFinder = new OrthogonalizedBumpFinder(possibleBumps, swaptions, caps, multiplier, tolerance);
+
+                Matrix[][] theBumps = bumpFinder.GetVegaBumps();
+
+                double[] values;
+                double[] errors;
+
+                {
+                    var accountingEngine = new PathwiseVegasAccountingEngine(evolver, capsDeflated, marketModel, theBumps, initialNumeraireValueThis);
+                    values = new double[accountingEngine.NumberOfResults];
+                    errors = new double[accountingEngine.NumberOfResults];
+                    accountingEngine.MultiplePathValues(values, errors, pathsToDoSimulation);
+                }
+
+                var vegasMatrix = new Matrix(capsDeflated.NumberOfProducts, theBumps[0].Length);
+                var standardErrors = new Matrix(capsDeflated.NumberOfProducts, theBumps[0].Length);
+
+                int entriesPerProduct = 1 + numberRates + theBumps[0].Length;
+
+                for (int i = 0; i < capsDeflated.NumberOfProducts; ++i)
+                {
+                    for (int jj = 0; jj < theBumps[0].Length; ++jj)
+                    {
+                        vegasMatrix[i, jj] = values[(i * entriesPerProduct) + numberRates + jj + 1];
+                        standardErrors[i, jj] = errors[(i * entriesPerProduct) + numberRates + jj + 1];
+                    }
+                }
+
+                double[] impliedVols = new double[caps.Count];
+                double[] analyticVegas = new double[caps.Count];
+
+                for (int i = 0; i < caps.Count; ++i)
+                {
+                    var capPseudo = new CapPseudoDerivative(marketModel, caps[i].Strike, caps[i].StartIndex, caps[i].EndIndex, initialNumeraireValueThis);
+
+                    impliedVols[i] = capPseudo.ImpliedVolatility;
+
+                    double vega = 0.0;
+                    for (int k = caps[i].StartIndex; k < caps[i].EndIndex; ++k)
+                    {
+                        double forward = cs.ForwardRates()[k];
+                        double annuity = cs.DiscountRatio(k + 1, 0) * initialNumeraireValueThis * vars.Accruals[k];
+                        double expiry = vars.RateTimes[k];
+                        double sd = impliedVols[i] * Math.Sqrt(expiry);
+                        const double displacement = 0.0;
+
+                        double capletVega = BlackFormulaFunctions.BlackFormulaVolDerivative(caps[i].Strike, forward, sd, expiry, annuity, displacement);
+
+                        vega += capletVega;
+                    }
+
+                    // one percent move
+                    analyticVegas[i] = vega * 0.01;
+                }
+
+                int numberDiagonalFailures = 0;
+                int offDiagonalFailures = 0;
+
+                for (int i = 0; i < caps.Count; ++i)
+                {
+                    double thisError = vegasMatrix[i, i + swaptions.Length] - analyticVegas[i];
+
+                    // silly to penalize for tiny standard error
+                    double thisErrorInSds = thisError / (standardErrors[i, i + swaptions.Length] + 1E-6);
+                    if (Math.Abs(thisErrorInSds) > 4)
+                    {
+                        ++numberDiagonalFailures;
+                    }
+                }
+
+                for (int i = 0; i < caps.Count; ++i)
+                {
+                    for (int jj = 0; jj < theBumps[0].Length; ++jj)
+                    {
+                        if (i + swaptions.Length != jj)
+                        {
+                            // true value is zero
+                            double thisError = vegasMatrix[i, jj];
+                            double thisErrorInSds = thisError / (standardErrors[i, jj] + 1E-6);
+                            if (Math.Abs(thisErrorInSds) > 3.5)
+                            {
+                                ++offDiagonalFailures;
+                            }
+                        }
+                    }
+                }
+
+                if (offDiagonalFailures + numberDiagonalFailures > 0)
+                {
+                    Assert.Fail(
+                        $"Pathwise market vega test fails for caps: {offDiagonalFailures} off diagonal failures \n "
+                        + $" and {numberDiagonalFailures} on the diagonal.");
+                }
+            }
+        }
+    }
+
+    [Fact]
     public void TestStochVolForwardsAndOptionlets()
     {
         // Testing exact repricing of forwards and optionlets in a stochastic vol displaced diffusion forward rate
@@ -1109,10 +2728,14 @@ public class MarketModelTests
 
             // Rates & displacement
             TodaysForwards = new double[RateTimes.Length - 1];
+            MeanForward = 0.0;
             for (int i = 0; i < TodaysForwards.Length; ++i)
             {
                 TodaysForwards[i] = 0.03 + (0.0010 * i);
+                MeanForward += TodaysForwards[i];
             }
+
+            MeanForward /= TodaysForwards.Length;
 
             // Discount factors
             TodaysDiscounts = new double[RateTimes.Length];
@@ -1162,6 +2785,8 @@ public class MarketModelTests
         public double[] Accruals { get; }
 
         public double[] TodaysForwards { get; }
+
+        public double MeanForward { get; }
 
         public double[] TodaysDiscounts { get; }
 

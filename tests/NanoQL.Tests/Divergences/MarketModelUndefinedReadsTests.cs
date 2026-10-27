@@ -160,7 +160,7 @@ public class MarketModelUndefinedReadsTests
         // lognormalfwdrateeulerconstrained.cpp:183, :195: advanceStep indexes isConstraintActive_, empty before
         // setThisConstraint, and an active step's covariances_, empty before setConstraintType; :122 reads the
         // pseudo-root row of a constrained rate past the rates.
-        var e = new LogNormalFwdRateEulerConstrained(m, new MTBrownianGeneratorFactory(42), [3, 3, 3]);
+        var e = new LogNormalFwdRateEulerConstrained(m, m, new MTBrownianGeneratorFactory(42), [3, 3, 3]);
         e.StartNewPath();
         Assert.Throws<NanoQLException>(() => e.AdvanceStep());
         e.SetThisConstraint([0.03, 0.03, 0.03], [true, true, true]);

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Models;
+using NanoQL.Numerics;
 using NanoQL.Tests.Conventions;
 
 namespace NanoQL.Tests.Divergences;
@@ -49,6 +50,33 @@ public class MarketModelDiscounterBracketTests
     [InlineData(3.5, 1.0)]
     public void APaymentOnARateTimeOrOutsideThePeriodsIsQuantLibs(double paymentTime, double quantLib) =>
         Assert.Equal(quantLib, new MarketModelDiscounter(paymentTime, Market.RateTimes).NumeraireBonds(State(), Market.N));
+
+    [Fact]
+    public void ThePathwiseDiscounterInterpolatesItsOwnPeriodToo()
+    {
+        // MarketModelPathwiseDiscounter's bracket, pathwisediscounter.cpp:32: a payment at 0.75 on six semi-annual rates
+        // from 0.5, forwards 3% rising 0.1% a period, the step's discount factors from the forwards; QuantLib's factors
+        // extrapolate the next period's (this run's probes\c4_facts.cpp)
+        var market = new MarketModelProductMarket(6);
+        var discounts = new Matrix(2, 7, 1.0);
+        for (int j = 1; j <= 6; ++j)
+        {
+            discounts[1, j] = discounts[1, j - 1] / (1.0 + (0.5 * market.Forwards[j - 1]));
+        }
+
+        double[] factors = new double[7];
+        new MarketModelPathwiseDiscounter(0.75, market.RateTimes).GetFactors(new Matrix(2, 6, 0.0), discounts, 1, factors);
+
+        // its own period's log-linear interpolation, half way, and its derivative in the period's rate
+        double df = discounts[1, 0] * Math.Pow(discounts[1, 1] / discounts[1, 0], 0.5);
+        Assert.Equal(df, factors[0]);
+        Assert.Equal(-df * 0.5 * discounts[1, 1] / discounts[1, 0] * 0.5, factors[1]);
+        Assert.Equal([0.0, 0.0, 0.0, 0.0, 0.0], factors[2..]);
+
+        double[] quantLib = [0.99282778252382275, -0.48907772538119354, 0.24441845950857277, 0, 0, 0, 0];
+        // QuantLib's: 2.4e-4 from the interpolation, and a derivative in the next period's rate
+        Assert.True(Math.Abs(quantLib[0] - df) > 2e-4 && quantLib[2] != 0.0, $"{quantLib[0]} against {df}");
+    }
 
     private static LMMCurveState State()
     {

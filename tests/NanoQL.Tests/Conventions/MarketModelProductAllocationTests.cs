@@ -16,7 +16,9 @@ namespace NanoQL.Tests.Conventions;
 /// multi-product composite and in a single-product composite, in the terminal and the money-market measures; and on
 /// every product family: the multi-step swaps, options and structured products, the one-step products, and the
 /// pathwise products through the wrapper; and the call-specified product with each strategy, the swap-rate trigger,
-/// the Longstaff-Schwartz strategy and the parametric exercise adapter.
+/// the Longstaff-Schwartz strategy and the parametric exercise adapter. And a path of the Greek engines allocates
+/// nothing: the pathwise delta engine, its two vega engines and the proxy Greek engine, the original's path and the
+/// constrained evolvers'.
 /// </summary>
 public class MarketModelProductAllocationTests
 {
@@ -41,6 +43,77 @@ public class MarketModelProductAllocationTests
                 return (engine, stats);
             },
             s => s.engine.MultiplePathValues(s.stats, 1));
+
+    [Theory]
+    [InlineData("pathwise")]
+    [InlineData("vegas")]
+    [InlineData("outerVegas")]
+    [InlineData("proxy")]
+    public void AGreekEnginePathAllocatesNothing(string engine) =>
+        AllocationAssert.AllocatesNothing(
+            () =>
+            {
+                Action path = Greeks(engine);
+                path();
+                return path;
+            },
+            path => path());
+
+    // One path of a Greek engine on caplets struck at the forwards, six rates, FlatVol 20%, 3 factors, the money-market
+    // measure.
+    private static Action Greeks(string kind)
+    {
+        var evolution = new EvolutionDescription(Market.RateTimes, Market.RateTimes[..^1]);
+        MarketModel model = Market.FlatVol(evolution, 3);
+        int[] numeraires = [.. EvolutionDescriptionFunctions.MoneyMarketMeasure(evolution)];
+        var factory = new MTBrownianGeneratorFactory(42);
+        var caplets = new MarketModelPathwiseMultiCaplet(Market.RateTimes, Market.Accruals, Market.PaymentTimes, Market.Forwards);
+        Matrix[][] bumps = [.. Enumerable.Range(0, 6).Select(l => new[] { new Matrix(6, 3, 0.01) })];
+        switch (kind)
+        {
+            case "pathwise":
+            {
+                var engine = new PathwiseAccountingEngine(new LogNormalFwdRateEuler(model, factory, numeraires), caplets, model, 0.95);
+                var stats = new SequenceStatisticsInc();
+                return () => engine.MultiplePathValues(stats, 1);
+            }
+
+            case "vegas":
+            {
+                var engine = new PathwiseVegasAccountingEngine(new LogNormalFwdRateEuler(model, factory, numeraires), caplets, model, bumps, 0.95);
+                double[] means = new double[engine.NumberOfResults], errors = new double[engine.NumberOfResults];
+                return () => engine.MultiplePathValues(means, errors, 1);
+            }
+
+            case "outerVegas":
+            {
+                var engine = new PathwiseVegasOuterAccountingEngine(new LogNormalFwdRateEuler(model, factory, numeraires), caplets, model, bumps, 0.95);
+                double[] means = new double[engine.NumberOfResults], errors = new double[engine.NumberOfResults];
+                return () => engine.MultiplePathValues(means, errors, 1);
+            }
+
+            default:
+            {
+                var product = new MultiStepOptionlets(
+                    Market.RateTimes, Market.Accruals, Market.PaymentTimes,
+                    [.. Market.Forwards.Select(f => (Payoff)new PlainVanillaPayoff(OptionType.Call, f))]);
+                int[] start = [0, 1, 2, 3, 4, 5], end = [1, 2, 3, 4, 5, 6];
+                ConstrainedEvolver Constrained(double vol)
+                {
+                    var e = new LogNormalFwdRateEulerConstrained(Market.FlatVol(evolution, 3, vol), model, factory, numeraires);
+                    e.SetConstraintType(start, end);
+                    return e;
+                }
+
+                var engine = new ProxyGreekEngine(
+                    new LogNormalFwdRateEuler(model, factory, numeraires), [[Constrained(0.1999), Constrained(0.2001)]],
+                    [[[0.0, -5000.0, 5000.0]]], start, end, product, 0.95);
+                var stats = new SequenceStatisticsInc();
+                SequenceStatisticsInc[][] greeks = [[new SequenceStatisticsInc()]];
+                return () => engine.MultiplePathValues(stats, greeks, 1);
+            }
+        }
+    }
 
     private static (AccountingEngine Engine, SequenceStatisticsInc Stats) Make(string kind, string measure)
     {

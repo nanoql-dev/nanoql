@@ -127,7 +127,7 @@ public class MarketModelAllocationTests
             case "LogNormalFwdRatePc":
                 return new LogNormalFwdRatePc(model, factory, numeraires);
             case "LogNormalFwdRateEulerConstrained":
-                var constrained = new LogNormalFwdRateEulerConstrained(model, factory, numeraires);
+                var constrained = new LogNormalFwdRateEulerConstrained(model, model, factory, numeraires);
                 constrained.SetConstraintType([0, 1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]);
                 constrained.SetThisConstraint([0.032, 0.033, 0.034, 0.035, 0.036, 0.037], [true, false, true, false, true, false]);
                 return constrained;

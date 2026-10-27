@@ -33,7 +33,7 @@ public class ConstrainedEulerDisplacementTests
             4,
             [0.03, 0.031, 0.032, 0.033],
             [0.001, 0.002, 0.003, 0.004]);
-        var e = new LogNormalFwdRateEulerConstrained(model, new MTBrownianGeneratorFactory(42), [4, 4, 4, 4, 4, 4, 4, 4]);
+        var e = new LogNormalFwdRateEulerConstrained(model, model, new MTBrownianGeneratorFactory(42), [4, 4, 4, 4, 4, 4, 4, 4]);
         int[] start = [.. Enumerable.Repeat(rate, 8)];
         e.SetConstraintType(start, [.. start.Select(s => s + 1)]);
         bool[] active = new bool[8];

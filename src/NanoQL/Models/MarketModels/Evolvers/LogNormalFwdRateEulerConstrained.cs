@@ -27,6 +27,16 @@ namespace NanoQL.Models;
 /// before <see cref="SetThisConstraint"/>, an active constraint before <see cref="SetConstraintType"/> and a
 /// constrained rate past the rates, which QuantLib reads before or past its vectors, are refused (MR3 (xx)).
 /// </para>
+/// <para>
+/// <b>The likelihood ratio</b> (the S-mmp plan's MMPR3, ruled by the user, a documented divergence;
+/// <c>Divergences/ProxyGreekVegaTests.cs</c>): the evolver takes the reference model, the unbumped model whose
+/// distribution the proxy simulation keeps, and a constrained step's weight carries the ratio of the two models'
+/// transition densities of the constrained rate, which beside QuantLib's ratio of shifted to unshifted Gaussian densities
+/// (<c>lognormalfwdrateeulerconstrained.cpp:200-212</c>) holds √(var_reference / var_own) of the rate's step variance.
+/// QuantLib's weight misses that factor, right for a forward bump, whose variances are equal, and wrong for a volatility
+/// bump: its proxy vegas take the wrong sign. Where the reference is the evolver's own model, QuantLib's weight bit for
+/// bit.
+/// </para>
 /// </remarks>
 public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
 {
@@ -34,6 +44,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
     private readonly BrownianGenerator generator;
     private readonly double[][] fixedDrifts;
     private readonly double[][] variances;
+    private readonly double[][] densityRatios;
     private readonly Matrix[] pseudoRoots;
     private readonly int numberOfRates;
     private readonly int numberOfFactors;
@@ -58,16 +69,33 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
 
     /// <summary>Initializes a new instance of the <see cref="LogNormalFwdRateEulerConstrained"/> class.</summary>
     /// <param name="marketModel">The model evolved.</param>
+    /// <param name="referenceModel">The reference model whose distribution the weights keep, of the model's rates and
+    /// steps: the unbumped model of a proxy simulation, or <paramref name="marketModel"/> for QuantLib's weight.</param>
     /// <param name="factory">The factory of the Brownian generator.</param>
     /// <param name="numeraires">The numeraires, one per step, compatible with the evolution.</param>
     /// <param name="initialStep">The step each path starts from, below the number of steps.</param>
-    /// <exception cref="ArgumentException">The numeraires aren't compatible with the evolution.</exception>
+    /// <exception cref="ArgumentException">
+    /// The numeraires aren't compatible with the evolution, or the reference model's rates or steps aren't the model's.
+    /// </exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="initialStep"/> isn't a step.</exception>
     public LogNormalFwdRateEulerConstrained(
-        MarketModel marketModel, BrownianGeneratorFactory factory, ReadOnlySpan<int> numeraires, int initialStep = 0)
+        MarketModel marketModel,
+        MarketModel referenceModel,
+        BrownianGeneratorFactory factory,
+        ReadOnlySpan<int> numeraires,
+        int initialStep = 0)
     {
         ArgumentNullException.ThrowIfNull(marketModel);
+        ArgumentNullException.ThrowIfNull(referenceModel);
         ArgumentNullException.ThrowIfNull(factory);
+        if (!(referenceModel.NumberOfRates == marketModel.NumberOfRates && referenceModel.NumberOfSteps == marketModel.NumberOfSteps))
+        {
+            throw new ArgumentException(
+                $"the reference model's {referenceModel.NumberOfRates} rates and {referenceModel.NumberOfSteps} steps aren't"
+                + $" the model's {marketModel.NumberOfRates} and {marketModel.NumberOfSteps}",
+                nameof(referenceModel));
+        }
+
         EvolutionDescription evolution = marketModel.Evolution;
         Numeraires = [.. numeraires];
         rateConstraints = new double[numeraires.Length];
@@ -94,6 +122,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
 
         calculators = new LMMDriftCalculator[steps];
         variances = new double[steps][];
+        densityRatios = new double[steps][];
         fixedDrifts = new double[steps][];
         pseudoRoots = new Matrix[steps];
         for (int j = 0; j < steps; ++j)
@@ -118,6 +147,23 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
 
             variances[j] = variance;
             fixedDrifts[j] = fixedDrift;
+
+            // the reference's step variance of each rate over the model's: 1 where the reference is the model (MMPR3)
+            Matrix reference = ReferenceEquals(referenceModel, marketModel) ? a : referenceModel.PseudoRoot(j);
+            double[] ratio = new double[numberOfRates];
+            for (int k = 0; k < numberOfRates; ++k)
+            {
+                ReadOnlySpan<double> row = reference.Row(k);
+                double sum = 0.0;
+                for (int f = 0; f < row.Length; ++f)
+                {
+                    sum += row[f] * row[f];
+                }
+
+                ratio[k] = Math.Sqrt(sum / variance[k]);
+            }
+
+            densityRatios[j] = ratio;
         }
 
         SetForwards(marketModel.InitialRates.AsSpan());
@@ -312,6 +358,8 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
                 weightsEffect *= originalDensity / newDensity;
             }
 
+            // the transition densities' ratio of the constrained rate, reference over own (MMPR3)
+            weightsEffect *= densityRatios[currentStep][index];
             weight *= weightsEffect;
         }
 

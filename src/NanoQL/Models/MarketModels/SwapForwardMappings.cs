@@ -271,43 +271,9 @@ public static class SwapForwardMappings
     public static double SwaptionImpliedVolatility(MarketModel volStructure, int startIndex, int endIndex)
     {
         ArgumentNullException.ThrowIfNull(volStructure);
-        if (!(startIndex < endIndex))
-        {
-            throw new ArgumentException("start index must be before end index in swaptionImpliedVolatility", nameof(startIndex));
-        }
-
-        ArgumentOutOfRangeException.ThrowIfNegative(startIndex);
+        CheckSwaption(volStructure, startIndex, endIndex);
         EvolutionDescription evolution = volStructure.Evolution;
-        if (!(endIndex <= evolution.NumberOfRates))
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(endIndex),
-                string.Create(
-                    CultureInfo.InvariantCulture,
-                    $"end index ({endIndex}) must be at most the number of rates ({evolution.NumberOfRates})"));
-        }
-
-        // QuantLib reads the first displacement alone, and sums whole steps up to the expiry: unequal displacements and
-        // an evolution that doesn't stop at the expiry are refused, with its adapters' texts (MR4 (a)).
         ImmutableArray<double> displacements = volStructure.Displacements;
-        for (int i = 1; i < displacements.Length; ++i)
-        {
-            if (!(displacements[i] == displacements[0]))
-            {
-                throw new ArgumentException(
-                    string.Create(
-                        CultureInfo.InvariantCulture,
-                        $"{DataFormattersFunctions.Ordinal(i + 1)} displacement ({displacements[i]}) not equal to the previous ones ({displacements[0]})"),
-                    nameof(volStructure));
-            }
-        }
-
-        if (!evolution.EvolutionTimes.Contains(evolution.RateTimes[startIndex]))
-        {
-            throw new ArgumentException(
-                string.Create(CultureInfo.InvariantCulture, $"skipping {DataFormattersFunctions.Ordinal(startIndex + 1)} rate time"),
-                nameof(volStructure));
-        }
 
         var cs = new LMMCurveState(evolution.RateTimes.AsSpan());
         cs.SetOnForwardRates(volStructure.InitialRates.AsSpan());
@@ -341,6 +307,48 @@ public static class SwapForwardMappings
 
         double expiry = evolution.RateTimes[startIndex];
         return Math.Sqrt(variance / expiry);
+    }
+
+    // QuantLib reads the first displacement alone, and sums whole steps up to the expiry: unequal displacements and an
+    // evolution that doesn't stop at the expiry are refused, with its adapters' texts (MR4 (a)); the S-mmp plan's
+    // MMPR5 (b) applies the rule to SwaptionPseudoDerivative.
+    internal static void CheckSwaption(MarketModel volStructure, int startIndex, int endIndex)
+    {
+        if (!(startIndex < endIndex))
+        {
+            throw new ArgumentException("start index must be before end index in swaptionImpliedVolatility", nameof(startIndex));
+        }
+
+        ArgumentOutOfRangeException.ThrowIfNegative(startIndex);
+        EvolutionDescription evolution = volStructure.Evolution;
+        if (!(endIndex <= evolution.NumberOfRates))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(endIndex),
+                string.Create(
+                    CultureInfo.InvariantCulture,
+                    $"end index ({endIndex}) must be at most the number of rates ({evolution.NumberOfRates})"));
+        }
+
+        ImmutableArray<double> displacements = volStructure.Displacements;
+        for (int i = 1; i < displacements.Length; ++i)
+        {
+            if (!(displacements[i] == displacements[0]))
+            {
+                throw new ArgumentException(
+                    string.Create(
+                        CultureInfo.InvariantCulture,
+                        $"{DataFormattersFunctions.Ordinal(i + 1)} displacement ({displacements[i]}) not equal to the previous ones ({displacements[0]})"),
+                    nameof(volStructure));
+            }
+        }
+
+        if (!evolution.EvolutionTimes.Contains(evolution.RateTimes[startIndex]))
+        {
+            throw new ArgumentException(
+                string.Create(CultureInfo.InvariantCulture, $"skipping {DataFormattersFunctions.Ordinal(startIndex + 1)} rate time"),
+                nameof(volStructure));
+        }
     }
 
     // QuantLib reads the accrual periods up to the end without a check.

@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Collections.Immutable;
 using NanoQL.Models;
+using NanoQL.Numerics;
 using NanoQL.Tests.Conventions;
 
 namespace NanoQL.Tests.Divergences;
@@ -47,6 +49,36 @@ public class MarketModelPathwiseDeflatedCapletTests
             {
                 Assert.True(Math.Abs(quantLib[j + 1] - fd) > 1e-6, $"QuantLib's derivative {j}: {quantLib[j + 1]} against {fd}");
             }
+        }
+    }
+
+    [Fact]
+    public void ThroughThePathwiseEngineTheDeflatedDeltasAreTheUndeflated()
+    {
+        // the engine-level check (the run's R2-3): the deflated and undeflated caplets on the same paths, 1,023 paths of
+        // the log-normal Euler evolver on FlatVol 20%, 3 factors, the Mersenne twister (seed 42), the money-market
+        // measure; QuantLib's deltas 2.06e-5 apart (this run's probes\c4_facts.cpp)
+        double[] accruals = [.. Market.Accruals.Select(a => a * 365.0 / 360.0)];
+        var evolution = new EvolutionDescription(Market.RateTimes, Market.RateTimes[..^1]);
+        MarketModel model = Market.FlatVol(evolution, 3);
+        int[] numeraires = [.. EvolutionDescriptionFunctions.MoneyMarketMeasure(evolution)];
+        ImmutableArray<double> undeflated = Engine(new MarketModelPathwiseMultiCaplet(Market.RateTimes, accruals, Market.PaymentTimes, Market.Forwards));
+        ImmutableArray<double> deflated = Engine(new MarketModelPathwiseMultiDeflatedCaplet(Market.RateTimes, accruals, Market.PaymentTimes, Market.Forwards));
+        for (int k = 0; k < undeflated.Length; ++k)
+        {
+            Assert.True(Math.Abs(undeflated[k] - deflated[k]) <= 1e-15, $"entry {k}: {deflated[k]} against {undeflated[k]}");
+        }
+
+        const double quantLibWorst = 2.0605417817398664e-05;
+        Assert.True(quantLibWorst > 1e9 * 1e-15);
+
+        ImmutableArray<double> Engine(MarketModelPathwiseMultiProduct product)
+        {
+            var engine = new PathwiseAccountingEngine(
+                new LogNormalFwdRateEuler(model, new MTBrownianGeneratorFactory(42), numeraires), product, model, 0.95);
+            var stats = new SequenceStatisticsInc(product.NumberOfProducts * 7);
+            engine.MultiplePathValues(stats, 1023);
+            return stats.Mean();
         }
     }
 

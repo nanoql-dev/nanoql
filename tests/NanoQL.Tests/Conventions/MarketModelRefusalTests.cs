@@ -205,7 +205,7 @@ public class MarketModelRefusalTests
         Check<ArgumentException>(() => new LogNormalFwdRateIpc(model, factory, moneyMarket), "numeraires", "terminal measure required for ipc ");
         Check<ArgumentException>(() => new LogNormalFwdRateiBalland(model, factory, moneyMarket), "numeraires", "terminal measure required for iBalland ");
 
-        var e = new LogNormalFwdRateEulerConstrained(model, factory, [3, 3, 3]);
+        var e = new LogNormalFwdRateEulerConstrained(model, model, factory, [3, 3, 3]);
         e.StartNewPath();
         Assert.Equal("setThisConstraint must be called before advanceStep", Assert.Throws<NanoQLException>(() => e.AdvanceStep()).Message);
         Check<ArgumentException>(() => e.SetThisConstraint([0.03, 0.03], [true, true, true]), "rateConstraints", "wrong number of constraints specified");

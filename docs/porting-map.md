@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 278 | 26 |
-| partial | 20 | 30 |
-| ported | 962 | 124 |
+| not started | 271 | 26 |
+| partial | 20 | 29 |
+| ported | 969 | 125 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -1219,11 +1219,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `marketmodel` | ported | Models/MarketModels/MarketModel.cs, Models/MarketModels/MarketModelFactory.cs |  |
 | `marketmodeldifferences` | partial | Models/MarketModels/MarketModelDifferencesFunctions.cs | partial: coterminalSwapPseudoRoots, never ported: marketmodeldifferences.hpp declares it and nothing defines it, and its two-argument definition in marketmodeldifferences.cpp, in no header, refuses every QuantLib correlation, reads past the variances otherwise, and scales the correlation, not a root of it |
 | `multiproduct` | ported | Models/MarketModels/MarketModelMultiProduct.cs, Models/MarketModels/MarketModelMultiProductCashFlow.cs |  |
-| `pathwiseaccountingengine` | not started |  | no nanoql type: PathwiseAccountingEngine, PathwiseVegasAccountingEngine, PathwiseVegasOuterAccountingEngine |
-| `pathwisediscounter` | not started |  | no nanoql type: MarketModelPathwiseDiscounter |
+| `pathwiseaccountingengine` | ported | Models/MarketModels/PathwiseAccountingEngine/PathwiseAccountingEngine.cs, Models/MarketModels/PathwiseAccountingEngine/PathwiseEngineFunctions.cs, Models/MarketModels/PathwiseAccountingEngine/PathwiseVegasAccountingEngine.cs, Models/MarketModels/PathwiseAccountingEngine/PathwiseVegasOuterAccountingEngine.cs |  |
+| `pathwisediscounter` | ported | Models/MarketModels/MarketModelPathwiseDiscounter.cs |  |
 | `pathwisemultiproduct` | ported | Models/MarketModels/MarketModelPathwiseMultiProduct.cs, Models/MarketModels/MarketModelPathwiseMultiProductCashFlow.cs |  |
 | `piecewiseconstantcorrelation` | ported | Models/MarketModels/PiecewiseConstantCorrelation.cs |  |
-| `proxygreekengine` | not started |  | no nanoql type: ProxyGreekEngine |
+| `proxygreekengine` | ported | Models/MarketModels/ProxyGreekEngine.cs |  |
 | `swapforwardmappings` | ported | Models/MarketModels/SwapForwardMappings.cs |  |
 | `utilities` | ported | Models/MarketModels/MergedTimes.cs, Models/MarketModels/UtilitiesFunctions.cs |  |
 
@@ -1336,10 +1336,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `bumpinstrumentjacobian` | not started |  | no nanoql type: VolatilityBumpInstrumentJacobian, VolatilityBumpInstrumentJacobianSwaption, VolatilityBumpInstrumentJacobianCap, OrthogonalizedBumpFinder |
-| `ratepseudorootjacobian` | not started |  | no nanoql type: RatePseudoRootJacobianNumerical, RatePseudoRootJacobian, RatePseudoRootJacobianAllElements |
-| `swaptionpseudojacobian` | not started |  | no nanoql type: SwaptionPseudoDerivative, CapPseudoDerivative |
-| `vegabumpcluster` | not started |  | no nanoql type: VegaBumpCluster, VegaBumpCollection |
+| `bumpinstrumentjacobian` | ported | Models/MarketModels/PathwiseGreeks/BumpInstrumentJacobian/OrthogonalizedBumpFinder.cs, Models/MarketModels/PathwiseGreeks/BumpInstrumentJacobian/VolatilityBumpInstrumentJacobian.cs, Models/MarketModels/PathwiseGreeks/BumpInstrumentJacobian/VolatilityBumpInstrumentJacobianCap.cs, Models/MarketModels/PathwiseGreeks/BumpInstrumentJacobian/VolatilityBumpInstrumentJacobianSwaption.cs |  |
+| `ratepseudorootjacobian` | ported | Models/MarketModels/PathwiseGreeks/RatePseudoRootJacobian/RatePseudoRootJacobian.cs, Models/MarketModels/PathwiseGreeks/RatePseudoRootJacobian/RatePseudoRootJacobianAllElements.cs, Models/MarketModels/PathwiseGreeks/RatePseudoRootJacobian/RatePseudoRootJacobianFunctions.cs, Models/MarketModels/PathwiseGreeks/RatePseudoRootJacobian/RatePseudoRootJacobianNumerical.cs |  |
+| `swaptionpseudojacobian` | ported | Models/MarketModels/PathwiseGreeks/CapPseudoDerivative.cs, Models/MarketModels/PathwiseGreeks/SwaptionPseudoDerivative.cs |  |
+| `vegabumpcluster` | ported | Models/MarketModels/PathwiseGreeks/VegaBumpCluster.cs, Models/MarketModels/PathwiseGreeks/VegaBumpCollection.cs |  |
 
 ### `ql/models/marketmodels/products/`
 
@@ -2169,7 +2169,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `lookbackoptions` | ported | TestSuite/LookbackOptionsTests.cs | 5 of 5 cases |
 | `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 8 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy |
 | `margrabeoption` | ported | TestSuite/MargrabeOptionTests.cs | 3 of 3 cases; moved: testEuroExchangeTwoAssets line 250 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 259 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 268 to Divergences/MargrabeGreeksQuantityTests.cs |
-| `marketmodel` | partial | TestSuite/MarketModelTests.cs | 14 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported); not yet: testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas |
+| `marketmodel` | ported | TestSuite/MarketModelTests.cs | 18 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported) |
 | `marketmodel_cms` | ported | TestSuite/MarketModelCmsTests.cs | 1 of 1 cases |
 | `marketmodel_smm` | ported | TestSuite/MarketModelSmmTests.cs | 1 of 1 cases |
 | `marketmodel_smmcapletalphacalibration` | ported | TestSuite/MarketModelSmmCapletAlphaCalibrationTests.cs | 1 of 1 cases |
