@@ -78,6 +78,21 @@ Facts:
 
 - `AnEmptyFactorVectorIsRefused`
 
+## AlphaFinderTests
+
+[`Divergences/AlphaFinderTests.cs`](../tests/NanoQL.Tests/Divergences/AlphaFinderTests.cs)
+
+`AlphaFinder`'s three fixes (the S-mm plan's MR3 (ix), (x), (xii), under R8) and its b where a final part fails (MR3 (viii) as the user ruled it on 2026-10-27, and the run's R4-4). (viii) `alphafinder.cpp:335-346`, `:405-415`: where the turning point's value at α₀ is at most the target, QuantLib returns α₀ without checking `finalPart`'s result, which fails where the variance left is negative, and its search returns its α unchecked too. nanoql returns QuantLib's α, its b NaN, which the alpha calibration counts as a failure (`Divergences/CTSMMCapletAlphaFormCalibrationTests.cs`). (ix) `:372-373`: the downward search's loop tests `topValue`, which it never changes; on the planner's MP25 inputs QuantLib's `solve` returns false where the acceptable α lie strictly below α₀, and nanoql's loop, testing `bottomValue`, finds α −0.3111 at the target; on round 1's m10 inputs (the reviewer's), QuantLib's returns false and nanoql's α 0.41286, whose final part fails. (x) `:117`, `:145`: `Minimize` calls the feasibility test on the objective's value, not on the trial α, so where that value isn't an acceptable α it stops at its first trial: on MP25's inputs QuantLib returns α −0.48497 with homogeneity failure 3.3880, where the acceptable α run from −0.7519 to −0.3112 and the least failure is 3.3628 at −0.7519 (MP25; the run's harness gives QuantLib's alpha-form calibration at maximum homogeneity, and nanoql with QuantLib's test restored reproduces it bit for bit, the run's R4-2); on round 1's m15 inputs, QuantLib's α 0.5168373510089983 fails by 0.12497903935064759 and nanoql's 0.4467697074628475 by 0.12229674463151122, and where the small α QuantLib's test reads are acceptable both return 1.2307430953608208e-08. (xii) `:30-111`: the bisections and `Minimize` loop on the bracket's width alone, so at tolerance 0 QuantLib's search never ends (MP8: killed after 20 s); nanoql's also stops when the bracket no longer moves. R4-4: where a final part fails QuantLib leaves b at its caller's value; nanoql's is NaN. Checks: QuantLib's arithmetic restated at an α (the turning point's value, the final part, the homogeneity failure), and the alpha-form calibration's QuantLib case at tolerance 0 against 1e-15.
+
+Facts:
+
+- `AHalfSolvedInitialAlphaIsQuantLibsWithNoB`
+- `TheDownwardSearchOnRoundOnesInput`
+- `MaximumHomogeneityOnRoundOnesInputs`
+- `TheDownwardSearchFindsTheAcceptableAlphaBelowAlphaZero`
+- `MaximumHomogeneityFindsTheAcceptableMinimum`
+- `ToleranceZeroEnds`
+
 ## AmericanBasketStrikeScalingTests
 
 [`Divergences/AmericanBasketStrikeScalingTests.cs`](../tests/NanoQL.Tests/Divergences/AmericanBasketStrikeScalingTests.cs)
@@ -1022,6 +1037,29 @@ Facts:
 
 - `TheFairRateZeroesTheSwap`
 
+## CTSMMCapletAlphaFormCalibrationTests
+
+[`Divergences/CTSMMCapletAlphaFormCalibrationTests.cs`](../tests/NanoQL.Tests/Divergences/CTSMMCapletAlphaFormCalibrationTests.cs)
+
+The alpha-form calibration's two departures, as the user ruled them on 2026-10-27. A step whose final part fails (S-mm plan MR3 (viii)): QuantLib's solve returns it as solved, the swap rate's last volatility left at its buffer's 0, and its calibration returns `true` with no failure (`alphafinder.cpp:335-346`, `:405-415`; `capletcoterminalalphacalibration.cpp:202-203`, its count commented out beside its throw). In the code review's 7,800-input sweep, 517 calibrations return so, their swaptions missing by 6.3e-4 to 0.249. One at QuantLib's own α₀ and bounds: displaced 2%, caplets × 0.95, three factors, QuantLib's swaptions missing by 0.0347198 and its caplet root-mean-square error 0.0109794 (the run's harness). nanoql returns QuantLib's numbers, counting each such step as a failure, so `Converged` is false. Maximum homogeneity (MR3 (x)): the fixed minimization's α at one caplet can leave a later caplet no α where QuantLib's first trial leaves room, so the fixed calibration throws on 50 of the sweep's inputs QuantLib calibrates; the pass then runs again on QuantLib's test of the objective's value. On caplets × 0.95 and eight factors QuantLib's caplet error is 3.4739757936758017e-07 and its swaptions exact (the run's harness; the vectors hold the case bit for bit). On QuantLib's case the fixed calibration completes, more homogeneous: its deformation, the sum over rates and steps of the squared change of each step's standard deviation, 0.0010560 against QuantLib's 0.0018891 (the code review's run and the run's harness). Checks: QuantLib's numbers on the half-solved case and the fallback; the fit and the deformation on QuantLib's case.
+
+Facts:
+
+- `AHalfSolvedStepIsAFailure`
+- `MaximumHomogeneityOnQuantLibsCaseIsMoreHomogeneous`
+- `WhereTheFixLeavesACapletNoAlphaQuantLibsTestRuns`
+
+## CTSMMCapletMaxHomogeneityDeformationTests
+
+[`Divergences/CTSMMCapletMaxHomogeneityDeformationTests.cs`](../tests/NanoQL.Tests/Divergences/CTSMMCapletMaxHomogeneityDeformationTests.cs)
+
+The calibrations' deformation size. QuantLib's maximally homogeneous calibration sums, for each caplet i, the squared change of the step index's own volatility once per moved volatility, `(theseNewVols[i] − secondRateVols[i])²` for each `j < i + 2` (`capletcoterminalmaxhomogeneity.cpp:370-371`), where its loop runs over j: nanoql sums each moved volatility's own squared change (fixed under R8, the run's own find; QuantLib's tests only print it). And QuantLib's alpha-form and original calibrations never compute it, returning the initializer's 987654321 (`ctsmmcapletcalibration.cpp:131`, `:199`), nor its periodic calibration (the S-mm plan's MR3 (xxi)): nanoql's is null there. Checks: the deformation rebuilt from the results' calibrated and given volatilities, each step's volatility times the root of its length; QuantLib's sum restated on the same volatilities, 0.00177 on QuantLib's case (the planner's MP4).
+
+Facts:
+
+- `TheDeformationSumsEachMovedVolatilitysChange`
+- `TheAlphaFormAndOriginalCalibrationsHaveNone`
+
 ## CalendarEqualityTests
 
 [`Divergences/CalendarEqualityTests.cs`](../tests/NanoQL.Tests/Divergences/CalendarEqualityTests.cs)
@@ -1210,6 +1248,16 @@ A cap/floor term-volatility surface on an empty matrix. QuantLib's constructors 
 Facts:
 
 - `AnEmptyMatrixReachesQuantLibsChecks`
+
+## CapletCoterminalPeriodicTests
+
+[`Divergences/CapletCoterminalPeriodicTests.cs`](../tests/NanoQL.Tests/Divergences/CapletCoterminalPeriodicTests.cs)
+
+The periodic calibration's failures and passes (the S-mm plan's MR3 (xi), fixed under R8). QuantLib returns the inner calibration's `calibrate` value, a `bool`, as its failure count (`capletcoterminalperiodic.cpp:125-126`), and its `++iterationsDone` runs only when the loop goes on (`:171`), one short of the passes when the errors end it: on QuantLib's case it returns 1, its inner calibration's `failures()` 0, and at caplets × 0.7 it returns 0 with 3 failures, each counting 5 passes with 6 rows of its volatility matrix filled (the planner's MP24). nanoql returns the inner failures and the passes run. Checks: the inner calibration's own failures on the last pass's variances, and the matrix's filled rows.
+
+Facts:
+
+- `TheFailuresAreTheInnerCalibrationsAndThePassesTheRowsFilled`
 
 ## CapletFixingExpiryTests
 
@@ -4266,7 +4314,7 @@ Facts:
 
 [`Divergences/MarketModelUndefinedReadsTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelUndefinedReadsTests.cs)
 
-The market-model framework's inputs whose QuantLib path is undefined, each refused before the undefined step (the S-mm plan's MR3 (xx), and those this run's C1, C2 and C3 found, under the playbook's row for undefined behaviour). The refusals' types, texts and parameters are asserted by `Conventions/MarketModelRefusalTests.cs`.
+The market-model framework's inputs whose QuantLib path is undefined, each refused before the undefined step (the S-mm plan's MR3 (xx), and those this run's C1 to C4 found, under the playbook's row for undefined behaviour). The refusals' types, texts and parameters are asserted by `Conventions/MarketModelRefusalTests.cs`.
 
 Facts:
 
@@ -4280,6 +4328,7 @@ Facts:
 - `TheIndexesQuantLibsUnsignedArithmeticWrapsAreRefused`
 - `TheEvolversAndTheVolatilityProcessesReadsPastTheirStateAreRefused`
 - `TheModelsVariancesAndAdaptersReadsPastTheirInputsAreRefused`
+- `TheCalibrationsReadsPastTheirInputsAreRefused`
 
 ## MarkovFunctionalOutputsTests
 
@@ -5503,6 +5552,16 @@ Facts:
 Facts:
 
 - `TheProductHasARowsLength`
+
+## SphereCylinderClampTests
+
+[`Divergences/SphereCylinderClampTests.cs`](../tests/NanoQL.Tests/Divergences/SphereCylinderClampTests.cs)
+
+The sphere-cylinder optimizer's clamp (the S-mm plan's MR3 (xxiii), fixed under R8). QuantLib's constructor stores the cylinder's radius s, then clamps its parameter to 0 (`spherecylinder.cpp:87`), so its intersection test reads the clamped radius and its solves the stored one: at r 1, α 0.5 and z (0.6, 0.1, 0.5), s −0.2 projects to (0.359, −0.141, 0.923) and s 0 to (0.5, 0, 0.866) (the planner's MP26). nanoql stores the clamped radius. QuantLib's one caller passes s ≥ 0. Check: QuantLib's own optimizer at s 0, for every s below 0.
+
+Facts:
+
+- `ANegativeRadiusIsTheZeroRadius`
 
 ## SpreadApproximationStrikeTests
 

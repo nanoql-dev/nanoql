@@ -273,6 +273,16 @@ public class MarketModelRefusalTests
         Check<ArgumentException>(() => new CotSwapFromFwdCorrelation(corr, two, 0.0), "curveState", "mismatch between number of rates in fwdCorr (3) and curveState (2)");
     }
 
+    // A variance of one step, on the rates' times.
+    private sealed class OneVariance(double[] times) : PiecewiseConstantVariance
+    {
+        public override ImmutableArray<double> Variances => [0.01];
+
+        public override ImmutableArray<double> Volatilities => [0.2];
+
+        public override ImmutableArray<double> RateTimes => [.. times];
+    }
+
     // A volatility process drawing no variates, which the SVD-DD evolver refuses (QuantLib divides by them).
     private sealed class NoVariates : MarketModelVolProcess
     {
@@ -293,6 +303,141 @@ public class MarketModelRefusalTests
         public override ReadOnlySpan<double> StateVariables() => [];
 
         public override MarketModelVolProcess Clone() => new NoVariates();
+    }
+
+    [Fact]
+    public void TheCalibrationsRefusals()
+    {
+        double[] times = [.. Enumerable.Range(1, 11).Select(i => 0.5 * i)];
+        var cs = new LMMCurveState(times);
+        cs.SetOnForwardRates([.. Enumerable.Range(0, 10).Select(i => 0.03 + (0.0025 * i))]);
+        var corr = new CotSwapFromFwdCorrelation(new ExponentialForwardCorrelation(times, 0.5, 0.2), cs, 0.0);
+        PiecewiseConstantVariance[] variances = [.. Enumerable.Range(0, 10).Select(i => new PiecewiseConstantAbcdVariance(0.0, 0.17, 1.0, 0.1, i, times))];
+        double[] caplets = [0.1640, 0.1740, 0.1840, 0.1940, 0.1840, 0.1740, 0.1640, 0.1540, 0.1440, variances[9].TotalVolatility(9)];
+        var evolution = new EvolutionDescription(times);
+        double[] ten = new double[10];
+        double[] nine = new double[9];
+        PiecewiseConstantVariance[] shortSecond = [variances[0], new OneVariance(times), .. variances[2..]];
+        double[] up = [.. Enumerable.Repeat(1.0, 10)];
+        var form = new AlphaFormLinearHyperbolic(times);
+
+        // QuantLib's texts
+        Check<ArgumentException>(
+            () => CTSMMCapletCalibration.PerformChecks(evolution, corr, variances[..9], caplets, cs),
+            "displacedSwapVariances",
+            "mismatch between EvolutionDescription number of rates (10) and displacedSwapVariances size (9)");
+        Check<ArgumentException>(
+            () => CTSMMCapletCalibration.PerformChecks(evolution, corr, variances, caplets[..9], cs),
+            "mktCapletVols",
+            "mismatch between EvolutionDescription number of rates (10) and mktCapletVols size (9)");
+        double[] offLast = [.. caplets[..9], 0.2];
+        Check<ArgumentException>(
+            () => CTSMMCapletCalibration.PerformChecks(evolution, corr, variances, offLast, cs),
+            "mktCapletVols",
+            "last caplet vol (0.2) must be equal to last swaption vol (");
+        Check<ArgumentException>(
+            () => CTSMMCapletCalibration.PerformChecks(new EvolutionDescription(times, [1.0, 2.0]), corr, variances, caplets, cs),
+            "corr",
+            "evolutionTimes ( 1 2 ) not equal to correlation times ( 0.5 1 1.5 2 2.5 3 3.5 4 4.5 5 )");
+        Check<ArgumentException>(
+            () => CTSMMCapletOriginalCalibration.CalibrationFunction(evolution, corr, variances, caplets, cs, 0.0, ten, true, false, 11),
+            "numberOfFactors",
+            "number of factors (11) cannot be greater than numberOfRates (10)");
+        Check<ArgumentException>(
+            () => CTSMMCapletMaxHomogeneityCalibration.CapletMaxHomogeneityCalibration(evolution, corr, variances, caplets, cs, 0.0, 1.0, 0, 100, 1e-8),
+            "numberOfFactors",
+            "number of factors (0) must be greater than zero");
+        Check<ArgumentException>(
+            () => new CTSMMCapletMaxHomogeneityCalibration(evolution, corr, variances, caplets, cs, 0.0, 1.5),
+            "caplet0Swaption1Priority",
+            "caplet0Swaption1Priority (1.5) must be in [0.0, 1.0]");
+        Check<ArgumentException>(
+            () => new CTSMMCapletOriginalCalibration(evolution, corr, variances, caplets, cs, 0.0, nine, true, false),
+            "alpha",
+            "mismatch between number of rates (10) and alpha (9)");
+        Check<ArgumentException>(
+            () => new CTSMMCapletAlphaFormCalibration(evolution, corr, variances, caplets, cs, 0.0, ten, up, nine, false),
+            "alphaMin",
+            "mismatch between number of rates (10) and alphaMin (9)");
+        Check<ArgumentException>(
+            () => new PseudoRootFacade([new Matrix(10, 3)], times, ten, ten),
+            "covariancePseudoRoots",
+            "number of rates (10) greater than number of factors (3) times number of steps (1)");
+        Check<ArgumentException>(
+            () => new PseudoRootFacade([new Matrix(1, 1)], [0.5], [0.03], [0.0]),
+            "rateTimes",
+            "Rate times must contain at least two values");
+        Check<ArgumentException>(
+            () => CapletCoterminalPeriodicFunctions.CapletSwaptionPeriodicCalibration(
+                evolution, corr, new VolatilityInterpolationSpecifierabcd(2, 0, [new PiecewiseConstantAbcdVariance(0.0, 0.17, 1.0, 0.1, 0, [0.5, 1.5])], [0.5, 1.0, 1.5]),
+                caplets, cs, 0.0, 1.0, 3, 2, 100, 1e-8, 10, 1e-5, 30, 1e-5),
+            "displacedSwapVariances",
+            "mismatch between number of swap variances given and number of rates and period");
+        Assert.Equal(
+            "alpha form failure",
+            Assert.Throws<NanoQLException>(() => CTSMMCapletAlphaFormCalibration.CapletAlphaFormCalibration(
+                evolution, corr, variances, [.. caplets[..9].Select(x => 0.7 * x), caplets[9]], cs, 0.0, ten, up, [.. up.Select(x => -x)], false, form, 3, 100, 1e-8)).Message);
+        Assert.Equal(
+            "intersection empty so no solution",
+            Assert.Throws<NanoQLException>(() => SphereCylinderFunctions.SphereCylinderOptimizerClosest(1.0, 0.2, 3.0, 0.5, 0.5, 0.5, 100, 1e-8)).Message);
+        Check<ArgumentException>(() => new SphereCylinderOptimizer(0.0, 0.2, 0.5, 0.5, 0.5, 0.5), "r", "sphere must have positive radius");
+        Check<ArgumentException>(() => new SphereCylinderOptimizer(1.0, 0.2, -0.5, 0.5, 0.5, 0.5), "alpha", "cylinder centre must have positive coordinate");
+        Check<ArgumentException>(
+            () => new BasisIncompleteOrdered(3).AddVector([1.0, 0.0]), "newVector1", "missized vector passed to BasisIncompleteOrdered::addVector");
+
+        // nanoql's, where QuantLib's path is undefined (Divergences/MarketModelUndefinedReadsTests.cs)
+        Check<ArgumentException>(() => new PseudoRootFacade(Array.Empty<Matrix>(), times, ten, ten), "covariancePseudoRoots", "no pseudo-roots given");
+        Check<ArgumentException>(
+            () => CTSMMCapletCalibration.PerformChecks(evolution, corr, shortSecond, caplets, cs),
+            "displacedSwapVariances",
+            "the 2nd displaced swap variance has 1 variances, fewer than its 2 steps");
+        Check<ArgumentException>(
+            () => CTSMMCapletOriginalCalibration.CalibrationFunction(evolution, corr, variances, caplets, cs, 0.0, nine, true, false, 3),
+            "alpha",
+            "mismatch between number of rates (10) and alpha (9)");
+        Check<ArgumentException>(
+            () => CTSMMCapletAlphaFormCalibration.CapletAlphaFormCalibration(evolution, corr, variances, caplets, cs, 0.0, nine, up, ten, false, form, 3, 100, 1e-8),
+            "alphaInitial",
+            "mismatch between number of rates (10) and alphaInitial (9)");
+        double[] bigTimes = [.. Enumerable.Range(0, 6).Select(i => times[2 * i])];
+        var specifier = new VolatilityInterpolationSpecifierabcd(
+            2, 0, [.. Enumerable.Range(0, 5).Select(i => new PiecewiseConstantAbcdVariance(0.0, 0.17, 1.0, 0.1, i, bigTimes))], times);
+        Check<ArgumentOutOfRangeException>(
+            () => CapletCoterminalPeriodicFunctions.CapletSwaptionPeriodicCalibration(evolution, corr, specifier, caplets, cs, 0.0, 1.0, 3, 0, 100, 1e-8, 10, 1e-5, 30, 1e-5),
+            "period",
+            "period must be at least 1");
+        Check<ArgumentOutOfRangeException>(
+            () => CapletCoterminalPeriodicFunctions.CapletSwaptionPeriodicCalibration(evolution, corr, specifier, caplets, cs, 0.0, 1.0, 3, 2, 100, 1e-8, 10, 1e-5, 0, 1e-5),
+            "maxPeriodIterations",
+            "maxPeriodIterations must be at least 1");
+        Check<ArgumentException>(
+            () => CapletCoterminalPeriodicFunctions.CapletSwaptionPeriodicCalibration(evolution, corr, specifier, [], cs, 0.0, 1.0, 3, 2, 100, 1e-8, 10, 1e-5, 30, 1e-5),
+            "capletVols",
+            "mismatch between EvolutionDescription number of rates (10) and mktCapletVols size (0)");
+        Check<ArgumentOutOfRangeException>(
+            () => new OrthogonalProjections(new Matrix(2, 3, 1.0), 100.0, 1e-6).GetVector(2), "index", "index (2) must be less than the number of vectors (2)");
+        Check<ArgumentOutOfRangeException>(() => new AlphaFormInverseLinear([0.5, 1.0]).Evaluate(2), "i", "index (2) must be less than the number of times (2)");
+        Check<ArgumentException>(
+            () => new AlphaFinder(form).Solve(0.0, 1, [0.2], [1.0, 1.0, 1.0], [0.9, 0.9], 1.0, 1.0, 0.02, 1e-8, 1.0, -1.0, 100, out _, out _, out _, new double[3]),
+            "rateOneVols",
+            "1 values given, the step index reads 2");
+
+        // a count below zero, which QuantLib's unsigned counts wrap
+        var calibration = new CTSMMCapletMaxHomogeneityCalibration(evolution, corr, variances, caplets, cs, 0.0, 1.0);
+        Check<ArgumentOutOfRangeException>(() => calibration.Calibrate(3, -1, 1e-4), "maxIterations", "");
+        Check<ArgumentOutOfRangeException>(() => calibration.Calibrate(3, 10, 1e-4, -1), "innerMaxIterations", "");
+        Check<ArgumentOutOfRangeException>(
+            () => CTSMMCapletMaxHomogeneityCalibration.CapletMaxHomogeneityCalibration(evolution, corr, variances, caplets, cs, 0.0, 1.0, 3, -1, 1e-8),
+            "maxIterations",
+            "");
+        Check<ArgumentOutOfRangeException>(
+            () => new AlphaFinder(form).SolveWithMaxHomogeneity(0.0, 1, [0.2, 0.2], [1.0, 1.0, 1.0], [0.9, 0.9], 1.0, 1.0, 0.02, 1e-8, 1.0, -1.0, -1, out _, out _, out _, new double[3]),
+            "steps",
+            "");
+        Check<ArgumentOutOfRangeException>(() => new SphereCylinderOptimizer(1.0, 0.5, 1.5, 0.5, 0.5, 0.5).FindClosest(-1, 1e-8, out _, out _, out _), "maxIterations", "");
+        Check<ArgumentOutOfRangeException>(
+            () => SphereCylinderFunctions.SphereCylinderOptimizerClosest(1.0, 0.5, 1.5, 0.5, 0.5, 0.5, -1, 1e-8), "maxIterations", "");
+        Check<ArgumentOutOfRangeException>(() => new BasisIncompleteOrdered(-1), "euclideanDimension", "");
     }
 
     // The refusal's type exactly, its parameter, and its text (an ArgumentException's own suffix after it).

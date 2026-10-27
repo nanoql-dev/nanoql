@@ -9,7 +9,7 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The market-model framework's inputs whose QuantLib path is undefined, each refused before the undefined step (the
-/// S-mm plan's MR3 (xx), and those this run's C1, C2 and C3 found, under the playbook's row for undefined behaviour).
+/// S-mm plan's MR3 (xx), and those this run's C1 to C4 found, under the playbook's row for undefined behaviour).
 /// The refusals' types, texts and parameters are asserted by <c>Conventions/MarketModelRefusalTests.cs</c>.
 /// </summary>
 public class MarketModelUndefinedReadsTests
@@ -227,6 +227,60 @@ public class MarketModelUndefinedReadsTests
         Assert.Throws<ArgumentException>(() => new CotSwapFromFwdCorrelation(new FewerTimes(), cs, 0.0));
     }
 
+    [Fact]
+    public void TheCalibrationsReadsPastTheirInputsAreRefused()
+    {
+        double[] times = [.. Enumerable.Range(1, 11).Select(i => 0.5 * i)];
+        var cs = new LMMCurveState(times);
+        cs.SetOnForwardRates([.. Enumerable.Range(0, 10).Select(i => 0.03 + (0.0025 * i))]);
+        var corr = new CotSwapFromFwdCorrelation(new ExponentialForwardCorrelation(times, 0.5, 0.2), cs, 0.0);
+        PiecewiseConstantVariance[] variances = [.. Enumerable.Range(0, 10).Select(i => new PiecewiseConstantAbcdVariance(0.0, 0.17, 1.0, 0.1, i, times))];
+        double[] caplets = [0.1640, 0.1740, 0.1840, 0.1940, 0.1840, 0.1740, 0.1640, 0.1540, 0.1440, variances[9].TotalVolatility(9)];
+        var evolution = new EvolutionDescription(times);
+        double[] ten = new double[10];
+        double[] nine = new double[9];
+        PiecewiseConstantVariance[] shortSecond = [variances[0], new OneVariance(times), .. variances[2..]];
+
+        // pseudorootfacade.cpp:29-30, :40-41 read the first of no pseudo-roots.
+        Assert.Throws<ArgumentException>(() => new PseudoRootFacade(Array.Empty<Matrix>(), times, ten, ten));
+
+        // capletcoterminalalphacalibration.cpp:142, capletcoterminalmaxhomogeneity.cpp:334 and
+        // capletcoterminalswaptioncalibration.cpp:112, :155 read each rate's variances to its own step, past a variance
+        // of fewer, after performChecks reads only the last's.
+        Assert.Throws<ArgumentException>(() => CTSMMCapletCalibration.PerformChecks(evolution, corr, shortSecond, caplets, cs));
+
+        // capletcoterminalswaptioncalibration.cpp:115 and capletcoterminalalphacalibration.cpp:167, :184 read the α
+        // vectors to the last rate, which only the constructors check.
+        Assert.Throws<ArgumentException>(() => CTSMMCapletOriginalCalibration.CalibrationFunction(
+            evolution, corr, variances, caplets, cs, 0.0, nine, true, false, 3));
+        Assert.Throws<ArgumentException>(() => CTSMMCapletAlphaFormCalibration.CapletAlphaFormCalibration(
+            evolution, corr, variances, caplets, cs, 0.0, ten, nine, ten, false, new AlphaFormLinearHyperbolic(times), 3, 100, 1e-8));
+
+        // capletcoterminalperiodic.cpp:74 divides by the period; :89 reads the last of the caplet volatilities before
+        // the inner calibration checks them, the back of none undefined; :165 writes the first pass's row of a matrix
+        // of maxPeriodIterations rows.
+        double[] bigTimes = [.. Enumerable.Range(0, 6).Select(i => times[2 * i])];
+        var specifier = new VolatilityInterpolationSpecifierabcd(
+            2, 0, [.. Enumerable.Range(0, 5).Select(i => new PiecewiseConstantAbcdVariance(0.0, 0.17, 1.0, 0.1, i, bigTimes))], times);
+        Assert.Throws<ArgumentOutOfRangeException>(() => CapletCoterminalPeriodicFunctions.CapletSwaptionPeriodicCalibration(
+            evolution, corr, specifier, caplets, cs, 0.0, 1.0, 3, 0, 100, 1e-8, 10, 1e-5, 30, 1e-5));
+        Assert.Throws<ArgumentException>(() => CapletCoterminalPeriodicFunctions.CapletSwaptionPeriodicCalibration(
+            evolution, corr, specifier, [], cs, 0.0, 1.0, 3, 2, 100, 1e-8, 10, 1e-5, 30, 1e-5));
+        Assert.Throws<ArgumentOutOfRangeException>(() => CapletCoterminalPeriodicFunctions.CapletSwaptionPeriodicCalibration(
+            evolution, corr, specifier, caplets, cs, 0.0, 1.0, 3, 2, 100, 1e-8, 10, 1e-5, 0, 1e-5));
+
+        // basisincompleteordered.cpp:216 and alphaformconcrete.cpp:30, :42 read their vectors unchecked;
+        // alphafinder.cpp:188-189, :202 read the vectors given to the step index plus one or two.
+        var projections = new OrthogonalProjections(new Matrix(2, 3, 1.0), 100.0, 1e-6);
+        Assert.Throws<ArgumentOutOfRangeException>(() => projections.GetVector(2));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new AlphaFormInverseLinear([0.5, 1.0]).Evaluate(2));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new AlphaFormLinearHyperbolic([0.5, 1.0]).Evaluate(-1));
+        Assert.Throws<ArgumentException>(() => new AlphaFinder(new AlphaFormLinearHyperbolic([0.5, 1.0, 1.5])).Solve(
+            0.0, 1, [0.2], [1.0, 1.0, 1.0], [0.9, 0.9], 1.0, 1.0, 0.02, 1e-8, 1.0, -1.0, 100, out _, out _, out _, new double[3]));
+        Assert.Throws<ArgumentException>(() => new AlphaFinder(new AlphaFormLinearHyperbolic([0.5, 1.0, 1.5])).Solve(
+            0.0, 1, [0.2, 0.2], [1.0, 1.0, 1.0], [0.9, 0.9], 1.0, 1.0, 0.02, 1e-8, 1.0, -1.0, 100, out _, out _, out _, new double[2]));
+    }
+
     private static CurveState[] States()
     {
         var lmm = new LMMCurveState(Times);
@@ -268,6 +322,16 @@ public class MarketModelUndefinedReadsTests
         public override ImmutableArray<double> Volatilities => [0.1, 0.1];
 
         public override ImmutableArray<double> RateTimes => [1.0];
+    }
+
+    // A variance of one step, on the rates' times.
+    private sealed class OneVariance(double[] times) : PiecewiseConstantVariance
+    {
+        public override ImmutableArray<double> Variances => [0.01];
+
+        public override ImmutableArray<double> Volatilities => [0.2];
+
+        public override ImmutableArray<double> RateTimes => [.. times];
     }
 
     // A correlation with fewer times than matrices.

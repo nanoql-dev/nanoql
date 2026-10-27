@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/matrices.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testOrthogonalProjection (S-mm); testQRDecomposition, testQRSolve (S-core); testMoorePenroseInverse (S-xrt)
+// Partial: testQRDecomposition, testQRSolve (S-core); testMoorePenroseInverse (S-xrt)
 // Moved: testSparseMatrixMemory line 755 (Divergences/SparseMatrixProductTests.cs)
 
 using NanoQL.Numerics;
@@ -162,6 +162,79 @@ public class MatricesTests
                 Assert.Fail(
                     $"determinant calculation failed \n matrix     :\n{m}\n calculated : {calculated}\n expected   : {expectedValue}");
             }
+        }
+    }
+
+    [Fact]
+    public void TestOrthogonalProjection()
+    {
+        // Testing orthogonal projections...
+        int dimension = 1000;
+        int numberVectors = 50;
+        double multiplier = 100;
+        double tolerance = 1e-6;
+        long seed = 1;
+
+        double errorAcceptable = 1E-11;
+
+        var test = new Matrix(numberVectors, dimension);
+
+        var rng = new MersenneTwisterUniformRng(seed);
+
+        for (int i = 0; i < numberVectors; ++i)
+        {
+            for (int j = 0; j < dimension; ++j)
+            {
+                test[i, j] = rng.Next().Value;
+            }
+        }
+
+        var projector = new OrthogonalProjections(test, multiplier, tolerance);
+
+        int numberFailures = 0;
+        int failuresTwo = 0;
+
+        for (int i = 0; i < numberVectors; ++i)
+        {
+            // check output vector i is orthogonal to all other vectors
+            if (projector.ValidVectors[i])
+            {
+                for (int j = 0; j < numberVectors; ++j)
+                {
+                    if (projector.ValidVectors[j] && i != j)
+                    {
+                        double dotProduct = 0.0;
+                        for (int k = 0; k < dimension; ++k)
+                        {
+                            dotProduct += test[j, k] * projector.GetVector(i)[k];
+                        }
+
+                        if (Math.Abs(dotProduct) > errorAcceptable)
+                        {
+                            ++numberFailures;
+                        }
+                    }
+                }
+
+                double innerProductWithOriginal = 0.0;
+                double normSq = 0.0;
+
+                for (int j = 0; j < dimension; ++j)
+                {
+                    innerProductWithOriginal += projector.GetVector(i)[j] * test[i, j];
+                    normSq += test[i, j] * test[i, j];
+                }
+
+                if (Math.Abs(innerProductWithOriginal - normSq) > errorAcceptable)
+                {
+                    ++failuresTwo;
+                }
+            }
+        }
+
+        if (numberFailures > 0 || failuresTwo > 0)
+        {
+            Assert.Fail($"OrthogonalProjections test failed with {numberFailures} failures  of orthogonality and {failuresTwo} failures of projection size.");
         }
     }
 

@@ -188,6 +188,92 @@ public class MarketModelImmutabilityTests
         Assert.Throws<NanoQLException>(() => given.Nextstep([0.1, 0.2]));
     }
 
+    [Fact]
+    public void TheCalibrationsCopyWhatTheyAreGivenAndWhatTheyReturn()
+    {
+        double[] times = [.. Enumerable.Range(1, 11).Select(i => 0.5 * i)];
+        var cs = new LMMCurveState(times);
+        cs.SetOnForwardRates([.. Enumerable.Range(0, 10).Select(i => 0.03 + (0.0025 * i))]);
+        var corr = new CotSwapFromFwdCorrelation(new ExponentialForwardCorrelation(times, 0.5, 0.2), cs, 0.0);
+        PiecewiseConstantVariance[] variances = [.. Enumerable.Range(0, 10).Select(i => new PiecewiseConstantAbcdVariance(0.0, 0.17, 1.0, 0.1, i, times))];
+        double[] caplets = [0.1640, 0.1740, 0.1840, 0.1940, 0.1840, 0.1740, 0.1640, 0.1540, 0.1440, variances[9].TotalVolatility(9)];
+        var evolution = new EvolutionDescription(times);
+
+        // the form given is copied: QuantLib's calibration leaves it at its last alpha (the S-mm plan's MR2 (b))
+        var form = new AlphaFormLinearHyperbolic(times, 0.25);
+        double before = form.Evaluate(5);
+        var calibration = new CTSMMCapletAlphaFormCalibration(
+            evolution, corr, variances, caplets, cs, 0.0, new double[10], [.. Enumerable.Repeat(1.0, 10)], [.. Enumerable.Repeat(-1.0, 10)], false, form);
+        CTSMMCapletCalibrationResults first = calibration.Calibrate(3, 10, 1e-4, 100, 1e-8);
+        Assert.Equal(before, form.Evaluate(5));
+        _ = CTSMMCapletAlphaFormCalibration.CapletAlphaFormCalibration(
+            evolution, corr, variances, caplets, cs, 0.0, new double[10], [.. Enumerable.Repeat(1.0, 10)], [.. Enumerable.Repeat(-1.0, 10)], false, form, 3, 100, 1e-8);
+        Assert.Equal(before, form.Evaluate(5));
+
+        // the curve state given is copied, and a read is a copy; a second calibration repeats the first
+        cs.SetOnForwardRates([.. Enumerable.Repeat(0.05, 10)]);
+        CurveState read = calibration.CurveState();
+        Assert.Equal(0.03, read.ForwardRate(0), 15);
+        ((LMMCurveState)read).SetOnForwardRates([.. Enumerable.Repeat(0.07, 10)]);
+        Assert.Equal(0.03, calibration.CurveState().ForwardRate(0), 15);
+        CTSMMCapletCalibrationResults second = calibration.Calibrate(3, 10, 1e-4, 100, 1e-8);
+        Assert.Equal(first.Alpha!.Value.ToArray(), second.Alpha!.Value.ToArray());
+        Assert.True(first.SwapPseudoRoot(4) == second.SwapPseudoRoot(4));
+
+        // a matrix read is a copy
+        Matrix root = first.SwapPseudoRoot(4);
+        root[0, 0] = 99.0;
+        Assert.NotEqual(99.0, first.SwapPseudoRoot(4)[0, 0]);
+        first.SwapPseudoRoots()[4][0, 0] = 99.0;
+        Assert.NotEqual(99.0, first.SwapPseudoRoots()[4][0, 0]);
+
+        // the facade copies its pseudo-roots and returns copies
+        Matrix[] roots = [.. first.SwapPseudoRoots()];
+        var facade = new PseudoRootFacade(roots, times, new double[10], new double[10]);
+        double kept = facade.PseudoRoot(4)[4, 0];
+        roots[4][4, 0] = 99.0;
+        facade.PseudoRoot(4)[4, 0] = 99.0;
+        Assert.Equal(kept, facade.PseudoRoot(4)[4, 0]);
+        CTSMMCapletCalibrationStep step = CTSMMCapletOriginalCalibration.CalibrationFunction(
+            evolution, corr, variances, caplets, cs, 0.0, [.. Enumerable.Repeat(-0.05, 10)], true, false, 3);
+        step.SwapCovariancePseudoRoots()[0][0, 0] = 99.0;
+        Assert.NotEqual(99.0, step.SwapCovariancePseudoRoots()[0][0, 0]);
+
+        // the periodic calibration leaves the caller's specifier as it was (MR2 (c))
+        double[] bigTimes = [.. Enumerable.Range(0, 6).Select(i => times[2 * i])];
+        var specifier = new VolatilityInterpolationSpecifierabcd(
+            2, 0, [.. Enumerable.Range(0, 5).Select(i => new PiecewiseConstantAbcdVariance(0.0, 0.17, 1.0, 0.1, i, bigTimes))], times);
+        double[] variancesBefore = [.. specifier.InterpolatedVariances.SelectMany(v => v.Variances)];
+        cs.SetOnForwardRates([.. Enumerable.Range(0, 10).Select(i => 0.03 + (0.0025 * i))]);
+        CapletSwaptionPeriodicCalibrationResults periodic = CapletCoterminalPeriodicFunctions.CapletSwaptionPeriodicCalibration(
+            evolution, corr, specifier, caplets, cs, 0.0, 1.0, 3, 2, 100, 1e-8, 10, 1e-5, 30, 1e-5);
+        Assert.Equal(variancesBefore, specifier.InterpolatedVariances.SelectMany(v => v.Variances).ToArray());
+        Assert.NotEqual(1.0, periodic.FinalScales[0]);
+        periodic.ModelSwaptionVolsMatrix()[0, 0] = 99.0;
+        Assert.NotEqual(99.0, periodic.ModelSwaptionVolsMatrix()[0, 0]);
+        periodic.SwapCovariancePseudoRoots()[0][0, 0] = 99.0;
+        Assert.NotEqual(99.0, periodic.SwapCovariancePseudoRoots()[0][0, 0]);
+    }
+
+    [Fact]
+    public void TheOrthogonalProjectionsAreComputedOnce()
+    {
+        var vectors = new Matrix(3, 4);
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = 0; j < 4; ++j)
+            {
+                vectors[i, j] = 1.0 + i + (i * j * 0.5) + (j * j * 0.1);
+            }
+        }
+
+        var projections = new OrthogonalProjections(vectors, 100.0, 1e-6);
+        double kept = projections.GetVector(1)[2];
+        vectors[1, 2] = 99.0;
+        Assert.Equal(kept, projections.GetVector(1)[2]);
+        Assert.Equal(3, projections.ValidVectors.Length);
+    }
+
     private static FlatVol Model() =>
         new([0.2, 0.22, 0.24], new ExponentialForwardCorrelation(RateTimes), new EvolutionDescription(RateTimes), 2, [0.03, 0.04, 0.05], [0.0, 0.0, 0.0]);
 }

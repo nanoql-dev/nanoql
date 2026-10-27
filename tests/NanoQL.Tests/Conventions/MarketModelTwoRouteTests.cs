@@ -242,6 +242,64 @@ public class MarketModelTwoRouteTests
         }
     }
 
+    [Fact]
+    public void AFacadeOnAModelsPseudoRootsIsTheModel()
+    {
+        double[] rates = [.. Enumerable.Range(0, 5).Select(i => 0.03 + (0.002 * i))];
+        var model = new FlatVol(
+            [0.2, 0.19, 0.21, 0.18, 0.2],
+            new ExponentialForwardCorrelation(RateTimes, 0.5, 0.2, 1.0),
+            new EvolutionDescription(RateTimes),
+            3,
+            rates,
+            [.. Enumerable.Repeat(0.01, 5)]);
+        var facade = new PseudoRootFacade(
+            [.. Enumerable.Range(0, 5).Select(model.PseudoRoot)], RateTimes, rates, [.. Enumerable.Repeat(0.01, 5)]);
+        Assert.Equal(model.Evolution.EvolutionTimes, facade.Evolution.EvolutionTimes);
+        Assert.Equal(model.NumberOfFactors, facade.NumberOfFactors);
+        for (int k = 0; k < 5; ++k)
+        {
+            Matrix expected = model.TotalCovariance(k), actual = facade.TotalCovariance(k);
+            for (int i = 0; i < 5; ++i)
+            {
+                for (int j = 0; j < 5; ++j)
+                {
+                    Assert.Equal(expected[i, j], actual[i, j]);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void AFacadeOnACalibrationIsTheFacadeOnItsPseudoRoots()
+    {
+        double[] times = [.. Enumerable.Range(1, 11).Select(i => 0.5 * i)];
+        var cs = new LMMCurveState(times);
+        cs.SetOnForwardRates([.. Enumerable.Range(0, 10).Select(i => 0.03 + (0.0025 * i))]);
+        var corr = new CotSwapFromFwdCorrelation(new ExponentialForwardCorrelation(times, 0.5, 0.2), cs, 0.01);
+        PiecewiseConstantVariance[] variances = [.. Enumerable.Range(0, 10).Select(i => new PiecewiseConstantAbcdVariance(0.0, 0.17, 1.0, 0.1, i, times))];
+        double[] caplets = [0.1640, 0.1740, 0.1840, 0.1940, 0.1840, 0.1740, 0.1640, 0.1540, 0.1440, variances[9].TotalVolatility(9)];
+        var calibration = new CTSMMCapletMaxHomogeneityCalibration(new EvolutionDescription(times), corr, variances, caplets, cs, 0.01);
+        CTSMMCapletCalibrationResults results = calibration.Calibrate(3, 10, 1e-4, 100, 1e-8);
+
+        var byCalibration = new PseudoRootFacade(calibration, results);
+        var byRoots = new PseudoRootFacade(results.SwapPseudoRoots(), times, cs.CoterminalSwapRates(), [.. Enumerable.Repeat(0.01, 10)]);
+        Assert.Equal(byRoots.InitialRates, byCalibration.InitialRates);
+        Assert.Equal(byRoots.Displacements, byCalibration.Displacements);
+        Assert.Equal(byRoots.Evolution.RateTimes, byCalibration.Evolution.RateTimes);
+        for (int k = 0; k < 10; ++k)
+        {
+            Assert.True(byRoots.TotalCovariance(k) == byCalibration.TotalCovariance(k));
+        }
+
+        // the calibration's own fit: its model swaption volatilities from the facade's total covariance
+        Matrix total = byCalibration.TotalCovariance(9);
+        for (int i = 0; i < 10; ++i)
+        {
+            Assert.Equal(results.MdlSwaptionVols[i], Math.Sqrt(total[i, i] / times[i]), 15);
+        }
+    }
+
     private static Matrix Pseudo(int factors)
     {
         var m = new Matrix(5, factors);

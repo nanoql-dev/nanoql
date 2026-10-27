@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 348 | 32 |
+| not started | 336 | 29 |
 | partial | 19 | 33 |
-| ported | 893 | 115 |
+| ported | 905 | 118 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -769,7 +769,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `pascaltriangle` | not started |  | no nanoql type: PascalTriangle |
 | `polynomialmathfunction` | not started |  | no nanoql type: PolynomialFunction |
 | `primenumbers` | ported | Numerics/PrimeNumbers.cs |  |
-| `quadratic` | not started |  | no nanoql type: Quadratic |
+| `quadratic` | ported | Numerics/Quadratic.cs |  |
 | `richardsonextrapolation` | not started |  | no nanoql type: RichardsonExtrapolation |
 | `rounding` | ported | Numerics/Rounding/CeilingTruncation.cs, Numerics/Rounding/ClosestRounding.cs, Numerics/Rounding/DownRounding.cs, Numerics/Rounding/FloorTruncation.cs, Numerics/Rounding/Rounding.cs, Numerics/Rounding/RoundingType.cs, Numerics/Rounding/UpRounding.cs |  |
 | `solver1d` | ported | Numerics/Solver1D/IDerivativeSolver1DFunction.cs, Numerics/Solver1D/ISolver1DFunction.cs, Numerics/Solver1D/Solver1D.cs, Numerics/Solver1D/Solver1DBracket.cs |  |
@@ -865,7 +865,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `basisincompleteordered` | not started |  | no nanoql type: BasisIncompleteOrdered, OrthogonalProjections |
+| `basisincompleteordered` | ported | Numerics/MatrixUtilities/BasisIncompleteOrdered/BasisIncompleteOrdered.cs, Numerics/MatrixUtilities/BasisIncompleteOrdered/OrthogonalProjections.cs |  |
 | `bicgstab` | ported | Numerics/MatrixUtilities/BiCGStabResult.cs, Numerics/MatrixUtilities/BiCGstab.cs |  |
 | `choleskydecomposition` | ported | Numerics/MatrixUtilities/CholeskyDecompositionFunctions.cs |  |
 | `expm` | not started |  |  |
@@ -918,7 +918,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `projection` | ported | Numerics/Optimization/Projection.cs |  |
 | `simplex` | ported | Numerics/Optimization/Simplex.cs |  |
 | `simulatedannealing` | not started |  | no nanoql type: SimulatedAnnealing, SimulatedAnnealingScheme |
-| `spherecylinder` | not started |  | no nanoql type: SphereCylinderOptimizer |
+| `spherecylinder` | ported | Numerics/Optimization/SphereCylinder/SphereCylinderFunctions.cs, Numerics/Optimization/SphereCylinder/SphereCylinderOptimizer.cs |  |
 | `steepestdescent` | not started |  | no nanoql type: SteepestDescent |
 
 ### `ql/math/randomnumbers/`
@@ -1313,21 +1313,21 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `abcdvol` | ported | Models/MarketModels/Models/AbcdVol.cs |  |
 | `all` | not ported: include-only header |  |  |
-| `alphafinder` | not started |  | no nanoql type: AlphaFinder |
-| `alphaform` | not started |  | no nanoql type: AlphaForm |
-| `alphaformconcrete` | not started |  | no nanoql type: AlphaFormInverseLinear, AlphaFormLinearHyperbolic |
-| `capletcoterminalalphacalibration` | not started |  | no nanoql type: CTSMMCapletAlphaFormCalibration |
-| `capletcoterminalmaxhomogeneity` | not started |  | no nanoql type: CTSMMCapletMaxHomogeneityCalibration |
-| `capletcoterminalperiodic` | not started |  |  |
-| `capletcoterminalswaptioncalibration` | not started |  | no nanoql type: CTSMMCapletOriginalCalibration |
+| `alphafinder` | ported | Models/MarketModels/Models/AlphaFinder.cs |  |
+| `alphaform` | ported | Models/MarketModels/Models/AlphaForm.cs |  |
+| `alphaformconcrete` | ported | Models/MarketModels/Models/AlphaFormConcrete/AlphaFormInverseLinear.cs, Models/MarketModels/Models/AlphaFormConcrete/AlphaFormLinearHyperbolic.cs |  |
+| `capletcoterminalalphacalibration` | ported | Models/MarketModels/Models/CTSMMCapletAlphaFormCalibration.cs |  |
+| `capletcoterminalmaxhomogeneity` | ported | Models/MarketModels/Models/CTSMMCapletMaxHomogeneityCalibration.cs |  |
+| `capletcoterminalperiodic` | ported | Models/MarketModels/Models/CapletCoterminalPeriodic/CapletCoterminalPeriodicFunctions.cs, Models/MarketModels/Models/CapletCoterminalPeriodic/CapletSwaptionPeriodicCalibrationResults.cs |  |
+| `capletcoterminalswaptioncalibration` | ported | Models/MarketModels/Models/CTSMMCapletOriginalCalibration.cs |  |
 | `cotswaptofwdadapter` | ported | Models/MarketModels/Models/CotSwapToFwdAdapter/CotSwapToFwdAdapter.cs, Models/MarketModels/Models/CotSwapToFwdAdapter/CotSwapToFwdAdapterFactory.cs |  |
-| `ctsmmcapletcalibration` | not started |  | no nanoql type: CTSMMCapletCalibration |
+| `ctsmmcapletcalibration` | ported | Models/MarketModels/Models/CTSMMCapletCalibration/CTSMMCapletCalibration.cs, Models/MarketModels/Models/CTSMMCapletCalibration/CTSMMCapletCalibrationResults.cs, Models/MarketModels/Models/CTSMMCapletCalibration/CTSMMCapletCalibrationStep.cs |  |
 | `flatvol` | ported | Models/MarketModels/Models/FlatVol/FlatVol.cs, Models/MarketModels/Models/FlatVol/FlatVolFactory.cs, Models/MarketModels/Models/FlatVol/FlatVolFunctions.cs |  |
 | `fwdperiodadapter` | ported | Models/MarketModels/Models/FwdPeriodAdapter.cs |  |
 | `fwdtocotswapadapter` | ported | Models/MarketModels/Models/FwdToCotSwapAdapter/FwdToCotSwapAdapter.cs, Models/MarketModels/Models/FwdToCotSwapAdapter/FwdToCotSwapAdapterFactory.cs |  |
 | `piecewiseconstantabcdvariance` | ported | Models/MarketModels/Models/PiecewiseConstantAbcdVariance/AbcdCoefficients.cs, Models/MarketModels/Models/PiecewiseConstantAbcdVariance/PiecewiseConstantAbcdVariance.cs |  |
 | `piecewiseconstantvariance` | ported | Models/MarketModels/Models/PiecewiseConstantVariance.cs |  |
-| `pseudorootfacade` | not started |  | no nanoql type: PseudoRootFacade |
+| `pseudorootfacade` | ported | Models/MarketModels/Models/PseudoRootFacade.cs |  |
 | `volatilityinterpolationspecifier` | ported | Models/MarketModels/Models/VolatilityInterpolationSpecifier.cs |  |
 | `volatilityinterpolationspecifierabcd` | ported | Models/MarketModels/Models/VolatilityInterpolationSpecifierabcd.cs |  |
 
@@ -2172,11 +2172,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `marketmodel` | partial | TestSuite/MarketModelTests.cs | 6 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported); not yet: testOneStepForwardsAndOptionlets, testOneStepNormalForwardsAndOptionlets, testInverseFloater, testAllMultiStepProducts, testPeriodAdapter, testCallableSwapNaif, testCallableSwapLS, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas, testStochVolForwardsAndOptionlets |
 | `marketmodel_cms` | not started |  | 1 cases |
 | `marketmodel_smm` | not started |  | 1 cases |
-| `marketmodel_smmcapletalphacalibration` | not started |  | 1 cases |
-| `marketmodel_smmcapletcalibration` | not started |  | 1 cases |
-| `marketmodel_smmcaplethomocalibration` | not started |  | 3 cases |
+| `marketmodel_smmcapletalphacalibration` | ported | TestSuite/MarketModelSmmCapletAlphaCalibrationTests.cs | 1 of 1 cases |
+| `marketmodel_smmcapletcalibration` | ported | TestSuite/MarketModelSmmCapletCalibrationTests.cs | 1 of 1 cases |
+| `marketmodel_smmcaplethomocalibration` | ported | TestSuite/MarketModelSmmCapletHomoCalibrationTests.cs | 3 of 3 cases |
 | `markovfunctional` | ported | TestSuite/MarkovFunctionalTests.cs | 7 of 7 cases |
-| `matrices` | partial | TestSuite/MatricesTests.cs | 16 of 20 cases; not yet: testQRDecomposition, testQRSolve, testOrthogonalProjection, testMoorePenroseInverse; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
+| `matrices` | partial | TestSuite/MatricesTests.cs | 17 of 20 cases; not yet: testQRDecomposition, testQRSolve, testMoorePenroseInverse; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
 | `mclongstaffschwartzengine` | ported | TestSuite/McLongstaffSchwartzEngineTests.cs | 2 of 2 cases |
 | `mersennetwister` | ported | TestSuite/MersenneTwisterTests.cs | 1 of 1 cases |
 | `money` | ported | TestSuite/MoneyTests.cs | 4 of 4 cases |

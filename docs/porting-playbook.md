@@ -301,7 +301,8 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `BinomialTree<T>`, `EqualProbabilitiesBinomialTree<T>`, `EqualJumpsBinomialTree<T>`, `MultiAssetOption`,
   `BasketPayoff`, `SpreadBlackScholesVanillaEngine`, `MCForwardVanillaEngine<TMc, TPath, TStats>`, `CurveState`,
   `MarketModel`, `MarketModelFactory`, `MarketModelEvolver`, `ConstrainedEvolver`, `PiecewiseConstantCorrelation`,
-  `MarketModelVolProcess`, `PiecewiseConstantVariance` and `VolatilityInterpolationSpecifier` (abstract);
+  `MarketModelVolProcess`, `PiecewiseConstantVariance`, `VolatilityInterpolationSpecifier`, `AlphaForm` and
+  `CTSMMCapletCalibration` (abstract);
   `DiscretizedOption`, `Vasicek`, `TermStructureFittingParameter`, `Projection`, `ZeroInflationIndex`,
   `YoYInflationIndex`, `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`,
   `YoYInflationCouponPricer`, `CPICouponPricer`, `YoYInflationCapFloor`, `GeneralizedBlackScholesProcess`,
