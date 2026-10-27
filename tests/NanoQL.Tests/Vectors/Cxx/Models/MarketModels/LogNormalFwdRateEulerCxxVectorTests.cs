@@ -21,15 +21,17 @@ public class LogNormalFwdRateEulerCxxVectorTests
     public void LogNormalFwdRateEulerCxxVector() =>
         CheckEvolutions(
             "cxx/models/marketmodels/evolvers/lognormalfwdrateeuler",
-            (m, f, numeraires, initial) => new LogNormalFwdRateEuler(m, f, numeraires, initial),
+            (_, m, f, numeraires, initial) => new LogNormalFwdRateEuler(m, f, numeraires, initial),
             e => ((LogNormalFwdRateEuler)e).BrowniansThisStep().ToArray());
 
     // An evolver file's evolutions, each path's weight and each step's reads, and its refused numeraires; the steps'
-    // Brownian increments where the evolver gives them.
+    // Brownian increments where the evolver gives them. The evolver is made from the case (its initial step 0 where the
+    // case gives none), its initial state set on the case's forwards, then prepare called on it.
     internal static void CheckEvolutions(
         string vectorFile,
-        Func<MarketModel, BrownianGeneratorFactory, int[], int, MarketModelEvolver> make,
-        Func<MarketModelEvolver, double[]>? brownians = null)
+        Func<VectorCase, MarketModel, BrownianGeneratorFactory, int[], int, MarketModelEvolver> make,
+        Func<MarketModelEvolver, double[]>? brownians = null,
+        Action<VectorCase, MarketModelEvolver>? prepare = null)
     {
         var file = VectorFile.Load(vectorFile);
         var check = new VectorAssert(file);
@@ -40,11 +42,12 @@ public class LogNormalFwdRateEulerCxxVectorTests
             if (c.String("call") == "refused")
             {
                 int[][] sets = [.. c.Input("numeraires").EnumerateArray().Select(Integers)];
-                check.Output(c, "refused", sets.Select(s => Lazy(() => make(model, factory, s, 0))).ToArray());
+                check.Output(c, "refused", sets.Select(s => Lazy(() => make(c, model, factory, s, 0))).ToArray());
                 continue;
             }
 
-            MarketModelEvolver e = make(model, factory, Integers(c.Input("numeraires")), c.Int("initialStep"));
+            int initialStep = c.Inputs.TryGetProperty("initialStep", out System.Text.Json.JsonElement i) ? i.GetInt32() : 0;
+            MarketModelEvolver e = make(c, model, factory, Integers(c.Input("numeraires")), initialStep);
             if (c.Input("initialForwards").ValueKind != System.Text.Json.JsonValueKind.Null)
             {
                 var cs = new LMMCurveState(model.Evolution.RateTimes.AsSpan());
@@ -52,7 +55,8 @@ public class LogNormalFwdRateEulerCxxVectorTests
                 e.SetInitialState(cs);
             }
 
-            int paths = c.Int("paths"), steps = model.NumberOfSteps - c.Int("initialStep");
+            prepare?.Invoke(c, e);
+            int paths = c.Int("paths"), steps = model.NumberOfSteps - initialStep;
             var pathWeights = new List<object?>();
             var reads = new Dictionary<string, List<object?>>();
             string[] keys = ["weight", "currentStep", "forwards", "discountRatios", "coterminalSwapRates", "brownians"];

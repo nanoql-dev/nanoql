@@ -10,8 +10,8 @@ namespace NanoQL.Tests.Conventions;
 /// The Brownian generators' contract (the S-hes plan's HR3 (iv)): <see cref="BrownianGeneratorFactory.Create"/> returns
 /// a new generator each call, each drawing its own sequence from the factory's seed;
 /// <see cref="BrownianGenerator.NextStep"/> and <see cref="BrownianGenerator.NextPath"/> return the draw's weight, 1
-/// for the Mersenne-Twister and Sobol generators, as QuantLib's; and seeds are explicit, in [1, 4294967295], where
-/// QuantLib's 0 draws one from the clock.
+/// for the Mersenne-Twister, Sobol and Burley-scrambled Sobol generators, as QuantLib's; and seeds are explicit, in [1,
+/// 4294967295], where QuantLib's 0 draws one from the clock.
 /// </summary>
 public class BrownianGeneratorContractTests
 {
@@ -19,6 +19,7 @@ public class BrownianGeneratorContractTests
     [
         new MTBrownianGeneratorFactory(1234),
         new SobolBrownianGeneratorFactory(SobolBrownianGeneratorBaseOrdering.Diagonal, 1234, SobolRsgDirectionIntegers.JoeKuoD7),
+        new Burley2020SobolBrownianGeneratorFactory(SobolBrownianGeneratorBaseOrdering.Diagonal, 1234, SobolRsgDirectionIntegers.JoeKuoD7, 5678),
     ];
 
     [Fact]
@@ -66,6 +67,10 @@ public class BrownianGeneratorContractTests
                 () => new SobolBrownianGeneratorFactory(SobolBrownianGeneratorBaseOrdering.Steps, seed));
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => new SobolBrownianGenerator(1, 1, SobolBrownianGeneratorBaseOrdering.Steps, seed));
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new Burley2020SobolBrownianGeneratorFactory(SobolBrownianGeneratorBaseOrdering.Steps, seed, SobolRsgDirectionIntegers.Jaeckel, 43));
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new Burley2020SobolBrownianGenerator(1, 1, SobolBrownianGeneratorBaseOrdering.Steps, seed, SobolRsgDirectionIntegers.Jaeckel, 43));
         }
     }
 

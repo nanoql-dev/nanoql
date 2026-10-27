@@ -102,9 +102,7 @@ The licensing gate checks that this list and the files match.
 
 - `src/NanoQL/Experimental/CallableBonds/CallableBondVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(dc, bdc)`, which no QuantLib 1.44 class uses and which waits for its first user.
 - `src/NanoQL/Methods/FiniteDifferences/StepCondition.cs`: `NullCondition`, which no QuantLib 1.44 class or test uses and which waits for its first user.
-- `src/NanoQL/Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGenerator.cs`: `Burley2020SobolBrownianGenerator` and `Burley2020SobolBrownianGeneratorFactory`, which wait for S-mm with `Burley2020SobolRsg`.
 - `src/NanoQL/Numerics/Integrals/FourierIntegration.cs`: the exp-sinh algorithm, which waits for S-core's exp-sinh integrator.
-- `src/NanoQL/Numerics/RandomNumbers/SobolBrownianBridgeRsg/SobolBrownianBridgeRsg.cs`: `Burley2020SobolBrownianBridgeRsg`, which waits for S-mm with `Burley2020SobolRsg`.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/TermStructures/Credit/DefaultDensityStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the default density, which waits for S-xcr's curves, its only users.
 - `src/NanoQL/TermStructures/Credit/HazardRateStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-xcr's curves, its only users.
@@ -143,7 +141,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/InstrumentsTests.cs`: `testCompositeWhenShiftingDates`, which waits for S-core's `CompositeInstrument`.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (S-core); and `testPiecewiseIntegral` (S-xrt).
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace).
-- `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice, Faure and Burley 2020 cases and the discrepancy cases, whose generators and statistics aren't ported yet.
+- `tests/NanoQL.Tests/TestSuite/LowDiscrepancySequencesTests.cs`: the randomized, lattice and Faure cases and the discrepancy cases, whose generators and statistics aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/MarketModelTests.cs`: the abcd, drift-calculator and covariance cases, which wait for S-mm's models (its C3), and the product, callable-swap, Greek and stochastic-volatility cases, which wait for S-mmp's products and accounting engines.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the orthogonal-projection, QR and Moore-Penrose cases, whose matrix utilities aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/NthOrderDerivativeOpTests.cs`: every case but `testSparseMatrixApply`, which wait for S-core's `NthOrderDerivativeOp`.

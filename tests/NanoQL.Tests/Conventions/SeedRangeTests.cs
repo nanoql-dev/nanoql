@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Models;
 using NanoQL.Numerics;
 
 namespace NanoQL.Tests.Conventions;
@@ -8,8 +9,8 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// Seeds are QuantLib's 32-bit unsigned values taken as a <see cref="long"/>: every generator refuses a seed outside
 /// [1, 4294967295] with <see cref="ArgumentOutOfRangeException"/>, naming the parameter, and takes both ends (seed 0,
-/// QuantLib's clock seed, is <c>Divergences/SeedZeroTests</c>'s). The Mersenne Twister's key takes words, not seeds:
-/// each in [0, 4294967295], at least one.
+/// QuantLib's clock seed, is <c>Divergences/SeedZeroTests</c>'s); Burley's scrambling seed is a seed too, named for its
+/// parameter. The Mersenne Twister's key takes words, not seeds: each in [0, 4294967295], at least one.
 /// </summary>
 public class SeedRangeTests
 {
@@ -29,6 +30,16 @@ public class SeedRangeTests
         seed => PoissonPseudoRandom.MakeSequenceGenerator(3, seed),
         seed => LowDiscrepancy.MakeSequenceGenerator(3, seed),
         seed => GenericLowDiscrepancy<HaltonRsg, InverseCumulativeNormal>.MakeSequenceGenerator(3, seed),
+        seed => new Burley2020SobolRsg(3, seed, SobolRsgDirectionIntegers.Jaeckel, 43),
+        seed => new Burley2020SobolBrownianBridgeRsg(2, 3, SobolBrownianGeneratorBaseOrdering.Diagonal, seed, SobolRsgDirectionIntegers.JoeKuoD7, 43),
+    ];
+
+    private static readonly Func<long, object>[] ScrambledGenerators =
+    [
+        seed => new Burley2020SobolRsg(3, 42, SobolRsgDirectionIntegers.Jaeckel, seed),
+        seed => new Burley2020SobolBrownianBridgeRsg(2, 3, SobolBrownianGeneratorBaseOrdering.Diagonal, 42, SobolRsgDirectionIntegers.JoeKuoD7, seed),
+        seed => new Burley2020SobolBrownianGenerator(2, 3, SobolBrownianGeneratorBaseOrdering.Diagonal, 42, SobolRsgDirectionIntegers.Jaeckel, seed),
+        seed => new Burley2020SobolBrownianGeneratorFactory(SobolBrownianGeneratorBaseOrdering.Diagonal, 42, SobolRsgDirectionIntegers.Jaeckel, seed),
     ];
 
     [Fact]
@@ -40,6 +51,23 @@ public class SeedRangeTests
             {
                 ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(() => generator(seed));
                 Assert.Equal("seed", e.ParamName);
+                Assert.Equal(seed, e.ActualValue);
+            }
+
+            Assert.NotNull(generator(1));
+            Assert.NotNull(generator(4294967295));
+        }
+    }
+
+    [Fact]
+    public void ScramblingSeedsOutsideTheRangeAreRefused()
+    {
+        foreach (Func<long, object> generator in ScrambledGenerators)
+        {
+            foreach (long seed in OutsideTheRange)
+            {
+                ArgumentOutOfRangeException e = Assert.Throws<ArgumentOutOfRangeException>(() => generator(seed));
+                Assert.Equal("scrambleSeed", e.ParamName);
                 Assert.Equal(seed, e.ActualValue);
             }
 

@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/models/marketmodels/browniangenerators/sobolbrowniangenerator.hpp ql/models/marketmodels/browniangenerators/sobolbrowniangenerator.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: Burley2020SobolBrownianGenerator and Burley2020SobolBrownianGeneratorFactory, which wait for S-mm with Burley2020SobolRsg
 
 using NanoQL.Methods;
 using NanoQL.Numerics;

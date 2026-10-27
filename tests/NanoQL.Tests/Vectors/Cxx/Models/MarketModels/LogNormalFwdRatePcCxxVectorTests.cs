@@ -19,5 +19,5 @@ public class LogNormalFwdRatePcCxxVectorTests
     public void LogNormalFwdRatePcCxxVector() =>
         LogNormalFwdRateEulerCxxVectorTests.CheckEvolutions(
             "cxx/models/marketmodels/evolvers/lognormalfwdratepc",
-            (m, f, numeraires, initial) => new LogNormalFwdRatePc(m, f, numeraires, initial));
+            (_, m, f, numeraires, initial) => new LogNormalFwdRatePc(m, f, numeraires, initial));
 }

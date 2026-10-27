@@ -142,6 +142,8 @@ public class GeneratorCopyTests
             PseudoRandom.MakeSequenceGenerator(4, 7),
             new MoroInvCumulativeHaltonGaussianRsg(new HaltonRsg(4, 7)),
             new SobolBrownianBridgeRsg(3, 4, SobolBrownianGeneratorBaseOrdering.Diagonal, 7),
+            new Burley2020SobolRsg(40, 7, SobolRsgDirectionIntegers.Jaeckel, 9),
+            new Burley2020SobolBrownianBridgeRsg(3, 4, SobolBrownianGeneratorBaseOrdering.Diagonal, 7, SobolRsgDirectionIntegers.JoeKuoD7, 9),
         ];
         foreach (IRsg original in sequences)
         {

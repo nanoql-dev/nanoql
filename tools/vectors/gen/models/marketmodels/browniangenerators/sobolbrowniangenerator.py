@@ -12,8 +12,8 @@ nextPath()'s weight and every step's nextStep weight and variates; and the same 
 numberOfFactors and numberOfSteps.
 
 Left out: the seed 0, which QuantLib's Sobol sequence replaces by one from the clock and nanoql refuses (seeds are
-explicit, in [1, 4294967295]); Burley2020SobolBrownianGenerator and its factory, which wait for S-mm's
-Burley2020SobolRsg.
+explicit, in [1, 4294967295]); Burley2020SobolBrownianGenerator and its factory, which the wheel doesn't bind (the C++
+harness's tools/vectors/gen/cxx/models/marketmodels/browniangenerators/burley2020sobolbrowniangenerator.py).
 
 The specs are {"factors", "steps", "ordering", "seed", "directionIntegers"}, the ordering QuantLib's Ordering (0
 factors, 1 steps, 2 diagonal) and the direction integers its SobolRsg::DirectionIntegers. The wheel's calls, by

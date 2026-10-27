@@ -50,6 +50,30 @@ public class RandomNumberErrorTests
     }
 
     [Fact]
+    public void Burley2020SobolRsgRefusesItsDimensionalityIndexAndDirectionIntegers()
+    {
+        AssertRange(
+            "dimensionality", 0, "dimensionality must be greater than 0", () => new Burley2020SobolRsg(0, 42, SobolRsgDirectionIntegers.Jaeckel, 43));
+        AssertRange(
+            "dimensionality",
+            21201,
+            "dimensionality 21201 exceeds the number of available primitive polynomials modulo two (21200)",
+            () => new Burley2020SobolRsg(21201, 42, SobolRsgDirectionIntegers.Jaeckel, 43));
+        var rsg = new Burley2020SobolRsg(8, 42, SobolRsgDirectionIntegers.Jaeckel, 43);
+        AssertRange("n", -1L, "the sample's index (-1) must be in [0, 4294967295]", () => rsg.SkipTo(-1));
+        AssertRange("n", 4294967296L, "the sample's index (4294967296) must be in [0, 4294967295]", () => rsg.SkipTo(4294967296));
+        AssertRange(
+            "directionIntegers",
+            (SobolRsgDirectionIntegers)10,
+            "unknown direction integers (10)",
+            () => new Burley2020SobolRsg(8, 42, (SobolRsgDirectionIntegers)10, 43));
+
+        // QuantLib's period: the last sample's draw wraps the counter
+        NanoQLException period = Assert.Throws<NanoQLException>(() => rsg.SkipTo(4294967295));
+        Assert.Equal("Burley2020SobolRsg::nextInt32Sequence(): period exceeded", period.Message);
+    }
+
+    [Fact]
     public void HaltonRsgRefusesADimensionalityBelowOne()
     {
         AssertRange("dimensionality", 0, "dimensionality must be greater than 0", () => new HaltonRsg(0, 1));

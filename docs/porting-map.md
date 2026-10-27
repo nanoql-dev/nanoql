@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 368 | 32 |
-| partial | 21 | 33 |
-| ported | 871 | 115 |
+| not started | 357 | 32 |
+| partial | 19 | 33 |
+| ported | 884 | 115 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -927,7 +927,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `boxmullergaussianrng` | not started |  | no nanoql type: BoxMullerGaussianRng |
-| `burley2020sobolrsg` | not started |  | no nanoql type: Burley2020SobolRsg |
+| `burley2020sobolrsg` | ported | Numerics/RandomNumbers/Burley2020SobolRsg.cs |  |
 | `centrallimitgaussianrng` | not started |  | no nanoql type: CLGaussianRng |
 | `faurersg` | not started |  | no nanoql type: FaureRsg |
 | `haltonrsg` | ported | Numerics/RandomNumbers/HaltonRsg.cs |  |
@@ -944,7 +944,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `ranluxuniformrng` | not started |  | no nanoql type: Ranlux64UniformRng, Ranlux3UniformRng, Ranlux4UniformRng |
 | `rngtraits` | ported | Numerics/RandomNumbers/RngTraits/GenericLowDiscrepancy{TUrsg,TIc}.cs, Numerics/RandomNumbers/RngTraits/GenericPseudoRandom{TUrng,TIc}.cs, Numerics/RandomNumbers/RngTraits/IRngTraits.cs, Numerics/RandomNumbers/RngTraits/LowDiscrepancy.cs, Numerics/RandomNumbers/RngTraits/PoissonPseudoRandom.cs, Numerics/RandomNumbers/RngTraits/PseudoRandom.cs |  |
 | `seedgenerator` | replaced: explicit seeds | Numerics/RandomNumbers/Seeds.cs |  |
-| `sobolbrownianbridgersg` | partial | Numerics/RandomNumbers/SobolBrownianBridgeRsg/SobolBrownianBridgeRsg.cs | partial: Burley2020SobolBrownianBridgeRsg, which waits for S-mm with Burley2020SobolRsg; no nanoql type: Burley2020SobolBrownianBridgeRsg |
+| `sobolbrownianbridgersg` | ported | Numerics/RandomNumbers/SobolBrownianBridgeRsg/Burley2020SobolBrownianBridgeRsg.cs, Numerics/RandomNumbers/SobolBrownianBridgeRsg/SobolBrownianBridgeRsg.cs |  |
 | `sobolrsg` | ported | Numerics/RandomNumbers/SobolRsg/SobolRsg.cs, Numerics/RandomNumbers/SobolRsg/SobolRsgDirectionIntegers.cs, Numerics/RandomNumbers/SobolRsg/SobolRsgTables.cs |  |
 | `stochasticcollocationinvcdf` | not started |  | no nanoql type: StochasticCollocationInvCDF |
 | `xoshiro256starstaruniformrng` | not started |  | no nanoql type: Xoshiro256StarStarUniformRng |
@@ -1233,7 +1233,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `mtbrowniangenerator` | ported | Models/MarketModels/BrownianGenerators/MTBrownianGenerator.cs, Models/MarketModels/BrownianGenerators/MTBrownianGeneratorFactory.cs |  |
-| `sobolbrowniangenerator` | partial | Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGenerator.cs, Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGeneratorBase.cs, Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGeneratorBaseOrdering.cs, Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGeneratorFactory.cs | partial: Burley2020SobolBrownianGenerator and Burley2020SobolBrownianGeneratorFactory, which wait for S-mm with Burley2020SobolRsg; no nanoql type: Burley2020SobolBrownianGenerator, Burley2020SobolBrownianGeneratorFactory |
+| `sobolbrowniangenerator` | ported | Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/Burley2020SobolBrownianGenerator.cs, Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/Burley2020SobolBrownianGeneratorFactory.cs, Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGenerator.cs, Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGeneratorBase.cs, Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGeneratorBaseOrdering.cs, Models/MarketModels/BrownianGenerators/SobolBrownianGenerator/SobolBrownianGeneratorFactory.cs |  |
 
 ### `ql/models/marketmodels/callability/`
 
@@ -1288,24 +1288,24 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `lognormalcmswapratepc` | not started |  | no nanoql type: LogNormalCmSwapRatePc |
-| `lognormalcotswapratepc` | not started |  | no nanoql type: LogNormalCotSwapRatePc |
-| `lognormalfwdrateballand` | not started |  | no nanoql type: LogNormalFwdRateBalland |
+| `lognormalcmswapratepc` | ported | Models/MarketModels/Evolvers/LogNormalCmSwapRatePc.cs |  |
+| `lognormalcotswapratepc` | ported | Models/MarketModels/Evolvers/LogNormalCotSwapRatePc.cs |  |
+| `lognormalfwdrateballand` | ported | Models/MarketModels/Evolvers/LogNormalFwdRateBalland.cs |  |
 | `lognormalfwdrateeuler` | ported | Models/MarketModels/Evolvers/LogNormalFwdRateEuler.cs |  |
-| `lognormalfwdrateeulerconstrained` | not started |  | no nanoql type: LogNormalFwdRateEulerConstrained |
-| `lognormalfwdrateiballand` | not started |  | no nanoql type: LogNormalFwdRateiBalland |
-| `lognormalfwdrateipc` | not started |  | no nanoql type: LogNormalFwdRateIpc |
+| `lognormalfwdrateeulerconstrained` | ported | Models/MarketModels/Evolvers/LogNormalFwdRateEulerConstrained.cs |  |
+| `lognormalfwdrateiballand` | ported | Models/MarketModels/Evolvers/LogNormalFwdRateiBalland.cs |  |
+| `lognormalfwdrateipc` | ported | Models/MarketModels/Evolvers/LogNormalFwdRateIpc.cs |  |
 | `lognormalfwdratepc` | ported | Models/MarketModels/Evolvers/LogNormalFwdRatePc.cs |  |
-| `marketmodelvolprocess` | not started |  | no nanoql type: MarketModelVolProcess |
-| `normalfwdratepc` | not started |  | no nanoql type: NormalFwdRatePc |
-| `svddfwdratepc` | not started |  | no nanoql type: SVDDFwdRatePc |
+| `marketmodelvolprocess` | ported | Models/MarketModels/Evolvers/MarketModelVolProcess.cs |  |
+| `normalfwdratepc` | ported | Models/MarketModels/Evolvers/NormalFwdRatePc.cs |  |
+| `svddfwdratepc` | ported | Models/MarketModels/Evolvers/SVDDFwdRatePc.cs |  |
 
 ### `ql/models/marketmodels/evolvers/volprocesses/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `squarerootandersen` | not started |  | no nanoql type: SquareRootAndersen |
+| `squarerootandersen` | ported | Models/MarketModels/Evolvers/VolProcesses/SquareRootAndersen.cs |  |
 
 ### `ql/models/marketmodels/models/`
 
@@ -2167,7 +2167,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `libormarketmodelprocess` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
 | `linearleastsquaresregression` | not started |  | 3 cases |
 | `lookbackoptions` | ported | TestSuite/LookbackOptionsTests.cs | 5 of 5 cases |
-| `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 6 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy, testSobolBurleySkipping, testBurley2020SobolRsgOutputBounds |
+| `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 8 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy |
 | `margrabeoption` | ported | TestSuite/MargrabeOptionTests.cs | 3 of 3 cases; moved: testEuroExchangeTwoAssets line 250 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 259 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 268 to Divergences/MargrabeGreeksQuantityTests.cs |
 | `marketmodel` | partial | TestSuite/MarketModelTests.cs | 1 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported); not yet: testOneStepForwardsAndOptionlets, testOneStepNormalForwardsAndOptionlets, testInverseFloater, testAllMultiStepProducts, testPeriodAdapter, testCallableSwapNaif, testCallableSwapLS, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas, testAbcdVolatilityIntegration, testAbcdVolatilityFit, testStochVolForwardsAndOptionlets, testDriftCalculator, testAbcdDegenerateCases, testCovariance |
 | `marketmodel_cms` | not started |  | 1 cases |

@@ -8,8 +8,9 @@
 // "rateTimes", "longTermCorr", "beta", "gamma", "times"} (QuantLib's ExponentialForwardCorrelation, times empty for its
 // default) or {"type": "TimeHomogeneous", "fwdCorrelation", "rateTimes"}. A model is {"type": "FlatVol", "vols",
 // "corr", "rateTimes", "evolutionTimes", "factors", "initialRates", "displacements"}, its evolution
-// EvolutionDescription(rateTimes, evolutionTimes). A Brownian generator factory is {"type": "MT", "seed"} or {"type":
-// "Sobol", "ordering", "seed"} (QuantLib's SobolBrownianGeneratorFactory with Jaeckel's direction integers).
+// EvolutionDescription(rateTimes, evolutionTimes). A Brownian generator factory is {"type": "MT", "seed"}, {"type":
+// "Sobol", "ordering", "seed"} (QuantLib's SobolBrownianGeneratorFactory with Jaeckel's direction integers) or {"type":
+// "Burley", "ordering", "seed", "scrambleSeed"} (Burley2020SobolBrownianGeneratorFactory, Jaeckel's too).
 
 #ifndef NANOQL_CXX_MODELS_MARKETMODELS_MARKETMODELSPEC_HPP
 #define NANOQL_CXX_MODELS_MARKETMODELS_MARKETMODELSPEC_HPP
@@ -69,7 +70,7 @@ namespace harness::marketmodels {
 
     struct GeneratorSpec {
         std::string type;
-        unsigned long seed = 0;
+        unsigned long seed = 0, scrambleSeed = 0;
         int ordering = 0;
     };
     GeneratorSpec generator(const json::value& v);

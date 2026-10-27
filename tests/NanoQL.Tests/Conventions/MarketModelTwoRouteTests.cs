@@ -9,7 +9,9 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// Two routes to one value in the market-model framework (the S-mm plan's §2.6, the planner's MP3 and MP14): the drifts
 /// with and without factor reduction at full factors; the constant-maturity state and drifts spanning one forward
-/// against the LIBOR ones; the three curve states on one curve; and the coterminal Jacobian against central bumps.
+/// against the LIBOR ones; the three curve states on one curve; the coterminal Jacobian against central bumps; and the
+/// Euler and iterative predictor-corrector evolvers' caplets converging to the predictor-corrector's as the steps
+/// refine (Balland's in <c>Divergences/BallandGeometricMeanTests.cs</c>).
 /// </summary>
 public class MarketModelTwoRouteTests
 {
@@ -126,6 +128,63 @@ public class MarketModelTwoRouteTests
                 Assert.Equal((u.CoterminalSwapRate(i) - w.CoterminalSwapRate(i)) / (2 * h), j[i, f], 1e-8);
             }
         }
+    }
+
+    [Fact]
+    public void TheEvolversCapletsConvergeAsTheStepsRefine()
+    {
+        double[] coarseEuler = CapletGaps(1, (m, f, n) => new LogNormalFwdRateEuler(m, f, n));
+        double[] fineEuler = CapletGaps(4, (m, f, n) => new LogNormalFwdRateEuler(m, f, n));
+        double[] fineIpc = CapletGaps(4, (m, f, n) => new LogNormalFwdRateIpc(m, f, n));
+        for (int i = 1; i < 9; ++i)
+        {
+            Assert.True(Math.Abs(fineEuler[i]) < 0.5 * Math.Abs(coarseEuler[i]), $"caplet {i}: {coarseEuler[i]} then {fineEuler[i]}");
+            Assert.True(Math.Abs(fineIpc[i]) < 1e-4, $"caplet {i}: {fineIpc[i]}");
+        }
+    }
+
+    // Each caplet's mean gap to the predictor-corrector's on the same paths, relative to it: ten semi-annual rates on a
+    // flat 30% model at 4%, the given steps a period, in the terminal measure.
+    private static double[] CapletGaps(int stepsPerPeriod, Func<MarketModel, BrownianGeneratorFactory, int[], MarketModelEvolver> make)
+    {
+        const int n = 10, paths = 8192;
+        double[] rateTimes = [.. Enumerable.Range(1, n + 1).Select(i => 0.5 * i)];
+        var evolutionTimes = new List<double>();
+        for (int i = 0; i < n; ++i)
+        {
+            double start = i == 0 ? 0.0 : rateTimes[i - 1];
+            for (int k = 1; k <= stepsPerPeriod; ++k)
+            {
+                evolutionTimes.Add(k == stepsPerPeriod ? rateTimes[i] : start + ((rateTimes[i] - start) * k / stepsPerPeriod));
+            }
+        }
+
+        var evolution = new EvolutionDescription(rateTimes, [.. evolutionTimes]);
+        var model = new FlatVol(
+            Enumerable.Repeat(0.3, n).ToArray(), new ExponentialForwardCorrelation(rateTimes, 0.5, 0.2), evolution, n, Enumerable.Repeat(0.04, n).ToArray(), new double[n]);
+        int[] numeraires = [.. EvolutionDescriptionFunctions.TerminalMeasure(evolution)];
+        MarketModelEvolver[] evolvers = [new LogNormalFwdRatePc(model, new MTBrownianGeneratorFactory(42), numeraires), make(model, new MTBrownianGeneratorFactory(42), numeraires)];
+        double[,] sums = new double[2, n];
+        for (int p = 0; p < paths; ++p)
+        {
+            for (int k = 0; k < 2; ++k)
+            {
+                MarketModelEvolver e = evolvers[k];
+                e.StartNewPath();
+                for (int s = 0, caplet = 0; s < evolution.NumberOfSteps; ++s)
+                {
+                    e.AdvanceStep();
+                    if (evolution.EvolutionTimes[s] == rateTimes[caplet])
+                    {
+                        CurveState cs = e.CurrentState;
+                        sums[k, caplet] += Math.Max(cs.ForwardRate(caplet) - 0.04, 0.0) * cs.DiscountRatio(caplet + 1, n);
+                        ++caplet;
+                    }
+                }
+            }
+        }
+
+        return [.. Enumerable.Range(0, n).Select(i => (sums[1, i] - sums[0, i]) / sums[0, i])];
     }
 
     private static Matrix Pseudo(int factors)

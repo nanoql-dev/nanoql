@@ -9,7 +9,8 @@ namespace NanoQL.Tests.Conventions;
 /// <summary>
 /// The market models' boundary (the S-mm plan's MR1 (i), (iv); the playbook's §2.5): a matrix read returns a copy, so
 /// changing it changes nothing; a constructor that takes a matrix copies it; an evolver copies each step's pseudo-root,
-/// so one model serves many evolvers on many threads, each path the same as on a model of its own.
+/// so one model serves many evolvers on many threads, each path the same as on a model of its own; and the SVD-DD
+/// evolver owns a copy of its volatility process, so the process given is left as it was and serves many evolvers.
 /// </summary>
 public class MarketModelImmutabilityTests
 {
@@ -112,6 +113,41 @@ public class MarketModelImmutabilityTests
         {
             Assert.Equal(own, c);
         }
+    }
+
+    [Fact]
+    public void TheStochasticVolatilityEvolverOwnsACopyOfItsProcess()
+    {
+        FlatVol model = Model();
+        var given = new SquareRootAndersen(1.0, 1.0, 1.0, 1.21, model.Evolution.EvolutionTimes.AsSpan(), 2, 0.5, 0.5);
+        double[][] Paths(MarketModelVolProcess process)
+        {
+            var e = new SVDDFwdRatePc(model, new MTBrownianGeneratorFactory(7), process, 1, 1, [3, 3, 3]);
+            var result = new double[10][];
+            for (int p = 0; p < result.Length; ++p)
+            {
+                e.StartNewPath();
+                for (int s = 0; s < 3; ++s)
+                {
+                    e.AdvanceStep();
+                }
+
+                result[p] = e.CurrentState.ForwardRates().ToArray();
+            }
+
+            return result;
+        }
+
+        double[][] own = Paths(given.Clone());
+        double[][][] concurrent = new double[4][][];
+        Parallel.For(0, concurrent.Length, i => concurrent[i] = Paths(given));
+        foreach (double[][] c in concurrent)
+        {
+            Assert.Equal(own, c);
+        }
+
+        // the process given never started a path
+        Assert.Throws<NanoQLException>(() => given.Nextstep([0.1, 0.2]));
     }
 
     private static FlatVol Model() =>

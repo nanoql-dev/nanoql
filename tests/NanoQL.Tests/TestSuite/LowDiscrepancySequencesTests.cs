@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/lowdiscrepancysequences.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy, testSobolBurleySkipping, testBurley2020SobolRsgOutputBounds
+// Partial: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy
 // Replaced: testSeedGenerator (Divergences/SeedZeroTests.cs)
 
 using System.Reflection;
@@ -340,9 +340,57 @@ public class LowDiscrepancySequencesTests
         Assert.Empty(errors);
     }
 
-    // Adapted: without its Burley 2020 sequence, s3, and the error checked against it (lines 1147, 1149, 1153, 1158
-    // and 1168-1171): Burley2020SobolRsg isn't ported yet. The two Sobol sequences, with and without the Gray code, and
-    // their checks are kept.
+    [Fact]
+    public void TestSobolBurleySkipping()
+    {
+        long seed = 42;
+        long scramblingSeed = 43;
+        Size[] dimensionality = [1, 10, 100, 1000];
+        long[] skip = [0, 1, 42, 512, 10000];
+        SobolRsgDirectionIntegers[] integers =
+        [
+            SobolRsgDirectionIntegers.Jaeckel,
+            SobolRsgDirectionIntegers.SobolLevitan,
+            SobolRsgDirectionIntegers.SobolLevitanLemieux,
+        ];
+
+        foreach (SobolRsgDirectionIntegers integer in integers)
+        {
+            foreach (Size j in dimensionality)
+            {
+                foreach (long k in skip)
+                {
+                    // extract n samples
+                    var rsg1 = new Burley2020SobolRsg(j, seed, integer, scramblingSeed);
+                    for (long l = 0; l < k; l++)
+                    {
+                        rsg1.NextInt32Sequence();
+                    }
+
+                    // skip n samples at once
+                    var rsg2 = new Burley2020SobolRsg(j, seed, integer, scramblingSeed);
+                    rsg2.SkipTo(k);
+
+                    // compare next 100 samples
+                    for (Size m = 0; m < 100; m++)
+                    {
+                        ReadOnlySpan<long> s1 = rsg1.NextInt32Sequence().Span;
+                        ReadOnlySpan<long> s2 = rsg2.NextInt32Sequence().Span;
+                        for (Size n = 0; n < s1.Length; n++)
+                        {
+                            if (s1[n] != s2[n])
+                            {
+                                errors.Add($"Mismatch after skipping:\n  size:     {j}\n  integers: {(int)integer}\n  skipped:  {k}\n  at index: {n}\n  expected: {s1[n]}\n  found:    {s2[n]}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Assert.Empty(errors);
+    }
+
     [Fact]
     public void TestHighDimensionalIntegrals()
     {
@@ -352,7 +400,9 @@ public class LowDiscrepancySequencesTests
         // Generators, available at https://www.broda.co.uk/doc/HD_SobolGenerator.pdf
         //
         // We check the error of Kuo1 (using Gray code and sequential numbers) roughly against what
-        // their graph suggests.
+        // their graph suggests. In addition we check the error of the Burley2020-scrambled version of
+        // Kuo1 against what we experimentally find - the error turns out to be more than one order
+        // better than the unscrambled version.
         static Real Integrand(Real[] c, ReadOnlySpan<Real> x)
         {
             Real p = 1.0;
@@ -375,16 +425,19 @@ public class LowDiscrepancySequencesTests
 
             var s1 = new SobolRsg(dimension[d], 42, SobolRsgDirectionIntegers.Kuo, true);
             var s2 = new SobolRsg(dimension[d], 42, SobolRsgDirectionIntegers.Kuo, false);
+            var s3 = new Burley2020SobolRsg(dimension[d], 42, SobolRsgDirectionIntegers.Kuo, 43);
 
-            Real I1 = 0.0, I2 = 0.0;
+            Real I1 = 0.0, I2 = 0.0, I3 = 0.0;
             for (Size i = 0; i < N; ++i)
             {
                 I1 += Integrand(c1, s1.NextSequence().Value.Span) / (double)N;
                 I2 += Integrand(c1, s2.NextSequence().Value.Span) / (double)N;
+                I3 += Integrand(c1, s3.NextSequence().Value.Span) / (double)N;
             }
 
             Real errOrder1 = Math.Log10(Math.Abs(I1 - 1.0));
             Real errOrder2 = Math.Log10(Math.Abs(I2 - 1.0));
+            Real errOrder3 = Math.Log10(Math.Abs(I3 - 1.0));
 
             if (!(errOrder1 < expectedOrderOfError[d][0]))
             {
@@ -394,6 +447,33 @@ public class LowDiscrepancySequencesTests
             if (!(errOrder2 < expectedOrderOfError[d][1]))
             {
                 errors.Add($"order of error for dimension {dimension[d]} is{errOrder2:F6} expected {expectedOrderOfError[d][1]:F6}");
+            }
+
+            if (!(errOrder3 < expectedOrderOfError[d][2]))
+            {
+                errors.Add($"order of error for dimension {dimension[d]} is{errOrder3:F6} expected {expectedOrderOfError[d][2]:F6}");
+            }
+        }
+
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public void TestBurley2020SobolRsgOutputBounds()
+    {
+        // With enough dimensions the scrambling occasionally maps to
+        // zero.  Without the +0.5 offset this would give 0.0 in the
+        // double sequence, which breaks InverseCumulativeNormal.
+        var rsg = new Burley2020SobolRsg(1551, 42, SobolRsgDirectionIntegers.JoeKuoD7, 43);
+        for (Size i = 0; i < 100000; ++i)
+        {
+            ReadOnlySpan<Real> seq = rsg.NextSequence().Value.Span;
+            for (Size j = 0; j < seq.Length; ++j)
+            {
+                if (seq[j] <= 0.0 || seq[j] >= 1.0)
+                {
+                    errors.Add($"output {seq[j]} at sample {i}, dim {j}");
+                }
             }
         }
 

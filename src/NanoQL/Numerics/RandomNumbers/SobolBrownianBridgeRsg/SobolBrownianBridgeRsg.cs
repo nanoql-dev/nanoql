@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/math/randomnumbers/sobolbrownianbridgersg.hpp ql/math/randomnumbers/sobolbrownianbridgersg.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: Burley2020SobolBrownianBridgeRsg, which waits for S-mm with Burley2020SobolRsg
 
 using NanoQL.Methods;
 using NanoQL.Models;

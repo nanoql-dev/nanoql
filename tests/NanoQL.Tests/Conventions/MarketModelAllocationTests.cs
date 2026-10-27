@@ -2,28 +2,47 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Models;
+using NanoQL.Numerics;
 
 namespace NanoQL.Tests.Conventions;
 
 /// <summary>
 /// The market-model evolution step's pin (the S-mm plan's MR1 (v), SD11): after a path's warm-up, a path of steps (the
-/// generator's step, the drifts, the state's update and the curve state's set) allocates nothing, for each evolver on
-/// the Mersenne-twister and Sobol generators, at reduced factors and at full ones (the drifts' plain branch); and the
-/// curve states' reads allocate nothing.
+/// generator's step, the drifts, the state's update and the curve state's set, the constraint's shift and the
+/// volatility process's step where the evolver has them) allocates nothing, for each evolver on the Mersenne-twister,
+/// Sobol and Burley-scrambled Sobol generators at reduced factors, and for the Euler and predictor-corrector ones at
+/// full factors (the drifts' plain branch) too; the constrained evolver's constraints, which QuantLib's one caller
+/// sets before each path, are set allocating nothing; and the curve states' reads allocate nothing.
 /// </summary>
 public class MarketModelAllocationTests
 {
     private static readonly double[] RateTimes = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5];
 
-    public static TheoryData<string, string, int> Evolvers => new()
+    private static readonly string[] EvolverNames =
+    [
+        "LogNormalFwdRateEuler", "LogNormalFwdRatePc", "LogNormalFwdRateEulerConstrained", "LogNormalFwdRateIpc",
+        "LogNormalFwdRateBalland", "LogNormalFwdRateiBalland", "NormalFwdRatePc", "LogNormalCotSwapRatePc",
+        "LogNormalCmSwapRatePc", "SVDDFwdRatePc",
+    ];
+
+    public static TheoryData<string, string, int> Evolvers
     {
-        { "LogNormalFwdRateEuler", "MT", 3 },
-        { "LogNormalFwdRateEuler", "Sobol", 3 },
-        { "LogNormalFwdRatePc", "MT", 3 },
-        { "LogNormalFwdRatePc", "Sobol", 3 },
-        { "LogNormalFwdRateEuler", "MT", 6 },
-        { "LogNormalFwdRatePc", "Sobol", 6 },
-    };
+        get
+        {
+            var data = new TheoryData<string, string, int>();
+            foreach (string evolver in EvolverNames)
+            {
+                foreach (string generator in new[] { "MT", "Sobol", "Burley" })
+                {
+                    data.Add(evolver, generator, 3);
+                }
+            }
+
+            data.Add("LogNormalFwdRateEuler", "MT", 6);
+            data.Add("LogNormalFwdRatePc", "Sobol", 6);
+            return data;
+        }
+    }
 
     [Theory]
     [MemberData(nameof(Evolvers))]
@@ -43,6 +62,16 @@ public class MarketModelAllocationTests
                     e.AdvanceStep();
                 }
             });
+
+    [Fact]
+    public void SettingAConstraintAllocatesNothing()
+    {
+        double[] constraints = [0.032, 0.033, 0.034, 0.035, 0.036, 0.037];
+        bool[] active = [true, false, true, false, true, false];
+        AllocationAssert.AllocatesNothing(
+            () => (LogNormalFwdRateEulerConstrained)Make("LogNormalFwdRateEulerConstrained", "MT", 3),
+            e => e.SetThisConstraint(constraints, active));
+    }
 
     [Fact]
     public void TheCurveStatesReadsAllocateNothing()
@@ -84,13 +113,40 @@ public class MarketModelAllocationTests
             factors,
             [0.03, 0.031, 0.032, 0.033, 0.034, 0.035],
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
-        BrownianGeneratorFactory factory = generator == "MT"
-            ? new MTBrownianGeneratorFactory(42)
-            : new SobolBrownianGeneratorFactory(SobolBrownianGeneratorBaseOrdering.Diagonal, 1234);
+        BrownianGeneratorFactory factory = generator switch
+        {
+            "MT" => new MTBrownianGeneratorFactory(42),
+            "Sobol" => new SobolBrownianGeneratorFactory(SobolBrownianGeneratorBaseOrdering.Diagonal, 1234),
+            _ => new Burley2020SobolBrownianGeneratorFactory(SobolBrownianGeneratorBaseOrdering.Diagonal, 1234, SobolRsgDirectionIntegers.Jaeckel, 5678),
+        };
         int[] numeraires = [.. EvolutionDescriptionFunctions.TerminalMeasure(model.Evolution)];
-        return evolver == "LogNormalFwdRateEuler"
-            ? new LogNormalFwdRateEuler(model, factory, numeraires)
-            : new LogNormalFwdRatePc(model, factory, numeraires);
+        switch (evolver)
+        {
+            case "LogNormalFwdRateEuler":
+                return new LogNormalFwdRateEuler(model, factory, numeraires);
+            case "LogNormalFwdRatePc":
+                return new LogNormalFwdRatePc(model, factory, numeraires);
+            case "LogNormalFwdRateEulerConstrained":
+                var constrained = new LogNormalFwdRateEulerConstrained(model, factory, numeraires);
+                constrained.SetConstraintType([0, 1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]);
+                constrained.SetThisConstraint([0.032, 0.033, 0.034, 0.035, 0.036, 0.037], [true, false, true, false, true, false]);
+                return constrained;
+            case "LogNormalFwdRateIpc":
+                return new LogNormalFwdRateIpc(model, factory, numeraires);
+            case "LogNormalFwdRateBalland":
+                return new LogNormalFwdRateBalland(model, factory, numeraires);
+            case "LogNormalFwdRateiBalland":
+                return new LogNormalFwdRateiBalland(model, factory, numeraires);
+            case "NormalFwdRatePc":
+                return new NormalFwdRatePc(model, factory, numeraires);
+            case "LogNormalCotSwapRatePc":
+                return new LogNormalCotSwapRatePc(model, factory, numeraires);
+            case "LogNormalCmSwapRatePc":
+                return new LogNormalCmSwapRatePc(2, model, factory, numeraires);
+            default:
+                var process = new SquareRootAndersen(1.0, 1.0, 1.0, 1.0, model.Evolution.EvolutionTimes.AsSpan(), 4, 0.5, 0.5);
+                return new SVDDFwdRatePc(model, factory, process, 2, 2, numeraires);
+        }
     }
 
     private static void Path(MarketModelEvolver e)

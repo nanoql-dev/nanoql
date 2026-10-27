@@ -171,6 +171,13 @@ namespace harness::marketmodels {
         } else if (g.type == "Sobol") {
             onlyKeys(o, {"type", "ordering", "seed"}, what);
             g.ordering = integer(key(o, "ordering", what));
+        } else if (g.type == "Burley") {
+            onlyKeys(o, {"type", "ordering", "seed", "scrambleSeed"}, what);
+            g.ordering = integer(key(o, "ordering", what));
+            long long scrambleSeed = int64(key(o, "scrambleSeed", what));
+            if (scrambleSeed < 1 || scrambleSeed > 4294967295LL)
+                throw InvalidParams("a seed must be in [1, 4294967295]");
+            g.scrambleSeed = static_cast<unsigned long>(scrambleSeed);
         } else {
             throw InvalidParams("unknown generator type " + g.type);
         }
@@ -180,6 +187,9 @@ namespace harness::marketmodels {
     std::unique_ptr<BrownianGeneratorFactory> makeFactory(const GeneratorSpec& g) {
         if (g.type == "MT")
             return std::make_unique<MTBrownianGeneratorFactory>(g.seed);
+        if (g.type == "Burley")
+            return std::make_unique<Burley2020SobolBrownianGeneratorFactory>(
+                static_cast<SobolBrownianGenerator::Ordering>(g.ordering), g.seed, SobolRsg::Jaeckel, g.scrambleSeed);
         return std::make_unique<SobolBrownianGeneratorFactory>(
             static_cast<SobolBrownianGenerator::Ordering>(g.ordering), g.seed);
     }

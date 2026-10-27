@@ -92,10 +92,37 @@ internal static class MarketModelCxxInputs
         {
             "MT" => new MTBrownianGeneratorFactory(seed),
             "Sobol" => new SobolBrownianGeneratorFactory((SobolBrownianGeneratorBaseOrdering)spec.GetProperty("ordering").GetInt32(), seed),
+            "Burley" => BurleyFactoryOf(spec),
             string t => throw new ArgumentException($"unknown generator type {t}", nameof(spec)),
             null => throw new ArgumentException("a generator spec needs a type", nameof(spec)),
         };
     }
+
+    /// <summary>The Burley-scrambled Sobol factory a spec of the harness's "Burley" type describes, on Jaeckel's
+    /// integers.</summary>
+    /// <param name="spec">The spec.</param>
+    /// <returns>The factory.</returns>
+    public static BrownianGeneratorFactory BurleyFactoryOf(JsonElement spec) =>
+        new Burley2020SobolBrownianGeneratorFactory(
+            (SobolBrownianGeneratorBaseOrdering)spec.GetProperty("ordering").GetInt32(),
+            spec.GetProperty("seed").GetInt64(),
+            SobolRsgDirectionIntegers.Jaeckel,
+            spec.GetProperty("scrambleSeed").GetInt64());
+
+    /// <summary>The square-root volatility process a spec describes.</summary>
+    /// <param name="spec">The spec: the harness's SquareRootAndersen object.</param>
+    /// <returns>The process.</returns>
+    public static SquareRootAndersen SquareRootAndersenOf(JsonElement spec) =>
+        new(
+            spec.GetProperty("meanLevel").GetDouble(),
+            spec.GetProperty("reversionSpeed").GetDouble(),
+            spec.GetProperty("volVar").GetDouble(),
+            spec.GetProperty("v0").GetDouble(),
+            Reals(spec.GetProperty("evolutionTimes")),
+            spec.GetProperty("numberSubSteps").GetInt32(),
+            spec.GetProperty("w1").GetDouble(),
+            spec.GetProperty("w2").GetDouble(),
+            spec.GetProperty("cutPoint").GetDouble());
 
     /// <summary>Checks a model's reads, as the harness's modelResults writes them.</summary>
     /// <param name="check">The file's assertion.</param>

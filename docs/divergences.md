@@ -465,6 +465,18 @@ Facts:
 - `AFarOutOfTheMoneyPutIsWorthBacheliersValue`
 - `AnOutOfTheMoneyPutAtAZeroDeviationIsWorthNothing`
 
+## BallandGeometricMeanTests
+
+[`Divergences/BallandGeometricMeanTests.cs`](../tests/NanoQL.Tests/Divergences/BallandGeometricMeanTests.cs)
+
+Balland's and the iterative Balland's geometric mean (the S-mm plan's MR3 (xix), fixed under R8). Both evolvers take `sqrt(f·f₀)` with f₀ the model's time-0 forward at every step, undisplaced (`lognormalfwdrateballand.cpp:127`, `lognormalfwdrateiballand.cpp:119`, `:135`), not the step's start, so the scheme doesn't converge to the model as the steps refine: on a flat 30% model of ten semi-annual rates its caplets sit 6.25 standard errors from Black at a million paths (the planner's MP21), and on this run's model at 4% its caplets are 0.15% to 0.97% above the predictor-corrector's on the same paths at four steps a period, 0.03% to 0.87% at one (QuantLib's form emulated in this run's measurement, 65,536 paths); and the undisplaced product is negative once a displaced forward goes below 0, so the forward is NaN: 1,450 of 2,000 paths at displacement 2%, forwards 0.2%, volatility 30% (this run's `probes\c2_facts.cpp`). nanoql takes the geometric mean of the displaced forwards at the step's start and end, sqrt((f_end + d)(f_start + d)) − d. Checks: on an evolution of one step from time 0, undisplaced, QuantLib's arithmetic (the vectors), bit for bit; on multi-step evolutions the caplets within 4 standard errors of Black, within 0.05% of the predictor-corrector's at four steps a period (the fix 0.010% at most), and converging to them as the steps refine; no NaN path displaced; and a set initial state, whose forwards QuantLib's mean ignores, the evolution of a model starting there, bit for bit.
+
+Facts:
+
+- `TheCapletsConvergeToTheModelsAsTheStepsRefine`
+- `ASetStateIsTheEvolutionOfAModelStartingThere`
+- `ADisplacedForwardBelowZeroStaysANumber`
+
 ## BaroneAdesiWhaleyCriticalPriceTests
 
 [`Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs`](../tests/NanoQL.Tests/Divergences/BaroneAdesiWhaleyCriticalPriceTests.cs)
@@ -1571,6 +1583,26 @@ Facts:
 - `AFlatMarketIsQuantLibsWithinDreznersAccuracy`
 - `TheGreeksOnARisingMarketMeetBumps`
 - `TheGreeksOnAFallingMarketMeetBumps`
+
+## ConstrainedEulerCovarianceTests
+
+[`Divergences/ConstrainedEulerCovarianceTests.cs`](../tests/NanoQL.Tests/Divergences/ConstrainedEulerCovarianceTests.cs)
+
+The constrained Euler evolver's step covariances (the S-mm plan's MR3 (vi), fixed under R8). QuantLib's `LogNormalFwdRateEulerConstrained::setConstraintType` builds every step's covariances from the pseudo-root of the step it is called at (`lognormalfwdrateeulerconstrained.cpp:117`), so a later step shifts its forwards by another step's covariances and misses its own constraint, though the code states the intent ("shift each rate by multiplier * weighting of index rate across the step", `:191`): on FlatVol of a 3-month first period then semi-annual, each step's first alive rate constrained to its initial value plus 0.2% and the type set at step 0, the constrained forward lands at step 0 and misses by +0.00097, −0.00196, −0.00323 and −0.00857 at steps 1 to 4 (this run's `probes\c2_facts.cpp`; the planner's MP6 on an abcd model). nanoql builds step i's covariances from step i's pseudo-root. Checks: QuantLib's own evolver with its type set again before each step, so each step's covariances are its own (the vectors), bit for bit; and the constraint landing to rounding at every step.
+
+Facts:
+
+- `EachStepsConstraintLands`
+
+## ConstrainedEulerDisplacementTests
+
+[`Divergences/ConstrainedEulerDisplacementTests.cs`](../tests/NanoQL.Tests/Divergences/ConstrainedEulerDisplacementTests.cs)
+
+The constrained Euler evolver's displaced constraint (the S-mm plan's MR3 (vii), fixed under R8). QuantLib's `setThisConstraint` takes each step's constraint in logs displaced by `displacements_[i]` for step i (`lognormalfwdrateeulerconstrained.cpp:146`), the displacement of the rate with the step's index, not of the rate constrained, and past the rates when steps outnumber them: on eight steps over four rates displaced 0.1% to 0.4%, rate 0 constrained to 3.5% at step 1 (its type set at that step) lands at 3.6% (this run's `probes\c2_facts.cpp`; the planner's MP24). nanoql displaces each constraint by its constrained rate's displacement. Checks: on equal displacements QuantLib's arithmetic (the vectors), bit for bit; and the displaced constraint landing to rounding, at steps past the rates too.
+
+Facts:
+
+- `ADisplacedConstraintLands`
 
 ## ConvertibleClockTests
 
@@ -4570,6 +4602,16 @@ Facts:
 
 - `TheConversionKeepsTheRoundingPrecision`
 
+## NormalFwdRatePcInitialStateTests
+
+[`Divergences/NormalFwdRatePcInitialStateTests.cs`](../tests/NanoQL.Tests/Divergences/NormalFwdRatePcInitialStateTests.cs)
+
+The normal predictor-corrector evolver's set initial state (the S-mm plan's MR3 (iv), fixed under R8). QuantLib's `NormalFwdRatePc::setForwards` has the drift computation for its loop body (`normalfwdratepc.cpp:80-81`), so the starting forwards stay the model's while the drifts are the new state's: on four semi-annual rates at 4%, normal volatility 0.8%, a state set at 7% starts its first path at the model's 4%, the first step's forwards 0.040197, 0.038239, 0.036115 and 0.038379 (this run's `probes\c2_facts.cpp`; the planner's MP3). nanoql starts from the forwards given, as the log-normal evolvers do. Check: QuantLib's own evolver on a model whose initial rates are the given forwards (its arithmetic, the vectors'), bit for bit.
+
+Facts:
+
+- `ASetStateIsTheEvolutionOfAModelStartingThere`
+
 ## NullDateTests
 
 [`Divergences/NullDateTests.cs`](../tests/NanoQL.Tests/Divergences/NullDateTests.cs)
@@ -5480,6 +5522,53 @@ Facts:
 
 - `TheConvertedVolatilityComparesTheUnderlyingsType`
 
+## SquareRootAndersenDegenerateStepTests
+
+[`Divergences/SquareRootAndersenDegenerateStepTests.cs`](../tests/NanoQL.Tests/Divergences/SquareRootAndersenDegenerateStepTests.cs)
+
+The square-root volatility process's step where its scheme degenerates or leaves its domain (R8). QuantLib's quadratic form takes b² = 2ψ⁻¹ − 1 + √(2ψ⁻¹(2ψ⁻¹ − 1)) (`squarerootandersen.cpp:102-103`), NaN where the conditional variance is 0 (no vol of variance: ψ = 0, a = 0, v = 0·∞), where the variance and its mean are both 0 (an absorbed 0 at θ = 0: ψ = 0/0), and where ψ is below about 1.5e-154 (the product overflows): from v₀ 0.09, θ 0.04, κ 4000 on times 1, 1.0002 and 1.0006, QuantLib's states are finite at vol of variance 3e-76 and NaN at 1e-76 and below (the C++ harness's `SquareRootAndersen.paths`, this run's probe; at κ 1 every state is NaN at 0). nanoql takes the form's limit there, the conditional mean. And QuantLib chooses its form by ψ against any cut point (`:100`), where the quadratic form holds for ψ ≤ 2 only and the exponential one for ψ ≥ 1: a cut below 1 gives ψ below 1 the exponential form, its p no probability, the mean 3.38% low and the variance 12.6% high at ψ 0.5 and cut 0.4 (64 standard errors at 2 million draws), and a cut above 2 gives ψ above 2 the quadratic form's square root of a negative, NaN. nanoql clamps the cut to [1, 2]. Checks: QuantLib's states at the NaN band's edge bit for bit; the conditional mean below it and CIR's deterministic path at 0; an absorbed 0 stays 0; every cut outside [1, 2] QuantLib's own value at 1 or 2 (the vectors hold cuts 1 and 2), bit for bit; the moments restored at cut 0.4; and an invalid process's negative or NaN conditional variance (κθ below 0) still QuantLib's NaN.
+
+Facts:
+
+- `AVanishingVarianceStepsToItsMean`
+- `NoVolOfVarianceIsCirsDeterministicPath`
+- `AnAbsorbedZeroStaysZero`
+- `AnInvalidProcessStaysNaN`
+- `ACutOutsideTheDomainIsItsNearestEnd`
+- `ACutBelowOneKeepsTheMoments`
+
+## SquareRootAndersenFirstStepTests
+
+[`Divergences/SquareRootAndersenFirstStepTests.cs`](../tests/NanoQL.Tests/Divergences/SquareRootAndersenFirstStepTests.cs)
+
+The square-root volatility process's first step (the S-mm plan's MR3 (xvii), fixed under R8). QuantLib's `SquareRootAndersen` fills the first evolution step's sub-step lengths but not their e^{−κΔt}, left 0 (`squarerootandersen.cpp:51-52`), so the first step reverts in full: from v₀ 0.16, θ 0.04, κ 1, ε 0.5 the mean of v at 0.5 over 20,000 Mersenne-twister paths is 0.0391 against CIR's 0.1128 (this run's `probes\c2_facts.cpp`). QuantLib's `testStochVolForwardsAndOptionlets` prices the SVD-DD evolver's caplets against `AnalyticHestonEngine` within 4 standard errors at θ = v₀ = 1 (`marketmodel.cpp:4326`, `:4330`), where the first step can't show; at v₀ 0.25, v₀ 2 or θ 0.5 its caplets are 6.3 to 38.6 standard errors off, and with the first step filled within 1.71 (this run's copy of the S-mm plan's m6 probe, `probes\m6.out`). nanoql takes e^{−κΔt} for the first step's sub-steps too. Checks: QuantLib's own process where its e^{−κΔt} underflows to 0 itself (the vectors), bit for bit; CIR's mean and variance at the first step; and QuantLib's test at v₀ ≠ θ.
+
+Facts:
+
+- `TheFirstStepHasCirsMoments`
+- `TheStochasticVolatilityCapletsAreHestonsAtAnyStartingVariance`
+
+## SquareRootAndersenSmallReversionTests
+
+[`Divergences/SquareRootAndersenSmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/SquareRootAndersenSmallReversionTests.cs)
+
+The square-root volatility process at small reversion (the S-mm plan's MR3 (xviii), fixed with an independent check, Revision 69). QuantLib's conditional variance divides (1 − e^{−κΔt}) by κ (`squarerootandersen.cpp:96-97`), which cancels about ε/(κΔt) relative: 9e-5 at κ 1e-12, the variance 0 at 1e-16, so its path is NaN at the next step, and NaN at κ 0, where the limit is v ε² Δt (the planner's MP10; at κ 1e-16 and 0 from v₀ = θ 0.04, ε 0.5 on times 0.5 and 1, QuantLib's state is NaN after the second step and the first, this run's `probes\c2_facts.cpp`). nanoql takes −expm1(−κΔt)/κ below κΔt = 1e-2 (S-g1d's cut, G1R4), Δt at κ 0, and QuantLib's form at and above it. Checks: the κ → 0 limit, CIR without reversion, at κ 0, 1e-16 and 1e-12; and the two forms' agreement across the cut.
+
+Facts:
+
+- `SmallReversionIsTheLimitWithoutReversion`
+- `TheFormsAgreeAcrossTheCut`
+
+## SquareRootAndersenStepsTests
+
+[`Divergences/SquareRootAndersenStepsTests.cs`](../tests/NanoQL.Tests/Divergences/SquareRootAndersenStepsTests.cs)
+
+The square-root volatility process's number of steps (the S-mm plan's MR3 (xiii), fixed under R8). QuantLib's `SquareRootAndersen::numberSteps` is `dt_.size()*numberSubSteps_` (`squarerootandersen.cpp:80`), where `dt_` already holds every sub-step: 48 for 3 evolution times of 4 sub-steps (this run's `probes\c2_facts.cpp`; the planner's MP3), though `variatesPerStep` counts per evolution step. nanoql's is the evolution steps a path takes. Checks: the `nextstep` calls a path takes, as QuantLib's own sizing of its path (`vPath_`, one value per sub-step and the start) allows, the next refused.
+
+Facts:
+
+- `ThePathTakesOneStepPerEvolutionTime`
+
 ## SquareRootProcessTruncationTests
 
 [`Divergences/SquareRootProcessTruncationTests.cs`](../tests/NanoQL.Tests/Divergences/SquareRootProcessTruncationTests.cs)
@@ -5657,6 +5746,17 @@ Facts:
 
 - `ASwapIndexGivenANullIborIndexIsRefused`
 - `AnOvernightIndexedSwapIndexGivenANullOvernightIndexIsRefused`
+
+## SwapRatePcInitialStateTests
+
+[`Divergences/SwapRatePcInitialStateTests.cs`](../tests/NanoQL.Tests/Divergences/SwapRatePcInitialStateTests.cs)
+
+The swap-rate evolvers' initial state from another curve state (the S-mm plan's MR3 (v), fixed under R8). QuantLib's `LogNormalCotSwapRatePc` and `LogNormalCmSwapRatePc::setInitialState` cast the state to their own type and dereference the result (`lognormalcotswapratepc.cpp:92-93`, `lognormalcmswapratepc.cpp:93-94`), null for any other: given an `LMMCurveState` the process stops (0xC0000005, 3 runs of 3; the planner's MP5). nanoql reads the base's coterminal and constant-maturity swap rates, which every curve state answers. Checks: on the evolver's own state type QuantLib's call, the same rates, so the same evolution bit for bit (the vectors set the state there); and from an LMM or another state on the same curve, that evolution again.
+
+Facts:
+
+- `TheCoterminalEvolverStartsFromAnyStatesCoterminalRates`
+- `TheConstantMaturityEvolverStartsFromAnyStatesSwapRates`
 
 ## SwapRefusalTests
 

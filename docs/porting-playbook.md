@@ -300,8 +300,8 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `FdmLinearOp`, `FdmLinearOpComposite`, `StepCondition`, `BoundaryCondition<TOperator>`, `FdmInnerValueCalculator`,
   `BinomialTree<T>`, `EqualProbabilitiesBinomialTree<T>`, `EqualJumpsBinomialTree<T>`, `MultiAssetOption`,
   `BasketPayoff`, `SpreadBlackScholesVanillaEngine`, `MCForwardVanillaEngine<TMc, TPath, TStats>`, `CurveState`,
-  `MarketModel`, `MarketModelFactory`, `MarketModelEvolver`, `ConstrainedEvolver` and `PiecewiseConstantCorrelation`
-  (abstract);
+  `MarketModel`, `MarketModelFactory`, `MarketModelEvolver`, `ConstrainedEvolver`, `PiecewiseConstantCorrelation` and
+  `MarketModelVolProcess` (abstract);
   `DiscretizedOption`, `Vasicek`, `TermStructureFittingParameter`, `Projection`, `ZeroInflationIndex`,
   `YoYInflationIndex`, `MultiplicativePriceSeasonality`, `IndexedCashFlow`, `YoYInflationCoupon`,
   `YoYInflationCouponPricer`, `CPICouponPricer`, `YoYInflationCapFloor`, `GeneralizedBlackScholesProcess`,
@@ -362,7 +362,8 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   algorithms use, `TridiagonalOperator`'s row setters), `ProblemState`, and the random-number and path generators
   (§2.7), and the lattices' discretized assets (`DiscretizedAsset` and its subclasses, §2's lattice row). Later ports
   add finite-difference operators and schemes, and market-model evolvers and accumulators, and each names the working
-  types it adds: S-mm's are the curve states, the evolvers and the drift calculators. Every other public type is immutable.
+  types it adds: S-mm's are the curve states, the evolvers, the drift calculators and the volatility processes. Every
+  other public type is immutable.
 - **A copy where C++ copies:** a C# class is a reference, so a port copies explicitly (`Clone()`) wherever C++ copies
   an `Array` or `Matrix` by value (an assignment, a copy construction, a by-value parameter) and then changes either
   copy. The review checks each such site.

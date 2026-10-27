@@ -175,6 +175,71 @@ public class MarketModelRefusalTests
         Check<ArgumentException>(() => euler.SetInitialState(other), "forwards", "mismatch between forwards and rateTimes");
     }
 
+    [Fact]
+    public void TheStochasticVolatilityRefusals()
+    {
+        Check<ArgumentException>(() => new SquareRootAndersen(0.04, 1.0, 0.5, 0.04, [], 2, 0.5, 0.5), "evolutionTimes", "at least one evolution time is required");
+        Check<ArgumentException>(() => new SquareRootAndersen(0.04, 1.0, 0.5, 0.04, [0.0, 1.0], 2, 0.5, 0.5), "evolutionTimes", "Steps must be of positive size.");
+        Check<ArgumentException>(() => new SquareRootAndersen(0.04, 1.0, 0.5, 0.04, [0.5, 0.5], 2, 0.5, 0.5), "evolutionTimes", "Steps must be of positive size.");
+        Check<ArgumentOutOfRangeException>(() => new SquareRootAndersen(0.04, 1.0, 0.5, 0.04, [0.5], -1, 0.5, 0.5), "numberSubSteps", "");
+        var process = new SquareRootAndersen(0.04, 1.0, 0.5, 0.04, [0.5, 1.0], 2, 0.5, 0.5);
+        Assert.Equal("nextPath must be called before nextstep", Assert.Throws<NanoQLException>(() => process.Nextstep([0.1, 0.2])).Message);
+        Assert.Equal("nextStep must be called before stepSd", Assert.Throws<NanoQLException>(() => process.StepSd()).Message);
+        process.NextPath();
+        Check<ArgumentException>(() => process.Nextstep([0.1]), "variates", "1 variates given, 2 required");
+
+        var model = new FlatVol([0.2, 0.2, 0.2], new ExponentialForwardCorrelation(Times), new EvolutionDescription(Times), 3, [0.03, 0.03, 0.03], [0.0, 0.0, 0.0]);
+        var factory = new MTBrownianGeneratorFactory(42);
+        Check<ArgumentException>(() => new SVDDFwdRatePc(model, factory, process, 0, 1, [3, 3, 3], 1), "initialStep", "initial step zero only supported currently. ");
+        Check<ArgumentException>(() => new SVDDFwdRatePc(model, factory, new NoVariates(), 0, 1, [3, 3, 3]), "volProcess", "the volatility process must draw at least one variate per step");
+        Check<ArgumentException>(() => new SVDDFwdRatePc(model, factory, process, 0, 1, [3, 3]), "numeraires", "Size mismatch between numeraires (2) and evolution times (3)");
+        Check<ArgumentOutOfRangeException>(() => new SVDDFwdRatePc(model, factory, process, -1, 1, [3, 3, 3]), "firstVolatilityFactor", "");
+    }
+
+    [Fact]
+    public void TheOtherEvolversRefusals()
+    {
+        var model = new FlatVol([0.2, 0.2, 0.2], new ExponentialForwardCorrelation(Times), new EvolutionDescription(Times), 3, [0.03, 0.03, 0.03], [0.0, 0.0, 0.0]);
+        var factory = new MTBrownianGeneratorFactory(42);
+        int[] moneyMarket = [.. EvolutionDescriptionFunctions.MoneyMarketMeasure(model.Evolution)];
+        Check<ArgumentException>(() => new LogNormalFwdRateIpc(model, factory, moneyMarket), "numeraires", "terminal measure required for ipc ");
+        Check<ArgumentException>(() => new LogNormalFwdRateiBalland(model, factory, moneyMarket), "numeraires", "terminal measure required for iBalland ");
+
+        var e = new LogNormalFwdRateEulerConstrained(model, factory, [3, 3, 3]);
+        e.StartNewPath();
+        Assert.Equal("setThisConstraint must be called before advanceStep", Assert.Throws<NanoQLException>(() => e.AdvanceStep()).Message);
+        Check<ArgumentException>(() => e.SetThisConstraint([0.03, 0.03], [true, true, true]), "rateConstraints", "wrong number of constraints specified");
+        Check<ArgumentException>(() => e.SetThisConstraint([0.03, 0.03, 0.03], [true, true]), "isConstraintActive", "wrong number of isConstraintActive specified");
+        e.SetThisConstraint([0.03, 0.03, 0.03], [true, true, true]);
+        Assert.Equal("setConstraintType must be called before a constraint is active", Assert.Throws<NanoQLException>(() => e.AdvanceStep()).Message);
+        Check<ArgumentException>(() => e.SetConstraintType([0, 1], [1, 2, 3]), "startIndexOfSwapRate", "Size mismatch in constraint specification.");
+        Check<ArgumentException>(() => e.SetConstraintType([0, 1, 2], [1, 2]), "endIndexOfSwapRate", "Size mismatch in constraint specification.");
+        Check<ArgumentException>(() => e.SetConstraintType([0, 1, 1], [1, 2, 3]), "endIndexOfSwapRate", "constrained euler currently only implemented for forward rates");
+        Check<ArgumentOutOfRangeException>(() => e.SetConstraintType([0, 1, 3], [1, 2, 4]), "startIndexOfSwapRate", "the constrained rate must be one of the rates");
+    }
+
+    // A volatility process drawing no variates, which the SVD-DD evolver refuses (QuantLib divides by them).
+    private sealed class NoVariates : MarketModelVolProcess
+    {
+        public override int VariatesPerStep => 0;
+
+        public override int NumberSteps => 3;
+
+        public override int NumberStateVariables => 0;
+
+        public override void NextPath()
+        {
+        }
+
+        public override double Nextstep(ReadOnlySpan<double> variates) => 1.0;
+
+        public override double StepSd() => 1.0;
+
+        public override ReadOnlySpan<double> StateVariables() => [];
+
+        public override MarketModelVolProcess Clone() => new NoVariates();
+    }
+
     // The refusal's type exactly, its parameter, and its text (an ArgumentException's own suffix after it).
     private static void Check<T>(Action a, string paramName, string text)
         where T : ArgumentException
