@@ -23,6 +23,20 @@ internal static class MultiStepProductChecks
         }
     }
 
+    /// <summary>Refuses more products than rates, which a product reads past.</summary>
+    /// <param name="rates">The number of rates.</param>
+    /// <param name="products">The number of products.</param>
+    /// <param name="paramName">The input that gives the products.</param>
+    /// <exception cref="ArgumentException">The products are more than the rates.</exception>
+    public static void AtMost(int rates, int products, string paramName)
+    {
+        if (products > rates)
+        {
+            throw new ArgumentException(
+                $"Incorrect number of {paramName} given, should be at most {rates} not {products}", paramName);
+        }
+    }
+
     /// <summary>Refuses an input shorter than it is read.</summary>
     /// <param name="given">The input's size.</param>
     /// <param name="needed">The number of entries read.</param>

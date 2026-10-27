@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/marketmodel.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testOneStepForwardsAndOptionlets, testOneStepNormalForwardsAndOptionlets, testInverseFloater, testAllMultiStepProducts, testPeriodAdapter, testCallableSwapNaif, testCallableSwapLS, testCallableSwapAnderson, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas (S-mmp)
+// Partial: testCallableSwapNaif, testCallableSwapLS, testCallableSwapAnderson, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas (S-mmp)
 // Not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported)
 
 using NanoQL.Instruments;
@@ -295,6 +295,15 @@ public class MarketModelTests
         }
     }
 
+    // QuantLib's EvolverType (marketmodel.cpp:419).
+    private enum EvolverType
+    {
+        Ipc,
+        Balland,
+        Pc,
+        NormalPc,
+    }
+
     // QuantLib's MeasureType (marketmodel.cpp:362-363).
     private enum MeasureType
     {
@@ -302,6 +311,369 @@ public class MarketModelTests
         Terminal,
         MoneyMarket,
         MoneyMarketPlus,
+    }
+
+    [Fact]
+    public void TestOneStepForwardsAndOptionlets()
+    {
+        // Testing exact repricing of one-step forwards and optionlets in a lognormal forward rate market model...
+
+        var vars = new CommonVars();
+
+        double[] forwardStrikes = new double[vars.TodaysForwards.Length];
+        Payoff[] optionletPayoffs = new Payoff[vars.TodaysForwards.Length];
+        StrikedTypePayoff[] displacedPayoffs = new StrikedTypePayoff[vars.TodaysForwards.Length];
+        for (int i = 0; i < vars.TodaysForwards.Length; ++i)
+        {
+            forwardStrikes[i] = vars.TodaysForwards[i] + 0.01;
+            optionletPayoffs[i] = new PlainVanillaPayoff(OptionType.Call, vars.TodaysForwards[i]);
+            displacedPayoffs[i] = new PlainVanillaPayoff(OptionType.Call, vars.TodaysForwards[i] + CommonVars.Displacement);
+        }
+
+        var forwards = new OneStepForwards(vars.RateTimes, vars.Accruals, vars.PaymentTimes, forwardStrikes);
+        var optionlets = new OneStepOptionlets(vars.RateTimes, vars.Accruals, vars.PaymentTimes, optionletPayoffs);
+
+        var product = new MultiProductComposite();
+        product.Add(forwards);
+        product.Add(optionlets);
+        product.FinalizeComposite();
+
+        EvolutionDescription evolution = product.Evolution;
+
+        string[] marketModels = ["ExponentialCorrelationFlatVolatility", "ExponentialCorrelationAbcdVolatility"];
+        foreach (string j in marketModels)
+        {
+            // one step must be always full factors
+            int[] testedFactors = [vars.TodaysForwards.Length];
+            foreach (int factors in testedFactors)
+            {
+                // for one step product ProductSuggested is equal to Terminal
+                // for one step product MoneyMarketPlus is equal to Terminal
+                MeasureType[] measures = [MeasureType.MoneyMarket, MeasureType.Terminal];
+                foreach (MeasureType measure in measures)
+                {
+                    int[] numeraires = vars.MakeMeasure(product, measure);
+
+                    MarketModel marketModel = vars.MakeMarketModel(true, evolution, factors, j);
+
+                    EvolverType[] evolvers = [EvolverType.Pc, EvolverType.Balland, EvolverType.Ipc];
+                    int stop = EvolutionDescriptionFunctions.IsInTerminalMeasure(evolution, numeraires) ? 0 : 1;
+                    for (int i = 0; i < evolvers.Length - stop; i++)
+                    {
+                        for (int n = 0; n < 1; n++)
+                        {
+                            var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+                            MarketModelEvolver evolver =
+                                CommonVars.MakeMarketModelEvolver(marketModel, numeraires, generatorFactory, evolvers[i]);
+                            string config = $"{j}, {factors} factors, {measure}, {evolvers[i]}, MT BGF";
+
+                            SequenceStatisticsInc stats = vars.Simulate(evolver, product);
+                            vars.CheckForwardsAndOptionlets(stats, forwardStrikes, displacedPayoffs, config);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestOneStepNormalForwardsAndOptionlets()
+    {
+        // Testing exact repricing of one-step forwards and optionlets in a normal forward rate market model...
+
+        var vars = new CommonVars();
+
+        double[] forwardStrikes = new double[vars.TodaysForwards.Length];
+        Payoff[] optionletPayoffs = new Payoff[vars.TodaysForwards.Length];
+        PlainVanillaPayoff[] displacedPayoffs = new PlainVanillaPayoff[vars.TodaysForwards.Length];
+        for (int i = 0; i < vars.TodaysForwards.Length; ++i)
+        {
+            forwardStrikes[i] = vars.TodaysForwards[i] + 0.01;
+            optionletPayoffs[i] = new PlainVanillaPayoff(OptionType.Call, vars.TodaysForwards[i]);
+            displacedPayoffs[i] = new PlainVanillaPayoff(OptionType.Call, vars.TodaysForwards[i] + CommonVars.Displacement);
+        }
+
+        var forwards = new OneStepForwards(vars.RateTimes, vars.Accruals, vars.PaymentTimes, forwardStrikes);
+        var optionlets = new OneStepOptionlets(vars.RateTimes, vars.Accruals, vars.PaymentTimes, optionletPayoffs);
+
+        var product = new MultiProductComposite();
+        product.Add(forwards);
+        product.Add(optionlets);
+        product.FinalizeComposite();
+
+        EvolutionDescription evolution = product.Evolution;
+
+        string[] marketModels = ["ExponentialCorrelationFlatVolatility", "ExponentialCorrelationAbcdVolatility"];
+        foreach (string j in marketModels)
+        {
+            // one step must be always full factors
+            int[] testedFactors = [vars.TodaysForwards.Length];
+            foreach (int factors in testedFactors)
+            {
+                // for one step product ProductSuggested is equal to Terminal
+                // for one step product MoneyMarketPlus is equal to Terminal
+                MeasureType[] measures = [MeasureType.MoneyMarket, MeasureType.Terminal];
+                foreach (MeasureType measure in measures)
+                {
+                    int[] numeraires = vars.MakeMeasure(product, measure);
+
+                    MarketModel marketModel = vars.MakeMarketModel(false, evolution, factors, j);
+
+                    EvolverType[] evolvers = [EvolverType.NormalPc];
+                    int stop = EvolutionDescriptionFunctions.IsInTerminalMeasure(evolution, numeraires) ? 0 : 1;
+                    for (int i = 0; i < evolvers.Length - stop; i++)
+                    {
+                        for (int n = 0; n < 1; n++)
+                        {
+                            var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+                            MarketModelEvolver evolver =
+                                CommonVars.MakeMarketModelEvolver(marketModel, numeraires, generatorFactory, evolvers[i]);
+                            string config = $"{j}, {factors} factors, {measure}, {evolvers[i]}, MT BGF";
+
+                            SequenceStatisticsInc stats = vars.Simulate(evolver, product);
+                            vars.CheckNormalForwardsAndOptionlets(stats, forwardStrikes, displacedPayoffs, config);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestInverseFloater()
+    {
+        // Testing exact repricing of inverse floater in forward rate market model...
+
+        var vars = new CommonVars();
+
+        // 1. Inverse Floater
+        double[] fixedStrikes = [.. Enumerable.Repeat(0.1, vars.Accruals.Length)];
+        double[] fixedMultipliers = [.. Enumerable.Repeat(2.0, vars.Accruals.Length)];
+        double[] floatingSpreads = [.. Enumerable.Repeat(0.002, vars.Accruals.Length)];
+        double[] fixedAccruals = vars.Accruals;
+        double[] floatingAccruals = vars.Accruals;
+
+        const bool payer = true;
+
+        var product = new MultiStepInverseFloater(
+            vars.RateTimes, fixedAccruals, floatingAccruals, fixedStrikes, fixedMultipliers, floatingSpreads,
+            vars.PaymentTimes, payer);
+
+        var productPathwise = new MarketModelPathwiseInverseFloater(
+            vars.RateTimes, fixedAccruals, floatingAccruals, fixedStrikes, fixedMultipliers, floatingSpreads,
+            vars.PaymentTimes, payer);
+
+        var productWrapped = new MultiProductPathwiseWrapper(productPathwise);
+
+        var productComposite = new MultiProductComposite();
+        productComposite.Add(product);
+        productComposite.Add(productWrapped);
+        productComposite.FinalizeComposite();
+
+        EvolutionDescription evolution = productComposite.Evolution;
+
+        string[] marketModels = ["ExponentialCorrelationFlatVolatility", "ExponentialCorrelationAbcdVolatility"];
+        foreach (string j in marketModels)
+        {
+            int[] testedFactors = [Math.Min(vars.TodaysForwards.Length, 3)];
+            foreach (int factors in testedFactors)
+            {
+                MeasureType[] measures = [MeasureType.MoneyMarket];
+                foreach (MeasureType measure in measures)
+                {
+                    int[] numeraires = vars.MakeMeasure(product, measure);
+
+                    MarketModel marketModel = vars.MakeMarketModel(false, evolution, factors, j);
+
+                    EvolverType[] evolvers = [EvolverType.Pc];
+
+                    foreach (EvolverType i in evolvers)
+                    {
+                        var generatorFactory = new MTBrownianGeneratorFactory(CommonVars.Seed);
+
+                        MarketModelEvolver evolver =
+                            CommonVars.MakeMarketModelEvolver(marketModel, numeraires, generatorFactory, i);
+
+                        SequenceStatisticsInc stats = vars.Simulate(evolver, productComposite);
+
+                        double[] modelVolatilities = new double[vars.Accruals.Length];
+                        for (int k = 0; k < vars.Accruals.Length; ++k)
+                        {
+                            modelVolatilities[k] = Math.Sqrt(marketModel.TotalCovariance(k)[k, k]);
+                        }
+
+                        double truePrice = 0.0;
+
+                        for (int k = 0; k < vars.Accruals.Length; ++k)
+                        {
+                            double floatingCouponPV = floatingAccruals[k] * (vars.TodaysForwards[k] + floatingSpreads[k])
+                                * vars.TodaysDiscounts[k + 1];
+                            double inverseCouponPV = 2 * fixedAccruals[k] * vars.TodaysDiscounts[k + 1]
+                                * BlackFormulaFunctions.BlackFormula(
+                                    OptionType.Put, fixedStrikes[k] / 2.0, vars.TodaysForwards[k], modelVolatilities[k]);
+
+                            truePrice += floatingCouponPV - inverseCouponPV;
+                        }
+
+                        double priceError = stats.Mean()[0] - truePrice;
+                        double priceSD = stats.ErrorEstimate()[0];
+
+                        double errorInSds = priceError / priceSD;
+                        if (Math.Abs(errorInSds) > 4.0)
+                        {
+                            Assert.Fail(
+                                $"Inverse floater product has price error equal to {errorInSds} sds . Price {truePrice} "
+                                + $"MC price {stats.Mean()[0]} \n");
+                        }
+
+                        const double numericalTolerance = 1E-12;
+
+                        if (Math.Abs(stats.Mean()[0] - stats.Mean()[1]) > numericalTolerance)
+                        {
+                            Assert.Fail(
+                                "Inverse floater and wrapper pathwise inverse floater do not agree:"
+                                + $"{stats.Mean()[0]}  {stats.Mean()[1]}");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestAllMultiStepProducts()
+    {
+        const string testDescription = "all multi-step products ";
+
+        var vars = new CommonVars();
+
+        var product = new MultiProductComposite();
+        var subProductExpectedValues = new List<SubProductExpectedValues>();
+        vars.AddForwards(product, subProductExpectedValues);
+        vars.AddOptionLets(product, subProductExpectedValues);
+        vars.AddCoinitialSwaps(product, subProductExpectedValues);
+        vars.AddCoterminalSwapsAndSwaptions(product, subProductExpectedValues);
+        product.FinalizeComposite();
+        vars.TestMultiProductComposite(product, subProductExpectedValues, testDescription);
+    }
+
+    [Fact]
+    public void TestPeriodAdapter()
+    {
+        // Testing period-adaptation routines in LIBOR market model...
+
+        var vars = new CommonVars();
+        var cs = new LMMCurveState(vars.RateTimes);
+        cs.SetOnForwardRates(vars.TodaysForwards);
+
+        const int period = 2;
+        const int offset = 0;
+
+        LMMCurveState bigRateCS = ForwardForwardMappings.RestrictCurveState(cs, period, offset);
+
+        double[] swaptionPaymentTimes = bigRateCS.RateTimes.AsSpan()[..^1].ToArray();
+
+        double[] capletPaymentTimes = swaptionPaymentTimes;
+
+        int numberBigRates = bigRateCS.NumberOfRates;
+
+        StrikedTypePayoff[] optionletPayoffs = new StrikedTypePayoff[numberBigRates];
+        StrikedTypePayoff[] swaptionPayoffs = new StrikedTypePayoff[numberBigRates];
+        StrikedTypePayoff[] displacedOptionletPayoffs = new StrikedTypePayoff[numberBigRates];
+        StrikedTypePayoff[] displacedSwaptionPayoffs = new StrikedTypePayoff[numberBigRates];
+
+        for (int i = 0; i < numberBigRates; ++i)
+        {
+            optionletPayoffs[i] = new PlainVanillaPayoff(OptionType.Call, bigRateCS.ForwardRate(i));
+            swaptionPayoffs[i] = new PlainVanillaPayoff(OptionType.Call, bigRateCS.CoterminalSwapRate(i));
+            displacedOptionletPayoffs[i] =
+                new PlainVanillaPayoff(OptionType.Call, bigRateCS.ForwardRate(i) + CommonVars.Displacement);
+            displacedSwaptionPayoffs[i] =
+                new PlainVanillaPayoff(OptionType.Call, bigRateCS.CoterminalSwapRate(i) + CommonVars.Displacement);
+        }
+
+        var theProduct = new MultiStepPeriodCapletSwaptions(
+            vars.RateTimes, capletPaymentTimes, swaptionPaymentTimes, optionletPayoffs, swaptionPayoffs, period, offset);
+
+        EvolutionDescription evolution = theProduct.Evolution;
+
+        const int factors = 5;
+
+        MarketModel originalModel = vars.MakeMarketModel(true, evolution, factors, "ExponentialCorrelationAbcdVolatility");
+
+        double[] newDisplacements = [];
+
+        MarketModel adaptedforwardModel = new FwdPeriodAdapter(originalModel, period, offset, newDisplacements);
+
+        MarketModel adaptedSwapModel = new FwdToCotSwapAdapter(adaptedforwardModel);
+
+        Matrix finalForwardCovariances = adaptedforwardModel.TotalCovariance(adaptedforwardModel.NumberOfSteps - 1);
+        Matrix finalSwapCovariances = adaptedSwapModel.TotalCovariance(adaptedSwapModel.NumberOfSteps - 1);
+
+        double[] adaptedForwardSds = new double[adaptedforwardModel.NumberOfRates];
+        double[] adaptedSwapSds = new double[adaptedSwapModel.NumberOfRates];
+        double[] approxCapletPrices = new double[adaptedforwardModel.NumberOfRates];
+        double[] approxSwaptionPrices = new double[adaptedSwapModel.NumberOfRates];
+
+        for (int j = 0; j < adaptedSwapModel.NumberOfRates; ++j)
+        {
+            adaptedForwardSds[j] = Math.Sqrt(finalForwardCovariances[j, j]);
+            adaptedSwapSds[j] = Math.Sqrt(finalSwapCovariances[j, j]);
+
+            double capletAnnuity = vars.TodaysDiscounts[0] * bigRateCS.DiscountRatio(j + 1, 0) * bigRateCS.RateTaus[j];
+
+            approxCapletPrices[j] = new BlackCalculator(
+                displacedOptionletPayoffs[j], bigRateCS.ForwardRate(j) + CommonVars.Displacement, adaptedForwardSds[j], capletAnnuity).Value;
+
+            double swaptionAnnuity = vars.TodaysDiscounts[0] * bigRateCS.CoterminalSwapAnnuity(0, j);
+
+            approxSwaptionPrices[j] = new BlackCalculator(
+                displacedSwaptionPayoffs[j], bigRateCS.CoterminalSwapRate(j) + CommonVars.Displacement, adaptedSwapSds[j], swaptionAnnuity).Value;
+        }
+
+        var generatorFactory = new SobolBrownianGeneratorFactory(SobolBrownianGeneratorBaseOrdering.Diagonal, CommonVars.Seed);
+
+        MarketModelEvolver evolver = CommonVars.MakeMarketModelEvolver(
+            originalModel, [.. theProduct.SuggestedNumeraires()], generatorFactory, EvolverType.Pc);
+
+        SequenceStatisticsInc stats = vars.Simulate(evolver, theProduct);
+
+        double[] results = [.. stats.Mean()];
+        double[] errors = [.. stats.ErrorEstimate()];
+
+        double[] capletErrorsInSds = new double[numberBigRates];
+        double[] swaptionErrorsInSds = new double[numberBigRates];
+
+        Assert.True(2 * numberBigRates == results.Length, "mismatch between the size of the result and the number of results");
+
+        for (int i = 0; i < numberBigRates; ++i)
+        {
+            capletErrorsInSds[i] = (results[i] - approxCapletPrices[i]) / errors[i];
+            swaptionErrorsInSds[i] = (results[i + numberBigRates] - approxSwaptionPrices[i]) / errors[i + numberBigRates];
+        }
+
+        const double capletTolerance = 4;
+        const double swaptionTolerance = 4;
+
+        for (int i = 0; i < numberBigRates; ++i)
+        {
+            if (Math.Abs(capletErrorsInSds[i]) > capletTolerance)
+            {
+                Assert.Fail(
+                    $"{DataFormattersFunctions.Ordinal(i + 1)}caplet , approx price {approxCapletPrices[i]}, \t simulation price "
+                    + $"{results[i]}, \t error in sds {capletErrorsInSds[i]}");
+            }
+        }
+
+        for (int i = 0; i < numberBigRates; ++i)
+        {
+            if (Math.Abs(swaptionErrorsInSds[i]) > swaptionTolerance)
+            {
+                Assert.Fail(
+                    $"{DataFormattersFunctions.Ordinal(i + 1)}swaption, approx price {approxSwaptionPrices[i]}, \t simulation price "
+                    + $"{results[i + numberBigRates]}, \t error in sds {swaptionErrorsInSds[i]}");
+            }
+        }
     }
 
     [Fact]
@@ -411,6 +783,18 @@ public class MarketModelTests
         }
     }
 
+    // QuantLib's SubProductExpectedValues (marketmodel.cpp:149-155).
+    private sealed class SubProductExpectedValues(string description)
+    {
+        public string Description { get; } = description;
+
+        public List<double> Values { get; } = [];
+
+        public bool TestBias { get; init; }
+
+        public double ErrorThreshold { get; init; }
+    }
+
     // Adapted: setup()'s evaluation date (marketmodel.cpp:161), the day QuantLib's suite runs, is 15 October 2026; its
     // schedule and SimpleDayCounter give the same semi-annual times on any day but the month's last few. Only the
     // members the ported cases read are kept, and makeMarketModel's volatility and correlation models of the legacy
@@ -476,13 +860,36 @@ public class MarketModelTests
                 TodaysDiscounts[i] = TodaysDiscounts[i - 1] / (1.0 + (TodaysForwards[i - 1] * Accruals[i - 1]));
             }
 
+            // Coterminal-related quantities
+            int nRates = TodaysForwards.Length;
+            TodaysCoterminalSwapRates = new double[nRates];
+            CoterminalAnnuity = new double[nRates];
+            double floatingLeg;
+            for (int i = 1; i <= nRates; ++i)
+            {
+                if (i == 1)
+                {
+                    CoterminalAnnuity[nRates - 1] = Accruals[nRates - 1] * TodaysDiscounts[nRates];
+                }
+                else
+                {
+                    CoterminalAnnuity[nRates - i] =
+                        CoterminalAnnuity[nRates - i + 1] + (Accruals[nRates - i] * TodaysDiscounts[nRates - i + 1]);
+                }
+
+                floatingLeg = TodaysDiscounts[nRates - i] - TodaysDiscounts[nRates];
+                TodaysCoterminalSwapRates[nRates - i] = floatingLeg / CoterminalAnnuity[nRates - i];
+            }
+
             // Cap/Floor Volatilities
             Volatilities = new double[TodaysForwards.Length];
             BlackVols = new double[TodaysForwards.Length];
+            NormalVols = new double[TodaysForwards.Length];
             for (int i = 0; i < Math.Min(MktVols.Length, TodaysForwards.Length); i++)
             {
                 Volatilities[i] = TodaysForwards[i] * MktVols[i] / (TodaysForwards[i] + Displacement);
                 BlackVols[i] = MktVols[i];
+                NormalVols[i] = MktVols[i] * TodaysForwards[i];
             }
         }
 
@@ -503,6 +910,280 @@ public class MarketModelTests
         public double[] Volatilities { get; }
 
         public double[] BlackVols { get; }
+
+        public double[] NormalVols { get; }
+
+        public double[] TodaysCoterminalSwapRates { get; }
+
+        public double[] CoterminalAnnuity { get; }
+
+        // QuantLib's makeMarketModelEvolver (marketmodel.cpp:436-461).
+        public static MarketModelEvolver MakeMarketModelEvolver(
+            MarketModel marketModel, int[] numeraires, BrownianGeneratorFactory generatorFactory, EvolverType evolverType,
+            int initialStep = 0) => evolverType switch
+            {
+                EvolverType.Ipc => new LogNormalFwdRateIpc(marketModel, generatorFactory, numeraires, initialStep),
+                EvolverType.Balland => new LogNormalFwdRateBalland(marketModel, generatorFactory, numeraires, initialStep),
+                EvolverType.Pc => new LogNormalFwdRatePc(marketModel, generatorFactory, numeraires, initialStep),
+                _ => new NormalFwdRatePc(marketModel, generatorFactory, numeraires, initialStep),
+            };
+
+        // QuantLib's checkForwardsAndOptionlets (marketmodel.cpp:521-584): the forwards' exact values and the caplets'
+        // Black values, every discrepancy within 2.5 standard errors and of both signs.
+        public void CheckForwardsAndOptionlets(
+            SequenceStatisticsInc stats, double[] forwardStrikes, StrikedTypePayoff[] displacedPayoffs, string config) =>
+            CheckForwardsAndCaplets(
+                stats,
+                forwardStrikes,
+                i => new BlackCalculator(
+                    displacedPayoffs[i],
+                    TodaysForwards[i] + Displacement,
+                    Volatilities[i] * Math.Sqrt(RateTimes[i]),
+                    TodaysDiscounts[i + 1] * Accruals[i]).Value,
+                config,
+                checkSign: true);
+
+        // QuantLib's checkNormalForwardsAndOptionlets (marketmodel.cpp:588-650): the caplets' Bachelier values.
+        public void CheckNormalForwardsAndOptionlets(
+            SequenceStatisticsInc stats, double[] forwardStrikes, PlainVanillaPayoff[] displacedPayoffs, string config) =>
+            CheckForwardsAndCaplets(
+                stats,
+                forwardStrikes,
+                i => BlackFormulaFunctions.BachelierBlackFormula(
+                    displacedPayoffs[i],
+                    TodaysForwards[i] + Displacement,
+                    NormalVols[i] * Math.Sqrt(RateTimes[i]),
+                    TodaysDiscounts[i + 1] * Accruals[i]),
+                config,
+                checkSign: true);
+
+        // QuantLib's testMultiProductComposite (marketmodel.cpp:997-1074).
+        public void TestMultiProductComposite(
+            MarketModelMultiProduct product, List<SubProductExpectedValues> subProductExpectedValues, string testDescription)
+        {
+            // Testing exact repricing of <testDescription>in a lognormal forward rate market model...
+            EvolutionDescription evolution = product.Evolution;
+
+            string[] marketModels = ["ExponentialCorrelationFlatVolatility", "ExponentialCorrelationAbcdVolatility"];
+            foreach (string j in marketModels)
+            {
+                int[] testedFactors = [4, 8, TodaysForwards.Length];
+                foreach (int factors in testedFactors)
+                {
+                    MeasureType[] measures = [MeasureType.Terminal, MeasureType.MoneyMarketPlus, MeasureType.MoneyMarket];
+                    foreach (MeasureType measure in measures)
+                    {
+                        int[] numeraires = MakeMeasure(product, measure);
+
+                        MarketModel marketModel = MakeMarketModel(true, evolution, factors, j);
+
+                        EvolverType[] evolvers = [EvolverType.Pc, EvolverType.Balland, EvolverType.Ipc];
+                        int stop = EvolutionDescriptionFunctions.IsInTerminalMeasure(evolution, numeraires) ? 0 : 1;
+                        for (int i = 0; i < evolvers.Length - stop; i++)
+                        {
+                            for (int n = 0; n < 1; n++)
+                            {
+                                var generatorFactory = new SobolBrownianGeneratorFactory(
+                                    SobolBrownianGeneratorBaseOrdering.Diagonal, Seed);
+
+                                MarketModelEvolver evolver =
+                                    MakeMarketModelEvolver(marketModel, numeraires, generatorFactory, evolvers[i]);
+                                string config = $"{testDescription}{j}, {factors} factors, {measure}, {evolvers[i]}, MT BGF";
+
+                                SequenceStatisticsInc stats = Simulate(evolver, product);
+                                CheckMultiProductCompositeResults(stats, subProductExpectedValues, config);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // QuantLib's addForwards (marketmodel.cpp:1076-1096).
+        public void AddForwards(MultiProductComposite product, List<SubProductExpectedValues> subProductExpectedValues)
+        {
+            double[] forwardStrikes = [.. TodaysForwards.Select(f => f + 0.01)];
+
+            var forwards = new MultiStepForwards(RateTimes, Accruals, PaymentTimes, forwardStrikes);
+            product.Add(forwards);
+
+            var v = new SubProductExpectedValues("Forward") { ErrorThreshold = 2.50 };
+            for (int i = 0; i < TodaysForwards.Length; ++i)
+            {
+                v.Values.Add((TodaysForwards[i] - forwardStrikes[i]) * Accruals[i] * TodaysDiscounts[i + 1]);
+            }
+
+            subProductExpectedValues.Add(v);
+        }
+
+        // QuantLib's addOptionLets (marketmodel.cpp:1098-1128).
+        public void AddOptionLets(MultiProductComposite product, List<SubProductExpectedValues> subProductExpectedValues)
+        {
+            Payoff[] optionletPayoffs = [.. TodaysForwards.Select(f => (Payoff)new PlainVanillaPayoff(OptionType.Call, f))];
+            StrikedTypePayoff[] displacedPayoffs =
+                [.. TodaysForwards.Select(f => (StrikedTypePayoff)new PlainVanillaPayoff(OptionType.Call, f + Displacement))];
+
+            var optionlets = new MultiStepOptionlets(RateTimes, Accruals, PaymentTimes, optionletPayoffs);
+            product.Add(optionlets);
+
+            var v = new SubProductExpectedValues("Caplet") { ErrorThreshold = 2.50 };
+            for (int i = 0; i < TodaysForwards.Length; ++i)
+            {
+                v.Values.Add(new BlackCalculator(
+                    displacedPayoffs[i],
+                    TodaysForwards[i] + Displacement,
+                    Volatilities[i] * Math.Sqrt(RateTimes[i]),
+                    TodaysDiscounts[i + 1] * Accruals[i]).Value);
+            }
+
+            subProductExpectedValues.Add(v);
+        }
+
+        // QuantLib's addCoinitialSwaps (marketmodel.cpp:1131-1149).
+        public void AddCoinitialSwaps(MultiProductComposite product, List<SubProductExpectedValues> subProductExpectedValues)
+        {
+            const double fixedRate = 0.04;
+            var multiStepCoinitialSwaps = new MultiStepCoinitialSwaps(RateTimes, Accruals, Accruals, PaymentTimes, fixedRate);
+            product.Add(multiStepCoinitialSwaps);
+
+            var v = new SubProductExpectedValues("coinitial swap") { TestBias = false, ErrorThreshold = 2.32 };
+            double coinitialSwapValue = 0;
+            for (int i = 0; i < TodaysForwards.Length; ++i)
+            {
+                coinitialSwapValue += (TodaysForwards[i] - fixedRate) * Accruals[i] * TodaysDiscounts[i + 1];
+                v.Values.Add(coinitialSwapValue);
+            }
+
+            subProductExpectedValues.Add(v);
+        }
+
+        // QuantLib's addCoterminalSwapsAndSwaptions (marketmodel.cpp:1151-1210).
+        public void AddCoterminalSwapsAndSwaptions(
+            MultiProductComposite product, List<SubProductExpectedValues> subProductExpectedValues)
+        {
+            const double fixedRate = 0.04;
+            var swaps = new MultiStepCoterminalSwaps(RateTimes, Accruals, Accruals, PaymentTimes, fixedRate);
+
+            StrikedTypePayoff[] payoffs =
+                [.. TodaysForwards.Select(f => (StrikedTypePayoff)new PlainVanillaPayoff(OptionType.Call, f))];
+
+            var swaptions = new MultiStepCoterminalSwaptions(RateTimes, RateTimes, payoffs);
+            product.Add(swaps);
+            product.Add(swaptions);
+
+            var swapValues = new SubProductExpectedValues("coterminal swap") { TestBias = false, ErrorThreshold = 2.32 };
+            var curveState = new LMMCurveState(RateTimes); // not the best way to detect errors in LMMCurveState...
+            curveState.SetOnForwardRates(TodaysForwards);
+            double[] atmRates = curveState.CoterminalSwapRates().ToArray();
+            for (int i = 0; i < TodaysForwards.Length; ++i)
+            {
+                double expectedNPV = curveState.CoterminalSwapAnnuity(0, i) * (atmRates[i] - fixedRate) * TodaysDiscounts[0];
+                swapValues.Values.Add(expectedNPV);
+            }
+
+            subProductExpectedValues.Add(swapValues);
+
+            var productClone = (MultiProductComposite)product.Clone();
+            productClone.FinalizeComposite();
+            var swaptionValues = new SubProductExpectedValues("coterminal swaption") { TestBias = false, ErrorThreshold = 2.32 };
+            const double displacement = 0;
+            Matrix jacobian = SwapForwardMappings.CoterminalSwapZedMatrix(curveState, displacement);
+
+            EvolutionDescription evolution = productClone.Evolution;
+            int factors = TodaysForwards.Length;
+            MarketModel marketModel = MakeMarketModel(true, evolution, factors, "ExponentialCorrelationFlatVolatility");
+            for (int i = 0; i < TodaysForwards.Length; ++i)
+            {
+                Matrix forwardsCovariance = marketModel.TotalCovariance(i);
+                Matrix cotSwapsCovariance = jacobian * forwardsCovariance * MatrixFunctions.Transpose(jacobian);
+                var payoff = new PlainVanillaPayoff(OptionType.Call, TodaysForwards[i] + displacement);
+
+                double expectedSwaption = new BlackCalculator(
+                    payoff,
+                    TodaysCoterminalSwapRates[i] + displacement,
+                    Math.Sqrt(cotSwapsCovariance[i, i]),
+                    curveState.CoterminalSwapAnnuity(0, i) * TodaysDiscounts[0]).Value;
+                swaptionValues.Values.Add(expectedSwaption);
+            }
+
+            subProductExpectedValues.Add(swaptionValues);
+        }
+
+        // QuantLib's checkMultiProductCompositeResults (marketmodel.cpp:463-518).
+        private static void CheckMultiProductCompositeResults(
+            SequenceStatisticsInc stats, List<SubProductExpectedValues> subProductExpectedValues, string config)
+        {
+            double[] results = [.. stats.Mean()];
+            double[] errors = [.. stats.ErrorEstimate()];
+
+            // size check
+            int nbOfResults = subProductExpectedValues.Sum(s => s.Values.Count);
+            Assert.True(nbOfResults == results.Length, "mismatch between the size of the result and the number of results");
+
+            int currentResultIndex = 0;
+            foreach (SubProductExpectedValues subProductExpectedValue in subProductExpectedValues)
+            {
+                double minError = double.MaxValue;
+                double maxError = double.MinValue;
+                double errorThreshold = subProductExpectedValue.ErrorThreshold;
+                foreach (double value in subProductExpectedValue.Values)
+                {
+                    double stdDev = (results[currentResultIndex] - value) / errors[currentResultIndex];
+                    maxError = Math.Max(maxError, stdDev);
+                    minError = Math.Min(minError, stdDev);
+                    ++currentResultIndex;
+                }
+
+                bool isBiased = minError > 0.0 || maxError < 0.0;
+                if ((subProductExpectedValue.TestBias && isBiased) || Math.Max(-minError, maxError) > errorThreshold)
+                {
+                    Assert.Fail($"{config}: {subProductExpectedValue.Description}: test failed ({minError}, {maxError})");
+                }
+            }
+        }
+
+        private void CheckForwardsAndCaplets(
+            SequenceStatisticsInc stats, double[] forwardStrikes, Func<int, double> caplet, string config, bool checkSign)
+        {
+            double[] results = [.. stats.Mean()];
+            double[] errors = [.. stats.ErrorEstimate()];
+
+            int n = TodaysForwards.Length;
+            double minError = double.MaxValue;
+            double maxError = double.MinValue;
+
+            // forwards check
+            for (int i = 0; i < n; ++i)
+            {
+                double expectedForward = (TodaysForwards[i] - forwardStrikes[i]) * Accruals[i] * TodaysDiscounts[i + 1];
+                double forwardStdDev = (results[i] - expectedForward) / errors[i];
+                if (forwardStdDev > maxError)
+                {
+                    maxError = forwardStdDev;
+                }
+                else if (forwardStdDev < minError)
+                {
+                    minError = forwardStdDev;
+                }
+
+                double expectedCaplet = caplet(i);
+                double capletStdDev = (results[i + n] - expectedCaplet) / errors[i + n];
+                if (capletStdDev > maxError)
+                {
+                    maxError = capletStdDev;
+                }
+                else if (capletStdDev < minError)
+                {
+                    minError = capletStdDev;
+                }
+            }
+
+            const double errorThreshold = 2.50;
+            if ((checkSign && (minError > 0.0 || maxError < 0.0)) || minError < -errorThreshold || maxError > errorThreshold)
+            {
+                Assert.Fail($"{config}: test failed ({minError}, {maxError})");
+            }
+        }
 
         // The test suite's flatRate(forward, dayCounter): a flat curve from the evaluation date.
         public YieldTermStructure FlatRate(double forward) => new FlatForward(TodaysDate, forward, DayCounter);
@@ -579,15 +1260,30 @@ public class MarketModelTests
         }
 
         // QuantLib's makeMarketModel, log-normal and unbumped, for its two exponential-correlation models.
-        public MarketModel MakeMarketModel(EvolutionDescription evolution, int numberOfFactors, string marketModelType)
+        public MarketModel MakeMarketModel(EvolutionDescription evolution, int numberOfFactors, string marketModelType) =>
+            MakeMarketModel(true, evolution, numberOfFactors, marketModelType);
+
+        // QuantLib's makeMarketModel (marketmodel.cpp:296-360) for its two exponential-correlation models: the
+        // log-normal volatilities or the normal ones, the forwards and volatilities bumped.
+        public MarketModel MakeMarketModel(
+            bool logNormal,
+            EvolutionDescription evolution,
+            int numberOfFactors,
+            string marketModelType,
+            double forwardBump = 0.0,
+            double volBump = 0.0)
         {
+            double[] bumpedForwards = [.. TodaysForwards.Select(r => r + forwardBump)];
+            double[] bumpedVols = logNormal
+                ? [.. Volatilities.Select(v => v + volBump)]
+                : [.. NormalVols.Select(v => v + volBump)];
             Matrix correlations = ExpCorrelationsFunctions.ExponentialCorrelations(evolution.RateTimes.AsSpan(), LongTermCorrelation, Beta);
             var corr = new TimeHomogeneousForwardCorrelation(correlations, evolution.RateTimes.AsSpan());
-            double[] displacements = [.. Enumerable.Repeat(Displacement, TodaysForwards.Length)];
+            double[] displacements = [.. Enumerable.Repeat(Displacement, bumpedForwards.Length)];
             return marketModelType switch
             {
-                "ExponentialCorrelationFlatVolatility" => new FlatVol(Volatilities, corr, evolution, numberOfFactors, TodaysForwards, displacements),
-                "ExponentialCorrelationAbcdVolatility" => new AbcdVol(0.0, 0.0, 1.0, 1.0, Volatilities, corr, evolution, numberOfFactors, TodaysForwards, displacements),
+                "ExponentialCorrelationFlatVolatility" => new FlatVol(bumpedVols, corr, evolution, numberOfFactors, bumpedForwards, displacements),
+                "ExponentialCorrelationAbcdVolatility" => new AbcdVol(0.0, 0.0, 1.0, 1.0, bumpedVols, corr, evolution, numberOfFactors, bumpedForwards, displacements),
                 _ => throw new ArgumentException($"unknown market model {marketModelType}", nameof(marketModelType)),
             };
         }

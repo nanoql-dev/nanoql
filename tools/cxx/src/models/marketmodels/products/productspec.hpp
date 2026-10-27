@@ -11,6 +11,19 @@
 // {"type": "MarketModelCashRebate", "rateTimes", "evolutionTimes", "paymentTimes", "amounts", "numberOfProducts"}, or
 // {"type": "MultiProductComposite" or "SingleProductComposite", "parts"}, each part {"product", "multiplier"}, added in
 // order and finalized.
+//
+// The other products take their QuantLib constructors' arguments under their parameters' names, in the table
+// productspec.cpp's keys() gives: the multi-step swap, swaption ("payoff" one [optionType, strike]), coterminal swaps
+// and swaptions, coinitial swaps, inverse floater, ratchet, TARN ("MultiStepTarn") and period caplet swaptions
+// ("forwardPayOffs", "swapPayOffs"); the one-step forwards, optionlets, coinitial and coterminal swaps; and
+// {"type": "MultiProductPathwiseWrapper", "inner"}, the inner product a pathwise spec. A pathwise product is
+// {"type": "MarketModelPathwiseMultiCaplet" or "MarketModelPathwiseMultiDeflatedCaplet", "rateTimes", "accruals",
+// "paymentTimes", "strikes"} (the deflated caplet "strike" in place of "strikes" for its one-strike constructor),
+// {"type": "MarketModelPathwiseMultiDeflatedCap", "rateTimes", "accruals", "paymentTimes", "strike", "startsAndEnds"}
+// (each [start, end]), {"type": "MarketModelPathwiseCashRebate", "rateTimes", "evolutionTimes", "paymentTimes",
+// "amounts", "numberOfProducts"}, the inverse floater and swap under their parameters' names, or
+// {"type": "MarketModelPathwiseCoterminalSwaptionsDeflated", "rateTimes", "strikes"} and its numerical twin with
+// "bumpSize". Where QuantLib reads past an input that doesn't fit its rates, the spec is refused (InvalidParams).
 
 #ifndef NANOQL_CXX_MODELS_MARKETMODELS_PRODUCTS_PRODUCTSPEC_HPP
 #define NANOQL_CXX_MODELS_MARKETMODELS_PRODUCTS_PRODUCTSPEC_HPP
@@ -19,7 +32,9 @@
 #include "models/marketmodels/marketmodelspec.hpp"
 
 #include <ql/models/marketmodels/multiproduct.hpp>
+#include <ql/models/marketmodels/pathwisemultiproduct.hpp>
 
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
@@ -34,9 +49,19 @@ namespace harness::marketmodels {
         QuantLib::Size numberOfProducts = 0, doneIndex = 0;
         Mat amounts;
         std::vector<std::pair<ProductSpec, QuantLib::Real>> parts;
+        // the other products' arguments, by their parameters' names
+        std::map<std::string, Vec> vecs;
+        std::map<std::string, QuantLib::Real> reals;
+        std::map<std::string, QuantLib::Size> sizes;
+        std::map<std::string, bool> flags;
+        std::map<std::string, std::vector<std::pair<int, QuantLib::Real>>> payoffLists;
+        std::vector<std::pair<QuantLib::Size, QuantLib::Size>> startsAndEnds;
+        std::shared_ptr<ProductSpec> inner;
     };
     ProductSpec product(const json::value& v);
     std::unique_ptr<QuantLib::MarketModelMultiProduct> makeProduct(const ProductSpec& p);
+    ProductSpec pathwiseProduct(const json::value& v);
+    std::unique_ptr<QuantLib::MarketModelPathwiseMultiProduct> makePathwiseProduct(const ProductSpec& p);
 
 }
 

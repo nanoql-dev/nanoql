@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 320 | 28 |
+| not started | 299 | 26 |
 | partial | 20 | 30 |
-| ported | 920 | 122 |
+| ported | 941 | 124 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -1221,7 +1221,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `multiproduct` | ported | Models/MarketModels/MarketModelMultiProduct.cs, Models/MarketModels/MarketModelMultiProductCashFlow.cs |  |
 | `pathwiseaccountingengine` | not started |  | no nanoql type: PathwiseAccountingEngine, PathwiseVegasAccountingEngine, PathwiseVegasOuterAccountingEngine |
 | `pathwisediscounter` | not started |  | no nanoql type: MarketModelPathwiseDiscounter |
-| `pathwisemultiproduct` | not started |  | no nanoql type: MarketModelPathwiseMultiProduct, MarketModelPathwiseMultiProductCashFlow |
+| `pathwisemultiproduct` | ported | Models/MarketModels/MarketModelPathwiseMultiProduct.cs, Models/MarketModels/MarketModelPathwiseMultiProductCashFlow.cs |  |
 | `piecewiseconstantcorrelation` | ported | Models/MarketModels/PiecewiseConstantCorrelation.cs |  |
 | `proxygreekengine` | not started |  | no nanoql type: ProxyGreekEngine |
 | `swapforwardmappings` | ported | Models/MarketModels/SwapForwardMappings.cs |  |
@@ -1349,7 +1349,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `compositeproduct` | ported | Models/MarketModels/Products/MarketModelComposite.cs |  |
 | `multiproductcomposite` | ported | Models/MarketModels/Products/MultiProductComposite.cs |  |
 | `multiproductmultistep` | ported | Models/MarketModels/Products/MultiProductMultiStep.cs |  |
-| `multiproductonestep` | not started |  | no nanoql type: MultiProductOneStep |
+| `multiproductonestep` | ported | Models/MarketModels/Products/MultiProductOneStep.cs |  |
 | `singleproductcomposite` | ported | Models/MarketModels/Products/SingleProductComposite.cs |  |
 
 ### `ql/models/marketmodels/products/multistep/`
@@ -1360,29 +1360,29 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `callspecifiedmultiproduct` | not started |  | no nanoql type: CallSpecifiedMultiProduct |
 | `cashrebate` | ported | Models/MarketModels/Products/MultiStep/MarketModelCashRebate.cs |  |
 | `exerciseadapter` | not started |  | no nanoql type: ExerciseAdapter |
-| `multistepcoinitialswaps` | not started |  | no nanoql type: MultiStepCoinitialSwaps |
-| `multistepcoterminalswaps` | not started |  | no nanoql type: MultiStepCoterminalSwaps |
-| `multistepcoterminalswaptions` | not started |  | no nanoql type: MultiStepCoterminalSwaptions |
+| `multistepcoinitialswaps` | ported | Models/MarketModels/Products/MultiStep/MultiStepCoinitialSwaps.cs |  |
+| `multistepcoterminalswaps` | ported | Models/MarketModels/Products/MultiStep/MultiStepCoterminalSwaps.cs |  |
+| `multistepcoterminalswaptions` | ported | Models/MarketModels/Products/MultiStep/MultiStepCoterminalSwaptions.cs |  |
 | `multistepforwards` | ported | Models/MarketModels/Products/MultiStep/MultiStepForwards.cs |  |
-| `multistepinversefloater` | not started |  | no nanoql type: MultiStepInverseFloater |
+| `multistepinversefloater` | ported | Models/MarketModels/Products/MultiStep/MultiStepInverseFloater.cs |  |
 | `multistepnothing` | ported | Models/MarketModels/Products/MultiStep/MultiStepNothing.cs |  |
 | `multistepoptionlets` | ported | Models/MarketModels/Products/MultiStep/MultiStepOptionlets.cs |  |
-| `multisteppathwisewrapper` | not started |  | no nanoql type: MultiProductPathwiseWrapper |
-| `multistepperiodcapletswaptions` | not started |  | no nanoql type: MultiStepPeriodCapletSwaptions |
-| `multistepratchet` | not started |  | no nanoql type: MultiStepRatchet |
-| `multistepswap` | not started |  | no nanoql type: MultiStepSwap |
-| `multistepswaption` | not started |  | no nanoql type: MultiStepSwaption |
-| `multisteptarn` | not started |  | no nanoql type: MultiStepTarn |
+| `multisteppathwisewrapper` | ported | Models/MarketModels/Products/MultiStep/MultiProductPathwiseWrapper.cs |  |
+| `multistepperiodcapletswaptions` | ported | Models/MarketModels/Products/MultiStep/MultiStepPeriodCapletSwaptions.cs |  |
+| `multistepratchet` | ported | Models/MarketModels/Products/MultiStep/MultiStepRatchet.cs |  |
+| `multistepswap` | ported | Models/MarketModels/Products/MultiStep/MultiStepSwap.cs |  |
+| `multistepswaption` | ported | Models/MarketModels/Products/MultiStep/MultiStepSwaption.cs |  |
+| `multisteptarn` | ported | Models/MarketModels/Products/MultiStep/MultiStepTarn.cs |  |
 
 ### `ql/models/marketmodels/products/onestep/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `onestepcoinitialswaps` | not started |  | no nanoql type: OneStepCoinitialSwaps |
-| `onestepcoterminalswaps` | not started |  | no nanoql type: OneStepCoterminalSwaps |
-| `onestepforwards` | not started |  | no nanoql type: OneStepForwards |
-| `onestepoptionlets` | not started |  | no nanoql type: OneStepOptionlets |
+| `onestepcoinitialswaps` | ported | Models/MarketModels/Products/OneStep/OneStepCoinitialSwaps.cs |  |
+| `onestepcoterminalswaps` | ported | Models/MarketModels/Products/OneStep/OneStepCoterminalSwaps.cs |  |
+| `onestepforwards` | ported | Models/MarketModels/Products/OneStep/OneStepForwards.cs |  |
+| `onestepoptionlets` | ported | Models/MarketModels/Products/OneStep/OneStepOptionlets.cs |  |
 
 ### `ql/models/marketmodels/products/pathwise/`
 
@@ -1390,11 +1390,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `pathwiseproductcallspecified` | not started |  | no nanoql type: CallSpecifiedPathwiseMultiProduct |
-| `pathwiseproductcaplet` | not started |  | no nanoql type: MarketModelPathwiseMultiCaplet, MarketModelPathwiseMultiDeflatedCaplet, MarketModelPathwiseMultiDeflatedCap |
-| `pathwiseproductcashrebate` | not started |  | no nanoql type: MarketModelPathwiseCashRebate |
-| `pathwiseproductinversefloater` | not started |  | no nanoql type: MarketModelPathwiseInverseFloater |
-| `pathwiseproductswap` | not started |  | no nanoql type: MarketModelPathwiseSwap |
-| `pathwiseproductswaption` | not started |  | no nanoql type: MarketModelPathwiseCoterminalSwaptionsDeflated, MarketModelPathwiseCoterminalSwaptionsNumericalDeflated |
+| `pathwiseproductcaplet` | ported | Models/MarketModels/Products/Pathwise/PathwiseProductCaplet/MarketModelPathwiseMultiCaplet.cs, Models/MarketModels/Products/Pathwise/PathwiseProductCaplet/MarketModelPathwiseMultiDeflatedCap.cs, Models/MarketModels/Products/Pathwise/PathwiseProductCaplet/MarketModelPathwiseMultiDeflatedCaplet.cs, Models/MarketModels/Products/Pathwise/PathwiseProductCaplet/PathwiseCapletChecks.cs |  |
+| `pathwiseproductcashrebate` | ported | Models/MarketModels/Products/Pathwise/MarketModelPathwiseCashRebate.cs |  |
+| `pathwiseproductinversefloater` | ported | Models/MarketModels/Products/Pathwise/MarketModelPathwiseInverseFloater.cs |  |
+| `pathwiseproductswap` | ported | Models/MarketModels/Products/Pathwise/MarketModelPathwiseSwap.cs |  |
+| `pathwiseproductswaption` | ported | Models/MarketModels/Products/Pathwise/MarketModelPathwiseCoterminalSwaptionsDeflated.cs, Models/MarketModels/Products/Pathwise/MarketModelPathwiseCoterminalSwaptionsNumericalDeflated.cs |  |
 
 ### `ql/models/shortrate/`
 
@@ -2169,9 +2169,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `lookbackoptions` | ported | TestSuite/LookbackOptionsTests.cs | 5 of 5 cases |
 | `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 8 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy |
 | `margrabeoption` | ported | TestSuite/MargrabeOptionTests.cs | 3 of 3 cases; moved: testEuroExchangeTwoAssets line 250 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 259 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 268 to Divergences/MargrabeGreeksQuantityTests.cs |
-| `marketmodel` | partial | TestSuite/MarketModelTests.cs | 7 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported); not yet: testOneStepForwardsAndOptionlets, testOneStepNormalForwardsAndOptionlets, testInverseFloater, testAllMultiStepProducts, testPeriodAdapter, testCallableSwapNaif, testCallableSwapLS, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas |
-| `marketmodel_cms` | not started |  | 1 cases |
-| `marketmodel_smm` | not started |  | 1 cases |
+| `marketmodel` | partial | TestSuite/MarketModelTests.cs | 12 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported); not yet: testCallableSwapNaif, testCallableSwapLS, testGreeks, testPathwiseGreeks, testPathwiseVegas, testPathwiseMarketVegas |
+| `marketmodel_cms` | ported | TestSuite/MarketModelCmsTests.cs | 1 of 1 cases |
+| `marketmodel_smm` | ported | TestSuite/MarketModelSmmTests.cs | 1 of 1 cases |
 | `marketmodel_smmcapletalphacalibration` | ported | TestSuite/MarketModelSmmCapletAlphaCalibrationTests.cs | 1 of 1 cases |
 | `marketmodel_smmcapletcalibration` | ported | TestSuite/MarketModelSmmCapletCalibrationTests.cs | 1 of 1 cases |
 | `marketmodel_smmcaplethomocalibration` | ported | TestSuite/MarketModelSmmCapletHomoCalibrationTests.cs | 3 of 3 cases |
@@ -2228,7 +2228,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `stats` | ported | TestSuite/StatsTests.cs | 4 of 4 cases |
 | `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |
 | `swap` | ported | TestSuite/SwapTests.cs | 15 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs |
-| `swapforwardmappings` | partial | TestSuite/SwapForwardMappingsTests.cs | 1 of 3 cases; not yet: testForwardCoterminalMappings, testSwaptionImpliedVolatility |
+| `swapforwardmappings` | partial | TestSuite/SwapForwardMappingsTests.cs | 2 of 3 cases; not yet: testForwardCoterminalMappings |
 | `swaption` | ported | TestSuite/SwaptionTests.cs | 13 of 13 cases; replaced: testBlackEngineCaching by Vectors/Instruments/SwaptionVectorTests.cs |
 | `swaptionvolatilitycube` | ported | TestSuite/SwaptionVolatilityCubeTests.cs | 17 of 17 cases; replaced: testObservability by Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs; testZabrObservability by Vectors/TermStructures/ZabrSwaptionVolatilityCubeVectorTests.cs |
 | `swaptionvolatilitymatrix` | ported | TestSuite/SwaptionVolatilityMatrixTests.cs | 2 of 2 cases; replaced: testSwaptionVolMatrixObservability by Vectors/TermStructures/SwaptionVolMatrixVectorTests.cs |

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Immutable;
+using NanoQL.Instruments;
 using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.Tests.Conventions;
@@ -20,7 +21,11 @@ namespace NanoQL.Tests.Divergences;
 /// is finished or at their last step, and the single composite's count is 0 at a step where no part steps
 /// (<c>singleproductcomposite.cpp:63</c> writes it only for a stepped part). Checks: QuantLib's own composite values,
 /// bit for bit, on the parts it steps the same; each forward's exact value; and the single composite's cash flows,
-/// those of the multi composite's products, bit for bit.
+/// those of the multi composite's products, bit for bit. A swaption (2, 5) beside a 1% rebate at 0.75 and a 2% one at
+/// 2.25, in one product: QuantLib's single composite ends the path at 0.75, 0.0094334, the first rebate's; recording
+/// each part's end but writing the count only for a stepped part, it pays the swaption's step again at 2.0, where no
+/// part steps, 0.0354032 for the multi composite's 0.0314175 (the planner's MPP23 rerun at 1,023 paths,
+/// <c>probes\r2\c2_spc1023.cpp</c>).
 /// </summary>
 public class MarketModelCompositeEndTests
 {
@@ -143,5 +148,41 @@ public class MarketModelCompositeEndTests
         (ImmutableArray<double> s, _) = Market.TerminalPc(single, 3, 2047);
         (ImmutableArray<double> m, _) = Market.TerminalPc(multi, 3, 2047);
         Assert.Equal(m[0] + m[1] + m[2], s[0], 1e-15);
+    }
+
+    [Fact]
+    public void ASwaptionsIdleStepPaysNothingInOneProduct()
+    {
+        // a swaption (2, 5) struck at 3.3%, finished at its exercise at 1.5, beside a 1% rebate at 0.75 and a 2% one at
+        // 2.25 (the plan's case, this run's R1-3): at 2.0 the swaption is present and finished, and no part steps
+        var swaption = new MultiStepSwaption(Market.RateTimes, 2, 5, new PlainVanillaPayoff(OptionType.Call, 0.033));
+        var early = new MarketModelCashRebate(
+            new EvolutionDescription(Market.RateTimes, [0.75]), [0.75], new Matrix(1, 1, 0.01), 1);
+        var late = new MarketModelCashRebate(
+            new EvolutionDescription(Market.RateTimes, [2.25]), [2.25], new Matrix(1, 1, 0.02), 1);
+        var single = new SingleProductComposite();
+        var multi = new MultiProductComposite();
+        foreach (MarketModelComposite c in new MarketModelComposite[] { single, multi })
+        {
+            c.Add(swaption);
+            c.Add(early);
+            c.Add(late);
+            c.FinalizeComposite();
+        }
+
+        (ImmutableArray<double> s, _) = Market.TerminalPc(single, 3, 1023);
+        (ImmutableArray<double> m, _) = Market.TerminalPc(multi, 3, 1023);
+
+        // the swaption, which pays on a rate time: the value QuantLib's composite gives it under the ruled end, bit for
+        // bit; the rebates, paid inside their periods, through the discounter's fix (MarketModelDiscounterBracketTests)
+        Assert.Equal(0.0039844127552868336, m[0]);
+
+        // the single composite pays the multi composite's products' sum
+        Assert.Equal(m[0] + m[1] + m[2], s[0], 1e-15);
+
+        // QuantLib's single composite, ended at 0.75; and with each end recorded but the count left at an idle step
+        const double quantLib = 0.0094333652416315264, quantLibCountLeft = 0.035403213273878471;
+        Assert.True(s[0] > quantLib + m[0]);
+        Assert.True(Math.Abs(quantLibCountLeft - s[0] - m[0]) < 1e-4, $"{quantLibCountLeft} against {s[0]} + {m[0]}");
     }
 }

@@ -4303,13 +4303,14 @@ Facts:
 
 [`Divergences/MarketModelCompositeEndTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelCompositeEndTests.cs)
 
-The composites' ends (the S-mmp plan's MMPR4 (vii), option (1), ruled by the user). QuantLib's composites never record a part's end: `compositeproduct.cpp:43` resets the flag `multiproductcomposite.cpp:49` and `singleproductcomposite.cpp:46` test, which nothing sets, so a finished part steps again at each of its later times; and a composite's path ends when the parts it stepped at a step are finished, whatever the others' later times. Forwards beside a 1% rebate at 1.0, 1.5 and 2.0, which finishes at each step: QuantLib's composite pays the rebate three times, 0.0276525, where alone it pays once; forwards struck 50 bp low beside a 1% rebate at 0.75: QuantLib's composite ends the path at 0.75, its later forwards 0 (this run's `probes\c1_facts.cpp`; the planner's MPP21). nanoql's composites record each part's end, step only unfinished parts, end a path when every part is finished or at their last step, and the single composite's count is 0 at a step where no part steps (`singleproductcomposite.cpp:63` writes it only for a stepped part). Checks: QuantLib's own composite values, bit for bit, on the parts it steps the same; each forward's exact value; and the single composite's cash flows, those of the multi composite's products, bit for bit.
+The composites' ends (the S-mmp plan's MMPR4 (vii), option (1), ruled by the user). QuantLib's composites never record a part's end: `compositeproduct.cpp:43` resets the flag `multiproductcomposite.cpp:49` and `singleproductcomposite.cpp:46` test, which nothing sets, so a finished part steps again at each of its later times; and a composite's path ends when the parts it stepped at a step are finished, whatever the others' later times. Forwards beside a 1% rebate at 1.0, 1.5 and 2.0, which finishes at each step: QuantLib's composite pays the rebate three times, 0.0276525, where alone it pays once; forwards struck 50 bp low beside a 1% rebate at 0.75: QuantLib's composite ends the path at 0.75, its later forwards 0 (this run's `probes\c1_facts.cpp`; the planner's MPP21). nanoql's composites record each part's end, step only unfinished parts, end a path when every part is finished or at their last step, and the single composite's count is 0 at a step where no part steps (`singleproductcomposite.cpp:63` writes it only for a stepped part). Checks: QuantLib's own composite values, bit for bit, on the parts it steps the same; each forward's exact value; and the single composite's cash flows, those of the multi composite's products, bit for bit. A swaption (2, 5) beside a 1% rebate at 0.75 and a 2% one at 2.25, in one product: QuantLib's single composite ends the path at 0.75, 0.0094334, the first rebate's; recording each part's end but writing the count only for a stepped part, it pays the swaption's step again at 2.0, where no part steps, 0.0354032 for the multi composite's 0.0314175 (the planner's MPP23 rerun at 1,023 paths, `probes\r2\c2_spc1023.cpp`).
 
 Facts:
 
 - `AFinishedPartIsntSteppedAgain`
 - `APathEndsOnlyWhenEveryPartHasEnded`
 - `AStepWhereNoPartStepsPaysNothing`
+- `ASwaptionsIdleStepPaysNothingInOneProduct`
 
 ## MarketModelDifferencesTests
 
@@ -4333,6 +4334,27 @@ Facts:
 
 - `APaymentInsideAPeriodInterpolatesItsOwnPeriod`
 - `APaymentOnARateTimeOrOutsideThePeriodsIsQuantLibs`
+
+## MarketModelPathwiseDeflatedCapletTests
+
+[`Divergences/MarketModelPathwiseDeflatedCapletTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelPathwiseDeflatedCapletTests.cs)
+
+The deflated caplets' deflator derivative (the S-mmp plan's MMPR4 (vi), fixed under R8). Caplet i pays (fᵢ − Kᵢ) aᵢ P(Tᵢ₊₁)/P(T₀), whose derivative with respect to fⱼ, j ≤ i, carries −τⱼ P(Tⱼ₊₁)/P(Tⱼ) times it, τⱼ the rate's own period; QuantLib multiplies by the caplet's accrual aⱼ (`pathwiseproductcaplet.cpp:233`), right only where the accruals are the periods. On six semi-annual rates with accruals 0.5 × 365/360, caplet 3 struck at 3.1% on the forwards: QuantLib's derivatives with respect to f₀, f₁ and f₂ are −4.7570e-4, −4.7547e-4 and −4.7524e-4, 365/360 of the amount's own central differences (this run's `probes\c2_facts.cpp`; the planner's MPP9: deltas 3.2e-5 from the undeflated caplet's on the same paths). nanoql multiplies by the period. Checks: the amount's central differences; QuantLib's bits where the accruals are the periods.
+
+Facts:
+
+- `TheDeflatorsDerivativeIsOverTheRatesPeriod`
+- `WhereTheAccrualsAreThePeriodsTheAmountsAreQuantLibs`
+
+## MarketModelPathwiseSwapStrikeTests
+
+[`Divergences/MarketModelPathwiseSwapStrikeTests.cs`](../tests/NanoQL.Tests/Divergences/MarketModelPathwiseSwapStrikeTests.cs)
+
+The pathwise swap's one strike (the S-mmp plan's MMPR4 (xi), fixed under R8). QuantLib's `MarketModelPathwiseSwap` expands one strike to every rate, then checks the strikes it was given, not the expanded ones (`pathwiseproductswap.cpp:59`), so it refuses one strike with the message that offers it, "strikes.size() does not equal numberOfRates or 1" (this run's `probes\c2_facts.cpp`; the planner's MPP10 (e)). nanoql checks the expanded strikes. Check: the same strike given for every rate, bit for bit.
+
+Facts:
+
+- `OneStrikeIsEveryRatesStrike`
 
 ## MarketModelTextTests
 
@@ -4646,6 +4668,27 @@ Facts:
 - `TheLastGridPointIsInterpolatedOnItsLastInterval`
 - `BeyondTheGridTheLastValueIsReadWithNoReadPastTheData`
 - `ACoordinateThatIsntANumberIsRefused`
+
+## MultiProductPathwiseWrapperDeflatedTests
+
+[`Divergences/MultiProductPathwiseWrapperDeflatedTests.cs`](../tests/NanoQL.Tests/Divergences/MultiProductPathwiseWrapperDeflatedTests.cs)
+
+The pathwise wrapper on an already-deflated product (the S-mmp plan's MMPR4 (xvii), Revision 2's O1-3, fixed under R8). QuantLib's `MultiProductPathwiseWrapper` hands the accounting engine a deflated product's amount as it is (`multisteppathwisewrapper.cpp:69`), and the engine discounts it again: deflated caplets struck at the forwards, wrapped, come out 1.8% to 11.7% below `MultiStepOptionlets` on the same paths (this run's `probes\c2_facts.cpp`; the planner's MPP22). nanoql divides a deflated product's amount by its payment time's money-market deflator on the current state (`MarketModelDiscounter.NumeraireBonds` at numeraire 0), the factor the pathwise engine skips for it. Checks: QuantLib's `MultiStepOptionlets` on the same paths; QuantLib's bits on an undeflated product (the vectors, QuantLib's `testInverseFloater`).
+
+Facts:
+
+- `AWrappedDeflatedCapletIsItsOptionlet`
+
+## MultiStepTarnPaymentTimesTests
+
+[`Divergences/MultiStepTarnPaymentTimesTests.cs`](../tests/NanoQL.Tests/Divergences/MultiStepTarnPaymentTimesTests.cs)
+
+The TARN's floating payment times (the S-mmp plan's MMPR4 (x), fixed under R8). QuantLib's `MultiStepTarn` takes the floating coupons' payment times and appends the fixed ones in their place (`multisteptarn.cpp:50`), so it discounts the floating coupons at the fixed times: on six semi-annual rates with the fixed coupons paid at each period's start and the floating at its end, its cash-flow times are the starts twice, and on a model of 1e-8 volatility its value is −0.351659, 1.3e-3 above the deterministic closed form (this run's `probes\c2_facts.cpp`; the planner's MPP10 (d)). nanoql pays the floating coupons at their own times. Checks: QuantLib's value where the two schedules coincide (the vectors); the deterministic model's closed form.
+
+Facts:
+
+- `TheFloatingCouponsArePaidAtTheirOwnTimes`
+- `ADeterministicModelGivesTheClosedForm`
 
 ## MultipleResetsFairSpreadTests
 
