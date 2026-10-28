@@ -150,8 +150,10 @@ internal static class PortfolioInputs
 
     /// <summary>The loss model a spec describes, unbound.</summary>
     /// <param name="spec">The spec.</param>
+    /// <param name="context">The case's evaluation context, from which a base-correlation surface takes its reference
+    /// date.</param>
     /// <returns>The model.</returns>
-    public static IDefaultLossModel LossModelOf(JsonElement spec)
+    public static IDefaultLossModel LossModelOf(JsonElement spec, EvaluationContext context)
     {
         string kind = spec.GetProperty("kind").GetString()!;
         return kind switch
@@ -160,8 +162,31 @@ internal static class PortfolioInputs
             "DefaultLossModel" => new BaseLossModel(),
             "GaussianLHP" => new GaussianLHPLossModel(
                 spec.GetProperty("correlation").GetDouble(), [.. spec.GetProperty("recoveries").EnumerateArray().Select(VectorCase.Real)]),
-            "HomogeneousPool" or "InhomogeneousPool" or "RandomDefault" or "RandomLoss" => OnCopula(kind, spec),
+            "HomogeneousPool" or "InhomogeneousPool" or "RandomDefault" or "RandomLoss" or "Binomial" or "Recursive" or "SaddlePoint" => OnCopula(kind, spec),
+            "BaseCorrelation" => BaseCorrelationOf(spec, context),
             _ => throw new ArgumentException($"unknown loss model {kind}", nameof(spec)),
+        };
+    }
+
+    /// <summary>The one-factor copula a spec describes: <c>{"kind": "Gaussian", "StudentT", "GaussianStudent" or
+    /// "StudentGaussian", "correlation", "nz", "nm", "maximum", "integrationSteps"}</c>, the last two optional.</summary>
+    /// <param name="spec">The spec.</param>
+    /// <returns>The copula.</returns>
+    public static OneFactorCopula OneFactorCopulaOf(JsonElement spec)
+    {
+        string kind = spec.GetProperty("kind").GetString()!;
+        double c = VectorCase.Real(spec.GetProperty("correlation"));
+        bool gaussian = kind == "Gaussian";
+        double max = spec.TryGetProperty("maximum", out JsonElement m) ? VectorCase.Real(m) : gaussian ? 5.0 : 10.0;
+        int steps = spec.TryGetProperty("integrationSteps", out JsonElement s) ? s.GetInt32() : gaussian ? 50 : 200;
+        int Dof(string name) => spec.GetProperty(name).GetInt32();
+        return kind switch
+        {
+            "Gaussian" => new OneFactorGaussianCopula(c, max, steps),
+            "StudentT" => new OneFactorStudentCopula(c, Dof("nz"), Dof("nm"), max, steps),
+            "GaussianStudent" => new OneFactorGaussianStudentCopula(c, Dof("nz"), max, steps),
+            "StudentGaussian" => new OneFactorStudentGaussianCopula(c, Dof("nm"), max, steps),
+            _ => throw new ArgumentException($"unknown copula {kind}", nameof(spec)),
         };
     }
 
@@ -171,7 +196,23 @@ internal static class PortfolioInputs
     /// <param name="context">The case's evaluation context.</param>
     /// <returns>The bound basket.</returns>
     public static Basket BoundBasketOf(JsonElement basket, JsonElement model, EvaluationContext context) =>
-        BasketOf(basket, context).SetLossModel(LossModelOf(model));
+        BasketOf(basket, context).SetLossModel(LossModelOf(model, context));
+
+    /// <summary>The bilinear base-correlation surface a spec describes: <c>{"settlementDays", "calendar",
+    /// "convention", "tenors", "lossLevels", "correlations", "dayCounter"}</c>.</summary>
+    /// <param name="spec">The spec.</param>
+    /// <param name="context">The case's evaluation context.</param>
+    /// <returns>The surface.</returns>
+    public static BaseCorrelationTermStructure<Bilinear> SurfaceOf(JsonElement spec, EvaluationContext context) =>
+        BaseCorrelationTermStructure<Bilinear>.Create(
+            spec.GetProperty("settlementDays").GetInt32(),
+            CashFlowInputs.CalendarOf(spec.GetProperty("calendar")),
+            (BusinessDayConvention)spec.GetProperty("convention").GetInt32(),
+            [.. spec.GetProperty("tenors").EnumerateArray().Select(InflationCashFlowInputs.PeriodOf)],
+            [.. spec.GetProperty("lossLevels").EnumerateArray().Select(VectorCase.Real)],
+            MatrixOf(spec.GetProperty("correlations")),
+            CashFlowInputs.DayCounterOf(spec.GetProperty("dayCounter")),
+            context);
 
     /// <summary>A model's factor weights, <c>[[...]...]</c>.</summary>
     /// <param name="spec">The rows.</param>
@@ -220,6 +261,9 @@ internal static class PortfolioInputs
                 : new GaussianConstantLossLM(MatrixOf(spec.GetProperty("factorWeights")), recoveries, type);
             return kind switch
             {
+                "Binomial" => new GaussianBinomialLossModel(g),
+                "Recursive" => new RecursiveGaussLossModel(g, spec.TryGetProperty("nBuckets", out JsonElement gb) ? gb.GetInt32() : 1),
+                "SaddlePoint" => new SaddlePointLossModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits>(g),
                 "RandomDefault" => onDefault
                     ? new GaussianRandomDefaultLM((DefaultLatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits>)g, recoveries, nSims, seed, accuracy)
                     : new GaussianRandomDefaultLM(g, nSims, seed, accuracy),
@@ -243,11 +287,30 @@ internal static class PortfolioInputs
             : new TConstantLossLM(MatrixOf(spec.GetProperty("factorWeights")), recoveries, type, ini);
         return kind switch
         {
+            "Binomial" => new TBinomialLossModel(t),
+            "Recursive" => new RecursiveLossModel<TCopulaPolicy, TCopulaPolicyInitTraits>(t, spec.TryGetProperty("nBuckets", out JsonElement tb) ? tb.GetInt32() : 1),
+            "SaddlePoint" => new SaddlePointLossModel<TCopulaPolicy, TCopulaPolicyInitTraits>(t),
             "RandomDefault" => onDefault
                 ? new TRandomDefaultLM((DefaultLatentModel<TCopulaPolicy, TCopulaPolicyInitTraits>)t, recoveries, nSims, seed, accuracy)
                 : new TRandomDefaultLM(t, nSims, seed, accuracy),
             "HomogeneousPool" => new HomogTPoolLossModel(t, Buckets(spec), Max(spec), Min(spec), Steps(spec)),
             _ => new IHStudentPoolLossModel(t, Buckets(spec), Max(spec), Min(spec), Steps(spec)),
+        };
+    }
+
+    // The base-correlation model on QuantLib's four bilinear base models.
+    private static IDefaultLossModel BaseCorrelationOf(JsonElement spec, EvaluationContext context)
+    {
+        BaseCorrelationTermStructure<Bilinear> surface = SurfaceOf(spec.GetProperty("surface"), context);
+        double[] recoveries = [.. spec.GetProperty("recoveries").EnumerateArray().Select(VectorCase.Real)];
+        return spec.GetProperty("base").GetString() switch
+        {
+            "GaussianLHP" => new GaussianLHPFlatBCLM(surface, recoveries),
+            "GaussianBinomial" => new BaseCorrelationLossModel<GaussianBinomialLossModel, Bilinear, GaussianCopulaPolicyInitTraits>(surface, recoveries),
+            "IHGaussPool" => new BaseCorrelationLossModel<IHGaussPoolLossModel, Bilinear, GaussianCopulaPolicyInitTraits>(surface, recoveries),
+            "TBinomial" => new BaseCorrelationLossModel<TBinomialLossModel, Bilinear, TCopulaPolicyInitTraits>(
+                surface, recoveries, TraitsOf(spec.GetProperty("tOrders"))),
+            var b => throw new ArgumentException($"unknown base model {b}", nameof(spec)),
         };
     }
 

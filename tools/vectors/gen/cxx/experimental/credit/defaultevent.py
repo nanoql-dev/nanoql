@@ -139,6 +139,15 @@ def constant_loss(copula, recoveries, correlation=None, factor_weights=None, t_o
     return m
 
 
+def surface(tenors, levels, correlations, settlement_days=0, convention=0):
+    """A bilinear base-correlation surface on TARGET and Actual/365 (Fixed): tenors [(length, units)...], the loss
+    levels, and the correlations a row per level and a column per tenor (tools/cxx/src/experimental/credit/
+    portfoliospec.hpp's surface)."""
+    return {"settlementDays": settlement_days, "calendar": {"type": "TARGET"}, "convention": convention,
+            "tenors": [list(t) for t in tenors], "lossLevels": list(levels),
+            "correlations": [list(r) for r in correlations], "dayCounter": {"type": "Actual365Fixed"}}
+
+
 def model_statistics(call, b, m, dates, levels=(), shortfalls=(), fractions=(), events=False, nth=False, splits=(),
                      distribution=False, recoveries=False, refused=()):
     """A loss model's statistics through the basket it is set on (tools/cxx/src/experimental/credit/basket.cpp): the

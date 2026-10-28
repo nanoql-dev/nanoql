@@ -115,7 +115,7 @@ public static class MidPointCDOEngine
             upfrontPremiumValue = outstanding * cdo.UpfrontRate * discountCurve.AccruedDiscount(first.AccrualStartDate) * leverage;
         }
 
-        return CdoResults.Assemble(
+        return CdoEngineResults.Assemble(
             cdo, basket, premiumValue, protectionValue, upfrontPremiumValue, outstanding * leverage, 0, expectedTrancheLoss.ToImmutable(),
             upfrontDue ? discountCurve.AccruedDiscount(first.AccrualStartDate) : null);
     }

@@ -594,6 +594,17 @@ Facts:
 
 - `TestZeroVolatility`
 
+## BaseCorrelationLossModelTests
+
+[`Divergences/BaseCorrelationLossModelTests.cs`](../tests/NanoQL.Tests/Divergences/BaseCorrelationLossModelTests.cs)
+
+The base-correlation model after a default (the S-xcr plan's XR8 (xvi)): its equity baskets hold the live names, their notionals and recoveries, where QuantLib's take the live notionals on the whole pool and its basket refuses ("unmatched data entry sizes in basket"). A (10) defaulted in June 2006 and settled at 0.25, B (20) and C (30) alive, [10%, 50%] from 1 January 2006, recoveries 0.3, 0.5, 0.6, the Gaussian LHP base on a flat surface of 0.3: QuantLib's model on the basket of the live names (B and C over [0, 45%]) reads 2.2611633149989752 at five years (the S-xcr run's `c3_facts.cpp`).
+
+Facts:
+
+- `TheModelPricesTheLiveNames`
+- `AnEquityTranchesAttachmentLegIsZero`
+
 ## BasisSystemFunctionCountTests
 
 [`Divergences/BasisSystemFunctionCountTests.cs`](../tests/NanoQL.Tests/Divergences/BasisSystemFunctionCountTests.cs)
@@ -761,6 +772,22 @@ The Leisen-Reimer and Joshi trees on an even step count. Both build their tree o
 Facts:
 
 - `AnEvenCountRollsBackTheTreeItBuilt`
+
+## BinomialLossModelTests
+
+[`Divergences/BinomialLossModelTests.cs`](../tests/NanoQL.Tests/Divergences/BinomialLossModelTests.cs)
+
+The adjusted binomial's weight (the S-xcr plan's XR8 (xviii)): mixed with the two-point mass at the floor and ceiling of the expected count, the binomial is weighted so that the conditional distribution has the pool's mean and variance, O'Kane's defining property; QuantLib's weight takes −(c − m)² − ((f − m)² − c²)(c − m) for the two-point mass's variance, so its distribution misses the variance it exists to match. On three names (notionals 10, 20, 30, hazards 0.02, 0.03, 0.015, recoveries 0.4, 0.3, 0.5, correlation 0.3) QuantLib's binomial reads the whole pool's expected loss 3.6067712419499616 at five years, its mean, which no weight moves, and the [10%, 40%] tranche's 2.0417230578123919, where the exact recursive model reads 1.8818433951861697 (the S-xcr run's `c3_facts.cpp`). And the loss distribution integrates a vector over the factor, where QuantLib's quadrature leaves its last node unweighted (XR8 (v), C1's fix): nanoql's is the scalar route's, point by point.
+
+Facts:
+
+- `TheConditionalDistributionHasThePoolsMeanAndVariance`
+- `QuantLibsWeightMissesThePoolsVariance`
+- `TheWholePoolsExpectedLossIsTheMeansWhateverTheWeight`
+- `ATranchesExpectedLossReadsTheWeight`
+- `TheLossDistributionIsTheScalarRoutes`
+- `ThePercentileAtOneIsATrancheLoss`
+- `ARealizedDefaultLeavesTheLiveNames`
 
 ## BinomialMismatchedTimesTests
 
@@ -1503,12 +1530,17 @@ Facts:
 
 [`Divergences/CdoRealizedDefaultsTests.cs`](../tests/NanoQL.Tests/Divergences/CdoRealizedDefaultsTests.cs)
 
-A CDO and a random model on a basket with a realized default (the S-xcr plan's XR8 (ii)): the CDO's premium leg, upfront and remaining notional stand on the tranche's outstanding notional, and the random models simulate the live names alone. A (10) and B (20) alive and C (30) defaulted in June 2006 and settled at 0.4, the [10%, 50%] tranche from 1 January 2006: QuantLib refuses the pool model on the realized basket ("sizes differ: 3 vs 2"), and on the restated basket (A and B, [0, 40%]) its mid-point CDO at 1% upfront and 2% running reads NPV −0.28931799290637461, premium 0.98631843637350081, protection 1.3956199920495744, fair premium 0.025866624453865835 and remaining notional 12, its integral CDO NPV −0.28056449432303487; at correlation 0 its random model on the restated basket reads P(≥ 2) 0.0088 and on the realized one P(≥ 3) 0.0004 (the S-xcr run's `c2_facts.cpp`).
+A CDO and a random model on a basket with a realized default (the S-xcr plan's XR8 (ii)): the CDO's premium leg, upfront and remaining notional stand on the tranche's outstanding notional, and the random models simulate the live names alone. A (10) and B (20) alive and C (30) defaulted in June 2006 and settled at 0.4, the [10%, 50%] tranche from 1 January 2006: QuantLib refuses the pool model on the realized basket ("sizes differ: 3 vs 2"), and on the restated basket (A and B, [0, 40%]) its mid-point CDO at 1% upfront and 2% running reads NPV −0.28931799290637461, premium 0.98631843637350081, protection 1.3956199920495744, fair premium 0.025866624453865835 and remaining notional 12, its integral CDO NPV −0.28056449432303487; at correlation 0 its random model on the restated basket reads P(≥ 2) 0.0088 and on the realized one P(≥ 3) 0.0004 (the S-xcr run's `c2_facts.cpp`). A basket whose first name has defaulted, the models' recoveries and rows differing by name, checks each model's restriction to the live rows, a seasoned CDO's paid first coupon and the random model's shifted loss distribution against QuantLib on its restated basket (the S-xcr run's `c2_o12.cpp`; the S-xcr code review's C2 O1-2).
 
 Facts:
 
 - `TheCdoIsQuantLibsOnTheRestatedBasket`
 - `TheRandomModelSimulatesTheLiveNames`
+- `TheLhpModelPricesTheLiveNamesRecoveries`
+- `TheRandomDefaultModelSimulatesTheLiveNamesRecoveries`
+- `TheRandomModelsLossDistributionIsShiftedByTheRealizedTrancheLoss`
+- `TheRandomLossModelPairsTheLiveNamesRows`
+- `ASeasonedCdoStartsFromTheRealizedLoss`
 
 ## CdoReferenceDateTests
 
@@ -1520,6 +1552,7 @@ Facts:
 
 - `TheCdoOnT2CurvesIsTheRestatedOnes`
 - `TheRandomModelCountsFromTheEvaluationDate`
+- `ASeasonedCdosUpfrontIsDiscountedFromTheEvaluationDate`
 
 ## CdsConventionalSpreadNullTests
 
@@ -2287,12 +2320,14 @@ Facts:
 
 [`Divergences/DistributionMembersTests.cs`](../tests/NanoQL.Tests/Divergences/DistributionMembersTests.cs)
 
-Distribution's members on its own density, uniform within each bucket (the S-xcr plan's XR8 (xx)), and the unused classes' slips (XR8 (xxvii)), each checked against its closed form. QuantLib's values are the S-xcr run's `c2_facts.cpp`: on a uniform of ten buckets over [0, 10] its shortfalls read 5.625 and 9 for 5.25 and 9.5, and its tranche on [2, 5] keeps a probability of 0.6; its cumulative density in the first bucket reads index −1 (`distribution.cpp:228`), its convolution assigns where it adds, its binomial distribution reads a member it never sets, and its binomial probability of at least 0 events wraps to 0.
+Distribution's members on its own density, uniform within each bucket (the S-xcr plan's XR8 (xx)), and the unused classes' slips (XR8 (xxvii)), each checked against its closed form. QuantLib's values are the S-xcr run's `c2_facts.cpp`: on a uniform of ten buckets over [0, 10] its shortfalls read 5.625 and 9 for 5.25 and 9.5, and its tranche on [2, 5] keeps a probability of 0.6, its shortfall reading the tranche's 3 at 0.5 to 0.99 (the S-xcr code review's C2 O1-1); its cumulative density in the first bucket reads index −1 (`distribution.cpp:228`), its convolution assigns where it adds, its binomial distribution reads a member it never sets, and its binomial probability of at least 0 events wraps to 0.
 
 Facts:
 
 - `TheShortfallIsTheUniformsTailMean`
 - `ATrancheKeepsTheMassAboveItsDetachment`
+- `ATranchesShortfallStopsAtItsWidth`
+- `ATranchesCumulativeDensityStopsAtItsWidth`
 - `TheCumulativeDensityStartsFromZero`
 - `TheConvolutionIsTheSumsDistribution`
 - `TheBinomialDistributionReadsItsVolume`
@@ -5240,6 +5275,27 @@ Facts:
 - `ALegsAtmRateTargetOfQuantLibsNullIsATarget`
 - `ASwaptionHelpersStrikeOfQuantLibsNullIsAStrike`
 
+## OldCdoTests
+
+[`Divergences/OldCdoTests.cs`](../tests/NanoQL.Tests/Divergences/OldCdoTests.cs)
+
+The older CDO's maximum loss given default (the S-xcr plan's XR8 (xxvii)): the sum of the names' losses given default, which QuantLib's sums onto an uninitialized value (`cdo.cpp:73-77`), so its `lgd()` is undefined; the vectors leave it out.
+
+Facts:
+
+- `ALaterCurvesProbabilityBeforeItsDateIsZero`
+- `TheMaximumLossIsTheSumOfTheLossesGivenDefault`
+
+## OneFactorStudentCopulaRangeTests
+
+[`Divergences/OneFactorStudentCopulaRangeTests.cs`](../tests/NanoQL.Tests/Divergences/OneFactorStudentCopulaRangeTests.cs)
+
+The Student-factor copulas' factor range (the S-xcr code review's C3 O1-4): QuantLib's three Student classes pass no minimum, so the base's −5 stands and the integrals run over [−5, 10], losing the factor's left tail, where defaults are nearly certain; nanoql's run over [−maximum, maximum]. The copula's identity, the integral of p equal to p, is the check: QuantLib's reads 0.000897975 for 0.001 and 0.00947913 for 0.01 on Student 5/5 at correlation 0.3, 0.000102474 and 0.00857744 on Student-Gaussian ν 3 at 0.6, where the symmetric range reads them within 2.3% and 0.6% (the review's `ofc` probe).
+
+Facts:
+
+- `TheIntegralOfAProbabilityIsTheProbability`
+
 ## OperatorSplittingZeroVolatilityTests
 
 [`Divergences/OperatorSplittingZeroVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/OperatorSplittingZeroVolatilityTests.cs)
@@ -5739,6 +5795,21 @@ Facts:
 
 - `TheAnalyticJacobiansAreTheNumerical`
 
+## RecursiveLossModelTests
+
+[`Divergences/RecursiveLossModelTests.cs`](../tests/NanoQL.Tests/Divergences/RecursiveLossModelTests.cs)
+
+The recursive model's percentile and loss distribution (the S-xcr plan's XR8 (vii)), a model set on two baskets (XR8 (viii)) and a basket with a realized default (XR8 (ii)). QuantLib's percentile at 0 and 1 returns the distribution's probability, 0.66930409955890324 and 1.0000000003070473 on five names at five years; on two names of notionals 10 and 30 it labels the attainable losses 0, 6, 18 and 24 as 0, 6, 12 and 18, their cumulatives 0.79243383385445709, 0.86063723644644652, 0.9729912416586074 and 1.0000000003070473; a model set on a basket of notionals 10, 20, 30 and then on one of 30, 20, 15 at hazard 0.05 reads 11.950518324119658 where a fresh model reads 7.9670122160797714 (the S-xcr run's `c3_facts.cpp`). The cumulatives integrate a vector over the factor, where QuantLib's quadrature leaves its last node unweighted (XR8 (v)), so they agree to that node's weight.
+
+Facts:
+
+- `ThePercentileEndsAreLosses`
+- `TheDistributionIsLabelledByItsAttainableLosses`
+- `AModelSetOnTwoBasketsWeighsEach`
+- `ARealizedDefaultLeavesTheLiveNames`
+- `ThePercentileAtOneIsATrancheLoss`
+- `AShortfallTheDistributionNeverReachesIsRefused`
+
 ## RendistatoUnsolvedSwapsTests
 
 [`Divergences/RendistatoUnsolvedSwapsTests.cs`](../tests/NanoQL.Tests/Divergences/RendistatoUnsolvedSwapsTests.cs)
@@ -5893,6 +5964,28 @@ A smile of zero volatilities fitted with vega weights. Every strike's vega weigh
 Facts:
 
 - `AZeroSmileWithVegaWeightsIsRefused`
+
+## SaddlePointLossModelTests
+
+[`Divergences/SaddlePointLossModelTests.cs`](../tests/NanoQL.Tests/Divergences/SaddlePointLossModelTests.cs)
+
+The saddle-point model's tail reads (the S-xcr plan's XR8 (xxiii), (xlvii)), on pools of n names at hazard 0.03, recovery 0.4 and notional 1 (the S-xcr run's `c3_facts.cpp` and `c3_saddle_pct.cpp`): Above the whole tranche the probability is 0: on 100 names over [0, 30%] QuantLib's reads 0.0016176810243568769 at a fraction of 1.5 (it compares the fraction with the detachment amount); and the shortfall is at most the tranche's remaining notional, 30, where QuantLib's caps it at the tranche notional times the remaining ratio, 9.0000000000000302. Where a factor node's names are all at 0 or 1, QuantLib's saddle search throws ("invalid range"): at the evaluation date, and on 100 names from correlation 0.8 at five years, 0.85 from three months, 0.9 from a month and 0.95 throughout; its tail elsewhere reads the exact (recursive) model's within 1% at 10% and 7% to 8% at 1% a year out (0.2165 for 0.2021 at 0.7, 0.1899 for 0.1755 at 0.75). Here those nodes are exact, the tail within 2% at 10% through correlation 0.9 and 5% at 0.95 (the run's stop 2, ruled on 2026-10-28), and 10% at 1%, of the exact one. A tail outside [0, 1] is refused: on ten names, 26.815515432090283 a day out at correlation 0.548 and 2.6118595103824398 at a week at 0.3, where the exact ones are 0.00073 and 0.0055. The percentile reads the exact distribution's within its loss unit where single nodes leave [0, 1] (the run's stop 1, ruled on 2026-10-28): on 100 names over the whole pool, QuantLib's 4.9485835 at 90% a year out at correlation 0.3, 55.627361 at 99% ten years out at 0.5 and 0.064772838 at 50% 30 days out at 0.1, the exact 4.8, 55.8 and 0 at its loss unit 0.6; its search solves below QuantLib's bracket (stop 3), so it isn't QuantLib's to the digit. Where the level falls outside the bracket QuantLib places on its name of largest loss, it returns the bracket's end (the run's stop 3, ruled on 2026-10-28; the S-xcr code review's C3 O1-3): on 95 names at hazard 0.03 and notional 1 with five at 0.001 and 3, it reads 0.97841938 at 1% a year out at correlation 0.7 and 0.20082286 at 10% 30 days out at 0.9, and throws a year out at 0.9, where the exact tails are 0.198289, 0.00494071 and 0.0564909; here the bracket widens and the point is solved. Above the largest loss a factor node reaches, the widened search's end reads 0/0 in the density and the conditional shortfall, so a tranche detaching above the pool's largest loss read NaN (the S-xcr code review's C3 O2-1); here both read 0 there, as the tail does, and the tranche reads its shortfall detaching at the largest loss. The split's contributions read ∞/∞ at a widened point on QuantLib's form; here they take the cumulants' treatment and add up to the loss (O2-2).
+
+Facts:
+
+- `NoTrancheLossExceedsTheTranche`
+- `ATranchesShortfallIsItsTrancheLoss`
+- `ARealizedDefaultLeavesTheLiveNames`
+- `TheEvaluationDatesTailIsExact`
+- `TheDegenerateNodesAreExact`
+- `ATailOutsideItsDomainIsRefused`
+- `ASmallPoolsTailInsideTheDomainIsQuantLibs`
+- `ThePercentileIsTheExactOnesWithinItsLossUnit`
+- `AHeterogeneousPoolsTailIsTheExactOnes`
+- `ATrancheDetachingAboveTheLargestLossReadsItsShortfallThere`
+- `TheDensityAboveTheLargestLossIsZero`
+- `AHeterogeneousPoolsSplitAddsUpToTheLoss`
+- `TheLossDistributionIsTheExactOnesWithinTheExpansionsAccuracy`
 
 ## SeasonedAsianSmileTests
 

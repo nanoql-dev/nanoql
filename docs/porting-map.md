@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 162 | 19 |
-| partial | 20 | 18 |
-| ported | 1,078 | 143 |
+| not started | 151 | 19 |
+| partial | 23 | 18 |
+| ported | 1,086 | 143 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -248,15 +248,15 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `basecorrelationlossmodel` | not started |  | no nanoql type: BaseCorrelationLossModel, GaussianLHPFlatBCLM |
-| `basecorrelationstructure` | not started |  | no nanoql type: BaseCorrelationTermStructure |
+| `basecorrelationlossmodel` | ported | Experimental/Credit/BaseCorrelationLossModel{TBaseModel,TInterpolator,TInitTraits}.cs, Experimental/Credit/GaussianLHPFlatBCLM.cs, Experimental/Credit/IBaseCorrelationModel{TInitTraits}.cs |  |
+| `basecorrelationstructure` | partial | Experimental/Credit/BaseCorrelationTermStructure{TInterpolator}.cs | partial: ImplicitCorrelation(Real, Real), never ported: basecorrelationstructure.hpp declares it and nothing defines it |
 | `basket` | partial | Experimental/Credit/Basket.cs | partial: densityTrancheLoss, never ported: basket.hpp declares it and nothing defines it, so QuantLib never compiles a call to it |
-| `binomiallossmodel` | not started |  | no nanoql type: BinomialLossModel, GaussianBinomialLossModel, TBinomialLossModel |
+| `binomiallossmodel` | ported | Experimental/Credit/BinomialLossModel{TCopula,TInitTraits}.cs, Experimental/Credit/GaussianBinomialLossModel.cs, Experimental/Credit/TBinomialLossModel.cs |  |
 | `blackcdsoptionengine` | not started |  | no nanoql type: BlackCdsOptionEngine |
-| `cdo` | not started |  | no nanoql type: CDO |
+| `cdo` | ported | Experimental/Credit/CDO.cs, Experimental/Credit/CdoResults.cs |  |
 | `cdsoption` | not started |  | no nanoql type: CdsOption, CdsOptionResults |
 | `constantlosslatentmodel` | ported | Experimental/Credit/ConstantLossLatentModel{TCopula,TInitTraits}.cs, Experimental/Credit/ConstantLossModel{TCopula,TInitTraits}.cs, Experimental/Credit/GaussianConstantLossLM.cs, Experimental/Credit/TConstantLossLM.cs | no nanoql type: ConstantLossLatentmodel |
-| `correlationstructure` | not started |  | no nanoql type: CorrelationTermStructure |
+| `correlationstructure` | partial | Experimental/Credit/CorrelationTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (cal, bdc, dc), which no QuantLib 1.44 class uses and which waits for its first user |
 | `defaultevent` | ported | Experimental/Credit/DefaultEvent/BankruptcyEvent.cs, Experimental/Credit/DefaultEvent/DefaultEvent.cs, Experimental/Credit/DefaultEvent/DefaultSettlement.cs, Experimental/Credit/DefaultEvent/FailureToPayEvent.cs | no nanoql type: DefaultEventDefaultSettlement |
 | `defaultlossmodel` | ported | Experimental/Credit/DefaultLossModel.cs, Experimental/Credit/IDefaultLossModel.cs |  |
 | `defaultprobabilitykey` | ported | Experimental/Credit/DefaultProbKey.cs, Experimental/Credit/NorthAmericaCorpDefaultKey.cs |  |
@@ -267,28 +267,28 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `gaussianlhplossmodel` | ported | Experimental/Credit/GaussianLHPLossModel.cs |  |
 | `homogeneouspooldef` | ported | Experimental/Credit/HomogGaussPoolLossModel.cs, Experimental/Credit/HomogTPoolLossModel.cs, Experimental/Credit/HomogeneousPoolLossModel{TCopula,TInitTraits}.cs |  |
 | `inhomogeneouspooldef` | ported | Experimental/Credit/IHGaussPoolLossModel.cs, Experimental/Credit/IHStudentPoolLossModel.cs, Experimental/Credit/InhomogeneousPoolLossModel{TCopula,TInitTraits}.cs |  |
-| `integralcdoengine` | ported | Experimental/Credit/CdoResults.cs, Experimental/Credit/IntegralCDOEngine.cs |  |
+| `integralcdoengine` | ported | Experimental/Credit/CdoEngineResults.cs, Experimental/Credit/IntegralCDOEngine.cs |  |
 | `integralntdengine` | ported | Experimental/Credit/IntegralNtdEngine.cs |  |
 | `interpolatedaffinehazardratecurve` | not started |  | no nanoql type: InterpolatedAffineHazardRateCurve, AffineHazardRate, AffineHazardRateCurve |
 | `issuer` | ported | Experimental/Credit/Issuer.cs | no nanoql type: DefaultEventSet |
 | `loss` | ported | Experimental/Credit/Loss.cs |  |
 | `lossdistribution` | ported | Experimental/Credit/BinomialProbabilityOfAtLeastNEvents.cs, Experimental/Credit/LossDist.cs, Experimental/Credit/LossDistBinomial.cs, Experimental/Credit/LossDistBucketing.cs, Experimental/Credit/LossDistHomogeneous.cs, Experimental/Credit/LossDistMonteCarlo.cs, Experimental/Credit/LossDistResult.cs, Experimental/Credit/ProbabilityOfAtLeastNEvents.cs, Experimental/Credit/ProbabilityOfNEvents.cs |  |
-| `midpointcdoengine` | ported | Experimental/Credit/CdoResults.cs, Experimental/Credit/MidPointCDOEngine.cs |  |
+| `midpointcdoengine` | ported | Experimental/Credit/CdoEngineResults.cs, Experimental/Credit/MidPointCDOEngine.cs |  |
 | `nthtodefault` | ported | Experimental/Credit/NthToDefault.cs, Experimental/Credit/NthToDefaultResults.cs |  |
 | `onefactoraffinesurvival` | not started |  | no nanoql type: OneFactorAffineSurvivalStructure |
-| `onefactorcopula` | not started |  | no nanoql type: OneFactorCopula |
-| `onefactorgaussiancopula` | not started |  | no nanoql type: OneFactorGaussianCopula |
-| `onefactorstudentcopula` | not started |  | no nanoql type: OneFactorStudentCopula, OneFactorGaussianStudentCopula, OneFactorStudentGaussianCopula |
+| `onefactorcopula` | ported | Experimental/Credit/OneFactorCopula.cs |  |
+| `onefactorgaussiancopula` | ported | Experimental/Credit/OneFactorGaussianCopula.cs |  |
+| `onefactorstudentcopula` | ported | Experimental/Credit/OneFactorGaussianStudentCopula.cs, Experimental/Credit/OneFactorStudentCopula.cs, Experimental/Credit/OneFactorStudentGaussianCopula.cs |  |
 | `pool` | ported | Experimental/Credit/Pool.cs |  |
 | `randomdefaultlatentmodel` | ported | Experimental/Credit/GaussianRandomDefaultLM.cs, Experimental/Credit/ITrancheLossDistribution.cs, Experimental/Credit/RandomDefaultLM{TCopula,TInitTraits,TUsng}.cs, Experimental/Credit/RandomLMEvent.cs, Experimental/Credit/RandomLM{TCopula,TInitTraits,TUsng}.cs, Experimental/Credit/TRandomDefaultLM.cs |  |
-| `randomdefaultmodel` | not started |  | no nanoql type: RandomDefaultModel, GaussianRandomDefaultModel |
+| `randomdefaultmodel` | ported | Experimental/Credit/GaussianRandomDefaultModel.cs, Experimental/Credit/RandomDefaultModel.cs |  |
 | `randomlosslatentmodel` | ported | Experimental/Credit/GaussianRandomLossLM.cs, Experimental/Credit/RandomLossLM{TCopula,TInitTraits,TUsng}.cs, Experimental/Credit/TRandomLossLM.cs |  |
 | `recoveryratemodel` | ported | Experimental/Credit/ConstantRecoveryModel.cs, Experimental/Credit/RecoveryRateModel.cs |  |
 | `recoveryratequote` | ported | Experimental/Credit/RecoveryRateQuote.cs |  |
-| `recursivelossmodel` | not started |  | no nanoql type: RecursiveLossModel, RecursiveGaussLossModel |
+| `recursivelossmodel` | partial | Experimental/Credit/RecursiveGaussLossModel.cs, Experimental/Credit/RecursiveLossModel{TCopula,TInitTraits}.cs | partial: expectedConditionalLoss, never ported: private and unused, its only call commented out |
 | `riskyassetswap` | not started |  | no nanoql type: RiskyAssetSwap, AssetSwapHelper |
 | `riskyassetswapoption` | not started |  | no nanoql type: RiskyAssetSwapOption |
-| `saddlepointlossmodel` | not started |  | no nanoql type: SaddlePointLossModel |
+| `saddlepointlossmodel` | ported | Experimental/Credit/SaddlePointLossModel{TCopula,TInitTraits}.cs |  |
 | `spotlosslatentmodel` | partial | Experimental/Credit/GaussianSpotLossLM.cs, Experimental/Credit/SpotRecoveryLatentModel{TCopula,TInitTraits}.cs, Experimental/Credit/TSpotLossLM.cs | partial: expectedLoss, conditionalExpLossRR and conditionalExpLossRRInv, never ported: they call conditionalRecoveryInvPinvRR, which QuantLib declares nowhere, so QuantLib never compiles them |
 | `spreadedhazardratecurve` | not started |  | no nanoql type: SpreadedHazardRateCurve |
 | `syntheticcdo` | ported | Experimental/Credit/SyntheticCDO.cs, Experimental/Credit/SyntheticCDOResults.cs |  |

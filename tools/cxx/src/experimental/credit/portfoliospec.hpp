@@ -21,7 +21,14 @@
 //               models: "HomogeneousPool" or "InhomogeneousPool" (the constant-loss keys and "nBuckets", "max", "min",
 //               "nSteps"), "RandomDefault" (the constant-loss keys and "nSims", "accuracy", "seed"), "RandomLoss"
 //               (the copula keys, "factorWeights" of the defaults then the recoveries, "recoveries", "modelA",
-//               "nSims", "accuracy", "seed") and "GaussianLHP" ("correlation", "recoveries")
+//               "nSims", "accuracy", "seed") and "GaussianLHP" ("correlation", "recoveries"); the C3 models:
+//               "Binomial", "Recursive" (and optionally "nBuckets") and "SaddlePoint" (the constant-loss keys), and
+//               "BaseCorrelation" ("base": "GaussianLHP", "GaussianBinomial", "TBinomial" with "tOrders" or
+//               "IHGaussPool"; "surface"; "recoveries")
+//     copula    {"kind": "Gaussian", "StudentT" ("nz", "nm"), "GaussianStudent" ("nz") or "StudentGaussian" ("nm"),
+//               "correlation", and optionally "maximum" and "integrationSteps" (the constructors' defaults otherwise)}
+//     surface   {"settlementDays", "calendar", "convention", "tenors" ([length, units]...), "lossLevels",
+//               "correlations" (a row per loss level, a column per tenor), "dayCounter"}, bilinear
 //
 // Everything is built inside the call, so that QuantLib's refusals are throws and a malformed spec InvalidParams.
 #ifndef NANOQL_CXX_EXPERIMENTAL_CREDIT_PORTFOLIOSPEC_HPP
@@ -30,10 +37,12 @@
 #include "convert.hpp"
 
 #include <ql/currency.hpp>
+#include <ql/experimental/credit/basecorrelationstructure.hpp>
 #include <ql/experimental/credit/basket.hpp>
 #include <ql/experimental/credit/defaultevent.hpp>
 #include <ql/experimental/credit/defaultlossmodel.hpp>
 #include <ql/experimental/credit/defaultprobabilitykey.hpp>
+#include <ql/experimental/credit/onefactorcopula.hpp>
 #include <ql/experimental/credit/defaulttype.hpp>
 #include <ql/experimental/credit/issuer.hpp>
 #include <ql/experimental/credit/pool.hpp>
@@ -54,6 +63,9 @@ namespace harness::credit::portfolio {
     QuantLib::ext::shared_ptr<QuantLib::Pool> makePool(const json::value& v);
     QuantLib::ext::shared_ptr<QuantLib::Basket> makeBasket(const json::value& v);
     QuantLib::ext::shared_ptr<QuantLib::DefaultLossModel> makeLossModel(const json::value& v);
+    QuantLib::ext::shared_ptr<QuantLib::BaseCorrelationTermStructure<QuantLib::BilinearInterpolation>>
+    makeBaseCorrelationSurface(const json::value& v);
+    QuantLib::ext::shared_ptr<QuantLib::OneFactorCopula> makeOneFactorCopula(const json::value& v);
 
     // A basket with its model set: QuantLib's flow, the model linked at the first statistic.
     QuantLib::ext::shared_ptr<QuantLib::Basket> makeBoundBasket(const json::value& basket, const json::value& model);

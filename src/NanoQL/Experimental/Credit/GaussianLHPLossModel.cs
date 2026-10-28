@@ -33,7 +33,8 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
-public class GaussianLHPLossModel : LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits>, IDefaultLossModel
+public class GaussianLHPLossModel
+    : LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits>, IDefaultLossModel, IBaseCorrelationModel<GaussianCopulaPolicyInitTraits>
 {
     private static readonly CumulativeNormalDistribution Phi = new();
     private readonly double sqrt1minuscorrel;
@@ -70,6 +71,16 @@ public class GaussianLHPLossModel : LatentModel<GaussianCopulaPolicy, GaussianCo
 
     /// <inheritdoc/>
     public Basket? Basket => basket;
+
+    /// <summary>The model at a correlation over the given recoveries, the copula's parameters unread: QuantLib's
+    /// base-correlation sub-model.</summary>
+    /// <param name="correlation">The correlation.</param>
+    /// <param name="recoveries">The names' recoveries.</param>
+    /// <param name="traits">The Gaussian copula's parameters, none.</param>
+    /// <returns>The model, unbound.</returns>
+    /// <exception cref="ArgumentException">A recovery lies outside [0, 1].</exception>
+    public static IDefaultLossModel ForCorrelation(double correlation, ImmutableArray<double> recoveries, GaussianCopulaPolicyInitTraits traits) =>
+        new GaussianLHPLossModel(correlation, recoveries);
 
     /// <summary>A copy of the model bound to a basket of its names, or fewer: to the basket's live names over its
     /// restated tranche, the copy keeping their rows and recoveries.</summary>

@@ -126,7 +126,7 @@ public static class IntegralCDOEngine
             upfrontPremiumValue = outstanding * cdo.UpfrontRate * discountCurve.AccruedDiscount(first.AccrualStartDate) * leverage;
         }
 
-        return CdoResults.Assemble(
+        return CdoEngineResults.Assemble(
             cdo, basket, premiumValue, protectionValue, upfrontPremiumValue, outstanding * leverage, error, expectedTrancheLoss.ToImmutable(),
             upfrontDue ? discountCurve.AccruedDiscount(first.AccrualStartDate) : null);
     }

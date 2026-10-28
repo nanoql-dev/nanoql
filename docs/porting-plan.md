@@ -101,7 +101,10 @@ Files that port only part of their QuantLib file, each with a `// Partial:` line
 The licensing gate checks that this list and the files match.
 
 - `src/NanoQL/Experimental/CallableBonds/CallableBondVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(dc, bdc)`, which no QuantLib 1.44 class uses and which waits for its first user.
+- `src/NanoQL/Experimental/Credit/BaseCorrelationTermStructure{TInterpolator}.cs`: `ImplicitCorrelation(Real, Real)`, never ported: `basecorrelationstructure.hpp` declares it and nothing defines it.
 - `src/NanoQL/Experimental/Credit/Basket.cs`: `densityTrancheLoss`, never ported: `basket.hpp` declares it and nothing defines it, so QuantLib never compiles a call to it.
+- `src/NanoQL/Experimental/Credit/CorrelationTermStructure.cs`: the constructor for a structure managing its own reference date, `(cal, bdc, dc)`, which no QuantLib 1.44 class uses and which waits for its first user.
+- `src/NanoQL/Experimental/Credit/RecursiveLossModel{TCopula,TInitTraits}.cs`: `expectedConditionalLoss`, never ported: private and unused, its only call commented out.
 - `src/NanoQL/Experimental/Credit/SpotRecoveryLatentModel{TCopula,TInitTraits}.cs`: `expectedLoss`, `conditionalExpLossRR` and `conditionalExpLossRRInv`, never ported: they call `conditionalRecoveryInvPinvRR`, which QuantLib declares nowhere, so QuantLib never compiles them.
 - `src/NanoQL/Methods/FiniteDifferences/StepCondition.cs`: `NullCondition`, which no QuantLib 1.44 class or test uses and which waits for its first user.
 - `src/NanoQL/Models/MarketModels/MarketModelDifferencesFunctions.cs`: `coterminalSwapPseudoRoots`, never ported: QuantLib declares it and defines none, and its two-argument definition, in no header, refuses every QuantLib correlation, reads past the variances otherwise, and scales the correlation, not a root of it.

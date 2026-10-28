@@ -16,7 +16,9 @@ internal static class LossModelStatistics
 {
     /// <summary>Checks a vector file of loss-model statistics.</summary>
     /// <param name="name">The vector file's name.</param>
-    public static void Check(string name)
+    /// <param name="extra">The file's outputs beyond the basket's statistics, read on the bound basket, if
+    /// any.</param>
+    public static void Check(string name, Action<VectorCase, VectorAssert, Basket>? extra = null)
     {
         var file = VectorFile.Load(name);
         var check = new VectorAssert(file);
@@ -54,6 +56,7 @@ internal static class LossModelStatistics
                 "defaultCorrelation" => (object)basket.DefaultCorrelation(last, 0, 1),
                 _ => throw new ArgumentException($"unknown statistic {r}", nameof(name)),
             }));
+            extra?.Invoke(c, check, basket);
         }
 
         check.Complete();

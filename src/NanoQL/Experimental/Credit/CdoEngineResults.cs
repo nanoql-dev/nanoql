@@ -10,7 +10,7 @@ using System.Collections.Immutable;
 namespace NanoQL.Experimental;
 
 /// <summary>The two CDO engines' common ending: the legs signed by the side, the value and the fair rates.</summary>
-internal static class CdoResults
+internal static class CdoEngineResults
 {
     /// <summary>The results of the seller's legs.</summary>
     /// <param name="cdo">The CDO.</param>

@@ -10,12 +10,19 @@
 
 #include <ql/currencies/america.hpp>
 #include <ql/currencies/europe.hpp>
+#include <ql/experimental/credit/basecorrelationlossmodel.hpp>
+#include <ql/experimental/credit/binomiallossmodel.hpp>
 #include <ql/experimental/credit/constantlosslatentmodel.hpp>
 #include <ql/experimental/credit/gaussianlhplossmodel.hpp>
 #include <ql/experimental/credit/homogeneouspooldef.hpp>
 #include <ql/experimental/credit/inhomogeneouspooldef.hpp>
+#include <ql/experimental/credit/onefactorgaussiancopula.hpp>
+#include <ql/experimental/credit/onefactorstudentcopula.hpp>
 #include <ql/experimental/credit/randomdefaultlatentmodel.hpp>
 #include <ql/experimental/credit/randomlosslatentmodel.hpp>
+#include <ql/experimental/credit/recursivelossmodel.hpp>
+#include <ql/experimental/credit/saddlepointlossmodel.hpp>
+#include <ql/math/interpolations/bilinearinterpolation.hpp>
 #include <ql/experimental/credit/spotlosslatentmodel.hpp>
 #include <ql/experimental/math/gaussiancopulapolicy.hpp>
 #include <ql/experimental/math/tcopulapolicy.hpp>
@@ -246,6 +253,16 @@ namespace harness::credit::portfolio {
                                                           static_cast<BigNatural>(int64(key(o, "seed", what))));
             }
             ext::shared_ptr<ConstantLossLatentmodel<CP>> lm = constantLossLatent<CP>(o, ini);
+            if (kind == "Binomial")
+                return ext::make_shared<BinomialLossModel<ConstantLossLatentmodel<CP>>>(lm);
+            if (kind == "Recursive") {
+                Size nBuckets = o.if_contains("nBuckets") != nullptr
+                                    ? static_cast<Size>(integer(key(o, "nBuckets", what)))
+                                    : 1;
+                return ext::make_shared<RecursiveLossModel<CP>>(lm, nBuckets);
+            }
+            if (kind == "SaddlePoint")
+                return ext::make_shared<SaddlePointLossModel<CP>>(lm);
             if (kind == "HomogeneousPool" || kind == "InhomogeneousPool") {
                 auto nBuckets = static_cast<Size>(integer(key(o, "nBuckets", what)));
                 Real max = real(key(o, "max", what)), min = real(key(o, "min", what));
@@ -271,12 +288,92 @@ namespace harness::credit::portfolio {
 
     }
 
+    ext::shared_ptr<OneFactorCopula> makeOneFactorCopula(const json::value& v) {
+        const std::string what = "a one-factor copula";
+        const json::object& o = object(v, what);
+        std::string kind = text(key(o, "kind", what));
+        Handle<Quote> c(ext::make_shared<SimpleQuote>(real(key(o, "correlation", what))));
+        const json::value* mx = o.if_contains("maximum");
+        const json::value* st = o.if_contains("integrationSteps");
+        bool gaussian = kind == "Gaussian";
+        Real maximum = mx != nullptr ? real(*mx) : (gaussian ? 5.0 : 10.0);
+        Size steps = st != nullptr ? static_cast<Size>(integer(*st)) : (gaussian ? 50 : 200);
+        if (gaussian)
+            return ext::make_shared<OneFactorGaussianCopula>(c, maximum, steps);
+        if (kind == "StudentT")
+            return ext::make_shared<OneFactorStudentCopula>(c, integer(key(o, "nz", what)),
+                                                            integer(key(o, "nm", what)), maximum, steps);
+        if (kind == "GaussianStudent")
+            return ext::make_shared<OneFactorGaussianStudentCopula>(c, integer(key(o, "nz", what)), maximum, steps);
+        if (kind == "StudentGaussian")
+            return ext::make_shared<OneFactorStudentGaussianCopula>(c, integer(key(o, "nm", what)), maximum, steps);
+        throw InvalidParams("unknown copula " + kind);
+    }
+
+    ext::shared_ptr<BaseCorrelationTermStructure<BilinearInterpolation>>
+    makeBaseCorrelationSurface(const json::value& v) {
+        const std::string what = "a base-correlation surface";
+        const json::object& s = object(v, what);
+        std::vector<Period> tenors;
+        const json::value& t = key(s, "tenors", what);
+        if (!t.is_array())
+            throw InvalidParams("expected an array of tenors");
+        for (const json::value& p : t.get_array())
+            tenors.push_back(period(p));
+        std::vector<std::vector<Handle<Quote>>> correls;
+        const json::value& c = key(s, "correlations", what);
+        if (!c.is_array())
+            throw InvalidParams("expected an array of correlation rows");
+        for (const json::value& row : c.get_array()) {
+            std::vector<Handle<Quote>> quotes;
+            for (Real x : reals(row))
+                quotes.emplace_back(ext::make_shared<SimpleQuote>(x));
+            correls.push_back(quotes);
+        }
+        return ext::make_shared<BaseCorrelationTermStructure<BilinearInterpolation>>(
+            static_cast<Natural>(integer(key(s, "settlementDays", what))),
+            indexes::makeCalendar(indexes::calendar(key(s, "calendar", what))),
+            enumeration<BusinessDayConvention>(key(s, "convention", what)), tenors, reals(key(s, "lossLevels", what)),
+            correls, harness::makeDayCounter(harness::dayCounter(key(s, "dayCounter", what))));
+    }
+
+    namespace {
+
+        // The base-correlation model on QuantLib's four bilinear base models.
+        ext::shared_ptr<DefaultLossModel> baseCorrelation(const json::object& o) {
+            const std::string what = "a base-correlation model";
+            Handle<BaseCorrelationTermStructure<BilinearInterpolation>> surface(
+                makeBaseCorrelationSurface(key(o, "surface", what)));
+            std::vector<Real> rr = reals(key(o, "recoveries", what));
+            std::string base = text(key(o, "base", what));
+            if (base == "GaussianLHP")
+                return ext::make_shared<BaseCorrelationLossModel<GaussianLHPLossModel, BilinearInterpolation>>(surface,
+                                                                                                             rr);
+            if (base == "GaussianBinomial")
+                return ext::make_shared<BaseCorrelationLossModel<GaussianBinomialLossModel, BilinearInterpolation>>(
+                    surface, rr);
+            if (base == "IHGaussPool")
+                return ext::make_shared<BaseCorrelationLossModel<IHGaussPoolLossModel, BilinearInterpolation>>(surface,
+                                                                                                             rr);
+            if (base == "TBinomial") {
+                TCopulaPolicy::initTraits ini;
+                ini.tOrders = integers(key(o, "tOrders", what));
+                return ext::make_shared<BaseCorrelationLossModel<TBinomialLossModel, BilinearInterpolation>>(surface, rr,
+                                                                                                           ini);
+            }
+            throw InvalidParams("unknown base model " + base);
+        }
+
+    }
+
     ext::shared_ptr<DefaultLossModel> makeLossModel(const json::value& v) {
         const std::string what = "a loss model";
         const json::object& o = object(v, what);
         std::string kind = text(key(o, "kind", what));
         if (kind == "DefaultLossModel")
             return ext::make_shared<BaseLossModel>();
+        if (kind == "BaseCorrelation")
+            return baseCorrelation(o);
         if (kind == "GaussianLHP")
             return ext::make_shared<GaussianLHPLossModel>(real(key(o, "correlation", what)),
                                                           reals(key(o, "recoveries", what)));
