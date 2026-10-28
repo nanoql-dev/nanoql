@@ -134,6 +134,9 @@ public class InterpolatedHazardRateCurve<TInterpolator>
         TermStructures.HazardRate.HazardRateImpl(curve.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t, this);
 
     /// <inheritdoc/>
+    internal override double? HazardRateSurvival(double t) => SurvivalProbabilityImpl(t);
+
+    /// <inheritdoc/>
     protected sealed override double SurvivalProbabilityImpl(double t) =>
         TermStructures.HazardRate.SurvivalProbabilityImpl(curve.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t);
 }

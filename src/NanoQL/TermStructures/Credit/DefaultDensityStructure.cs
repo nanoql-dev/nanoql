@@ -5,8 +5,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/credit/defaultdensitystructure.hpp ql/termstructures/credit/defaultdensitystructure.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the default density, which waits for S-xcr's curves, its only users
 
+using NanoQL.Numerics;
 using NanoQL.Time;
 
 namespace NanoQL.TermStructures;
@@ -16,14 +16,16 @@ namespace NanoQL.TermStructures;
 /// the hazard rates follow.
 /// </summary>
 /// <remarks>
-/// An extension point. QuantLib's default survival probability integrates the default density numerically, with a
-/// 48-point Gauss-Chebyshev rule, floored at 0, and warns that it "might be inefficient and inaccurate": that rule
-/// integrates a constant over [-1, 1] to 2.000357018144566, a relative error of 1.785e-4. It waits for S-xcr's
-/// curves, its only users; here <see cref="DefaultProbabilityTermStructure.SurvivalProbabilityImpl"/> stays abstract,
-/// and every curve of this slot implements it exactly.
+/// An extension point. The default survival probability is QuantLib's: 1 less the default density integrated
+/// numerically with a 48-point Gauss-Chebyshev rule, floored at 0, which QuantLib warns "might be inefficient and
+/// inaccurate. Derived classes should override it if a more efficient implementation is available": the rule
+/// integrates a constant over [-1, 1] to 2.000357018144566, a relative error of 1.785e-4. No QuantLib class reads it;
+/// the curves of S-infl's slot implement it exactly (the S-xcr plan's XR3 (a)).
 /// </remarks>
 public abstract class DefaultDensityStructure : DefaultProbabilityTermStructure
 {
+    private static readonly GaussChebyshevIntegration Integral = new(48);
+
     /// <summary>Initializes a new instance of the <see cref="DefaultDensityStructure"/> class with a fixed reference
     /// date.</summary>
     /// <param name="referenceDate">The reference date.</param>
@@ -45,5 +47,18 @@ public abstract class DefaultDensityStructure : DefaultProbabilityTermStructure
         IEnumerable<Date>? jumpDates = null)
         : base(referenceDate, cal, dc, settlementDays, jumps, jumpDates)
     {
+    }
+
+    /// <summary>The survival probability at a time: QuantLib's default, 1 less the default density integrated from 0
+    /// with a 48-point Gauss-Chebyshev rule, floored at 0, which derived curves should override where they can do
+    /// better.</summary>
+    /// <param name="t">The time.</param>
+    /// <returns>The probability.</returns>
+    protected override double SurvivalProbabilityImpl(double t)
+    {
+        // the Gauss-Chebyshev quadratures integrate over [-1,1],
+        // hence the remapping (and the Jacobian term t/2)
+        double p = 1.0 - (Integral.Evaluate(x => DefaultDensityImpl((x + 1.0) * t / 2.0)) * t / 2.0);
+        return Math.Max(p, 0.0);
     }
 }

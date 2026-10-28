@@ -78,6 +78,17 @@ Facts:
 
 - `AnEmptyFactorVectorIsRefused`
 
+## AffineHazardRateTests
+
+[`Divergences/AffineHazardRateTests.cs`](../tests/NanoQL.Tests/Divergences/AffineHazardRateTests.cs)
+
+The affine hazard-rate curve's initial intensity (the S-xcr plan's XR8 (xiii)): the model's dynamics' short rate at the process's x0, where QuantLib squares x0. On nodes today and one, three and five years out (Actual/365 Fixed), with the Cox-Ingersoll-Ross model r0 0.02, θ 0.03, k 0.5, σ 0.05, QuantLib's curve of zero hazard rates reads S(5) 0.90893263808262059, P(0, 5, r0²), where its own base structure on the same model reads 0.87690828065332527, P(0, 5, r0); on hazard rates 0.01 to 0.04 its S(5) is 0.79418153056948726, and its conditional survival from one to three years at an intensity of 0.025 is 0.90156675873632208, which reads no x0. On Vasicek r0 0.02, a 0.1, b 0.03, σ 0.01, whose x0 is r0 − b, its curve reads 0.96957583433..., its base 0.89655379153... (the S-xcr run's `c4_facts.cpp`).
+
+Facts:
+
+- `TheCurveOfZeroHazardRatesIsTheBaseStructure`
+- `TheCurvesSurvivalIsQuantLibsOnTheModelsOwnIntensity`
+
 ## AlphaFinderTests
 
 [`Divergences/AlphaFinderTests.cs`](../tests/NanoQL.Tests/Divergences/AlphaFinderTests.cs)
@@ -719,6 +730,18 @@ Facts:
 - `TheSeriesIsAccuratePastOrder171`
 - `TheInverseFindsItsRoot`
 
+## BetaRiskTests
+
+[`Divergences/BetaRiskTests.cs`](../tests/NanoQL.Tests/Divergences/BetaRiskTests.cs)
+
+BetaRisk's event process (the S-xcr plan's XR8 (xlii)): the inter-arrival times cumulated, a Poisson process, where QuantLib draws each event's time afresh, a geometric count whose dates come unordered. At a two-year return period over three years (2 January 2015 to 2018, maximum loss 100, mean 10, standard deviation 15) QuantLib's mean count reads 3.48466 for λT = 1.5, and 51,727 of 10⁵ paths unordered; on `testBetaRisk`'s risk (return period 100 years) QuantLib reads a count mean of 0.030433 and variance 0.031354832510999998, a loss mean of 0.30134899766945406 and variance 9.7413702370590478 over 10⁶ paths, its checks at 1% passing on its seed (the S-xcr run's `c4_facts.cpp`). QuantLib's draws are kept up to the parting path: of its first 24 paths with events (the S-xcr plan's XP16, `probes\xp_betarisk.cpp`), only the two with two events move, their second date alone.
+
+Facts:
+
+- `TheCountIsPoissonsAtAHighRate`
+- `TheCountIsPoissonsOnTestBetaRisksRisk`
+- `AMultiEventPathMovesItsLaterDatesOnly`
+
 ## BiCGstabLastIterationTests
 
 [`Divergences/BiCGstabLastIterationTests.cs`](../tests/NanoQL.Tests/Divergences/BiCGstabLastIterationTests.cs)
@@ -935,6 +958,17 @@ Facts:
 
 - `AnOccurredCallabilityIsRefusedWithQuantLibsText`
 - `TheOASThroughTheBlackEngineCantBeBracketed`
+
+## BlackCdsOptionEngineTests
+
+[`Divergences/BlackCdsOptionEngineTests.cs`](../tests/NanoQL.Tests/Divergences/BlackCdsOptionEngineTests.cs)
+
+The CDS option's time before the discount curve's date (the S-xcr plan's XR8 (xv)): floored at 0, the intrinsic value, where QuantLib's is negative and its standard deviation NaN. On 31 August 2006, a knock-out payer option exercising the next day on a five-year buyer swap from a month out (spread 0.0005, notional 10⁶, quarterly, TARGET, Actual/360), the hazard rate 0.001 flat from today and the discount curve 5% flat from two days out, QuantLib throws ("stdDev (-nan(ind)) must be non-negative"); the Black formula at a standard deviation of 0 on its swap's fair spread 0.00060383738773871025 and coupon-leg NPV −2212.1143600025548 reads 459.4003530439083 (the S-xcr run's `c4_facts.cpp`). The same option not knocking out adds its front-end protection, read as XR8 (x) reads a curve before its date: a discount of 1 and a default probability of 0 (the S-xcr code review's C4 O1-3), where QuantLib refuses at the time first.
+
+Facts:
+
+- `AnExerciseBeforeTheCurvesDateIsTheIntrinsicValue`
+- `AKnockInsFrontEndProtectionReadsTheCurvesBeforeTheirDates`
 
 ## BlackFormulaNullPayoffTests
 
@@ -2512,6 +2546,16 @@ Facts:
 
 - `EachRateMovesOverItsOwnCurvesTime`
 - `CurvesSharingTheirTimesAreQuantLibs`
+
+## EventSetTests
+
+[`Divergences/EventSetTests.cs`](../tests/NanoQL.Tests/Divergences/EventSetTests.cs)
+
+An event set's simulation from 29 February (the S-xcr plan's XR8 (xvii)): its periods take 28 February in years without one, where QuantLib throws ("day outside month (2) day-range [1,28]"). On events of 100 on 1 March 2001, 50 on 15 June 2002, 70 on 28 February 2003, 30 on 1 March 2004 and 20 on 10 January 2006, covering 2001 to 2010, the simulation from 28 February 2012 to 28 February 2014 reads in QuantLib the paths (serial numbers) 40969 100, 41440 50, 41698 70; 41334 30; 41284 20; and an empty one, then none (the S-xcr run's `c4_facts.cpp`).
+
+Facts:
+
+- `ASimulationFrom29FebruaryIsQuantLibsFrom28February`
 
 ## ExchangeRateChainRefusalTests
 
@@ -5110,6 +5154,16 @@ Facts:
 
 - `MinimizeProblemStartsFromTheInitialValueAndMinimizeStateContinues`
 
+## MonteCarloCatBondEngineTests
+
+[`Divergences/MonteCarloCatBondEngineTests.cs`](../tests/NanoQL.Tests/Divergences/MonteCarloCatBondEngineTests.cs)
+
+The Monte Carlo cat bond engine on a simulation of no path (QuantLib's #2839, taken from its master after the pin): refused ("no Monte Carlo paths were generated"), where 1.44 divides 0 by 0. On `testCatBondInDoomScenario`'s floating cat bond (22 November 2004, the index on a 2.5% curve, discounted on 3%) and an event set of no events covering 2000 to 2003, which ends before the bond's first period, QuantLib 1.44 reads NPV and loss probability NaN (the S-xcr run's `c4_facts.cpp`).
+
+Facts:
+
+- `ASimulationOfNoPathIsRefused`
+
 ## MonteCarloUndefinedInputsTests
 
 [`Divergences/MonteCarloUndefinedInputsTests.cs`](../tests/NanoQL.Tests/Divergences/MonteCarloUndefinedInputsTests.cs)
@@ -5855,6 +5909,33 @@ Facts:
 - `AnExpiredSwapHasNoValuationDate`
 - `PerLegResultsAnEngineDoesNotReturnAreNull`
 
+## RiskyAssetSwapOptionTests
+
+[`Divergences/RiskyAssetSwapOptionTests.cs`](../tests/NanoQL.Tests/Divergences/RiskyAssetSwapOptionTests.cs)
+
+The risky asset swap option at a zero standard deviation (the S-xcr plan's XR8 (xxii)): the formula's limit, the intrinsic value, where QuantLib's reads 0·∞, NaN. On 31 August 2006, the payer swap of nominal 100 at spread 0.01 (an annual fixed and a quarterly float schedule on TARGET to 31 August 2011, Actual/360, recovery 0.4, the discount curve 5% flat, the hazard rate 0.02 flat), the option expiring a year out at a market spread of 0.012 reads 35.967035007653337 at a volatility of 0.2, 0.890356389102676 at 1e-9 and NaN at 0 in QuantLib (the S-xcr run's `c4_facts.cpp`).
+
+Facts:
+
+- `AZeroVolatilityIsTheIntrinsicValue`
+- `AnOptionExpiringTodayIsExpired`
+
+## RiskyAssetSwapTests
+
+[`Divergences/RiskyAssetSwapTests.cs`](../tests/NanoQL.Tests/Divergences/RiskyAssetSwapTests.cs)
+
+The risky asset swap's annuities, recovery integral and reads before the discount curve's date (the S-xcr plan's XR8 (xii), (xxi), (x)), on 31 August 2006 with the discount curve 5% flat (Actual/360) and the hazard rate 0.02 flat (Actual/365 Fixed), nominal 100, spread 0.01, an annual fixed and a quarterly float schedule on TARGET to 31 August 2011, both legs Actual/360 (the S-xcr run's `c4_facts.cpp`): QuantLib's fixed annuity runs over the float schedule: at recovery 0.4 its fair spread reads 0.011808418663949119 and the package at it 99.57571577267737, not par. Where the schedules coincide, at recovery 0 (whose integral reads nothing), its fair spread is 0.019050924808858876 and its NPV 95.97072563457229, the receiver's at a 4% coupon −96.194787454490481. The recovery value's Euler sum stops a day short of each period's end: on five annual periods of a 5% continuous discount curve and a 0.02 hazard rate (Actual/365 Fixed, recovery 0.4) QuantLib's reads 0.033672884840343142, the closed form R·h/(r + h)·(1 − e^(−(r + h)T)) 0.033765376341026734. On a discount curve from two TARGET days out QuantLib throws ("negative time (-0.0111111) given"); on that curve restated from today, discounting 1 to its date, it reads NPV 95.971197157591376 and fair spread 0.019044839323900529 where the schedules coincide at recovery 0. A seasoned swap's past periods are QuantLib's reads, which refuse a date before the curve's: on 15 January 2026, the curves from today, a swap from 15 March 2024 to 15 March 2030 (annual fixed, quarterly float, no calendar) refuses in QuantLib ("negative time (-1.60833) given"), where reading 1 there would price every past period at par (the S-xcr code review's C4 O1-1).
+
+Facts:
+
+- `WhereTheSchedulesCoincideTheSwapIsQuantLibs`
+- `OnEqualSchedulesWithOtherDayCountersTheFairSpreadIsOverTheFloatAnnuity`
+- `ThePackageIsAtParAtTheFairSpread`
+- `TheRecoveryValueRunsToEachPeriodsEnd`
+- `AT2DiscountCurveReadsAsItsRestatement`
+- `ASeasonedSwapsPastPeriodsAreRefused`
+- `AnExpiredSwapHasNoFairSpread`
+
 ## RoughHestonTimeFormTests
 
 [`Divergences/RoughHestonTimeFormTests.cs`](../tests/NanoQL.Tests/Divergences/RoughHestonTimeFormTests.cs)
@@ -6359,6 +6440,20 @@ Facts:
 
 - `ADiscountingCurveDatedEarlierIsReadAtTheInstant`
 - `ADiscountingCurveOnAnotherDayCounterIsReadAtTheInstant`
+
+## SpreadedHazardRateCurveTests
+
+[`Divergences/SpreadedHazardRateCurveTests.cs`](../tests/NanoQL.Tests/Divergences/SpreadedHazardRateCurveTests.cs)
+
+The spreaded curves' survival (the S-xcr plan's XR3 (b), XR8 (xiv)): exact, where QuantLib's integrates the hazard rate with its base's 48-point Gauss-Chebyshev rule. On a flat hazard rate of 0.02 (Actual/365 Fixed) with an additive spread of 0.01, or a factor of 0.5, QuantLib reads 0.97044033656246698, 0.8606849301062508 and 0.74077854891200179 at 1, 5 and 10 years, for the exact e^(−0.03t); and on a stepped original (0.01, 0.01, 0.03, 0.06 backward flat on today and one, three and five years out) spread by 0, 0.96078257879155837 and 0.87807505391690122 at two and four years, for the original's 0.96078943915232318 and 0.8781676061138235 (the S-xcr run's `c4_facts.cpp`). The survival is the exact integral of the hazard rate the curve reports, so on originals whose rate isn't their jump-free survival's it is QuantLib's within the 48-point rule's error (the S-xcr code review's C4 O1-2; the S-xcr run's `c4_r1b.cpp`): a linear survival curve (1, 0.98, 0.94, 0.90, 0.80 today and 1, 3, 5 and 10 years out) and a linear density curve (0.02, 0.02, 0.025, 0.03, 0.03) with a jump of 0.95 at two years, whose rate is the density over the jumped survival; and backward-flat affine curves (0.01, 0.01, 0.015, 0.02, 0.02) on Vasicek models, whose rate is the deterministic part alone. A user's subclass that reports its own rate is integrated with QuantLib's rule, as QuantLib integrates every original: on a structure deriving the one-factor affine survival structure with a deterministic rate of 0.02 (Vasicek r0 = b = 0.02), the additive spread of 0.01 reads QuantLib's 0.8606849301062508 at five years (the S-xcr code review's C4 O2-1). A piecewise curve of each kind spreads as the interpolated curve on its nodes (O2-2).
+
+Facts:
+
+- `TheSurvivalIsExact`
+- `OnEveryKindOfOriginalTheSurvivalIsTheReportedRates`
+- `AUsersSubclassIsIntegratedAsQuantLibDoes`
+- `APiecewiseCurveSpreadsAsTheInterpolatedCurveOnItsNodes`
+- `ASpreadOfZeroIsTheOriginal`
 
 ## SpreadedSmileSectionTypeTests
 

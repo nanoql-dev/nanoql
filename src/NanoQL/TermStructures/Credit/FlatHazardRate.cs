@@ -68,4 +68,7 @@ public sealed class FlatHazardRate : HazardRateStructure
 
     /// <inheritdoc/>
     protected override double SurvivalProbabilityImpl(double t) => Math.Exp(-hazardRate * t);
+
+    /// <inheritdoc/>
+    internal override double? HazardRateSurvival(double t) => SurvivalProbabilityImpl(t);
 }

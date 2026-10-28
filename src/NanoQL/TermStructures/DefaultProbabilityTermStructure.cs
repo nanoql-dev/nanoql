@@ -280,6 +280,41 @@ public abstract class DefaultProbabilityTermStructure : TermStructure
         return HazardRateImpl(t);
     }
 
+    // exp(-∫ h), the integral from 0 of the hazard rate the curve reports, where the curve's kind gives it in closed form:
+    // the spreaded curves read it exactly where QuantLib's integrates their hazard rates numerically, and integrate
+    // numerically, as QuantLib does, on a curve that gives none (null, the default). A kind gives it on its own classes
+    // alone, by exact type: a user's subclass may report another rate, as QuantLib's affine header asks its derived
+    // classes to. Range checks have already been performed (the S-xcr plan's XR3 (b); the S-xcr code review's C4 O1-2,
+    // O2-1).
+    internal virtual double? HazardRateSurvival(double t) => null;
+
+    // HazardRateSurvival on a curve whose hazard rate is the base's, the default density over the survival with its
+    // jumps, and whose density is its jump-free survival's -dS/dt (the survival and density kinds): each interval between
+    // the jumps before t adds its fall in log survival over the jumps before it.
+    private protected double DensityHazardRateSurvival(double t)
+    {
+        if (jumps.IsEmpty)
+        {
+            return SurvivalProbabilityImpl(t);
+        }
+
+        // the jumps' checks, as the hazard rate's survival read makes them
+        _ = SurvivalProbability(t, true);
+        (double Time, double Jump)[] before = [.. jumpTimes.Select((x, i) => (x, jumps[i])).Where(j => j.x > 0 && j.x < t).OrderBy(j => j.x)];
+        double integral = 0.0, from = 0.0, jumpEffect = 1.0;
+        foreach ((double time, double jump) in before)
+        {
+            integral += (LogSurvival(from) - LogSurvival(time)) / jumpEffect;
+            jumpEffect *= jump;
+            from = time;
+        }
+
+        integral += (LogSurvival(from) - LogSurvival(t)) / jumpEffect;
+        return Math.Exp(-integral);
+    }
+
+    private double LogSurvival(double t) => t == 0.0 ? 0.0 : Math.Log(SurvivalProbabilityImpl(t));
+
     /// <summary>The dates of the survival-probability jumps, one per jump.</summary>
     /// <returns>The dates, empty for a curve without jumps.</returns>
     public virtual ImmutableArray<Date> JumpDates() => jumpDates;

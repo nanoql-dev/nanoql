@@ -134,6 +134,12 @@ public class InterpolatedDefaultDensityCurve<TInterpolator>
         TermStructures.DefaultDensity.DefaultDensityImpl(curve.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t);
 
     /// <inheritdoc/>
+    internal override double? HazardRateSurvival(double t) =>
+        GetType() == typeof(InterpolatedDefaultDensityCurve<TInterpolator>) || GetType() == typeof(DefaultDensityCurve)
+            ? DensityHazardRateSurvival(t)
+            : null;
+
+    /// <inheritdoc/>
     protected sealed override double SurvivalProbabilityImpl(double t) =>
         TermStructures.DefaultDensity.SurvivalProbabilityImpl(curve.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t);
 }

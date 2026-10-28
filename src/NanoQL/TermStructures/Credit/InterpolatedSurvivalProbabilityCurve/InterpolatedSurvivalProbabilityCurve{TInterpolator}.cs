@@ -150,6 +150,12 @@ public class InterpolatedSurvivalProbabilityCurve<TInterpolator>
     }
 
     /// <inheritdoc/>
+    internal override double? HazardRateSurvival(double t) =>
+        GetType() == typeof(InterpolatedSurvivalProbabilityCurve<TInterpolator>) || GetType() == typeof(SurvivalProbabilityCurve)
+            ? DensityHazardRateSurvival(t)
+            : null;
+
+    /// <inheritdoc/>
     protected sealed override double SurvivalProbabilityImpl(double t) =>
         TermStructures.SurvivalProbability.SurvivalProbabilityImpl(curve.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t);
 

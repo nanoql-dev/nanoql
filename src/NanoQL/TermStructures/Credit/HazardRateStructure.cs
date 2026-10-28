@@ -7,8 +7,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/credit/hazardratestructure.hpp ql/termstructures/credit/hazardratestructure.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-xcr's curves, its only users
 
+using NanoQL.Numerics;
 using NanoQL.Time;
 
 namespace NanoQL.TermStructures;
@@ -19,16 +19,18 @@ namespace NanoQL.TermStructures;
 /// </summary>
 /// <remarks>
 /// <para>
-/// An extension point. QuantLib's default survival probability integrates the hazard rate numerically, with a 48-point
-/// Gauss-Chebyshev rule, and warns that it "might be inefficient and inaccurate": that rule integrates a constant over
-/// [-1, 1] to 2.000357018144566, a relative error of 1.785e-4. It waits for S-xcr's curves, its only users; here
-/// <see cref="DefaultProbabilityTermStructure.SurvivalProbabilityImpl"/> stays abstract, and every curve of this slot
-/// implements it exactly. QuantLib's default hazard rate refuses ("hazardRateImpl() must be implemented by a class
-/// derived from HazardRateStructure"); here it is abstract.
+/// An extension point. The default survival probability is QuantLib's: the hazard rate integrated numerically with a
+/// 48-point Gauss-Chebyshev rule, which QuantLib warns "might be inefficient and inaccurate. Derived classes should
+/// override it if a more efficient implementation is available": the rule integrates a constant over [-1, 1] to
+/// 2.000357018144566, a relative error of 1.785e-4, and the spreaded curves miss their exact survival by 5.4e-6 to
+/// 1.05e-4 on it, so they override it exactly (the S-xcr plan's XR3 (a), (b)). QuantLib's default hazard rate refuses
+/// ("hazardRateImpl() must be implemented by a class derived from HazardRateStructure"); here it is abstract.
 /// </para>
 /// </remarks>
 public abstract class HazardRateStructure : DefaultProbabilityTermStructure
 {
+    private static readonly GaussChebyshevIntegration Integral = new(48);
+
     /// <summary>Initializes a new instance of the <see cref="HazardRateStructure"/> class with a fixed reference
     /// date.</summary>
     /// <param name="referenceDate">The reference date.</param>
@@ -59,6 +61,17 @@ public abstract class HazardRateStructure : DefaultProbabilityTermStructure
     /// <param name="t">The time.</param>
     /// <returns>The rate.</returns>
     protected abstract override double HazardRateImpl(double t);
+
+    /// <summary>The survival probability at a time: QuantLib's default, the hazard rate integrated from 0 with a
+    /// 48-point Gauss-Chebyshev rule, which derived curves should override where they can do better.</summary>
+    /// <param name="t">The time.</param>
+    /// <returns>The probability.</returns>
+    protected override double SurvivalProbabilityImpl(double t)
+    {
+        // the Gauss-Chebyshev quadratures integrate over [-1,1],
+        // hence the remapping (and the Jacobian term t/2)
+        return Math.Exp(-Integral.Evaluate(x => HazardRateImpl((x + 1.0) * t / 2.0)) * t / 2.0);
+    }
 
     /// <summary>The default density at a time: the hazard rate times the survival probability.</summary>
     /// <param name="t">The time.</param>

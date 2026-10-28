@@ -6,9 +6,9 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/termstructures/credit/piecewisedefaultcurve.hpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: the constructor on a one-factor affine model, which waits for S-xcr's AffineHazardRate traits, the only traits whose curve takes a model
 
 using System.Collections.Immutable;
+using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.Time;
 
@@ -35,8 +35,12 @@ namespace NanoQL.TermStructures;
 /// </para>
 /// <para>
 /// QuantLib's settlement-days constructors are <see cref="Create"/> (D15). Its constructor on a one-factor affine model
-/// waits for S-xcr's affine hazard-rate traits, the only traits whose curve takes a model. A curve is always built
-/// afresh, as the piecewise yield curve is. Unsealed for its named class, which adds constructors only.
+/// of the default intensity is the one taking a <see cref="OneFactorAffineModel"/>, for the affine hazard-rate traits:
+/// the curve calls the traits' model-aware members when it holds a model, which other traits refuse, and the landed
+/// formulas otherwise (the S-xcr plan's XR3 (c)). QuantLib's piecewise affine curve is a one-factor affine survival
+/// structure, with its conditional survival; this one can't change its base by its traits, so that structure is built
+/// on its nodes. A curve is always built afresh, as the piecewise yield curve is. Unsealed for its named class, which
+/// adds constructors only.
 /// </para>
 /// </remarks>
 public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
@@ -84,6 +88,35 @@ public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PiecewiseDefaultCurve{TTraits, TInterpolator, TBootstrap}"/> class
+    /// on a one-factor affine model of the default intensity, and bootstraps it: the curve is the deterministic part
+    /// added to the model so that the helpers reprice, QuantLib's constructor for its affine hazard-rate traits.
+    /// </summary>
+    /// <param name="referenceDate">The reference date.</param>
+    /// <param name="instruments">The helpers the curve is bootstrapped on.</param>
+    /// <param name="dayCounter">The day counter.</param>
+    /// <param name="model">The model of the default intensity.</param>
+    /// <param name="context">The evaluation context the helpers are dated and priced in.</param>
+    /// <param name="i">The interpolator.</param>
+    /// <param name="bootstrap">The bootstrap.</param>
+    /// <exception cref="ArgumentNullException">An argument but the interpolator and bootstrap is
+    /// <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">A helper is <see langword="null"/>, or the reference date is
+    /// <c>default(Date)</c>.</exception>
+    /// <exception cref="NanoQLException">The traits take no model, or the bootstrap fails.</exception>
+    public PiecewiseDefaultCurve(
+        Date referenceDate,
+        IEnumerable<BootstrapHelper<DefaultProbabilityTermStructure>> instruments,
+        DayCounter dayCounter,
+        OneFactorAffineModel model,
+        EvaluationContext context,
+        TInterpolator i = default,
+        TBootstrap bootstrap = default)
+        : this(referenceDate, null, null, instruments, dayCounter, context, null, null, i, bootstrap, model ?? throw new ArgumentNullException(nameof(model)))
+    {
+    }
+
     /// <summary>The constructors' work: the curve with its calendar and settlement days, bootstrapped.</summary>
     /// <param name="referenceDate">The reference date.</param>
     /// <param name="calendar">The calendar the settlement days were counted on, if any.</param>
@@ -95,6 +128,7 @@ public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
     /// <param name="jumpDates">The jumps' dates, or <see langword="null"/>.</param>
     /// <param name="i">The interpolator.</param>
     /// <param name="bootstrap">The bootstrap.</param>
+    /// <param name="model">The model of the default intensity, if any.</param>
     private protected PiecewiseDefaultCurve(
         Date referenceDate,
         Calendar? calendar,
@@ -105,9 +139,11 @@ public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
         IEnumerable<double>? jumps,
         IEnumerable<Date>? jumpDates,
         TInterpolator i,
-        TBootstrap bootstrap)
+        TBootstrap bootstrap,
+        OneFactorAffineModel? model = null)
         : base(referenceDate, calendar, CheckArguments(context, instruments, dayCounter), settlementDays, jumps, jumpDates)
     {
+        Model = model;
         Interpolator = i;
         Bootstrap = bootstrap;
         BootstrapState<DefaultProbabilityTermStructure> s =
@@ -119,6 +155,9 @@ public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
         additionalVariables = s.AdditionalVariables;
         state = null;
     }
+
+    /// <summary>Gets the one-factor affine model of the default intensity the curve was built on, if any.</summary>
+    public OneFactorAffineModel? Model { get; }
 
     /// <summary>Gets the interpolator the curve was built with.</summary>
     public TInterpolator Interpolator { get; }
@@ -224,25 +263,58 @@ public class PiecewiseDefaultCurve<TTraits, TInterpolator, TBootstrap>
     }
 
     /// <inheritdoc/>
+    internal override double? HazardRateSurvival(double t)
+    {
+        if (Model is not null)
+        {
+            // the affine traits' rate, the deterministic part alone: its integral, the hazard-rate traits' survival
+            return state is { } s
+                ? TermStructures.HazardRate.SurvivalProbabilityImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t)
+                : TermStructures.HazardRate.SurvivalProbabilityImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t);
+        }
+
+        if (typeof(TTraits) == typeof(TermStructures.HazardRate))
+        {
+            return SurvivalProbabilityImpl(t);
+        }
+
+        return typeof(TTraits) == typeof(TermStructures.DefaultDensity) || typeof(TTraits) == typeof(TermStructures.SurvivalProbability)
+            ? DensityHazardRateSurvival(t)
+            : null;
+    }
+
+    /// <inheritdoc/>
     /// <remarks>The traits' formula, on the working state while the curve is built.</remarks>
     protected sealed override double SurvivalProbabilityImpl(double t) =>
         state is { } s
-            ? TTraits.SurvivalProbabilityImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t)
-            : TTraits.SurvivalProbabilityImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t);
+            ? (Model is null
+                ? TTraits.SurvivalProbabilityImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t)
+                : TTraits.SurvivalProbabilityImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t, Model))
+            : (Model is null
+                ? TTraits.SurvivalProbabilityImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t)
+                : TTraits.SurvivalProbabilityImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t, Model));
 
     /// <inheritdoc/>
     /// <remarks>The traits' formula, on the working state while the curve is built.</remarks>
     protected sealed override double DefaultDensityImpl(double t) =>
         state is { } s
-            ? TTraits.DefaultDensityImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t)
-            : TTraits.DefaultDensityImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t);
+            ? (Model is null
+                ? TTraits.DefaultDensityImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t)
+                : TTraits.DefaultDensityImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t, Model))
+            : (Model is null
+                ? TTraits.DefaultDensityImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t)
+                : TTraits.DefaultDensityImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t, Model));
 
     /// <inheritdoc/>
     /// <remarks>The traits' rate, on the working state while the curve is built.</remarks>
     protected sealed override double HazardRateImpl(double t) =>
         state is { } s
-            ? TTraits.HazardRateImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t, this)
-            : TTraits.HazardRateImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t, this);
+            ? (Model is null
+                ? TTraits.HazardRateImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t, this)
+                : TTraits.HazardRateImpl(s.Times, s.Data, s.Interpolation ?? throw NotSetUp(), t, this, Model))
+            : (Model is null
+                ? TTraits.HazardRateImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t, this)
+                : TTraits.HazardRateImpl(curve!.Times().AsSpan(), curve.Data().AsSpan(), curve.Interpolation, t, this, Model));
 
     private static DayCounter CheckArguments(
         EvaluationContext context,

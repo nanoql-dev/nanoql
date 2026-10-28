@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 151 | 19 |
-| partial | 23 | 18 |
-| ported | 1,086 | 143 |
+| not started | 139 | 17 |
+| partial | 22 | 18 |
+| ported | 1,099 | 145 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -197,10 +197,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `catbond` | not started |  | no nanoql type: CatBond, CatBondResults, FloatingCatBond |
-| `catrisk` | not started |  | no nanoql type: CatSimulation, CatRisk, EventSetSimulation, EventSet, BetaRiskSimulation, BetaRisk |
-| `montecarlocatbondengine` | not started |  | no nanoql type: MonteCarloCatBondEngine |
-| `riskynotional` | not started |  | no nanoql type: EventPaymentOffset, NoOffset, NotionalPath, NotionalRisk, DigitalNotionalRisk, ProportionalNotionalRisk |
+| `catbond` | ported | Experimental/CatBonds/CatBond.cs, Experimental/CatBonds/CatBondResults.cs, Experimental/CatBonds/FloatingCatBond.cs |  |
+| `catrisk` | ported | Experimental/CatBonds/BetaRisk.cs, Experimental/CatBonds/BetaRiskSimulation.cs, Experimental/CatBonds/CatRisk.cs, Experimental/CatBonds/CatSimulation.cs, Experimental/CatBonds/EventSet.cs, Experimental/CatBonds/EventSetSimulation.cs |  |
+| `montecarlocatbondengine` | ported | Experimental/CatBonds/MonteCarloCatBondEngine.cs |  |
+| `riskynotional` | ported | Experimental/CatBonds/DigitalNotionalRisk.cs, Experimental/CatBonds/EventPaymentOffset.cs, Experimental/CatBonds/NoOffset.cs, Experimental/CatBonds/NotionalPath.cs, Experimental/CatBonds/NotionalRisk.cs, Experimental/CatBonds/ProportionalNotionalRisk.cs |  |
 
 ### `ql/experimental/commodities/`
 
@@ -252,9 +252,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `basecorrelationstructure` | partial | Experimental/Credit/BaseCorrelationTermStructure{TInterpolator}.cs | partial: ImplicitCorrelation(Real, Real), never ported: basecorrelationstructure.hpp declares it and nothing defines it |
 | `basket` | partial | Experimental/Credit/Basket.cs | partial: densityTrancheLoss, never ported: basket.hpp declares it and nothing defines it, so QuantLib never compiles a call to it |
 | `binomiallossmodel` | ported | Experimental/Credit/BinomialLossModel{TCopula,TInitTraits}.cs, Experimental/Credit/GaussianBinomialLossModel.cs, Experimental/Credit/TBinomialLossModel.cs |  |
-| `blackcdsoptionengine` | not started |  | no nanoql type: BlackCdsOptionEngine |
-| `cdo` | ported | Experimental/Credit/CDO.cs, Experimental/Credit/CdoResults.cs |  |
-| `cdsoption` | not started |  | no nanoql type: CdsOption, CdsOptionResults |
+| `blackcdsoptionengine` | ported | Experimental/Credit/BlackCdsOptionEngine.cs |  |
+| `cdo` | ported | Experimental/Credit/CDO.cs, Experimental/Credit/CDOResults.cs |  |
+| `cdsoption` | ported | Experimental/Credit/CdsOption.cs, Experimental/Credit/CdsOptionResults.cs |  |
 | `constantlosslatentmodel` | ported | Experimental/Credit/ConstantLossLatentModel{TCopula,TInitTraits}.cs, Experimental/Credit/ConstantLossModel{TCopula,TInitTraits}.cs, Experimental/Credit/GaussianConstantLossLM.cs, Experimental/Credit/TConstantLossLM.cs | no nanoql type: ConstantLossLatentmodel |
 | `correlationstructure` | partial | Experimental/Credit/CorrelationTermStructure.cs | partial: the constructor for a structure that manages its own reference date, (cal, bdc, dc), which no QuantLib 1.44 class uses and which waits for its first user |
 | `defaultevent` | ported | Experimental/Credit/DefaultEvent/BankruptcyEvent.cs, Experimental/Credit/DefaultEvent/DefaultEvent.cs, Experimental/Credit/DefaultEvent/DefaultSettlement.cs, Experimental/Credit/DefaultEvent/FailureToPayEvent.cs | no nanoql type: DefaultEventDefaultSettlement |
@@ -263,19 +263,19 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `defaultprobabilitylatentmodel` | ported | Experimental/Credit/DefaultLatentModel{TCopula,TInitTraits}.cs, Experimental/Credit/GaussianDefProbLM.cs, Experimental/Credit/TDefProbLM.cs |  |
 | `defaulttype` | ported | Experimental/Credit/AtomicDefaultType.cs, Experimental/Credit/DefaultType.cs, Experimental/Credit/FailureToPay.cs, Experimental/Credit/RestructuringType.cs, Experimental/Credit/Seniority.cs |  |
 | `distribution` | ported | Experimental/Credit/Distribution.cs, Experimental/Credit/ManipulateDistribution.cs |  |
-| `factorspreadedhazardratecurve` | not started |  | no nanoql type: FactorSpreadedHazardRateCurve |
+| `factorspreadedhazardratecurve` | ported | Experimental/Credit/FactorSpreadedHazardRateCurve.cs |  |
 | `gaussianlhplossmodel` | ported | Experimental/Credit/GaussianLHPLossModel.cs |  |
 | `homogeneouspooldef` | ported | Experimental/Credit/HomogGaussPoolLossModel.cs, Experimental/Credit/HomogTPoolLossModel.cs, Experimental/Credit/HomogeneousPoolLossModel{TCopula,TInitTraits}.cs |  |
 | `inhomogeneouspooldef` | ported | Experimental/Credit/IHGaussPoolLossModel.cs, Experimental/Credit/IHStudentPoolLossModel.cs, Experimental/Credit/InhomogeneousPoolLossModel{TCopula,TInitTraits}.cs |  |
 | `integralcdoengine` | ported | Experimental/Credit/CdoEngineResults.cs, Experimental/Credit/IntegralCDOEngine.cs |  |
 | `integralntdengine` | ported | Experimental/Credit/IntegralNtdEngine.cs |  |
-| `interpolatedaffinehazardratecurve` | not started |  | no nanoql type: InterpolatedAffineHazardRateCurve, AffineHazardRate, AffineHazardRateCurve |
+| `interpolatedaffinehazardratecurve` | partial | Experimental/Credit/AffineHazardRate.cs, Experimental/Credit/InterpolatedAffineHazardRateCurve{TInterpolator}.cs | partial: the protected constructors without nodes, (dc, model, jumps), (referenceDate, dc, model, jumps) and (settlementDays, cal, dc, model, jumps), which only QuantLib's piecewise curve calls, deriving from this curve, where nanoql's piecewise curve takes the model itself; no nanoql type: AffineHazardRateCurve |
 | `issuer` | ported | Experimental/Credit/Issuer.cs | no nanoql type: DefaultEventSet |
 | `loss` | ported | Experimental/Credit/Loss.cs |  |
 | `lossdistribution` | ported | Experimental/Credit/BinomialProbabilityOfAtLeastNEvents.cs, Experimental/Credit/LossDist.cs, Experimental/Credit/LossDistBinomial.cs, Experimental/Credit/LossDistBucketing.cs, Experimental/Credit/LossDistHomogeneous.cs, Experimental/Credit/LossDistMonteCarlo.cs, Experimental/Credit/LossDistResult.cs, Experimental/Credit/ProbabilityOfAtLeastNEvents.cs, Experimental/Credit/ProbabilityOfNEvents.cs |  |
 | `midpointcdoengine` | ported | Experimental/Credit/CdoEngineResults.cs, Experimental/Credit/MidPointCDOEngine.cs |  |
 | `nthtodefault` | ported | Experimental/Credit/NthToDefault.cs, Experimental/Credit/NthToDefaultResults.cs |  |
-| `onefactoraffinesurvival` | not started |  | no nanoql type: OneFactorAffineSurvivalStructure |
+| `onefactoraffinesurvival` | partial | Experimental/Credit/OneFactorAffineSurvivalStructure.cs | partial: the constructor for a structure that manages its own reference date, (model, dc, jumps), which only the interpolated affine curve's constructor of the same form calls, and nothing calls that |
 | `onefactorcopula` | ported | Experimental/Credit/OneFactorCopula.cs |  |
 | `onefactorgaussiancopula` | ported | Experimental/Credit/OneFactorGaussianCopula.cs |  |
 | `onefactorstudentcopula` | ported | Experimental/Credit/OneFactorGaussianStudentCopula.cs, Experimental/Credit/OneFactorStudentCopula.cs, Experimental/Credit/OneFactorStudentGaussianCopula.cs |  |
@@ -286,11 +286,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `recoveryratemodel` | ported | Experimental/Credit/ConstantRecoveryModel.cs, Experimental/Credit/RecoveryRateModel.cs |  |
 | `recoveryratequote` | ported | Experimental/Credit/RecoveryRateQuote.cs |  |
 | `recursivelossmodel` | partial | Experimental/Credit/RecursiveGaussLossModel.cs, Experimental/Credit/RecursiveLossModel{TCopula,TInitTraits}.cs | partial: expectedConditionalLoss, never ported: private and unused, its only call commented out |
-| `riskyassetswap` | not started |  | no nanoql type: RiskyAssetSwap, AssetSwapHelper |
-| `riskyassetswapoption` | not started |  | no nanoql type: RiskyAssetSwapOption |
+| `riskyassetswap` | ported | Experimental/Credit/AssetSwapHelper.cs, Experimental/Credit/RiskyAssetSwap.cs, Experimental/Credit/RiskyAssetSwapResults.cs |  |
+| `riskyassetswapoption` | ported | Experimental/Credit/RiskyAssetSwapOption.cs |  |
 | `saddlepointlossmodel` | ported | Experimental/Credit/SaddlePointLossModel{TCopula,TInitTraits}.cs |  |
 | `spotlosslatentmodel` | partial | Experimental/Credit/GaussianSpotLossLM.cs, Experimental/Credit/SpotRecoveryLatentModel{TCopula,TInitTraits}.cs, Experimental/Credit/TSpotLossLM.cs | partial: expectedLoss, conditionalExpLossRR and conditionalExpLossRRInv, never ported: they call conditionalRecoveryInvPinvRR, which QuantLib declares nowhere, so QuantLib never compiles them |
-| `spreadedhazardratecurve` | not started |  | no nanoql type: SpreadedHazardRateCurve |
+| `spreadedhazardratecurve` | ported | Experimental/Credit/SpreadedHazardRateCurve.cs |  |
 | `syntheticcdo` | ported | Experimental/Credit/SyntheticCDO.cs, Experimental/Credit/SyntheticCDOResults.cs |  |
 
 ### `ql/experimental/exoticoptions/`
@@ -1780,15 +1780,15 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `defaultdensitystructure` | partial | TermStructures/Credit/DefaultDensityStructure.cs | partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the default density, which waits for S-xcr's curves, its only users |
+| `defaultdensitystructure` | ported | TermStructures/Credit/DefaultDensityStructure.cs |  |
 | `defaultprobabilityhelpers` | ported | TermStructures/Credit/DefaultProbabilityHelpers/CdsHelper.cs, TermStructures/Credit/DefaultProbabilityHelpers/DefaultProbabilityHelperExtensions.cs, TermStructures/Credit/DefaultProbabilityHelpers/SpreadCdsHelper.cs, TermStructures/Credit/DefaultProbabilityHelpers/UpfrontCdsHelper.cs | no nanoql type: DefaultProbabilityHelper, RelativeDateDefaultProbabilityHelper |
 | `flathazardrate` | ported | TermStructures/Credit/FlatHazardRate.cs |  |
-| `hazardratestructure` | partial | TermStructures/Credit/HazardRateStructure.cs | partial: survivalProbabilityImpl's default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-xcr's curves, its only users |
+| `hazardratestructure` | ported | TermStructures/Credit/HazardRateStructure.cs |  |
 | `interpolateddefaultdensitycurve` | ported | TermStructures/Credit/InterpolatedDefaultDensityCurve/DefaultDensityCurve.cs, TermStructures/Credit/InterpolatedDefaultDensityCurve/InterpolatedDefaultDensityCurve{TInterpolator}.cs |  |
 | `interpolatedhazardratecurve` | ported | TermStructures/Credit/InterpolatedHazardRateCurve/HazardRateCurve.cs, TermStructures/Credit/InterpolatedHazardRateCurve/InterpolatedHazardRateCurve{TInterpolator}.cs |  |
 | `interpolatedsurvivalprobabilitycurve` | ported | TermStructures/Credit/InterpolatedSurvivalProbabilityCurve/InterpolatedSurvivalProbabilityCurve{TInterpolator}.cs, TermStructures/Credit/InterpolatedSurvivalProbabilityCurve/SurvivalProbabilityCurve.cs |  |
-| `piecewisedefaultcurve` | partial | TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseDefaultCurve{TTraits,TInterpolator,TBootstrap}.cs, TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseFlatHazardRate.cs | partial: the constructor on a one-factor affine model, which waits for S-xcr's AffineHazardRate traits, the only traits whose curve takes a model |
-| `probabilitytraits` | ported | TermStructures/Credit/ProbabilityTraits/DefaultDensity.cs, TermStructures/Credit/ProbabilityTraits/HazardRate.cs, TermStructures/Credit/ProbabilityTraits/IDefaultProbabilityTraits.cs, TermStructures/Credit/ProbabilityTraits/ProbabilityTraitsDetail.cs, TermStructures/Credit/ProbabilityTraits/SurvivalProbability.cs | no nanoql type: SurvivalProbabilityCurve, HazardRateCurve, DefaultDensityCurve |
+| `piecewisedefaultcurve` | ported | TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseDefaultCurve{TTraits,TInterpolator,TBootstrap}.cs, TermStructures/Credit/PiecewiseDefaultCurve/PiecewiseFlatHazardRate.cs |  |
+| `probabilitytraits` | ported | TermStructures/Credit/ProbabilityTraits/DefaultDensity.cs, TermStructures/Credit/ProbabilityTraits/HazardRate.cs, TermStructures/Credit/ProbabilityTraits/IDefaultProbabilityTraits.cs, TermStructures/Credit/ProbabilityTraits/ProbabilityTraitsDetail.cs, TermStructures/Credit/ProbabilityTraits/SurvivalProbability.cs | no nanoql type: SurvivalProbabilityCurve, HazardRateCurve, DefaultDensityCurve; own-tested: Conventions/AffineCreditCurveConventionTests.cs (the model-aware defaults, nanoql's refusals of what QuantLib can't compile) |
 | `survivalprobabilitystructure` | ported | TermStructures/Credit/SurvivalProbabilityStructure.cs |  |
 
 ### `ql/termstructures/inflation/`
@@ -2088,9 +2088,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `capfloor` | ported | TestSuite/CapFloorTests.cs | 10 of 10 cases |
 | `capflooredcoupon` | ported | TestSuite/CapFlooredCouponTests.cs | 2 of 2 cases |
 | `cashflows` | ported | TestSuite/CashFlowsTests.cs | 16 of 16 cases |
-| `catbonds` | not started |  | 9 cases |
+| `catbonds` | ported | TestSuite/CatBondsTests.cs | 9 of 9 cases |
 | `cdo` | ported | TestSuite/CdoTests.cs | 0 of 0 cases |
-| `cdsoption` | not started |  | 1 cases |
+| `cdsoption` | ported | TestSuite/CdsOptionTests.cs | 1 of 1 cases |
 | `chooseroption` | ported | TestSuite/ChooserOptionTests.cs | 2 of 2 cases; moved: testAnalyticComplexChooserEngine line 138 to Divergences/ComplexChooserEqualTermsTests.cs |
 | `cliquetoption` | ported | TestSuite/CliquetOptionTests.cs | 4 of 4 cases |
 | `cms` | ported | TestSuite/CmsTests.cs | 5 of 5 cases |

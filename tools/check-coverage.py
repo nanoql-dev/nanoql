@@ -28,9 +28,12 @@ NanoQL package; a listed type has no covered line; a ported file carries Exclude
 executable lines are its equality members lacks a "// Equality-tested:" line naming an existing test file; or, with
 --all, its folder doesn't hold exactly one report, or a NanoQL class of that report resolves to no file, which would
 leave every member unmatched and the line at 0.
-Listed apart: the types the report doesn't list, with their kinds, and the equality-only types. A constructor the
-source doesn't declare (field and property initialisers, a primary constructor's parameters) counts as no code,
-as the coverage engines don't agree on listing one.
+A type with no covered line but an "// Own-tested:" line whose first word names an existing test file (from the
+repository root or tests/NanoQL.Tests/) is listed apart instead: a type whose every executable line is nanoql's own,
+which no QuantLib-checked test can reach, such as a refusal of what QuantLib can't compile (the S-xcr run's stop 4).
+Listed apart: the types the report doesn't list, with their kinds, the equality-only types and the own-tested ones. A
+constructor the source doesn't declare (field and property initialisers, a primary constructor's parameters) counts
+as no code, as the coverage engines don't agree on listing one.
 
 With --all it also prints, without failing, the members no test reaches: the public members of the same files, or
 with --since of the files changed since that commit (a slot's, at its last commit), whose lines no report hits.
@@ -553,6 +556,11 @@ def check(root, results, commit_files, all_files, whole=None, member_files=None)
                 elif record:
                     errors.append(f"{path}: {name}'s only code is equality, and it has no // Equality-tested: line "
                                   "naming an existing test file")
+                continue
+            own = (header.own_tested or "").split()
+            if not covered and own and any(os.path.isfile(os.path.join(base, own[0]))
+                                           for base in (root, os.path.join(root, "tests", "NanoQL.Tests"))):
+                apart.append(f"{name} (own-tested: {own[0]})")
                 continue
             counted += 1
             if covered:
