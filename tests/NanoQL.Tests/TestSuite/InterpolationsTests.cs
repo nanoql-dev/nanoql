@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testKernelInterpolation, testKernelInterpolation2D, testUnknownRichardsonExtrapolation, testRichardsonExtrapolation (S-core); testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
+// Partial: testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
 // Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs); testBicubicUpdate (Conventions/InterpolationConstructionTests.cs)
 
 using System.Collections.Immutable;
@@ -28,6 +28,9 @@ public class InterpolationsTests
 
     // QuantLib's Null<Real>(), the largest float, which the tests pass as the ignored value of a not-a-knot condition.
     private const Real NullReal = 3.4028234663852886e38;
+
+    // mathconstants.hpp's M_PI, which nanoql keeps internal.
+    private const double M_PI = 3.141592653589793238462643383280;
 
     [Fact]
     public void TestMultiSpline()
@@ -1175,6 +1178,225 @@ public class InterpolationsTests
         }
     }
 
+    // Adapted: enableExtrapolation (line 1678), which changes QuantLib's interpolation, returns a modified copy here
+    // (playbook §2), which f is rebound to. QuantLib's __FAST_MATH__ tolerance isn't taken: nanoql's arithmetic is
+    // strict.
+    [Fact]
+    public void TestKernelInterpolation()
+    {
+        // Testing kernel 1D interpolation...
+
+        Real[] deltaGrid = [0.10, 0.25, 0.50, 0.75, 0.90];
+
+        Real[][] yd =
+        [
+            [11.275, 11.125, 11.250, 11.825, 12.625],
+            [16.025, 13.450, 11.350, 10.150, 10.075],
+            [10.300, 9.6375, 9.2000, 9.1125, 9.4000],
+        ];
+        Real[] lambdaVec = [0.05, 0.50, 0.75, 1.65, 2.55];
+
+        const Real tolerance = 2.0e-5;
+
+        Real expectedVal;
+        Real calcVal;
+        var errors = new List<string>();
+
+        // Check that y-values at knots are exactly the feeded y-values,
+        // irrespective of kernel parameters
+        foreach (Real i in lambdaVec)
+        {
+            var myKernel = new GaussianKernel(0, i);
+
+            foreach (Real[] currY in yd)
+            {
+                var f = new KernelInterpolation(deltaGrid, currY, myKernel.Evaluate);
+
+                for (int dIt = 0; dIt < deltaGrid.Length; ++dIt)
+                {
+                    expectedVal = currY[dIt];
+                    calcVal = f.Evaluate(deltaGrid[dIt]);
+
+                    if (Math.Abs(expectedVal - calcVal) > tolerance)
+                    {
+                        errors.Add(
+                            $"Kernel interpolation failed at x = {deltaGrid[dIt]}"
+                            + $"\n    interpolated value: {calcVal:E}"
+                            + $"\n    expected value:     {expectedVal:E}"
+                            + $"\n    error:              {Math.Abs(expectedVal - calcVal):E}");
+                    }
+                }
+            }
+        }
+
+        Real[] testDeltaGrid = [0.121, 0.279, 0.678, 0.790, 0.980];
+
+        // Gaussian Kernel values for testDeltaGrid with a standard
+        // deviation of 2.05 (the value is arbitrary.)  Source: parrallel
+        // implementation in R, no literature sources found
+        Real[][] ytd =
+        [
+            [11.23847, 11.12003, 11.58932, 11.99168, 13.29650],
+            [15.55922, 13.11088, 10.41615, 10.05153, 10.50741],
+            [10.17473, 9.557842, 9.09339, 9.149687, 9.779971],
+        ];
+
+        var kernel = new GaussianKernel(0, 2.05);
+
+        for (int j = 0; j < ytd.Length; ++j)
+        {
+            Real[] currY = yd[j];
+            Real[] currTY = ytd[j];
+
+            // Build interpolation according to original grid + y-values
+            var f = new KernelInterpolation(deltaGrid, currY, kernel.Evaluate);
+
+            // test values at test Grid
+            for (int dIt = 0; dIt < testDeltaGrid.Length; ++dIt)
+            {
+                expectedVal = currTY[dIt];
+                f = f.EnableExtrapolation(); // allow extrapolation
+
+                calcVal = f.Evaluate(testDeltaGrid[dIt]);
+                if (Math.Abs(expectedVal - calcVal) > tolerance)
+                {
+                    errors.Add(
+                        $"Kernel interpolation failed at x = {deltaGrid[dIt]}"
+                        + $"\n    interpolated value: {calcVal:E}"
+                        + $"\n    expected value:     {expectedVal:E}"
+                        + $"\n    error:              {Math.Abs(expectedVal - calcVal):E}");
+                }
+            }
+        }
+
+        Assert.True(errors.Count == 0, string.Join("\n", errors));
+    }
+
+    // Adapted: the update test (lines 1792-1812) changes the vectors QuantLib's interpolation reads and calls update();
+    // nanoql's interpolation copies its inputs, so the updated interpolation is a new one on the changed vectors.
+    [Fact]
+    public void TestKernelInterpolation2D()
+    {
+        // No test values known from the literature.
+        // Testing for consistency of input output data
+        // at the nodes
+
+        // Testing kernel 2D interpolation...
+
+        Real mean = 0.0, var = 0.18;
+        var myKernel = new GaussianKernel(mean, var);
+
+        var xVec = new Real[10];
+        xVec[0] = 0.10; xVec[1] = 0.20; xVec[2] = 0.30; xVec[3] = 0.40;
+        xVec[4] = 0.50; xVec[5] = 0.60; xVec[6] = 0.70; xVec[7] = 0.80;
+        xVec[8] = 0.90; xVec[9] = 1.00;
+
+        var yVec = new Real[3];
+        yVec[0] = 1.0; yVec[1] = 2.0; yVec[2] = 3.5;
+
+        var m = new Matrix(xVec.Length, yVec.Length);
+
+        m[0, 0] = 0.25; m[1, 0] = 0.24; m[2, 0] = 0.23; m[3, 0] = 0.20; m[4, 0] = 0.19;
+        m[5, 0] = 0.20; m[6, 0] = 0.21; m[7, 0] = 0.22; m[8, 0] = 0.26; m[9, 0] = 0.29;
+
+        m[0, 1] = 0.27; m[1, 1] = 0.26; m[2, 1] = 0.25; m[3, 1] = 0.22; m[4, 1] = 0.21;
+        m[5, 1] = 0.22; m[6, 1] = 0.23; m[7, 1] = 0.24; m[8, 1] = 0.28; m[9, 1] = 0.31;
+
+        m[0, 2] = 0.21; m[1, 2] = 0.22; m[2, 2] = 0.27; m[3, 2] = 0.29; m[4, 2] = 0.24;
+        m[5, 2] = 0.28; m[6, 2] = 0.25; m[7, 2] = 0.22; m[8, 2] = 0.29; m[9, 2] = 0.30;
+
+        var kernel2D = new KernelInterpolation2D(xVec, yVec, m, myKernel.Evaluate);
+
+        Real calcVal, expectedVal;
+        const Real tolerance = 1.0e-10;
+        var errors = new List<string>();
+
+        for (int i = 0; i < m.Rows; ++i)
+        {
+            for (int j = 0; j < m.Columns; ++j)
+            {
+                calcVal = kernel2D.Evaluate(xVec[i], yVec[j]);
+                expectedVal = m[i, j];
+
+                if (Math.Abs(expectedVal - calcVal) > tolerance)
+                {
+                    errors.Add(
+                        $"2D Kernel interpolation failed at x = {xVec[i]}, y = {yVec[j]}"
+                        + $"\n    interpolated value: {calcVal}"
+                        + $"\n    expected value:     {expectedVal}"
+                        + $"\n    error:              {Math.Abs(expectedVal - calcVal)}");
+                }
+            }
+        }
+
+        // alternative data set
+        var xVec1 = new Real[4];
+        xVec1[0] = 80.0; xVec1[1] = 90.0; xVec1[2] = 100.0; xVec1[3] = 110.0;
+
+        var yVec1 = new Real[8];
+        yVec1[0] = 0.5; yVec1[1] = 0.7; yVec1[2] = 1.0; yVec1[3] = 2.0;
+        yVec1[4] = 3.5; yVec1[5] = 4.5; yVec1[6] = 5.5; yVec1[7] = 6.5;
+
+        var m1 = new Matrix(xVec1.Length, yVec1.Length);
+        m1[0, 0] = 10.25; m1[1, 0] = 12.24; m1[2, 0] = 14.23; m1[3, 0] = 17.20;
+        m1[0, 1] = 12.25; m1[1, 1] = 15.24; m1[2, 1] = 16.23; m1[3, 1] = 16.20;
+        m1[0, 2] = 12.25; m1[1, 2] = 13.24; m1[2, 2] = 13.23; m1[3, 2] = 17.20;
+        m1[0, 3] = 13.25; m1[1, 3] = 15.24; m1[2, 3] = 12.23; m1[3, 3] = 19.20;
+        m1[0, 4] = 14.25; m1[1, 4] = 16.24; m1[2, 4] = 13.23; m1[3, 4] = 12.20;
+        m1[0, 5] = 15.25; m1[1, 5] = 17.24; m1[2, 5] = 14.23; m1[3, 5] = 12.20;
+        m1[0, 6] = 16.25; m1[1, 6] = 13.24; m1[2, 6] = 15.23; m1[3, 6] = 10.20;
+        m1[0, 7] = 14.25; m1[1, 7] = 14.24; m1[2, 7] = 16.23; m1[3, 7] = 19.20;
+
+        // test with function pointer
+        var kernel2DEp = new KernelInterpolation2D(xVec1, yVec1, m1, EpanechnikovKernel);
+
+        for (int i = 0; i < m1.Rows; ++i)
+        {
+            for (int j = 0; j < m1.Columns; ++j)
+            {
+                calcVal = kernel2DEp.Evaluate(xVec1[i], yVec1[j]);
+                expectedVal = m1[i, j];
+
+                if (Math.Abs(expectedVal - calcVal) > tolerance)
+                {
+                    errors.Add(
+                        $"2D Epanechnkikov Kernel interpolation failed at x = {xVec1[i]}, y = {yVec1[j]}"
+                        + $"\n    interpolated value: {calcVal}"
+                        + $"\n    expected value:     {expectedVal}"
+                        + $"\n    error:              {Math.Abs(expectedVal - calcVal)}");
+                }
+            }
+        }
+
+        // test updating mechanism by changing initial variables
+        xVec1[0] = 60.0; xVec1[1] = 95.0; xVec1[2] = 105.0; xVec1[3] = 135.0;
+
+        yVec1[0] = 12.5; yVec1[1] = 13.7; yVec1[2] = 15.0; yVec1[3] = 19.0;
+        yVec1[4] = 26.5; yVec1[5] = 27.5; yVec1[6] = 29.2; yVec1[7] = 36.5;
+
+        kernel2DEp = new KernelInterpolation2D(xVec1, yVec1, m1, EpanechnikovKernel);
+
+        for (int i = 0; i < m1.Rows; ++i)
+        {
+            for (int j = 0; j < m1.Columns; ++j)
+            {
+                calcVal = kernel2DEp.Evaluate(xVec1[i], yVec1[j]);
+                expectedVal = m1[i, j];
+
+                if (Math.Abs(expectedVal - calcVal) > tolerance)
+                {
+                    errors.Add(
+                        $"2D Epanechnkikov Kernel updated interpolation failed at x = {xVec1[i]}, y = {yVec1[j]}"
+                        + $"\n    interpolated value: {calcVal}"
+                        + $"\n    expected value:     {expectedVal}"
+                        + $"\n    error:              {Math.Abs(expectedVal - calcVal)}");
+                }
+            }
+        }
+
+        Assert.True(errors.Count == 0, string.Join("\n", errors));
+    }
+
     [Fact]
     public void TestBicubicDerivatives()
     {
@@ -1238,6 +1460,91 @@ public class InterpolationsTests
         }
 
         Assert.True(failures.Count == 0, string.Join("\n", failures));
+    }
+
+    [Fact]
+    public void TestUnknownRichardsonExtrapolation()
+    {
+        // Testing Richardson extrapolation with unknown order of convergence...
+
+        const Real stepSize = 0.01;
+
+        (Real Exponent, Real Factor)[] testCases =
+        [
+            (1.0, 1.0), (1.0, -1.0),
+            (2.0, 0.25), (2.0, -1.0),
+            (3.0, 2.0), (3.0, -0.5),
+            (4.0, 1.0), (4.0, 0.5),
+        ];
+
+        foreach ((Real exponent, Real factor) in testCases)
+        {
+            var extrap = new RichardsonExtrapolation(h => GF(exponent, factor, h), stepSize);
+
+            Real calculated = extrap.Evaluate(4.0, 2.0);
+            Real diff = Math.Abs(M_PI - calculated);
+
+            Real tol = Math.Pow(stepSize, exponent + 1);
+
+            Assert.False(
+                diff > tol, "failed to reproduce Richardson extrapolation  with unknown order of convergence");
+        }
+
+        Real highOrder = new RichardsonExtrapolation(h => GF(14.0, 1.0, h), 0.5).Evaluate(4.0, 2.0);
+        Assert.False(
+            Math.Abs(highOrder - M_PI) > 1e-12,
+            "failed to reproduce Richardson extrapolation  with unknown order of convergence");
+
+        bool thrown = false;
+        try
+        {
+            new RichardsonExtrapolation(h => GF(16.0, 1.0, h), 0.5).Evaluate(4.0, 2.0);
+        }
+        catch (Exception)
+        {
+            thrown = true;
+        }
+
+        Assert.True(
+            thrown, "Richardson extrapolation with order of convergence above 15 should throw exception");
+
+        Real limCosValue = new RichardsonExtrapolation(h => -Math.Cos(h), 0.01).Evaluate(4.0, 2.0);
+        Assert.False(
+            Math.Abs(limCosValue + 1.0) > 1e-6,
+            "failed to reproduce Richardson extrapolation  with unknown order of convergence");
+    }
+
+    [Fact]
+    public void TestRichardsonExtrapolation()
+    {
+        // Testing Richardson extrapolation...
+
+        /* example taken from
+         * http://www.ipvs.uni-stuttgart.de/abteilungen/bv/lehre/
+         *      lehrveranstaltungen/vorlesungen/WS0910/
+         *      NSG_termine/dateien/Richardson.pdf
+         */
+
+        const Real stepSize = 0.1;
+        const Real orderOfConvergence = 1.0;
+        var extrap = new RichardsonExtrapolation(h => Math.Pow(1.0 + h, 1 / h), stepSize, orderOfConvergence);
+
+        const Real tol = 0.00002;
+        Real expected = 2.71285;
+
+        const Real scalingFactor = 2.0;
+        Real calculated = extrap.Evaluate(scalingFactor);
+
+        Assert.False(Math.Abs(expected - calculated) > tol, "failed to reproduce Richardson extrapolation");
+
+        calculated = extrap.Evaluate();
+        Assert.False(Math.Abs(expected - calculated) > tol, "failed to reproduce Richardson extrapolation");
+
+        expected = 2.721376;
+        const Real scalingFactor2 = 4.0;
+        calculated = extrap.Evaluate(scalingFactor2, scalingFactor);
+
+        Assert.False(Math.Abs(expected - calculated) > tol, "failed to reproduce Richardson extrapolation");
     }
 
     [Fact]
@@ -2054,6 +2361,23 @@ public class InterpolationsTests
 
         return f1 / f2;
     }
+
+    // interpolations.cpp's epanechnikovKernel (lines 199-206).
+    private static Real EpanechnikovKernel(Real u)
+    {
+        if (Math.Abs(u) <= 1)
+        {
+            return (3.0 / 4.0) * (1 - (u * u));
+        }
+        else
+        {
+            return 0.0;
+        }
+    }
+
+    // interpolations.cpp's GF (lines 216-227): π + factor·h^exponent + (factor·h)^(exponent + 1).
+    private static Real GF(Real exponent, Real factor, Real h) =>
+        M_PI + (factor * Math.Pow(h, exponent)) + Math.Pow(factor * h, exponent + 1);
 
     // The test suite's lagrangeTestFct: |x| + x/2 - x squared.
     private static Real LagrangeTestFct(Real x) => Math.Abs(x) + (0.5 * x) - (x * x);

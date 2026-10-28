@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/hestonmodel.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testAllIntegrationMethods and testCosHestonCumulants, which wait for S-core's exp-sinh integral and numerical differentiation
 
 using System.Numerics;
 using NanoQL.Instruments;
@@ -1080,6 +1079,274 @@ public class HestonModelTests
                 }
             }
         }
+    }
+
+    [Fact]
+    public void TestAllIntegrationMethods()
+    {
+        // Testing semi-analytic Heston pricing with all integration methods...
+
+        var settlementDate = new Date(7, Month.February, 2017);
+        var context = new EvaluationContext { EvaluationDate = settlementDate };
+
+        DayCounter dayCounter = new Actual365Fixed();
+        YieldTermStructure riskFreeTS = FlatRate(0.05, dayCounter, context);
+        YieldTermStructure dividendTS = FlatRate(0.075, dayCounter, context);
+
+        const Real s0 = 100.0;
+
+        const Real v0 = 0.1;
+        const Real rho = -0.75;
+        const Real sigma = 0.4;
+        const Real kappa = 4.0;
+        const Real theta = 0.05;
+
+        var model = new HestonModel(new HestonProcess(riskFreeTS, dividendTS, s0, v0, kappa, theta, sigma, rho));
+
+        var payoff = new PlainVanillaPayoff(OptionType.Put, s0);
+
+        Date maturityDate = settlementDate + new Period(1, TimeUnit.Years);
+        var exercise = new EuropeanExercise(maturityDate);
+
+        var option = new VanillaOption(payoff, exercise);
+
+        const Real tol = 1e-8;
+        const Real expected = 10.147041515497;
+        var errors = new List<string>();
+
+        void Report(
+            FourierIntegration integration,
+            AnalyticHestonEngineComplexLogFormula formula,
+            bool isAdaptive,
+            Real tolerance,
+            Size? valuations,
+            string method) =>
+            ReportOnIntegrationMethodTest(
+                option, context, model, integration, formula, isAdaptive, expected, tolerance, valuations, method, errors);
+
+        // Gauss-Laguerre with Gatheral logarithm integration method
+        Report(
+            FourierIntegration.GaussLaguerre(), AnalyticHestonEngineComplexLogFormula.Gatheral, false, tol, 256,
+            "Gauss-Laguerre with Gatheral logarithm");
+
+        // Gauss-Laguerre with branch correction integration method
+        Report(
+            FourierIntegration.GaussLaguerre(), AnalyticHestonEngineComplexLogFormula.BranchCorrection, false, tol, 256,
+            "Gauss-Laguerre with branch correction");
+
+        // Gauss-Laguerre with Andersen-Piterbarg integration method
+        Report(
+            FourierIntegration.GaussLaguerre(), AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, false, tol, 128,
+            "Gauss-Laguerre with Andersen Piterbarg control variate");
+
+        // Gauss-Legendre with Gatheral logarithm integration method
+        Report(
+            FourierIntegration.GaussLegendre(), AnalyticHestonEngineComplexLogFormula.Gatheral, false, tol, 256,
+            "Gauss-Legendre with Gatheral logarithm");
+
+        // Gauss-Legendre with branch correction integration method
+        Report(
+            FourierIntegration.GaussLegendre(), AnalyticHestonEngineComplexLogFormula.BranchCorrection, false, tol, 256,
+            "Gauss-Legendre with branch correction");
+
+        // Gauss-Legendre with Andersen-Piterbarg integration method
+        Report(
+            FourierIntegration.GaussLegendre(256), AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, false, 1e-4,
+            256, "Gauss-Legendre with Andersen Piterbarg control variate");
+
+        // Gauss-Chebyshev with Gatheral logarithm integration method
+        Report(
+            FourierIntegration.GaussChebyshev(512), AnalyticHestonEngineComplexLogFormula.Gatheral, false, 1e-4, 1024,
+            "Gauss-Chebyshev with Gatheral logarithm");
+
+        // Gauss-Chebyshev with branch correction integration method
+        Report(
+            FourierIntegration.GaussChebyshev(512), AnalyticHestonEngineComplexLogFormula.BranchCorrection, false, 1e-4,
+            1024, "Gauss-Chebyshev with branch correction");
+
+        // Gauss-Chebyshev with Andersen-Piterbarg integration method
+        Report(
+            FourierIntegration.GaussChebyshev(512), AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, false, 1e-4,
+            512, "Gauss-Laguerre with Andersen Piterbarg control variate");
+
+        // Gauss-Chebyshev2nd with Gatheral logarithm integration method
+        Report(
+            FourierIntegration.GaussChebyshev2nd(512), AnalyticHestonEngineComplexLogFormula.Gatheral, false, 2e-4, 1024,
+            "Gauss-Chebyshev2nd with Gatheral logarithm");
+
+        // Gauss-Chebyshev with branch correction integration method
+        Report(
+            FourierIntegration.GaussChebyshev2nd(512), AnalyticHestonEngineComplexLogFormula.BranchCorrection, false,
+            2e-4, 1024, "Gauss-Chebyshev2nd with branch correction");
+
+        // Gauss-Chebyshev with Andersen-Piterbarg integration method
+        Report(
+            FourierIntegration.GaussChebyshev2nd(512), AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, false,
+            2e-4, 512, "Gauss-Chebyshev2nd with Andersen Piterbarg control variate");
+
+        // Discrete Simpson rule with Gatheral logarithm
+        Report(
+            FourierIntegration.DiscreteSimpson(512), AnalyticHestonEngineComplexLogFormula.Gatheral, false, tol, 1024,
+            "Discrete Simpson rule with Gatheral logarithm");
+
+        // Discrete Simpson rule with Andersen-Piterbarg integration method
+        Report(
+            FourierIntegration.DiscreteSimpson(64), AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, false, tol,
+            64, "Discrete Simpson rule with Andersen Piterbarg control variate");
+
+        // Discrete Trapezoid rule with Gatheral logarithm
+        Report(
+            FourierIntegration.DiscreteTrapezoid(512), AnalyticHestonEngineComplexLogFormula.Gatheral, false, 2e-4, 1024,
+            "Discrete Trapezoid rule with Gatheral logarithm");
+
+        // Discrete Trapezoid rule with Andersen-Piterbarg integration method
+        Report(
+            FourierIntegration.DiscreteTrapezoid(64), AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, false,
+            tol, 64, "Discrete Trapezoid rule with Andersen Piterbarg control variate");
+
+        // Gauss-Lobatto with Gatheral logarithm
+        Report(
+            FourierIntegration.GaussLobatto(tol, null), AnalyticHestonEngineComplexLogFormula.Gatheral, true, tol, null,
+            "Gauss-Lobatto with Gatheral logarithm");
+
+        // Gauss-Lobatto with Andersen-Piterbarg integration method
+        Report(
+            FourierIntegration.GaussLobatto(tol, null), AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, true,
+            tol, null, "Gauss-Lobatto with Andersen Piterbarg control variate");
+
+        // Gauss-Konrod with Gatheral logarithm
+        Report(
+            FourierIntegration.GaussKronrod(tol), AnalyticHestonEngineComplexLogFormula.Gatheral, true, tol, null,
+            "Gauss-Konrod with Gatheral logarithm");
+
+        // Gauss-Konrod with Andersen-Piterbarg integration method
+        Report(
+            FourierIntegration.GaussKronrod(tol), AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, true, tol,
+            null, "Gauss-Konrod with Andersen Piterbarg control variate");
+
+        // Simpson with Gatheral logarithm
+        Report(
+            FourierIntegration.Simpson(tol), AnalyticHestonEngineComplexLogFormula.Gatheral, true, 1e-6, null,
+            "Simpson with Gatheral logarithm");
+
+        // Simpson with Andersen-Piterbarg integration method
+        Report(
+            FourierIntegration.Simpson(tol), AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, true, 1e-6, null,
+            "Simpson with Andersen Piterbarg control variate");
+
+        // Trapezoid with Gatheral logarithm
+        Report(
+            FourierIntegration.Trapezoid(tol), AnalyticHestonEngineComplexLogFormula.Gatheral, true, 1e-6, null,
+            "Trapezoid with Gatheral logarithm");
+
+        // Trapezoid with Andersen-Piterbarg integration method
+        Report(
+            FourierIntegration.Trapezoid(tol), AnalyticHestonEngineComplexLogFormula.AndersenPiterbarg, true, 1e-6,
+            null, "Trapezoid with Andersen Piterbarg control variate");
+
+        // Angled contour shift integral
+        Report(
+            FourierIntegration.GaussLaguerre(), AnalyticHestonEngineComplexLogFormula.AngledContour, false, tol, 128,
+            "Angled contour shift integral");
+
+        // Angled contour shift integral w/o control variate
+        Report(
+            FourierIntegration.GaussLaguerre(192), AnalyticHestonEngineComplexLogFormula.AngledContourNoCV, false, tol,
+            192, "Angled contour shift integral without control variate");
+
+        // Angled contour shift integral with expSinh
+        Report(
+            FourierIntegration.ExpSinh(), AnalyticHestonEngineComplexLogFormula.AngledContour, true, 1e-8, null,
+            "exp-sinh integration with angled contour shift integral");
+
+        // Angled contour shift integral with tanhSinh
+        Report(
+            FourierIntegration.TanhSinh(), AnalyticHestonEngineComplexLogFormula.AngledContour, true, 1e-8, null,
+            "tanh-sinh integration with angled contour shift integral");
+
+        Assert.True(errors.Count == 0, string.Join("\n", errors));
+    }
+
+    [Fact]
+    public void TestCosHestonCumulants()
+    {
+        // Testing Heston COS cumulants...
+
+        var settlementDate = new Date(7, Month.February, 2017);
+        var context = new EvaluationContext { EvaluationDate = settlementDate };
+
+        DayCounter dayCounter = new Actual365Fixed();
+        YieldTermStructure riskFreeTS = FlatRate(0.15, dayCounter, context);
+        YieldTermStructure dividendTS = FlatRate(0.075, dayCounter, context);
+
+        const Real s0 = 100.0;
+
+        const Real v0 = 0.1;
+        const Real rho = -0.75;
+        const Real sigma = 0.4;
+        const Real kappa = 4.0;
+        const Real theta = 0.25;
+
+        var model = new HestonModel(new HestonProcess(riskFreeTS, dividendTS, s0, v0, kappa, theta, sigma, rho));
+
+        var cosEngine = new COSHestonEngine(model);
+
+        const Real tol = 1e-7;
+        const NumericalDifferentiationScheme central = NumericalDifferentiationScheme.Central;
+        var errors = new List<string>();
+
+        for (Real t = 0.01; t < 41.0; t += t)
+        {
+            Real nc1 = new NumericalDifferentiation(LogCharacteristicFunction(1, t, cosEngine), 1, 1e-5, 5, central)
+                .Evaluate(0.0);
+
+            Real c1 = cosEngine.C1(t);
+
+            if (Math.Abs(nc1 - c1) > tol)
+            {
+                errors.Add(
+                    " failed to reproduce first cumulant"
+                    + $"\n    expected:   {nc1}\n    calculated: {c1}\n    difference: {Math.Abs(nc1 - c1)}");
+            }
+
+            Real nc2 = new NumericalDifferentiation(LogCharacteristicFunction(2, t, cosEngine), 2, 1e-2, 5, central)
+                .Evaluate(0.0);
+
+            Real c2 = cosEngine.C2(t);
+
+            if (Math.Abs(nc2 - c2) > tol)
+            {
+                errors.Add(
+                    " failed to reproduce second cumulant"
+                    + $"\n    expected:   {nc2}\n    calculated: {c2}\n    difference: {Math.Abs(nc2 - c2)}");
+            }
+
+            Real nc3 = new NumericalDifferentiation(LogCharacteristicFunction(3, t, cosEngine), 3, 5e-3, 7, central)
+                .Evaluate(0.0);
+
+            Real c3 = cosEngine.C3(t);
+
+            if (Math.Abs(nc3 - c3) > tol)
+            {
+                errors.Add(
+                    " failed to reproduce third cumulant"
+                    + $"\n    expected:   {nc3}\n    calculated: {c3}\n    difference: {Math.Abs(nc3 - c3)}");
+            }
+
+            Real nc4 = new NumericalDifferentiation(LogCharacteristicFunction(4, t, cosEngine), 4, 5e-2, 9, central)
+                .Evaluate(0.0);
+
+            Real c4 = cosEngine.C4(t);
+
+            if (Math.Abs(nc4 - c4) > 10 * tol)
+            {
+                errors.Add(
+                    " failed to reproduce 4th cumulant"
+                    + $"\n    expected:   {nc4}\n    calculated: {c4}\n    difference: {Math.Abs(nc4 - c4)}");
+            }
+        }
+
+        Assert.True(errors.Count == 0, string.Join("\n", errors));
     }
 
     [Fact]
@@ -2490,6 +2757,62 @@ public class HestonModelTests
         }
 
         return (s0, riskFreeTS, dividendYield, [.. options]);
+    }
+
+    // hestonmodel.cpp's reportOnIntegrationMethodTest: the engine's price and count, BOOST_ERROR's going on.
+    private static void ReportOnIntegrationMethodTest(
+        VanillaOption option,
+        EvaluationContext context,
+        HestonModel model,
+        FourierIntegration integration,
+        AnalyticHestonEngineComplexLogFormula formula,
+        bool isAdaptive,
+        Real expected,
+        Real tol,
+        Size? valuations,
+        string method,
+        List<string> errors)
+    {
+        if (integration.IsAdaptiveIntegration != isAdaptive)
+        {
+            errors.Add($"{method} is not an adaptive integration routine");
+        }
+
+        OneAssetOptionResults results = AnalyticHestonEngine.Calculate(option, context, model, formula, integration, 1e-9);
+        Real calculated = results.NPV!.Value;
+
+        Real error = Math.Abs(calculated - expected);
+
+        if (double.IsNaN(error) || error > tol)
+        {
+            errors.Add(
+                "failed to reproduce simple Heston Pricing with "
+                + $"\n    integration method: {method}"
+                + $"\n    expected          : {expected:G12}"
+                + $"\n    calculated        : {calculated:G12}"
+                + $"\n    error             : {error:G12}");
+        }
+
+        int evaluations = results.Result<int>("numberOfEvaluations");
+        if (valuations is Size v && v != evaluations)
+        {
+            errors.Add(
+                "nubmer of function evaluations does not match "
+                + $"\n    integration method      : {method}"
+                + $"\n    expected function calls : {v}"
+                + $"\n    number of function calls: {evaluations}");
+        }
+    }
+
+    // hestonmodel.cpp's LogCharacteristicFunction: Re(ln φ(u, t) / iⁿ).
+    private static Func<Real, Real> LogCharacteristicFunction(Size n, Real t, COSHestonEngine engine)
+    {
+        var alpha = new Complex(0.0, 1.0);
+        for (Size i = 1; i < n; ++i, alpha *= new Complex(0, 1))
+        {
+        }
+
+        return u => (Complex.Log(engine.ChF(u, t)) / alpha).Real;
     }
 
     // The test suite's flatRate(forward, dc): a flat forward from the evaluation date.

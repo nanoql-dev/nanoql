@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/matrices.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testQRDecomposition, testQRSolve (S-core); testMoorePenroseInverse (S-xrt)
+// Partial: testMoorePenroseInverse (S-xrt)
 // Moved: testSparseMatrixMemory line 755 (Divergences/SparseMatrixProductTests.cs)
 
 using NanoQL.Numerics;
@@ -33,6 +33,7 @@ public class MatricesTests
     private readonly Matrix M1 = new(N, N), M2 = new(N, N), I = new(N, N);
     private readonly Matrix M3 = new(3, 4), M4 = new(4, 3);
     private readonly Matrix M5 = new(4, 4, 0.0), M6 = new(4, 4, 0.0);
+    private readonly Matrix M7;
 
     // BOOST_CHECK_EQUAL and QL_CHECK_CLOSE record a failure and go on; the case fails at its end.
     private readonly List<string> errors = [];
@@ -71,6 +72,9 @@ public class MatricesTests
         M6[1, 0] = M6[0, 1]; M6[1, 1] = 1;        M6[1, 2] = -0.6562326948;  M6[1, 3] = M6[0, 2];
         M6[2, 0] = M6[0, 2]; M6[2, 1] = M6[1, 2]; M6[2, 2] = 1;        M6[2, 3] = M6[0, 1];
         M6[3, 0] = M6[0, 3]; M6[3, 1] = M6[1, 3]; M6[3, 2] = M6[2, 3]; M6[3, 3] = 1;
+
+        M7 = M1.Clone();
+        M7[0, 1] = 0.3; M7[0, 2] = 0.2; M7[2, 1] = 1.2;
     }
 
     [Fact]
@@ -584,6 +588,132 @@ public class MatricesTests
             if (Norm(A_reconstructed - A) > tol)
             {
                 Assert.Fail($"Product does not recover A: (norm of U*S*V^T-A = {Norm(A_reconstructed - A)})");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestQRDecomposition()
+    {
+        // Testing QR decomposition...
+
+        Real tol = 1.0e-12;
+        Matrix[] testMatrices = [M1, M2, I, M3, Transpose(M3), M4, Transpose(M4), M5];
+
+        foreach (Matrix A in testMatrices)
+        {
+            bool pivot = true;
+            QRDecompositionResult qr = QRDecompositionFunctions.QRDecomposition(A, pivot);
+            Matrix Q = qr.Q, R = qr.R;
+
+            var P = new Matrix(A.Columns, A.Columns, 0.0);
+
+            // reverse column pivoting
+            for (Size i = 0; i < P.Columns; ++i)
+            {
+                P[qr.Ipvt[i], i] = 1.0;
+            }
+
+            if (Norm((Q * R) - (A * P)) > tol)
+            {
+                Assert.Fail($"Q*R does not match matrix A*P (norm = {Norm((Q * R) - (A * P))})");
+            }
+
+            pivot = false;
+            qr = QRDecompositionFunctions.QRDecomposition(A, pivot);
+            Q = qr.Q;
+            R = qr.R;
+
+            if (Norm((Q * R) - A) > tol)
+            {
+                Assert.Fail($"Q*R does not match matrix A (norm = {Norm((Q * R) - A)})");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestQRSolve()
+    {
+        // Testing QR solve...
+
+        Real tol = 1.0e-12;
+        var rng = new MersenneTwisterUniformRng(1234);
+        var bigM = new Matrix(50, 100, 0.0);
+        for (Size i = 0; i < Math.Min(bigM.Rows, bigM.Columns); ++i)
+        {
+            bigM[i, i] = i + 1.0;
+        }
+
+        var randM = new Matrix(50, 200);
+        for (Size i = 0; i < randM.Rows; ++i)
+        {
+            for (Size j = 0; j < randM.Columns; ++j)
+            {
+                randM[i, j] = rng.Next().Value;
+            }
+        }
+
+        Matrix[] testMatrices =
+        [
+            M1, M2, M3, Transpose(M3), M4, Transpose(M4), M5, I, M7, bigM, Transpose(bigM), randM, Transpose(randM),
+        ];
+
+        foreach (Matrix A in testMatrices)
+        {
+            var b = new Vector(A.Rows);
+
+            for (Size k = 0; k < 10; ++k)
+            {
+                for (Size iter = 0; iter < b.Size; ++iter)
+                {
+                    b[iter] = rng.Next().Value;
+                }
+
+                Vector x = QRDecompositionFunctions.QRSolve(A, b, true);
+
+                if (A.Columns >= A.Rows)
+                {
+                    if (Norm((A * x) - b) > tol)
+                    {
+                        Assert.Fail($"A*x does not match vector b (norm = {Norm((A * x) - b)})");
+                    }
+                }
+                else
+                {
+                    // use the SVD to calculate the reference values
+                    Size n = A.Columns;
+                    var xr = new Vector(n, 0.0);
+
+                    var svd = new SVD(A);
+                    Matrix V = svd.V();
+                    Matrix U = svd.U();
+                    Vector w = svd.SingularValues();
+                    Real threshold = n * QL_EPSILON;
+
+                    for (Size i = 0; i < n; ++i)
+                    {
+                        if (w[i] > threshold)
+                        {
+                            Real inner = 0.0;
+                            for (Size r = 0; r < U.Rows; ++r)
+                            {
+                                inner = inner + (U[r, i] * b[r]);
+                            }
+
+                            Real u = inner / w[i];
+
+                            for (Size j = 0; j < n; ++j)
+                            {
+                                xr[j] += u * V[j, i];
+                            }
+                        }
+                    }
+
+                    if (Norm(xr - x) > tol)
+                    {
+                        Assert.Fail($"least square solution does not match (norm = {Norm(x - xr)})");
+                    }
+                }
             }
         }
     }

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/gaussianquadratures.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testMomentBasedGaussianPolynomial, testGaussLaguerreCosinePolynomial (S-core); testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes (S-xrt)
+// Partial: testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes (S-xrt)
 
 using NanoQL.Numerics;
 
@@ -97,6 +97,61 @@ public class GaussianQuadraturesTests
         TestSingleTabulated(x => x * x, "f(x) = x^2", 2.0 / 3.0, 1.0e-13);
         TestSingleTabulated(x => x * x * x, "f(x) = x^3", 0.0, 1.0e-13);
         TestSingleTabulated(x => x * x * x * x, "f(x) = x^4", 2.0 / 5.0, 1.0e-13);
+    }
+
+    // Adapted: QuantLib's multiprecision instantiation, built only under TEST_BOOST_MULTIPRECISION_GAUSSIAN_QUADRATURE,
+    // isn't ported (only Real is).
+    [Fact]
+    public void TestMomentBasedGaussianPolynomial()
+    {
+        // Testing moment-based Gaussian polynomials...
+
+        var g = new GaussLaguerrePolynomial();
+
+        GaussianOrthogonalPolynomial[] ml = [new MomentBasedGaussLaguerrePolynomial()];
+
+        const Real tol = 1e-12;
+        var errors = new List<string>();
+        foreach (GaussianOrthogonalPolynomial k in ml)
+        {
+            for (Size i = 0; i < 10; ++i)
+            {
+                Real diffAlpha = Math.Abs(k.Alpha(i) - g.Alpha(i));
+                Real diffBeta = Math.Abs(k.Beta(i) - g.Beta(i));
+
+                if (diffAlpha > tol)
+                {
+                    errors.Add(
+                        "failed to reproduce alpha for Laguerre quadrature"
+                        + $"\n    calculated: {k.Alpha(i)}\n    expected  : {g.Alpha(i)}\n    diff      : {diffAlpha}");
+                }
+
+                if (i > 0 && diffBeta > tol)
+                {
+                    errors.Add(
+                        "failed to reproduce beta for Laguerre quadrature"
+                        + $"\n    calculated: {k.Beta(i)}\n    expected  : {g.Beta(i)}\n    diff      : {diffBeta}");
+                }
+            }
+        }
+
+        Assert.True(errors.Count == 0, string.Join("\n", errors));
+    }
+
+    [Fact]
+    public void TestGaussLaguerreCosinePolynomial()
+    {
+        // Testing Gauss-Laguerre-Cosine quadrature...
+
+        var quadCosine = new GaussianQuadrature(16, new GaussLaguerreCosinePolynomial(0.2));
+
+        TestSingle(quadCosine, "f(x) = exp(-x)", InvExp, 1.0);
+        TestSingle(quadCosine, "f(x) = x*exp(-x)", XInvExp, 1.0);
+
+        var quadSine = new GaussianQuadrature(16, new GaussLaguerreSinePolynomial(0.2));
+
+        TestSingle(quadSine, "f(x) = exp(-x)", InvExp, 1.0);
+        TestSingle(quadSine, "f(x) = x*exp(-x)", XInvExp, 1.0);
     }
 
     [Fact]
@@ -339,5 +394,13 @@ public class GaussianQuadraturesTests
                     + $"    expected: {expected}");
             }
         }
+    }
+
+    // gaussianquadratures.cpp's MomentBasedGaussLaguerrePolynomial (lines 145-157): the moments i! by recursion.
+    private sealed class MomentBasedGaussLaguerrePolynomial : MomentBasedGaussianPolynomial
+    {
+        public override double Moment(int i) => i == 0 ? 1.0 : i * Moment(i - 1);
+
+        public override double W(double x) => Math.Exp(-x);
     }
 }

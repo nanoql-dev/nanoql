@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: ql/math/integrals/fourierintegration.hpp ql/math/integrals/fourierintegration.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: expSinh (S-core)
 
 namespace NanoQL.Numerics;
 
@@ -175,6 +174,12 @@ public sealed class FourierIntegration
     public static FourierIntegration DiscreteTrapezoid(int evaluations = 1000) =>
         new(Algorithm.DiscreteTrapezoid, new DiscreteTrapezoidIntegrator(evaluations));
 
+    /// <summary>The exp-sinh integration, on [0, ∞) directly, its abscissas scaled by the caller's scaling.</summary>
+    /// <param name="relTolerance">The tolerance relative to the integral's L1 norm.</param>
+    /// <returns>The integration.</returns>
+    public static FourierIntegration ExpSinh(double relTolerance = 1e-8) =>
+        new(Algorithm.ExpSinh, new ExpSinhIntegral(relTolerance));
+
     /// <summary>The tanh-sinh integration, on [0, ∞) directly, Boost's map of a half-infinite range.</summary>
     /// <param name="relTolerance">The tolerance relative to the integral's L1 norm.</param>
     /// <returns>The integration.</returns>
@@ -224,7 +229,8 @@ public sealed class FourierIntegration
     /// <param name="f">The integrand.</param>
     /// <param name="maxBound">For an adaptive integrator, the range's bound, or <see langword="null"/> (or a bound
     /// returning <see langword="null"/>, QuantLib's <c>Null</c>) for the mapped range.</param>
-    /// <param name="scaling">The scaling of QuantLib's exp-sinh integration, which waits for S-core.</param>
+    /// <param name="scaling">For the exp-sinh integration, the scale s of its abscissas: it integrates s·f(s·x) over
+    /// [0, ∞); the other algorithms ignore it.</param>
     /// <returns>The integral.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="f"/> is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The integrator doesn't reach its accuracy.</exception>
@@ -246,16 +252,16 @@ public sealed class FourierIntegration
     /// <param name="f">The integrand.</param>
     /// <param name="maxBound">For an adaptive integrator, the range's bound, or <see langword="null"/> (or a bound
     /// returning <see langword="null"/>, QuantLib's <c>Null</c>) for the mapped range.</param>
-    /// <param name="scaling">The scaling of QuantLib's exp-sinh integration, which waits for S-core.</param>
-    /// <returns>The integral and the number of evaluations: the quadrature's order, or the integrator's
-    /// count.</returns>
+    /// <param name="scaling">For the exp-sinh integration, the scale s of its abscissas: it integrates s·f(s·x) over
+    /// [0, ∞); the other algorithms ignore it.</param>
+    /// <returns>The integral and the number of evaluations: the quadrature's order, or the integrator's count; for
+    /// the exp-sinh integration, Boost's error estimate too, scaled with the integral.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="f"/> is <see langword="null"/>.</exception>
     /// <exception cref="NanoQLException">The integrator doesn't reach its accuracy.</exception>
     public IntegrationResult CalculateWithStatistics(
         double c_inf, Func<double, double> f, Func<double?>? maxBound = null, double scaling = 1.0)
     {
         ArgumentNullException.ThrowIfNull(f);
-        _ = scaling;
 
         switch (intAlgo_)
         {
@@ -266,6 +272,13 @@ public sealed class FourierIntegration
             case Algorithm.GaussChebyshev2nd:
                 return new IntegrationResult(
                     gaussianQuadrature_!.Evaluate(x => Integrand1(c_inf, f, x)), gaussianQuadrature_.Order);
+            case Algorithm.ExpSinh:
+            {
+                IntegrationResult scaled =
+                    integrator_!.IntegrateWithStatistics(x => f(scaling * x), 0.0, double.MaxValue);
+                return scaled with { Value = scaling * scaled.Value, AbsoluteError = scaling * scaled.AbsoluteError };
+            }
+
             case Algorithm.TanhSinh:
                 return integrator_!.IntegrateWithStatistics(f, 0.0, double.MaxValue);
             case Algorithm.Simpson:

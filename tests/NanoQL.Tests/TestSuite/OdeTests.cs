@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/ode.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testMatrixExponential and testMatrixExponentialOfZero, which wait for S-core's Expm
 
 using System.Collections.Immutable;
 using System.Numerics;
@@ -15,6 +14,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class OdeTests
 {
+    // QL_EPSILON (qldefines.hpp): machine epsilon.
+    private const double QL_EPSILON = 2.220446049250313e-16;
+
     [Fact]
     public void TestAdaptiveRungeKutta()
     {
@@ -88,6 +90,89 @@ public class OdeTests
             y4 = rk_complex.Evaluate(ode4_, y40, 0.0, x);
         }
     }
+
+    [Fact]
+    public void TestMatrixExponential()
+    {
+        // Testing matrix exponential based on ode...
+
+        // Reference results are taken from
+        // http://www.millersville.edu/~bikenaga/linear-algebra/matrix-exponential/matrix-exponential.html
+
+        var m = new Matrix(3, 3);
+        m[0, 0] = 5; m[0, 1] = -6; m[0, 2] = -6;
+        m[1, 0] = -1; m[1, 1] = 4; m[1, 2] = 2;
+        m[2, 0] = 3; m[2, 1] = -6; m[2, 2] = -4;
+
+        const Real tol = 1e-12;
+
+        for (Real t = 0.01; t < 11; t += t)
+        {
+            Matrix calculated = ExpmFunctions.Expm(m, t, tol);
+
+            var expected = new Matrix(3, 3);
+            expected[0, 0] = (-3 * Math.Exp(t)) + (4 * Math.Exp(2 * t));
+            expected[0, 1] = (6 * Math.Exp(t)) - (6 * Math.Exp(2 * t));
+            expected[0, 2] = (6 * Math.Exp(t)) - (6 * Math.Exp(2 * t));
+            expected[1, 0] = Math.Exp(t) - Math.Exp(2 * t);
+            expected[1, 1] = (-2 * Math.Exp(t)) + (3 * Math.Exp(2 * t));
+            expected[1, 2] = (-2 * Math.Exp(t)) + (2 * Math.Exp(2 * t));
+            expected[2, 0] = (-3 * Math.Exp(t)) + (3 * Math.Exp(2 * t));
+            expected[2, 1] = (6 * Math.Exp(t)) - (6 * Math.Exp(2 * t));
+            expected[2, 2] = (6 * Math.Exp(t)) - (5 * Math.Exp(2 * t));
+
+            Matrix diff = calculated - expected;
+            Real relDiffNorm = FrobenuiusNorm(diff) / FrobenuiusNorm(expected);
+
+            if (Math.Abs(relDiffNorm) > 100 * tol)
+            {
+                Assert.Fail(
+                    "Failed to reproduce expected matrix exponential."
+                    + $"\n rel. difference norm: {relDiffNorm}"
+                    + $"\n tolerance           : {100 * tol}");
+            }
+
+            Matrix negativeTime = ExpmFunctions.Expm(-1 * m, -t, tol);
+            diff = negativeTime - expected;
+            relDiffNorm = FrobenuiusNorm(diff) / FrobenuiusNorm(expected);
+
+            if (Math.Abs(relDiffNorm) > 100 * tol)
+            {
+                Assert.Fail(
+                    "Failed to reproduce expected matrix exponential."
+                    + $"\n rel. difference norm: {relDiffNorm}"
+                    + $"\n tolerance           : {100 * tol}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestMatrixExponentialOfZero()
+    {
+        // Testing matrix exponential of a zero matrix based on ode...
+
+        var m = new Matrix(3, 3, 0.0);
+
+        const double tol = 100 * QL_EPSILON;
+        const double t = 1.0;
+        Matrix calculated = ExpmFunctions.Expm(m, t);
+
+        for (Size i = 0; i < calculated.Rows; ++i)
+        {
+            for (Size j = 0; j < calculated.Columns; ++j)
+            {
+                Real kroneckerDelta = (i == j) ? 1.0 : 0.0;
+                if (Math.Abs(calculated[i, j] - kroneckerDelta) > tol)
+                {
+                    Assert.Fail($"Failed to reproduce expected matrix exponential.\n tolerance           : {tol}");
+                }
+            }
+        }
+    }
+
+    // ode.cpp's frobenuiusNorm (lines 139-142): the root of the diagonal sum of m·mᵀ.
+    private static Real FrobenuiusNorm(Matrix m) =>
+        Math.Sqrt(ArrayFunctions.DotProduct((m * MatrixFunctions.Transpose(m)).Diagonal(), new NanoQL.Numerics.Vector(m.Rows, 1.0)));
 
     private static Real Ode1(Real x, Real y) => y;
 

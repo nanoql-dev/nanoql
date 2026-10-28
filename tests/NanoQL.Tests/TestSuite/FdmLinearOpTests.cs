@@ -5,7 +5,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/fdmlinearop.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testDerivativeWeightsOnNonUniformGrids, testBiCGstab, testGMRES (S-core)
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -352,6 +351,160 @@ public class FdmLinearOpTests
             if (Math.Abs(d - t[i]) > tol)
             {
                 Assert.Fail($"numerical derivative in dz^2 deviation is too big\n  found at {x} {y} {z}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestDerivativeWeightsOnNonUniformGrids()
+    {
+        // Testing finite differences coefficients...
+
+        var mesherX = new Concentrating1dMesher(-2.0, 3.0, 50, (0.5, 0.01));
+        var mesherY = new Concentrating1dMesher(0.5, 5.0, 25, (0.5, 0.1));
+        var mesherZ = new Concentrating1dMesher(-1.0, 2.0, 31, (1.5, 0.01));
+
+        var meshers = new FdmMesherComposite(mesherX, mesherY, mesherZ);
+
+        const Real tol = 1e-13;
+        for (Size direction = 0; direction < 3; ++direction)
+        {
+            SparseMatrix dfdx = new FirstDerivativeOp(direction, meshers).ToMatrix();
+            SparseMatrix d2fdx2 = new SecondDerivativeOp(direction, meshers).ToMatrix();
+
+            Vector gridPoints = meshers.Locations(direction);
+
+            FdmLinearOpIterator iter = meshers.Layout.Begin();
+            for (Size k = 0; k < meshers.Layout.Size; ++k, iter.Increment())
+            {
+                Size c = iter.Coordinates[direction];
+                Size index = iter.Index;
+                Size indexM1 = meshers.Layout.Neighbourhood(iter, direction, -1);
+                Size indexP1 = meshers.Layout.Neighbourhood(iter, direction, +1);
+
+                // test only if not on the boundary
+                if (c == 0)
+                {
+                    Real[] twoPoints = [0.0, gridPoints[indexP1] - gridPoints[index]];
+
+                    ImmutableArray<Real> ndWeights1st = new NumericalDifferentiation(null, 1, twoPoints).Weights();
+
+                    Real beta1 = dfdx[index, index];
+                    Real gamma1 = dfdx[index, indexP1];
+                    if (Math.Abs((beta1 - ndWeights1st[0]) / beta1) > tol
+                        || Math.Abs((gamma1 - ndWeights1st[1]) / gamma1) > tol)
+                    {
+                        Assert.Fail(
+                            "can not reproduce the weights of the first order derivative operator on the lower boundary"
+                            + $"\n expected beta:    {ndWeights1st[0]}"
+                            + $"\n calculated beta:  {beta1}"
+                            + $"\n difference beta:  {beta1 - ndWeights1st[0]}"
+                            + $"\n expected gamma:   {ndWeights1st[1]}"
+                            + $"\n calculated gamma: {gamma1}"
+                            + $"\n difference gamma: {gamma1 - ndWeights1st[1]}");
+                    }
+
+                    // free boundary condition by default
+                    Real beta2 = d2fdx2[index, index];
+                    Real gamma2 = d2fdx2[index, indexP1];
+
+                    if (Math.Abs(beta2) > QL_EPSILON || Math.Abs(gamma2) > QL_EPSILON)
+                    {
+                        Assert.Fail(
+                            "can not reproduce the weights of the second order derivative operator on the lower boundary"
+                            + $"\n expected beta:    {0.0}"
+                            + $"\n calculated beta:  {beta2}"
+                            + $"\n expected gamma:   {0.0}"
+                            + $"\n calculated gamma: {gamma2}");
+                    }
+                }
+                else if (c == meshers.Layout.Dim[direction] - 1)
+                {
+                    Real[] twoPoints = [gridPoints[indexM1] - gridPoints[index], 0.0];
+
+                    ImmutableArray<Real> ndWeights1st = new NumericalDifferentiation(null, 1, twoPoints).Weights();
+
+                    Real alpha1 = dfdx[index, indexM1];
+                    Real beta1 = dfdx[index, index];
+                    if (Math.Abs((alpha1 - ndWeights1st[0]) / alpha1) > tol
+                        || Math.Abs((beta1 - ndWeights1st[1]) / beta1) > tol)
+                    {
+                        Assert.Fail(
+                            "can not reproduce the weights of the first order derivative operator on the upper boundary"
+                            + $"\n expected alpha:   {ndWeights1st[0]}"
+                            + $"\n calculated alpha: {alpha1}"
+                            + $"\n difference alpha: {alpha1 - ndWeights1st[0]}"
+                            + $"\n expected beta:    {ndWeights1st[1]}"
+                            + $"\n calculated beta:  {beta1}"
+                            + $"\n difference beta:  {beta1 - ndWeights1st[1]}");
+                    }
+
+                    // free boundary condition by default
+                    Real alpha2 = d2fdx2[index, indexM1];
+                    Real beta2 = d2fdx2[index, index];
+
+                    if (Math.Abs(alpha2) > QL_EPSILON || Math.Abs(beta2) > QL_EPSILON)
+                    {
+                        Assert.Fail(
+                            "can not reproduce the weights of the second order derivative operator on the upper boundary"
+                            + $"\n expected alpha:   {0.0}"
+                            + $"\n calculated alpha: {alpha2}"
+                            + $"\n expected beta:    {0.0}"
+                            + $"\n calculated beta:  {beta2}");
+                    }
+                }
+                else
+                {
+                    Real[] threePoints =
+                    [
+                        gridPoints[indexM1] - gridPoints[index], 0.0, gridPoints[indexP1] - gridPoints[index],
+                    ];
+
+                    ImmutableArray<Real> ndWeights1st = new NumericalDifferentiation(null, 1, threePoints).Weights();
+
+                    Real alpha1 = dfdx[index, indexM1];
+                    Real beta1 = dfdx[index, index];
+                    Real gamma1 = dfdx[index, indexP1];
+
+                    if (Math.Abs((alpha1 - ndWeights1st[0]) / alpha1) > tol
+                        || Math.Abs((beta1 - ndWeights1st[1]) / beta1) > tol
+                        || Math.Abs((gamma1 - ndWeights1st[2]) / gamma1) > tol)
+                    {
+                        Assert.Fail(
+                            "can not reproduce the weights of the first order derivative operator"
+                            + $"\n expected alpha:   {ndWeights1st[0]}"
+                            + $"\n calculated alpha: {alpha1}"
+                            + $"\n difference alpha: {alpha1 - ndWeights1st[0]}"
+                            + $"\n expected beta:    {ndWeights1st[1]}"
+                            + $"\n calculated beta:  {beta1}"
+                            + $"\n difference beta:  {beta1 - ndWeights1st[1]}"
+                            + $"\n expected gamma:   {ndWeights1st[2]}"
+                            + $"\n calculated gamma: {gamma1}"
+                            + $"\n difference gamma: {gamma1 - ndWeights1st[2]}");
+                    }
+
+                    ImmutableArray<Real> ndWeights2nd = new NumericalDifferentiation(null, 2, threePoints).Weights();
+
+                    Real alpha2 = d2fdx2[index, indexM1];
+                    Real beta2 = d2fdx2[index, index];
+                    Real gamma2 = d2fdx2[index, indexP1];
+                    if (Math.Abs((alpha2 - ndWeights2nd[0]) / alpha2) > tol
+                        || Math.Abs((beta2 - ndWeights2nd[1]) / beta2) > tol
+                        || Math.Abs((gamma2 - ndWeights2nd[2]) / gamma2) > tol)
+                    {
+                        Assert.Fail(
+                            "can not reproduce the weights of the second order derivative operator"
+                            + $"\n expected alpha:   {ndWeights2nd[0]}"
+                            + $"\n calculated alpha: {alpha2}"
+                            + $"\n difference alpha: {alpha2 - ndWeights2nd[0]}"
+                            + $"\n expected beta:    {ndWeights2nd[1]}"
+                            + $"\n calculated beta:  {beta2}"
+                            + $"\n difference beta:  {beta2 - ndWeights2nd[1]}"
+                            + $"\n expected gamma:   {ndWeights2nd[2]}"
+                            + $"\n calculated gamma: {gamma2}"
+                            + $"\n difference gamma: {gamma2 - ndWeights2nd[2]}");
+                    }
+                }
             }
         }
     }
@@ -905,6 +1058,93 @@ public class FdmLinearOpTests
     }
 
     [Fact]
+    public void TestBiCGstab()
+    {
+        // Testing bi-conjugated gradient stabilized algorithm...
+
+        const Size n = 41, m = 21;
+        const Real theta = 1.0;
+        SparseMatrix a = CreateTestMatrix(n, m, theta);
+
+        Vector Matmult(Vector x) => Axpy(a, x);
+
+        var ilu = new SparseILUPreconditioner(a, 4);
+        Vector Precond(Vector x) => ilu.Apply(x);
+
+        var b = new Vector(n * m);
+        var rng = new MersenneTwisterUniformRng(1234);
+        for (Size i = 0; i < b.Size; ++i)
+        {
+            b[i] = rng.Next().Value;
+        }
+
+        const Real tol = 1e-10;
+
+        var biCGstab = new BiCGstab(Matmult, n * m, tol, Precond);
+        Vector x = biCGstab.Solve(b).X;
+
+        Real error = Math.Sqrt(ArrayFunctions.DotProduct(b - Axpy(a, x), b - Axpy(a, x)) / ArrayFunctions.DotProduct(b, b));
+
+        if (error > tol)
+        {
+            Assert.Fail($"Error calculating the inverse using BiCGstab\n tolerance:  {tol}\n error:      {error}");
+        }
+    }
+
+    [Fact]
+    public void TestGMRES()
+    {
+        // Testing GMRES algorithm...
+
+        const Size n = 41, m = 21;
+        const Real theta = 1.0;
+        SparseMatrix a = CreateTestMatrix(n, m, theta);
+
+        Vector Matmult(Vector x) => Axpy(a, x);
+
+        var ilu = new SparseILUPreconditioner(a, 4);
+        Vector Precond(Vector x) => ilu.Apply(x);
+
+        var b = new Vector(n * m);
+        var rng = new MersenneTwisterUniformRng(1234);
+        for (Size i = 0; i < b.Size; ++i)
+        {
+            b[i] = rng.Next().Value;
+        }
+
+        const Real tol = 1e-10;
+
+        var gmres = new GMRES(Matmult, n * m, tol, Precond);
+        GMRESResult result = gmres.Solve(b, b);
+        Vector x = result.X;
+        Real errorCalculated = result.Errors[^1];
+
+        Real error = Math.Sqrt(ArrayFunctions.DotProduct(b - Axpy(a, x), b - Axpy(a, x)) / ArrayFunctions.DotProduct(b, b));
+
+        if (error > tol)
+        {
+            Assert.Fail($"Error calculating the inverse using GMRES\n tolerance:  {tol}\n error:      {error}");
+        }
+
+        if (Math.Abs(error - errorCalculated) > 10 * QL_EPSILON)
+        {
+            Assert.Fail(
+                $"Calculation if the error in GMRES went wrong\n calculated: {errorCalculated}\n error:      {error}");
+        }
+
+        var gmresRestart = new GMRES(Matmult, 5, tol, Precond);
+        GMRESResult resultRestart = gmresRestart.SolveWithRestart(5, b, b);
+        Real errorWithRestart = resultRestart.Errors[^1];
+
+        if (errorWithRestart > tol)
+        {
+            Assert.Fail(
+                "Error calculating the inverse using GMRES with restarts"
+                + $"\n tolerance:  {tol}\n error:      {errorWithRestart}");
+        }
+    }
+
+    [Fact]
     public void TestCrankNicolsonWithDamping()
     {
         // Testing Crank-Nicolson with initial implicit damping steps for a digital option...
@@ -1159,6 +1399,40 @@ public class FdmLinearOpTests
     }
 
     // The test suite's flatRate(forward, dc): a flat forward from the evaluation date.
+    // fdmlinearop.cpp's axpy (lines 217-225): uBLAS's axpy_prod, the product A·x.
+    private static Vector Axpy(SparseMatrix a, Vector x) => SparseMatrixFunctions.Prod(a, x);
+
+    // fdmlinearop.cpp's createTestMatrix (lines 227-252).
+    private static SparseMatrix CreateTestMatrix(Size n, Size m, Real theta)
+    {
+        var a = new SparseMatrix(n * m, n * m);
+
+        for (Size i = 0; i < n; ++i)
+        {
+            for (Size j = 0; j < m; ++j)
+            {
+                Size k = (i * m) + j;
+                a[k, k] = 1.0;
+
+                if (i > 0 && j > 0 && i < n - 1 && j < m - 1)
+                {
+                    Size im1 = i - 1;
+                    Size ip1 = i + 1;
+                    Size jm1 = j - 1;
+                    Size jp1 = j + 1;
+                    Real delta = theta / ((ip1 - im1) * (jp1 - jm1));
+
+                    a[k, (im1 * m) + jm1] = delta;
+                    a[k, (im1 * m) + jp1] = -delta;
+                    a[k, (ip1 * m) + jm1] = -delta;
+                    a[k, (ip1 * m) + jp1] = delta;
+                }
+            }
+        }
+
+        return a;
+    }
+
     private static YieldTermStructure FlatRate(Rate forward, DayCounter dc, EvaluationContext context) =>
         FlatForward.Create(0, new NullCalendar(), forward, dc, context);
 

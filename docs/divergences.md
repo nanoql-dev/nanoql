@@ -726,6 +726,17 @@ Facts:
 - `StructuresDatedAfterTheRiskFreeCurveAccrueNothingBeforeTheirDate`
 - `StructuresSharingTheRiskFreeTimesAreQuantLibs`
 
+## BisectionTests
+
+[`Divergences/BisectionTests.cs`](../tests/NanoQL.Tests/Divergences/BisectionTests.cs)
+
+The bisection's exit on a midpoint whose value is close to 0 (the S-core plan's CR7 (xv)): QuantLib returns its running root, the bracket's low side, where the midpoint's value is above 0, so x − 1.5 + 1e-30 on [0, 3] returns 0; nanoql returns the midpoint, 1.5. Where the midpoint's value is at or below 0 the two are QuantLib's own exit. QuantLib's value is its own (this run's `probes\c4_facts.cpp`, `c4_facts.out`).
+
+Facts:
+
+- `AMidpointCloseToZeroAboveItIsTheRoot`
+- `AMidpointAtOrBelowZeroIsQuantLibsExit`
+
 ## BivariateDr78DegenerateCorrelationsTests
 
 [`Divergences/BivariateDr78DegenerateCorrelationsTests.cs`](../tests/NanoQL.Tests/Divergences/BivariateDr78DegenerateCorrelationsTests.cs)
@@ -2459,6 +2470,25 @@ Facts:
 - `TimesSkippingARateTimeAreRefusedAtAnExponentOtherThanOne`
 - `ALastTimePastTheLastRateTimeIsNamedAsTheLast`
 
+## ExponentialJump1dMesherTests
+
+[`Divergences/ExponentialJump1dMesherTests.cs`](../tests/NanoQL.Tests/Divergences/ExponentialJump1dMesherTests.cs)
+
+The jump mesher's distribution and density at a finite time and its stationary distribution (the S-core plan's CR7 (xvii), and the code review's C4-O1, C4-O2, C4-O6 to C4-O8). QuantLib integrates its density from 1e-100, which holds no mass while βt is below about 230, so at β 100, λ 4, η 2.5 its distribution meets the closed form's to 6e-16 at t 1, misses 1.06e-4 at t 5, and from t 8 its integrator refuses, "accuracy not reached"; nanoql integrates the closed form's route over the time since the last jump, its norm 1 − e^(−λt) by `expm1`, which QuantLib's subtraction loses at small λt (it refuses at t 1e-12, "max number of iterations reached"). QuantLib's density at t, a difference of regularised incomplete gammas, cancels as βt falls and where ηx is large, and refuses at intensities from β, where it takes Γ(1 − λ/β) ("positive argument required", its harness at β 4, λ 4, η 5 and β 0.2, λ 6, η 0.3); nanoql's is the route's derivative, which computes there too, its terms one exponential so that none leaves the double range before its peak. QuantLib's stationary distribution holds the mass to min(x, ε)/η where it means x, wrong with η below 1 and x below ε/η; there nanoql takes its series at ηx. The references are the route at 40 digits, QuantLib's density formula continued in mpmath and the Gamma(λ/β, η) cdf (this run's `c4work\refs_c4.py`, `refs_jump2.py`, `refs_jump6.py`, `refs_jump7.py`, with their outputs, and the plan's `premises\jump_ref.py`); QuantLib's values are its own (`probes\c4_facts.cpp`, `c4_facts.out`, and its harness, `c4work\refs_jump6.out`, `refs_jump7.out`).
+
+Facts:
+
+- `WhereQuantLibsCutHoldsNoMassItsValuesAreMet`
+- `WhereEtaXReachesOneTheComplementKeepsTheDigits`
+- `AtSmallTimesTheNormKeepsItsDigits`
+- `BeyondItTheDistributionKeepsItsMass`
+- `TheDensityAtSmallAndLargeTimesKeepsItsDigits`
+- `TheDensityComputesWhereItsTermsLeaveTheDoubleRange`
+- `WhereEtaXIsLargeQuantLibsDensityCancels`
+- `BelowEpsOverEtaTheStationarySeriesTakesEtaX`
+- `BelowZeroTheStationaryFormsAreZero`
+- `AtIntensitiesFromBetaTheDistributionAndDensityCompute`
+
 ## ExponentialSplinesFixedKappaTests
 
 [`Divergences/ExponentialSplinesFixedKappaTests.cs`](../tests/NanoQL.Tests/Divergences/ExponentialSplinesFixedKappaTests.cs)
@@ -2480,6 +2510,18 @@ Facts:
 - `TheCopysFlagChangesAndTheReceiversDoesNot`
 - `TheCopyKeepsItsTypeAndItsValues`
 - `ANullReceiverThrows`
+
+## FactorReductionTests
+
+[`Divergences/FactorReductionTests.cs`](../tests/NanoQL.Tests/Divergences/FactorReductionTests.cs)
+
+The factor reduction's loadings and its last pass (the S-core plan's CR7 (iv)): QuantLib reads the loadings from the matrix's row at the largest eigenvalue's index, the input's first row, so an exact one-factor matrix with loadings (0.9, 0.7, 0.5, 0.3, 0.8) gives (0.546, 0.63, 0.45, 0.27, 0.72); nanoql's principal factor iteration gives the loadings, to QuantLib's stopping tolerance of 1e-6 relative change. And QuantLib refuses a reduction that converges on its last allowed pass: its own iteration on that matrix converges at its second pass, which maxIters 1 allows, and refuses there, "convergence not reached after 1 iterations". QuantLib's values are its own (this run's `probes\c4_facts.cpp`, `c4_facts.out`).
+
+Facts:
+
+- `AnExactOneFactorMatrixGivesItsLoadings`
+- `ConvergenceOnTheLastAllowedPassIsAccepted`
+- `AZeroFirstLoadingStillIterates`
 
 ## Fd2dMismatchedTimesTests
 
@@ -2846,6 +2888,18 @@ Facts:
 
 - `FewerThanThreeParametersAreRefused`
 - `ThreeParametersAreRead`
+
+## FilonIntegralTests
+
+[`Divergences/FilonIntegralTests.cs`](../tests/NanoQL.Tests/Divergences/FilonIntegralTests.cs)
+
+Filon's coefficients at small θ = t·h (the S-core plan's CR7 (x)): QuantLib's closed forms for α, β and γ cancel as θ falls, so its ∫₀¹ cos(tx) dx on 100 intervals is 5.7e-13 off at t 1, 2.4e-4 off at 1e-4, 5.7e-16 for 1 at 1e-6 and NaN at 0; nanoql takes their Taylor series below |θ| 1.7, within 1e-15 of sin t/t, and QuantLib's closed forms, bit for bit, from 1.7. The references are sin t/t and (1 − cos t)/t at 40 digits (this run's `c4work\refs_c4.py`, `refs_c4.out`); QuantLib's values are its own (`probes\c4_facts.cpp`, `c4_facts.out`).
+
+Facts:
+
+- `AtSmallThetaTheCoefficientsKeepTheirDigits`
+- `AtThetaZeroTheRuleIsSimpsons`
+- `FromThetaOnePointSevenQuantLibsClosedFormsAreKept`
 
 ## FittedCurveRecalculationTests
 
@@ -5170,6 +5224,17 @@ Facts:
 
 - `AStartWindowSpotBeyondTheBarrierIsRefused`
 
+## PascalTriangleTests
+
+[`Divergences/PascalTriangleTests.cs`](../tests/NanoQL.Tests/Divergences/PascalTriangleTests.cs)
+
+Pascal's triangle on Windows (the S-core plan's CR7 (xiv)): QuantLib's coefficients are `BigNatural`, a 32-bit `unsigned long` under MSVC, so its rows wrap from order 35; nanoql's are 64-bit, exact to order 67, Linux QuantLib's values. QuantLib's values are its own on the wheel's platform (this run's `probes\c4_facts.cpp`, `c4_facts.out`).
+
+Facts:
+
+- `FromOrderThirtyFiveTheRowsAreExact`
+- `EachRowIsTheBinomialCoefficients`
+
 ## PathGeneratorProcessTests
 
 [`Divergences/PathGeneratorProcessTests.cs`](../tests/NanoQL.Tests/Divergences/PathGeneratorProcessTests.cs)
@@ -5914,6 +5979,16 @@ Facts:
 
 - `The2025ListsHoldTheElectionDay`
 
+## SparseIluTests
+
+[`Divergences/SparseIluTests.cs`](../tests/NanoQL.Tests/Divergences/SparseIluTests.cs)
+
+The sparse ILU's fill levels (the S-core plan's CR7 (xxiv)): QuantLib records each new entry's level from the levels' nonzero entries by the entries' rank among the row's nonzero values, which a value that cancels to 0 shifts, so a later row reads another entry's level; nanoql records each entry's own. On the first of the planner's random 8 × 8 matrices with exact cancellations whose factors move at fill level 1 (Mersenne Twister seed 5, the 36th), QuantLib drops U's fill entry (4, 7) and keeps U(7, 7) at 4; the levels at their own positions keep (4, 7) at −0.5 and give U(7, 7) 4.1875. QuantLib's factors and those of its own constructor with the one read changed are its own (this run's `probes\c4_facts.cpp`, `c4_facts.out`).
+
+Facts:
+
+- `EachFillEntryKeepsItsOwnLevel`
+
 ## SparseMatrixPlusAssignTests
 
 [`Divergences/SparseMatrixPlusAssignTests.cs`](../tests/NanoQL.Tests/Divergences/SparseMatrixPlusAssignTests.cs)
@@ -6338,6 +6413,17 @@ A NaN eigenvalue is refused before the eigenvalues are sorted (playbook §2's un
 Facts:
 
 - `ANaNEigenvalueCantBeSorted`
+
+## TRBDF2Tests
+
+[`Divergences/TRBDF2Tests.cs`](../tests/NanoQL.Tests/Divergences/TRBDF2Tests.cs)
+
+The old TR-BDF2's trapezoidal stage (the S-core plan's CR7 (xvi)): QuantLib builds the stage's implicit part at t − Δt, where the stage ends at t − αΔt, so a time-dependent operator steps at first order; nanoql builds it at t − αΔt. On u_t = c(t)·u_xx on 101 points from sin(πx), rolled back from 1 to 0 with Dirichlet rows, sin(πx) is the discrete operator's eigenvector, so the semi-discrete solution at x ½ is exp(−λ_h ∫c), λ_h = (2/h²)(1 − cos πh), and the errors are the scheme's own (this run's `c4work\refs_c4.py`, `refs_c4.out`). At c = 1 nanoql's values are QuantLib's, bit for bit; at c = 1 + t nanoql's errors fall fourfold per halving, QuantLib's don't. QuantLib's values are its own (`probes\c4_facts.cpp`, `c4_facts.out`).
+
+Facts:
+
+- `AtAConstantOperatorQuantLibsSchemeIsKept`
+- `AtATimeDependentOperatorTheSchemeIsSecondOrder`
 
 ## TelescopicValueDatesTests
 

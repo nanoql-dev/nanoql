@@ -17,7 +17,8 @@ namespace NanoQL.Tests.Conventions;
 /// count is the call's own; here
 /// <see cref="AnalyticHestonEngine.PriceVanillaPayoffWithStatistics(PlainVanillaPayoff, Date)"/> returns it with the
 /// price and the engine's results carry it as "numberOfEvaluations", and one engine serves many calls. The counts are
-/// QuantLib's own per integration (<c>hestonmodel.cpp:1617-1780</c>, whose case waits for S-core).
+/// QuantLib's own per integration (<c>hestonmodel.cpp:1617-1780</c>, ported as
+/// <c>HestonModelTests.TestAllIntegrationMethods</c>).
 /// </summary>
 public class HestonEvaluationCountTests
 {

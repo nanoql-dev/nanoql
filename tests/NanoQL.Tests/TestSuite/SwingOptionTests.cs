@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/swingoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testExtendedOrnsteinUhlenbeckProcess, testFdmExponentialJump1dMesher, testExtOUJumpVanillaEngine, testExtOUJumpSwingOption, testKlugeChFVanillaPricing, which wait for S-xeq's extended Ornstein-Uhlenbeck processes, jump mesher and engines
+// Partial: testExtendedOrnsteinUhlenbeckProcess, testFdmExponentialJump1dMesher, testExtOUJumpVanillaEngine, testExtOUJumpSwingOption, testKlugeChFVanillaPricing, which wait for S-xeq's extended Ornstein-Uhlenbeck processes and engines
 
 using NanoQL.Instruments;
 using NanoQL.PricingEngines;

@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/integrals.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testExpSinh, testTwoDimensionalIntegration, testFolinIntegration (S-core); testPiecewiseIntegral (S-xrt)
+// Partial: testPiecewiseIntegral (S-xrt)
 
 using System.Numerics;
 using NanoQL.Numerics;
@@ -20,6 +20,7 @@ public class IntegralsTests
     private const double QL_EPSILON = 2.220446049250313E-16;
     private const double QL_MAX_REAL = double.MaxValue;
     private const double M_PI = 3.141592653589793238462643383280;
+    private const double M_PI_2 = 1.57079632679489661923;
     private const double M_EULER_MASCHERONI = 0.5772156649015328606065121;
 
     // std::numeric_limits<Real>::min(): the smallest normal double.
@@ -93,6 +94,17 @@ public class IntegralsTests
     }
 
     [Fact]
+    public void TestExpSinh()
+    {
+        // Testing exp-sinh integration...
+
+        var integrator = new ExpSinhIntegral();
+        TestSingle(integrator, "f(x) = Gaussian(x)", new NormalDistribution().Evaluate, 0.0, double.MaxValue, 0.5);
+
+        TestSingle(integrator, "f(x) = x*e^(-x)", x => x * Math.Exp(-x), 0.0, double.MaxValue, 1.0);
+    }
+
+    [Fact]
     public void TestGaussLegendreIntegrator()
     {
         // Testing Gauss-Legendre integrator...
@@ -133,6 +145,72 @@ public class IntegralsTests
         var gaussKronrodNonAdaptive = new GaussKronrodNonAdaptive(precision, maxEvaluations, relativeAccuracy);
         TestSeveral(gaussKronrodNonAdaptive);
         TestDegeneratedDomain(gaussKronrodNonAdaptive);
+    }
+
+    [Fact]
+    public void TestTwoDimensionalIntegration()
+    {
+        // Testing two dimensional adaptive Gauss-Lobatto integration...
+
+        const int maxEvaluations = 1000;
+        Real calculated = new TwoDimensionalIntegral(
+                new TrapezoidIntegral<Default>(Tolerance, maxEvaluations),
+                new TrapezoidIntegral<Default>(Tolerance, maxEvaluations))
+            .Integrate((x, y) => x * y, (0.0, 0.0), (1.0, 2.0));
+
+        const double expected = 1.0;
+        if (Math.Abs(calculated - expected) > Tolerance)
+        {
+            Assert.Fail(
+                "two dimensional integration: "
+                + $"\n    calculated: {calculated:G10}"
+                + $"\n    expected:   {expected:G10}");
+        }
+    }
+
+    [Fact]
+    public void TestFolinIntegration()
+    {
+        // Testing Folin's integral formulae...
+
+        // Examples taken from
+        // http://www.tat.physik.uni-tuebingen.de/~kokkotas/Teaching/Num_Methods_files/Comp_Phys5.pdf
+        int[] nr = [4, 8, 16, 128, 256, 1024, 2048];
+        double[] expected =
+        [
+            4.55229440e-5, 4.72338540e-5, 4.72338540e-5, 4.78308678e-5, 4.78404787e-5, 4.78381120e-5, 4.78381084e-5,
+        ];
+
+        const double t = 100;
+        const double o = M_PI_2 / t;
+
+        const double tol = 1e-12;
+
+        for (int i = 0; i < nr.Length; ++i)
+        {
+            int n = nr[i];
+            Real calculatedCosine =
+                new FilonIntegral(FilonIntegralType.Cosine, t, n).Integrate(CosineF, 0, 2 * M_PI);
+            Real calculatedSine =
+                new FilonIntegral(FilonIntegralType.Sine, t, n).Integrate(SineF, o, (2 * M_PI) + o);
+
+            if (Math.Abs(calculatedCosine - expected[i]) > tol)
+            {
+                Assert.Fail(
+                    "Filon Cosine integration failed: "
+                    + $"\n    calculated: {calculatedCosine:G10}"
+                    + $"\n    expected:   {expected[i]:G10}");
+            }
+
+            // QuantLib's message prints the cosine integral here
+            if (Math.Abs(calculatedSine - expected[i]) > tol)
+            {
+                Assert.Fail(
+                    "Filon Sine integration failed: "
+                    + $"\n    calculated: {calculatedCosine:G10}"
+                    + $"\n    expected:   {expected[i]:G10}");
+            }
+        }
     }
 
     [Fact]
@@ -499,6 +577,10 @@ public class IntegralsTests
                 + $"    expected:   {expected:G10}");
         }
     }
+
+    private static Real SineF(Real x) => Math.Exp(-0.5 * (x - (M_PI_2 / 100)));
+
+    private static Real CosineF(Real x) => Math.Exp(-0.5 * x);
 
     private static Real F1(Real x) => (1.2 * x * x) + (3.2 * x) + 3.1;
 

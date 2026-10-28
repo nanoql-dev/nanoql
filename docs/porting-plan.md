@@ -103,7 +103,6 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Experimental/CallableBonds/CallableBondVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(dc, bdc)`, which no QuantLib 1.44 class uses and which waits for its first user.
 - `src/NanoQL/Methods/FiniteDifferences/StepCondition.cs`: `NullCondition`, which no QuantLib 1.44 class or test uses and which waits for its first user.
 - `src/NanoQL/Models/MarketModels/MarketModelDifferencesFunctions.cs`: `coterminalSwapPseudoRoots`, never ported: QuantLib declares it and defines none, and its two-argument definition, in no header, refuses every QuantLib correlation, reads past the variances otherwise, and scales the correlation, not a root of it.
-- `src/NanoQL/Numerics/Integrals/FourierIntegration.cs`: the exp-sinh algorithm, which waits for S-core's exp-sinh integrator.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
 - `src/NanoQL/TermStructures/Credit/DefaultDensityStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the default density, which waits for S-xcr's curves, its only users.
 - `src/NanoQL/TermStructures/Credit/HazardRateStructure.cs`: `survivalProbabilityImpl`'s default, a Gauss-Chebyshev integral of the hazard rate, which waits for S-xcr's curves, its only users.
@@ -128,18 +127,12 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/DoubleBarrierOptionTests.cs`: `testEuropeanHaugValues`' Suo-Wang and binomial checks, which wait for S-xeq's `SuoWangDoubleBarrierEngine` and `BinomialDoubleBarrierEngine`; `testVannaVolgaDoubleBarrierValues`, which waits for S-xeq's `VannaVolgaDoubleBarrierEngine`; and `testMonteCarloDoubleBarrierWithAnalytical`, which waits for S-xeq's `MCDoubleBarrierEngine`.
 - `tests/NanoQL.Tests/TestSuite/DoubleBinaryOptionTests.cs`: `testHaugValues`' binomial checks, which wait for S-xeq's `BinomialDoubleBarrierEngine`.
 - `tests/NanoQL.Tests/TestSuite/EuropeanOptionTests.cs`: `testFFTEngines`, which waits for S-xeq's `FFTVanillaEngine`.
-- `tests/NanoQL.Tests/TestSuite/FdSabrTests.cs`: `testFdmSabrOp` and `testOosterleeTestCaseIV`, which wait for S-core's Richardson extrapolation and Sobol Brownian bridge sequences.
-- `tests/NanoQL.Tests/TestSuite/FdmLinearOpTests.cs`: `testDerivativeWeightsOnNonUniformGrids`, `testBiCGstab` and `testGMRES`, which wait for S-core.
 - `tests/NanoQL.Tests/TestSuite/ForwardOptionTests.cs`: `testHestonMCPrices` and `testHestonAnalyticalVsMCPrices`, which wait for S-xeq's analytic Heston forward engine.
-- `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testMomentBasedGaussianPolynomial` and `testGaussLaguerreCosinePolynomial`, which wait for S-core; `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
-- `tests/NanoQL.Tests/TestSuite/HestonModelTests.cs`: `testAllIntegrationMethods` and `testCosHestonCumulants` (S-core).
-- `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testExpSinh`, `testTwoDimensionalIntegration` and `testFolinIntegration` (S-core); and `testPiecewiseIntegral` (S-xrt).
-- `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (no-arbitrage SABR and the SABR transformations, kernel, Richardson, Laplace).
-- `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the QR and Moore-Penrose cases, whose matrix utilities aren't ported yet.
-- `tests/NanoQL.Tests/TestSuite/NthOrderDerivativeOpTests.cs`: every case but `testSparseMatrixApply`, which wait for S-core's `NthOrderDerivativeOp`.
-- `tests/NanoQL.Tests/TestSuite/OdeTests.cs`: `testMatrixExponential` and `testMatrixExponentialOfZero`, which wait for S-core's `Expm`.
+- `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
+- `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testPiecewiseIntegral`, which waits for S-xrt.
+- `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (no-arbitrage SABR and the SABR transformations, Laplace).
+- `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the Moore-Penrose case, which waits for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing cases, which wait for S-xrt's hybrid simulated annealing.
 - `tests/NanoQL.Tests/TestSuite/PiecewiseBlackVarianceSurfaceTests.cs`: `testSabrEquivalence`, which waits for S-xeq's `SABRVolTermStructure`.
 - `tests/NanoQL.Tests/TestSuite/QuantoOptionTests.cs`: `testDoubleBarrierValues`, which waits for S-xeq's quanto double-barrier option.
-- `tests/NanoQL.Tests/TestSuite/SolversTests.cs`: the bisection, false-position and secant cases, whose solvers aren't ported yet.
-- `tests/NanoQL.Tests/TestSuite/SwingOptionTests.cs`: every case but `testFdBSSwingOption`, which wait for S-xeq's extended Ornstein-Uhlenbeck processes, jump mesher and engines.
+- `tests/NanoQL.Tests/TestSuite/SwingOptionTests.cs`: every case but `testFdBSSwingOption`, which wait for S-xeq's extended Ornstein-Uhlenbeck processes and engines.

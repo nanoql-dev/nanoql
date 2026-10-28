@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/solvers.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testBisection, testFalsePosition, testSecant (S-core's solvers)
 
 using System.Runtime.CompilerServices;
 using NanoQL.Numerics;
@@ -22,6 +21,20 @@ public class SolversTests
     {
         // Testing Brent solver...
         TestSolver(new Brent(), "Brent", 1.0e-6);
+    }
+
+    [Fact]
+    public void TestBisection()
+    {
+        // Testing bisection solver...
+        TestSolver(new Bisection(), "Bisection", 1.0e-6);
+    }
+
+    [Fact]
+    public void TestFalsePosition()
+    {
+        // Testing false-position solver...
+        TestSolver(new FalsePosition(), "FalsePosition", 1.0e-6);
     }
 
     [Fact]
@@ -50,6 +63,13 @@ public class SolversTests
     {
         // Testing Ridder solver...
         TestSolver(new Ridder(), "Ridder", 1.0e-6);
+    }
+
+    [Fact]
+    public void TestSecant()
+    {
+        // Testing secant solver...
+        TestSolver(new Secant(), "Secant", 1.0e-6);
     }
 
     [Fact]
@@ -157,6 +177,12 @@ public class SolversTests
     private static void TestSolver(Brent solver, string name, Real? accuracy) =>
         TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
 
+    private static void TestSolver(Bisection solver, string name, Real? accuracy) =>
+        TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
+
+    private static void TestSolver(FalsePosition solver, string name, Real? accuracy) =>
+        TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
+
     private static void TestSolver(Newton solver, string name, Real? accuracy) =>
         TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
 
@@ -167,6 +193,9 @@ public class SolversTests
         TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
 
     private static void TestSolver(Ridder solver, string name, Real? accuracy) =>
+        TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
+
+    private static void TestSolver(Secant solver, string name, Real? accuracy) =>
         TestSolver(solver, name, accuracy, new F1(), new F2(), new F3(), (result, offset) => new Probe(result, offset));
 
     private static void TestSolver(Halley solver, string name, Real? accuracy) =>
