@@ -10,7 +10,8 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The inverse cumulative generators' vectors, <c>tests/vectors/math/randomnumbers/inversecumulativerng.json</c>:
 /// <see cref="InverseCumulativeRng{TRng, TIc}"/> through its two named classes over
-/// <see cref="MersenneTwisterUniformRng"/>, for three seeds, 500 draws each and the last weight. Halfway, the draws
+/// <see cref="MersenneTwisterUniformRng"/>, and the Knuth, L'Ecuyer and xoshiro256** compositions, for three seeds,
+/// 500 draws each and the last weight. Halfway, the draws
 /// continue from a copy (<see cref="IRng.Clone"/>), whose stream is QuantLib's, carried on.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
@@ -24,11 +25,20 @@ public class InverseCumulativeRngVectorTests
         foreach (VectorCase c in file.Cases)
         {
             int draws = c.Int("draws");
-            var uniform = new MersenneTwisterUniformRng(c.Input("seed").GetInt64());
+            long seed = c.Input("seed").GetInt64();
+            var uniform = new MersenneTwisterUniformRng(seed);
             IRng rng = c.String("composition") switch
             {
                 "InvCumulativeMersenneTwisterGaussianRng" => new InvCumulativeMersenneTwisterGaussianRng(uniform),
                 "MoroInvCumulativeMersenneTwisterGaussianRng" => new MoroInvCumulativeMersenneTwisterGaussianRng(uniform),
+                "InvCumulativeKnuthGaussianRng" => new InvCumulativeKnuthGaussianRng(new KnuthUniformRng(seed)),
+                "MoroInvCumulativeKnuthGaussianRng" => new MoroInvCumulativeKnuthGaussianRng(new KnuthUniformRng(seed)),
+                "InvCumulativeLecuyerGaussianRng" => new InvCumulativeLecuyerGaussianRng(new LecuyerUniformRng(seed)),
+                "MoroInvCumulativeLecuyerGaussianRng" => new MoroInvCumulativeLecuyerGaussianRng(new LecuyerUniformRng(seed)),
+                "InvCumulativeXoshiro256StarStarGaussianRng" =>
+                    new InvCumulativeXoshiro256StarStarGaussianRng(new Xoshiro256StarStarUniformRng(seed)),
+                "MoroInvCumulativeXoshiro256StarStarGaussianRng" =>
+                    new MoroInvCumulativeXoshiro256StarStarGaussianRng(new Xoshiro256StarStarUniformRng(seed)),
                 string other => throw new InvalidOperationException($"no composition {other}"),
             };
             var next = new double[draws];

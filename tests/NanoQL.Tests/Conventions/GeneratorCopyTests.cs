@@ -117,6 +117,14 @@ public class GeneratorCopyTests
             new MersenneTwisterUniformRng(7),
             new InverseCumulativeRng<MersenneTwisterUniformRng, MoroInverseCumulativeNormal>(new MersenneTwisterUniformRng(7)),
             new MoroInvCumulativeMersenneTwisterGaussianRng(new MersenneTwisterUniformRng(7)),
+            new KnuthUniformRng(7),
+            new LecuyerUniformRng(7),
+            new Ranlux3UniformRng(7),
+            new Ranlux4UniformRng(7),
+            new Xoshiro256StarStarUniformRng(7),
+            new BoxMullerLecuyerGaussianRng(new LecuyerUniformRng(7)),
+            new CLGaussianRng<Ranlux4UniformRng>(new Ranlux4UniformRng(7)),
+            new ZigguratXoshiro256StarStarGaussianRng(new Xoshiro256StarStarUniformRng(7)),
         ];
         foreach (IRng original in scalars)
         {
@@ -144,6 +152,16 @@ public class GeneratorCopyTests
             new SobolBrownianBridgeRsg(3, 4, SobolBrownianGeneratorBaseOrdering.Diagonal, 7),
             new Burley2020SobolRsg(40, 7, SobolRsgDirectionIntegers.Jaeckel, 9),
             new Burley2020SobolBrownianBridgeRsg(3, 4, SobolBrownianGeneratorBaseOrdering.Diagonal, 7, SobolRsgDirectionIntegers.JoeKuoD7, 9),
+            RandomSequenceGenerator.Create<KnuthUniformRng>(4, 7),
+            RandomSequenceGenerator.Create<LecuyerUniformRng>(4, 7),
+            RandomSequenceGenerator.Create<Ranlux3UniformRng>(4, 7),
+            RandomSequenceGenerator.Create<Ranlux4UniformRng>(4, 7),
+            new Xoshiro256StarStarUniformRsg(4, 7),
+            new ZigguratXoshiro256StarStarGaussianRsg(
+                4, new ZigguratXoshiro256StarStarGaussianRng(new Xoshiro256StarStarUniformRng(7))),
+            new FaureRsg(4),
+            new LatticeRsg(4, LatticeRule.GetRule(LatticeRuleType.A, 1024), 1024),
+            RandomizedLDS.Create<HaltonRsg, KnuthUniformRng>(new HaltonRsg(4, 7), 7),
         ];
         foreach (IRsg original in sequences)
         {
@@ -155,6 +173,7 @@ public class GeneratorCopyTests
             IRsg copy = original.Clone();
             Assert.NotSame(original, copy);
             Assert.IsType(original.GetType(), copy);
+            Assert.Equal(original.Dimension, copy.Dimension);
             Assert.Equal(original.LastSequence().Value.ToArray(), copy.LastSequence().Value.ToArray());
             Sample<ReadOnlyMemory<double>> a = original.NextSequence(), b = copy.NextSequence();
             Assert.Equal(a.Value.ToArray(), b.Value.ToArray());

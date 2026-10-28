@@ -92,6 +92,21 @@ internal static class CommonErrorHandlingFunctions
         }
     }
 
+    /// <summary><c>check_df_gt0_to_inf</c>: degrees of freedom must be positive, or +∞.</summary>
+    /// <param name="function">Boost's name of the calling function.</param>
+    /// <param name="df">The degrees of freedom.</param>
+    /// <exception cref="NanoQLException">The degrees of freedom aren't positive, or are NaN.</exception>
+    internal static void CheckDfGt0ToInf(string function, double df)
+    {
+        // df > 0 or +infinity are allowed.
+        if ((df <= 0) || double.IsNaN(df))
+        {
+            // is bad df <= 0 or NaN or -infinity.
+            throw new NanoQLException(
+                $"Error in function {function}: Degrees of freedom argument is {Show(df)}, but must be > 0 !");
+        }
+    }
+
     /// <summary>
     /// <c>check_positive_x</c>: a random variate must be finite and not below 0. This catches both an infinity and a
     /// NaN.

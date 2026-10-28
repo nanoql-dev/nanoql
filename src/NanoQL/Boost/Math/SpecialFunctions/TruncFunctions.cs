@@ -8,8 +8,8 @@
 namespace NanoQL.Numerics;
 
 /// <summary>
-/// Boost.Math's truncation towards zero (<c>trunc.hpp</c>): <c>trunc</c>, and <c>lltrunc</c>, which converts to
-/// <c>long long</c>.
+/// Boost.Math's truncation towards zero (<c>trunc.hpp</c>): <c>trunc</c>, and <c>itrunc</c> and <c>lltrunc</c>, which
+/// convert to <c>int</c> and <c>long long</c>.
 /// </summary>
 /// <remarks>
 /// Under the default policy a value that isn't finite, or whose truncation lies outside the target type, raises
@@ -30,6 +30,25 @@ internal static class TruncFunctions
         }
 
         return (v >= 0) ? Math.Floor(v) : Math.Ceiling(v);
+    }
+
+    /// <summary><c>itrunc(v)</c>: <paramref name="v"/> truncated towards zero to an <c>int</c>.</summary>
+    /// <param name="v">The value.</param>
+    /// <returns>The truncated value.</returns>
+    /// <exception cref="NanoQLException"><paramref name="v"/> isn't finite, or its truncation isn't an
+    /// <c>int</c>.</exception>
+    internal static int ITrunc(double v)
+    {
+        double r = Trunc(v);
+
+        // ldexp(1, std::numeric_limits<int>::digits), 2^31
+        const double maxVal = 2147483648.0;
+        if (r >= maxVal || r < -maxVal)
+        {
+            throw RoundFunctions.RoundingError("boost::math::itrunc<long double>(long double)", v);
+        }
+
+        return (int)r;
     }
 
     /// <summary><c>lltrunc(v)</c>: <paramref name="v"/> truncated towards zero to a <c>long long</c>.</summary>

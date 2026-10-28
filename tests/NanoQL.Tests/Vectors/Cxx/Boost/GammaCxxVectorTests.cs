@@ -7,8 +7,8 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// Boost's gamma family's harness vectors, <c>tests/vectors/cxx/boost/math/special_functions/gamma.json</c>:
-/// <c>tgamma</c>, <c>lgamma</c>, <c>tgamma1pm1</c>, the incomplete gamma with its derivative, and its two inverses,
-/// read through nanoql's internal <c>GammaFunctions</c> and <c>IgammaInverseFunctions</c>.
+/// <c>tgamma</c>, <c>lgamma</c>, <c>tgamma1pm1</c>, the incomplete gamma with its derivative, its two inverses, and
+/// <c>tgamma_delta_ratio</c>, read through nanoql's internal <c>GammaFunctions</c> and <c>IgammaInverseFunctions</c>.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class GammaCxxVectorTests
@@ -36,6 +36,9 @@ public class GammaCxxVectorTests
 
     private static readonly Func<double, double, double> GammaQInv =
         BoostInternals.Function<Func<double, double, double>>("IgammaInverseFunctions", "GammaQInv");
+
+    private static readonly Func<double, double, double> TGammaDeltaRatio =
+        BoostInternals.Function<Func<double, double, double>>("GammaFunctions", "TGammaDeltaRatio");
 
     [Fact]
     public void GammaCxxVector()
@@ -74,6 +77,10 @@ public class GammaCxxVectorTests
                     check.Output(c, "gammaQInv", Two(GammaQInv, a, p));
                     break;
                 }
+
+                case "tgamma_delta_ratio":
+                    check.Output(c, "tgammaDeltaRatio", Two(TGammaDeltaRatio, Reals(c, "z"), Reals(c, "delta")));
+                    break;
 
                 default:
                     throw new InvalidOperationException($"unknown case {c.Name}");

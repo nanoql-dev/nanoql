@@ -14,8 +14,9 @@ namespace NanoQL.Numerics;
 
 /// <summary>
 /// Boost.Math's gamma functions (<c>gamma.hpp</c>) for <c>double</c> under the default policy: <c>tgamma</c>,
-/// <c>lgamma</c>, <c>tgamma1pm1</c>, the regularised incomplete gammas <c>gamma_p</c> and <c>gamma_q</c>, and
-/// <c>gamma_p_derivative</c>, on Boost's Lanczos approximation <see cref="Lanczos13m53"/>. Boost promotes
+/// <c>lgamma</c>, <c>tgamma1pm1</c>, the regularised incomplete gammas <c>gamma_p</c> and <c>gamma_q</c>,
+/// <c>gamma_p_derivative</c> and <c>tgamma_delta_ratio</c>, on Boost's Lanczos approximation
+/// <see cref="Lanczos13m53"/>. Boost promotes
 /// <c>double</c> to <c>long double</c>, which under MSVC is <c>double</c>, so its errors name the
 /// <c>long double</c> instantiation; the public entries' last check, an infinite result's overflow as it narrows to
 /// the caller's type, names <c>double</c>. A domain error on an argument throws <see cref="ArgumentOutOfRangeException"/>;
@@ -419,6 +420,144 @@ internal static class GammaFunctions
         }
 
         return prefix;
+    }
+
+    /// <summary><c>tgamma_delta_ratio(z, delta)</c>: the ratio Γ(z)/Γ(z + δ).</summary>
+    /// <param name="z">The first argument.</param>
+    /// <param name="delta">The increment.</param>
+    /// <returns>Γ(z)/Γ(z + δ).</returns>
+    /// <exception cref="NanoQLException">A gamma function on the way has a pole or overflows, or the ratio
+    /// does.</exception>
+    internal static double TGammaDeltaRatio(double z, double delta) =>
+        CheckedNarrowing(TgammaDeltaRatioImp(z, delta), "boost::math::tgamma_delta_ratio<double>(double, double)");
+
+    // tgamma_delta_ratio_imp_lanczos_final(z, delta, pol, lanczos13m53)
+    private static double TgammaDeltaRatioImpLanczosFinal(double z, double delta)
+    {
+        double zgh = z + Lanczos13m53.G - 0.5;
+        double result;
+        if (z + delta == z)
+        {
+            // Given delta < z * eps
+            // and zgh > z
+            // Then this must follow:
+            // We have:
+            // result = exp((constants::half<T>() - z) * boost::math::log1p(delta / zgh, pol));
+            // 0.5 - z == -z
+            // log1p(delta / zgh) = delta / zgh = delta / z
+            // multiplying we get -delta.
+            result = Math.Exp(-delta);
+        }
+        else
+        {
+            if (Math.Abs(delta) < 10)
+            {
+                result = Math.Exp((0.5 - z) * Log1pFunctions.Log1p(delta / zgh));
+            }
+            else
+            {
+                result = Math.Pow(zgh / (zgh + delta), z - 0.5);
+            }
+
+            // Split the calculation up to avoid spurious overflow:
+            result *= Lanczos13m53.LanczosSum(z) / Lanczos13m53.LanczosSum(z + delta);
+        }
+
+        result *= Math.Pow(2.718281828459045235360287471352662497757 / (zgh + delta), delta);
+        return result;
+    }
+
+    // tgamma_delta_ratio_imp_lanczos(z, delta, pol, lanczos13m53)
+    private static double TgammaDeltaRatioImpLanczos(double z, double delta)
+    {
+        if (z < Epsilon)
+        {
+            //
+            // We get spurious numeric overflow unless we're very careful, this
+            // can occur either inside Lanczos::lanczos_sum(z) or in the
+            // final combination of terms, to avoid this, split the product up
+            // into 2 (or 3) parts:
+            //
+            // G(z) / G(L) = 1 / (z * G(L)) ; z < eps, L = z + delta = delta
+            //    z * G(L) = z * G(lim) * (G(L)/G(lim)) ; lim = largest factorial
+            //
+            if (UncheckedFactorialFunctions.MaxFactorial < delta)
+            {
+                double ratio = TgammaDeltaRatioImpLanczosFinal(delta, UncheckedFactorialFunctions.MaxFactorial - delta);
+                ratio *= z;
+                ratio *= UncheckedFactorialFunctions.UncheckedFactorial(UncheckedFactorialFunctions.MaxFactorial - 1);
+                return 1 / ratio;
+            }
+            else
+            {
+                return 1 / (z * TGamma(z + delta));
+            }
+        }
+
+        return TgammaDeltaRatioImpLanczosFinal(z, delta);
+    }
+
+    // tgamma_delta_ratio_imp(z, delta, pol)
+    private static double TgammaDeltaRatioImp(double z, double delta)
+    {
+        if ((z <= 0) || (z + delta <= 0))
+        {
+            // This isn't very sophisticated, or accurate, but it does work:
+            return TGamma(z) / TGamma(z + delta);
+        }
+
+        if (Math.Floor(delta) == delta)
+        {
+            if (Math.Floor(z) == z)
+            {
+                //
+                // Both z and delta are integers, see if we can just use table lookup
+                // of the factorials to get the result:
+                //
+                if ((z <= UncheckedFactorialFunctions.MaxFactorial) && (z + delta <= UncheckedFactorialFunctions.MaxFactorial))
+                {
+                    return UncheckedFactorialFunctions.UncheckedFactorial((int)((uint)TruncFunctions.ITrunc(z) - 1))
+                        / UncheckedFactorialFunctions.UncheckedFactorial((int)((uint)TruncFunctions.ITrunc(z + delta) - 1));
+                }
+            }
+
+            if (Math.Abs(delta) < 20)
+            {
+                //
+                // delta is a small integer, we can use a finite product:
+                //
+                if (delta == 0)
+                {
+                    return 1;
+                }
+
+                if (delta < 0)
+                {
+                    z -= 1;
+                    double result = z;
+                    while ((delta += 1) != 0)
+                    {
+                        z -= 1;
+                        result *= z;
+                    }
+
+                    return result;
+                }
+                else
+                {
+                    double result = 1 / z;
+                    while ((delta -= 1) != 0)
+                    {
+                        z += 1;
+                        result /= z;
+                    }
+
+                    return result;
+                }
+            }
+        }
+
+        return TgammaDeltaRatioImpLanczos(z, delta);
     }
 
     // tgamma(z), with Lanczos support

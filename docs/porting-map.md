@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 237 | 25 |
-| partial | 19 | 27 |
-| ported | 1,004 | 128 |
+| not started | 221 | 23 |
+| partial | 19 | 24 |
+| ported | 1,020 | 133 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -801,12 +801,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `binomialdistribution` | ported | Numerics/Distributions/BinomialDistribution/BinomialDistribution.cs, Numerics/Distributions/BinomialDistribution/BinomialDistributionFunctions.cs, Numerics/Distributions/BinomialDistribution/CumulativeBinomialDistribution.cs |  |
 | `bivariatenormaldistribution` | ported | Numerics/Distributions/BivariateNormalDistribution/BivariateCumulativeNormalDistributionDr78.cs, Numerics/Distributions/BivariateNormalDistribution/BivariateCumulativeNormalDistributionWe04DP.cs |  |
-| `bivariatestudenttdistribution` | not started |  | no nanoql type: BivariateCumulativeStudentDistribution |
+| `bivariatestudenttdistribution` | ported | Numerics/Distributions/BivariateCumulativeStudentDistribution.cs |  |
 | `chisquaredistribution` | ported | Numerics/Distributions/ChiSquareDistribution/CumulativeChiSquareDistribution.cs, Numerics/Distributions/ChiSquareDistribution/InverseNonCentralCumulativeChiSquareDistribution.cs, Numerics/Distributions/ChiSquareDistribution/NonCentralCumulativeChiSquareDistribution.cs, Numerics/Distributions/ChiSquareDistribution/NonCentralCumulativeChiSquareSankaranApprox.cs |  |
 | `gammadistribution` | ported | Numerics/Distributions/CumulativeGammaDistribution.cs, Numerics/Distributions/GammaFunction.cs |  |
 | `normaldistribution` | ported | Numerics/Distributions/NormalDistribution/CumulativeNormalDistribution.cs, Numerics/Distributions/NormalDistribution/InverseCumulativeNormal.cs, Numerics/Distributions/NormalDistribution/MaddockCumulativeNormal.cs, Numerics/Distributions/NormalDistribution/MaddockInverseCumulativeNormal.cs, Numerics/Distributions/NormalDistribution/MoroInverseCumulativeNormal.cs, Numerics/Distributions/NormalDistribution/NormalDistribution.cs |  |
 | `poissondistribution` | ported | Numerics/Distributions/PoissonDistribution/CumulativePoissonDistribution.cs, Numerics/Distributions/PoissonDistribution/InverseCumulativePoisson.cs, Numerics/Distributions/PoissonDistribution/PoissonDistribution.cs |  |
-| `studenttdistribution` | not started |  | no nanoql type: StudentDistribution, CumulativeStudentDistribution, InverseCumulativeStudent |
+| `studenttdistribution` | ported | Numerics/Distributions/StudentTDistribution/CumulativeStudentDistribution.cs, Numerics/Distributions/StudentTDistribution/InverseCumulativeStudent.cs, Numerics/Distributions/StudentTDistribution/StudentDistribution.cs |  |
 
 ### `ql/math/integrals/`
 
@@ -926,29 +926,29 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `boxmullergaussianrng` | not started |  | no nanoql type: BoxMullerGaussianRng |
+| `boxmullergaussianrng` | ported | Numerics/RandomNumbers/BoxMullerGaussianRng/BoxMullerGaussianRng{TRng}.cs, Numerics/RandomNumbers/BoxMullerGaussianRng/BoxMullerKnuthGaussianRng.cs, Numerics/RandomNumbers/BoxMullerGaussianRng/BoxMullerLecuyerGaussianRng.cs, Numerics/RandomNumbers/BoxMullerGaussianRng/BoxMullerMersenneTwisterGaussianRng.cs, Numerics/RandomNumbers/BoxMullerGaussianRng/BoxMullerXoshiro256StarStarGaussianRng.cs |  |
 | `burley2020sobolrsg` | ported | Numerics/RandomNumbers/Burley2020SobolRsg.cs |  |
-| `centrallimitgaussianrng` | not started |  | no nanoql type: CLGaussianRng |
-| `faurersg` | not started |  | no nanoql type: FaureRsg |
+| `centrallimitgaussianrng` | ported | Numerics/RandomNumbers/CentralLimitGaussianRng/CLGaussianRng{TRng}.cs, Numerics/RandomNumbers/CentralLimitGaussianRng/CentralLimitKnuthGaussianRng.cs, Numerics/RandomNumbers/CentralLimitGaussianRng/CentralLimitLecuyerGaussianRng.cs, Numerics/RandomNumbers/CentralLimitGaussianRng/CentralLimitMersenneTwisterGaussianRng.cs, Numerics/RandomNumbers/CentralLimitGaussianRng/CentralLimitXoshiro256StarStarGaussianRng.cs |  |
+| `faurersg` | ported | Numerics/RandomNumbers/FaureRsg.cs |  |
 | `haltonrsg` | ported | Numerics/RandomNumbers/HaltonRsg.cs |  |
-| `inversecumulativerng` | ported | Numerics/RandomNumbers/InverseCumulativeRng/IInverseCumulative.cs, Numerics/RandomNumbers/InverseCumulativeRng/InvCumulativeMersenneTwisterGaussianRng.cs, Numerics/RandomNumbers/InverseCumulativeRng/InverseCumulativeRng{TRng,TIc}.cs, Numerics/RandomNumbers/InverseCumulativeRng/MoroInvCumulativeMersenneTwisterGaussianRng.cs |  |
-| `inversecumulativersg` | ported | Numerics/RandomNumbers/InverseCumulativeRsg/IRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/ISeedableRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeHaltonGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeMersenneTwisterGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeSobolGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InverseCumulativeRsg{TUsg,TIc}.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeHaltonGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeMersenneTwisterGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeSobolGaussianRsg.cs |  |
-| `knuthuniformrng` | not started |  | no nanoql type: KnuthUniformRng |
-| `latticersg` | not started |  | no nanoql type: LatticeRsg |
-| `latticerules` | not started |  | no nanoql type: LatticeRule, LatticeRuleType |
-| `lecuyeruniformrng` | not started |  | no nanoql type: LecuyerUniformRng |
+| `inversecumulativerng` | ported | Numerics/RandomNumbers/InverseCumulativeRng/IInverseCumulative.cs, Numerics/RandomNumbers/InverseCumulativeRng/InvCumulativeKnuthGaussianRng.cs, Numerics/RandomNumbers/InverseCumulativeRng/InvCumulativeLecuyerGaussianRng.cs, Numerics/RandomNumbers/InverseCumulativeRng/InvCumulativeMersenneTwisterGaussianRng.cs, Numerics/RandomNumbers/InverseCumulativeRng/InvCumulativeXoshiro256StarStarGaussianRng.cs, Numerics/RandomNumbers/InverseCumulativeRng/InverseCumulativeRng{TRng,TIc}.cs, Numerics/RandomNumbers/InverseCumulativeRng/MoroInvCumulativeKnuthGaussianRng.cs, Numerics/RandomNumbers/InverseCumulativeRng/MoroInvCumulativeLecuyerGaussianRng.cs, Numerics/RandomNumbers/InverseCumulativeRng/MoroInvCumulativeMersenneTwisterGaussianRng.cs, Numerics/RandomNumbers/InverseCumulativeRng/MoroInvCumulativeXoshiro256StarStarGaussianRng.cs |  |
+| `inversecumulativersg` | ported | Numerics/RandomNumbers/InverseCumulativeRsg/IRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/ISeedableRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeHaltonGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeKnuthGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeLecuyerGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeMersenneTwisterGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeSobolGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InvCumulativeXoshiro256StarStarGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/InverseCumulativeRsg{TUsg,TIc}.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeHaltonGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeKnuthGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeLecuyerGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeMersenneTwisterGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeSobolGaussianRsg.cs, Numerics/RandomNumbers/InverseCumulativeRsg/MoroInvCumulativeXoshiro256StarStarGaussianRsg.cs |  |
+| `knuthuniformrng` | ported | Numerics/RandomNumbers/KnuthUniformRng.cs |  |
+| `latticersg` | ported | Numerics/RandomNumbers/LatticeRsg.cs |  |
+| `latticerules` | ported | Numerics/RandomNumbers/LatticeRules/LatticeRule.cs, Numerics/RandomNumbers/LatticeRules/LatticeRuleType.cs |  |
+| `lecuyeruniformrng` | ported | Numerics/RandomNumbers/LecuyerUniformRng.cs |  |
 | `mt19937uniformrng` | ported | Numerics/RandomNumbers/MersenneTwisterUniformRng.cs |  |
 | `primitivepolynomials` | ported | Numerics/RandomNumbers/PrimitivePolynomials.cs |  |
-| `randomizedlds` | not started |  | no nanoql type: RandomizedLDS |
-| `randomsequencegenerator` | ported | Numerics/RandomNumbers/RandomSequenceGenerator/IInt32Rng.cs, Numerics/RandomNumbers/RandomSequenceGenerator/IRng.cs, Numerics/RandomNumbers/RandomSequenceGenerator/ISeedableRng.cs, Numerics/RandomNumbers/RandomSequenceGenerator/MersenneTwisterUniformRsg.cs, Numerics/RandomNumbers/RandomSequenceGenerator/RandomSequenceGenerator.cs, Numerics/RandomNumbers/RandomSequenceGenerator/RandomSequenceGenerator{TRng}.cs |  |
-| `ranluxuniformrng` | not started |  | no nanoql type: Ranlux64UniformRng, Ranlux3UniformRng, Ranlux4UniformRng |
+| `randomizedlds` | ported | Numerics/RandomNumbers/RandomizedLDS/RandomizedLDS.cs, Numerics/RandomNumbers/RandomizedLDS/RandomizedLDS{TLds,TPrng}.cs |  |
+| `randomsequencegenerator` | ported | Numerics/RandomNumbers/RandomSequenceGenerator/IInt32Rng.cs, Numerics/RandomNumbers/RandomSequenceGenerator/IRng.cs, Numerics/RandomNumbers/RandomSequenceGenerator/ISeedableRng.cs, Numerics/RandomNumbers/RandomSequenceGenerator/KnuthUniformRsg.cs, Numerics/RandomNumbers/RandomSequenceGenerator/LecuyerUniformRsg.cs, Numerics/RandomNumbers/RandomSequenceGenerator/MersenneTwisterUniformRsg.cs, Numerics/RandomNumbers/RandomSequenceGenerator/RandomSequenceGenerator.cs, Numerics/RandomNumbers/RandomSequenceGenerator/RandomSequenceGenerator{TRng}.cs, Numerics/RandomNumbers/RandomSequenceGenerator/Xoshiro256StarStarUniformRsg.cs, Numerics/RandomNumbers/RandomSequenceGenerator/ZigguratXoshiro256StarStarGaussianRsg.cs |  |
+| `ranluxuniformrng` | ported | Numerics/RandomNumbers/RanluxUniformRng/Ranlux3UniformRng.cs, Numerics/RandomNumbers/RanluxUniformRng/Ranlux4UniformRng.cs, Numerics/RandomNumbers/RanluxUniformRng/Ranlux64UniformRng.cs |  |
 | `rngtraits` | ported | Numerics/RandomNumbers/RngTraits/GenericLowDiscrepancy{TUrsg,TIc}.cs, Numerics/RandomNumbers/RngTraits/GenericPseudoRandom{TUrng,TIc}.cs, Numerics/RandomNumbers/RngTraits/IRngTraits.cs, Numerics/RandomNumbers/RngTraits/LowDiscrepancy.cs, Numerics/RandomNumbers/RngTraits/PoissonPseudoRandom.cs, Numerics/RandomNumbers/RngTraits/PseudoRandom.cs |  |
 | `seedgenerator` | replaced: explicit seeds | Numerics/RandomNumbers/Seeds.cs |  |
 | `sobolbrownianbridgersg` | ported | Numerics/RandomNumbers/SobolBrownianBridgeRsg/Burley2020SobolBrownianBridgeRsg.cs, Numerics/RandomNumbers/SobolBrownianBridgeRsg/SobolBrownianBridgeRsg.cs |  |
 | `sobolrsg` | ported | Numerics/RandomNumbers/SobolRsg/SobolRsg.cs, Numerics/RandomNumbers/SobolRsg/SobolRsgDirectionIntegers.cs, Numerics/RandomNumbers/SobolRsg/SobolRsgTables.cs |  |
-| `stochasticcollocationinvcdf` | not started |  | no nanoql type: StochasticCollocationInvCDF |
-| `xoshiro256starstaruniformrng` | not started |  | no nanoql type: Xoshiro256StarStarUniformRng |
-| `zigguratgaussianrng` | not started |  | no nanoql type: ZigguratGaussianRng |
+| `stochasticcollocationinvcdf` | ported | Numerics/RandomNumbers/StochasticCollocationInvCDF.cs |  |
+| `xoshiro256starstaruniformrng` | ported | Numerics/RandomNumbers/Xoshiro256StarStarUniformRng.cs |  |
+| `zigguratgaussianrng` | ported | Numerics/RandomNumbers/ZigguratGaussianRng/IInt64Rng.cs, Numerics/RandomNumbers/ZigguratGaussianRng/ZigguratGaussianRng{TRng}.cs, Numerics/RandomNumbers/ZigguratGaussianRng/ZigguratXoshiro256StarStarGaussianRng.cs |  |
 
 ### `ql/math/solvers1d/`
 
@@ -971,10 +971,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `convergencestatistics` | ported | Numerics/Statistics/ConvergenceStatistics/ConvergenceStatistics{TStats,TRule}.cs, Numerics/Statistics/ConvergenceStatistics/DoublingConvergenceSteps.cs, Numerics/Statistics/ConvergenceStatistics/IConvergenceSteps.cs |  |
-| `discrepancystatistics` | not started |  | no nanoql type: DiscrepancyStatistics |
+| `discrepancystatistics` | ported | Numerics/Statistics/DiscrepancyStatistics.cs |  |
 | `gaussianstatistics` | ported | Numerics/Statistics/GaussianStatistics/GaussianStatisticsExtensions.cs, Numerics/Statistics/GaussianStatistics/ISummaryStatistics.cs, Numerics/Statistics/GaussianStatistics/StatsHolder.cs | no nanoql type: GenericGaussianStatistics, GaussianStatistics |
 | `generalstatistics` | ported | Numerics/Statistics/GeneralStatistics/GeneralStatistics.cs, Numerics/Statistics/GeneralStatistics/IEmpiricalStatistics.cs, Numerics/Statistics/GeneralStatistics/IStatistics.cs |  |
-| `histogram` | not started |  | no nanoql type: Histogram, HistogramAlgorithm |
+| `histogram` | ported | Numerics/Statistics/Histogram/Histogram.cs, Numerics/Statistics/Histogram/HistogramAlgorithm.cs |  |
 | `incrementalstatistics` | ported | Numerics/Statistics/IncrementalStatistics.cs |  |
 | `riskstatistics` | ported | Numerics/Statistics/RiskStatisticsExtensions.cs | no nanoql type: GenericRiskStatistics, RiskStatistics |
 | `sequencestatistics` | ported | Numerics/Statistics/SequenceStatistics/GenericSequenceStatisticsExtensions.cs, Numerics/Statistics/SequenceStatistics/GenericSequenceStatistics{TStats}.cs, Numerics/Statistics/SequenceStatistics/SequenceStatistics.cs, Numerics/Statistics/SequenceStatistics/SequenceStatisticsInc.cs |  |
@@ -2114,7 +2114,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `defaultprobabilitycurves` | ported | TestSuite/DefaultProbabilityCurvesTests.cs | 10 of 10 cases |
 | `digitalcoupon` | ported | TestSuite/DigitalCouponTests.cs | 8 of 8 cases |
 | `digitaloption` | ported | TestSuite/DigitalOptionTests.cs | 10 of 10 cases |
-| `distributions` | partial | TestSuite/DistributionsTests.cs | 14 of 21 cases; not yet: testInverseCumulativeStudent, testStudentDistribution, testBivariateCumulativeStudent, testBivariateCumulativeStudentInvalidParameters, testBivariateCumulativeStudentBoundaryContinuity, testBivariateCumulativeStudentVsBivariate, testInvCDFviaStochasticCollocation |
+| `distributions` | ported | TestSuite/DistributionsTests.cs | 21 of 21 cases |
 | `dividendoption` | partial | TestSuite/DividendOptionTests.cs | 17 of 18 cases; not yet: testEuropeanEndLimit |
 | `doublebarrieroption` | partial | TestSuite/DoubleBarrierOptionTests.cs | 1 of 3 cases; not yet: testVannaVolgaDoubleBarrierValues, testMonteCarloDoubleBarrierWithAnalytical |
 | `doublebinaryoption` | ported | TestSuite/DoubleBinaryOptionTests.cs | 2 of 2 cases; moved: testHaugValues line 171 to Divergences/DoubleBinaryKnockedInTests.cs; testHaugValues line 172 to Divergences/DoubleBinaryKnockedInTests.cs |
@@ -2167,7 +2167,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `libormarketmodelprocess` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
 | `linearleastsquaresregression` | not started |  | 3 cases |
 | `lookbackoptions` | ported | TestSuite/LookbackOptionsTests.cs | 5 of 5 cases |
-| `lowdiscrepancysequences` | partial | TestSuite/LowDiscrepancySequencesTests.cs | 8 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs; not yet: testRandomizedLowDiscrepancySequence, testRandomizedLattices, testFaure, testMersenneTwisterDiscrepancy, testPlainHaltonDiscrepancy, testRandomStartHaltonDiscrepancy, testRandomShiftHaltonDiscrepancy, testRandomStartRandomShiftHaltonDiscrepancy, testJackelSobolDiscrepancy, testSobolLevitanSobolDiscrepancy, testSobolLevitanLemieuxSobolDiscrepancy, testUnitSobolDiscrepancy |
+| `lowdiscrepancysequences` | ported | TestSuite/LowDiscrepancySequencesTests.cs | 20 of 20 cases; replaced: testSeedGenerator by Divergences/SeedZeroTests.cs |
 | `margrabeoption` | ported | TestSuite/MargrabeOptionTests.cs | 3 of 3 cases; moved: testEuroExchangeTwoAssets line 250 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 259 to Divergences/MargrabeGreeksQuantityTests.cs; testEuroExchangeTwoAssets line 268 to Divergences/MargrabeGreeksQuantityTests.cs |
 | `marketmodel` | ported | TestSuite/MarketModelTests.cs | 18 of 19 cases; not ported: testAbcdVolatilityCompare (it checks AbcdFunction against the legacy LIBOR model's LmExtLinearExponentialVolModel, which isn't ported) |
 | `marketmodel_cms` | ported | TestSuite/MarketModelCmsTests.cs | 1 of 1 cases |
@@ -2215,7 +2215,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `rangeaccrual` | ported | TestSuite/RangeAccrualTests.cs | 3 of 3 cases |
 | `riskneutraldensitycalculator` | ported | TestSuite/RiskNeutralDensityCalculatorTests.cs | 14 of 14 cases |
 | `riskstats` | ported | TestSuite/RiskStatsTests.cs | 1 of 1 cases |
-| `rngtraits` | partial | TestSuite/RngTraitsTests.cs | 3 of 4 cases; not yet: testRanLux |
+| `rngtraits` | ported | TestSuite/RngTraitsTests.cs | 4 of 4 cases |
 | `roughhestonmodel` | ported | TestSuite/RoughHestonModelTests.cs | 24 of 24 cases |
 | `rounding` | ported | TestSuite/RoundingTests.cs | 5 of 5 cases |
 | `schedule` | ported | TestSuite/ScheduleTests.cs | 28 of 28 cases |
@@ -2250,7 +2250,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `varianceswaps` | ported | TestSuite/VarianceSwapsTests.cs | 2 of 2 cases |
 | `volatilitymodels` | ported | TestSuite/VolatilityModelsTests.cs | 1 of 1 cases |
 | `vpp` | not started |  | 6 cases |
-| `xoshiro256starstar` | not started |  | 3 cases |
+| `xoshiro256starstar` | ported | TestSuite/Xoshiro256StarStarTests.cs | 3 of 3 cases |
 | `zabr` | ported | TestSuite/ZabrTests.cs | 1 of 1 cases |
 | `zerocouponswap` | ported | TestSuite/ZeroCouponSwapTests.cs | 6 of 6 cases |
-| `zigguratgaussian` | not started |  | 2 cases |
+| `zigguratgaussian` | ported | TestSuite/ZigguratGaussianTests.cs | 2 of 2 cases |

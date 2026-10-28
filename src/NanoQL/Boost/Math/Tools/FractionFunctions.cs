@@ -8,8 +8,9 @@
 namespace NanoQL.Numerics;
 
 /// <summary>
-/// Boost.Math's continued fractions (<c>fraction.hpp</c>): <c>continued_fraction_a</c> by the modified Lentz algorithm,
-/// a generator returning each step's (a, b), the form the incomplete gamma reads.
+/// Boost.Math's continued fractions (<c>fraction.hpp</c>) by the modified Lentz algorithm, a generator returning each
+/// step's (a, b): <c>continued_fraction_a</c>, the form the incomplete gamma reads, and <c>continued_fraction_b</c>,
+/// the incomplete beta's.
 /// </summary>
 internal static class FractionFunctions
 {
@@ -89,5 +90,57 @@ internal static class FractionFunctions
     {
         ulong maxIter = ulong.MaxValue;
         return ContinuedFractionA(ref g, factor, ref maxIter);
+    }
+
+    /// <summary>
+    /// <c>continued_fraction_b(g, factor, max_terms)</c>: b0 + a1/(b1 + a2/(b2 + a3/(b3 + …))), the first a discarded.
+    /// </summary>
+    /// <typeparam name="TGenerator">The generator's type.</typeparam>
+    /// <param name="g">The generator.</param>
+    /// <param name="factor">The relative accuracy of the last step.</param>
+    /// <param name="maxTerms">The most terms; on return, the number used.</param>
+    /// <returns>The fraction.</returns>
+    internal static double ContinuedFractionB<TGenerator>(ref TGenerator g, double factor, ref ulong maxTerms)
+        where TGenerator : struct, IGenerator
+    {
+        double terminator = Math.Abs(factor);
+
+        (double a, double b) v = g.Next();
+
+        double f, c, d, delta;
+        f = v.b;
+        if (f == 0)
+        {
+            f = Tiny;
+        }
+
+        c = f;
+        d = 0;
+
+        ulong counter = maxTerms;
+        do
+        {
+            v = g.Next();
+            d = v.b + (v.a * d);
+            if (d == 0)
+            {
+                d = Tiny;
+            }
+
+            c = v.b + (v.a / c);
+            if (c == 0)
+            {
+                c = Tiny;
+            }
+
+            d = 1 / d;
+            delta = c * d;
+            f *= delta;
+        }
+        while ((Math.Abs(delta - 1) > terminator) && (--counter != 0));
+
+        maxTerms -= counter;
+
+        return f;
     }
 }

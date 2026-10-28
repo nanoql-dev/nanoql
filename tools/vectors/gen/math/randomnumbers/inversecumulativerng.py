@@ -5,7 +5,9 @@ compositions of it over MersenneTwisterUniformRng, each a SWIG %template of the 
 InvCumulativeMersenneTwisterGaussianRng (InverseCumulativeNormal) and MoroInvCumulativeMersenneTwisterGaussianRng
 (MoroInverseCumulativeNormal), whose inverse cumulative is its default construction, never assigned. For seeds 1, 1234
 and 4294967295, each records its first 500 draws of next() and the last draw's weight. The wheel's
-MersenneTwisterUniformRng takes the seed as a signed 32-bit BigInteger, so 4294967295 reaches it as -1. Read back by
+MersenneTwisterUniformRng takes the seed as a signed 32-bit BigInteger, so 4294967295 reaches it as -1. The wheel's
+compositions over KnuthUniformRng, LecuyerUniformRng and Xoshiro256StarStarUniformRng likewise, for seeds 1, 1234 and
+2147483647 (below 2^31, where the signed seed and nanoql's agree). Read back by
 tests/NanoQL.Tests/Vectors/Numerics/RandomNumbers/InverseCumulativeRngVectorTests.cs."""
 import os
 import sys
@@ -23,6 +25,11 @@ SEEDS = [1, 1234, 4294967295]
 DRAWS = 500
 COMPOSITIONS = [("InvCumulativeMersenneTwisterGaussianRng", ql.InvCumulativeMersenneTwisterGaussianRng),
                 ("MoroInvCumulativeMersenneTwisterGaussianRng", ql.MoroInvCumulativeMersenneTwisterGaussianRng)]
+SEEDS_32 = [1, 1234, 2147483647]
+COMPOSITIONS_32 = [(f"{prefix}{kind}GaussianRng", getattr(ql, f"{prefix}{kind}GaussianRng"),
+                    getattr(ql, f"{kind}UniformRng"))
+                   for kind in ("Knuth", "Lecuyer", "Xoshiro256StarStar")
+                   for prefix in ("InvCumulative", "MoroInvCumulative")]
 
 
 def wheel_seed(seed):
@@ -36,6 +43,15 @@ def cases():
         for seed in SEEDS:
             st = v.settings(ql.Date(15, ql.October, 2026))
             rng = composition(ql.MersenneTwisterUniformRng(wheel_seed(seed)))
+            samples = [rng.next() for _ in range(DRAWS)]
+            out.append({"name": f"{name}, seed {seed}",
+                        "inputs": {"settings": st, "composition": name, "seed": seed, "draws": DRAWS},
+                        "expected": {"next": [v.enc(s.value()) for s in samples],
+                                     "lastWeight": v.enc(samples[-1].weight())}})
+    for name, composition, uniform in COMPOSITIONS_32:
+        for seed in SEEDS_32:
+            st = v.settings(ql.Date(15, ql.October, 2026))
+            rng = composition(uniform(seed))
             samples = [rng.next() for _ in range(DRAWS)]
             out.append({"name": f"{name}, seed {seed}",
                         "inputs": {"settings": st, "composition": name, "seed": seed, "draws": DRAWS},

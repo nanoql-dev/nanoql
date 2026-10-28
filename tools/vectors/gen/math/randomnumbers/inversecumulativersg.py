@@ -11,7 +11,9 @@ cumulative's default construction and the uniform generator built from a Mersenn
 default too and, for the Mersenne Twister ones, MersenneTwisterUniformRsg's seed constructor; and seed 4294967295 with
 the inverse cumulative given (average 0.5, sigma 2). Each records its first 50 nextSequence draws, the last draw's
 weight and its dimension. The wheel's MersenneTwisterUniformRng and SobolRsg take the seed as a signed 32-bit
-BigInteger, so 4294967295 reaches them as -1; HaltonRsg and the seed constructor take it unsigned. Read back by
+BigInteger, so 4294967295 reaches them as -1; HaltonRsg and the seed constructor take it unsigned. The wheel's
+compositions over KnuthUniformRsg, LecuyerUniformRsg and Xoshiro256StarStarUniformRsg likewise, their third seed
+2147483647 (below 2^31, where the wheel's signed seed and nanoql's agree). Read back by
 tests/NanoQL.Tests/Vectors/Numerics/RandomNumbers/InverseCumulativeRsgVectorTests.cs."""
 import os
 import sys
@@ -43,6 +45,13 @@ COMPOSITIONS = [
 ]
 
 
+GENERATORS_32 = [(1, "rng", None), (42, "seed", None), (2147483647, "rng", {"average": 0.5, "sigma": 2.0})]
+COMPOSITIONS_32 = [(f"{prefix}{kind}GaussianRsg", getattr(ql, f"{prefix}{kind}GaussianRsg"), kind,
+                    ql.InverseCumulativeNormal if prefix == "InvCumulative" else ql.MoroInverseCumulativeNormal)
+                   for kind in ("Knuth", "Lecuyer", "Xoshiro256StarStar")
+                   for prefix in ("InvCumulative", "MoroInvCumulative")]
+
+
 def wheel_seed(seed):
     """The seed as the wheel's signed 32-bit BigInteger carries it."""
     return seed - 2**32 if seed > 2**31 - 1 else seed
@@ -55,13 +64,19 @@ def uniform(kind, seed, construction):
         return ql.MersenneTwisterUniformRsg(DIMENSION, ql.MersenneTwisterUniformRng(wheel_seed(seed)))
     if kind == "Halton":
         return ql.HaltonRsg(DIMENSION, seed)
+    if kind in ("Knuth", "Lecuyer", "Xoshiro256StarStar"):
+        rsg = getattr(ql, f"{kind}UniformRsg")
+        if construction == "seed":
+            return rsg(DIMENSION, seed)
+        return rsg(DIMENSION, getattr(ql, f"{kind}UniformRng")(seed))
     return ql.SobolRsg(DIMENSION, wheel_seed(seed))
 
 
 def cases():
     out = []
-    for name, composition, kind, inverse in COMPOSITIONS:
-        for seed, construction, ic in GENERATORS:
+    for name, composition, kind, inverse, generators in (
+            [c + (GENERATORS,) for c in COMPOSITIONS] + [c + (GENERATORS_32,) for c in COMPOSITIONS_32]):
+        for seed, construction, ic in generators:
             st = v.settings(ql.Date(15, ql.October, 2026))
             usg = uniform(kind, seed, construction)
             rsg = composition(usg) if ic is None else composition(usg, inverse(ic["average"], ic["sigma"]))

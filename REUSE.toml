@@ -42,3 +42,11 @@ SPDX-FileCopyrightText = [
   "Copyright (C) 2013 Cheng Li", "Copyright (c) 2008, Frances Y. Kuo and Stephen Joe",
 ]
 SPDX-License-Identifier = "BSD-3-Clause AND LicenseRef-JoeKuo"
+
+# QuantLib's lattice rules' generating vectors (Cools, Kuo and Nuyens), generated from latticerules.cpp by
+# tools/tables/latticerules.py: data only.
+[[annotations]]
+path = "src/NanoQL/Numerics/RandomNumbers/LatticeRules/LatticeRules.bin"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Copyright (C) 2007 Mark Joshi"
+SPDX-License-Identifier = "BSD-3-Clause"

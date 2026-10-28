@@ -60,6 +60,15 @@ public class InverseCumulativeRsgVectorTests
         MersenneTwisterUniformRsg MersenneTwister() => c.String("construction") == "seed"
             ? new MersenneTwisterUniformRsg(dimension, seed)
             : new MersenneTwisterUniformRsg(dimension, new MersenneTwisterUniformRng(seed));
+        KnuthUniformRsg Knuth() => c.String("construction") == "seed"
+            ? new KnuthUniformRsg(dimension, seed)
+            : new KnuthUniformRsg(dimension, new KnuthUniformRng(seed));
+        LecuyerUniformRsg Lecuyer() => c.String("construction") == "seed"
+            ? new LecuyerUniformRsg(dimension, seed)
+            : new LecuyerUniformRsg(dimension, new LecuyerUniformRng(seed));
+        Xoshiro256StarStarUniformRsg Xoshiro() => c.String("construction") == "seed"
+            ? new Xoshiro256StarStarUniformRsg(dimension, seed)
+            : new Xoshiro256StarStarUniformRsg(dimension, new Xoshiro256StarStarUniformRng(seed));
         return c.String("composition") switch
         {
             "InvCumulativeMersenneTwisterGaussianRsg" => given
@@ -80,6 +89,24 @@ public class InverseCumulativeRsgVectorTests
             "MoroInvCumulativeSobolGaussianRsg" => given
                 ? new MoroInvCumulativeSobolGaussianRsg(new SobolRsg(dimension, seed), new MoroInverseCumulativeNormal(average, sigma))
                 : new MoroInvCumulativeSobolGaussianRsg(new SobolRsg(dimension, seed)),
+            "InvCumulativeKnuthGaussianRsg" => given
+                ? new InvCumulativeKnuthGaussianRsg(Knuth(), new InverseCumulativeNormal(average, sigma))
+                : new InvCumulativeKnuthGaussianRsg(Knuth()),
+            "MoroInvCumulativeKnuthGaussianRsg" => given
+                ? new MoroInvCumulativeKnuthGaussianRsg(Knuth(), new MoroInverseCumulativeNormal(average, sigma))
+                : new MoroInvCumulativeKnuthGaussianRsg(Knuth()),
+            "InvCumulativeLecuyerGaussianRsg" => given
+                ? new InvCumulativeLecuyerGaussianRsg(Lecuyer(), new InverseCumulativeNormal(average, sigma))
+                : new InvCumulativeLecuyerGaussianRsg(Lecuyer()),
+            "MoroInvCumulativeLecuyerGaussianRsg" => given
+                ? new MoroInvCumulativeLecuyerGaussianRsg(Lecuyer(), new MoroInverseCumulativeNormal(average, sigma))
+                : new MoroInvCumulativeLecuyerGaussianRsg(Lecuyer()),
+            "InvCumulativeXoshiro256StarStarGaussianRsg" => given
+                ? new InvCumulativeXoshiro256StarStarGaussianRsg(Xoshiro(), new InverseCumulativeNormal(average, sigma))
+                : new InvCumulativeXoshiro256StarStarGaussianRsg(Xoshiro()),
+            "MoroInvCumulativeXoshiro256StarStarGaussianRsg" => given
+                ? new MoroInvCumulativeXoshiro256StarStarGaussianRsg(Xoshiro(), new MoroInverseCumulativeNormal(average, sigma))
+                : new MoroInvCumulativeXoshiro256StarStarGaussianRsg(Xoshiro()),
             string other => throw new InvalidOperationException($"no composition {other}"),
         };
     }

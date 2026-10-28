@@ -6,7 +6,9 @@ computed by the C++ harness: tgamma, lgamma and tgamma1pm1 over the poles' neigh
 Lanczos regions and past the overflow; gamma_p, gamma_q and gamma_p_derivative over shapes from 1e-5 to 1e6 at points
 relative to the shape, which reach each of the incomplete gamma's evaluation methods (the series, the continued
 fraction, Temme's large-shape expansion, the small-shape and integer and half-integer forms); gamma_p_inv and
-gamma_q_inv over the same shapes at probabilities from 1e-300 to 1; and the refused arguments. Read back by
+gamma_q_inv over the same shapes at probabilities from 1e-300 to 1; tgamma_delta_ratio over
+arguments from 1e-20 to 1e5 and increments from -20 to 200, which reach its table, finite-product and Lanczos routes;
+and the refused arguments. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Boost/GammaCxxVectorTests.cs through nanoql's GammaFunctions and
 IgammaInverseFunctions."""
 import os
@@ -41,6 +43,8 @@ ABSOLUTE = [0.0, 1e-300, 1e-20, 1e-5, 0.1, 0.5, 0.75, 1.1, 1.5, 2.0, 5.0, 20.0, 
 PROBABILITIES = [0.0, 1e-300, 1e-100, 1e-30, 1e-15, 1e-10, 1e-5, 1e-3, 0.01, 0.05, 0.1, 0.3, 0.5, 0.7, 0.9, 0.95,
                  0.99, 0.999, 1 - 1e-6, 1 - 1e-12, 1.0]
 REFUSED_AX = [(0.0, 1.0), (-1.0, 1.0), (NAN, 1.0), (2.0, -1.0), (2.0, NAN), (-1.0, 0.0), (INF, 1.0), (1.0, INF)]
+DELTA_Z = [1e-20, 1e-10, 0.25, 0.5, 1.0, 2.0, 3.0, 5.5, 10.0, 20.0, 100.0, 150.0, 1000.0, 1e5]
+DELTAS = [-20.0, -10.5, -3.0, -1.0, -0.5, 1e-10, 0.5, 1.0, 2.0, 5.5, 10.0, 19.0, 20.0, 50.0, 100.5, 200.0]
 REFUSED_AP = [(0.0, 0.5), (-1.0, 0.5), (2.0, -0.1), (2.0, 1.1), (NAN, 0.5), (2.0, NAN)]
 
 
@@ -67,6 +71,7 @@ def cases():
 
         ax = pairs_ax()
         ap = pairs_ap()
+        zd = [(z, d) for z in DELTA_Z for d in DELTAS]
         return [
             {"name": "tgamma and lgamma",
              "inputs": {"settings": st, "z": v.enc(Z)},
@@ -81,6 +86,9 @@ def cases():
             {"name": "the inverses",
              "inputs": {"settings": st, "a": v.enc([a for a, _ in ap]), "p": v.enc([p for _, p in ap])},
              "expected": {"gammaPInv": two("gamma::gamma_p_inv", ap), "gammaQInv": two("gamma::gamma_q_inv", ap)}},
+            {"name": "tgamma_delta_ratio",
+             "inputs": {"settings": st, "z": v.enc([z for z, _ in zd]), "delta": v.enc([d for _, d in zd])},
+             "expected": {"tgammaDeltaRatio": two("gamma::tgamma_delta_ratio", zd)}},
         ]
 
 

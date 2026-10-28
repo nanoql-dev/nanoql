@@ -12,6 +12,7 @@
 //     gamma::gamma_p_derivative  (a, x): boost::math::gamma_p_derivative(a, x)
 //     gamma::gamma_p_inv         (a, p): boost::math::gamma_p_inv(a, p)
 //     gamma::gamma_q_inv         (a, q): boost::math::gamma_q_inv(a, q)
+//     gamma::tgamma_delta_ratio  (z, d): boost::math::tgamma_delta_ratio(z, d)
 //
 // Boost's errors throw under the default policy, so a refused argument reads as a throw.
 
@@ -56,6 +57,8 @@ namespace harness {
             {"gamma::gamma_p_derivative", two([](Real a, Real x) { return boost::math::gamma_p_derivative(a, x); })},
             {"gamma::gamma_p_inv", two([](Real a, Real p) { return boost::math::gamma_p_inv(a, p); })},
             {"gamma::gamma_q_inv", two([](Real a, Real q) { return boost::math::gamma_q_inv(a, q); })},
+            {"gamma::tgamma_delta_ratio",
+             two([](Real z, Real d) { return boost::math::tgamma_delta_ratio(z, d); })},
         });
 
     }

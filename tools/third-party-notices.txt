@@ -28,5 +28,8 @@ ql/math/randomnumbers/mt19937uniformrng.cpp	A C-program for MT19937, with initia
 ql/math/randomnumbers/primitivepolynomials.cpp	This file contains 21200 polinomials, that is all primitive polynomials	=========================================================================	LicenseRef-Jaeckel
 ql/math/randomnumbers/primitivepolynomials.hpp	this file is a slightly edited version of	===========================================================================	LicenseRef-Jaeckel
 ql/math/randomnumbers/sobolrsg.cpp	Copyright (c) 2008, Frances Y. Kuo and Stephen Joe	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.	LicenseRef-JoeKuo	LICENSES/LicenseRef-JoeKuo.txt
+ql/math/randomnumbers/xoshiro256starstaruniformrng.cpp	Written in 2015 by Sebastiano Vigna (vigna@acm.org)	See <http://creativecommons.org/publicdomain/zero/1.0/>.	CC0-1.0
+ql/math/randomnumbers/xoshiro256starstaruniformrng.hpp	Written in 2018 by David Blackman and Sebastiano Vigna (vigna@acm.org)	See <http://creativecommons.org/publicdomain/zero/1.0/>.	CC0-1.0
 ql/methods/montecarlo/brownianbridge.cpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel
 ql/methods/montecarlo/brownianbridge.hpp	===========================================================================	===========================================================================	LicenseRef-Jaeckel
+test-suite/xoshiro256starstar.cpp	Written in 2018 by David Blackman and Sebastiano Vigna (vigna@acm.org)	See <http://creativecommons.org/publicdomain/zero/1.0/>.	CC0-1.0

@@ -749,6 +749,17 @@ Facts:
 - `APlusInfiniteBoundIsTheOtherBoundsMarginal`
 - `AMinusInfiniteBoundIsNothing`
 
+## BivariateStudentTests
+
+[`Divergences/BivariateStudentTests.cs`](../tests/NanoQL.Tests/Divergences/BivariateStudentTests.cs)
+
+The bivariate Student t-distribution beside the line h = ρk at |ρ| = 1 (found under R8): QuantLib's x(m, h, k) returns 0 wherever its denominator is below 1e-8, which flips x from 1 to 0 within about 1e-4 of the line, so its value there is off by up to 1.9e-5 and can be negative; nanoql takes the limit only at an exact 0/0. The references are the distribution's limits at ρ = ±1, F(min(h, k)) at ρ 1 and max(0, F(h) − F(−k)) at −1 (QuantLib's own boundary test's formulas), here ½ and 0; QuantLib's values are its own (this run's `probes\c3r2_facts.cpp`, `c3r3_facts.cpp`, their `.out`).
+
+Facts:
+
+- `BesideTheLineAtRhoOneTheLimitsHold`
+- `AwayFromTheLineQuantLibsValuesAreKept`
+
 ## BjerksundStenslandMismatchedTimesTests
 
 [`Divergences/BjerksundStenslandMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/BjerksundStenslandMismatchedTimesTests.cs)
@@ -2134,6 +2145,17 @@ Facts:
 
 - `TheIborAndCmsLegsDefaultToACoveredOption`
 - `TheCmsSpreadLegDefaultsToACoveredOption`
+
+## DiscrepancyStatisticsTests
+
+[`Divergences/DiscrepancyStatisticsTests.cs`](../tests/NanoQL.Tests/Divergences/DiscrepancyStatisticsTests.cs)
+
+The discrepancy statistics' lazy dimension and pairing (the S-core plan's CR7 (viii) and (ix)): QuantLib computes its constants for the dimension at construction, so a statistics of dimension 0, whose first sample sets it, keeps dimension 0's constants; and it pairs the components' stored samples by position, which a percentile read, sorting each component in place, breaks. nanoql fixes the constants with the dimension and keeps its own copy of the points. On 200 three-dimensional Sobol points (seed 1) QuantLib gives 0.005923430933947052 with the dimension given, 0.666 with it lazy and 0.102 after a percentile read halfway (the plan's `misc1.cpp`, rerun in this run's `probes\misc1.cpp`); nanoql gives the first in all three.
+
+Facts:
+
+- `ALazyDimensionTakesItsConstantsFromTheFirstSample`
+- `APercentileReadLeavesThePointsPaired`
 
 ## DiscreteIntegratorFewPointsTests
 
@@ -3730,6 +3752,18 @@ Facts:
 - `ExponentialFittingIsContinuousAsKappaFalls`
 - `BelowTheFloorTheInverseDistributionInverts`
 
+## HistogramTests
+
+[`Divergences/HistogramTests.cs`](../tests/NanoQL.Tests/Divergences/HistogramTests.cs)
+
+The histogram's quantiles and given breaks (the S-core plan's CR7 (v) to (vii)): QuantLib's Freedman-Diaconis rule takes Hyndman and Fan's type 8 quantile, as its comment says, but its interpolation weight drops the method's p/3 term, so ten squares bin into 3 where type 8 gives 2; given breaks that repeat count their bins before QuantLib removes the repeats, so breaks 20, 20 and 50 give 4 bins over 2 breaks (counts 4, 3, 0, 3); and at the upper boundary's probability QuantLib's quantile reads a 0 past its sorted samples, where type 8 clamps to the largest. No public input reaches that last one: QuantLib's two probabilities, ¼ and ¾, meet the boundary at no whole number of samples, so its fact reads the private quantile. QuantLib's values are its own (the plan's `misc1.cpp`, rerun in this run's `probes\misc1.cpp`).
+
+Facts:
+
+- `TheFreedmanDiaconisQuantilesAreType8`
+- `RepeatedBreaksCountTheirBinsOnce`
+- `TheUpperBoundarysQuantileIsTheLargestSample`
+
 ## HolderExtensibleCriticalPricesTests
 
 [`Divergences/HolderExtensibleCriticalPricesTests.cs`](../tests/NanoQL.Tests/Divergences/HolderExtensibleCriticalPricesTests.cs)
@@ -4171,6 +4205,17 @@ Facts:
 Facts:
 
 - `TheReferenceDateIsTheLastStoredFixingOnOrBeforeTheEvaluationDate`
+
+## LatticeRsgTests
+
+[`Divergences/LatticeRsgTests.cs`](../tests/NanoQL.Tests/Divergences/LatticeRsgTests.cs)
+
+The lattice rules' bound and skip (the S-core plan's CR7 (xi) and (xii)): QuantLib's `LatticeRule::getRule` checks the number of points against 2.9^20, about 1.8e9, where its message and its tables say 2^20, so 2^22 points are accepted; nanoql checks 2^20. And QuantLib's `LatticeRsg::skipTo(n)` moves n points on, where its other sequences' `skipTo` moves to the n-th: after 3 draws, `skipTo(10)` draws the 13th point (0.0126953125, 0.0146484375 on rule A at 1,024 points in two dimensions); nanoql's draws the 10th, as a fresh sequence skipped to 10 does in QuantLib (0.009765625, 0.857421875) (the plan's `misc1.cpp`, rerun in this run's `probes\misc1.cpp`).
+
+Facts:
+
+- `TheRulesHoldUpToTwoToTheTwentyPoints`
+- `SkipToMovesToThePoint`
 
 ## LeastSquaresStandardErrorTests
 
@@ -5337,6 +5382,16 @@ Facts:
 
 - `AQuoteEqualToQuantLibsNullIsAValue`
 
+## RandomizedLdsTests
+
+[`Divergences/RandomizedLdsTests.cs`](../tests/NanoQL.Tests/Divergences/RandomizedLdsTests.cs)
+
+The randomized sequence's modulo (the S-core plan's CR7 (xiii)): QuantLib wraps a coordinate's sum only where it exceeds 1.0, so a sum of exactly 1.0 stays outside [0, 1); nanoql wraps it to 0.0. With a low-discrepancy and a pseudo-random stand-in each returning 0.5 in every coordinate, QuantLib's point is (1, 1, 1) (this run's `probes\c3_facts.cpp`, `c3_facts.out`), nanoql's (0, 0, 0). Elsewhere QuantLib's values, bit for bit (the harness vectors).
+
+Facts:
+
+- `ASumOfExactlyOneWrapsToZero`
+
 ## RangeAccrualLegTests
 
 [`Divergences/RangeAccrualLegTests.cs`](../tests/NanoQL.Tests/Divergences/RangeAccrualLegTests.cs)
@@ -6075,6 +6130,24 @@ A stripped optionlet's fixing times after the evaluation date moves. QuantLib's 
 Facts:
 
 - `TheTimesAreTheConstructionsAndTheAdapterIsTheContexts`
+
+## StudentDistributionTests
+
+[`Divergences/StudentDistributionTests.cs`](../tests/NanoQL.Tests/Divergences/StudentDistributionTests.cs)
+
+The Student t density at large degrees of freedom and the cumulative function at large ν (the S-core plan's CR7 (xxii) and (xxiii)): QuantLib takes each gamma function as the exponential of its logarithm, which overflows from n 342 (0 there, NaN from 343), and its denominator's product overflows earlier at large x (0 at n 330, x 30); nanoql takes the gammas' ratio as Boost's tgamma_delta_ratio and the power by log1p wherever a factor overflows, to n = 2³¹ − 1. QuantLib's cumulative function takes the incomplete beta's complement at 1 − n/(n + x²), which loses the argument's digits as n grows (6.4e-10 relative at 1e6, 4.6e-9 at 1e8); nanoql takes the complementary argument x²/(n + x²) directly where n/(n + x²) exceeds ½. Below the centre QuantLib's ½ − ½·(1 − I) cancels as the probability falls (1.3e-6 relative at n 10, x −30, and 0 for 3.1e-24 at n 30); nanoql takes ½·I directly. Both through Boost's incomplete beta, as QuantLib's own loses digits in its log-gamma prefactor as n grows; at n 1 below the centre, ½·(1 − I), as Boost's complement there rounds 1 − z. And the quantile at n 4 and 6, whose Boost forms cancel near ½ (±0 within 1e-9 of it), takes one Newton step on the cumulative function there. The references are 50-digit evaluations of the definitions (this run's `c3work\student_refs.py`, `refs_c3r2.py`, their `.out`); QuantLib's values beside them are its own (`probes\c3_facts.cpp`, `c3r2_facts.cpp`, their `.out`).
+
+Facts:
+
+- `TheDensityAtLargeDegreesOfFreedomIsFinite`
+- `TheDensityComputesAtTheLargestDegreesOfFreedom`
+- `WhereQuantLibsFactorsAreFiniteItsDensityIsKept`
+- `TheCumulativeFunctionKeepsItsDigitsAtLargeNu`
+- `TheLowerTailKeepsItsDigits`
+- `AtOneDegreeOfFreedomBelowTheCentreTheCauchyDistributionKeepsItsDigits`
+- `AtFourAndSixDegreesOfFreedomTheQuantileNearTheCentreIsItsCumulativeFunctionsInverse`
+- `AboveTheCentreQuantLibsFormulaIsKept`
+- `AtSmallNuTheComplementaryArgumentAgreesWithQuantLib`
 
 ## StulzDegenerateTests
 

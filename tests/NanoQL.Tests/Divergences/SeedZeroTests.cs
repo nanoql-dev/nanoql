@@ -38,6 +38,21 @@ public class SeedZeroTests
         AssertRefused(() => LowDiscrepancy.MakeSequenceGenerator(3, 0));
         AssertRefused(() => GenericLowDiscrepancy<HaltonRsg, InverseCumulativeNormal>.MakeSequenceGenerator(3, 0));
 
+        // C3's generators: Knuth's and L'Ecuyer's 0 is QuantLib's clock seed; Ranlux's 0 is the standard engines'
+        // default, 19780503, which nanoql doesn't default to either; xoshiro's 0 is the clock seed among its 64-bit
+        // seeds; the randomized sequences' seed constructors pass theirs on.
+        AssertRefused(() => new KnuthUniformRng(0));
+        AssertRefused(() => new KnuthUniformRsg(3, 0));
+        AssertRefused(() => new LecuyerUniformRng(0));
+        AssertRefused(() => new LecuyerUniformRsg(3, 0));
+        AssertRefused(() => new Ranlux3UniformRng(0));
+        AssertRefused(() => new Ranlux4UniformRng(0));
+        AssertRefused(() => new Xoshiro256StarStarUniformRng(0));
+        AssertRefused(() => new Xoshiro256StarStarUniformRsg(3, 0));
+        AssertRefused(() => RandomizedLDS.Create<SobolRsg, MersenneTwisterUniformRng>(new SobolRsg(3, 1), 0));
+        AssertRefused(() => RandomizedLDS.Create<SobolRsg, MersenneTwisterUniformRng>(3, 0, 1));
+        AssertRefused(() => RandomizedLDS.Create<SobolRsg, MersenneTwisterUniformRng>(3, 1, 0));
+
         // A key's word of 0 is no seed: the constructor from a key takes it, as QuantLib's does.
         _ = new MersenneTwisterUniformRng([0L]);
     }

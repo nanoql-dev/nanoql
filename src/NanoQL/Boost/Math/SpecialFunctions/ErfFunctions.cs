@@ -11,10 +11,10 @@ using static NanoQL.Numerics.PolynomialHorner2Functions;
 namespace NanoQL.Numerics;
 
 /// <summary>
-/// Boost.Math's complementary error function (<c>erf.hpp</c>) for <c>double</c>: <c>erfc</c> and the 53-bit branch of
+/// Boost.Math's error functions (<c>erf.hpp</c>) for <c>double</c>: <c>erf</c>, <c>erfc</c> and the 53-bit branch of
 /// <c>erf_imp</c>, which Boost's precision policy selects for <c>double</c>. Boost evaluates in <c>long double</c>,
-/// which under MSVC is <c>double</c>, so <c>exp</c> is <see cref="Math.Exp"/>. <c>erfc</c>'s
-/// <c>checked_narrowing_cast</c> isn't ported: its overflow check can't fire, since the result lies in [0, 2].
+/// which under MSVC is <c>double</c>, so <c>exp</c> is <see cref="Math.Exp"/>. Their <c>checked_narrowing_cast</c>
+/// isn't ported: its overflow check can't fire, since the results lie in [−1, 2].
 /// </summary>
 internal static class ErfFunctions
 {
@@ -136,6 +136,12 @@ internal static class ErfFunctions
         13.5064170191802889145,
         5.48409182238641741584,
     ];
+
+    /// <summary><c>erf(z)</c>: the error function.</summary>
+    /// <param name="z">The argument.</param>
+    /// <returns>erf(z), in [−1, 1].</returns>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="z"/> is NaN.</exception>
+    internal static double Erf(double z) => ErfImp(z, false);
 
     /// <summary><c>erfc(z)</c>: the complementary error function, 1 − erf(z).</summary>
     /// <param name="z">The argument.</param>

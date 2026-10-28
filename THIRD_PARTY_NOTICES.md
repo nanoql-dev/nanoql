@@ -244,7 +244,7 @@ POSSIBILITY OF SUCH DAMAGE.
 ## Boost
 
 nanoql ports parts of Boost 1.90.0: Boost.Math's normal distribution, error functions and polynomial evaluation,
-uBLAS's LU factorization, and Boost.Accumulators' weighted mean, variance, moments, skewness and kurtosis, under
+its beta functions and Student's t quantile, uBLAS's LU factorization, and Boost.Accumulators' weighted mean, variance, moments, skewness and kurtosis, under
 `src/NanoQL/Boost/`. Each ported file carries its Boost copyright notices. Boost's license file, `LICENSE_1_0.txt` at
 release 1.90.0, is reproduced verbatim below.
 
@@ -433,6 +433,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Any feedback is very welcome.
 http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
 email: matumoto@math.keio.ac.jp
+```
+
+### xoshiro256** and SplitMix64, in `ql/math/randomnumbers/xoshiro256starstaruniformrng.hpp` and
+`xoshiro256starstaruniformrng.cpp`
+
+QuantLib's xoshiro256** generator, and the SplitMix64 generator that seeds it, are based on their authors' C
+implementations, https://prng.di.unimi.it/xoshiro256starstar.c and https://prng.di.unimi.it/splitmix64.c, which
+their authors dedicated to the public domain; QuantLib's test copies the first. The dedications follow.
+
+```text
+Written in 2018 by David Blackman and Sebastiano Vigna (vigna@acm.org)
+
+To the extent possible under law, the author has dedicated all copyright
+and related and neighboring rights to this software to the public domain
+worldwide. This software is distributed without any warranty.
+
+See <http://creativecommons.org/publicdomain/zero/1.0/>.
+```
+
+```text
+Written in 2015 by Sebastiano Vigna (vigna@acm.org)
+
+To the extent possible under law, the author has dedicated all copyright
+and related and neighboring rights to this software to the public domain
+worldwide. This software is distributed without any warranty.
+
+See <http://creativecommons.org/publicdomain/zero/1.0/>.
 ```
 
 ### Peter Jäckel's primitive polynomials, in `ql/math/randomnumbers/primitivepolynomials.hpp` and
