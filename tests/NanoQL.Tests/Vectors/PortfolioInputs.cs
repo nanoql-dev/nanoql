@@ -4,6 +4,7 @@
 using System.Text.Json;
 using NanoQL.Currencies;
 using NanoQL.Experimental;
+using NanoQL.Numerics;
 using NanoQL.TermStructures;
 using NanoQL.Tests.Harness;
 using NanoQL.Time;
@@ -157,6 +158,9 @@ internal static class PortfolioInputs
         {
             "ConstantLossModel" => ConstantLoss(spec),
             "DefaultLossModel" => new BaseLossModel(),
+            "GaussianLHP" => new GaussianLHPLossModel(
+                spec.GetProperty("correlation").GetDouble(), [.. spec.GetProperty("recoveries").EnumerateArray().Select(VectorCase.Real)]),
+            "HomogeneousPool" or "InhomogeneousPool" or "RandomDefault" or "RandomLoss" => OnCopula(kind, spec),
             _ => throw new ArgumentException($"unknown loss model {kind}", nameof(spec)),
         };
     }
@@ -189,6 +193,71 @@ internal static class PortfolioInputs
     /// <param name="k">The key.</param>
     /// <returns>The summary.</returns>
     public static object?[] KeySummary(DefaultProbKey k) => [(int)k.Seniority, k.Currency?.Code, k.EventTypes.Select(TypeSummary).ToArray()];
+
+    // The C2 models of a copula: the pool and random default models over a constant-loss latent model, the random
+    // loss model over a spot-recovery one.
+    private static IDefaultLossModel OnCopula(string kind, JsonElement spec)
+    {
+        double[] recoveries = [.. spec.GetProperty("recoveries").EnumerateArray().Select(VectorCase.Real)];
+        var type = (LatentModelIntegrationType)spec.GetProperty("integration").GetInt32();
+        int nSims = spec.TryGetProperty("nSims", out JsonElement s) ? s.GetInt32() : 0;
+        long seed = spec.TryGetProperty("seed", out JsonElement e) ? e.GetInt64() : 0;
+        double accuracy = spec.TryGetProperty("accuracy", out JsonElement a) ? a.GetDouble() : 0.0;
+        bool onDefault = spec.TryGetProperty("onDefaultModel", out _);
+        if (spec.GetProperty("copula").GetString() == "Gaussian")
+        {
+            if (kind == "RandomLoss")
+            {
+                return new GaussianRandomLossLM(
+                    new GaussianSpotLossLM(MatrixOf(spec.GetProperty("factorWeights")), recoveries, spec.GetProperty("modelA").GetDouble(), type),
+                    nSims,
+                    seed,
+                    accuracy);
+            }
+
+            GaussianConstantLossLM g = spec.TryGetProperty("correlation", out JsonElement gc)
+                ? new GaussianConstantLossLM(gc.GetDouble(), recoveries, type, spec.GetProperty("nVariables").GetInt32())
+                : new GaussianConstantLossLM(MatrixOf(spec.GetProperty("factorWeights")), recoveries, type);
+            return kind switch
+            {
+                "RandomDefault" => onDefault
+                    ? new GaussianRandomDefaultLM((DefaultLatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits>)g, recoveries, nSims, seed, accuracy)
+                    : new GaussianRandomDefaultLM(g, nSims, seed, accuracy),
+                "HomogeneousPool" => new HomogGaussPoolLossModel(g, Buckets(spec), Max(spec), Min(spec), Steps(spec)),
+                _ => new IHGaussPoolLossModel(g, Buckets(spec), Max(spec), Min(spec), Steps(spec)),
+            };
+        }
+
+        TCopulaPolicyInitTraits ini = TraitsOf(spec.GetProperty("tOrders"));
+        if (kind == "RandomLoss")
+        {
+            return new TRandomLossLM(
+                new TSpotLossLM(MatrixOf(spec.GetProperty("factorWeights")), recoveries, spec.GetProperty("modelA").GetDouble(), type, ini),
+                nSims,
+                seed,
+                accuracy);
+        }
+
+        TConstantLossLM t = spec.TryGetProperty("correlation", out JsonElement tc)
+            ? new TConstantLossLM(tc.GetDouble(), recoveries, type, spec.GetProperty("nVariables").GetInt32(), ini)
+            : new TConstantLossLM(MatrixOf(spec.GetProperty("factorWeights")), recoveries, type, ini);
+        return kind switch
+        {
+            "RandomDefault" => onDefault
+                ? new TRandomDefaultLM((DefaultLatentModel<TCopulaPolicy, TCopulaPolicyInitTraits>)t, recoveries, nSims, seed, accuracy)
+                : new TRandomDefaultLM(t, nSims, seed, accuracy),
+            "HomogeneousPool" => new HomogTPoolLossModel(t, Buckets(spec), Max(spec), Min(spec), Steps(spec)),
+            _ => new IHStudentPoolLossModel(t, Buckets(spec), Max(spec), Min(spec), Steps(spec)),
+        };
+    }
+
+    private static int Buckets(JsonElement spec) => spec.GetProperty("nBuckets").GetInt32();
+
+    private static double Max(JsonElement spec) => spec.GetProperty("max").GetDouble();
+
+    private static double Min(JsonElement spec) => spec.GetProperty("min").GetDouble();
+
+    private static int Steps(JsonElement spec) => spec.GetProperty("nSteps").GetInt32();
 
     // DefaultLossModel with every default kept, the harness's BaseLossModel: each statistic refuses.
     private sealed class BaseLossModel : DefaultLossModel

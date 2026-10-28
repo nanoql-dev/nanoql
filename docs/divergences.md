@@ -1487,6 +1487,40 @@ Facts:
 - `TheBlackCompoundingPricersForwardPartReadsTheSmileAtTheQuotedStrike`
 - `TheBlackAveragingPricersForwardPartReadsTheSmileAtTheQuotedStrike`
 
+## CdoLeverageTests
+
+[`Divergences/CdoLeverageTests.cs`](../tests/NanoQL.Tests/Divergences/CdoLeverageTests.cs)
+
+The CDO engines' leverage, additional fair premium and fair upfront (the S-xcr plan's XR8 (ix)): every leg and the upfront levered, the fair rates unlevered, the additional fair premium the instrument's, the fair upfront the side-invariant rate that zeroes the value over the first accrual's discount. QuantLib's values on the eight-name [3%, 7%] tranche at 2% running are the S-xcr run's `c2_facts.cpp`: unlevered, the mid-point fair premium 0.10676171982795336 and NPV −0.94866792850998161, the integral 0.10608680303646907 and −0.94135991232162608; at twice the notional, the mid-point's 0.053380859913976682 and −0.72998440531768671 (its premium leg alone levered), the integral's unchanged; the additional fair premium the instrument's negated; the buyer's fair upfront −0.2964587276593692 where the seller's is 0.2964587276593692, its NPV at it 1.8972059114097959; a forward start's NPV at its fair upfront −0.020592559070216399.
+
+Facts:
+
+- `TheLeveredLegsKeepTheUnleveredRates`
+- `TheAdditionalFairPremiumIsTheInstruments`
+- `TheFairUpfrontZeroesTheValueOnEitherSide`
+
+## CdoRealizedDefaultsTests
+
+[`Divergences/CdoRealizedDefaultsTests.cs`](../tests/NanoQL.Tests/Divergences/CdoRealizedDefaultsTests.cs)
+
+A CDO and a random model on a basket with a realized default (the S-xcr plan's XR8 (ii)): the CDO's premium leg, upfront and remaining notional stand on the tranche's outstanding notional, and the random models simulate the live names alone. A (10) and B (20) alive and C (30) defaulted in June 2006 and settled at 0.4, the [10%, 50%] tranche from 1 January 2006: QuantLib refuses the pool model on the realized basket ("sizes differ: 3 vs 2"), and on the restated basket (A and B, [0, 40%]) its mid-point CDO at 1% upfront and 2% running reads NPV −0.28931799290637461, premium 0.98631843637350081, protection 1.3956199920495744, fair premium 0.025866624453865835 and remaining notional 12, its integral CDO NPV −0.28056449432303487; at correlation 0 its random model on the restated basket reads P(≥ 2) 0.0088 and on the realized one P(≥ 3) 0.0004 (the S-xcr run's `c2_facts.cpp`).
+
+Facts:
+
+- `TheCdoIsQuantLibsOnTheRestatedBasket`
+- `TheRandomModelSimulatesTheLiveNames`
+
+## CdoReferenceDateTests
+
+[`Divergences/CdoReferenceDateTests.cs`](../tests/NanoQL.Tests/Divergences/CdoReferenceDateTests.cs)
+
+The CDO and the random models on default curves dated after the evaluation date (the S-xcr plan's XR8 (x)): a default probability before a curve's reference date is 0 and a random model counts its days from the evaluation date, so T+2 curves read as their restatement from the evaluation date. QuantLib's mid-point CDO on T+2 curves throws ("negative time (-0.00821918) given") and on the restated curves reads NPV −0.94756528135798312, fair premium 0.10656135275585535; its random model counts from each curve's date, reading P(≥ 1, a year) 0.1215 on the T+2 curves and throwing on the restated ones ("t < 0", its day solver bracketing below 0 where the hazard is 0) (the S-xcr run's `c2_facts.cpp`).
+
+Facts:
+
+- `TheCdoOnT2CurvesIsTheRestatedOnes`
+- `TheRandomModelCountsFromTheEvaluationDate`
+
 ## CdsConventionalSpreadNullTests
 
 [`Divergences/CdsConventionalSpreadNullTests.cs`](../tests/NanoQL.Tests/Divergences/CdsConventionalSpreadNullTests.cs)
@@ -2248,6 +2282,21 @@ Facts:
 
 - `AnUninitializedAssetIsRefused`
 - `AnAmericanOptionReadPastItsExerciseTimesIsRefused`
+
+## DistributionMembersTests
+
+[`Divergences/DistributionMembersTests.cs`](../tests/NanoQL.Tests/Divergences/DistributionMembersTests.cs)
+
+Distribution's members on its own density, uniform within each bucket (the S-xcr plan's XR8 (xx)), and the unused classes' slips (XR8 (xxvii)), each checked against its closed form. QuantLib's values are the S-xcr run's `c2_facts.cpp`: on a uniform of ten buckets over [0, 10] its shortfalls read 5.625 and 9 for 5.25 and 9.5, and its tranche on [2, 5] keeps a probability of 0.6; its cumulative density in the first bucket reads index −1 (`distribution.cpp:228`), its convolution assigns where it adds, its binomial distribution reads a member it never sets, and its binomial probability of at least 0 events wraps to 0.
+
+Facts:
+
+- `TheShortfallIsTheUniformsTailMean`
+- `ATrancheKeepsTheMassAboveItsDetachment`
+- `TheCumulativeDensityStartsFromZero`
+- `TheConvolutionIsTheSumsDistribution`
+- `TheBinomialDistributionReadsItsVolume`
+- `AtLeastNoEventIsCertain`
 
 ## DividendMismatchedTimesTests
 
@@ -4387,6 +4436,16 @@ Facts:
 - `ASmallVolatilityIsTheFormulaInFiftyDigits`
 - `ZeroVolatilityIsTheForwardsPayoff`
 
+## LhpProgrammedDefaultTests
+
+[`Divergences/LhpProgrammedDefaultTests.cs`](../tests/NanoQL.Tests/Divergences/LhpProgrammedDefaultTests.cs)
+
+The LHP model under a default programmed after the evaluation date (the S-xcr plan's XR8 (ii), round 3's O3-1): its averages read the notionals and recoveries of the names alive at the evaluation date, so its statistics are its model's without the event. QuantLib's reads the notionals alive at the statistic's date beside the evaluation date's probabilities and recoveries, past its vectors, undefined (the plan's four runs: 2.24789, 2.24363, 1.77310 and a throw); without the event it reads 12.282321555009048 at ten years on the basket vector's programmed case (the S-xcr run's `c2_facts.cpp`).
+
+Facts:
+
+- `AProgrammedDefaultLeavesTheModelsStatistics`
+
 ## LineSearchReturnTests
 
 [`Divergences/LineSearchReturnTests.cs`](../tests/NanoQL.Tests/Divergences/LineSearchReturnTests.cs)
@@ -5578,6 +5637,29 @@ A quote is a `double`, so a quote equal to QuantLib's null sentinel, `Null<Real>
 Facts:
 
 - `AQuoteEqualToQuantLibsNullIsAValue`
+
+## RandomModelBindingTests
+
+[`Divergences/RandomModelBindingTests.cs`](../tests/NanoQL.Tests/Divergences/RandomModelBindingTests.cs)
+
+A random model bound to two baskets in turn (the S-xcr plan's XR8 (viii), fixed by XR1's binding): each binding is a fresh model's simulation. QuantLib's model keeps its first basket's paths: set on three names at 2% then on three at 5%, it reads 3.447 on both, where a fresh model reads 8.007 on the second (the S-xcr run's `c2_facts.cpp`).
+
+Facts:
+
+- `EachBindingSimulatesItsBasket`
+
+## RandomModelStatisticsTests
+
+[`Divergences/RandomModelStatisticsTests.cs`](../tests/NanoQL.Tests/Divergences/RandomModelStatisticsTests.cs)
+
+The random models' statistics where QuantLib's misread their paths, each checked on the paths themselves or against an exact model; QuantLib's values are the S-xcr run's `c2_facts.cpp`'s: the default correlation, Pearson's on the paths (the S-xcr plan's XR8 (xxiv)): QuantLib divides the joint frequency by n − 1, a name with itself reading 1.0002212831946919 on 5,000 paths; the random loss model's recovery of 256/256 (XR8 (xxv)): QuantLib's 8 bits hold it as 0, a full loss, reading an expected loss of 5.775 at recoveries of 0.9995; the horizon, a parameter (XR8 (xliv)): QuantLib's 4,050 days stop the expected loss of ten names at 3% and correlation 0.3 at 16.9836 at 12 and 20 years, where its recursive model reads 18.149740938526683 and 27.0848313951936; the n-th event, every default of a day counted: QuantLib keys its order by day, so on the random-default vector's whole pool the n-th event's probabilities sum to 0.1685 and 0.071 where at least 4 and 5 events read 0.169 and 0.072.
+
+Facts:
+
+- `TheCorrelationIsThePathsPearsons`
+- `AFullRecoveryLosesNothing`
+- `TheHorizonIsAParameter`
+- `TheNthEventCountsEveryDefaultOfADay`
 
 ## RandomizedLdsTests
 

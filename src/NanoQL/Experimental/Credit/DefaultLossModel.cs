@@ -32,6 +32,7 @@ namespace NanoQL.Experimental;
 public abstract class DefaultLossModel : IDefaultLossModel
 {
     private Basket? basket;
+    private Basket? source;
 
     /// <summary>Gets the basket the model is bound to, or <see langword="null"/> before it is bound.</summary>
     public Basket? Basket => basket;
@@ -39,6 +40,12 @@ public abstract class DefaultLossModel : IDefaultLossModel
     /// <summary>Gets the basket the model is bound to, which a statistic reads.</summary>
     /// <exception cref="NanoQLException">The model isn't bound to a basket.</exception>
     protected Basket BoundBasket => basket ?? throw new NanoQLException("No portfolio basket set.");
+
+    /// <summary>Gets the basket as given to <see cref="SetBasket"/>, of every name, whose
+    /// <see cref="Experimental.Basket.PricingBasket"/> the model is bound to: a model binding a latent model to it,
+    /// which restricts itself to the live names.</summary>
+    /// <exception cref="NanoQLException">The model isn't bound to a basket.</exception>
+    private protected Basket SourceBasket => source ?? throw new NanoQLException("No portfolio basket set.");
 
     /// <inheritdoc/>
     /// <exception cref="ArgumentNullException"><paramref name="basket"/> is <see langword="null"/>.</exception>
@@ -48,6 +55,7 @@ public abstract class DefaultLossModel : IDefaultLossModel
         var copy = (DefaultLossModel)MemberwiseClone();
         copy.RestrictTo(basket.ModelRows, basket.Size);
         copy.basket = basket.PricingBasket;
+        copy.source = basket;
         copy.ResetModel();
         return copy;
     }

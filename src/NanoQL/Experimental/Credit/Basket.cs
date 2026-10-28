@@ -539,7 +539,9 @@ public sealed class Basket
         return Model().SplitVaRLevel(date, loss);
     }
 
-    /// <summary>The full loss distribution: the live model's, shifted by the settled loss.</summary>
+    /// <summary>The full loss distribution: the live model's, shifted by the realized loss, the settled loss where the
+    /// model's distribution is the pool's and the realized tranche loss where it is the tranche's (the random
+    /// models').</summary>
     /// <param name="d">The date.</param>
     /// <returns>Each loss level's probability.</returns>
     /// <exception cref="NanoQLException">The basket has no loss model, or the model refuses.</exception>
@@ -547,8 +549,10 @@ public sealed class Basket
     public ImmutableSortedDictionary<double, double> LossDistribution(Date d)
     {
         Date.ThrowIfDefault(d, nameof(d));
-        ImmutableSortedDictionary<double, double> live = Model().LossDistribution(d);
-        if (settledLoss == 0.0)
+        IDefaultLossModel model = Model();
+        ImmutableSortedDictionary<double, double> live = model.LossDistribution(d);
+        double shift = model is ITrancheLossDistribution ? realizedTrancheLoss : settledLoss;
+        if (shift == 0.0)
         {
             return live;
         }
@@ -556,7 +560,7 @@ public sealed class Basket
         var shifted = ImmutableSortedDictionary.CreateBuilder<double, double>();
         foreach (KeyValuePair<double, double> kv in live)
         {
-            shifted[kv.Key + settledLoss] = kv.Value;
+            shifted[kv.Key + shift] = kv.Value;
         }
 
         return shifted.ToImmutable();

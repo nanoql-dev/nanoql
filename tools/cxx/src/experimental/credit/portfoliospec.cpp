@@ -11,6 +11,12 @@
 #include <ql/currencies/america.hpp>
 #include <ql/currencies/europe.hpp>
 #include <ql/experimental/credit/constantlosslatentmodel.hpp>
+#include <ql/experimental/credit/gaussianlhplossmodel.hpp>
+#include <ql/experimental/credit/homogeneouspooldef.hpp>
+#include <ql/experimental/credit/inhomogeneouspooldef.hpp>
+#include <ql/experimental/credit/randomdefaultlatentmodel.hpp>
+#include <ql/experimental/credit/randomlosslatentmodel.hpp>
+#include <ql/experimental/credit/spotlosslatentmodel.hpp>
 #include <ql/experimental/math/gaussiancopulapolicy.hpp>
 #include <ql/experimental/math/tcopulapolicy.hpp>
 #include <ql/quotes/simplequote.hpp>
@@ -207,6 +213,62 @@ namespace harness::credit::portfolio {
             return ext::make_shared<ConstantLossModel<CP>>(matrix(key(o, "factorWeights", what)), recoveries, type, ini);
         }
 
+        template <class CP>
+        ext::shared_ptr<ConstantLossLatentmodel<CP>> constantLossLatent(const json::object& o,
+                                                                         const typename CP::initTraits& ini) {
+            const std::string what = "a constant-loss latent model";
+            std::vector<Real> recoveries = reals(key(o, "recoveries", what));
+            auto type = enumeration<LatentModelIntegrationType::LatentModelIntegrationType>(key(o, "integration", what));
+            if (const json::value* c = o.if_contains("correlation"); c != nullptr) {
+                auto n = static_cast<Size>(integer(key(o, "nVariables", what)));
+                return ext::make_shared<ConstantLossLatentmodel<CP>>(
+                    Handle<Quote>(ext::make_shared<SimpleQuote>(real(*c))), recoveries, type, n, ini);
+            }
+            return ext::make_shared<ConstantLossLatentmodel<CP>>(matrix(key(o, "factorWeights", what)), recoveries, type,
+                                                                 ini);
+        }
+
+        // The models over a constant-loss latent model, and the random loss model over a spot-recovery one.
+        template <class CP>
+        ext::shared_ptr<DefaultLossModel> onCopula(const std::string& kind, const json::object& o,
+                                                   const typename CP::initTraits& ini) {
+            const std::string what = "a " + kind + " model";
+            if (kind == "ConstantLossModel")
+                return constantLoss<CP>(o, ini);
+            if (kind == "RandomLoss") {
+                auto type =
+                    enumeration<LatentModelIntegrationType::LatentModelIntegrationType>(key(o, "integration", what));
+                auto spot = ext::make_shared<SpotRecoveryLatentModel<CP>>(
+                    matrix(key(o, "factorWeights", what)), reals(key(o, "recoveries", what)),
+                    real(key(o, "modelA", what)), type, ini);
+                return ext::make_shared<RandomLossLM<CP>>(spot, static_cast<Size>(integer(key(o, "nSims", what))),
+                                                          real(key(o, "accuracy", what)),
+                                                          static_cast<BigNatural>(int64(key(o, "seed", what))));
+            }
+            ext::shared_ptr<ConstantLossLatentmodel<CP>> lm = constantLossLatent<CP>(o, ini);
+            if (kind == "HomogeneousPool" || kind == "InhomogeneousPool") {
+                auto nBuckets = static_cast<Size>(integer(key(o, "nBuckets", what)));
+                Real max = real(key(o, "max", what)), min = real(key(o, "min", what));
+                auto nSteps = static_cast<Size>(integer(key(o, "nSteps", what)));
+                if (kind == "HomogeneousPool")
+                    return ext::make_shared<HomogeneousPoolLossModel<CP>>(lm, nBuckets, max, min, nSteps);
+                return ext::make_shared<InhomogeneousPoolLossModel<CP>>(lm, nBuckets, max, min, nSteps);
+            }
+            if (kind == "RandomDefault" && o.if_contains("onDefaultModel") != nullptr) {
+                // the default latent model's constructor, with the recoveries given
+                ext::shared_ptr<DefaultLatentModel<CP>> dm = lm;
+                return ext::make_shared<RandomDefaultLM<CP>>(dm, reals(key(o, "recoveries", what)),
+                                                             static_cast<Size>(integer(key(o, "nSims", what))),
+                                                             real(key(o, "accuracy", what)),
+                                                             static_cast<BigNatural>(int64(key(o, "seed", what))));
+            }
+            if (kind == "RandomDefault")
+                return ext::make_shared<RandomDefaultLM<CP>>(lm, static_cast<Size>(integer(key(o, "nSims", what))),
+                                                             real(key(o, "accuracy", what)),
+                                                             static_cast<BigNatural>(int64(key(o, "seed", what))));
+            throw InvalidParams("unknown loss model " + kind);
+        }
+
     }
 
     ext::shared_ptr<DefaultLossModel> makeLossModel(const json::value& v) {
@@ -215,15 +277,16 @@ namespace harness::credit::portfolio {
         std::string kind = text(key(o, "kind", what));
         if (kind == "DefaultLossModel")
             return ext::make_shared<BaseLossModel>();
+        if (kind == "GaussianLHP")
+            return ext::make_shared<GaussianLHPLossModel>(real(key(o, "correlation", what)),
+                                                          reals(key(o, "recoveries", what)));
         std::string copula = text(key(o, "copula", what));
-        if (kind != "ConstantLossModel")
-            throw InvalidParams("unknown loss model " + kind);
         if (copula == "Gaussian")
-            return constantLoss<GaussianCopulaPolicy>(o, GaussianCopulaPolicy::initTraits());
+            return onCopula<GaussianCopulaPolicy>(kind, o, GaussianCopulaPolicy::initTraits());
         if (copula == "T") {
             TCopulaPolicy::initTraits ini;
             ini.tOrders = integers(key(o, "tOrders", what));
-            return constantLoss<TCopulaPolicy>(o, ini);
+            return onCopula<TCopulaPolicy>(kind, o, ini);
         }
         throw InvalidParams("unknown copula " + copula);
     }

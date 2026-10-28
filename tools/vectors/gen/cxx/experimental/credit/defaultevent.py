@@ -21,7 +21,7 @@ by the C++ harness (tools/cxx/src/experimental/credit/defaultevent.cpp).
 
 This file also holds the credit portfolio generators' shared inputs, the specs of
 tools/cxx/src/experimental/credit/portfoliospec.hpp: currencies, types, keys, events, issuers, pools, baskets and loss
-models. Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/DefaultEventCxxVectorTests.cs, whose inputs
+models, and the loss models' statistics through their basket. Read back by tests/NanoQL.Tests/Vectors/Cxx/Experimental/Credit/DefaultEventCxxVectorTests.cs, whose inputs
 tests/NanoQL.Tests/Vectors/PortfolioInputs.cs builds."""
 import importlib.util
 import os
@@ -137,6 +137,50 @@ def constant_loss(copula, recoveries, correlation=None, factor_weights=None, t_o
     if t_orders is not None:
         m["tOrders"] = list(t_orders)
     return m
+
+
+def model_statistics(call, b, m, dates, levels=(), shortfalls=(), fractions=(), events=False, nth=False, splits=(),
+                     distribution=False, recoveries=False, refused=()):
+    """A loss model's statistics through the basket it is set on (tools/cxx/src/experimental/credit/basket.cpp): the
+    expected tranche loss at each date; the percentile at each date and level, the shortfall at each date and level,
+    the probability over each loss fraction at each date; the event counts (at least n events for n from 0 to the size
+    plus one) and the n-th event's probabilities for n from 1 to the size; the split of each loss level; the loss
+    distribution at each date; each name's recovery at the first date; and the statistics refused, each at the last
+    date. The inputs are tests/NanoQL.Tests/Vectors/LossModelStatistics.cs's."""
+    n = len(b["notionals"])
+    ds = [d.serialNumber() for d in dates]
+    inputs = {"basket": b, "model": m, "dates": ds, "levels": list(levels), "shortfalls": list(shortfalls),
+              "fractions": list(fractions), "splits": list(splits), "refused": list(refused)}
+    expected = {"expectedTrancheLoss": [call("Basket::expectedTrancheLoss", b, m, d) for d in ds]}
+    if levels:
+        expected["percentile"] = [call("Basket::percentile", b, m, d, p) for d in ds for p in levels]
+    if shortfalls:
+        expected["expectedShortfall"] = [call("Basket::expectedShortfall", b, m, d, p) for d in ds for p in shortfalls]
+    if fractions:
+        expected["probOverLoss"] = [call("Basket::probOverLoss", b, m, d, f) for d in ds for f in fractions]
+    if events:
+        expected["probAtLeastNEvents"] = [call("Basket::probAtLeastNEvents", b, m, k, d)
+                                          for d in ds for k in range(n + 2)]
+    if nth:
+        expected["probsBeingNthEvent"] = [call("Basket::probsBeingNthEvent", b, m, k, d)
+                                          for d in ds for k in range(1, n + 1)]
+    if splits:
+        expected["splitVaRLevel"] = [call("Basket::splitVaRLevel", b, m, d, x) for d in ds for x in splits]
+    if distribution:
+        expected["lossDistribution"] = [call("Basket::lossDistribution", b, m, d) for d in ds]
+    if recoveries:
+        expected["recoveryRate"] = [call("Basket::recoveryRate", b, m, ds[0], i) for i in range(n)]
+    args = {"probsBeingNthEvent": (1,), "expectedTrancheLoss": (), "probOverLoss": (0.5,), "percentile": (0.9,),
+            "expectedShortfall": (0.9,), "splitVaRLevel": (1.0,), "lossDistribution": (), "recoveryRate": (0,),
+            "probAtLeastNEvents": (1,), "defaultCorrelation": (0, 1)}
+    expected["refused"] = []
+    for r in refused:
+        a = args[r]
+        if r in ("probsBeingNthEvent", "probAtLeastNEvents"):
+            expected["refused"].append(call("Basket::" + r, b, m, a[0], ds[-1]))
+        else:
+            expected["refused"].append(call("Basket::" + r, b, m, ds[-1], *a))
+    return inputs, expected
 
 
 TYPES = ([atomic(a) for a in ATOMICS if a != RESTRUCTURING]

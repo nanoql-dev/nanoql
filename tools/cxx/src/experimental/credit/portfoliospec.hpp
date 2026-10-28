@@ -17,7 +17,11 @@
 //     basket    {"refDate", "notionals", "pool", "attachment", "detachment"}, the pool's names its names
 //     model     {"kind": "ConstantLossModel", "copula": "Gaussian" or "T", "tOrders" (T), "integration", the
 //               "recoveries", and either "correlation" with "nVariables" (QuantLib's quote constructor) or
-//               "factorWeights"}; or {"kind": "DefaultLossModel"}, QuantLib's base with every default kept
+//               "factorWeights"}; or {"kind": "DefaultLossModel"}, QuantLib's base with every default kept; the C2
+//               models: "HomogeneousPool" or "InhomogeneousPool" (the constant-loss keys and "nBuckets", "max", "min",
+//               "nSteps"), "RandomDefault" (the constant-loss keys and "nSims", "accuracy", "seed"), "RandomLoss"
+//               (the copula keys, "factorWeights" of the defaults then the recoveries, "recoveries", "modelA",
+//               "nSims", "accuracy", "seed") and "GaussianLHP" ("correlation", "recoveries")
 //
 // Everything is built inside the call, so that QuantLib's refusals are throws and a malformed spec InvalidParams.
 #ifndef NANOQL_CXX_EXPERIMENTAL_CREDIT_PORTFOLIOSPEC_HPP
