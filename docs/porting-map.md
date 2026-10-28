@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 194 | 21 |
-| partial | 18 | 18 |
-| ported | 1,048 | 141 |
+| not started | 173 | 20 |
+| partial | 19 | 18 |
+| ported | 1,068 | 142 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -250,41 +250,41 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `basecorrelationlossmodel` | not started |  | no nanoql type: BaseCorrelationLossModel, GaussianLHPFlatBCLM |
 | `basecorrelationstructure` | not started |  | no nanoql type: BaseCorrelationTermStructure |
-| `basket` | not started |  | no nanoql type: Basket |
+| `basket` | partial | Experimental/Credit/Basket.cs | partial: densityTrancheLoss, never ported: basket.hpp declares it and nothing defines it, so QuantLib never compiles a call to it |
 | `binomiallossmodel` | not started |  | no nanoql type: BinomialLossModel, GaussianBinomialLossModel, TBinomialLossModel |
 | `blackcdsoptionengine` | not started |  | no nanoql type: BlackCdsOptionEngine |
 | `cdo` | not started |  | no nanoql type: CDO |
 | `cdsoption` | not started |  | no nanoql type: CdsOption, CdsOptionResults |
-| `constantlosslatentmodel` | not started |  | no nanoql type: ConstantLossLatentmodel, GaussianConstantLossLM, TConstantLossLM, ConstantLossModel |
+| `constantlosslatentmodel` | ported | Experimental/Credit/ConstantLossLatentModel{TCopula,TInitTraits}.cs, Experimental/Credit/ConstantLossModel{TCopula,TInitTraits}.cs, Experimental/Credit/GaussianConstantLossLM.cs, Experimental/Credit/TConstantLossLM.cs | no nanoql type: ConstantLossLatentmodel |
 | `correlationstructure` | not started |  | no nanoql type: CorrelationTermStructure |
-| `defaultevent` | not started |  | no nanoql type: DefaultEvent, DefaultEventDefaultSettlement, FailureToPayEvent, BankruptcyEvent |
-| `defaultlossmodel` | not started |  | no nanoql type: DefaultLossModel |
-| `defaultprobabilitykey` | not started |  | no nanoql type: DefaultProbKey, NorthAmericaCorpDefaultKey |
-| `defaultprobabilitylatentmodel` | not started |  | no nanoql type: DefaultLatentModel, GaussianDefProbLM, TDefProbLM |
-| `defaulttype` | not started |  | no nanoql type: Seniority, AtomicDefaultType, RestructuringType, DefaultType, FailureToPay |
+| `defaultevent` | ported | Experimental/Credit/DefaultEvent/BankruptcyEvent.cs, Experimental/Credit/DefaultEvent/DefaultEvent.cs, Experimental/Credit/DefaultEvent/DefaultSettlement.cs, Experimental/Credit/DefaultEvent/FailureToPayEvent.cs | no nanoql type: DefaultEventDefaultSettlement |
+| `defaultlossmodel` | ported | Experimental/Credit/DefaultLossModel.cs, Experimental/Credit/IDefaultLossModel.cs |  |
+| `defaultprobabilitykey` | ported | Experimental/Credit/DefaultProbKey.cs, Experimental/Credit/NorthAmericaCorpDefaultKey.cs |  |
+| `defaultprobabilitylatentmodel` | ported | Experimental/Credit/DefaultLatentModel{TCopula,TInitTraits}.cs, Experimental/Credit/GaussianDefProbLM.cs, Experimental/Credit/TDefProbLM.cs |  |
+| `defaulttype` | ported | Experimental/Credit/AtomicDefaultType.cs, Experimental/Credit/DefaultType.cs, Experimental/Credit/FailureToPay.cs, Experimental/Credit/RestructuringType.cs, Experimental/Credit/Seniority.cs |  |
 | `distribution` | not started |  | no nanoql type: Distribution, ManipulateDistribution |
 | `factorspreadedhazardratecurve` | not started |  | no nanoql type: FactorSpreadedHazardRateCurve |
 | `gaussianlhplossmodel` | not started |  | no nanoql type: GaussianLHPLossModel |
 | `homogeneouspooldef` | not started |  | no nanoql type: HomogeneousPoolLossModel, HomogGaussPoolLossModel, HomogTPoolLossModel |
 | `inhomogeneouspooldef` | not started |  | no nanoql type: InhomogeneousPoolLossModel, IHGaussPoolLossModel, IHStudentPoolLossModel |
 | `integralcdoengine` | not started |  | no nanoql type: IntegralCDOEngine |
-| `integralntdengine` | not started |  | no nanoql type: IntegralNtdEngine |
+| `integralntdengine` | ported | Experimental/Credit/IntegralNtdEngine.cs |  |
 | `interpolatedaffinehazardratecurve` | not started |  | no nanoql type: InterpolatedAffineHazardRateCurve, AffineHazardRate, AffineHazardRateCurve |
-| `issuer` | not started |  | no nanoql type: DefaultEventSet, Issuer |
-| `loss` | not started |  | no nanoql type: Loss |
+| `issuer` | ported | Experimental/Credit/Issuer.cs | no nanoql type: DefaultEventSet |
+| `loss` | ported | Experimental/Credit/Loss.cs |  |
 | `lossdistribution` | not started |  | no nanoql type: LossDist, ProbabilityOfNEvents, ProbabilityOfAtLeastNEvents, BinomialProbabilityOfAtLeastNEvents, LossDistBinomial, LossDistHomogeneous, LossDistBucketing, LossDistMonteCarlo |
 | `midpointcdoengine` | not started |  | no nanoql type: MidPointCDOEngine |
-| `nthtodefault` | not started |  | no nanoql type: NthToDefault, NthToDefaultResults |
+| `nthtodefault` | ported | Experimental/Credit/NthToDefault.cs, Experimental/Credit/NthToDefaultResults.cs |  |
 | `onefactoraffinesurvival` | not started |  | no nanoql type: OneFactorAffineSurvivalStructure |
 | `onefactorcopula` | not started |  | no nanoql type: OneFactorCopula |
 | `onefactorgaussiancopula` | not started |  | no nanoql type: OneFactorGaussianCopula |
 | `onefactorstudentcopula` | not started |  | no nanoql type: OneFactorStudentCopula, OneFactorGaussianStudentCopula, OneFactorStudentGaussianCopula |
-| `pool` | not started |  | no nanoql type: Pool |
+| `pool` | ported | Experimental/Credit/Pool.cs |  |
 | `randomdefaultlatentmodel` | not started |  | no nanoql type: RandomLM, RandomDefaultLM, GaussianRandomDefaultLM, TRandomDefaultLM |
 | `randomdefaultmodel` | not started |  | no nanoql type: RandomDefaultModel, GaussianRandomDefaultModel |
 | `randomlosslatentmodel` | not started |  | no nanoql type: RandomLossLM, GaussianRandomLossLM, TRandomLossLM |
-| `recoveryratemodel` | not started |  | no nanoql type: RecoveryRateModel, ConstantRecoveryModel |
-| `recoveryratequote` | not started |  | no nanoql type: RecoveryRateQuote |
+| `recoveryratemodel` | ported | Experimental/Credit/ConstantRecoveryModel.cs, Experimental/Credit/RecoveryRateModel.cs |  |
+| `recoveryratequote` | ported | Experimental/Credit/RecoveryRateQuote.cs |  |
 | `recursivelossmodel` | not started |  | no nanoql type: RecursiveLossModel, RecursiveGaussLossModel |
 | `riskyassetswap` | not started |  | no nanoql type: RiskyAssetSwap, AssetSwapHelper |
 | `riskyassetswapoption` | not started |  | no nanoql type: RiskyAssetSwapOption |
@@ -386,26 +386,26 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `claytoncopularng` | not started |  | no nanoql type: ClaytonCopulaRng |
-| `convolvedstudentt` | not started |  | no nanoql type: CumulativeBehrensFisher, InverseCumulativeBehrensFisher |
+| `convolvedstudentt` | ported | Experimental/Math/CumulativeBehrensFisher.cs, Experimental/Math/InverseCumulativeBehrensFisher.cs |  |
 | `farliegumbelmorgensterncopularng` | not started |  | no nanoql type: FarlieGumbelMorgensternCopulaRng |
 | `fireflyalgorithm` | not started |  | no nanoql type: FireflyAlgorithm, FireflyAlgorithmIntensity, ExponentialIntensity, InverseLawSquareIntensity, FireflyAlgorithmRandomWalk, DistributionRandomWalk, GaussianWalk, LevyFlightWalk, DecreasingGaussianWalk |
 | `frankcopularng` | not started |  | no nanoql type: FrankCopulaRng |
-| `gaussiancopulapolicy` | not started |  | no nanoql type: GaussianCopulaPolicy |
+| `gaussiancopulapolicy` | ported | Experimental/Math/GaussianCopulaPolicy.cs, Experimental/Math/GaussianCopulaPolicyInitTraits.cs |  |
 | `gaussiannoncentralchisquaredpolynomial` | not started |  | no nanoql type: GaussNonCentralChiSquaredPolynomial |
 | `hybridsimulatedannealing` | not started |  | no nanoql type: HybridSimulatedAnnealing, HybridSimulatedAnnealingLocalOptimizeScheme, HybridSimulatedAnnealingResetScheme, GaussianSimulatedAnnealing, LogNormalSimulatedAnnealing, MirrorGaussianSimulatedAnnealing, GaussianSimulatedReAnnealing, VeryFastSimulatedAnnealing, VeryFastSimulatedReAnnealing |
 | `hybridsimulatedannealingfunctors` | not started |  | no nanoql type: SamplerLogNormal, SamplerGaussian, SamplerRingGaussian, SamplerMirrorGaussian, SamplerCauchy, SamplerVeryFastAnnealing, ProbabilityAlwaysDownhill, ProbabilityBoltzmann, ProbabilityBoltzmannDownhill, TemperatureBoltzmann, TemperatureCauchy, TemperatureCauchy1D, TemperatureExponential, TemperatureVeryFastAnnealing, ReannealingTrivial, ReannealingFiniteDifferences |
 | `isotropicrandomwalk` | not started |  | no nanoql type: IsotropicRandomWalk |
 | `laplaceinterpolation` | not started |  | no nanoql type: LaplaceInterpolation |
-| `latentmodel` | not started |  | no nanoql type: LMIntegration, IntegrationBase, LatentModel, LatentModelFactorSampler |
+| `latentmodel` | ported | Experimental/Math/BoxMullerFactorSampler.cs, Experimental/Math/BoxMullerFactorSampler{TUrng}.cs, Experimental/Math/GaussianQuadLMIntegration.cs, Experimental/Math/ICopulaPolicy.cs, Experimental/Math/LMIntegration.cs, Experimental/Math/LatentModelFactorSampler.cs, Experimental/Math/LatentModelFactorSampler{TCopula,TInitTraits,TUsng}.cs, Experimental/Math/LatentModelIntegrationType.cs, Experimental/Math/LatentModel{TCopula,TInitTraits}.cs, Experimental/Math/MultidimLMIntegration.cs, Experimental/Math/PolarStudentTFactorSampler.cs, Experimental/Math/PolarStudentTFactorSampler{TUrng}.cs | no nanoql type: IntegrationBase |
 | `levyflightdistribution` | not started |  | no nanoql type: LevyFlightDistribution, LevyFlightDistributionParam_type |
 | `moorepenroseinverse` | not started |  |  |
-| `multidimintegrator` | not started |  | no nanoql type: MultidimIntegral |
-| `multidimquadrature` | not started |  | no nanoql type: GaussianQuadMultidimIntegrator |
+| `multidimintegrator` | ported | Experimental/Math/MultidimIntegral.cs, Experimental/Math/MultidimIntegrand.cs |  |
+| `multidimquadrature` | ported | Experimental/Math/GaussianQuadMultidimIntegrator.cs, Experimental/Math/MultidimVectorIntegrand.cs |  |
 | `particleswarmoptimization` | not started |  | no nanoql type: ParticleSwarmOptimization, ParticleSwarmOptimizationInertia, TrivialInertia, SimpleRandomInertia, DecreasingInertia, AdaptiveInertia, LevyFlightInertia, ParticleSwarmOptimizationTopology, GlobalTopology, KNeighbors, ClubsTopology |
 | `piecewisefunction` | not started |  |  |
 | `piecewiseintegral` | not started |  | no nanoql type: PiecewiseIntegral |
-| `polarstudenttrng` | not started |  | no nanoql type: PolarStudentTRng |
-| `tcopulapolicy` | not started |  | no nanoql type: TCopulaPolicy |
+| `polarstudenttrng` | ported | Experimental/Math/PolarStudentTRng.cs, Experimental/Math/PolarStudentTRng{TUrng}.cs |  |
+| `tcopulapolicy` | ported | Experimental/Math/TCopulaPolicy.cs, Experimental/Math/TCopulaPolicyInitTraits.cs |  |
 | `zigguratrng` | not started |  | no nanoql type: ZigguratRng, Ziggurat |
 
 ### `ql/experimental/mcbasket/`
@@ -2186,7 +2186,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `noarbsabr` | not started |  | 2 cases |
 | `normalclvmodel` | not started |  | 5 cases |
 | `nthorderderivativeop` | ported | TestSuite/NthOrderDerivativeOpTests.cs | 15 of 15 cases |
-| `nthtodefault` | not started |  | 2 cases |
+| `nthtodefault` | ported | TestSuite/NthToDefaultTests.cs | 2 of 2 cases |
 | `numericaldifferentiation` | ported | TestSuite/NumericalDifferentiationTests.cs | 7 of 7 cases |
 | `observable` | not ported: tests Observable, which is removed |  |  |
 | `ode` | ported | TestSuite/OdeTests.cs | 3 of 3 cases |

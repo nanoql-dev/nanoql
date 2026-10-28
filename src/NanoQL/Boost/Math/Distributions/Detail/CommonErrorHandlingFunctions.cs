@@ -78,6 +78,25 @@ internal static class CommonErrorHandlingFunctions
         }
     }
 
+    /// <summary>
+    /// <c>check_x_not_NaN</c>: a random variate must not be NaN; a distribution that allows infinite variates takes this
+    /// check.
+    /// </summary>
+    /// <param name="function">Boost's name of the calling function, its type written <c>double</c>.</param>
+    /// <param name="x">The random variate.</param>
+    /// <param name="paramName">The caller's name for the argument.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The variate is NaN.</exception>
+    internal static void CheckXNotNaN(string function, double x, string paramName)
+    {
+        // Note that this test catches only NaN.
+        if (double.IsNaN(x))
+        {
+            throw new ArgumentOutOfRangeException(
+                paramName,
+                $"Error in function {function}: Random variate x is {Show(x)}, but must be finite or + or - infinity!");
+        }
+    }
+
     /// <summary><c>check_df</c>: degrees of freedom must be positive and finite.</summary>
     /// <param name="function">Boost's name of the calling function.</param>
     /// <param name="df">The degrees of freedom.</param>

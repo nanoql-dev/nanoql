@@ -604,6 +604,16 @@ Facts:
 
 - `EachExercisesCountIsItsValues`
 
+## BasketConstructionOrderTests
+
+[`Divergences/BasketConstructionOrderTests.cs`](../tests/NanoQL.Tests/Divergences/BasketConstructionOrderTests.cs)
+
+A basket's remaining tranche computed after its attachment and detachment amounts (the S-xcr plan's XR8 (xliii)): QuantLib's constructor computes the basket's evaluation-date state before it sets the amounts (`basket.cpp:57-68`), so the remaining amounts read 0 and 0 until the first statistic recomputes them. QuantLib's values are the plan review's `rv_basket.cpp order`; the check is QuantLib's values after its first statistic.
+
+Facts:
+
+- `TheRemainingTrancheIsSetAtConstruction`
+
 ## BasketExpiryBeforeReferenceDateTests
 
 [`Divergences/BasketExpiryBeforeReferenceDateTests.cs`](../tests/NanoQL.Tests/Divergences/BasketExpiryBeforeReferenceDateTests.cs)
@@ -615,6 +625,16 @@ Facts:
 - `ARiskFreeCurveDatedAfterExpiryDiscountsNothing`
 - `AVolatilityDatedAfterExpiryAccruesNoVariance`
 
+## BasketLiveReadsTests
+
+[`Divergences/BasketLiveReadsTests.cs`](../tests/NanoQL.Tests/Divergences/BasketLiveReadsTests.cs)
+
+A basket's live reads by the live names, not by the live list's positions (the S-xcr plan's XR8 (ii)): QuantLib's `remainingNotionals(d)` and `remainingProbabilities(d)` read the first live-list-length positions of the pool (`basket.cpp:196-220`), so after the first of three names defaults they read the first two names. QuantLib's values are the planner's `xp_basket.cpp` (D2, D3); the check is QuantLib on the basket of the live names alone, whose reads are those names' notionals and curves.
+
+Facts:
+
+- `TheLiveReadsTakeTheLiveNames`
+
 ## BasketPayoffEmptyTests
 
 [`Divergences/BasketPayoffEmptyTests.cs`](../tests/NanoQL.Tests/Divergences/BasketPayoffEmptyTests.cs)
@@ -624,6 +644,24 @@ The minimum and maximum basket payoffs on no prices. QuantLib dereferences `std:
 Facts:
 
 - `AnEmptyBasketIsRefused`
+
+## BasketRealizedDefaultsTests
+
+[`Divergences/BasketRealizedDefaultsTests.cs`](../tests/NanoQL.Tests/Divergences/BasketRealizedDefaultsTests.cs)
+
+A basket with realized defaults restated on its live names (the S-xcr plan's XR8 (ii), ORE's form): the lost notional writes the tranche down from its attachment and the recovered notional amortizes it from its detachment's side, the model prices the live names over the restated tranche and the realized tranche loss is added; the event counts take the order less the realized defaults. QuantLib's adds the whole settled loss to the expected tranche loss, tranches the live loss against min(D, A + max(0, L − A)) where its header means max(0, A − L), and counts the defaulted name among the live ones (`basket.cpp:292-299`, `:325-328`, `:345-369`). On A (10) and B (20) alive and C (30) defaulted and settled at 0.4, QuantLib's values are the plan review's `rv_basket.cpp realized` and the S-xcr run's `c1_facts.cpp`; the checks are the tranche's loss enumerated over the live names' defaults at independence, and QuantLib on the restated basket (the live names, the restated ratios).
+
+Facts:
+
+- `TheTrancheIsRestatedOnTheLiveNames`
+- `TheExpectedTrancheLossIsTheTranchesLoss`
+- `TheEventCountsTakeTheOrderLessTheRealizedDefaults`
+- `TheNameReadsTakePoolPositions`
+- `AFirstNameDefaultedAtItsOwnRecoveryLeavesTheLiveNamesPrices`
+- `TheProbabilityOverALossReadsTheWholeTranche`
+- `ThePercentileAndShortfallAddTheRealizedTrancheLoss`
+- `TheLossDistributionIsThePools`
+- `AProgrammedDefaultIsntRealized`
 
 ## BasketZeroVolatilitiesTests
 
@@ -658,6 +696,17 @@ Facts:
 - `AnUpJumpMeanOfOneOrMoreIsRefused`
 - `TheConstraintRefusesACalibrationStepThere`
 - `BelowOneQuantLibsValuesStand`
+
+## BehrensFisherHighOrderTests
+
+[`Divergences/BehrensFisherHighOrderTests.cs`](../tests/NanoQL.Tests/Divergences/BehrensFisherHighOrderTests.cs)
+
+The convolved Student t past order 171, its factorial and power scaled together (the S-xcr plan's XR8 (xxvi)): QuantLib's series divides a factorial by a power, both of which leave the doubles from degree 172 on (`convolvedstudentt.cpp:124-127`), so on two t's of order 173 its cumulative reads −∞ and its inverse refuses ("root not bracketed"). QuantLib's values are the S-xcr run's `c1_facts.cpp`; the check is the same series in 50 digits (the run's `premises\bf_ref.py`, after the planner's `xp_bf_precision.py`), within R7: the scaled terms carry the logarithms' rounding through the series' alternating sum, 4e-12 at most here.
+
+Facts:
+
+- `TheSeriesIsAccuratePastOrder171`
+- `TheInverseFindsItsRoot`
 
 ## BiCGstabLastIterationTests
 
@@ -1753,6 +1802,16 @@ The constrained Euler evolver's displaced constraint (the S-mm plan's MR3 (vii),
 Facts:
 
 - `ADisplacedConstraintLands`
+
+## ConventionalRecoveryNoSeniorityTests
+
+[`Divergences/ConventionalRecoveryNoSeniorityTests.cs`](../tests/NanoQL.Tests/Divergences/ConventionalRecoveryNoSeniorityTests.cs)
+
+ISDA's conventional recovery refused for `Seniority.NoSeniority` (the S-xcr plan's XR8 (xxviii)): QuantLib's `conventionalRecovery` indexes its five-entry table by the seniority (`recoveryratequote.hpp:36-37`), and `NoSeniority` is 5, past its end: an undefined read. The check is the table's five entries.
+
+Facts:
+
+- `NoSeniorityHasNoConventionalRecovery`
 
 ## ConvertibleClockTests
 
@@ -4112,6 +4171,16 @@ Facts:
 - `TheFirstThreeWeeksOf1901Answer`
 - `TheLastDayOf2199Answers`
 
+## IssuerEventsOnOneDateTests
+
+[`Divergences/IssuerEventsOnOneDateTests.cs`](../tests/NanoQL.Tests/Divergences/IssuerEventsOnOneDateTests.cs)
+
+An issuer keeps every event, two on one date in the order given (the S-xcr plan's XR8 (iv)): QuantLib's event set orders by date alone (`issuer.hpp:36-38`), so it keeps the first event of a date and drops the second, where its own documentation lets several events take place on one date. QuantLib's values are the S-xcr run's `c1_facts.cpp`; the check is QuantLib's issuer with each event alone.
+
+Facts:
+
+- `BothEventsOnADateCount`
+
 ## JamshidianBracketTests
 
 [`Divergences/JamshidianBracketTests.cs`](../tests/NanoQL.Tests/Divergences/JamshidianBracketTests.cs)
@@ -4259,6 +4328,16 @@ Facts:
 Facts:
 
 - `TheReferenceDateIsTheLastStoredFixingOnOrBeforeTheEvaluationDate`
+
+## LatentModelVectorConstructorTests
+
+[`Divergences/LatentModelVectorConstructorTests.cs`](../tests/NanoQL.Tests/Divergences/LatentModelVectorConstructorTests.cs)
+
+The latent model on one factor's weights builds its Gaussian policy from them (the S-xcr plan's XR8 (vi)): QuantLib's constructor default-constructs the policy first (`latentmodel.hpp:667-680`), whose default reads the first row of an empty matrix (`gaussiancopulapolicy.hpp:40-43`): QuantLib crashes (the planner's `xp_latent.cpp`, D16). The check is QuantLib's matrix constructor on the same weights, bit for bit.
+
+Facts:
+
+- `TheVectorConstructorIsTheMatrixOne`
 
 ## LatticeRsgTests
 
@@ -4538,6 +4617,16 @@ The analytic lookback engines at zero volatility (the S-bar plan's BR5 (xxiv), #
 Facts:
 
 - `EachEngineTakesTheForwardPathsPayoff`
+
+## LossModelBindingTests
+
+[`Divergences/LossModelBindingTests.cs`](../tests/NanoQL.Tests/Divergences/LossModelBindingTests.cs)
+
+A loss model bound to a basket by copy, its precomputation run there, once (the S-xcr plan's XR1 (b), XR8 (viii)): QuantLib's model holds a relinkable handle to its basket, so a model set on two baskets in turn can keep the first's precomputation (the recursive model's weights and the random models' simulations, the planner's `xp_basket.cpp` D23, D32: 26.31 and 28.72 against a fresh model's 49.47 and 94.475). Each binding here is a fresh model's; the check is QuantLib's fresh model, bit for bit.
+
+Facts:
+
+- `EachBindingIsAFreshModels`
 
 ## MakeSwaptionNullIndexTests
 
@@ -5037,6 +5126,26 @@ Facts:
 
 - `ASetStateIsTheEvolutionOfAModelStartingThere`
 
+## NthToDefaultReferenceDateTests
+
+[`Divergences/NthToDefaultReferenceDateTests.cs`](../tests/NanoQL.Tests/Divergences/NthToDefaultReferenceDateTests.cs)
+
+The n-th-to-default engine reads a default probability before a default curve's reference date as 0, and a discount before the discount curve's as 1 (the S-xcr plan's XR8 (x), S-core's CR7 (xxxiv) class): on default curves dated T+2 QuantLib's reads at the evaluation date refuse ("negative time (-0.00821918) given"). QuantLib's values are the S-xcr run's `c1_facts.cpp`; the check is QuantLib on the market restated from the evaluation date: each curve a hazard curve of rate 0 to T+2 and the T+2 curve's rate after it.
+
+Facts:
+
+- `DefaultCurvesDatedAfterTheEvaluationDateReadNoDefaultBeforeIt`
+
+## NthToDefaultUpfrontTests
+
+[`Divergences/NthToDefaultUpfrontTests.cs`](../tests/NanoQL.Tests/Divergences/NthToDefaultUpfrontTests.cs)
+
+The n-th-to-default upfront on the swap's own nominal (the S-xcr plan's XR8 (xi)): QuantLib's is the basket's remaining notional times the rate (`integralntdengine.cpp:157-163`), 5 for a 1,000 nominal on a 100 basket (the planner's `xp_engines.cpp`, D42: the swap at its fair premium reads an NPV of 5, its upfront). The check is QuantLib where the nominal is the basket's notional.
+
+Facts:
+
+- `TheUpfrontIsTheNominalsRate`
+
 ## NullDateTests
 
 [`Divergences/NullDateTests.cs`](../tests/NanoQL.Tests/Divergences/NullDateTests.cs)
@@ -5336,6 +5445,29 @@ The perpetual futures engine on a curve dated apart (the playbook's dates row; t
 Facts:
 
 - `ADomesticCurveSettlingLaterIsReadFromItsOwnDate`
+
+## PolarStudentTSamplerTests
+
+[`Divergences/PolarStudentTSamplerTests.cs`](../tests/NanoQL.Tests/Divergences/PolarStudentTSamplerTests.cs)
+
+The polar Student t factor sampler draws its factors from one uniform stream in turn, each scaled to unit variance (the S-xcr plan's XR8 (xix)): QuantLib's gives each t generator its own copy of one uniform generator, so the systemic draw k equals the idiosyncratic stream's draw k, and leaves its draws raw, of variance ν/(ν − 2) (`latentmodel.hpp:779-794`, `polarstudenttrng.hpp:86`). QuantLib's values are the plan review's `rv_basket.cpp polar` (ν 5, 5, weight √0.3, 200,000 paths at seed 42) and the planner's `xp_latent.cpp` (D17); the checks, which QuantLib's sampler fails, are each factor's sample variance within three standard errors of 1, the simulated default frequency against the model's probability and the inversion sampler's, and the systemic draws against the idiosyncratic stream's.
+
+Facts:
+
+- `TheFactorsAreOfUnitVariance`
+- `TheDefaultFrequencyIsTheModels`
+- `TheSystemicDrawsArentTheIdiosyncraticStreams`
+
+## PoolKeyOrderTests
+
+[`Divergences/PoolKeyOrderTests.cs`](../tests/NanoQL.Tests/Divergences/PoolKeyOrderTests.cs)
+
+A pool's default keys, read in the pool's order with each name's own key (the S-xcr plan's XR8 (i)): QuantLib's `defaultKeys()` lists them in name order (`pool.cpp:77-82`), so names C and A entering with keys KA and KB read C's probability on KB's curve; and its `clear()` keeps the cleared names' keys (`pool.cpp:34-38`), so a name added after it reads a cleared name's key. QuantLib's values are the planner's `xp_basket.cpp` and the plan review's `rv_basket.cpp clear`; the checks are QuantLib on the pool added in name order, and on a fresh pool.
+
+Facts:
+
+- `EachNameReadsItsOwnKey`
+- `AClearedPoolHoldsNoKey`
 
 ## PremiumAdjustedPutStrikeTests
 
@@ -5830,6 +5962,17 @@ The single composite's buffer (the S-mmp plan's MMPR4 (viii), fixed under R8). Q
 Facts:
 
 - `APartOfSeveralProductsFitsTheBuffer`
+
+## SingleSenioritySettlementTests
+
+[`Divergences/SingleSenioritySettlementTests.cs`](../tests/NanoQL.Tests/Divergences/SingleSenioritySettlementTests.cs)
+
+An event settled at one recovery rate settles the seniority it names (the S-xcr plan's XR8 (iii)): QuantLib's single-rate settlement fills every other seniority with ISDA's conventional recovery (`defaultevent.cpp:63-75`), so a failure to pay settled for SubLT2 at 0.3 reads 0.65 for SecDom, where each seniority settles at its own auction (ISDA's 2008 Icelandic protocols). And a bankruptcy settled by a map settles the seniorities it holds, where QuantLib's refuses a map without all five (`defaultevent.cpp:210-213`). QuantLib's values are the S-xcr run's `c1_facts.cpp` and the plan review's `rv_events.cpp`; the check is QuantLib's map constructor holding the seniority alone, which reads `Null<Real>()` for the others.
+
+Facts:
+
+- `AFailureToPaySettlesTheSeniorityItNames`
+- `ABankruptcySettlesTheSeniorityItNamesOrItsMapHolds`
 
 ## SinkingNotionalsTests
 
@@ -6414,6 +6557,16 @@ Facts:
 
 - `ANaNEigenvalueCantBeSorted`
 
+## TCopulaQuantileCentreTests
+
+[`Divergences/TCopulaQuantileCentreTests.cs`](../tests/NanoQL.Tests/Divergences/TCopulaQuantileCentreTests.cs)
+
+The Student t copula policy's quantile near ½ at 4 and 6 degrees of freedom, one Newton step on Boost's cumulative function there (S-core's C3-O4, applied where the policy reads Boost's quantile): Boost's quantile takes Shaw's forms, which cancel near ½, returning ±0 for ±2.67e-9 within 1e-9 of ½ and 58% off at ½ − 1e-8 at 4 degrees of freedom (`Numerics.InverseCumulativeStudent`). The convolution refuses even orders, so only a policy built without variables reads them. QuantLib's value is Boost's quantile times the variance factor; the check is Boost's cumulative function at the result, which returns the probability within the quantile's conditioning.
+
+Facts:
+
+- `TheQuantileInvertsTheCumulativeNearTheCentre`
+
 ## TRBDF2Tests
 
 [`Divergences/TRBDF2Tests.cs`](../tests/NanoQL.Tests/Divergences/TRBDF2Tests.cs)
@@ -6764,6 +6917,17 @@ Facts:
 
 - `TheZeroBondJustAboveTheCutoff`
 - `TheBondOptionAtSmallReversion`
+
+## VectorQuadratureWeightTests
+
+[`Divergences/VectorQuadratureWeightTests.cs`](../tests/NanoQL.Tests/Divergences/VectorQuadratureWeightTests.cs)
+
+The Gauss-Hermite vector integration weights every node (the S-xcr plan's XR8 (v)): QuantLib's applies its first node's weight inside a `std::for_each` that discards the result (`multidimquadrature.hpp:61-64`), so node n − 1 enters unweighted. QuantLib's values are the S-xcr run's `c1_facts.cpp` and the planner's `xp_latent.cpp` (D18); the check is QuantLib's scalar rule per component, bit for bit.
+
+Facts:
+
+- `TheVectorRuleIsTheScalarRulePerComponent`
+- `ALatentModelsVectorExpectationIsItsScalarOnes`
 
 ## VegaBumpCollectionCheckTests
 

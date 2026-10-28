@@ -896,4 +896,54 @@ internal static class EnumArguments
             throw new ArgumentOutOfRangeException(paramName, value, "Unknown interpolation type");
         }
     }
+
+    /// <summary>Refuses an atomic default type outside <see cref="Experimental.AtomicDefaultType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(Experimental.AtomicDefaultType value, string paramName)
+    {
+        if (value is < Experimental.AtomicDefaultType.Restructuring or > Experimental.AtomicDefaultType.MergerEvent)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown atomic default type");
+        }
+    }
+
+    /// <summary>Refuses a restructuring type outside <see cref="Experimental.RestructuringType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(Experimental.RestructuringType value, string paramName)
+    {
+        if (value is < Experimental.RestructuringType.NoRestructuring or > Experimental.RestructuringType.AnyRestructuring)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown restructuring type");
+        }
+    }
+
+    /// <summary>Refuses a seniority outside <see cref="Experimental.Seniority"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    internal static void Check(Experimental.Seniority value, string paramName)
+    {
+        if (value is < Experimental.Seniority.SecDom or > Experimental.Seniority.NoSeniority)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown seniority");
+        }
+    }
+
+    /// <summary>Refuses an integration type outside <see cref="Experimental.LatentModelIntegrationType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member, with QuantLib's text
+    /// (<c>latentmodel.hpp:488</c>).</exception>
+    internal static void Check(Experimental.LatentModelIntegrationType value, string paramName)
+    {
+        if (value is < Experimental.LatentModelIntegrationType.GaussianQuadrature
+            or > Experimental.LatentModelIntegrationType.Trapezoid)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "Unknown latent model integration type.");
+        }
+    }
 }
