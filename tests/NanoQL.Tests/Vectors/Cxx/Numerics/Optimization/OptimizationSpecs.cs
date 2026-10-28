@@ -21,13 +21,26 @@ internal static class OptimizationSpecs
     internal static readonly string[] ResultNames =
         ["currentValue", "functionValue", "gradientNormValue", "functionEvaluation", "gradientEvaluation", "endCriteriaType"];
 
-    /// <summary>A cost function from its spec: <c>{"type": name}</c>, or a <see cref="SimpleCostFunction"/>.</summary>
+    /// <summary>
+    /// A cost function from its spec: <c>{"type": name}</c>, a <see cref="SimpleCostFunction"/>, or one of QuantLib's
+    /// test-suite functions with its parameters (<c>weightedQuadratic</c>'s center and weight, <c>quadraticForm</c>'s
+    /// matrix).
+    /// </summary>
     /// <param name="spec">The spec.</param>
     /// <returns>The cost function.</returns>
-    internal static CostFunction CostFunction(JsonElement spec) =>
-        Named(
-            spec.GetProperty("type").GetString() ?? throw new InvalidOperationException("a cost function spec without a type"),
-            spec.TryGetProperty("values", out JsonElement values) ? values.GetString() : null);
+    internal static CostFunction CostFunction(JsonElement spec)
+    {
+        string type = spec.GetProperty("type").GetString()
+            ?? throw new InvalidOperationException("a cost function spec without a type");
+        return type switch
+        {
+            "weightedQuadratic" => new WeightedQuadratic(Numbers(spec.GetProperty("center")), Numbers(spec.GetProperty("weight"))),
+            "weightedQuadraticValueOnly" =>
+                new WeightedQuadraticValueOnly(Numbers(spec.GetProperty("center")), Numbers(spec.GetProperty("weight"))),
+            "quadraticForm" => new QuadraticForm(SquareMatrix(spec.GetProperty("matrix"))),
+            _ => Named(type, spec.TryGetProperty("values", out JsonElement values) ? values.GetString() : null),
+        };
+    }
 
     /// <summary>A named cost function, or a <see cref="SimpleCostFunction"/> over a named values function.</summary>
     /// <param name="type">The name, or <c>SimpleCostFunction</c>.</param>
@@ -42,6 +55,10 @@ internal static class OptimizationSpecs
         "rankDeficient" => new RankDeficient(),
         "quadratic2" => new Quadratic2(),
         "booth" => new Booth(),
+        "extendedRosenbrock" => new ExtendedRosenbrock(),
+        "firstDeJong" => new FirstDeJong(),
+        "griewangk" => new Griewangk(),
+        "rastrigin" => new Rastrigin(),
         "SimpleCostFunction" when values == "circle" => new SimpleCostFunction(Circle),
         _ => throw new InvalidOperationException($"unknown cost function {type}"),
     };
@@ -84,6 +101,24 @@ internal static class OptimizationSpecs
     internal static void Results(VectorAssert check, VectorCase c, ProblemResults r)
     {
         check.Output(c, "currentValue", r.CurrentValue);
+        check.Output(c, "functionValue", r.FunctionValue);
+        check.Output(c, "gradientNormValue", r.GradientNormValue);
+        check.Output(c, "functionEvaluation", r.FunctionEvaluation);
+        check.Output(c, "gradientEvaluation", r.GradientEvaluation);
+        check.Output(c, "endCriteriaType", r.EndCriteriaType);
+    }
+
+    /// <summary>
+    /// Compares a line-search-based minimization's results with a case's outputs, its current value with the point
+    /// QuantLib's line search last accepted (<c>lastAcceptedPoint</c>): QuantLib's own current value is the point before
+    /// where it returns on the function tolerance or the iteration limit (the S-sr plan's SSR6 (xvii)).
+    /// </summary>
+    /// <param name="check">The comparison.</param>
+    /// <param name="c">The case.</param>
+    /// <param name="r">The results.</param>
+    internal static void LineSearchResults(VectorAssert check, VectorCase c, ProblemResults r)
+    {
+        check.Output(c, "lastAcceptedPoint", r.CurrentValue);
         check.Output(c, "functionValue", r.FunctionValue);
         check.Output(c, "gradientNormValue", r.GradientNormValue);
         check.Output(c, "functionEvaluation", r.FunctionEvaluation);
@@ -195,5 +230,151 @@ internal static class OptimizationSpecs
         }
 
         public override Vector Values(Vector x) => throw new NanoQLException("Not implemented");
+    }
+
+    // A square matrix from the list of its rows.
+    private static Matrix SquareMatrix(JsonElement rows)
+    {
+        double[][] r = [.. rows.EnumerateArray().Select(row => Numbers(row))];
+        var m = new Matrix(r.Length, r.Length);
+        for (int i = 0; i < r.Length; ++i)
+        {
+            for (int j = 0; j < r.Length; ++j)
+            {
+                m[i, j] = r[i][j];
+            }
+        }
+
+        return m;
+    }
+
+    // QuantLib's test-suite cost functions (test-suite/optimizers.cpp), as the harness writes them.
+
+    // Any number of variables: sum of 100 (x_{i+1} - x_i x_i)^2 + (1 - x_i)^2, with its analytic gradient.
+    private sealed class ExtendedRosenbrock : CostFunction
+    {
+        public override double Value(Vector x)
+        {
+            double f = 0.0;
+            for (int i = 0; i + 1 < x.Size; ++i)
+            {
+                f += (100.0 * Math.Pow(x[i + 1] - (x[i] * x[i]), 2)) + Math.Pow(1.0 - x[i], 2);
+            }
+
+            return f;
+        }
+
+        public override Vector Values(Vector x) => new(1, Value(x));
+
+        public override void Gradient(Vector grad, Vector x)
+        {
+            grad.AsSpan().Fill(0.0);
+            for (int i = 0; i + 1 < x.Size; ++i)
+            {
+                grad[i] += (-400.0 * x[i] * (x[i + 1] - (x[i] * x[i]))) - (2.0 * (1.0 - x[i]));
+                grad[i + 1] += 200.0 * (x[i + 1] - (x[i] * x[i]));
+            }
+        }
+
+        public override double ValueAndGradient(Vector grad, Vector x)
+        {
+            Gradient(grad, x);
+            return Value(x);
+        }
+    }
+
+    // Sum of w_i (x_i - c_i)^2, with no analytic gradient.
+    private class WeightedQuadraticValueOnly(double[] center, double[] weight) : CostFunction
+    {
+        protected double[] Center { get; } = center;
+
+        protected double[] Weight { get; } = weight;
+
+        public override double Value(Vector x)
+        {
+            double f = 0.0;
+            for (int i = 0; i < x.Size; ++i)
+            {
+                f += Weight[i] * Math.Pow(x[i] - Center[i], 2);
+            }
+
+            return f;
+        }
+
+        public override Vector Values(Vector x) => new(1, Value(x));
+    }
+
+    // The same with its analytic gradient.
+    private sealed class WeightedQuadratic(double[] center, double[] weight) : WeightedQuadraticValueOnly(center, weight)
+    {
+        public override void Gradient(Vector grad, Vector x)
+        {
+            for (int i = 0; i < x.Size; ++i)
+            {
+                grad[i] = 2.0 * Weight[i] * (x[i] - Center[i]);
+            }
+        }
+
+        public override double ValueAndGradient(Vector grad, Vector x)
+        {
+            Gradient(grad, x);
+            return Value(x);
+        }
+    }
+
+    // x . x
+    private sealed class FirstDeJong : CostFunction
+    {
+        public override Vector Values(Vector x) => new(x.Size, Value(x));
+
+        public override double Value(Vector x) => ArrayFunctions.DotProduct(x, x);
+    }
+
+    // Sum of x_i x_i / 4000, minus prod cos(x_i / sqrt(i + 1)), plus 1.
+    private sealed class Griewangk : CostFunction
+    {
+        public override Vector Values(Vector x) => new(x.Size, Value(x));
+
+        public override double Value(Vector x)
+        {
+            double fx = 0.0;
+            for (int i = 0; i < x.Size; ++i)
+            {
+                fx += x[i] * x[i] / 4000.0;
+            }
+
+            double p = 1.0;
+            for (int i = 0; i < x.Size; ++i)
+            {
+                p *= Math.Cos(x[i] / Math.Sqrt(i + 1.0));
+            }
+
+            return fx - p + 1.0;
+        }
+    }
+
+    // 10 n + sum of x_i x_i - 10 cos(2 pi x_i).
+    private sealed class Rastrigin : CostFunction
+    {
+        public override double Value(Vector x)
+        {
+            double fx = 10.0 * x.Size;
+            for (int i = 0; i < x.Size; ++i)
+            {
+                fx += (x[i] * x[i]) - (10.0 * Math.Cos(2.0 * Math.PI * x[i]));
+            }
+
+            return fx;
+        }
+
+        public override Vector Values(Vector x) => new(x.Size, Value(x));
+    }
+
+    // x . (M x)
+    private sealed class QuadraticForm(Matrix m) : CostFunction
+    {
+        public override double Value(Vector x) => ArrayFunctions.DotProduct(x, m * x);
+
+        public override Vector Values(Vector x) => new(x.Size, Value(x));
     }
 }

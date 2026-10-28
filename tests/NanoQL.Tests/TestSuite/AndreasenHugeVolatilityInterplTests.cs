@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/andreasenhugevolatilityinterpl.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testDifferentOptimizers, which waits for S-core's BFGS
 
 using NanoQL.Instruments;
 using NanoQL.Methods;
@@ -424,6 +423,42 @@ public class AndreasenHugeVolatilityInterplTests
                 double.IsNaN(ahVol) || diff > 0.005,
                 "failed to reproduce SABR volatility with Andreasen-Huge interpolation"
                 + $"\n    Andreasen-Huge vol: {ahVol}\n    SABR volatility:    {sabrVol}\n    diff:               {diff}\n    tolerance:          {tol}");
+        }
+    }
+
+    [Fact]
+    public void TestDifferentOptimizers()
+    {
+        // Testing different optimizer for Andreasen-Huge volatility interpolation...
+
+        CalibrationData data = SabrData().Data;
+
+        OptimizationMethod[] optimizationMethods =
+        [
+            new LevenbergMarquardt(),
+            new BFGS(),
+            new Simplex(0.2),
+        ];
+
+        foreach (OptimizationMethod optimizationMethod in optimizationMethods)
+        {
+            double avgError = new AndreasenHugeVolatilityInterpl(
+                    data.CalibrationSet,
+                    data.Spot,
+                    data.RTS,
+                    data.QTS,
+                    AndreasenHugeVolatilityInterplInterpolationType.CubicSpline,
+                    AndreasenHugeVolatilityInterplCalibrationType.Call,
+                    400,
+                    null,
+                    null,
+                    optimizationMethod)
+                .CalibrationError().Avg;
+
+            Assert.False(
+                double.IsNaN(avgError) || avgError > 0.0001,
+                "failed to calibrate Andreasen-Huge volatility interpolation with different optimizera"
+                + $"\n    calibration error: {avgError}");
         }
     }
 

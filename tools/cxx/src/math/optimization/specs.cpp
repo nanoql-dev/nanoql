@@ -4,8 +4,10 @@
 #include "math/optimization/specs.hpp"
 
 #include <ql/errors.hpp>
+#include <ql/mathconstants.hpp>
 #include <ql/models/equity/hestonmodel.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <set>
 
@@ -108,6 +110,102 @@ namespace harness::optimization {
             Array values(const Array&) const override { QL_FAIL("Not implemented"); }
         };
 
+        // QuantLib's test-suite cost functions (test-suite/optimizers.cpp), as it writes them.
+
+        class ExtendedRosenbrock : public CostFunction {
+          public:
+            Real value(const Array& x) const override {
+                Real f = 0.0;
+                for (Size i = 0; i + 1 < x.size(); ++i)
+                    f += 100.0 * std::pow(x[i + 1] - x[i] * x[i], 2) + std::pow(1.0 - x[i], 2);
+                return f;
+            }
+            Array values(const Array& x) const override { return Array(1, value(x)); }
+            void gradient(Array& grad, const Array& x) const override {
+                std::fill(grad.begin(), grad.end(), 0.0);
+                for (Size i = 0; i + 1 < x.size(); ++i) {
+                    grad[i] += -400.0 * x[i] * (x[i + 1] - x[i] * x[i]) - 2.0 * (1.0 - x[i]);
+                    grad[i + 1] += 200.0 * (x[i + 1] - x[i] * x[i]);
+                }
+            }
+            Real valueAndGradient(Array& grad, const Array& x) const override {
+                gradient(grad, x);
+                return value(x);
+            }
+        };
+
+        class WeightedQuadraticValueOnly : public CostFunction {
+          public:
+            WeightedQuadraticValueOnly(Array center, Array weight)
+            : center_(std::move(center)), weight_(std::move(weight)) {}
+            Real value(const Array& x) const override {
+                Real f = 0.0;
+                for (Size i = 0; i < x.size(); ++i)
+                    f += weight_[i] * std::pow(x[i] - center_[i], 2);
+                return f;
+            }
+            Array values(const Array& x) const override { return Array(1, value(x)); }
+
+          protected:
+            Array center_, weight_;
+        };
+
+        class WeightedQuadratic : public WeightedQuadraticValueOnly {
+          public:
+            using WeightedQuadraticValueOnly::WeightedQuadraticValueOnly;
+            void gradient(Array& grad, const Array& x) const override {
+                for (Size i = 0; i < x.size(); ++i)
+                    grad[i] = 2.0 * weight_[i] * (x[i] - center_[i]);
+            }
+            Real valueAndGradient(Array& grad, const Array& x) const override {
+                gradient(grad, x);
+                return value(x);
+            }
+        };
+
+        class FirstDeJong : public CostFunction {
+          public:
+            Array values(const Array& x) const override { return Array(x.size(), value(x)); }
+            Real value(const Array& x) const override { return DotProduct(x, x); }
+        };
+
+        class Griewangk : public CostFunction {
+          public:
+            Array values(const Array& x) const override { return Array(x.size(), value(x)); }
+            Real value(const Array& x) const override {
+                Real fx = 0.0;
+                for (Real i : x) {
+                    fx += i * i / 4000.0;
+                }
+                Real p = 1.0;
+                for (Size i = 0; i < x.size(); ++i) {
+                    p *= std::cos(x[i] / std::sqrt(i + 1.0));
+                }
+                return fx - p + 1.0;
+            }
+        };
+
+        class Rastrigin : public CostFunction {
+          public:
+            Real value(const Array& x) const override {
+                Real fx = 10.0 * x.size();
+                for (Real xi : x)
+                    fx += xi * xi - 10.0 * std::cos(M_TWOPI * xi);
+                return fx;
+            }
+            Array values(const Array& x) const override { return Array(x.size(), value(x)); }
+        };
+
+        class QuadraticForm : public CostFunction {
+          public:
+            explicit QuadraticForm(Matrix m) : m_(std::move(m)) {}
+            Real value(const Array& x) const override { return DotProduct(x, m_ * x); }
+            Array values(const Array& x) const override { return Array(x.size(), value(x)); }
+
+          private:
+            Matrix m_;
+        };
+
         // The named values functions of SimpleCostFunction.
         Array circle(const Array& x) {
             Array v(2);
@@ -137,11 +235,33 @@ namespace harness::optimization {
                 throw InvalidParams("unknown values function " + values);
             return {type, values};
         }
+        if (type == "weightedQuadratic" || type == "weightedQuadraticValueOnly") {
+            onlyKeys(o, {"type", "center", "weight"}, type);
+            CostFunctionSpec s{type, "", reals(key(o, "center", type)), reals(key(o, "weight", type)), {}};
+            if (s.center.size() != s.weight.size())
+                throw InvalidParams(type + "'s center and weight differ in size");
+            return s;
+        }
+        if (type == "quadraticForm") {
+            onlyKeys(o, {"type", "matrix"}, type);
+            const json::value& rows = key(o, "matrix", type);
+            if (!rows.is_array())
+                throw InvalidParams(type + "'s matrix is a list of rows, got " + shown(rows));
+            CostFunctionSpec s{type, "", {}, {}, {}};
+            for (const json::value& row : rows.get_array())
+                s.matrix.push_back(reals(row));
+            for (const auto& row : s.matrix) {
+                if (row.size() != s.matrix.size())
+                    throw InvalidParams(type + "'s matrix is square");
+            }
+            return s;
+        }
         if (type != "rosenbrock" && type != "polynomialFit" && type != "beale" && type != "linear" &&
-            type != "rankDeficient" && type != "quadratic2" && type != "booth")
+            type != "rankDeficient" && type != "quadratic2" && type != "booth" && type != "extendedRosenbrock" &&
+            type != "firstDeJong" && type != "griewangk" && type != "rastrigin")
             throw InvalidParams("unknown cost function " + type);
         onlyKeys(o, {"type"}, type);
-        return {type, ""};
+        return {type, "", {}, {}, {}};
     }
 
     std::optional<Size> variables(const CostFunctionSpec& s) {
@@ -150,6 +270,10 @@ namespace harness::optimization {
             return 2;
         if (s.type == "polynomialFit")
             return 3;
+        if (s.type == "weightedQuadratic" || s.type == "weightedQuadraticValueOnly")
+            return s.center.size();
+        if (s.type == "quadraticForm")
+            return s.matrix.size();
         return std::nullopt;
     }
 
@@ -175,6 +299,25 @@ namespace harness::optimization {
             return std::make_unique<Quadratic2>();
         if (s.type == "booth")
             return std::make_unique<Booth>();
+        if (s.type == "extendedRosenbrock")
+            return std::make_unique<ExtendedRosenbrock>();
+        if (s.type == "weightedQuadratic")
+            return std::make_unique<WeightedQuadratic>(makeArray(s.center), makeArray(s.weight));
+        if (s.type == "weightedQuadraticValueOnly")
+            return std::make_unique<WeightedQuadraticValueOnly>(makeArray(s.center), makeArray(s.weight));
+        if (s.type == "firstDeJong")
+            return std::make_unique<FirstDeJong>();
+        if (s.type == "griewangk")
+            return std::make_unique<Griewangk>();
+        if (s.type == "rastrigin")
+            return std::make_unique<Rastrigin>();
+        if (s.type == "quadraticForm") {
+            Matrix m(s.matrix.size(), s.matrix.size());
+            for (Size i = 0; i < s.matrix.size(); ++i)
+                for (Size j = 0; j < s.matrix.size(); ++j)
+                    m[i][j] = s.matrix[i][j];
+            return std::make_unique<QuadraticForm>(m);
+        }
         if (s.type == "SimpleCostFunction" && s.values == "circle")
             return std::make_unique<SimpleCostFunction<Array (*)(const Array&)>>(&circle);
         throw InvalidParams("the cost function " + s.type + " was not checked");
@@ -290,6 +433,12 @@ namespace harness::optimization {
     json::value minimizationResult(const Problem& p, EndCriteria::Type type) {
         json::object out = problemResult(p);
         out["endCriteriaType"] = static_cast<std::int64_t>(type);
+        return json::value(std::move(out));
+    }
+
+    json::value lineSearchResult(const Problem& p, EndCriteria::Type type, LineSearch& search) {
+        json::object out = minimizationResult(p, type).get_object();
+        out["lastAcceptedPoint"] = arrayResult(search.succeed() ? search.lastX() : p.currentValue());
         return json::value(std::move(out));
     }
 

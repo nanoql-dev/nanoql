@@ -19,6 +19,16 @@
 //   booth          the same, with a = x0 + 2 x1 - 7, b = 2 x0 + x1 - 5: a a + b b
 //   circle         (a values function) 2 variables, 2 values: x0 x0 + x1 x1 - 1, x0 - x1
 // quadratic2 and booth are tools/vectors/gen/math/optimization/simplex.py's, for Simplex's constrained runs.
+// QuantLib's test-suite cost functions (test-suite/optimizers.cpp), as it writes them, each value() with values() the
+// one value repeated, the first three with QuantLib's analytic gradient() and valueAndGradient():
+//   extendedRosenbrock          any number of variables: sum of 100 (x_{i+1} - x_i x_i)^2 + (1 - x_i)^2
+//   weightedQuadratic           {"type", "center", "weight"}: sum of w_i (x_i - c_i)^2, as many variables as c
+//   weightedQuadraticValueOnly  the same with no analytic gradient, so CostFunction's central differences
+//   firstDeJong                 any number of variables: x . x
+//   griewangk                   any number of variables: sum of x_i x_i / 4000, minus prod cos(x_i / sqrt(i + 1)),
+//                               plus 1
+//   rastrigin                   any number of variables: 10 n + sum of x_i x_i - 10 cos(2 pi x_i)
+//   quadraticForm               {"type", "matrix"} with a square matrix's rows: x . (M x)
 // A call refuses a point whose size isn't its function's number of variables, which the functions don't check.
 //
 // A constraint is {"type": "NoConstraint"}, {"type": "PositiveConstraint"}, {"type": "BoundaryConstraint", "low",
@@ -39,6 +49,7 @@
 #include <ql/math/optimization/constraint.hpp>
 #include <ql/math/optimization/costfunction.hpp>
 #include <ql/math/optimization/endcriteria.hpp>
+#include <ql/math/optimization/linesearch.hpp>
 #include <ql/math/optimization/problem.hpp>
 
 #include <memory>
@@ -51,6 +62,8 @@ namespace harness::optimization {
     struct CostFunctionSpec {
         std::string type;    // a named cost function, or "SimpleCostFunction"
         std::string values;  // SimpleCostFunction's named values function
+        std::vector<QuantLib::Real> center, weight;          // weightedQuadratic's
+        std::vector<std::vector<QuantLib::Real>> matrix;     // quadraticForm's rows
     };
     CostFunctionSpec costFunction(const json::value& v);
     // The function's number of variables, or none for a function of any number.
@@ -87,6 +100,12 @@ namespace harness::optimization {
     json::object problemResult(const QuantLib::Problem& p);
     // The state after a minimization, with the end criterion it returned.
     json::value minimizationResult(const QuantLib::Problem& p, QuantLib::EndCriteria::Type type);
+    // The same after a line-search-based method's, with "lastAcceptedPoint": the point its line search last accepted,
+    // the search's lastX() where its last search succeeded (the method then returns on the function tolerance or the
+    // iteration limit before setting the problem's current value, which stays the point before), the current value
+    // where it failed.
+    json::value lineSearchResult(const QuantLib::Problem& p, QuantLib::EndCriteria::Type type,
+                                 QuantLib::LineSearch& search);
 
 }
 

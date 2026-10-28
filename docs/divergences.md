@@ -425,6 +425,16 @@ Facts:
 - `MoreWeightsThanAssetsAreRefused`
 - `FewerWeightsThanAssetsAreRefused`
 
+## BFGSTests
+
+[`Divergences/BFGSTests.cs`](../tests/NanoQL.Tests/Divergences/BFGSTests.cs)
+
+BFGS's inverse Hessian, one per minimization (the S-core plan's CR5 (a)): QuantLib's method keeps it as a member, built at its first minimization only (`bfgs.cpp:29-32`), so a second minimization on the same object starts from the first's final Hessian, and one of another dimension reads it out of range; nanoql's starts each minimization from the identity, so a second is the first. QuantLib's values are its own class's, from this run's `probes\c2_facts.cpp` (`c2_facts.out`).
+
+Facts:
+
+- `ASecondMinimizationStartsFromTheIdentity`
+
 ## BMANullIndexTests
 
 [`Divergences/BMANullIndexTests.cs`](../tests/NanoQL.Tests/Divergences/BMANullIndexTests.cs)
@@ -1579,6 +1589,17 @@ Facts:
 - `TheCliquetThetaIsTheForwardEnginesPeriodByPeriod`
 - `ThePerformanceThetaIsTheForwardPerformanceEnginesPeriodByPeriod`
 
+## CmaesTests
+
+[`Divergences/CmaesTests.cs`](../tests/NanoQL.Tests/Divergences/CmaesTests.cs)
+
+CMA-ES's generator, one per minimization (the S-core plan's CR2 (c)), and its ranking of equal costs (CD5): QuantLib's optimizer keeps its Mersenne Twister as a member (`cmaes.cpp:50`), so a second minimization on the same object continues the first's stream, where nanoql's builds one from the seed in each minimization; and QuantLib ranks the samples with `std::sort` (`cmaes.cpp:190-191`), which MSVC runs as an insertion sort up to 32 elements and an introsort beyond, where nanoql sorts stably: equal costs keep QuantLib's order in a population of 32 or fewer, and their own beyond. QuantLib's values are its own class's, from this run's `probes\c2_facts.cpp` (`c2_facts.out`).
+
+Facts:
+
+- `ASecondMinimizationRepeatsTheFirst`
+- `EqualCostsKeepTheirOrderToAPopulationOf32`
+
 ## CmsCalibrationFixedReversionTests
 
 [`Divergences/CmsCalibrationFixedReversionTests.cs`](../tests/NanoQL.Tests/Divergences/CmsCalibrationFixedReversionTests.cs)
@@ -1735,6 +1756,34 @@ Facts:
 - `ADiscriminantRoundedBelowZeroIsZero`
 - `NegativeAveragesKeepTheirAverages`
 - `ANegativeRateCurveReadsNoSpuriousForward`
+
+## CopulaEdgeTests
+
+[`Divergences/CopulaEdgeTests.cs`](../tests/NanoQL.Tests/Divergences/CopulaEdgeTests.cs)
+
+The copulas on the unit square's edges (the S-core plan's CR7 (xxxiii)): every copula is defined on [0, 1]² with C(u, 0) = C(0, v) = 0, C(u, 1) = u and C(1, v) = v, and QuantLib's checks accept the edges, but its formulas miss them: Hüsler-Reiss is NaN at (0, 0) and wherever an argument is 1 but at (1, 1) (−ln 1 is −0, so the ratio's logarithm is that of −∞), and at θ 0 on every edge point but (1, 1); Galambos and Ali-Mikhail-Haq are NaN at (0, 0); the Gaussian copula is NaN at (0, 0) and (1, 1) at ρ 0.5, at (0, 1) and (1, 0) at −0.5, and 2e-10 off on the edges at 1; Clayton below 0 takes the power of a negative base. nanoql's copulas return the boundary values before their formulas. QuantLib's values are its own classes', from this run's `probes\c2_facts.cpp` (`c2_facts.out`), the points the planner's `r1_edges.cpp` found.
+
+Facts:
+
+- `EveryCopulaTakesItsBoundaryValuesOnTheEdges`
+- `QuantLibsFormulasMissTheEdges`
+
+## CopulaFormTests
+
+[`Divergences/CopulaFormTests.cs`](../tests/NanoQL.Tests/Divergences/CopulaFormTests.cs)
+
+The copulas where QuantLib's formulas fail (the S-core plan's CR7 (xx) and (xxi)): Clayton's maximum taken after the power, so a negative base gives a positive value; Clayton's, Frank's and Plackett's formulas cancelling near independence and near the edges; Frank's overflowing at large |θ|; Gumbel's and Galambos' powers leaving the doubles' range at large θ; Clayton's overflowing at large θ near 0; Ali-Mikhail-Haq's denominator cancelling as θ nears 1 and its arguments 0; and Galambos' and Ali-Mikhail-Haq's product x·y underflowing near (0, 0), Galambos' to NaN where x and y are subnormal. nanoql's forms are within a few ulps of a high-precision evaluation of QuantLib's own formula (this run's `c2work\copula_refs.py`, `copula_refs.out`, at 60 digits and more, and `c2work\refs_r2.py`, `refs_r2.out`, at 800), where QuantLib's double formula gives the values beside them (`probes\c2_facts.out`, `probes\c2r2_facts.out`).
+
+Facts:
+
+- `ClaytonsMaximumIsTakenBeforeThePower`
+- `AliMikhailHaqKeepsItsDigitsNearItsBound`
+- `FrankKeepsItsDigitsAtEveryTheta`
+- `GumbelAndGalambosFactorTheirLargerTermAtLargeTheta`
+- `GalambosAndAliMikhailHaqKeepTheirProductBelowTheNormalRange`
+- `ClaytonKeepsItsDigitsNearIndependenceAndAtLargeTheta`
+- `PlackettTakesTheStableRoot`
+- `WhereQuantLibsFormulaHoldsItsValueIsKept`
 
 ## CosHestonLargeKappaTests
 
@@ -2042,6 +2091,16 @@ Facts:
 
 - `TheSpreadDiscountAndUltimateForwardCurvesExtrapolateTheirBase`
 - `ThePiecewiseSpreadCurveExtrapolatesItsBase`
+
+## DifferentialEvolutionTests
+
+[`Divergences/DifferentialEvolutionTests.cs`](../tests/NanoQL.Tests/Divergences/DifferentialEvolutionTests.cs)
+
+Differential evolution's generator, one per minimization (the S-core plan's CR2 (c)): QuantLib's optimizer keeps its Mersenne Twister as a member (`differentialevolution.hpp:164`), so a second minimization on the same object continues the first's stream; nanoql's builds one from the seed in each minimization, so a second is the first. QuantLib's values are its own class's, from this run's `probes\c2_facts.cpp` (`c2_facts.out`).
+
+Facts:
+
+- `ASecondMinimizationRepeatsTheFirst`
 
 ## DigitalAmericanKnockOutAtHitTests
 
@@ -4071,6 +4130,16 @@ Facts:
 - `QuantLibsValuesAtTolerancesItReaches`
 - `TolerancesItCantReachAreRefused`
 
+## LBFGSBTests
+
+[`Divergences/LBFGSBTests.cs`](../tests/NanoQL.Tests/Divergences/LBFGSBTests.cs)
+
+L-BFGS-B's gradient norm on its relative function-reduction stop (the S-core plan's CR7 (xviii)): QuantLib's minimization breaks there after moving to the new point, so the problem keeps the projected gradient's norm of the iterate before (`lbfgsb.cpp:528`, `:638-646`); nanoql's reports the norm at the point it returns. QuantLib's values are its own class's, from this run's `probes\c2_facts.cpp` (`c2_facts.out`).
+
+Facts:
+
+- `TheReportedGradientNormIsThePointReturnedOnes`
+
 ## LaggedYoYRateBranchTests
 
 [`Divergences/LaggedYoYRateBranchTests.cs`](../tests/NanoQL.Tests/Divergences/LaggedYoYRateBranchTests.cs)
@@ -5619,6 +5688,18 @@ Simplex on a problem with no variables: QuantLib sizes its function values at n 
 Facts:
 
 - `ASimplexWithNoVariablesIsRefused`
+
+## SimulatedAnnealingTests
+
+[`Divergences/SimulatedAnnealingTests.cs`](../tests/NanoQL.Tests/Divergences/SimulatedAnnealingTests.cs)
+
+Simulated annealing's generator, copied per minimization (the S-core plan's CR2 (c)), and its NaN guard (CR7 (xix)): QuantLib's optimizer holds its generator and continues its stream in a second minimization, where nanoql's draws from a copy each time; and QuantLib's guard on the initial vertices tests `ytry_`, the previous trial's value, left from an earlier minimization or unset (`simulatedannealing.hpp:166`), where its trial path tests the value just computed (`:121-123`), so a vertex whose value is NaN enters the simplex. nanoql's guards each vertex's value, and the vertices a contraction moves alike. QuantLib's values are its own class's, from this run's `probes\c2_facts.cpp` (`c2_facts.out`).
+
+Facts:
+
+- `ASecondMinimizationRepeatsTheFirst`
+- `AVertexWhoseValueIsNaNEntersAtTheLargestDouble`
+- `AContractedVertexWhoseValueIsNaNEntersAtTheLargestDouble`
 
 ## SingleProductCompositeBufferTests
 

@@ -122,7 +122,6 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Utilities/DataParsers/DateParser.cs`: `parseFormatted`, not ported: a `DateOnly`'s `ParseExact` does its job.
-- `tests/NanoQL.Tests/TestSuite/AndreasenHugeVolatilityInterplTests.cs`: `testDifferentOptimizers`, which waits for S-core's BFGS.
 - `tests/NanoQL.Tests/TestSuite/AsianOptionsTests.cs`: `testVecerEngine` and `testAnalyticContinuousGeometricAveragePriceHeston`, which wait for S-xeq's `VecerEngine` and `AnalyticContinuousGeometricAveragePriceAsianHestonEngine`.
 - `tests/NanoQL.Tests/TestSuite/BarrierOptionTests.cs`: the four perturbative cases, which wait for S-xeq's `PerturbativeBarrierOptionEngine`.
 - `tests/NanoQL.Tests/TestSuite/CmsSpreadTests.cs`: `testCouponPricing`, which waits for S-xrt's `LognormalCmsSpreadPricer`.
@@ -141,7 +140,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the QR and Moore-Penrose cases, whose matrix utilities aren't ported yet.
 - `tests/NanoQL.Tests/TestSuite/NthOrderDerivativeOpTests.cs`: every case but `testSparseMatrixApply`, which wait for S-core's `NthOrderDerivativeOp`.
 - `tests/NanoQL.Tests/TestSuite/OdeTests.cs`: `testMatrixExponential` and `testMatrixExponentialOfZero`, which wait for S-core's `Expm`.
-- `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing, L-BFGS-B, differential evolution and CMA-ES cases, whose optimizers aren't ported yet.
+- `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing cases, which wait for S-xrt's hybrid simulated annealing.
 - `tests/NanoQL.Tests/TestSuite/PiecewiseBlackVarianceSurfaceTests.cs`: `testSabrEquivalence`, which waits for S-xeq's `SABRVolTermStructure`.
 - `tests/NanoQL.Tests/TestSuite/QuantoOptionTests.cs`: `testDoubleBarrierValues`, which waits for S-xeq's quanto double-barrier option.
 - `tests/NanoQL.Tests/TestSuite/RngTraitsTests.cs`: `testRanLux`, whose generator isn't ported yet.

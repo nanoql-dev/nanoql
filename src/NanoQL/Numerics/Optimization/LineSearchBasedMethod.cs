@@ -13,10 +13,17 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// <para>
 /// An extension point, as in QuantLib: the methods derive from it and give the new search direction
-/// (<see cref="ConjugateGradient"/>, and S-core's steepest descent and BFGS). Immutable: it holds its line search as a
-/// prototype and runs each minimization on a new one (<see cref="LineSearch.NewSearch"/>), which it passes to
-/// <see cref="GetUpdatedDirection"/>, where QuantLib's method mutates one line search across minimizations and its
-/// derived classes read it as a member.
+/// (<see cref="ConjugateGradient"/>, <see cref="SteepestDescent"/>, <see cref="BFGS"/>). Immutable: it holds its line
+/// search as a prototype and runs each minimization on a new one (<see cref="LineSearch.NewSearch"/>), which it passes
+/// to <see cref="GetUpdatedDirection(ProblemState, double, Vector, LineSearch)"/>, where QuantLib's method mutates one
+/// line search across minimizations and its derived classes read it as a member.
+/// </para>
+/// <para>
+/// A method that keeps state through a minimization (BFGS's inverse Hessian, which QuantLib's keeps as a member across
+/// minimizations) returns it from <see cref="NewMinimizationState"/> at each minimization's start and reads it in the
+/// five-argument <see cref="GetUpdatedDirection(ProblemState, double, Vector, LineSearch, LineSearchBasedMethodState?)"/>
+/// (the S-core plan's CR5 (a)); a method without state overrides the four-argument member, which the five-argument
+/// one calls by default. A method overriding neither is refused at its first direction.
 /// </para>
 /// <para>
 /// The problem's current value is the last point the line search accepted at every return, where QuantLib's
@@ -66,6 +73,10 @@ public abstract class LineSearchBasedMethod : OptimizationMethod
         search.SearchDirection = -prevGradient;
 
         bool firstTime = true;
+
+        // the method's state for this minimization, a fresh one each time
+        LineSearchBasedMethodState? minimizationState = NewMinimizationState(P);
+
         // Loop over iterations
         do
         {
@@ -94,7 +105,7 @@ public abstract class LineSearchBasedMethod : OptimizationMethod
                 P.GradientNormValue = search.LastGradientNorm2;
 
                 // conjugate gradient search direction
-                direction = GetUpdatedDirection(P, gold2, prevGradient, search);
+                direction = GetUpdatedDirection(P, gold2, prevGradient, search, minimizationState);
 
                 search.SearchDirection = direction;
                 // Now compute accuracy and check end criteria
@@ -151,5 +162,26 @@ public abstract class LineSearchBasedMethod : OptimizationMethod
     /// the previous one. QuantLib's derived methods read it as the base's member.
     /// </param>
     /// <returns>The new search direction.</returns>
-    protected abstract Vector GetUpdatedDirection(ProblemState P, double gold2, Vector gradient, LineSearch lineSearch);
+    /// <exception cref="NanoQLException">The method overrides neither this member nor the five-argument one.</exception>
+    protected virtual Vector GetUpdatedDirection(ProblemState P, double gold2, Vector gradient, LineSearch lineSearch) =>
+        throw new NanoQLException("a line-search method overrides one of the GetUpdatedDirection members");
+
+    /// <summary>
+    /// The new search direction, from the method's state for the minimization; by default the four-argument member's.
+    /// </summary>
+    /// <param name="P">The optimization problem's state, its gradient norm the new point's.</param>
+    /// <param name="gold2">The gradient's squared norm at the previous point.</param>
+    /// <param name="gradient">The gradient at the previous point.</param>
+    /// <param name="lineSearch">The minimization's line search, after its search.</param>
+    /// <param name="minimizationState">The state <see cref="NewMinimizationState"/> returned at the minimization's
+    /// start.</param>
+    /// <returns>The new search direction.</returns>
+    protected virtual Vector GetUpdatedDirection(
+        ProblemState P, double gold2, Vector gradient, LineSearch lineSearch, LineSearchBasedMethodState? minimizationState) =>
+        GetUpdatedDirection(P, gold2, gradient, lineSearch);
+
+    /// <summary>The method's state for a minimization, created at its start; none by default.</summary>
+    /// <param name="state">The optimization problem's state at the minimization's start.</param>
+    /// <returns>The state, or <see langword="null"/> for none.</returns>
+    protected virtual LineSearchBasedMethodState? NewMinimizationState(ProblemState state) => null;
 }

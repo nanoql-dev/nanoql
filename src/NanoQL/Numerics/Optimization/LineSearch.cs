@@ -10,9 +10,10 @@ namespace NanoQL.Numerics;
 /// <summary>The base class for line searches.</summary>
 /// <remarks>
 /// <para>
-/// An extension point, as in QuantLib: the line searches derive from it (<see cref="ArmijoLineSearch"/>, and S-core's
-/// Goldstein search). A line search is a working type (S2R2): <see cref="Evaluate"/> changes it, and a search reads
-/// the state its previous call left (QuantLib's Armijo search reads the last gradient), so it isn't thread-safe.
+/// An extension point, as in QuantLib: the line searches derive from it (<see cref="ArmijoLineSearch"/>,
+/// <see cref="GoldsteinLineSearch"/>). A line search is a working type (S2R2): <see cref="Evaluate"/> changes it,
+/// and a search reads the state its previous call left (QuantLib's Armijo search reads the last gradient), so it
+/// isn't thread-safe.
 /// </para>
 /// <para>
 /// A <see cref="LineSearchBasedMethod"/> holds one as a prototype and runs each minimization on a new one,

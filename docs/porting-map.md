@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 257 | 25 |
-| partial | 19 | 28 |
-| ported | 984 | 127 |
+| not started | 237 | 25 |
+| partial | 19 | 27 |
+| ported | 1,004 | 128 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -779,20 +779,20 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `alimikhailhaqcopula` | not started |  | no nanoql type: AliMikhailHaqCopula |
+| `alimikhailhaqcopula` | ported | Numerics/Copulas/AliMikhailHaqCopula.cs |  |
 | `all` | not ported: include-only header |  |  |
-| `claytoncopula` | not started |  | no nanoql type: ClaytonCopula |
-| `farliegumbelmorgensterncopula` | not started |  | no nanoql type: FarlieGumbelMorgensternCopula |
-| `frankcopula` | not started |  | no nanoql type: FrankCopula |
-| `galamboscopula` | not started |  | no nanoql type: GalambosCopula |
-| `gaussiancopula` | not started |  | no nanoql type: GaussianCopula |
-| `gumbelcopula` | not started |  | no nanoql type: GumbelCopula |
-| `huslerreisscopula` | not started |  | no nanoql type: HuslerReissCopula |
-| `independentcopula` | not started |  | no nanoql type: IndependentCopula |
-| `marshallolkincopula` | not started |  | no nanoql type: MarshallOlkinCopula |
-| `maxcopula` | not started |  | no nanoql type: MaxCopula |
-| `mincopula` | not started |  | no nanoql type: MinCopula |
-| `plackettcopula` | not started |  | no nanoql type: PlackettCopula |
+| `claytoncopula` | ported | Numerics/Copulas/ClaytonCopula.cs |  |
+| `farliegumbelmorgensterncopula` | ported | Numerics/Copulas/FarlieGumbelMorgensternCopula.cs |  |
+| `frankcopula` | ported | Numerics/Copulas/FrankCopula.cs |  |
+| `galamboscopula` | ported | Numerics/Copulas/GalambosCopula.cs |  |
+| `gaussiancopula` | ported | Numerics/Copulas/GaussianCopula.cs |  |
+| `gumbelcopula` | ported | Numerics/Copulas/GumbelCopula.cs |  |
+| `huslerreisscopula` | ported | Numerics/Copulas/HuslerReissCopula.cs |  |
+| `independentcopula` | ported | Numerics/Copulas/IndependentCopula.cs |  |
+| `marshallolkincopula` | ported | Numerics/Copulas/MarshallOlkinCopula.cs |  |
+| `maxcopula` | ported | Numerics/Copulas/MaxCopula.cs |  |
+| `mincopula` | ported | Numerics/Copulas/MinCopula.cs |  |
+| `plackettcopula` | ported | Numerics/Copulas/PlackettCopula.cs |  |
 
 ### `ql/math/distributions/`
 
@@ -897,19 +897,19 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `armijo` | ported | Numerics/Optimization/ArmijoLineSearch.cs |  |
-| `bfgs` | not started |  | no nanoql type: BFGS |
-| `cmaes` | not started |  | no nanoql type: Cmaes, CmaesConfiguration |
+| `bfgs` | ported | Numerics/Optimization/BFGS.cs |  |
+| `cmaes` | ported | Numerics/Optimization/Cmaes.cs, Numerics/Optimization/CmaesConfiguration.cs |  |
 | `conjugategradient` | ported | Numerics/Optimization/ConjugateGradient.cs |  |
 | `constraint` | ported | Numerics/Optimization/Constraint/BoundaryConstraint.cs, Numerics/Optimization/Constraint/CompositeConstraint.cs, Numerics/Optimization/Constraint/Constraint.cs, Numerics/Optimization/Constraint/NoConstraint.cs, Numerics/Optimization/Constraint/NonhomogeneousBoundaryConstraint.cs, Numerics/Optimization/Constraint/PositiveConstraint.cs |  |
 | `costfunction` | ported | Numerics/Optimization/CostFunction/CostFunction.cs, Numerics/Optimization/CostFunction/ParametersTransformation.cs, Numerics/Optimization/CostFunction/SimpleCostFunction.cs |  |
-| `differentialevolution` | not started |  | no nanoql type: DifferentialEvolution, DifferentialEvolutionStrategy, DifferentialEvolutionCrossoverType, DifferentialEvolutionCandidate, DifferentialEvolutionConfiguration |
+| `differentialevolution` | ported | Numerics/Optimization/DifferentialEvolution/DifferentialEvolution.cs, Numerics/Optimization/DifferentialEvolution/DifferentialEvolutionConfiguration.cs, Numerics/Optimization/DifferentialEvolution/DifferentialEvolutionCrossoverType.cs, Numerics/Optimization/DifferentialEvolution/DifferentialEvolutionStrategy.cs | no nanoql type: DifferentialEvolutionCandidate |
 | `endcriteria` | ported | Numerics/Optimization/EndCriteria/EndCriteria.cs, Numerics/Optimization/EndCriteria/EndCriteriaCheck.cs, Numerics/Optimization/EndCriteria/EndCriteriaType.cs |  |
-| `goldstein` | not started |  | no nanoql type: GoldsteinLineSearch |
-| `lbfgsb` | not started |  | no nanoql type: LBFGSB |
+| `goldstein` | ported | Numerics/Optimization/GoldsteinLineSearch.cs |  |
+| `lbfgsb` | ported | Numerics/Optimization/LBFGSB.cs |  |
 | `leastsquare` | ported | Numerics/Optimization/LeastSquare/LeastSquareFunction.cs, Numerics/Optimization/LeastSquare/LeastSquareProblem.cs, Numerics/Optimization/LeastSquare/NonLinearLeastSquare.cs, Numerics/Optimization/LeastSquare/NonLinearLeastSquareResults.cs |  |
 | `levenbergmarquardt` | ported | Numerics/Optimization/LevenbergMarquardt.cs |  |
 | `linesearch` | ported | Numerics/Optimization/LineSearch.cs |  |
-| `linesearchbasedmethod` | ported | Numerics/Optimization/LineSearchBasedMethod.cs |  |
+| `linesearchbasedmethod` | ported | Numerics/Optimization/LineSearchBasedMethod.cs, Numerics/Optimization/LineSearchBasedMethodState.cs |  |
 | `lmdif` | ported | Numerics/Optimization/LmdifFunctions.cs |  |
 | `method` | ported | Numerics/Optimization/OptimizationMethod.cs |  |
 | `problem` | ported | Numerics/Optimization/Problem/Problem.cs, Numerics/Optimization/Problem/ProblemResults.cs, Numerics/Optimization/Problem/ProblemState.cs |  |
@@ -917,9 +917,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `projectedcostfunction` | ported | Numerics/Optimization/ProjectedCostFunction.cs |  |
 | `projection` | ported | Numerics/Optimization/Projection.cs |  |
 | `simplex` | ported | Numerics/Optimization/Simplex.cs |  |
-| `simulatedannealing` | not started |  | no nanoql type: SimulatedAnnealing, SimulatedAnnealingScheme |
+| `simulatedannealing` | ported | Numerics/Optimization/SimulatedAnnealing{TRng}.cs | no nanoql type: SimulatedAnnealingScheme |
 | `spherecylinder` | ported | Numerics/Optimization/SphereCylinder/SphereCylinderFunctions.cs, Numerics/Optimization/SphereCylinder/SphereCylinderOptimizer.cs |  |
-| `steepestdescent` | not started |  | no nanoql type: SteepestDescent |
+| `steepestdescent` | ported | Numerics/Optimization/SteepestDescent.cs |  |
 
 ### `ql/math/randomnumbers/`
 
@@ -2062,7 +2062,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `americanoption` | ported | TestSuite/AmericanOptionTests.cs | 32 of 32 cases; moved: testBjerksundStenslandAmericanGreeks line 2437 to Divergences/BjerksundStenslandTriggerTests.cs; testLargeDividendShoutNPV line 1042 to Divergences/ShoutDividendStrikeTests.cs |
 | `amortizingbond` | ported | TestSuite/AmortizingBondTests.cs | 3 of 3 cases |
-| `andreasenhugevolatilityinterpl` | partial | TestSuite/AndreasenHugeVolatilityInterplTests.cs | 13 of 14 cases; not yet: testDifferentOptimizers |
+| `andreasenhugevolatilityinterpl` | ported | TestSuite/AndreasenHugeVolatilityInterplTests.cs | 14 of 14 cases |
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
 | `asianoptions` | partial | TestSuite/AsianOptionsTests.cs | 21 of 23 cases; not yet: testVecerEngine, testAnalyticContinuousGeometricAveragePriceHeston; moved: testAnalyticDiscreteGeometricAverageStrike line 488 to Divergences/GeometricAverageStrikeForwardStartTests.cs |
 | `assetswap` | ported | TestSuite/AssetSwapTests.cs | 9 of 9 cases |
@@ -2191,7 +2191,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `observable` | not ported: tests Observable, which is removed |  |  |
 | `ode` | partial | TestSuite/OdeTests.cs | 1 of 3 cases; not yet: testMatrixExponential, testMatrixExponentialOfZero |
 | `operators` | ported | TestSuite/OperatorsTests.cs | 1 of 2 cases; not ported: testConsistency (exercises only deprecated code: DZero and DPlusDMinus, D5) |
-| `optimizers` | partial | TestSuite/OptimizersTests.cs | 2 of 10 cases; not yet: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination, testLBFGSB, testLBFGSBActiveBounds, testLBFGSBCoverage, testDifferentialEvolution, testCMAES |
+| `optimizers` | partial | TestSuite/OptimizersTests.cs | 7 of 10 cases; not yet: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination |
 | `optionletstripper` | ported | TestSuite/OptionletStripperTests.cs | 19 of 19 cases |
 | `overnightindexedcoupon` | ported | TestSuite/OvernightIndexedCouponTests.cs | 45 of 45 cases; moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 to Divergences/TelescopicValueDatesTests.cs; testOvernightLegNPV line 1033 to Divergences/TelescopicValueDatesTests.cs |
 | `overnightindexedfundingratehelper` | not started |  | 3 cases |
