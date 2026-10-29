@@ -6,9 +6,9 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/matrices.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testMoorePenroseInverse (S-xrt)
 // Moved: testSparseMatrixMemory line 755 (Divergences/SparseMatrixProductTests.cs)
 
+using NanoQL.Experimental;
 using NanoQL.Numerics;
 using static NanoQL.Numerics.CholeskyDecompositionFunctions;
 using static NanoQL.Numerics.MatrixFunctions;
@@ -816,6 +816,63 @@ public class MatricesTests
                         $"Failed to verify Cholesky decomposition at (i,j)=({i},{j}), original value is {m[i, j]}, "
                         + $"replicated value is {m2[i, j]}");
                 }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestMoorePenroseInverse()
+    {
+        // Testing Moore-Penrose inverse...
+
+        // this is taken from
+        // http://de.mathworks.com/help/matlab/ref/pinv.html
+        Real[,] tmp =
+        {
+            { 64, 2, 3, 61, 60, 6 }, { 9, 55, 54, 12, 13, 51 },
+            { 17, 47, 46, 20, 21, 43 }, { 40, 26, 27, 37, 36, 30 },
+            { 32, 34, 35, 29, 28, 38 }, { 41, 23, 22, 44, 45, 19 },
+            { 49, 15, 14, 52, 53, 11 }, { 8, 58, 59, 5, 4, 62 },
+        };
+        var A = new Matrix(8, 6);
+        for (Size i = 0; i < 8; ++i)
+        {
+            for (Size j = 0; j < 6; ++j)
+            {
+                A[i, j] = tmp[i, j];
+            }
+        }
+
+        Matrix P = MoorePenroseInverseFunctions.MoorePenroseInverse(A);
+        var b = new Vector(8, 260.0);
+        Vector x = P * b;
+
+        Real[] cached =
+        [
+            1.153846153846152, 1.461538461538463, 1.384615384615384,
+            1.384615384615385, 1.461538461538462, 1.153846153846152,
+        ];
+        const double tol = 500.0 * QL_EPSILON;
+
+        for (Size i = 0; i < 6; ++i)
+        {
+            if (Math.Abs(x[i] - cached[i]) > tol)
+            {
+                Assert.Fail(
+                    "Failed to verify minimal norm solution obtained from Moore-Penrose-Inverse against cached results, "
+                    + $"component {i} is {x[i]}, expected {cached[i]}, difference {x[i] - cached[i]}, tolerance {tol}");
+            }
+        }
+
+        Vector y = A * x;
+        const double tol2 = 2000.0 * QL_EPSILON;
+        for (Size i = 0; i < 6; ++i)
+        {
+            if (Math.Abs(y[i] - 260.0) > tol2)
+            {
+                Assert.Fail(
+                    "Failed to verify minimal norm solution obtained from Moore-Penrose-Inverse when back-substituting, "
+                    + $"rhs component {i} is {y[i]}, expected 260.0, difference {y[i] - 260.0}, tolerance {tol2}");
             }
         }
     }

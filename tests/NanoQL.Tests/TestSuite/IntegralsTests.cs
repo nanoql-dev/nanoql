@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/integrals.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testPiecewiseIntegral (S-xrt)
 
 using System.Numerics;
+using NanoQL.Experimental;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
 
@@ -291,6 +291,29 @@ public class IntegralsTests
     }
 
     [Fact]
+    public void TestPiecewiseIntegral()
+    {
+        // Testing piecewise integral...
+        Real[] x = [1.0, 2.0, 3.0, 4.0, 5.0];
+        Real[] y = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+        Integrator segment = new SegmentIntegral(1);
+        Integrator piecewise = new PiecewiseIntegral(segment, x);
+        PwCheck(piecewise, x, y, -1.0, 0.0, 1.0);
+        PwCheck(piecewise, x, y, 0.0, 1.0, 1.0);
+        PwCheck(piecewise, x, y, 0.0, 1.5, 2.0);
+        PwCheck(piecewise, x, y, 0.0, 2.0, 3.0);
+        PwCheck(piecewise, x, y, 0.0, 2.5, 4.5);
+        PwCheck(piecewise, x, y, 0.0, 3.0, 6.0);
+        PwCheck(piecewise, x, y, 0.0, 4.0, 10.0);
+        PwCheck(piecewise, x, y, 0.0, 5.0, 15.0);
+        PwCheck(piecewise, x, y, 0.0, 6.0, 21.0);
+        PwCheck(piecewise, x, y, 0.0, 7.0, 27.0);
+        PwCheck(piecewise, x, y, 3.5, 4.5, 4.5);
+        PwCheck(piecewise, x, y, 5.0, 10.0, 30.0);
+        PwCheck(piecewise, x, y, 9.0, 10.0, 6.0);
+    }
+
+    [Fact]
     public void TestExponentialIntegral()
     {
         // Testing exponential integrals...
@@ -562,6 +585,18 @@ public class IntegralsTests
                     ComparisonFunctions.CloseEnough(ei.Real, 0.0), "check close_enough(ei.real(), 0.0) has failed");
                 CheckClose(ei.Imaginary, limit_ei_imag, tol);
             }
+        }
+    }
+
+    // QuantLib's pw_fct, QL_PIECEWISE_FUNCTION(x, y, t), and pw_check
+    private static void PwCheck(Integrator integrator, Real[] x, Real[] y, Real a, Real b, Real expected)
+    {
+        Real calculated = integrator.Integrate(t => PiecewiseFunctionFunctions.Evaluate(x, y, t), a, b);
+        if (!ComparisonFunctions.Close(calculated, expected))
+        {
+            Assert.Fail(
+                $"piecewise integration over [{a},{b}] failed: \n   calculated: {calculated:R}\n   expected:   {expected:R}"
+                + $"\n   difference: {calculated - expected:R}");
         }
     }
 

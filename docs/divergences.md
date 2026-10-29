@@ -2066,6 +2066,17 @@ Facts:
 - `PlackettTakesTheStableRoot`
 - `WhereQuantLibsFormulaHoldsItsValueIsKept`
 
+## CopulaRngNearIndependenceTests
+
+[`Divergences/CopulaRngNearIndependenceTests.cs`](../tests/NanoQL.Tests/Divergences/CopulaRngNearIndependenceTests.cs)
+
+The Clayton and Frank copula generators near independence (the S-xrt plan's XRR5 (xxxiv), fixed under R8). Their conditional inverses cancel as θ → 0: QuantLib's Clayton draw is 7.1e-5 off at θ 1e-12 and 2.5e-7 at 1e-10, its Frank draw 2.4e-4 and 8.3e-8 (the references: 40-digit mpmath of QuantLib's own formulas on the same uniforms, the S-xrt run's `c4\copula_refs.py`). nanoql's `log1p`/`expm1` forms below |θ| 1e-2 meet the references to the last bits; at and above 1e-2 the forms are QuantLib's.
+
+Facts:
+
+- `TheDrawsMeetTheirReferences`
+- `QuantLibsFormsCancelAtTheta1e12`
+
 ## CosHestonLargeKappaTests
 
 [`Divergences/CosHestonLargeKappaTests.cs`](../tests/NanoQL.Tests/Divergences/CosHestonLargeKappaTests.cs)
@@ -3286,6 +3297,19 @@ Facts:
 - `AtSmallThetaTheCoefficientsKeepTheirDigits`
 - `AtThetaZeroTheRuleIsSimpsons`
 - `FromThetaOnePointSevenQuantLibsClosedFormsAreKept`
+
+## FireflyAlgorithmTests
+
+[`Divergences/FireflyAlgorithmTests.cs`](../tests/NanoQL.Tests/Divergences/FireflyAlgorithmTests.cs)
+
+The firefly algorithm (the S-xrt plan's XRR5 (xxxii) and the run's R4-1, fixed under R8). QuantLib's attraction loop stops at k < i − 1, so each firefly misses the next brighter one and the second brightest is attracted by none; its moved fireflies' new values go to the sorted population's place their index names, another firefly's, so values and positions part after the first move; and pure differential evolution assigns its random base through a reference, overwriting the best firefly. nanoql attracts each firefly to every brighter one, which a recording intensity counts, i(i − 1)/2 of M brightest a round; keeps each value with its firefly, which the intensity checks against the cost at every round; and copies the base, so pure differential evolution converges on the shifted sphere, where QuantLib's population of six collapses onto copies of its members and stalls at 1.2e-3 (6.0e-16 for the copy). The decreasing walk's δ squares at each round's first walk from the second round (the S-xrt code review's F4-2): each walk's scale, read against a walk at δ 1 on the same seed, is δ₀^(2^(r − 1)) in round r, where QuantLib's count squares once every Mfa + 1 walks, so with one firefly δ₀² still in the third round.
+
+Facts:
+
+- `EachFireflyIsAttractedByEveryBrighterOne`
+- `ThePopulationKeepsEachFireflysValue`
+- `PureDifferentialEvolutionConverges`
+- `TheDecreasingWalksDeltaSquaresEachRound`
 
 ## FittedCurveRecalculationTests
 
@@ -4568,6 +4592,17 @@ Facts:
 
 - `TheProtectionRunsToTheMaturity`
 
+## IsotropicRandomWalkTests
+
+[`Divergences/IsotropicRandomWalkTests.cs`](../tests/NanoQL.Tests/Divergences/IsotropicRandomWalkTests.cs)
+
+The isotropic random walk's direction from three dimensions (the S-xrt plan's XRR5 (xxxiii) and XRR11, fixed under R8). QuantLib's hyperspherical angles are each uniform in [0, π], where a uniform direction needs densities ∝ sin^(d−k−1)φ, so its first coordinate's second moment is ½ in any dimension, against 1/d. nanoql's direction is Muller's, d normals scaled to unit length (IMSL's RNSPH above four dimensions). On a unit radius at a fixed seed its moments are E[xᵢ²] = 1/d and E[xᵢxⱼ] = 0 within three standard errors, d 3 to 6, and its first coordinate's law, the density ∝ (1 − x²)^((d−3)/2) on [−1, 1], passes a binned χ² test at the 0.1% level; in one and two dimensions the walk is QuantLib's, bit for bit (the harness's vectors).
+
+Facts:
+
+- `TheMomentsAreTheUniformDirections`
+- `TheFirstCoordinatesLawPassesAChiSquaredTest`
+
 ## IsraelRangeEndTests
 
 [`Divergences/IsraelRangeEndTests.cs`](../tests/NanoQL.Tests/Divergences/IsraelRangeEndTests.cs)
@@ -5500,6 +5535,17 @@ Facts:
 - `APathGeneratorOfNoStepIsRefused`
 - `AnEmptyMultiPathsPathSizeIsRefused`
 
+## MoorePenroseWideTests
+
+[`Divergences/MoorePenroseWideTests.cs`](../tests/NanoQL.Tests/Divergences/MoorePenroseWideTests.cs)
+
+The Moore-Penrose inverse of a wide matrix (the S-xrt plan's XRR5 (xxxv), fixed under R8). QuantLib's reads the singular values past their end and then throws "matrices with different sizes (3x2, 3x3) cannot be multiplied" on a 2 × 3 matrix (the S-xrt planner's XRP9). nanoql's is ((Aᵀ)⁺)ᵀ, Penrose's identity; on wide, tall, rank-deficient and zero matrices it meets Penrose's four conditions, A A⁺ A = A, A⁺ A A⁺ = A⁺ and A A⁺, A⁺ A symmetric.
+
+Facts:
+
+- `ThePenroseConditionsHold`
+- `AWideInverseIsItsTransposesTransposed`
+
 ## MultiCubicSplineBoundaryTests
 
 [`Divergences/MultiCubicSplineBoundaryTests.cs`](../tests/NanoQL.Tests/Divergences/MultiCubicSplineBoundaryTests.cs)
@@ -5847,6 +5893,33 @@ Facts:
 
 - `AStartWindowSpotBeyondTheBarrierIsRefused`
 
+## ParticleSwarmInertiaTests
+
+[`Divergences/ParticleSwarmInertiaTests.cs`](../tests/NanoQL.Tests/Divergences/ParticleSwarmInertiaTests.cs)
+
+The particle swarm's adaptive and decreasing inertias (the S-xrt plan's XRR5 (xxxi), fixed under R8). QuantLib's adaptive counter is unsigned, so its first improvement wraps it to 2⁶⁴ − 1 and halves the inertia as if the swarm had stalled; its decreasing inertia never sets its swarm size, which it loops over, and never advances its iteration, so it never decreases. On the inertia form with c₁ = c₂ = 0 each velocity changes only by the inertia's factor, so a recording topology reads each iteration's factor from the velocities, on a linear cost whose leading particle's drift improves the swarm, an improvement at a net count of 0 among them: nanoql's are each inertia's formula.
+
+Facts:
+
+- `TheDecreasingInertiaFallsLinearlyToTheThreshold`
+- `TheAdaptiveInertiaCountsImprovementsLessStalls`
+
+## ParticleSwarmTopologyTests
+
+[`Divergences/ParticleSwarmTopologyTests.cs`](../tests/NanoQL.Tests/Divergences/ParticleSwarmTopologyTests.cs)
+
+The particle swarm's topologies (the S-xrt plan's XRR5 (xxviii)–(xxx), fixed under R8, the run's R4-2 and R4-4, and the S-xrt code review's B4-1). QuantLib's global topology keeps the largest personal best and skips the best particle, whose social best stays at the zero vector, so it steers the swarm toward the worst; its k-neighbours window runs from i − K − 1 to i + K − 1 and a particle that is its window's best takes particle 0's position; its clubs topology reads one past its clubs, takes a club's index for a particle, weighs a club's worst only on a member that isn't its new best, leaves and joins clubs past its bounds, and reads particle 0 for a club left empty. nanoql's set every particle's social best to the best personal best of its neighbourhood, the whole swarm, the window [i − K, i + K] wrapping around, or its clubs' members, which a recording inertia checks after each `FindSocialBest`; each converges on the shifted sphere; and a clubs topology driven directly keeps its invariants at every call: each club's best and worst over its members, each particle's one leave or join within [min, max] and at a reset toward the default, and each social best the best personal best among its clubs' members, on configurations where particles join clubs left empty and particle 0, the swarm's best, isn't their club-mate, and with one particle's personal best NaN, which QuantLib's comparisons pass over and nanoql's too (the S-xrt code review's F4-5); and the clubs topology converges on a cost that is NaN near the box's centre, the Sobol start's first point, on twelve particles over twenty seeds, where QuantLib's comparisons replaced by a first member's NaN stall up to 3.1e-4.
+
+Facts:
+
+- `TheGlobalSocialBestIsTheBestPersonalBest`
+- `EachKNeighboursSocialBestIsItsWindowsBest`
+- `EachClubsSocialBestIsAParticlesPersonalBest`
+- `EachClubsCallKeepsTheClubsInvariants`
+- `AClubsWorstIsWeighedOverEveryMember`
+- `EachTopologyConvergesOnTheShiftedSphere`
+- `TheClubsSwarmConvergesWhereTheBoxsCentreIsNaN`
+
 ## PascalTriangleTests
 
 [`Divergences/PascalTriangleTests.cs`](../tests/NanoQL.Tests/Divergences/PascalTriangleTests.cs)
@@ -5975,6 +6048,17 @@ Facts:
 - `TheSecondOrderHelpersAreTheirFunctionsDerivatives`
 - `OrderTwoApproachesTheFiniteDifferencesOnAStronglyTimeDependentMarket`
 - `OnAFlatMarketEachOrderIsTheAnalyticBarrierPrice`
+
+## PiecewiseIntegralNudgeTests
+
+[`Divergences/PiecewiseIntegralNudgeTests.cs`](../tests/NanoQL.Tests/Divergences/PiecewiseIntegralNudgeTests.cs)
+
+The piecewise integral's nudges at critical points at or below 0 (the S-xrt plan's XRR5 (xxxvi), fixed under R8). QuantLib's nudges each piece's ends inward by multiplying by 1 + ε, which moves a negative point the wrong way and 0 not at all, so on the two-interval segment rule a step from 0 to 1 at −1 integrates to 3.5 over [−3, 3], exactly 4, and at 0 to 3.75, exactly 3 (the S-xrt planner's XRP9); at +1 QuantLib's is exact. nanoql's nudge is mirrored below 0 and is the next double at 0, so every piece excludes its critical points and the rule is exact on each constant piece.
+
+Facts:
+
+- `AStepIntegratesExactly`
+- `QuantLibsNudgesMissTheSteps`
 
 ## PiecewiseYoYVolatilityNodesTests
 
@@ -7753,6 +7837,22 @@ Facts:
 - `TheStressReachesTheStepInsideTheBox`
 - `OutsideTheBoxTheStepIsThePlainOne`
 - `WithNoStressTheProcessIsQuantLibs`
+
+## VeryFastAnnealingSamplerTests
+
+[`Divergences/VeryFastAnnealingSamplerTests.cs`](../tests/NanoQL.Tests/Divergences/VeryFastAnnealingSamplerTests.cs)
+
+The very fast annealing's sampler, fixed under R8 beside the S-xrt code review's B4-2. QuantLib's starts each coordinate's loop from lower − 1, which rounds to the lower bound itself at every magnitude from 2⁵⁴, so it returns that bound with no draw (`hybridsimulatedannealingfunctors.hpp:190-198`); nanoql's draws each coordinate at least once. QuantLib's step T·((1 + 1/T)^e − 1) is infinite where 1/T overflows, below about 5.6e-309, so its loop never lands in the box, and NaN at T = 0, which its loop returns; nanoql's takes the same value as T^(1 − e)·(1 + T)^e − T, which agrees with QuantLib's form where both are finite, so at T = 0 it holds the point; and an annealing on the very fast temperature with an end temperature of 0 runs past the overflow to its iteration limit. Above T 100 QuantLib's 1 + 1/T loses the digits of 1/T, its step 2.3e-2 off at 1e14 and 0 from about 1e16, where every draw holds the point (the S-xrt code review's F4-7): nanoql's, T·expm1(e·log1p(1/T)) there, is within 4 ulps of a 50-digit reference from 1e3 to 1e20 (mpmath on the exact doubles, the S-xrt run's `c4\f47_refs.py`), and QuantLib's bits at 100 and below.
+
+Facts:
+
+- `ABoxPast2To54IsDrawnNotItsLowerBound`
+- `TheStepsRewrittenFormIsQuantLibsWhereBothAreFinite`
+- `ATemperatureWhoseReciprocalOverflowsDraws`
+- `AnAnnealingRunsPastTheTemperaturesOverflow`
+- `TheStepAboveTemperature100KeepsItsDigits`
+- `TheStepAt100AndBelowIsQuantLibs`
+- `AHighTemperatureMovesThePoint`
 
 ## VolatilityBumpInstrumentJacobianTests
 

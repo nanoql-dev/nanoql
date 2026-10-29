@@ -111,6 +111,7 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Experimental/Credit/RecursiveLossModel{TCopula,TInitTraits}.cs`: `expectedConditionalLoss`, never ported: private and unused, its only call commented out.
 - `src/NanoQL/Experimental/Credit/SpotRecoveryLatentModel{TCopula,TInitTraits}.cs`: `expectedLoss`, `conditionalExpLossRR` and `conditionalExpLossRRInv`, never ported: they call `conditionalRecoveryInvPinvRR`, which QuantLib declares nowhere, so QuantLib never compiles them.
 - `src/NanoQL/Experimental/Inflation/KInterpolatedYoYOptionletVolatilitySurface{TInterpolator}.cs`: `KInterpolatedYoYOptionletVolatilitySurface::volatilityImpl(const Date&, Rate)`, never ported: only its time form calls it, and the time form reads the stripped curves by time (XRR5 (xiii)).
+- `src/NanoQL/Experimental/Math/LevyFlightDistribution.cs`: `LevyFlightDistribution::param_type`, its constructor from one, `param()`, `reset()` and `operator()(Engine&, const param_type&)`, never ported: the standard library's distribution concept, which no QuantLib code reads.
 - `src/NanoQL/Experimental/Swaptions/HaganIrregularSwaptionEngine.cs`: `HaganIrregularSwaptionEngine::LGMPrice` and `rStarFinder`, never ported: `haganirregularswaptionengine.hpp` declares them and nothing defines them.
 - `src/NanoQL/Experimental/Swaptions/IrregularSwap.cs`: `IrregularSwap::arguments` and `IrregularSwap::engine`, never ported: no engine derives from the engine class, and no engine reads the arguments' vectors (Hagan's engine reads the swaption's swap and exercise).
 - `src/NanoQL/Experimental/Swaptions/IrregularSwaption/IrregularSwaption.cs`: `IrregularSwaption::impliedVolatility`, never ported: every call throws, unpriced "null pricing engine", priced "wrong argument type" (its Black helper's arguments can't take an irregular swaption's); and `IrregularSwaption::arguments` and `IrregularSwaption::engine`, never ported: Hagan's engine reads the swaption's swap, exercise and settlement type, and derives from no engine class but the generic one.
@@ -131,7 +132,3 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Utilities/DataParsers/DateParser.cs`: `parseFormatted`, not ported: a `DateOnly`'s `ParseExact` does its job.
-- `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testPiecewiseIntegral`, which waits for S-xrt.
-- `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: `testLaplaceInterpolation`, which waits for S-xrt's Laplace interpolation.
-- `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the Moore-Penrose case, which waits for S-xrt.
-- `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing cases, which wait for S-xrt's hybrid simulated annealing.

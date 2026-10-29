@@ -808,6 +808,34 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a scheme outside <see cref="HybridSimulatedAnnealingResetScheme"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's <c>minimize</c> leaves the current point where it is on any other value.</remarks>
+    internal static void Check(HybridSimulatedAnnealingResetScheme value, string paramName)
+    {
+        if (value is < HybridSimulatedAnnealingResetScheme.NoResetScheme
+            or > HybridSimulatedAnnealingResetScheme.ResetToOrigin)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown reset scheme");
+        }
+    }
+
+    /// <summary>Refuses a scheme outside <see cref="HybridSimulatedAnnealingLocalOptimizeScheme"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's <c>minimize</c> runs no local optimization on any other value.</remarks>
+    internal static void Check(HybridSimulatedAnnealingLocalOptimizeScheme value, string paramName)
+    {
+        if (value is < HybridSimulatedAnnealingLocalOptimizeScheme.NoLocalOptimize
+            or > HybridSimulatedAnnealingLocalOptimizeScheme.EveryBestPoint)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown local optimize scheme");
+        }
+    }
+
     /// <summary>Refuses a swap type outside <see cref="MtMCrossCurrencyBasisSwapType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

@@ -7,8 +7,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/optimizers.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination (S-xrt's hybrid simulated annealing)
 
+using NanoQL.Experimental;
 using NanoQL.Numerics;
 
 namespace NanoQL.Tests.TestSuite;
@@ -137,6 +137,39 @@ public class OptimizersTests
         //SteepestDescent optimizationMethod;
         var endCriteria = new EndCriteria(1000, 100, 1e-5, 1e-5, 1e-5);
         optimizationMethod.Minimize(problem, endCriteria);
+    }
+
+    [Fact]
+    public void TestHybridSimulatedAnnealingTemperatureTermination()
+    {
+        // Testing hybrid simulated annealing temperature termination...
+        (EndCriteriaType type, int evaluations) =
+            RunHybridAnnealing(new StationarySampler(), new RejectAllMoves(), new StagedCooling(), 100, 50);
+
+        Assert.Equal(EndCriteriaType.None, type);
+        Assert.Equal(3, evaluations);
+    }
+
+    [Fact]
+    public void TestHybridSimulatedAnnealingIterationTermination()
+    {
+        // Testing hybrid simulated annealing iteration termination...
+        (EndCriteriaType type, int evaluations) =
+            RunHybridAnnealing(new ImprovingSampler(), new AcceptAllMoves(), new ConstantTemperature(), 3, 2);
+
+        Assert.Equal(EndCriteriaType.MaxIterations, type);
+        Assert.Equal(4, evaluations);
+    }
+
+    [Fact]
+    public void TestHybridSimulatedAnnealingStationaryTermination()
+    {
+        // Testing hybrid simulated annealing stationary-point termination...
+        (EndCriteriaType type, int evaluations) =
+            RunHybridAnnealing(new StationarySampler(), new RejectAllMoves(), new ConstantTemperature(), 100, 2);
+
+        Assert.Equal(EndCriteriaType.StationaryPoint, type);
+        Assert.Equal(3, evaluations);
     }
 
     [Fact]
@@ -983,6 +1016,91 @@ public class OptimizersTests
     }
 
     private sealed record NamedOptimizationMethod(OptimizationMethod OptimizationMethod, string Name);
+
+    private static (EndCriteriaType Type, int Evaluations) RunHybridAnnealing<TSampler, TProbability, TTemperature>(
+        TSampler sampler, TProbability probability, TTemperature temperature, Size maxIterations, Size maxStationaryStateIterations)
+        where TSampler : IAnnealingSampler<TSampler>
+        where TProbability : IAnnealingProbability<TProbability>
+        where TTemperature : IAnnealingTemperature<TTemperature>
+    {
+        var costFunction = new MultidimensionalQuadratic();
+        var constraint = new NoConstraint();
+        var problem = new Problem(costFunction, constraint, new Vector(2, 1.0).AsSpan());
+        var endCriteria = new EndCriteria(maxIterations, maxStationaryStateIterations, 1e-8, 1e-8, 1e-8);
+
+        var annealing = new HybridSimulatedAnnealing<TSampler, TProbability, TTemperature, ReannealingTrivial>(
+            sampler,
+            probability,
+            temperature,
+            new ReannealingTrivial(),
+            1.0,
+            0.5,
+            0,
+            HybridSimulatedAnnealingResetScheme.NoResetScheme,
+            0,
+            null,
+            HybridSimulatedAnnealingLocalOptimizeScheme.NoLocalOptimize);
+
+        ProblemResults result = annealing.Minimize(problem, endCriteria);
+        return (result.EndCriteriaType, result.FunctionEvaluation);
+    }
+
+    private sealed class StationarySampler : IAnnealingSampler<StationarySampler>
+    {
+        public void Sample(Vector newPoint, Vector currentPoint, Vector temp) => currentPoint.AsSpan().CopyTo(newPoint.AsSpan());
+
+        public StationarySampler Clone() => this;
+    }
+
+    private sealed class ImprovingSampler : IAnnealingSampler<ImprovingSampler>
+    {
+        public void Sample(Vector newPoint, Vector currentPoint, Vector temp) => (currentPoint / 2.0).AsSpan().CopyTo(newPoint.AsSpan());
+
+        public ImprovingSampler Clone() => this;
+    }
+
+    private sealed class RejectAllMoves : IAnnealingProbability<RejectAllMoves>
+    {
+        public bool Accept(Real currentValue, Real newValue, Vector temp) => false;
+
+        public RejectAllMoves Clone() => this;
+    }
+
+    private sealed class AcceptAllMoves : IAnnealingProbability<AcceptAllMoves>
+    {
+        public bool Accept(Real currentValue, Real newValue, Vector temp) => true;
+
+        public AcceptAllMoves Clone() => this;
+    }
+
+    private sealed class StagedCooling : IAnnealingTemperature<StagedCooling>
+    {
+        public void Update(Vector newTemperature, Vector currentTemperature, Vector steps)
+        {
+            newTemperature.AsSpan().Fill(0.0);
+            if (steps[0] <= 2.0)
+            {
+                newTemperature[1] = 0.5;
+            }
+        }
+
+        public StagedCooling Clone() => this;
+    }
+
+    private sealed class ConstantTemperature : IAnnealingTemperature<ConstantTemperature>
+    {
+        public void Update(Vector newTemperature, Vector currentTemperature, Vector steps) =>
+            currentTemperature.AsSpan().CopyTo(newTemperature.AsSpan());
+
+        public ConstantTemperature Clone() => this;
+    }
+
+    private sealed class MultidimensionalQuadratic : CostFunction
+    {
+        public override Real Value(Vector x) => ArrayFunctions.DotProduct(x, x);
+
+        public override Vector Values(Vector x) => new(1, Value(x));
+    }
 
     private sealed class OneDimensionalPolynomialDegreeN : CostFunction
     {

@@ -20,9 +20,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 14 | 1 |
-| partial | 28 | 9 |
-| ported | 1,218 | 170 |
+| partial | 29 | 5 |
+| ported | 1,231 | 175 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -385,28 +384,28 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `claytoncopularng` | not started |  | no nanoql type: ClaytonCopulaRng |
+| `claytoncopularng` | ported | Experimental/Math/ClaytonCopulaRng{TRng}.cs |  |
 | `convolvedstudentt` | ported | Experimental/Math/CumulativeBehrensFisher.cs, Experimental/Math/InverseCumulativeBehrensFisher.cs |  |
-| `farliegumbelmorgensterncopularng` | not started |  | no nanoql type: FarlieGumbelMorgensternCopulaRng |
-| `fireflyalgorithm` | not started |  | no nanoql type: FireflyAlgorithm, FireflyAlgorithmIntensity, ExponentialIntensity, InverseLawSquareIntensity, FireflyAlgorithmRandomWalk, DistributionRandomWalk, GaussianWalk, LevyFlightWalk, DecreasingGaussianWalk |
-| `frankcopularng` | not started |  | no nanoql type: FrankCopulaRng |
+| `farliegumbelmorgensterncopularng` | ported | Experimental/Math/FarlieGumbelMorgensternCopulaRng{TRng}.cs |  |
+| `fireflyalgorithm` | ported | Experimental/Math/FireflyAlgorithm/DecreasingGaussianWalk.cs, Experimental/Math/FireflyAlgorithm/DistributionRandomWalk{TDistribution}.cs, Experimental/Math/FireflyAlgorithm/ExponentialIntensity.cs, Experimental/Math/FireflyAlgorithm/FireflyAlgorithm.cs, Experimental/Math/FireflyAlgorithm/FireflyAlgorithmIntensity.cs, Experimental/Math/FireflyAlgorithm/FireflyAlgorithmRandomWalk.cs, Experimental/Math/FireflyAlgorithm/GaussianWalk.cs, Experimental/Math/FireflyAlgorithm/InverseLawSquareIntensity.cs, Experimental/Math/FireflyAlgorithm/LevyFlightWalk.cs, Experimental/Math/FireflyAlgorithm/NormalRandomWalkDistribution.cs |  |
+| `frankcopularng` | ported | Experimental/Math/FrankCopulaRng{TRng}.cs |  |
 | `gaussiancopulapolicy` | ported | Experimental/Math/GaussianCopulaPolicy.cs, Experimental/Math/GaussianCopulaPolicyInitTraits.cs |  |
 | `gaussiannoncentralchisquaredpolynomial` | ported | Experimental/Math/GaussNonCentralChiSquaredPolynomial.cs |  |
-| `hybridsimulatedannealing` | not started |  | no nanoql type: HybridSimulatedAnnealing, HybridSimulatedAnnealingLocalOptimizeScheme, HybridSimulatedAnnealingResetScheme, GaussianSimulatedAnnealing, LogNormalSimulatedAnnealing, MirrorGaussianSimulatedAnnealing, GaussianSimulatedReAnnealing, VeryFastSimulatedAnnealing, VeryFastSimulatedReAnnealing |
-| `hybridsimulatedannealingfunctors` | not started |  | no nanoql type: SamplerLogNormal, SamplerGaussian, SamplerRingGaussian, SamplerMirrorGaussian, SamplerCauchy, SamplerVeryFastAnnealing, ProbabilityAlwaysDownhill, ProbabilityBoltzmann, ProbabilityBoltzmannDownhill, TemperatureBoltzmann, TemperatureCauchy, TemperatureCauchy1D, TemperatureExponential, TemperatureVeryFastAnnealing, ReannealingTrivial, ReannealingFiniteDifferences |
-| `isotropicrandomwalk` | not started |  | no nanoql type: IsotropicRandomWalk |
-| `laplaceinterpolation` | not started |  | no nanoql type: LaplaceInterpolation |
+| `hybridsimulatedannealing` | ported | Experimental/Math/HybridSimulatedAnnealing/GaussianSimulatedAnnealing.cs, Experimental/Math/HybridSimulatedAnnealing/HybridSimulatedAnnealingLocalOptimizeScheme.cs, Experimental/Math/HybridSimulatedAnnealing/HybridSimulatedAnnealingResetScheme.cs, Experimental/Math/HybridSimulatedAnnealing/HybridSimulatedAnnealing{TSampler,TProbability,TTemperature,TReannealing}.cs, Experimental/Math/HybridSimulatedAnnealing/IAnnealingProbability{TSelf}.cs, Experimental/Math/HybridSimulatedAnnealing/IAnnealingReannealing{TSelf}.cs, Experimental/Math/HybridSimulatedAnnealing/IAnnealingSampler{TSelf}.cs, Experimental/Math/HybridSimulatedAnnealing/IAnnealingTemperature{TSelf}.cs, Experimental/Math/HybridSimulatedAnnealing/LogNormalSimulatedAnnealing.cs, Experimental/Math/HybridSimulatedAnnealing/MirrorGaussianSimulatedAnnealing.cs | no nanoql type: GaussianSimulatedReAnnealing, VeryFastSimulatedAnnealing, VeryFastSimulatedReAnnealing |
+| `hybridsimulatedannealingfunctors` | ported | Experimental/Math/HybridSimulatedAnnealingFunctors/ProbabilityAlwaysDownhill.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/ProbabilityBoltzmann.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/ProbabilityBoltzmannDownhill.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/ReannealingFiniteDifferences.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/ReannealingTrivial.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/SamplerCauchy.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/SamplerGaussian.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/SamplerLogNormal.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/SamplerMirrorGaussian.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/SamplerRingGaussian.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/SamplerVeryFastAnnealing.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/TemperatureBoltzmann.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/TemperatureCauchy.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/TemperatureCauchy1D.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/TemperatureExponential.cs, Experimental/Math/HybridSimulatedAnnealingFunctors/TemperatureVeryFastAnnealing.cs |  |
+| `isotropicrandomwalk` | ported | Experimental/Math/IRandomWalkDistribution.cs, Experimental/Math/IsotropicRandomWalk{TDistribution}.cs |  |
+| `laplaceinterpolation` | ported | Experimental/Math/LaplaceInterpolation.cs, Experimental/Math/LaplaceInterpolationFunctions.cs |  |
 | `latentmodel` | ported | Experimental/Math/BoxMullerFactorSampler.cs, Experimental/Math/BoxMullerFactorSampler{TUrng}.cs, Experimental/Math/GaussianQuadLMIntegration.cs, Experimental/Math/ICopulaPolicy.cs, Experimental/Math/LMIntegration.cs, Experimental/Math/LatentModelFactorSampler.cs, Experimental/Math/LatentModelFactorSampler{TCopula,TInitTraits,TUsng}.cs, Experimental/Math/LatentModelIntegrationType.cs, Experimental/Math/LatentModel{TCopula,TInitTraits}.cs, Experimental/Math/MultidimLMIntegration.cs, Experimental/Math/PolarStudentTFactorSampler.cs, Experimental/Math/PolarStudentTFactorSampler{TUrng}.cs | no nanoql type: IntegrationBase |
-| `levyflightdistribution` | not started |  | no nanoql type: LevyFlightDistribution, LevyFlightDistributionParam_type |
-| `moorepenroseinverse` | not started |  |  |
+| `levyflightdistribution` | partial | Experimental/Math/LevyFlightDistribution.cs | partial: LevyFlightDistribution::param_type, its constructor from one, param(), reset() and operator()(Engine&, const param_type&), never ported: the standard library's distribution concept, which no QuantLib code reads; no nanoql type: LevyFlightDistributionParam_type |
+| `moorepenroseinverse` | ported | Experimental/Math/MoorePenroseInverseFunctions.cs |  |
 | `multidimintegrator` | ported | Experimental/Math/MultidimIntegral.cs, Experimental/Math/MultidimIntegrand.cs |  |
 | `multidimquadrature` | ported | Experimental/Math/GaussianQuadMultidimIntegrator.cs, Experimental/Math/MultidimVectorIntegrand.cs |  |
-| `particleswarmoptimization` | not started |  | no nanoql type: ParticleSwarmOptimization, ParticleSwarmOptimizationInertia, TrivialInertia, SimpleRandomInertia, DecreasingInertia, AdaptiveInertia, LevyFlightInertia, ParticleSwarmOptimizationTopology, GlobalTopology, KNeighbors, ClubsTopology |
-| `piecewisefunction` | not started |  |  |
-| `piecewiseintegral` | not started |  | no nanoql type: PiecewiseIntegral |
+| `particleswarmoptimization` | ported | Experimental/Math/ParticleSwarmOptimization/AdaptiveInertia.cs, Experimental/Math/ParticleSwarmOptimization/ClubsTopology.cs, Experimental/Math/ParticleSwarmOptimization/DecreasingInertia.cs, Experimental/Math/ParticleSwarmOptimization/GlobalTopology.cs, Experimental/Math/ParticleSwarmOptimization/KNeighbors.cs, Experimental/Math/ParticleSwarmOptimization/LevyFlightInertia.cs, Experimental/Math/ParticleSwarmOptimization/ParticleSwarmOptimization.cs, Experimental/Math/ParticleSwarmOptimization/ParticleSwarmOptimizationInertia.cs, Experimental/Math/ParticleSwarmOptimization/ParticleSwarmOptimizationTopology.cs, Experimental/Math/ParticleSwarmOptimization/SimpleRandomInertia.cs, Experimental/Math/ParticleSwarmOptimization/TrivialInertia.cs | own-tested: Divergences/ParticleSwarmInertiaTests.cs (QuantLib's unsigned counter wraps at the first improvement, from a swarm's second iteration); Divergences/ParticleSwarmTopologyTests.cs (QuantLib's reads past its clubs, takes a club's index for a particle and leaves every club at every iteration); Divergences/ParticleSwarmInertiaTests.cs (QuantLib's loops over a swarm size it never sets, undefined); Divergences/ParticleSwarmTopologyTests.cs (QuantLib's keeps the largest personal best and skips the best particle at every call, so no QuantLib route reaches the fixed social best); Divergences/ParticleSwarmTopologyTests.cs (QuantLib's window starts one particle early and its search starts from particle 0's position at every call, so no QuantLib route reaches the fixed social bests) |
+| `piecewisefunction` | ported | Experimental/Math/PiecewiseFunctionFunctions.cs |  |
+| `piecewiseintegral` | ported | Experimental/Math/PiecewiseIntegral.cs |  |
 | `polarstudenttrng` | ported | Experimental/Math/PolarStudentTRng.cs, Experimental/Math/PolarStudentTRng{TUrng}.cs |  |
 | `tcopulapolicy` | ported | Experimental/Math/TCopulaPolicy.cs, Experimental/Math/TCopulaPolicyInitTraits.cs |  |
-| `zigguratrng` | not started |  | no nanoql type: ZigguratRng, Ziggurat |
+| `zigguratrng` | ported | Experimental/Math/Ziggurat.cs, Experimental/Math/ZigguratRng.cs |  |
 
 ### `ql/experimental/mcbasket/`
 
@@ -2103,7 +2102,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `constnotionalcrosscurrencyfixedvsfloatingswap` | ported | TestSuite/ConstNotionalCrossCurrencyFixedVsFloatingSwapTests.cs | 1 of 1 cases |
 | `constnotionalcrosscurrencyswap` | ported | TestSuite/ConstNotionalCrossCurrencySwapTests.cs | 3 of 3 cases |
 | `convertiblebonds` | ported | TestSuite/ConvertibleBondsTests.cs | 4 of 4 cases |
-| `copulas` | not started |  | 3 cases |
+| `copulas` | ported | TestSuite/CopulaTests.cs | 3 of 3 cases |
 | `covariance` | ported | TestSuite/CovarianceTests.cs | 3 of 3 cases |
 | `creditdefaultswap` | ported | TestSuite/CreditDefaultSwapTests.cs | 10 of 10 cases |
 | `crosscurrencyratehelpers` | ported | TestSuite/CrossCurrencyRateHelpersTests.cs | 30 of 30 cases |
@@ -2157,10 +2156,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcpiswap` | ported | TestSuite/CPISwapTests.cs | 5 of 5 cases |
 | `inflationvolatility` | ported | TestSuite/InflationVolatilityTests.cs | 3 of 3 cases; replaced: testConstantVolatilityQuoteIsObserved by Conventions/ConstantInflationVolatilityQuoteTests.cs |
 | `instruments` | ported | TestSuite/InstrumentsTests.cs | 1 of 2 cases; not ported: testObservable (observer notifications and freezing, which an immutable instrument has no use for, R1) |
-| `integrals` | partial | TestSuite/IntegralsTests.cs | 20 of 21 cases; not yet: testPiecewiseIntegral |
+| `integrals` | ported | TestSuite/IntegralsTests.cs | 21 of 21 cases |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
-| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 39 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testLaplaceInterpolation |
+| `interpolations` | ported | TestSuite/InterpolationsTests.cs | 40 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs |
 | `jumpdiffusion` | ported | TestSuite/JumpDiffusionTests.cs | 2 of 2 cases |
 | `lazyobject` | not ported: tests LazyObject, which is replaced |  |  |
 | `libormarketmodel` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
@@ -2176,7 +2175,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `marketmodel_smmcapletcalibration` | ported | TestSuite/MarketModelSmmCapletCalibrationTests.cs | 1 of 1 cases |
 | `marketmodel_smmcaplethomocalibration` | ported | TestSuite/MarketModelSmmCapletHomoCalibrationTests.cs | 3 of 3 cases |
 | `markovfunctional` | ported | TestSuite/MarkovFunctionalTests.cs | 7 of 7 cases |
-| `matrices` | partial | TestSuite/MatricesTests.cs | 19 of 20 cases; not yet: testMoorePenroseInverse; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
+| `matrices` | ported | TestSuite/MatricesTests.cs | 20 of 20 cases; moved: testSparseMatrixMemory line 755 to Divergences/SparseMatrixProductTests.cs |
 | `mclongstaffschwartzengine` | ported | TestSuite/McLongstaffSchwartzEngineTests.cs | 2 of 2 cases |
 | `mersennetwister` | ported | TestSuite/MersenneTwisterTests.cs | 1 of 1 cases |
 | `money` | ported | TestSuite/MoneyTests.cs | 4 of 4 cases |
@@ -2191,7 +2190,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `observable` | not ported: tests Observable, which is removed |  |  |
 | `ode` | ported | TestSuite/OdeTests.cs | 3 of 3 cases |
 | `operators` | ported | TestSuite/OperatorsTests.cs | 1 of 2 cases; not ported: testConsistency (exercises only deprecated code: DZero and DPlusDMinus, D5) |
-| `optimizers` | partial | TestSuite/OptimizersTests.cs | 7 of 10 cases; not yet: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination |
+| `optimizers` | ported | TestSuite/OptimizersTests.cs | 10 of 10 cases |
 | `optionletstripper` | ported | TestSuite/OptionletStripperTests.cs | 19 of 19 cases |
 | `overnightindexedcoupon` | ported | TestSuite/OvernightIndexedCouponTests.cs | 45 of 45 cases; moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 to Divergences/TelescopicValueDatesTests.cs; testOvernightLegNPV line 1033 to Divergences/TelescopicValueDatesTests.cs |
 | `overnightindexedfundingratehelper` | ported | TestSuite/OvernightIndexedFundingRateHelperTests.cs | 3 of 3 cases |

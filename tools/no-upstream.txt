@@ -7,6 +7,8 @@
 src/NanoQL/EnumArguments.cs
 src/NanoQL/Models/MarketModels/Products/MultiStep/MultiStepProductChecks.cs
 src/NanoQL/MsvcConversions.cs
+src/NanoQL/MsvcNormalDistribution.cs
+src/NanoQL/MsvcRandom.cs
 src/NanoQL/NanoQLException.cs
 src/NanoQL/NumericLimits.cs
 src/NanoQL/Numerics/DoubleDouble.cs

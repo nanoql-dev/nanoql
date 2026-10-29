@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testLaplaceInterpolation (S-xrt)
 // Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs); testBicubicUpdate (Conventions/InterpolationConstructionTests.cs)
 
 using System.Collections.Immutable;
@@ -2201,6 +2200,194 @@ public class InterpolationsTests
                 diff > tol,
                 $"failed to reproduce updated node values\n    node      : {i}\n    expected  : {expected}"
                 + $"\n    calculated: {calculated}\n    difference: {diff}\n    tolerance : {tol}");
+        }
+    }
+
+    [Fact]
+    public void TestLaplaceInterpolation()
+    {
+        // Testing Laplace interpolation...
+
+        Real tol = 1E-12;
+
+        // QuantLib's Null<Real>(), a missing value, is NaN in nanoql's matrix
+        Real na = double.NaN;
+
+        // full matrix
+
+        Matrix m1 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, 6.5, 7.0 }, { 5.0, 3.0, 2.0 } }));
+        CheckClose(m1[0, 0], 1.0, tol);
+        CheckClose(m1[0, 2], 4.0, tol);
+        CheckClose(m1[2, 0], 5.0, tol);
+        CheckClose(m1[2, 1], 3.0, tol);
+
+        // inner point
+
+        Matrix m2 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, na, 7.0 }, { 5.0, 3.0, 2.0 } }));
+        CheckClose(m2[1, 1], 4.5, tol);
+        CheckClose(m2[2, 1], 3.0, tol);
+
+        // boundaries
+
+        Matrix m3 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, na, 4.0 }, { 6.0, 6.5, 7.0 }, { 5.0, 3.0, 2.0 } }));
+        CheckClose(m3[0, 1], 2.5, tol);
+
+        Matrix m4 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { na, 6.5, 7.0 }, { 5.0, 3.0, 2.0 } }));
+        CheckClose(m4[1, 0], 3.0, tol);
+
+        Matrix m5 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, 6.5, 7.0 }, { 5.0, na, 2.0 } }));
+        CheckClose(m5[2, 1], 3.5, tol);
+
+        Matrix m6 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, 6.5, na }, { 5.0, 3.0, 2.0 } }));
+        CheckClose(m6[1, 2], 3.0, tol);
+
+        // corners
+
+        Matrix m7 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { na, 2.0, 4.0 }, { 6.0, 6.5, 7.0 }, { 5.0, 3.0, 2.0 } }));
+        CheckClose(m7[0, 0], 4.0, tol);
+
+        Matrix m8 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, 6.5, 7.0 }, { na, 3.0, 2.0 } }));
+        CheckClose(m8[2, 0], 4.5, tol);
+
+        Matrix m9 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, 6.5, 7.0 }, { 5.0, 3.0, na } }));
+        CheckClose(m9[2, 2], 5.0, tol);
+
+        Matrix m10 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, na }, { 6.0, 6.5, 7.0 }, { 5.0, 3.0, 2.0 } }));
+        CheckClose(m10[0, 2], 4.5, tol);
+
+        // one dim (col vector)
+
+        Matrix m20 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { na }, { na }, { 3.0 }, { 5.0 }, { 7.0 }, { na } }));
+        CheckClose(m20[0, 0], 3.0, tol);
+        CheckClose(m20[1, 0], 3.0, tol);
+        CheckClose(m20[5, 0], 7.0, tol);
+
+        // one dim (row vector)
+
+        Matrix m21 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { na, na, 3.0, 5.0, 7.0, na } }));
+        CheckClose(m21[0, 0], 3.0, tol);
+        CheckClose(m21[0, 1], 3.0, tol);
+        CheckClose(m21[0, 5], 7.0, tol);
+
+        // non equidistant grid, inner point
+
+        Matrix m30 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, na, 7.0 }, { 5.0, 3.0, 2.0 } }),
+            [1.0, 2.0, 4.0],
+            [1.0, 2.0, 4.0]);
+        CheckClose(m30[1, 1], 26.0 / 6.0, tol);
+
+        // non equidistant grid, boundaries
+
+        Matrix m31 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, na, 4.0 }, { 6.0, 6.5, 7.0 }, { 5.0, 3.0, 2.0 } }),
+            [1.0, 2.0, 4.0],
+            [1.0, 2.0, 4.0]);
+        CheckClose(m31[0, 1], 6.0 / 3.0, tol);
+
+        Matrix m32 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { na, 6.5, 7.0 }, { 5.0, 3.0, 2.0 } }),
+            [1.0, 2.0, 4.0],
+            [1.0, 2.0, 4.0]);
+        CheckClose(m32[1, 0], 7.0 / 3.0, tol);
+
+        Matrix m33 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, 6.5, 7.0 }, { 5.0, na, 2.0 } }),
+            [1.0, 2.0, 4.0],
+            [1.0, 2.0, 4.0]);
+        CheckClose(m33[2, 1], 12.0 / 3.0, tol);
+
+        Matrix m34 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, 6.5, na }, { 5.0, 3.0, 2.0 } }),
+            [1.0, 2.0, 4.0],
+            [1.0, 2.0, 4.0]);
+        CheckClose(m34[1, 2], 10.0 / 3.0, tol);
+
+        // non equidistant grid, corners
+
+        Matrix m35 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { na, 2.0, 4.0 }, { 6.0, 6.5, 7.0 }, { 5.0, 3.0, 2.0 } }),
+            [1.0, 2.0, 4.0],
+            [1.0, 3.0, 7.0]);
+        CheckClose(m35[0, 0], 10.0 / 3.0, tol);
+
+        Matrix m36 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, 6.5, 7.0 }, { na, 3.0, 2.0 } }),
+            [1.0, 2.0, 4.0],
+            [1.0, 3.0, 7.0]);
+        CheckClose(m36[2, 0], 18.0 / 5.0, tol);
+
+        Matrix m37 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, 4.0 }, { 6.0, 6.5, 7.0 }, { 5.0, 3.0, na } }),
+            [1.0, 2.0, 4.0],
+            [1.0, 3.0, 7.0]);
+        CheckClose(m37[2, 2], 13.0 / 3.0, tol);
+
+        Matrix m38 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0, 2.0, na }, { 6.0, 6.5, 7.0 }, { 5.0, 3.0, 2.0 } }),
+            [1.0, 2.0, 4.0],
+            [1.0, 2.0, 3.0]);
+        CheckClose(m38[0, 2], 16.0 / 3.0, tol);
+
+        // single point with given value
+
+        Matrix m50 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { 1.0 } }));
+        CheckClose(m50[0, 0], 1.0, tol);
+
+        // single point with missing value
+
+        Matrix m51 = LaplaceInterpolationFunctions.LaplaceInterpolation(
+            new Matrix(new Real[,] { { na } }));
+        CheckClose(m51[0, 0], 0.0, tol);
+
+        // no point
+        var l0 = new LaplaceInterpolation(_ => null, []);
+        CheckClose(l0.Value([]), 0.0, tol);
+
+        // single test cases from actual issues observed in the field
+        Real[] tx =
+        [
+            0.0849315, 0.257534, 0.509589, 1.00548, 2.00274, 3.00274, 4.00274,
+            5.00548, 7.00822, 10.0082, 15.011, 20.0137, 30.0219, 70.0493,
+        ];
+        Real[] ty = [0.25, 1, 2, 3, 4, 5, 7, 10, 15, 20, 30, 100];
+        var m52 = new Matrix(new Real[,]
+        {
+            { na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na },
+            { na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na },
+            { na, na, na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na },
+            { na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na },
+            { na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na },
+            { na, na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na },
+            { na, na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na },
+            { na, na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na },
+            { na, na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na, na },
+            { na, na, na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na, na },
+            { na, na, na, na, na, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, na, na },
+            { na, na, na, na, na, na, na, na, na, na, na, na, na, na },
+        });
+
+        // we need to allow for more iterations to achieve the desired accuracy
+        m52 = LaplaceInterpolationFunctions.LaplaceInterpolation(m52, tx, ty, 1E-6, 100);
+        for (int i = 0; i < m52.Rows; ++i)
+        {
+            for (int j = 0; j < m52.Columns; ++j)
+            {
+                CheckClose(m52[i, j], 1.0, 0.1);
+            }
         }
     }
 
