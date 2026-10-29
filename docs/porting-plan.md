@@ -125,9 +125,7 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Utilities/DataParsers/DateParser.cs`: `parseFormatted`, not ported: a `DateOnly`'s `ParseExact` does its job.
-- `tests/NanoQL.Tests/TestSuite/AsianOptionsTests.cs`: `testVecerEngine`, which waits for S-xeq's `VecerEngine`.
 - `tests/NanoQL.Tests/TestSuite/CmsSpreadTests.cs`: `testCouponPricing`, which waits for S-xrt's `LognormalCmsSpreadPricer`.
-- `tests/NanoQL.Tests/TestSuite/EuropeanOptionTests.cs`: `testFFTEngines`, which waits for S-xeq's `FFTVanillaEngine`.
 - `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testPiecewiseIntegral`, which waits for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (no-arbitrage SABR and the SABR transformations, Laplace).

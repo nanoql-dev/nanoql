@@ -5,13 +5,14 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/europeanoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testFFTEngines, which waits for S-xeq's FFTVanillaEngine
 // Not ported: testFdEnginesWithNonStrikedPayoff (a vanilla option takes a striked payoff, so no engine can be given another, and Conventions/FdVanillaEngineErrorTests.cs asserts the type)
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Instruments;
 using NanoQL.Methods;
+using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
@@ -795,6 +796,19 @@ public class EuropeanOptionTests
     }
 
     [Fact]
+    public void TestFFTEngines()
+    {
+        // Testing FFT European engines against analytic results...
+
+        EngineType engine = EngineType.FFT;
+        Size steps = 0; // QuantLib's Null<Size>(), which the FFT engine doesn't read
+        Size samples = 0; // QuantLib's Null<Size>(), which the FFT engine doesn't read
+        Dictionary<string, Real> relativeTol = [];
+        relativeTol["value"] = 0.01;
+        TestEngineConsistency(engine, steps, samples, relativeTol);
+    }
+
+    [Fact]
     public void TestLocalVolatility()
     {
         // Testing finite-differences with local volatility...
@@ -1276,7 +1290,8 @@ public class EuropeanOptionTests
                 .WithSteps(1)
                 .WithSamples(samples)
                 .ToEngine(),
-            _ => throw new InvalidOperationException($"the {engineType} engine waits for its slot"),
+            EngineType.FFT => (option, context) => FFTVanillaEngine.Calculate(option, context, stochProcess),
+            _ => throw new InvalidOperationException($"unknown engine type {engineType}"),
         };
 
     // The body of testImpliedVol and testImpliedVolWithDividends for one set of market data.
@@ -1378,6 +1393,112 @@ public class EuropeanOptionTests
         (Integer)Math.Round(t * daysPerYear, MidpointRounding.AwayFromZero);
 
     // QuantLib's EngineType.
+    // QuantLib's master's case for #2927 (after v1.44; the S-xeq plan's XER4), a check of S-van's landed Black-Vasicek
+    // engine
+    [Fact]
+    public void TestBlackVasicekEngineWithDeterministicRates()
+    {
+        // Testing Black-Vasicek engine with deterministic rates...
+
+        // With a vanishing short-rate volatility and a long-term mean equal to the
+        // initial rate, the Vasicek rate stays constant and the price must match
+        // Black-Scholes, including dividends and a volatility term structure.
+        DayCounter dc = new Actual365Fixed();
+        EvaluationContext context = RunnerContext;
+        Date today = context.EvaluationDate;
+        Date maturity = today + new Period(1, TimeUnit.Years);
+        double r = 0.05;
+
+        YieldTermStructure rTS = new FlatForward(today, r, dc);
+        var vasicek = new Vasicek(r, 0.3, r, 1.0e-10);
+
+        BlackVolTermStructure[] volCurves =
+        [
+            new BlackConstantVol(today, new NullCalendar(), 0.20, dc),
+            new BlackVarianceCurve(today, [today + new Period(3, TimeUnit.Months), maturity], [0.10, 0.20], dc),
+        ];
+
+        double tolerance = 1.0e-8;
+        for (int i = 0; i < volCurves.Length; ++i)
+        {
+            foreach (OptionType type in new[] { OptionType.Call, OptionType.Put })
+            {
+                foreach (double strike in new[] { 80.0, 100.0, 120.0 })
+                {
+                    var payoff = new PlainVanillaPayoff(type, strike);
+                    var exercise = new EuropeanExercise(maturity);
+                    var option = new VanillaOption(payoff, exercise);
+
+                    // changing the dividend yield after the first pricing also checks that the engine is notified of
+                    // the change: here a new process per yield
+                    foreach (double q in new[] { 0.0, 0.03 })
+                    {
+                        var process = new BlackScholesMertonProcess(100.0, new FlatForward(today, q, dc), rTS, volCurves[i]);
+                        double calculated = AnalyticBlackVasicekEngine.Calculate(option, context, process, vasicek, 0.0).NPV!.Value;
+                        double expected = AnalyticEuropeanEngine.Calculate(option, context, process).NPV!.Value;
+                        Assert.False(
+                            Math.Abs(calculated - expected) > tolerance,
+                            $"failed to reproduce Black-Scholes price\n    option type:    {type}\n    strike:         {strike}"
+                            + $"\n    dividend yield: {q}\n    vol curve:      {(i == 0 ? "flat" : "term structure")}"
+                            + $"\n    calculated:     {calculated}\n    expected:       {expected}\n    tolerance:      {tolerance}");
+                    }
+                }
+            }
+        }
+    }
+
+    // QuantLib's master's case for #2927 (after v1.44; the S-xeq plan's XER4), a check of S-van's landed Black-Vasicek
+    // engine
+    [Fact]
+    public void TestBlackVasicekEngineWithStochasticRates()
+    {
+        // Testing Black-Vasicek engine against closed-form total variance...
+        DayCounter dc = new Actual365Fixed();
+        EvaluationContext context = RunnerContext;
+        Date today = context.EvaluationDate;
+        Date maturity = today + new Period(2, TimeUnit.Years);
+
+        double s0 = 100.0;
+        double q = 0.02;
+        double sigmaS = 0.25;
+        double a = 0.4, b = 0.04, r0 = 0.03, sigmaR = 0.015;
+
+        YieldTermStructure qTS = new FlatForward(today, q, dc);
+        var process = new BlackScholesMertonProcess(
+            s0, qTS, new FlatForward(today, r0, dc), new BlackConstantVol(today, new NullCalendar(), sigmaS, dc));
+        var vasicek = new Vasicek(r0, a, b, sigmaR);
+
+        double T = dc.YearFraction(today, maturity);
+        double zcb = vasicek.DiscountBond(0.0, T, r0);
+        double forward = s0 * qTS.Discount(maturity) / zcb;
+        double g = (1.0 - Math.Exp(-a * T)) / a;
+
+        double tolerance = 1.0e-6;
+        foreach (double rho in new[] { -0.5, 0.0, 0.5 })
+        {
+            // integral over [0, T] of sigmaS^2 + 2 rho sigmaS sigmaR g(u) + sigmaR^2 g(u)^2,
+            // with g(u) = (1 - exp(-a u)) / a
+            double variance = (sigmaS * sigmaS * T)
+                + (2.0 * rho * sigmaS * sigmaR * (T - g) / a)
+                + (sigmaR * sigmaR * (T - (2.0 * g) + ((1.0 - Math.Exp(-2.0 * a * T)) / (2.0 * a))) / (a * a));
+
+            foreach (OptionType type in new[] { OptionType.Call, OptionType.Put })
+            {
+                foreach (double strike in new[] { 80.0, 100.0, 120.0 })
+                {
+                    var option = new VanillaOption(new PlainVanillaPayoff(type, strike), new EuropeanExercise(maturity));
+                    double calculated = AnalyticBlackVasicekEngine.Calculate(option, context, process, vasicek, rho).NPV!.Value;
+                    double expected = BlackFormulaFunctions.BlackFormula(type, strike, forward, Math.Sqrt(variance), zcb);
+                    Assert.False(
+                        Math.Abs(calculated - expected) > tolerance,
+                        $"failed to reproduce closed-form price\n    option type: {type}\n    strike:      {strike}"
+                        + $"\n    correlation: {rho}\n    calculated:  {calculated}\n    expected:    {expected}"
+                        + $"\n    tolerance:   {tolerance}");
+                }
+            }
+        }
+    }
+
     private enum EngineType
     {
         Analytic,

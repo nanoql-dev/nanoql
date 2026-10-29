@@ -1038,7 +1038,7 @@ Facts:
 
 [`Divergences/BlackVasicekVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/BlackVasicekVolatilityTests.cs)
 
-The Black-Vasicek engine's equity volatility and dividends (the S-van plan's VR4 (xii)). QuantLib reads the equity volatility at time 0 (`blackVol(t, K)` with t = 0, `analyticeuropeanvasicekengine.cpp:78`) and leaves the dividend curve out, so a volatility curve rising from 10% to 30% prices on 10% and a dividend yield changes nothing. nanoql integrates the equity's term variance over [0, T] and takes the dividend discount into the forward. QuantLib's check: the engine's limit as the short rate's volatility vanishes, QuantLib's analytic European engine on the Vasicek bond's flat rate with the term volatility and the dividend curve [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section vasicek; QuantLib's own engine through the harness]. On a flat volatility and no dividend, QuantLib's bits (the engine's harness vectors).
+The Black-Vasicek engine's equity volatility and dividends (the S-van plan's VR4 (xii)). QuantLib reads the equity volatility at time 0 (`blackVol(t, K)` with t = 0, `analyticeuropeanvasicekengine.cpp:78`) and leaves the dividend curve out, so a volatility curve rising from 10% to 30% prices on 10% and a dividend yield changes nothing. nanoql integrates the equity's term variance over [0, T] and takes the dividend discount into the forward. QuantLib's check: the engine's limit as the short rate's volatility vanishes, QuantLib's analytic European engine on the Vasicek bond's flat rate with the term volatility and the dividend curve [executed on the wheel: `scratchpad\c2\oracle_c2.py`, section vasicek; QuantLib's own engine through the harness]. On a flat volatility and no dividend, QuantLib's bits (the engine's harness vectors). QuantLib's master fixes the same class after v1.44 (#2927: the volatility at maturity, the spot discounted by the dividend curve), whose two cases `EuropeanOptionTests` ports as checks of this engine; it stays until the pin moves to a release carrying the fix (the S-xeq plan's XER4).
 
 Facts:
 
@@ -4302,6 +4302,20 @@ Facts:
 
 - `AtZeroVarianceTheValueIsTheDiscountedPayoffAtTheForward`
 
+## IntegralHestonVarianceOptionTests
+
+[`Divergences/IntegralHestonVarianceOptionTests.cs`](../tests/NanoQL.Tests/Divergences/IntegralHestonVarianceOptionTests.cs)
+
+The integral Heston variance-option engine's put, other payoffs, start date and dividend curve (the user's ruling at the S-xeq run's stop 8; the S-xeq plan's XER5 (xx), XER2). QuantLib sums any payoff but a call against the integrated variance's density on 4,096 points of spacing √(2π)/64, about one standard deviation of it, so its put case prices 0.0466796 [executed: QuantLib's `testIntegralHeston`]; nanoql prices a put by parity on the call's integral, 0.0465915, and refuses other payoffs, which QuantLib's grid prices 13% to 24% off. Checks: an independent price, the integrated CIR variance's characteristic function (the CIR bond formula at λ = −iu, averaged over the start variance's non-central χ² law) inverted by Gil-Pelaez's distribution function integrated over [0, K], which gives QuantLib's call case to 1e-10 [executed: the run's `varopt_cf.py`]. QuantLib's engine measures the variance from the evaluation date whatever the option's start, so a start 180 days ahead prices as one starting today, 0.9104618670 [executed: the planner's `xp_c2.cpp`]; nanoql prices a forward start on the variance integrated from its start, each integrand's expectation over the start variance's non-central χ² law the CIR transform, and refuses a seasoned option. QuantLib refuses a process whose dividend handle isn't empty; nanoql ignores the dividend curve, which the integrated variance's law doesn't read. Checks: a Monte Carlo of the integrated variance (the exact mean-reverting step with a truncated diffusion and trapezoid integration, four steps a day, 100,000 antithetic pairs on QuantLib's Mersenne twister) within three standard errors, for a call (the one-dimensional integral) and a put (the two-dimensional one); the start tending to the evaluation date.
+
+Facts:
+
+- `AForwardStartIsTheMonteCarloOfItsIntegratedVariance`
+- `APutIsItsIndependentPrice`
+- `OtherPayoffsAreRefused`
+- `AStartTendingToTheEvaluationDateTendsToQuantLibsValue`
+- `TheDividendCurveIsntRead`
+
 ## InterpolatedSmileSectionCountTests
 
 [`Divergences/InterpolatedSmileSectionCountTests.cs`](../tests/NanoQL.Tests/Divergences/InterpolatedSmileSectionCountTests.cs)
@@ -4558,7 +4572,7 @@ Facts:
 
 [`Divergences/LevyTermStructureTests.cs`](../tests/NanoQL.Tests/Divergences/LevyTermStructureTests.cs)
 
-Levy's engine on term structures and at its closed form's singular points (the S-bar plan's BR4 (b), BR5 (xxxix), fixed under R8). QuantLib reads one volatility and the zero rates at maturity (`continuousarithmeticasianlevyengine.cpp:81-90`), +38.5% and −17.2% off a Monte Carlo on P5's rising and falling markets (the planner's BP20); and its closed form, taken wherever |b| > 1000·QL_EPSILON, cancels near the carries b = 0, −σ²/2 and −σ² and at small volatility: on spot 100, the call at 100 over a year from today (r 5%, σ 20%, Act/365 Fixed), it prices 1.4982854223412403 at b = 3e-13 (−65.8% off its own formula in 50 digits) and NaN at b = −σ²/2 and −σ², and NaN at σ 1e-8 and b 3% (the S-bar run's `c3_levy_refs.py`). nanoql integrates the two moments under the structures by date, the covariance on QuantLib's adaptive Gauss-Lobatto rule, the log-variance through log1p of the normalized covariance, so nothing cancels, and at zero variance takes the average as its forward. The plan's Kronrod rule for the covariance missed the exact value by −8.9e-9 and +4.3e-9 on P5's markets, fooled by the kinks at the structures' nodes (Gauss-Lobatto by the user's ruling of 2026-10-26). Checks: the exact value, Levy's formula on the moments in 30 digits (5.7995941086251922 rising, 9.6602716681694337 falling, the S-bar run's `c3_levy_p5.py`), within R7, and the same formula on the moments computed here by Gauss-Lobatto split at the nodes, and a Monte Carlo, on P5's markets; QuantLib's formula in 50 digits at the singular points and at small volatility, within R7; the forward's payoff at σ = 0.
+Levy's engine on term structures and at its closed form's singular points (the S-bar plan's BR4 (b), BR5 (xxxix), fixed under R8). QuantLib reads one volatility and the zero rates at maturity (`continuousarithmeticasianlevyengine.cpp:81-90`), +38.5% and −17.2% off a Monte Carlo on P5's rising and falling markets (the planner's BP20); and its closed form, taken wherever |b| > 1000·QL_EPSILON, cancels near the carries b = 0, −σ²/2 and −σ² and at small volatility: on spot 100, the call at 100 over a year from today (r 5%, σ 20%, Act/365 Fixed), it prices 1.4982854223412403 at b = 3e-13 (−65.8% off its own formula in 50 digits) and NaN at b = −σ²/2 and −σ², and NaN at σ 1e-8 and b 3% (the S-bar run's `c3_levy_refs.py`). nanoql integrates the two moments under the structures by date, the covariance on QuantLib's adaptive Gauss-Lobatto rule, the log-variance through log1p of the normalized covariance, so nothing cancels, and at zero variance takes the average as its forward. The plan's Kronrod rule for the covariance missed the exact value by −8.9e-9 and +4.3e-9 on P5's markets, fooled by the kinks at the structures' nodes (Gauss-Lobatto by the user's ruling of 2026-10-26). Checks: the exact value, Levy's formula on the moments in 30 digits (5.7995941086251922 rising, 9.6602716681694337 falling, the S-bar run's `c3_levy_p5.py`), within R7, and the same formula on the moments computed here by Gauss-Lobatto split at the nodes, and a Monte Carlo, on P5's markets; QuantLib's formula in 50 digits at the singular points and at small volatility, within R7; the forward's payoff at σ = 0. QuantLib's master fixes the same class after v1.44 by another route (#2926: a cancellation-free series for the second moment, log1p, the intrinsic forward at zero variance), whose three cases `AsianOptionsTests` ports as checks of this engine, its mean taken as spot·t₂ plus the integral of F/spot − 1 so it is exact at zero carry (the S-xeq run's stop 5); it stays until the pin moves to a release carrying the fix (the S-xeq plan's XER4).
 
 Facts:
 
@@ -7281,6 +7295,24 @@ Facts:
 - `AnUncappedKnockOutWithARebateIsQuantLibsOwnPrice`
 - `AZeroRebateKeepsQuantLibsValues`
 
+## VarianceGammaFftTests
+
+[`Divergences/VarianceGammaFftTests.cs`](../tests/NanoQL.Tests/Divergences/VarianceGammaFftTests.cs)
+
+The variance-gamma and FFT engines where QuantLib's fail (the S-xeq plan's XER5 (xvi), (xviii), (xix); the user's rulings of 2026-10-28 at about 10:22, 10:55 and 11:27 and at the S-xeq run's stops 6 and 9; the run's R2-4). QuantLib's analytic engine takes the gamma density as Γ(t/ν)·ν^(t/ν), an overflow times an underflow past t/ν of about 170, so at ν 0.002 over a year it throws "Interval contains no more machine number", and starts its bound at 15√(νt), below the gamma time's mean once ν < t/225; nanoql takes the density in logs there and starts the bound beyond the mean where ν < t/100, and the price rises toward Black-Scholes as ν falls, within the FFT engine's ordinary accuracy of it. QuantLib's FFT engine damps at α 1.25 even past the moment E[S^(α+1)], pricing 0.494 against the analytic 48.34 at ν 2, θ 0.3, σ 0.5 [executed: the planner's `xp_c2.cpp`]; nanoql damps inside the strip, on the put side near its boundary, matching the planner's independent quadratures (`xp_fft_putside.py`, this run's `probes\vgref\refs.out`) within 1e-5. QuantLib sizes the grid from the largest strike's log alone, undefined below e^(−λ) ("vector too long" on an FX call at 0.85) and too coarse in frequency wherever its size falls below 2^14 (any strike between 1 and about 60); nanoql sizes it from the largest |log K| and at least 2^14, QuantLib's size on every QuantLib case. QuantLib's grid at α 1.25, period λn, aliases the damped call's tail once σ√T passes about 1.2, an at-the-money call pricing −298.8926 against 66.80 at σ√T 2 [executed: the code review's `cr2_fft.cpp` on QuantLib 1.44]; nanoql doubles the grid until two successive grids agree within 5e-5 of the spot, QuantLib's grid where it already agrees. Checks: the analytic engines, Black-Scholes's limit, the independent quadratures.
+
+Facts:
+
+- `AtSmallNuTheAnalyticPriceRisesTowardBlackScholes`
+- `PastTheDampingsMomentTheFftIsTheAnalyticPrice`
+- `NearTheMomentBoundaryTheFftIsTheIndependentQuadrature`
+- `AtStrikesNearOneTheFftIsTheAnalyticPrice`
+- `AListsLargestStrikeSetsItsExpirysGrid`
+- `PastSigmaRootTOf12TheGridIsDoubledToTheAnalyticPrice`
+- `PastTheTailGrowthBoundTheFftRefuses`
+- `AVarianceGammaCallAtALargeVarianceIsTheAnalyticPrice`
+- `ANearBoundaryListFromStrike20To400IsTheIndependentQuadrature`
+
 ## VarianceSwapMismatchedTimesTests
 
 [`Divergences/VarianceSwapMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/VarianceSwapMismatchedTimesTests.cs)
@@ -7301,6 +7333,17 @@ Facts:
 
 - `TheZeroBondJustAboveTheCutoff`
 - `TheBondOptionAtSmallReversion`
+
+## VecerEngineTests
+
+[`Divergences/VecerEngineTests.cs`](../tests/NanoQL.Tests/Divergences/VecerEngineTests.cs)
+
+Vecer's Asian engine at its grid's upper end and on mixed clocks (the S-xeq plan's XER5 (xxi), (xxii)). QuantLib interpolates between the nodes below and above the initial point, so where the point lies on the grid's upper end it reads one node past the grid (`continuousarithmeticasianvecerengine.cpp:185-190`); nanoql takes the last node's value there, the interpolation's own limit. QuantLib measures the time from the evaluation date on the risk-free day counter beside each structure's own zero rate and volatility; nanoql reads each on the engine's clock, so the market restated on one day counter prices the same. Checks: the price continuous as the point reaches the upper end; the restated market's price, against QuantLib's reading of the unrestated rates and volatility.
+
+Facts:
+
+- `AtTheGridsUpperEndThePriceIsTheLastNode`
+- `AMarketOnMixedDayCountersIsTheMarketRestatedOnOne`
 
 ## VectorQuadratureWeightTests
 

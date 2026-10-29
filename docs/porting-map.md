@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 130 | 17 |
-| partial | 22 | 14 |
-| ported | 1,108 | 149 |
+| not started | 108 | 12 |
+| partial | 22 | 12 |
+| ported | 1,130 | 156 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -298,14 +298,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `continuousarithmeticasianvecerengine` | not started |  | no nanoql type: ContinuousArithmeticAsianVecerEngine |
-| `everestoption` | not started |  | no nanoql type: EverestOption, EverestOptionResults |
-| `himalayaoption` | not started |  | no nanoql type: HimalayaOption, HimalayaOptionResults |
+| `continuousarithmeticasianvecerengine` | ported | Experimental/ExoticOptions/ContinuousArithmeticAsianVecerEngine.cs |  |
+| `everestoption` | ported | Experimental/ExoticOptions/EverestOption/EverestOption.cs, Experimental/ExoticOptions/EverestOption/EverestOptionResults.cs |  |
+| `himalayaoption` | ported | Experimental/ExoticOptions/HimalayaOption.cs | replaced: HimalayaOptionResults by MultiAssetOptionResults |
 | `kirkspreadoptionengine` | not ported: deprecated |  |  |
-| `mceverestengine` | not started |  | no nanoql type: MCEverestEngine, MakeMCEverestEngine, EverestMultiPathPricer |
-| `mchimalayaengine` | not started |  | no nanoql type: MCHimalayaEngine, MakeMCHimalayaEngine, HimalayaMultiPathPricer |
-| `mcpagodaengine` | not started |  | no nanoql type: MCPagodaEngine, MakeMCPagodaEngine, PagodaMultiPathPricer |
-| `pagodaoption` | not started |  | no nanoql type: PagodaOption |
+| `mceverestengine` | ported | Experimental/ExoticOptions/MCEverestEngine/EverestMultiPathPricer.cs, Experimental/ExoticOptions/MCEverestEngine/MCEverestEngine.cs, Experimental/ExoticOptions/MCEverestEngine/MakeMCEverestEngine{TRng,TStats}.cs |  |
+| `mchimalayaengine` | ported | Experimental/ExoticOptions/MCHimalayaEngine/HimalayaMultiPathPricer.cs, Experimental/ExoticOptions/MCHimalayaEngine/MCHimalayaEngine.cs, Experimental/ExoticOptions/MCHimalayaEngine/MakeMCHimalayaEngine{TRng,TStats}.cs |  |
+| `mcpagodaengine` | ported | Experimental/ExoticOptions/MCPagodaEngine/MCPagodaEngine.cs, Experimental/ExoticOptions/MCPagodaEngine/MakeMCPagodaEngine{TRng,TStats}.cs, Experimental/ExoticOptions/MCPagodaEngine/PagodaMultiPathPricer.cs |  |
+| `pagodaoption` | ported | Experimental/ExoticOptions/PagodaOption.cs |  |
 | `spreadoption` | not ported: deprecated |  |  |
 
 ### `ql/experimental/finitedifferences/`
@@ -412,14 +412,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `adaptedpathpayoff` | not started |  | no nanoql type: AdaptedPathPayoff, AdaptedPathPayoffValuationData |
+| `adaptedpathpayoff` | ported | Experimental/McBasket/AdaptedPathPayoff/AdaptedPathPayoff.cs, Experimental/McBasket/AdaptedPathPayoff/AdaptedPathPayoffValuationData.cs |  |
 | `all` | not ported: include-only header |  |  |
-| `longstaffschwartzmultipathpricer` | not started |  | no nanoql type: LongstaffSchwartzMultiPathPricer |
-| `mcamericanpathengine` | not started |  | no nanoql type: MCAmericanPathEngine, MakeMCAmericanPathEngine |
-| `mclongstaffschwartzpathengine` | not started |  | no nanoql type: MCLongstaffSchwartzPathEngine |
-| `mcpathbasketengine` | not started |  | no nanoql type: MCPathBasketEngine, EuropeanPathMultiPathPricer, MakeMCPathBasketEngine |
-| `pathmultiassetoption` | not started |  | no nanoql type: PathMultiAssetOption, PathMultiAssetOptionResults |
-| `pathpayoff` | not started |  | no nanoql type: PathPayoff |
+| `longstaffschwartzmultipathpricer` | ported | Experimental/McBasket/LongstaffSchwartzMultiPathPricer.cs |  |
+| `mcamericanpathengine` | ported | Experimental/McBasket/MCAmericanPathEngine/MCAmericanPathEngine{TRng,TStats}.cs, Experimental/McBasket/MCAmericanPathEngine/MakeMCAmericanPathEngine{TRng,TStats}.cs |  |
+| `mclongstaffschwartzpathengine` | ported | Experimental/McBasket/MCLongstaffSchwartzPathEngine{TRng,TStats}.cs |  |
+| `mcpathbasketengine` | ported | Experimental/McBasket/MCPathBasketEngine/EuropeanPathMultiPathPricer.cs, Experimental/McBasket/MCPathBasketEngine/MCPathBasketEngine.cs, Experimental/McBasket/MCPathBasketEngine/MakeMCPathBasketEngine{TRng,TStats}.cs |  |
+| `pathmultiassetoption` | ported | Experimental/McBasket/PathMultiAssetOption.cs | replaced: PathMultiAssetOptionResults by InstrumentResults |
+| `pathpayoff` | ported | Experimental/McBasket/PathPayoff.cs |  |
 
 ### `ql/experimental/models/`
 
@@ -480,20 +480,20 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `analyticvariancegammaengine` | not started |  | no nanoql type: VarianceGammaEngine |
-| `fftengine` | not started |  | no nanoql type: FFTEngine |
-| `fftvanillaengine` | not started |  | no nanoql type: FFTVanillaEngine |
-| `fftvariancegammaengine` | not started |  | no nanoql type: FFTVarianceGammaEngine |
-| `variancegammamodel` | not started |  | no nanoql type: VarianceGammaModel |
-| `variancegammaprocess` | not started |  | no nanoql type: VarianceGammaProcess |
+| `analyticvariancegammaengine` | ported | Experimental/VarianceGamma/VarianceGammaEngine.cs |  |
+| `fftengine` | ported | Experimental/VarianceGamma/FFTEngine.cs |  |
+| `fftvanillaengine` | ported | Experimental/VarianceGamma/FFTVanillaEngine.cs |  |
+| `fftvariancegammaengine` | ported | Experimental/VarianceGamma/FFTVarianceGammaEngine.cs |  |
+| `variancegammamodel` | ported | Experimental/VarianceGamma/VarianceGammaModel.cs |  |
+| `variancegammaprocess` | ported | Experimental/VarianceGamma/VarianceGammaProcess.cs |  |
 
 ### `ql/experimental/varianceoption/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `integralhestonvarianceoptionengine` | not started |  | no nanoql type: IntegralHestonVarianceOptionEngine |
-| `varianceoption` | not started |  | no nanoql type: VarianceOption, VarianceOptionResults |
+| `integralhestonvarianceoptionengine` | ported | Experimental/VarianceOption/IntegralHestonVarianceOptionEngine.cs |  |
+| `varianceoption` | ported | Experimental/VarianceOption/VarianceOption.cs | replaced: VarianceOptionResults by InstrumentResults |
 
 ### `ql/experimental/volatility/`
 
@@ -2064,7 +2064,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `amortizingbond` | ported | TestSuite/AmortizingBondTests.cs | 3 of 3 cases |
 | `andreasenhugevolatilityinterpl` | ported | TestSuite/AndreasenHugeVolatilityInterplTests.cs | 14 of 14 cases |
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
-| `asianoptions` | partial | TestSuite/AsianOptionsTests.cs | 22 of 23 cases; not yet: testVecerEngine; moved: testAnalyticDiscreteGeometricAverageStrike line 488 to Divergences/GeometricAverageStrikeForwardStartTests.cs |
+| `asianoptions` | ported | TestSuite/AsianOptionsTests.cs | 23 of 23 cases; moved: testAnalyticDiscreteGeometricAverageStrike line 488 to Divergences/GeometricAverageStrikeForwardStartTests.cs |
 | `assetswap` | ported | TestSuite/AssetSwapTests.cs | 9 of 9 cases |
 | `autocovariances` | ported | TestSuite/AutocovariancesTests.cs | 3 of 3 cases |
 | `bacheliercalculator` | ported | TestSuite/BachelierCalculatorTests.cs | 8 of 8 cases; moved: testBachelierCalculatorGreeks line 173 to Divergences/BachelierGreeksTests.cs; testBachelierCalculatorGreeks line 213 to Divergences/BachelierGreeksTests.cs |
@@ -2121,8 +2121,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `equitycashflow` | ported | TestSuite/EquityCashFlowTests.cs | 8 of 8 cases |
 | `equityindex` | ported | TestSuite/EquityIndexTests.cs | 11 of 12 cases; not ported: testFixingObservability (observer notifications, which an immutable index has no use for, R1) |
 | `equitytotalreturnswap` | ported | TestSuite/EquityTotalReturnSwapTests.cs | 5 of 5 cases |
-| `europeanoption` | partial | TestSuite/EuropeanOptionTests.cs | 25 of 27 cases; not ported: testFdEnginesWithNonStrikedPayoff (a vanilla option takes a striked payoff, so no engine can be given another, and Conventions/FdVanillaEngineErrorTests.cs asserts the type); not yet: testFFTEngines |
-| `everestoption` | not started |  | 1 cases |
+| `europeanoption` | ported | TestSuite/EuropeanOptionTests.cs | 26 of 27 cases; not ported: testFdEnginesWithNonStrikedPayoff (a vanilla option takes a striked payoff, so no engine can be given another, and Conventions/FdVanillaEngineErrorTests.cs asserts the type) |
+| `everestoption` | ported | TestSuite/EverestOptionTests.cs | 1 of 1 cases |
 | `exchangerate` | ported | TestSuite/ExchangeRateTests.cs | 5 of 5 cases |
 | `extendedblackvariancesurface` | not started |  | 1 cases |
 | `extendedtrees` | not started |  | 7 cases |
@@ -2146,7 +2146,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `gsr` | ported | TestSuite/GsrTests.cs | 13 of 13 cases |
 | `hestonmodel` | ported | TestSuite/HestonModelTests.cs | 39 of 39 cases |
 | `hestonslvmodel` | partial | TestSuite/HestonSlvModelTests.cs | 15 of 19 cases; not yet: testFDMCalibration, testBarrierPricingMixedModels, testForwardSkewSLV, testBarrierPricingMixedModelsMonteCarloVsFdmPricing |
-| `himalayaoption` | not started |  | 1 cases |
+| `himalayaoption` | ported | TestSuite/HimalayaOptionTests.cs | 1 of 1 cases |
 | `hybridhestonhullwhiteprocess` | ported | TestSuite/HybridHestonHullWhiteProcessTests.cs | 13 of 13 cases |
 | `indexes` | ported | TestSuite/IndexesTests.cs | 6 of 6 cases; replaced: testFixingObservability by Vectors/Indexes/BMAIndexVectorTests.cs |
 | `inflation` | ported | TestSuite/InflationTests.cs | 27 of 28 cases; replaced: testNotifications by Vectors/Coupons/IndexedCashFlowVectorTests.cs; not ported: testCpiAsIndexInterpolation (CPI::AsIndex, deprecated in QuantLib 1.43, D5) |
@@ -2196,7 +2196,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `overnightindexedcoupon` | ported | TestSuite/OvernightIndexedCouponTests.cs | 45 of 45 cases; moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 to Divergences/TelescopicValueDatesTests.cs; testOvernightLegNPV line 1033 to Divergences/TelescopicValueDatesTests.cs |
 | `overnightindexedfundingratehelper` | not started |  | 3 cases |
 | `overnightindexedswap` | ported | TestSuite/OvernightIndexedSwapTests.cs | 25 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs |
-| `pagodaoption` | not started |  | 1 cases |
+| `pagodaoption` | ported | TestSuite/PagodaOptionTests.cs | 1 of 1 cases |
 | `paralleltestrunner` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `partialtimebarrieroption` | ported | TestSuite/PartialTimeBarrierOptionTests.cs | 3 of 3 cases |
 | `pathgenerator` | ported | TestSuite/PathGeneratorTests.cs | 2 of 2 cases |
@@ -2245,8 +2245,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `twoassetcorrelationoption` | ported | TestSuite/TwoAssetCorrelationOptionTests.cs | 1 of 1 cases |
 | `ultimateforwardtermstructure` | ported | TestSuite/UltimateForwardTermStructureTests.cs | 8 of 8 cases; replaced: testObservability by TestSuite/UltimateForwardTermStructureTests.cs |
 | `utilities` | replaced: test infrastructure: xUnit and the vector harness |  |  |
-| `variancegamma` | not started |  | 2 cases |
-| `varianceoption` | not started |  | 1 cases |
+| `variancegamma` | ported | TestSuite/VarianceGammaTests.cs | 2 of 2 cases |
+| `varianceoption` | ported | TestSuite/VarianceOptionTests.cs | 1 of 1 cases; moved: testIntegralHeston line 104 to Divergences/IntegralHestonVarianceOptionTests.cs |
 | `varianceswaps` | ported | TestSuite/VarianceSwapsTests.cs | 2 of 2 cases |
 | `volatilitymodels` | ported | TestSuite/VolatilityModelsTests.cs | 1 of 1 cases |
 | `vpp` | not started |  | 6 cases |

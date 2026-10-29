@@ -24,15 +24,16 @@ namespace NanoQL.PricingEngines;
 /// </para>
 /// <para>
 /// Documented divergences (BR4 (b), BR5 (xxvi), (xxxi), (xxxix)). The two moments are integrated under deterministic
-/// term structures, each on a first 15-point estimate at 1e-12 (SD24): E[A] from the forwards on NanoQL's adaptive
-/// Kronrod rule, and the average's covariance (2/T²)∫∫F(s)F(t)(e^{V(min(s, t))} − 1) on QuantLib's adaptive
-/// Gauss-Lobatto rule, the log-variance ln(E[A²]/E[A]²) its log1p over E[A]², so nothing cancels, where QuantLib reads
-/// one volatility and the zero rates at maturity, +38.5% and −17.2% off a Monte Carlo on shaped markets, and its closed
-/// form cancels near the carries b = 0, −σ²/2 and −σ², up to 75% off and NaN, and at small volatility, NaN
-/// (<c>Divergences/LevyTermStructureTests.cs</c>). The covariance's integrands have kinks where the structures have
+/// term structures, each at 1e-12 relative: E[A] from the forwards on NanoQL's adaptive Kronrod rule, as spot·t₂ plus
+/// the integral of F/spot − 1, exact at zero carry (QuantLib's master's #2926 cases; the S-xeq run's stop 5), and the
+/// average's covariance, on a first 15-point estimate (SD24), (2/T²)∫∫F(s)F(t)(e^{V(min(s, t))} − 1) on QuantLib's
+/// adaptive Gauss-Lobatto rule, the log-variance ln(E[A²]/E[A]²) its log1p over E[A]², so nothing cancels, where
+/// QuantLib reads one volatility and the zero rates at maturity, +38.5% and −17.2% off a Monte Carlo on shaped markets,
+/// and its closed form cancels near the carries b = 0, −σ²/2 and −σ², up to 75% off and NaN, and at small volatility,
+/// NaN (<c>Divergences/LevyTermStructureTests.cs</c>). The covariance's integrands have kinks where the structures have
 /// nodes, where the Kronrod rule accepts panels whose two estimates agree while both are off: 9e-9 off the exact value
-/// on shaped markets, in tens of millions of evaluations, where the Gauss-Lobatto rule is within 7e-13 of Levy's formula
-/// on the moments in 30 digits, in under 100,000. At zero variance the average is its forward. An effective
+/// on shaped markets, in tens of millions of evaluations, where the Gauss-Lobatto rule is within 7e-13 of Levy's
+/// formula on the moments in 30 digits, in under 100,000. At zero variance the average is its forward. An effective
 /// strike at or below zero is the certain exercise, the call Se − X·e^{−rT₂} and the put 0, the formula's limit, where
 /// QuantLib takes log(X) and prices NaN (<c>Divergences/LevyEffectiveStrikeTests.cs</c>).
 /// </para>
@@ -117,7 +118,12 @@ public static class ContinuousArithmeticAsianLevyEngine
         double Variance(double u) => u > 0.0 ? volatility.BlackVariance(u, strike, true) : 0.0;
 
         // E[A] = (1/T)∫F and the covariance (2/T²)∫₀^{T₂} F(t) ∫₀ᵗ F(s) expm1(V(s)) ds dt (BR4 (b))
-        double meanAverage = GaussKronrodAdaptive.IntegrateOnFirstEstimate(Forward, 0.0, t2, Tolerance, Cap) / t;
+        // E[A] = (1/T)∫F as spot·t₂ plus the integral of F/spot − 1 on its own scale, exact where the carry is 0
+        // (QuantLib's master's #2926 cases at a volatility of 1e-8; the S-xeq run's stop 5), the integral's tolerance
+        // the former relative one on spot·t₂
+        double meanAverage = Tolerance * t2 > NumericLimits.QL_EPSILON
+            ? spot * (t2 + new GaussKronrodAdaptive(Tolerance * t2, Cap).Integrate(u => (Forward(u) / spot) - 1.0, 0.0, t2)) / t
+            : GaussKronrodAdaptive.IntegrateOnFirstEstimate(Forward, 0.0, t2, Tolerance, Cap) / t;
         double covariance = 2.0 / (t * t) * LobattoOnFirstEstimate(
             u => Forward(u) * LobattoOnFirstEstimate(s => Forward(s) * Expm1Functions.StdExpm1(Variance(s)), 0.0, u), 0.0, t2);
         double se = discount * meanAverage;

@@ -15,17 +15,21 @@ namespace NanoQL.Tests.Divergences;
 /// fixed under R8). QuantLib reads one volatility and the zero rates at maturity
 /// (<c>continuousarithmeticasianlevyengine.cpp:81-90</c>), +38.5% and −17.2% off a Monte Carlo on P5's rising and
 /// falling markets (the planner's BP20); and its closed form, taken wherever |b| &gt; 1000·QL_EPSILON, cancels near the
-/// carries b = 0, −σ²/2 and −σ² and at small volatility: on spot 100, the call at 100 over a year from today (r 5%,
-/// σ 20%, Act/365 Fixed), it prices 1.4982854223412403 at b = 3e-13 (−65.8% off its own formula in 50 digits) and NaN at
+/// carries b = 0, −σ²/2 and −σ² and at small volatility: on spot 100, the call at 100 over a year from today (r 5%, σ
+/// 20%, Act/365 Fixed), it prices 1.4982854223412403 at b = 3e-13 (−65.8% off its own formula in 50 digits) and NaN at
 /// b = −σ²/2 and −σ², and NaN at σ 1e-8 and b 3% (the S-bar run's <c>c3_levy_refs.py</c>). nanoql integrates the two
 /// moments under the structures by date, the covariance on QuantLib's adaptive Gauss-Lobatto rule, the log-variance
 /// through log1p of the normalized covariance, so nothing cancels, and at zero variance takes the average as its
 /// forward. The plan's Kronrod rule for the covariance missed the exact value by −8.9e-9 and +4.3e-9 on P5's markets,
-/// fooled by the kinks at the structures' nodes (Gauss-Lobatto by the user's ruling of 2026-10-26). Checks: the exact value,
-/// Levy's formula on the moments in 30 digits (5.7995941086251922 rising, 9.6602716681694337 falling, the S-bar run's
-/// <c>c3_levy_p5.py</c>), within R7, and the same formula on the moments computed here by Gauss-Lobatto split at the
-/// nodes, and a Monte Carlo, on P5's markets; QuantLib's formula in 50 digits at the singular points and at small
-/// volatility, within R7; the forward's payoff at σ = 0.
+/// fooled by the kinks at the structures' nodes (Gauss-Lobatto by the user's ruling of 2026-10-26). Checks: the exact
+/// value, Levy's formula on the moments in 30 digits (5.7995941086251922 rising, 9.6602716681694337 falling, the S-bar
+/// run's <c>c3_levy_p5.py</c>), within R7, and the same formula on the moments computed here by Gauss-Lobatto split at
+/// the nodes, and a Monte Carlo, on P5's markets; QuantLib's formula in 50 digits at the singular points and at small
+/// volatility, within R7; the forward's payoff at σ = 0. QuantLib's master fixes the same class after v1.44 by another
+/// route (#2926: a cancellation-free series for the second moment, log1p, the intrinsic forward at zero variance),
+/// whose three cases <c>AsianOptionsTests</c> ports as checks of this engine, its mean taken as spot·t₂ plus the
+/// integral of F/spot − 1 so it is exact at zero carry (the S-xeq run's stop 5); it stays until the pin moves to a
+/// release carrying the fix (the S-xeq plan's XER4).
 /// </summary>
 public class LevyTermStructureTests
 {

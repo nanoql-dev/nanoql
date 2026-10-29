@@ -8,7 +8,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/asianoptions.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testVecerEngine, which waits for S-xeq's VecerEngine
 // Moved: testAnalyticDiscreteGeometricAverageStrike line 488 (Divergences/GeometricAverageStrikeForwardStartTests.cs)
 
 using NanoQL.Experimental;
@@ -1397,6 +1396,50 @@ public class AsianOptionsTests
     }
 
     [Fact]
+    public void TestVecerEngine()
+    {
+        // Testing Vecer engine for Asian options...
+        VecerData[] cases =
+        [
+            new(1.9, 0.05, 0.5, 2.0, 1, 0.193174, 1.0e-5),
+            new(2.0, 0.05, 0.5, 2.0, 1, 0.246416, 1.0e-5),
+            new(2.1, 0.05, 0.5, 2.0, 1, 0.306220, 1.0e-4),
+            new(2.0, 0.02, 0.1, 2.0, 1, 0.055986, 2.0e-4),
+            new(2.0, 0.18, 0.3, 2.0, 1, 0.218388, 1.0e-4),
+            new(2.0, 0.0125, 0.25, 2.0, 2, 0.172269, 1.0e-4),
+            new(2.0, 0.05, 0.5, 2.0, 2, 0.350095, 2.0e-4),
+        ];
+
+        EvaluationContext context = RunnerContext;
+        Date today = context.EvaluationDate;
+        DayCounter dayCounter = new Actual360();
+        OptionType type = OptionType.Call;
+        var q = new FlatForward(today, 0.0, dayCounter);
+        int timeSteps = 200;
+        int assetSteps = 200;
+
+        foreach (VecerData i in cases)
+        {
+            var r = new FlatForward(today, i.RiskFreeRate, dayCounter);
+            var sigma = new BlackConstantVol(today, new NullCalendar(), i.Volatility, dayCounter);
+            var process = new BlackScholesMertonProcess(i.Spot, q, r, sigma);
+            Date maturity = today + (i.Length * 360);
+            var exercise = new EuropeanExercise(maturity);
+            var payoff = new PlainVanillaPayoff(type, i.Strike);
+            double average = 0.0;
+            var option = new ContinuousAveragingAsianOption(AverageType.Arithmetic, payoff, exercise);
+            double calculated = ContinuousArithmeticAsianVecerEngine.Calculate(
+                option, context, process, average, today, timeSteps, assetSteps, -1.0, 1.0).NPV!.Value;
+
+            double error = Math.Abs(calculated - i.Result);
+            Assert.False(
+                error > i.Tolerance,
+                $"Failed to reproduce expected NPV\n    calculated: {calculated}\n    expected:   {i.Result}"
+                + $"\n    expected:   {i.Result}\n    error:      {error}\n    tolerance:  {i.Tolerance}");
+        }
+    }
+
+    [Fact]
     public void TestAnalyticContinuousGeometricAveragePriceHeston()
     {
         // Testing analytic continuous geometric Asians under Heston...
@@ -1792,6 +1835,177 @@ public class AsianOptionsTests
     // QuantLib's test utility: days from a year fraction at a day count of a year
     private static int TimeToDays(double t, int daysPerYear = 360) =>
         (int)Math.Round(t * daysPerYear, MidpointRounding.AwayFromZero);
+
+    // QuantLib's master's case for #2926 (after v1.44; the S-xeq plan's XER4), a check of S-bar's landed Levy engine
+    [Fact]
+    public void TestLevyZeroVolatility()
+    {
+        // Testing the deterministic limit of the Levy Asian engine...
+        var today = new Date(20, Month.October, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual360();
+        var exercise = new EuropeanExercise(today + 360);
+        const double previousCutoff = 1.4901161193847656e-08; // std::sqrt(QL_EPSILON)
+        double[] sigmaValues = [0.0, 1.0e-8, 0.99 * previousCutoff, previousCutoff, 1.01 * previousCutoff, 2.0 * previousCutoff, 1.0e-7];
+
+        foreach (int elapsed in new[] { 0, 180 })
+        {
+            foreach (OptionType type in new[] { OptionType.Call, OptionType.Put })
+            {
+                foreach (double strike in new[] { 30.0, 90.0, 100.0, 110.0 })
+                {
+                    var payoff = new PlainVanillaPayoff(type, strike);
+                    var option = new ContinuousAveragingAsianOption(AverageType.Arithmetic, today - elapsed, payoff, exercise);
+                    foreach (double yield in new[] { 0.05, 0.02, 0.08 })
+                    {
+                        // Integrate the deterministic forward S(t)=100 exp((r-q)t),
+                        // and combine it with the already observed running average.
+                        double b = 0.05 - yield;
+                        double futureIntegral = b == 0.0 ? 100.0 : 100.0 * Expm1(b) / b;
+                        double mean = ((97.0 * elapsed / 360.0) + futureIntegral) / (1.0 + (elapsed / 360.0));
+                        double expected = Math.Exp(-0.05) * payoff.Evaluate(mean);
+                        foreach (double sigma in sigmaValues)
+                        {
+                            var process = new BlackScholesMertonProcess(
+                                100.0, new FlatForward(today, yield, dc), new FlatForward(today, 0.05, dc),
+                                new BlackConstantVol(today, new NullCalendar(), sigma, dc));
+                            double calculated = ContinuousArithmeticAsianLevyEngine.Calculate(option, context, process, 97.0).NPV!.Value;
+                            Assert.True(double.IsFinite(calculated));
+
+                            // At the kink the true time value is O(sigma * spot).
+                            double tolerance = sigma == 0.0 ? 1.0e-12 : 1.0e-5;
+                            Assert.True(
+                                Math.Abs(calculated - expected) < tolerance,
+                                $"Levy {type}, elapsed={elapsed}, strike={strike}, q={yield}, vol={sigma}: calculated {calculated}, expected {expected}");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // QuantLib's master's case for #2926 (after v1.44; the S-xeq plan's XER4), a check of S-bar's landed Levy engine
+    [Fact]
+    public void TestLevyLowVolatilityContinuity()
+    {
+        // Testing continuity of the Levy Asian engine at zero volatility...
+        var today = new Date(20, Month.October, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual360();
+        GeneralizedBlackScholesProcess Process(double vol) => new BlackScholesMertonProcess(
+            100.0, new FlatForward(today, 0.05, dc), new FlatForward(today, 0.05, dc),
+            new BlackConstantVol(today, new NullCalendar(), vol, dc));
+
+        foreach (int elapsed in new[] { 0, 180 })
+        {
+            foreach (OptionType type in new[] { OptionType.Call, OptionType.Put })
+            {
+                var option = new ContinuousAveragingAsianOption(
+                    AverageType.Arithmetic, today - elapsed, new PlainVanillaPayoff(type, 100.0), new EuropeanExercise(today + 360));
+                Assert.True(
+                    Math.Abs(ContinuousArithmeticAsianLevyEngine.Calculate(option, context, Process(0.0), 100.0).NPV!.Value) < 1.0e-12);
+
+                // At zero carry Var(A_future) ~ (100/T)^2 sigma^2/3.
+                // An ATM call or put has value ~ discount * stddev / sqrt(2*pi).
+                double slope = Math.Exp(-0.05) * 100.0 / ((1.0 + (elapsed / 360.0)) * Math.Sqrt(6.0 * Math.PI));
+                double previous = double.MaxValue;
+                foreach (double sigma in new[] { 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8 })
+                {
+                    double value = ContinuousArithmeticAsianLevyEngine.Calculate(option, context, Process(sigma), 100.0).NPV!.Value;
+                    string message = $"type={type}, elapsed={elapsed}, vol={sigma}: {value}";
+                    Assert.True(double.IsFinite(value), message);
+                    Assert.True(value > 0.0, message);
+                    Assert.True(value < previous, message);
+                    Assert.True(Math.Abs((value / sigma) - slope) < 1.0e-5, message);
+                    previous = value;
+                }
+            }
+        }
+    }
+
+    // QuantLib's master's case for #2926 (after v1.44; the S-xeq plan's XER4), a check of S-bar's landed Levy engine
+    [Fact]
+    public void TestLevyVarianceReference()
+    {
+        // Testing Levy prices against integrated covariance...
+        var today = new Date(20, Month.October, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual360();
+        var integrate = new GaussLegendreIntegration(32);
+
+        void CheckPrice(int remaining, int elapsed, double b, double sigma)
+        {
+            double tau = remaining / 360.0;
+            double T = tau + (elapsed / 360.0);
+            double x = b * tau;
+            double w = sigma * sigma * tau;
+            double meanFactor = 100.0 * tau / T;
+            var process = new BlackScholesMertonProcess(
+                100.0, new FlatForward(today, 0.05 - b, dc), new FlatForward(today, 0.05, dc),
+                new BlackConstantVol(today, new NullCalendar(), sigma, dc));
+            double mean = meanFactor / 2.0 * integrate.Evaluate(u => Math.Exp(x * (u + 1.0) / 2.0));
+            double strike = ((T - tau) / T * 97.0) + mean;
+            var option = new ContinuousAveragingAsianOption(
+                AverageType.Arithmetic, today - elapsed, new PlainVanillaPayoff(OptionType.Call, strike),
+                new EuropeanExercise(today + remaining));
+
+            // Integrate the covariance over the normalized triangle 0 <= s <= t <= 1.
+            double variance = 2.0 * meanFactor * meanFactor * integrate.Evaluate(u =>
+            {
+                double t = (u + 1.0) / 2.0;
+                return t / 4.0 * integrate.Evaluate(v =>
+                {
+                    double s = t * (v + 1.0) / 2.0;
+                    return Math.Exp(x * (s + t)) * Expm1(w * s);
+                });
+            });
+            double logVariance = Log1p(variance / (mean * mean));
+            double expected = BlackFormulaFunctions.BlackFormula(
+                OptionType.Call, mean, mean, Math.Sqrt(logVariance), Math.Exp(-0.05 * tau));
+            double calculated = ContinuousArithmeticAsianLevyEngine.Calculate(option, context, process, 97.0).NPV!.Value;
+            string message = $"remaining={remaining}, elapsed={elapsed}, carry={b}, vol={sigma}: calculated {calculated}, expected {expected}";
+            Assert.True(double.IsFinite(calculated), message);
+
+            // Allow for quadrature and pricing roundoff across platforms.
+            Assert.True(Math.Abs(calculated - expected) < 2.0e-11, message);
+        }
+
+        foreach (int elapsed in new[] { 0, 180 })
+        {
+            // Include near-zero carry, both signs, and the series scaling boundary.
+            foreach (double b in new[] { 0.0, -1.0e-10, 1.0e-10, -0.03, 0.03, -1.0, 1.0 })
+            {
+                foreach (double sigma in new[] { 1.0e-8, 1.0e-3, Math.Sqrt(0.499), Math.Sqrt(0.501) })
+                {
+                    CheckPrice(360, elapsed, b, sigma);
+                }
+            }
+
+            foreach (int remaining in new[] { 1, 10800 })
+            {
+                foreach (double b in new[] { -0.03, 0.0, 0.03 })
+                {
+                    CheckPrice(remaining, elapsed, b, 1.0e-3);
+                }
+            }
+        }
+    }
+
+    // std::expm1 and std::log1p to double precision: their series where the argument is small
+    private static double Expm1(double x) =>
+        Math.Abs(x) < 1e-5 ? x + (x * x / 2.0) + (x * x * x / 6.0) : Math.Exp(x) - 1.0;
+
+    private static double Log1p(double x) =>
+        Math.Abs(x) < 1e-4 ? x - (x * x / 2.0) + (x * x * x / 3.0) - (x * x * x * x / 4.0) : Math.Log(1.0 + x);
+
+    private sealed record VecerData(
+        double Spot,
+        double RiskFreeRate,
+        double Volatility,
+        double Strike,
+        int Length,
+        double Result,
+        double Tolerance);
 
     private sealed record ContinuousAverageData(
         OptionType Type,

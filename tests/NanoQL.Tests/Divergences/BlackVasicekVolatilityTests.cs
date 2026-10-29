@@ -14,11 +14,14 @@ namespace NanoQL.Tests.Divergences;
 /// The Black-Vasicek engine's equity volatility and dividends (the S-van plan's VR4 (xii)). QuantLib reads the equity
 /// volatility at time 0 (<c>blackVol(t, K)</c> with t = 0, <c>analyticeuropeanvasicekengine.cpp:78</c>) and leaves the
 /// dividend curve out, so a volatility curve rising from 10% to 30% prices on 10% and a dividend yield changes nothing.
-/// nanoql integrates the equity's term variance over [0, T] and takes the dividend discount into the forward. QuantLib's
-/// check: the engine's limit as the short rate's volatility vanishes, QuantLib's analytic European engine on the Vasicek
-/// bond's flat rate with the term volatility and the dividend curve [executed on the wheel:
-/// <c>scratchpad\c2\oracle_c2.py</c>, section vasicek; QuantLib's own engine through the harness].
-/// On a flat volatility and no dividend, QuantLib's bits (the engine's harness vectors).
+/// nanoql integrates the equity's term variance over [0, T] and takes the dividend discount into the forward.
+/// QuantLib's check: the engine's limit as the short rate's volatility vanishes, QuantLib's analytic European engine on
+/// the Vasicek bond's flat rate with the term volatility and the dividend curve [executed on the wheel:
+/// <c>scratchpad\c2\oracle_c2.py</c>, section vasicek; QuantLib's own engine through the harness]. On a flat volatility
+/// and no dividend, QuantLib's bits (the engine's harness vectors). QuantLib's master fixes the same class after v1.44
+/// (#2927: the volatility at maturity, the spot discounted by the dividend curve), whose two cases
+/// <c>EuropeanOptionTests</c> ports as checks of this engine; it stays until the pin moves to a release carrying the
+/// fix (the S-xeq plan's XER4).
 /// </summary>
 public class BlackVasicekVolatilityTests
 {
