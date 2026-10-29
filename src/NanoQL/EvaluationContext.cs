@@ -7,6 +7,7 @@
 // Ported to C# from QuantLib and modified by the nanoql Authors.
 
 using NanoQL.Currencies;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Time;
 
@@ -29,15 +30,23 @@ namespace NanoQL;
 /// Equality is the record's: field by field. <see cref="Fixings"/> and <see cref="ExchangeRates"/> compare by content,
 /// since <see cref="IndexFixings"/> and <see cref="Currencies.ExchangeRates"/> define value equality, so two contexts
 /// holding the same fixings and rates are equal however their stores were built; <see cref="MoneySettings"/> is a
-/// record.
+/// record. So are <see cref="CommoditySettings"/> and <see cref="QuantitySettings"/>, and
+/// <see cref="UnitOfMeasureConversions"/> compares by content.
 /// </para>
 /// </remarks>
 public sealed record EvaluationContext
 {
+    // QuantLib's defaults, immutable values shared by every context that keeps them.
+    private static readonly CommoditySettings DefaultCommoditySettings = new();
+    private static readonly QuantitySettings DefaultQuantitySettings = new();
+
     private readonly Date evaluationDate;
     private readonly IndexFixings fixings = IndexFixings.Empty;
     private readonly ExchangeRates exchangeRates = Currencies.ExchangeRates.Default;
     private readonly MoneySettings moneySettings = new();
+    private readonly CommoditySettings commoditySettings = DefaultCommoditySettings;
+    private readonly UnitOfMeasureConversions unitOfMeasureConversions = Experimental.UnitOfMeasureConversions.Default;
+    private readonly QuantitySettings quantitySettings = DefaultQuantitySettings;
 
     /// <summary>Gets the evaluation date; required.</summary>
     /// <exception cref="ArgumentException">Set to <c>default(Date)</c>, which is not a valid date.</exception>
@@ -107,5 +116,40 @@ public sealed record EvaluationContext
     {
         get => moneySettings;
         init => moneySettings = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    /// <summary>
+    /// Gets the base currency and unit of measure the energy instruments value in, QuantLib's
+    /// <c>CommoditySettings</c>; by default QuantLib's, U.S. dollars and barrels.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Set to <see langword="null"/>.</exception>
+    public CommoditySettings CommoditySettings
+    {
+        get => commoditySettings;
+        init => commoditySettings = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    /// <summary>
+    /// Gets the registry of conversion factors between units of measure, QuantLib's
+    /// <c>UnitOfMeasureConversionManager</c>; by default <see cref="Experimental.UnitOfMeasureConversions.Default"/>,
+    /// QuantLib's known factors alone. <see cref="Quantity"/>'s conversions and the energy instruments read it.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Set to <see langword="null"/>.</exception>
+    public UnitOfMeasureConversions UnitOfMeasureConversions
+    {
+        get => unitOfMeasureConversions;
+        init => unitOfMeasureConversions = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    /// <summary>
+    /// Gets the settings that say how <see cref="Quantity"/> amounts in different units combine, QuantLib's static
+    /// <c>Quantity::conversionType</c> and <c>Quantity::baseUnitOfMeasure</c>; by default QuantLib's, no conversion and
+    /// no base unit.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Set to <see langword="null"/>.</exception>
+    public QuantitySettings QuantitySettings
+    {
+        get => quantitySettings;
+        init => quantitySettings = value ?? throw new ArgumentNullException(nameof(value));
     }
 }

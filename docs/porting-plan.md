@@ -101,6 +101,7 @@ Files that port only part of their QuantLib file, each with a `// Partial:` line
 The licensing gate checks that this list and the files match.
 
 - `src/NanoQL/Experimental/CallableBonds/CallableBondVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(dc, bdc)`, which no QuantLib 1.44 class uses and which waits for its first user.
+- `src/NanoQL/Experimental/Commodities/EnergyCommodity/EnergyCommodity.cs`: `EnergyCommodity::arguments` and `EnergyCommodity::engine`, never ported: no engine derives from the engine class, and `setupArguments` fills no argument.
 - `src/NanoQL/Experimental/Credit/BaseCorrelationTermStructure{TInterpolator}.cs`: `ImplicitCorrelation(Real, Real)`, never ported: `basecorrelationstructure.hpp` declares it and nothing defines it.
 - `src/NanoQL/Experimental/Credit/Basket.cs`: `densityTrancheLoss`, never ported: `basket.hpp` declares it and nothing defines it, so QuantLib never compiles a call to it.
 - `src/NanoQL/Experimental/Credit/CorrelationTermStructure.cs`: the constructor for a structure managing its own reference date, `(cal, bdc, dc)`, which no QuantLib 1.44 class uses and which waits for its first user.

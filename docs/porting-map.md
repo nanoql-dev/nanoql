@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 67 | 9 |
-| partial | 22 | 11 |
-| ported | 1,171 | 160 |
+| not started | 45 | 8 |
+| partial | 23 | 11 |
+| ported | 1,192 | 161 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -207,28 +207,28 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `commodity` | not started |  | no nanoql type: SecondaryCosts, SecondaryCostAmounts, PricingError, PricingErrorLevel, PricingErrors, Commodity |
-| `commoditycashflow` | not started |  | no nanoql type: CommodityCashFlow, CommodityCashFlows |
-| `commoditycurve` | not started |  | no nanoql type: CommodityCurve |
-| `commodityindex` | not started |  | no nanoql type: CommodityIndex |
-| `commoditypricinghelpers` | not started |  | no nanoql type: CommodityPricingHelper |
-| `commoditysettings` | not started |  | no nanoql type: CommoditySettings |
-| `commoditytype` | not started |  | no nanoql type: CommodityType, NullCommodityType |
-| `commodityunitcost` | not started |  | no nanoql type: CommodityUnitCost |
-| `dateinterval` | not started |  | no nanoql type: DateInterval |
-| `energybasisswap` | not started |  | no nanoql type: EnergyBasisSwap |
-| `energycommodity` | not started |  | no nanoql type: EnergyDailyPosition, EnergyDailyPositions, EnergyCommodity, EnergyCommodityDeliverySchedule, EnergyCommodityQuantityPeriodicity, EnergyCommodityPaymentSchedule, EnergyCommodityResults |
-| `energyfuture` | not started |  | no nanoql type: EnergyFuture |
-| `energyswap` | not started |  | no nanoql type: EnergySwap |
-| `energyvanillaswap` | not started |  | no nanoql type: EnergyVanillaSwap |
-| `exchangecontract` | not started |  | no nanoql type: ExchangeContract, ExchangeContracts |
-| `paymentterm` | not started |  | no nanoql type: PaymentTerm, PaymentTermEventType |
-| `petroleumunitsofmeasure` | not started |  | no nanoql type: BarrelUnitOfMeasure, MTUnitOfMeasure, MBUnitOfMeasure, GallonUnitOfMeasure, LitreUnitOfMeasure, KilolitreUnitOfMeasure, TokyoKilolitreUnitOfMeasure |
-| `pricingperiod` | not started |  | no nanoql type: PricingPeriod, PricingPeriods |
-| `quantity` | not started |  | no nanoql type: Quantity, QuantityConversionType |
-| `unitofmeasure` | not started |  | no nanoql type: UnitOfMeasure, UnitOfMeasureType, UnitOfMeasureData, LotUnitOfMeasure |
-| `unitofmeasureconversion` | not started |  | no nanoql type: UnitOfMeasureConversion, UnitOfMeasureConversionType |
-| `unitofmeasureconversionmanager` | not started |  | no nanoql type: UnitOfMeasureConversionManager |
+| `commodity` | ported | Experimental/Commodities/Commodity/Commodity.cs, Experimental/Commodities/Commodity/PricingError.cs, Experimental/Commodities/Commodity/PricingErrorLevel.cs | no nanoql type: SecondaryCosts, SecondaryCostAmounts, PricingErrors |
+| `commoditycashflow` | ported | Experimental/Commodities/CommodityCashFlow.cs | no nanoql type: CommodityCashFlows |
+| `commoditycurve` | ported | Experimental/Commodities/CommodityCurve.cs |  |
+| `commodityindex` | ported | Experimental/Commodities/CommodityIndex.cs |  |
+| `commoditypricinghelpers` | ported | Experimental/Commodities/CommodityPricingHelperFunctions.cs |  |
+| `commoditysettings` | ported | Experimental/Commodities/CommoditySettings.cs |  |
+| `commoditytype` | ported | Experimental/Commodities/CommodityType.cs, Experimental/Commodities/NullCommodityType.cs |  |
+| `commodityunitcost` | ported | Experimental/Commodities/CommodityUnitCost.cs |  |
+| `dateinterval` | ported | Experimental/Commodities/DateInterval.cs |  |
+| `energybasisswap` | ported | Experimental/Commodities/EnergyBasisSwap.cs |  |
+| `energycommodity` | partial | Experimental/Commodities/EnergyCommodity/EnergyCommodity.cs, Experimental/Commodities/EnergyCommodity/EnergyCommodityDeliverySchedule.cs, Experimental/Commodities/EnergyCommodity/EnergyCommodityPaymentSchedule.cs, Experimental/Commodities/EnergyCommodity/EnergyCommodityQuantityPeriodicity.cs, Experimental/Commodities/EnergyCommodity/EnergyCommodityResults.cs, Experimental/Commodities/EnergyCommodity/EnergyDailyPosition.cs | partial: EnergyCommodity::arguments and EnergyCommodity::engine, never ported: no engine derives from the engine class, and setupArguments fills no argument; no nanoql type: EnergyDailyPositions |
+| `energyfuture` | ported | Experimental/Commodities/EnergyFuture.cs |  |
+| `energyswap` | ported | Experimental/Commodities/EnergySwap.cs |  |
+| `energyvanillaswap` | ported | Experimental/Commodities/EnergyVanillaSwap.cs |  |
+| `exchangecontract` | ported | Experimental/Commodities/ExchangeContract.cs | no nanoql type: ExchangeContracts |
+| `paymentterm` | ported | Experimental/Commodities/PaymentTerm.cs, Experimental/Commodities/PaymentTermEventType.cs |  |
+| `petroleumunitsofmeasure` | ported | Experimental/Commodities/PetroleumUnitsOfMeasure/BarrelUnitOfMeasure.cs, Experimental/Commodities/PetroleumUnitsOfMeasure/GallonUnitOfMeasure.cs, Experimental/Commodities/PetroleumUnitsOfMeasure/KilolitreUnitOfMeasure.cs, Experimental/Commodities/PetroleumUnitsOfMeasure/LitreUnitOfMeasure.cs, Experimental/Commodities/PetroleumUnitsOfMeasure/MBUnitOfMeasure.cs, Experimental/Commodities/PetroleumUnitsOfMeasure/MTUnitOfMeasure.cs, Experimental/Commodities/PetroleumUnitsOfMeasure/TokyoKilolitreUnitOfMeasure.cs |  |
+| `pricingperiod` | ported | Experimental/Commodities/PricingPeriod.cs | no nanoql type: PricingPeriods |
+| `quantity` | ported | Experimental/Commodities/Quantity/Quantity.cs, Experimental/Commodities/Quantity/QuantityConversionType.cs, Experimental/Commodities/Quantity/QuantityFunctions.cs, Experimental/Commodities/Quantity/QuantitySettings.cs |  |
+| `unitofmeasure` | ported | Experimental/Commodities/UnitOfMeasure/LotUnitOfMeasure.cs, Experimental/Commodities/UnitOfMeasure/UnitOfMeasure.cs, Experimental/Commodities/UnitOfMeasure/UnitOfMeasureType.cs | no nanoql type: UnitOfMeasureData |
+| `unitofmeasureconversion` | ported | Experimental/Commodities/UnitOfMeasureConversion.cs, Experimental/Commodities/UnitOfMeasureConversionType.cs |  |
+| `unitofmeasureconversionmanager` | ported | Experimental/Commodities/UnitOfMeasureConversions.cs |  |
 
 ### `ql/experimental/coupons/`
 
@@ -2096,7 +2096,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `cms` | ported | TestSuite/CmsTests.cs | 5 of 5 cases |
 | `cms_normal` | ported | TestSuite/CmsNormalTests.cs | 3 of 3 cases |
 | `cmsspread` | partial | TestSuite/CmsSpreadTests.cs | 1 of 2 cases; not yet: testCouponPricing |
-| `commodityunitofmeasure` | not started |  | 2 cases |
+| `commodityunitofmeasure` | ported | TestSuite/CommodityUnitOfMeasureTests.cs | 2 of 2 cases |
 | `compiledboostversion` | not ported: tests the C++ platform |  |  |
 | `compoundoption` | ported | TestSuite/CompoundOptionTests.cs | 2 of 2 cases |
 | `constnotionalcrosscurrencybasisswap` | ported | TestSuite/ConstNotionalCrossCurrencyBasisSwapTests.cs | 2 of 2 cases |

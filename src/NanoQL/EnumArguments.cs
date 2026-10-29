@@ -716,6 +716,84 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a value outside <see cref="UnitOfMeasureType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib stores any value and reads it nowhere.</remarks>
+    internal static void Check(UnitOfMeasureType value, string paramName)
+    {
+        if (value is < UnitOfMeasureType.Mass or > UnitOfMeasureType.Quantity)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown unit of measure type");
+        }
+    }
+
+    /// <summary>Refuses a value outside <see cref="PaymentTermEventType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib stores any value and reads it nowhere.</remarks>
+    internal static void Check(PaymentTermEventType value, string paramName)
+    {
+        if (value is < PaymentTermEventType.TradeDate or > PaymentTermEventType.PricingDate)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown payment term event type");
+        }
+    }
+
+    /// <summary>Refuses a value outside <see cref="UnitOfMeasureConversionType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's lookup reads any value but <c>Direct</c> as derived, and a conversion's own <c>convert</c> fails another "unknown conversion-factor type" (<c>unitofmeasureconversion.cpp:90</c>).</remarks>
+    internal static void Check(UnitOfMeasureConversionType value, string paramName)
+    {
+        if (value is < UnitOfMeasureConversionType.Direct or > UnitOfMeasureConversionType.Derived)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown conversion-factor type");
+        }
+    }
+
+    /// <summary>Refuses a value outside <see cref="QuantityConversionType"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib reads any other value as no conversion, refusing a mismatch with "unitOfMeasure mismatch and no conversion specified" (<c>quantity.cpp:63</c>); the text names the value.</remarks>
+    internal static void Check(QuantityConversionType value, string paramName)
+    {
+        if (value is < QuantityConversionType.NoConversion or > QuantityConversionType.AutomatedConversion)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"unknown conversion type ({(int)value})");
+        }
+    }
+
+    /// <summary>Refuses a value outside <see cref="EnergyCommodityDeliverySchedule"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's <c>createPricingPeriods</c> returns no period for any value but its monthly and daily ones.</remarks>
+    internal static void Check(EnergyCommodityDeliverySchedule value, string paramName)
+    {
+        if (value is < EnergyCommodityDeliverySchedule.Constant or > EnergyCommodityDeliverySchedule.Yearly)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown delivery schedule");
+        }
+    }
+
+    /// <summary>Refuses a value outside <see cref="EnergyCommodityQuantityPeriodicity"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's <c>createPricingPeriods</c> refuses any value but the one its schedule takes.</remarks>
+    internal static void Check(EnergyCommodityQuantityPeriodicity value, string paramName)
+    {
+        if (value is < EnergyCommodityQuantityPeriodicity.Absolute or > EnergyCommodityQuantityPeriodicity.PerYear)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown quantity periodicity");
+        }
+    }
+
     /// <summary>Refuses a swap type outside <see cref="MtMCrossCurrencyBasisSwapType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

@@ -1837,6 +1837,63 @@ Facts:
 
 - `EachRowIsTheConstantMaturityFirstRow`
 
+## CommodityCashFlowAmountTests
+
+[`Divergences/CommodityCashFlowAmountTests.cs`](../tests/NanoQL.Tests/Divergences/CommodityCashFlowAmountTests.cs)
+
+`CommodityCashFlow.Amount` undiscounted (the S-xrt plan's XRR9, ruled 2026-10-28). QuantLib's `amount()` returns the discounted amount (`commoditycashflow.hpp:56`), where `CashFlow::amount()` is documented as "the actual amount paid at the cash flow date" (`cashflow.hpp:62-66`), so a consumer reading these as cash flows discounts them twice: on the run's `probes\xi_c1.cpp` payer at 1.5, April's `amount()` is 496.72311389766833 for a payment of 500. nanoql's `CommodityCashFlow.Amount` is the 500, the discounted one `CommodityCashFlow.DiscountedAmount`. Checks: each amount times its discount factor is its discounted amount, and where the swap's curves are one, the discounted amounts sum to the NPV before the secondary costs.
+
+Facts:
+
+- `AnAmountIsWhatIsPaidOnTheDate`
+
+## CommodityCurveTests
+
+[`Divergences/CommodityCurveTests.cs`](../tests/NanoQL.Tests/Divergences/CommodityCurveTests.cs)
+
+The commodity curve's node times from its reference date, and its basis curve read by date (the S-xrt plan's XRR5 (x) and (xi), fixed under R8). QuantLib's moving-date curve follows the evaluation date, and its `setPrices` times the nodes from the first price's date (`commoditycurve.cpp:68-87`): with prices 1, 2 and 3 at ten, forty and seventy days it prices 2 at 35 and 39 days and 3 at 65 and 69, the next node's, where its constructor from the same dates prices 1 and 2 (the run's `probes\xi_c1.cpp`). And it reads a basis curve at its own time, on its own reference date and day counter (`commoditycurve.hpp:205-219`): a basis dated thirty days later on Actual/360, at 1, 2 and 3 from thirty, sixty and 120 days, adds 2 at 45 and 59 days and 3 at 119, where the basis curve's own price there is 1, 1 and 2. nanoql times the nodes from the reference date (`CommodityCurve.Create`, a copy from `CommodityCurve.SetPrices`) and reads a basis at the date on its own clock; where the curves share their reference date and day counter both readings are QuantLib's.
+
+Facts:
+
+- `TheMovingCurvePricesAsTheCurveFromItsDates`
+- `ABasisCurveDatedApartIsReadAtTheDate`
+
+## CommodityIndexNoFixingsTests
+
+[`Divergences/CommodityIndexNoFixingsTests.cs`](../tests/NanoQL.Tests/Divergences/CommodityIndexNoFixingsTests.cs)
+
+An index with no fixings read as having no quote date (the S-xrt plan's XRR5 (vi), fixed under R8). QuantLib's `lastQuoteDate()` reads `timeSeries().lastDate()`, which throws "empty timeseries" on an empty history, so the swaps and the future refuse an index with no fixings that the swaps' own branch prices from the forward curve with a warning (the S-xrt planner's `xp_c1.cpp`: the payer swap throws on every unit). nanoql's `CommodityIndex.LastQuoteDate` is null there, and every date is priced from the forward curve, QuantLib's warning recorded. Check: the instruments on an index with no fixings price as on one whose fixings all precede their first period.
+
+Facts:
+
+- `AVanillaSwapOnAnIndexWithNoFixingsPricesFromTheCurve`
+- `ABasisSwapOnTwoIndexesWithNoFixingsPricesFromTheCurves`
+- `AFutureOnAnIndexWithNoFixingsPricesFromTheCurve`
+
+## CommodityKnownFactorsTests
+
+[`Divergences/CommodityKnownFactorsTests.cs`](../tests/NanoQL.Tests/Divergences/CommodityKnownFactorsTests.cs)
+
+Two of QuantLib's known unit factors stored the right way round (the S-xrt plan's XRR4, ruled 2026-10-28). QuantLib's `(LitreUnitOfMeasure, GallonUnitOfMeasure, 3.78541)` says one litre is 3.785 gallons and its `(GallonUnitOfMeasure, MBUnitOfMeasure, 1000 * 42)` that one gallon is 42,000 thousand-barrels (`unitofmeasureconversionmanager.cpp:115-122`), where NIST Handbook 44, Appendix C, gives one gallon as 3.785 411 784 litres and, "by custom", 42 gallons a barrel; so a direct lookup converts 1,000 litres into 3,785.41 gallons and 1,000 thousand-barrels into 2.381e-2 gallons, the values QuantLib's `testDirect` asserts, its "actual" built from the same backward numbers. nanoql stores one gallon as 3.78541 litres and one thousand-barrel as 42,000 gallons: 264.17 gallons and 42,000,000 gallons, which its `testDirect` asserts.
+
+Facts:
+
+- `AThousandLitresAreTwoHundredSixtyFourGallons`
+- `AThousandThousandBarrelsAreFortyTwoMillionGallons`
+- `TheTwoRowsAgreeWithTheBarrelsTheyTriangulateThrough`
+
+## CommodityRegistryTests
+
+[`Divergences/CommodityRegistryTests.cs`](../tests/NanoQL.Tests/Divergences/CommodityRegistryTests.cs)
+
+The units of measure, commodity types and payment terms as values (the S-xrt plan's XRR1, ruled 2026-10-28). QuantLib keeps a process-wide registry for each, keyed by a unit's name, a type's code and a term's name, and a second construction with a known key returns the first construction's data whatever it was given: on QuantLib 1.44 (the run's `probes\xi_c1.cpp`) `UnitOfMeasure("Barrels", "B2", Mass)` after `("Barrels", "BBL", Volume)` has code BBL and type Volume, `CommodityType("Gasoil", "HOX")` after `("Heating Oil", "HOX")` is named Heating Oil, and `PaymentTerm("Term R", TradeDate, 10, TARGET)` after `("Term R", PricingDate, 5, NullCalendar)` counts 5 days from the pricing date on the null calendar. nanoql has no registry: each holds the data it is given. Equality stays QuantLib's: a unit by code, a type by code, a term by name.
+
+Facts:
+
+- `ASecondUnitWithAKnownNameKeepsItsOwnCodeAndType`
+- `ASecondTypeWithAKnownCodeKeepsItsOwnName`
+- `ASecondTermWithAKnownNameKeepsItsOwnEventOffsetAndCalendar`
+
 ## ComplexChooserEqualTermsTests
 
 [`Divergences/ComplexChooserEqualTermsTests.cs`](../tests/NanoQL.Tests/Divergences/ComplexChooserEqualTermsTests.cs)
@@ -2200,6 +2257,17 @@ Facts:
 
 - `AnOverflowingAdvanceIsRefusedByTheDateRange`
 
+## DateIntervalTests
+
+[`Divergences/DateIntervalTests.cs`](../tests/NanoQL.Tests/Divergences/DateIntervalTests.cs)
+
+`DateInterval.IsDateBetween` with its flags as named (the S-xrt plan's XRR5 (iii), fixed under R8). QuantLib's `else if` follows the `includeFirst` test, so a start date that passes `date >= startDate` then fails `date > startDate`, and the end likewise (`dateinterval.hpp:51-63`): on 1 to 31 January 2025 both ends are excluded under all four flag pairs, the middle included (the S-xrt planner's `xp_c1.cpp`). nanoql includes an end exactly when its flag says. Check: every date of the interval and a day either side, under the four pairs.
+
+Facts:
+
+- `EachEndIsIncludedAsItsFlagSays`
+- `TheDefaultFlagsIncludeBothEnds`
+
 ## DatedFxSwapRateHelperTests
 
 [`Divergences/DatedFxSwapRateHelperTests.cs`](../tests/NanoQL.Tests/Divergences/DatedFxSwapRateHelperTests.cs)
@@ -2528,6 +2596,59 @@ Facts:
 
 - `IsECBdateAnswersOnDatesFirstDay`
 - `AMonthsDateIsFoundFromDatesFirstDay`
+
+## EnergyBasisSwapTests
+
+[`Divergences/EnergyBasisSwapTests.cs`](../tests/NanoQL.Tests/Divergences/EnergyBasisSwapTests.cs)
+
+An energy basis swap's basis converted from its own currency into the base (the S-xrt plan's XRR5 (ix), fixed under R8). QuantLib converts it from the base currency into the basis currency (`energybasisswap.cpp:126-129`), the reverse of every other conversion in the swap: on QuantLib 1.44 (the run's `probes\xi_c1.cpp`: 1,000 barrels in March 2025, the pay index at 70 and the receive index at 73 dollars a barrel, a basis of 2 euros a barrel at 1.25 dollars a euro, flat zero curves) the swap with the basis on the receive leg prices 4,600 and on the pay leg 1,400, the basis read as 1.6 dollars. nanoql reads it as 2.5 dollars: 5,500 and 500, the hand values (73 + 2.5 − 70) × 1,000 and (73 − 70 − 2.5) × 1,000. A basis in the base currency is QuantLib's either way.
+
+Facts:
+
+- `ABasisInEurosIsWorthItsDollars`
+
+## EnergyFutureTests
+
+[`Divergences/EnergyFutureTests.cs`](../tests/NanoQL.Tests/Divergences/EnergyFutureTests.cs)
+
+The energy future's lots, secondary costs and quote (the S-xrt plan's XRR5 (vii), (xxxix) and (xl), fixed under R8 with Revision 69), on the S-xrt planner's probes' future: 10 units at 1.5 a unit on an index at 2 a unit. (vii) QuantLib's quantity conversion factor already carries the index's lot and the value multiplies by it again: lot 1,000 prices 5,000,000 for (2 − 1.5) × 10 × 1,000 = 5,000 (`xp_c1.cpp`). nanoql multiplies once. (xxxix) QuantLib charges a unit cost converted to the base unit on the quantity in its own unit without its lots (`energyfuture.cpp:107-108`): a fee of 0.1 a unit on 10 units reads 1 in barrels, 42 in gallons and 1,000 in thousand-barrels, 1 each by hand (`xr_c1.cpp`: the future prices 4, 8,778 and 4,999,000). nanoql charges it on the base-unit quantity the value uses, lots included. (xl) Within QuantLib's window (the last quote date the evaluation date or the day before) QuantLib reads the evaluation date's fixing alone, so with the last fixing yesterday it refuses ("missing quote for [FIDX1]", `xr_c1.cpp`), and reads it through the index's fixing, which refuses a Saturday evaluation on a TARGET index with Friday's fixing ("January 18th, 2025 is not a valid fixing date", the run's `probes\xi_c1.cpp`). nanoql reads the stored history's entry for the evaluation date, else the day before's.
+
+Facts:
+
+- `TheLotMultipliesTheValueOnce`
+- `AUnitCostIsChargedOnTheQuantityDelivered`
+- `YesterdaysFixingQuotesTheFutureWhenTodaysIsMissing`
+- `TodaysFixingQuotesTheFutureAsQuantLibs`
+- `ASaturdayEvaluationOnAWeekdayIndexReadsFridaysFixing`
+
+## EnergySwapPaymentTests
+
+[`Divergences/EnergySwapPaymentTests.cs`](../tests/NanoQL.Tests/Divergences/EnergySwapPaymentTests.cs)
+
+An energy swap's payments in the currency of the leg the net amount goes through, at that currency's rate (the S-xrt plan's XRR5 (viii), fixed under R8). QuantLib's vanilla swap files its fixed leg under the pay currency and its floating leg under the receive currency whichever way it faces (`energyvanillaswap.cpp:104-113`), and nanoql keeps that; but it pairs a payer's payment currency with the other leg's rate, and gives a receiver a pay-receive flag of 0, so a receiver's payment never changes currency (`:220-225`); the basis swap pairs a payment's currency with the other leg's rate too (`energybasisswap.cpp:263-266`). On QuantLib 1.44 (the run's `probes\xi_c1.cpp`: paying dollars and receiving euros at 1.25 dollars a euro, 3% flat), a payer vanilla swap at 1.5 on 1,000 barrels a month from March to May 2025 on an index at 2 is paid 496.72311389766810 "EUR", its dollar amount, in April, and a payer at 2.5 pays −397.37849111813631 "USD", its euro amount; a receiver pays and is paid in dollars. A basis swap on 1,000 barrels in March, its pay index at 70, is paid 2,980.3386833860422 "EUR" with its receive index at 73 and pays −2,384.2709467087875 "USD" at 67, the other leg's amount each time. nanoql pays a payer in euros and takes its payments in dollars, each at its own rate (397.37849111813467 EUR and −496.72311389767009 USD); a receiver is paid its fixed leg in dollars, QuantLib's payments, and pays its floating leg in euros; a basis swap pays 2,384.27 EUR and takes −2,980.34 USD. The NPV, in the base currency, is QuantLib's either way.
+
+Facts:
+
+- `APaymentIsInTheCurrencyOfItsLegAtThatCurrencysRate`
+- `QuantLibsAprilPaymentsPairTheOtherLegsRate`
+- `AReceiversFixedLegPaymentsAreQuantLibs`
+- `ABasisSwapsPaymentIsInTheCurrencyOfItsLegAtThatCurrencysRate`
+
+## EnergyUnitConversionTests
+
+[`Divergences/EnergyUnitConversionTests.cs`](../tests/NanoQL.Tests/Divergences/EnergyUnitConversionTests.cs)
+
+The energy instruments' unit conversions (the S-xrt plan's XRR5 (i), fixed under R8 with Revision 69). QuantLib's `calculateUomConversionFactor` returns the looked-up conversion's stored factor whatever its orientation, so it is one unit's value in the other for 25 of the 30 ordered pairs of its six petroleum units and the reciprocal for five (BBL→MB, BBL→kl, BBL→KL_tk, GAL→BBL, l→BBL), and its call sites multiply a quantity by the factor from the base to its unit and a price by the factor from its unit to the base, so one is inverted: a payer vanilla swap on 1,000 units a month at a 0.5 spread prices 500 in barrels, 882,000 in gallons and 500,000,000 in thousand-barrels, and a fee of 0.1 a unit reads 100, 176,400 and 10⁸ (the S-xrt planner's `xp_c1.cpp` and `xr_c1.cpp`, flat zero curves). nanoql's factor is one unit's value in the other, the conversion's own convert of a unit quantity; a quantity converts to the base by the factor from its unit, and a price, an index's forward price, a curve's basis and a unit cost by the factor from the base (or the index's unit) to theirs. The check is the hand value, the spread and the fee converted through barrels by QuantLib's known factors, on every unit; QuantLib's bits stand on the base unit, where every factor is 1.
+
+Facts:
+
+- `TheFactorIsOneUnitsValueInTheOther`
+- `QuantLibsStoredFactorIsTheReciprocalOnFivePairs`
+- `APayerSwapInAnyUnitIsWorthItsSpreadTimesItsQuantity`
+- `AUnitCostIsChargedPerUnitDelivered`
+- `EveryUnitCombinationPricesItsHandValue`
+- `AnIndexsForwardPriceConvertsIntoItsUnitAsAPrice`
+- `ABasisCurveInThousandBarrelsAddsItsPricePerBarrel`
 
 ## EngineSequenceTests
 
@@ -5790,6 +5911,16 @@ Facts:
 - `ASpotPremiumAdjustedPutsStrikeIsSolved`
 - `AForwardPremiumAdjustedPutsStrikeIsSolved`
 
+## PricingPeriodTests
+
+[`Divergences/PricingPeriodTests.cs`](../tests/NanoQL.Tests/Divergences/PricingPeriodTests.cs)
+
+A daily schedule's periods counting both their ends (the S-xrt plan's XRR5 (iv), fixed under R8). QuantLib's `createPricingPeriods` gives a period `[start, start + 1M − 1]` the quantity `perDay × (end − start)`, one day short: 10 barrels a day from January to March 2025 makes 300, 270 and 300 barrels where the months have 31, 28 and 31 days (the S-xrt planner's `xp_c1.cpp`). nanoql's is the daily quantity times the period's days, FpML's `PerCalendarDay` ("the Quantity or Notional Quantity is deemed to apply once per Calendar Day"): 310, 280 and 310. Check: each period's quantity is the sum of its days' quantities.
+
+Facts:
+
+- `ADailyPeriodsQuantityIsItsDaysTimesTheDailyQuantity`
+
 ## ProcessMismatchedTimesTests
 
 [`Divergences/ProcessMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/ProcessMismatchedTimesTests.cs)
@@ -5844,6 +5975,20 @@ Facts:
 
 - `QdPlusReadsTheVolatilitysOwnVariance`
 - `QdFixedPointReadsTheVolatilitysOwnVariance`
+
+## QuantityRoundingTests
+
+[`Divergences/QuantityRoundingTests.cs`](../tests/NanoQL.Tests/Divergences/QuantityRoundingTests.cs)
+
+Quantity's conversions unrounded (the S-xrt plan's XRR10, ruled 2026-10-28). QuantLib's `convertTo` rounds every converted quantity to its target unit's rounding (`quantity.cpp:33-40`), and every unit's is `Rounding(0)`, to the closest whole unit, which its public constructor can't change: under automated conversion 2 MB == 1,500 BBL is true and 1,500 BBL == 2 MB false, 2 MB / 1,500 BBL is 1, 2 MB + 1,500 BBL is 4 MB and 1 BBL + 20 GAL is 1 BBL (the S-xrt planner's `xr_c1.cpp`). nanoql's units round nothing, QuantLib's default `Rounding()`: the comparisons are symmetric and the ratio and sums exact, 1.333…, 3.5 MB and 1.476… BBL.
+
+Facts:
+
+- `EqualityIsSymmetric`
+- `TheRatioIsExact`
+- `TwoThousandBarrelsAndFifteenHundredAreThreeAndAHalf`
+- `ABarrelAndTwentyGallonsAreOnePointFourSevenSixBarrels`
+- `EveryUnitsRoundingLeavesAnAmountAsItIs`
 
 ## QuantoGreeksTermStructureTests
 
@@ -7292,6 +7437,19 @@ The ultimate-forward curve's kernel at small α (the S-sr plan's SSR6 (xviii)). 
 Facts:
 
 - `ASmallAlphaGivesTheLimit`
+
+## UnitConversionSearchTests
+
+[`Divergences/UnitConversionSearchTests.cs`](../tests/NanoQL.Tests/Divergences/UnitConversionSearchTests.cs)
+
+The registry's chained search with its forbidden list passed down (the S-xrt run's R1-1, fixed under R8 with Revision 69). QuantLib's `smartLookup` forbids each unit it starts from to the searches below it, "in order to avoid cycles", but drops the list when it recurses (`unitofmeasureconversionmanager.cpp:190`), so a search whose first candidate leads back recurses without end: its known factors' first entry pairs thousand-barrels and barrels, so every chained search from either overflows the stack. On QuantLib 1.44 (the run's `probes\xi_smart.cpp`, each lookup in its own process) barrels to metric tonnes overflows (exit 127) with and without a user's metric-tonne-to-gallon factor of 300, as gallons to metric tonnes does, through barrels; metric tonnes to barrels returns 7.14286, its first candidate the user's factor. nanoql passes the list down, as QuantLib's `ExchangeRateManager` passes its own; wherever QuantLib's search returns it never revisits a unit above it, so the answer is QuantLib's. Checks: the chains against the hand value through gallons, the refusal where no chain exists, and QuantLib's 7.14286.
+
+Facts:
+
+- `BarrelsToTonnesChainsThroughTheUsersGallonFactor`
+- `GallonsToTonnesTriangulatesThroughBarrels`
+- `TonnesToBarrelsIsQuantLibs`
+- `BarrelsToTonnesWithNoPathIsRefused`
 
 ## UpperBoundEngineTests
 
