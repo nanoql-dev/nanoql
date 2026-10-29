@@ -7,7 +7,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/barrieroption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast and testPerturbativeOrder2FullResolution, which wait for S-xeq's PerturbativeBarrierOptionEngine
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
@@ -1029,6 +1028,38 @@ public class BarrierOptionTests
     }
 
     [Fact]
+    public void TestPerturbativeOrder0()
+    {
+        // Testing perturbative barrier engine, order 0...
+        Assert.True(Math.Abs(PerturbativeBarrierOptionValue(0) - 0.897365) <= 1.0e-6);
+    }
+
+    [Fact]
+    public void TestPerturbativeOrder1()
+    {
+        // Testing perturbative barrier engine, order 1...
+        Assert.True(Math.Abs(PerturbativeBarrierOptionValue(1) - 0.894374) <= 1.0e-6);
+    }
+
+    // QuantLib's master's cached value (#2935, the S-xeq plan's XER3 (a)), its own check of the trivariate normal's fix;
+    // QuantLib 1.44 cached its defective code's 0.8943769 (Divergences/PerturbativeBarrierEngineTests.cs)
+    [Fact]
+    public void TestPerturbativeOrder2Fast()
+    {
+        // Testing perturbative barrier engine, fast order 2...
+        Assert.True(Math.Abs(PerturbativeBarrierOptionValue(2, 100, 10) - 0.8943754) <= 1.0e-6);
+    }
+
+    // As TestPerturbativeOrder2Fast: #2935's cached value
+    [Fact]
+    public void TestPerturbativeOrder2FullResolution()
+    {
+        // Takes about 10-20 seconds on Apple Silicon (2026).
+        // Testing perturbative barrier engine, full-resolution order 2...
+        Assert.True(Math.Abs(PerturbativeBarrierOptionValue(2) - 0.8943754) <= 1.0e-6);
+    }
+
+    [Fact]
     public void TestVannaVolgaSimpleBarrierValues()
     {
         // Testing barrier FX options against Vanna/Volga values...
@@ -1318,6 +1349,41 @@ public class BarrierOptionTests
                 + $"strike {value.Strike}, spot {value.S}, expected {expected}, calculated {calculated}, "
                 + $"error {error}, tolerance {value.Tol}");
         }
+    }
+
+    // QuantLib's perturbativeBarrierOptionValue: an up-and-out put struck at the barrier on a variance curve.
+    private static double PerturbativeBarrierOptionValue(int order, int npoint = 1000, int npoint2 = 100)
+    {
+        double s = 100.0;
+        double rebate = 0.0;
+        double r = 0.03;
+        double q = 0.02;
+
+        DayCounter dc = new Actual360();
+        Date today = Date.TodaysDate();
+
+        YieldTermStructure qTS = FlatRate(today, q, dc);
+        YieldTermStructure rTS = FlatRate(today, r, dc);
+
+        Date[] dates = [today + 90, today + 180];
+        double[] vols = [0.105, 0.11];
+
+        var volTS = new BlackVarianceCurve(today, dates, vols, dc);
+
+        var stochProcess = new BlackScholesMertonProcess(s, qTS, rTS, volTS);
+
+        double strike = 101.0;
+        double barrier = 101.0;
+        Date exDate = today + 180;
+
+        var exercise = new EuropeanExercise(exDate);
+        var payoff = new PlainVanillaPayoff(OptionType.Put, strike);
+
+        var option = new BarrierOption(BarrierType.UpOut, barrier, rebate, payoff, exercise);
+
+        const bool zeroGamma = false;
+        return PerturbativeBarrierOptionEngine.Calculate(
+            option, RunnerContext, stochProcess, order, zeroGamma, npoint, npoint2).NPV!.Value;
     }
 
     // The test suite's flatRate: a flat continuously compounded curve from the reference date.

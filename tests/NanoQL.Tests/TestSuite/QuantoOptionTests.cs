@@ -7,8 +7,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/quantooption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testDoubleBarrierValues (S-xeq's quanto double-barrier option)
 
+using NanoQL.Experimental;
 using NanoQL.Instruments;
 using NanoQL.Methods;
 using NanoQL.Numerics;
@@ -497,6 +497,59 @@ public class QuantoOptionTests
             $"failed to reproduce American quanto option prices with the Heston Local Volatility model\n    calculated: {hestoSlvCalculated}\n    expected:   {expected}");
     }
 
+    [Fact]
+    public void TestDoubleBarrierValues()
+    {
+        // Testing quanto-double-barrier option values...
+
+        QuantoDoubleBarrierOptionData[] values =
+        [
+            // barrierType, bar.lo, bar.hi, rebate, type, spot, strk, q, r, T, vol, fx rate, fx vol, corr, result, tol
+            new(DoubleBarrierType.KnockOut, 50.0, 150.0, 0, OptionType.Call, 100, 100.0, 0.00, 0.1, 0.25, 0.15, 0.05, 0.2,
+                0.3, 3.4623, 1.0e-4),
+            new(DoubleBarrierType.KnockOut, 90.0, 110.0, 0, OptionType.Call, 100, 100.0, 0.00, 0.1, 0.50, 0.15, 0.05, 0.2,
+                0.3, 0.5236, 1.0e-4),
+            new(DoubleBarrierType.KnockOut, 90.0, 110.0, 0, OptionType.Put, 100, 100.0, 0.00, 0.1, 0.25, 0.15, 0.05, 0.2,
+                0.3, 1.1320, 1.0e-4),
+            new(DoubleBarrierType.KnockIn, 80.0, 120.0, 0, OptionType.Call, 100, 102.0, 0.00, 0.1, 0.25, 0.25, 0.05, 0.2,
+                0.3, 2.6313, 1.0e-4),
+            new(DoubleBarrierType.KnockIn, 80.0, 120.0, 0, OptionType.Call, 100, 102.0, 0.00, 0.1, 0.50, 0.15, 0.05, 0.2,
+                0.3, 1.9305, 1.0e-4),
+        ];
+
+        DayCounter dc = new Actual360();
+        Date today = Date.TodaysDate();
+        var context = new EvaluationContext { EvaluationDate = today };
+
+        foreach (QuantoDoubleBarrierOptionData value in values)
+        {
+            var payoff = new PlainVanillaPayoff(value.Type, value.Strike);
+
+            Date exDate = today + TimeToDays(value.T);
+            var exercise = new EuropeanExercise(exDate);
+
+            Market market = Market.On(today, dc, value.S, value.Q, value.R, value.V, value.Fxr, value.Fxv);
+
+            var option = new QuantoDoubleBarrierOption(
+                value.BarrierType, value.BarrierLo, value.BarrierHi, value.Rebate, payoff, exercise);
+
+            Real calculated = QuantoEngine.Calculate(
+                option, context, market.Process, market.ForeignTS, market.FxVolTS, value.Corr,
+                (o, c, p) => AnalyticDoubleBarrierEngine.Calculate(o, c, p)).NPV!.Value;
+            Real error = Math.Abs(calculated - value.Result);
+            Real tolerance = value.Tol;
+
+            Assert.False(
+                error > tolerance,
+                $"Quanto {DoubleBarrierTypeFunctions.ToString(value.BarrierType)} {exercise.Type} {payoff.OptionType} "
+                + $"option with {payoff.Name} payoff: spot value {value.S}, strike {payoff.Strike}, barrier low "
+                + $"{value.BarrierLo}, barrier high {value.BarrierHi}, rebate {value.Rebate}, dividend yield {value.Q}, "
+                + $"risk-free rate {value.R}, fx risk-free rate {value.Fxr}, reference date {today}, maturity "
+                + $"{exercise.LastDate()}, volatility {value.V}, fx volatility {value.Fxv}, correlation {value.Corr}: "
+                + $"expected value {value.Result}, calculated value {calculated}, error {error}, tolerance {tolerance}");
+        }
+    }
+
     // testForwardValues' and testForwardPerformanceValues' body, the forward engine template's.
     private static void CheckForwardValues(
         QuantoForwardOptionData[] values,
@@ -760,6 +813,10 @@ public class QuantoOptionTests
     private readonly record struct QuantoBarrierOptionData(
         BarrierType BarrierType, Real Barrier, Real Rebate, OptionType Type, Real S, Real Strike, Rate Q, Rate R, double T,
         Volatility V, Rate Fxr, Volatility Fxv, Real Corr, Real Result, Real Tol);
+
+    private readonly record struct QuantoDoubleBarrierOptionData(
+        DoubleBarrierType BarrierType, Real BarrierLo, Real BarrierHi, Real Rebate, OptionType Type, Real S, Real Strike,
+        Rate Q, Rate R, double T, Volatility V, Rate Fxr, Volatility Fxv, Real Corr, Real Result, Real Tol);
 
     private readonly record struct QuantoForwardOptionData(
         OptionType Type, Real Moneyness, Real S, Rate Q, Rate R, double Start, double T, Volatility V, Rate Fxr,

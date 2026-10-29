@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/doublebinaryoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testHaugValues' binomial checks, which wait for S-xeq's BinomialDoubleBarrierEngine
 // Moved: testHaugValues line 171 (Divergences/DoubleBinaryKnockedInTests.cs); testHaugValues line 172 (Divergences/DoubleBinaryKnockedInTests.cs)
 
+using NanoQL.Experimental;
 using NanoQL.Instruments;
 using NanoQL.Methods;
 using NanoQL.Models;
@@ -148,7 +148,19 @@ public class DoubleBinaryOptionTests
                 + $"risk-free rate {value.R}, reference date {today}, maturity {exDate}, volatility {value.V}: expected "
                 + $"value {expected}, calculated value {calculated}, error {error}, tolerance {value.Tol}");
 
-            // the binomial engine's check waits for S-xeq's BinomialDoubleBarrierEngine
+            int steps = 500;
+
+            // checking with binomial engine
+            calculated = BinomialDoubleBarrierEngine.Calculate<CoxRossRubinstein, DiscretizedDoubleBarrierOption>(
+                opt, RunnerContext, stochProcess, steps).NPV!.Value;
+            expected = value.Result;
+            error = Math.Abs(calculated - expected);
+            double tol = 0.22;
+            Assert.False(
+                error > tol,
+                $"{DoubleBarrierTypeFunctions.ToString(value.BarrierType)} option: barrier low {value.BarrierLo}, "
+                + $"barrier high {value.BarrierHi}, cash {value.Cash}, spot {value.S}: expected binomial value "
+                + $"{expected}, calculated value {calculated}, error {error}, tolerance {tol}");
         }
     }
 

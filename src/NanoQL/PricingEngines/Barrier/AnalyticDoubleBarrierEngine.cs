@@ -137,6 +137,22 @@ public static class AnalyticDoubleBarrierEngine
         return new OneAssetOptionResults { NPV = value };
     }
 
+    // The knock-out's value without its rebate on this engine's routes (its converged series in logs, its deterministic
+    // limit), each read on the volatility's clock: the Suo-Wang engine's value where its own series overflows (the
+    // S-xeq plan's XER5 (vi))
+    internal static double KnockOutValue(
+        DoubleBarrierOption option, PlainVanillaPayoff payoff, GeneralizedBlackScholesProcess process, int series)
+    {
+        var f = new Formulas(option, payoff, process, series);
+        return payoff.OptionType == OptionType.Call ? f.CallKO() : f.PutKO();
+    }
+
+    // The rebate's value as this engine prices it (BR5 (xlvi)): the Suo-Wang engine's rebate (the S-xeq plan's XER5
+    // (v))
+    internal static double RebateValue(
+        DoubleBarrierOption option, PlainVanillaPayoff payoff, GeneralizedBlackScholesProcess process, int series) =>
+        new Formulas(option, payoff, process, series).RebateValue();
+
     // The image series' sum Σₙ [Pₙᵐ (N(a₁ + s) − N(a₂ + s)) − Qₙᵐ (N(a₃ + s) − N(a₄ + s))] over the corridor [L, U],
     // for terminal spots in [lo, hi]: Pₙ = (U/L)ⁿ, Qₙ = L^(n+1)/(Uⁿ S), a₁, a₃ at lo and a₂, a₄ at hi, the exponent m
     // μ₁ for the asset part and μ₁ − 2 for the cash part, the shift s 0 and −σ√T. QuantLib's callKO and putKO sum it as

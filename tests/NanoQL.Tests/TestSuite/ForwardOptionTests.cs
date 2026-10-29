@@ -3,10 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/forwardoption.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testHestonMCPrices, testHestonAnalyticalVsMCPrices (S-xeq's analytic Heston forward engine)
 
+using NanoQL.Experimental;
 using NanoQL.Instruments;
 using NanoQL.Methods;
+using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
@@ -171,6 +172,265 @@ public class ForwardOptionTests
                 ReportFailure(
                     "testMCPrices", payoff, exercise, s, q, r, today, sigma, moneyness[moneynessIndex], reset, analyticPrice,
                     mcPrice, error, tol[moneynessIndex]);
+            }
+        }
+    }
+
+    [Fact]
+    public void TestHestonMCPrices()
+    {
+        // Testing forward option Heston MC prices...
+        OptionType[] optionTypes = [OptionType.Call, OptionType.Put];
+        Real[][] mcForwardStartTolerance =
+        [
+            [7e-4, // Call, moneyness=0.8
+                8e-4, // Call, moneyness=0.9
+                6e-4, // Call, moneyness=1.0
+                5e-4, // Call, moneyness=1.1
+                5e-4], // Call, moneyness=1.2
+            [6e-4, // Put, moneyness=0.8
+                5e-4, // Put, moneyness=0.9
+                6e-4, // Put, moneyness=1.0
+                0.001, // Put, moneyness=1.1
+                0.001], // Put, moneyness=1.2
+        ];
+
+        Real[][] tol =
+        [
+            [9e-4, // Call, moneyness=0.8
+                9e-4, // Call, moneyness=0.9
+                6e-4, // Call, moneyness=1.0
+                5e-4, // Call, moneyness=1.1
+                5e-4], // Call, moneyness=1.2
+            [6e-4, // Put, moneyness=0.8
+                5e-4, // Put, moneyness=0.9
+                8e-4, // Put, moneyness=1.0
+                0.002, // Put, moneyness=1.1
+                0.002], // Put, moneyness=1.2
+        ];
+
+        for (int typeIndex = 0; typeIndex < optionTypes.Length; ++typeIndex)
+        {
+            Real analyticTolerance = 5e-4;
+
+            int timeSteps = 50;
+            int numberOfSamples = 4095;
+            long mcSeed = 42;
+
+            Real q = 0.04;
+            Real r = 0.01;
+            Real sigmaBs = 0.245;
+            Real s = 100;
+
+            // Test 1: Set up an equivalent flat Heston and compare to analytical BS pricing
+            Real v0 = sigmaBs * sigmaBs;
+            Real kappa = 1e-8;
+            Real theta = sigmaBs * sigmaBs;
+            Real sigma = 1e-8;
+            Real rho = -0.93;
+
+            DayCounter dc = new Actual360();
+            Date today = Date.TodaysDate();
+            var context = new EvaluationContext { EvaluationDate = today };
+
+            Date exDate = today + new Period(1, TimeUnit.Years);
+            var exercise = new EuropeanExercise(exDate);
+            Date reset = today + new Period(6, TimeUnit.Months);
+            var payoff = new PlainVanillaPayoff(optionTypes[typeIndex], 0.0);
+
+            YieldTermStructure qTS = FlatForward.Create(0, new NullCalendar(), q, dc, context);
+            YieldTermStructure rTS = FlatForward.Create(0, new NullCalendar(), r, dc, context);
+            GeneralizedBlackScholesProcess bsProcess = Process(s, q, r, sigmaBs, dc, context);
+
+            var hestonProcess = new HestonProcess(rTS, qTS, s, v0, kappa, theta, sigma, rho);
+
+            Func<ForwardVanillaOption, EvaluationContext, OneAssetOptionResults> mcEngine =
+                new MakeMCForwardEuropeanHestonEngine<LowDiscrepancy, GeneralStatistics>(hestonProcess, mcSeed)
+                    .WithSteps(timeSteps)
+                    .WithSamples(numberOfSamples)
+                    .ToEngine();
+
+            Real[] moneyness = [0.8, 0.9, 1.0, 1.1, 1.2];
+
+            for (int moneynessIndex = 0; moneynessIndex < moneyness.Length; ++moneynessIndex)
+            {
+                var option = new ForwardVanillaOption(moneyness[moneynessIndex], reset, payoff, exercise);
+
+                Real analyticPrice = ForwardVanillaEngine.Calculate(
+                    option, context, bsProcess, AnalyticEuropeanEngine.Calculate).NPV!.Value;
+
+                Real mcPrice = mcEngine(option, context).NPV!.Value;
+
+                Real mcError = RelativeError(analyticPrice, mcPrice, s);
+
+                if (mcError > mcForwardStartTolerance[typeIndex][moneynessIndex])
+                {
+                    ReportFailure(
+                        "testHestonMCForwardStartPrices", payoff, exercise, s, q, r, today, sigmaBs,
+                        moneyness[moneynessIndex], reset, analyticPrice, mcPrice, mcError,
+                        mcForwardStartTolerance[typeIndex][moneynessIndex]);
+                }
+            }
+
+            // Test 2: Using an arbitrary Heston model, check that prices match semi-analytical
+            // Heston prices when reset date is t=0
+            v0 = sigmaBs * sigmaBs;
+            kappa = 1.0;
+            theta = 0.08;
+            sigma = 0.39;
+            rho = -0.93;
+
+            reset = today;
+
+            var hestonProcessSmile = new HestonProcess(rTS, qTS, s, v0, kappa, theta, sigma, rho);
+
+            var hestonModel = new HestonModel(hestonProcessSmile);
+
+            var analyticHestonEngine = new AnalyticHestonEngine(hestonModel, 96);
+
+            Func<ForwardVanillaOption, EvaluationContext, OneAssetOptionResults> mcEngineSmile =
+                new MakeMCForwardEuropeanHestonEngine<LowDiscrepancy, GeneralStatistics>(hestonProcessSmile, mcSeed)
+                    .WithSteps(timeSteps)
+                    .WithSamples(numberOfSamples)
+                    .ToEngine();
+
+            var analyticForwardHestonEngine = new AnalyticHestonForwardEuropeanEngine(hestonProcessSmile);
+
+            for (int moneynessIndex = 0; moneynessIndex < moneyness.Length; ++moneynessIndex)
+            {
+                Real strike = s * moneyness[moneynessIndex];
+                var vanillaPayoff = new PlainVanillaPayoff(optionTypes[typeIndex], strike);
+
+                var vanillaOption = new VanillaOption(vanillaPayoff, exercise);
+                var forwardOption = new ForwardVanillaOption(moneyness[moneynessIndex], reset, payoff, exercise);
+
+                Real analyticPrice = analyticHestonEngine.Calculate(vanillaOption, context).NPV!.Value;
+
+                Real mcPrice = mcEngineSmile(forwardOption, context).NPV!.Value;
+
+                Real mcError = RelativeError(analyticPrice, mcPrice, s);
+                Real tolerance = tol[typeIndex][moneynessIndex];
+
+                if (mcError > tolerance)
+                {
+                    ReportFailure(
+                        "testHestonMCPrices", vanillaPayoff, exercise, s, q, r, today, sigmaBs, moneyness[moneynessIndex],
+                        reset, analyticPrice, mcPrice, mcError, tolerance);
+                }
+
+                // T=0, testing the Analytic Pricer's T=0 analytical solution
+                Real hestonAnalyticPrice = analyticForwardHestonEngine.Calculate(forwardOption, context).NPV!.Value;
+
+                Real analyticError = RelativeError(analyticPrice, hestonAnalyticPrice, s);
+                if (analyticError > analyticTolerance)
+                {
+                    ReportFailure(
+                        "testHestonAnalyticForwardStartPrices", vanillaPayoff, exercise, s, q, r, today, sigmaBs,
+                        moneyness[moneynessIndex], reset, analyticPrice, hestonAnalyticPrice, analyticError,
+                        analyticTolerance);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestHestonAnalyticalVsMCPrices()
+    {
+        // Testing Heston analytic vs MC prices...
+        OptionType[] optionTypes = [OptionType.Call, OptionType.Put];
+        Real[][] tol =
+        [
+            [0.002, // Call, moneyness=0.8, CV:false
+                0.002, // Call, moneyness=0.8, CV:true
+                0.001, // Call, moneyness=1.0, CV:false
+                0.001, // Call, moneyness=1.8, CV:true
+                0.001, // Call, moneyness=1.2, CV:false
+                0.001], // Call, moneyness=1.2, CV:true
+            [0.001, // Put, moneyness=0.8, CV:false
+                0.001, // Put, moneyness=0.8, CV:true
+                0.003, // Put, moneyness=1.0, CV:false
+                0.003, // Put, moneyness=1.0, CV:true
+                0.003, // Put, moneyness=1.2, CV:false
+                0.003], // Put, moneyness=1.2, CV:true
+        ];
+
+        for (int optionTypeIndex = 0; optionTypeIndex < optionTypes.Length; ++optionTypeIndex)
+        {
+            int timeSteps = 50;
+            int numberOfSamples = 5000;
+            long mcSeed = 42;
+
+            Real q = 0.03;
+            Real r = 0.005;
+            Real s = 100;
+
+            Real vol = 0.3;
+            Real v0 = vol * vol;
+            Real kappa = 11.35;
+            Real theta = 0.022;
+            Real sigma = 0.618;
+            Real rho = -0.5;
+
+            DayCounter dc = new Actual360();
+            Date today = Date.TodaysDate();
+            var context = new EvaluationContext { EvaluationDate = today };
+
+            Date exDate = today + new Period(1, TimeUnit.Years);
+            var exercise = new EuropeanExercise(exDate);
+            Date reset = today + new Period(6, TimeUnit.Months);
+            var payoff = new PlainVanillaPayoff(optionTypes[optionTypeIndex], 0.0);
+
+            YieldTermStructure qTS = FlatForward.Create(0, new NullCalendar(), q, dc, context);
+            YieldTermStructure rTS = FlatForward.Create(0, new NullCalendar(), r, dc, context);
+
+            var hestonProcess = new HestonProcess(rTS, qTS, s, v0, kappa, theta, sigma, rho);
+
+            Func<ForwardVanillaOption, EvaluationContext, OneAssetOptionResults> mcEngine =
+                new MakeMCForwardEuropeanHestonEngine<PseudoRandom, GeneralStatistics>(hestonProcess, mcSeed)
+                    .WithSteps(timeSteps)
+                    .WithSamples(numberOfSamples)
+                    .ToEngine();
+
+            Func<ForwardVanillaOption, EvaluationContext, OneAssetOptionResults> mcEngineCv =
+                new MakeMCForwardEuropeanHestonEngine<PseudoRandom, GeneralStatistics>(hestonProcess, mcSeed)
+                    .WithSteps(timeSteps)
+                    .WithSamples(numberOfSamples)
+                    .WithControlVariate(true)
+                    .ToEngine();
+
+            var analyticEngine = new AnalyticHestonForwardEuropeanEngine(hestonProcess);
+
+            Real[] moneyness = [0.8, 1.0, 1.2];
+
+            // QuantLib's loop advances its index twice a pass, so it prices moneyness 0.8 and 1.2 only
+            for (int tol2ndIndex = 0; tol2ndIndex < moneyness.Length; ++tol2ndIndex)
+            {
+                Real m = moneyness[tol2ndIndex];
+                var option = new ForwardVanillaOption(m, reset, payoff, exercise);
+
+                Real analyticPrice = analyticEngine.Calculate(option, context).NPV!.Value;
+
+                Real mcPrice = mcEngine(option, context).NPV!.Value;
+                Real error = RelativeError(analyticPrice, mcPrice, s);
+
+                Real tolerance = tol[optionTypeIndex][tol2ndIndex];
+                if (error > tolerance)
+                {
+                    ReportFailure(
+                        "testHestonMCVsAnalyticPrices", payoff, exercise, s, q, r, today, vol, m, reset, analyticPrice,
+                        mcPrice, error, tolerance);
+                }
+
+                Real mcPriceCv = mcEngineCv(option, context).NPV!.Value;
+
+                Real errorCv = RelativeError(analyticPrice, mcPriceCv, s);
+                tolerance = tol[optionTypeIndex][++tol2ndIndex];
+                if (errorCv > tolerance)
+                {
+                    ReportFailure(
+                        "testHestonMCControlVariateVsAnalyticPrices", payoff, exercise, s, q, r, today, vol, m, reset,
+                        analyticPrice, mcPrice, errorCv, tolerance);
+                }
             }
         }
     }

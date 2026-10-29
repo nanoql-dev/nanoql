@@ -8,7 +8,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/asianoptions.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testVecerEngine and testAnalyticContinuousGeometricAveragePriceHeston, which wait for S-xeq's VecerEngine and AnalyticContinuousGeometricAveragePriceAsianHestonEngine
+// Partial: testVecerEngine, which waits for S-xeq's VecerEngine
 // Moved: testAnalyticDiscreteGeometricAverageStrike line 488 (Divergences/GeometricAverageStrikeForwardStartTests.cs)
 
 using NanoQL.Experimental;
@@ -1394,6 +1394,136 @@ public class AsianOptionsTests
         // Test 4: Continuous geometric should fail for seasoned options (not yet implemented)
         var seasonedGeometric = new ContinuousAveragingAsianOption(AverageType.Geometric, startDate, payoff, europeanExercise);
         Assert.Throws<NanoQLException>(() => AnalyticContinuousGeometricAveragePriceAsianEngine.Calculate(seasonedGeometric, context, bsmProcess));
+    }
+
+    [Fact]
+    public void TestAnalyticContinuousGeometricAveragePriceHeston()
+    {
+        // Testing analytic continuous geometric Asians under Heston...
+
+        // data from "Pricing of Geometric Asian Options under Heston's Stochastic
+        // Volatility Model", Kim & Wee, Quantitative Finance, 14:10, 1795-1809, 2011
+
+        // 73, 348 and 1095 are 0.2, 1.5 and 3.0 years respectively in Actual365Fixed
+        int[] days = [73, 73, 73, 73, 73, 548, 548, 548, 548, 548, 1095, 1095, 1095, 1095, 1095];
+        double[] strikes = [90.0, 95.0, 100.0, 105.0, 110.0, 90.0, 95.0, 100.0, 105.0, 110.0, 90.0, 95.0, 100.0, 105.0, 110.0];
+
+        // Prices from Table 1 (params obey Feller condition)
+        double[] prices =
+        [
+            10.6571, 6.5871, 3.4478, 1.4552, 0.4724, 16.5030, 13.7625, 11.3374, 9.2245, 7.4122, 20.5102, 18.3060, 16.2895,
+            14.4531, 12.7882,
+        ];
+
+        // Prices from Table 4 (params do not obey Feller condition)
+        double[] prices2 =
+        [
+            10.6425, 6.4362, 3.1578, 1.1936, 0.3609, 14.9955, 11.6707, 8.7767, 6.3818, 4.5118, 18.1219, 15.2009, 12.5707,
+            10.2539, 8.2611,
+        ];
+
+        // 0.2 and 3.0 match to 1e-4. Unfortunatly 1.5 corresponds to 547.5 days, 547 and 548
+        // bound the expected answer but are both out by ~5e-3
+        double tolerance = 1.0e-2;
+
+        DayCounter dc = new Actual365Fixed();
+        Date today = RunnerContext.EvaluationDate;
+        var type = OptionType.Call;
+        AverageType averageType = AverageType.Geometric;
+
+        double spot = 100;
+        YieldTermStructure qTS = new FlatForward(today, 0.0, dc);
+        YieldTermStructure rTS = new FlatForward(today, 0.05, dc);
+
+        double v0 = 0.09;
+        double kappa = 1.15;
+        double theta = 0.348;
+        double sigma = 0.39;
+        double rho = -0.64;
+
+        var hestonProcess = new HestonProcess(rTS, qTS, spot, v0, kappa, theta, sigma, rho);
+
+        var engine = new AnalyticContinuousGeometricAveragePriceAsianHestonEngine(hestonProcess);
+
+        void Check(AnalyticContinuousGeometricAveragePriceAsianHestonEngine e, int day, double strike, double expected, double tol)
+        {
+            Date expiryDate = today + day;
+
+            var europeanExercise = new EuropeanExercise(expiryDate);
+            var payoff = new PlainVanillaPayoff(type, strike);
+
+            var option = new ContinuousAveragingAsianOption(averageType, payoff, europeanExercise);
+
+            double calculated = e.Calculate(option, RunnerContext).NPV!.Value;
+
+            Assert.False(
+                Math.Abs(calculated - expected) > tol,
+                $"Continuous geometric average-price Asian call under Heston: strike {strike}, expiry {expiryDate}, "
+                + $"spot {spot}, dividend yield 0, risk-free rate 0.05, reference date {today}, volatility {Math.Sqrt(v0)}: "
+                + $"expected {expected}, calculated {calculated}, tolerance {tol}");
+        }
+
+        for (int i = 0; i < strikes.Length; i++)
+        {
+            Check(engine, days[i], strikes[i], prices[i], tolerance);
+        }
+
+        double v02 = 0.09;
+        double kappa2 = 2.0;
+        double theta2 = 0.09;
+        double sigma2 = 1.0;
+        double rho2 = -0.3;
+
+        var hestonProcess2 = new HestonProcess(rTS, qTS, spot, v02, kappa2, theta2, sigma2, rho2);
+
+        var engine2 = new AnalyticContinuousGeometricAveragePriceAsianHestonEngine(hestonProcess2);
+
+        for (int i = 0; i < strikes.Length; i++)
+        {
+            Check(engine2, days[i], strikes[i], prices2[i], tolerance);
+        }
+
+        // Also test the continuous data from the authors' subsequent paper
+
+        // data from "A Recursive Method for Discretely Monitored Geometric Asian Option
+        // Prices", Kim, Kim, Kim & Wee, Bull. Korean Math. Soc. 53, 733-749, 2016
+
+        // 73, 348 and 1095 are 0.2, 1.5 and 3.0 years respectively in Actual365Fixed
+        int[] days3 = [30, 91, 182, 365, 730, 1095, 30, 91, 182, 365, 730, 1095, 30, 91, 182, 365, 730, 1095];
+        double[] strikes3 = [90, 90, 90, 90, 90, 90, 100, 100, 100, 100, 100, 100, 110, 110, 110, 110, 110, 110];
+
+        // 30-day options need wider tolerance due to the day-bracket issue discussed above
+        double[] tol3 =
+        [
+            2.0e-2, 1.0e-2, 1.0e-2, 1.0e-2, 1.0e-2, 1.0e-2, 2.0e-2, 1.0e-2,
+            1.0e-2, 1.0e-2, 1.0e-2, 1.0e-2, 2.0e-2, 1.0e-2, 1.0e-2, 1.0e-2,
+            1.0e-2, 1.0e-2,
+        ];
+
+        // Prices from Tables 1, 2 and 3
+        double[] prices3 =
+        [
+            10.1513, 10.8175, 11.8664, 13.5931, 16.0988, 17.9475, 2.0472,
+            3.5735, 5.0588, 7.1132, 9.9139, 11.9959, 0.0350, 0.4869,
+            1.3376, 2.8569, 5.2804, 7.2682,
+        ];
+
+        // Note that although these parameters look similar to the first set above, theta
+        // is a factor of 10 smaller. I guess there is a mis-transcription somewhere!
+        double v03 = 0.09;
+        double kappa3 = 1.15;
+        double theta3 = 0.0348;
+        double sigma3 = 0.39;
+        double rho3 = -0.64;
+
+        var hestonProcess3 = new HestonProcess(rTS, qTS, spot, v03, kappa3, theta3, sigma3, rho3);
+
+        var engine3 = new AnalyticContinuousGeometricAveragePriceAsianHestonEngine(hestonProcess3);
+
+        for (int i = 0; i < strikes3.Length; i++)
+        {
+            Check(engine3, days3[i], strikes3[i], prices3[i], tol3[i]);
+        }
     }
 
     [Fact]

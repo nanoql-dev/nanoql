@@ -786,6 +786,17 @@ Facts:
 - `AnAct365VolatilityBesideAnAct360CurvePricesAsOnTheRestatedMarket`
 - `ARiskFreeCurveSettlingLaterIsReadFromItsDateOnTheEarliestClock`
 
+## BinomialDoubleBarrierMismatchedTimesTests
+
+[`Divergences/BinomialDoubleBarrierMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/BinomialDoubleBarrierMismatchedTimesTests.cs)
+
+The binomial double-barrier engine's tree and steps (the S-xeq plan's XER5 (x), (xi), fixed under R8). QuantLib flattens each structure from the risk-free curve's reference date on its own day counter and runs the tree over the risk-free curve's time (`binomialdoublebarrierengine.hpp:73-117`), so a volatility on another day counter integrates the wrong variance; and it builds the grid and the lattice on the step count given where the Leisen-Reimer and Joshi trees build on one more at an even count, its 200 steps 3.8467695315 against 201's 3.8822505099 on a Leisen-Reimer tree [executed: the planner's `xp_c1.cpp bin`]. nanoql's tree is S-bar's binomial barrier engine's (BR5 (ii)) and its grid and lattice take the tree's own steps (SEQR7 (x)). Checks: the market restated onto the risk-free curve's day counter; the tree's steps.
+
+Facts:
+
+- `AnAct365VolatilityBesideAnAct360CurvePricesAsOnTheRestatedMarket`
+- `AnEvenCountOnALeisenReimerTreeIsTheTreesOddOne`
+
 ## BinomialEvenStepsTests
 
 [`Divergences/BinomialEvenStepsTests.cs`](../tests/NanoQL.Tests/Divergences/BinomialEvenStepsTests.cs)
@@ -2413,6 +2424,16 @@ Facts:
 
 - `ANarrowCorridorOverTwoYearsIsWorthItsConvergedSeries`
 
+## DoubleBarrierUpstreamFixesTests
+
+[`Divergences/DoubleBarrierUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBarrierUpstreamFixesTests.cs)
+
+Upstream's fix after v1.44 the discretized double-barrier assets take (the S-xeq plan's XER5 (xii), R8 master first): #2878 (QuantLib's master `eaeac5651`), the American window's bounds compared with `isOnTime` as well (`discretizeddoublebarrieroption.cpp:61-66`), where QuantLib 1.44's plain comparison skips the exercise at expiry when the grid's last time rounds below maturity. QuantLib's own case, `DoubleBarrierOptionTests.TestBinomialExerciseAtMaturity`, checks the plain asset; here the Derman-Kani asset, which reads the plain one's check, on that case's market, until the pin moves to a release that carries the fix.
+
+Facts:
+
+- `TheDermanKaniAssetExercisesAnAmericanAtMaturity`
+
 ## DoubleBinaryHuiCheckTests
 
 [`Divergences/DoubleBinaryHuiCheckTests.cs`](../tests/NanoQL.Tests/Divergences/DoubleBinaryHuiCheckTests.cs)
@@ -3707,6 +3728,20 @@ Facts:
 - `TheBatesEnginesRunFromTheEarliestDate`
 - `TheSurfaceAndTheDensityCalculatorReadEachCurveAtItsInstant`
 
+## HestonContinuousGeometricAsianTests
+
+[`Divergences/HestonContinuousGeometricAsianTests.cs`](../tests/NanoQL.Tests/Divergences/HestonContinuousGeometricAsianTests.cs)
+
+The continuous geometric Asian Heston engine's `Phi` and start date (the S-xeq plan's XER5 (xv), fixed under R8). QuantLib's coefficient of w, `a4_ = logS0*qdcf/dcf − ρv₀/σ + ρκθτ/σ` (`analytic_cont_geom_av_price_heston.cpp:245`), multiplies the log spot by the carry factor where log S_T's constant adds log(D_q/D_r), and adds ρκθτ/σ where that constant, as QuantLib's own a3 for the average, subtracts it: its `Phi(0, 1)`, the expected terminal spot, reads 81.92 against the forward 103.05 [executed: the planner's `xp_c1.cpp asian`]. The prices read w = 0 only, so they are QuantLib's. And QuantLib's engine prices an option with a start date as unseasoned from today, where QuantLib's Black-Scholes continuous engine refuses one; nanoql refuses it with that engine's text. Checks: the forward; at a vanishing vol of vol, Black-Scholes's moments of the average and the spot.
+
+Facts:
+
+- `PhiAtTheSpotsArgumentIsTheForward`
+- `AtAVanishingVolOfVolPhisMomentsAreBlackScholess`
+- `ThePricesAreQuantLibs`
+- `AnOptionWithAStartDateIsRefused`
+- `AnAverageStartingTodayIsTheUnseasonedOne`
+
 ## HestonDensityTransformCutTests
 
 [`Divergences/HestonDensityTransformCutTests.cs`](../tests/NanoQL.Tests/Divergences/HestonDensityTransformCutTests.cs)
@@ -3755,6 +3790,26 @@ Facts:
 
 - `TheHelpersMarketValueReadsTheDividendCurveByDate`
 - `OptimalAlphasDateFormReadsTheForwardByDate`
+
+## HestonForwardEngineTests
+
+[`Divergences/HestonForwardEngineTests.cs`](../tests/NanoQL.Tests/Divergences/HestonForwardEngineTests.cs)
+
+The analytic Heston forward engine's propagator and outer integral (the S-xeq plan's XER5 (xiii), (xiv); the user's ruling at the S-xeq run's stop 2). QuantLib's propagator e^(−(Bν + Λ)/2) · I(√(ΛBν)) underflows times overflows to NaN for resets just above its 1e-3 cut, at a vol of vol of 0.2 for resets of 0.00101 to 0.005 years and forward-start prices of 1 to 7 days (`analytichestonforwardeuropeanengine.cpp:218-231`) [executed: the planner's `xp_c1.cpp hfwd`]; at κ̂ = κ − ρσ = 0 its B is 0/0 and its R 0·∞ (`:115-117`, `:222`). nanoql takes the propagator through QuantLib's exponentially weighted Bessel function where QuantLib's product isn't finite and nonzero, and B through x/(−expm1(−x)) below |κ̂t| of 1e-2. That exposes QuantLib's outer integral: its 128 nodes over [0, max(2, ...)] in the reset variance carry the propagator's mass to 1.188 at a one-day reset (vol of vol 0.2), pricing 10.376, and where 2κθ < σ² lose it, 0.979 at 182 days (vol of vol 0.5), pricing 5.100. Where QuantLib's nodes miss the propagator's unit mass by more than 1e-6 nanoql takes the expectation in closed form: QuantLib's characteristic function from the reset is affine in the reset variance, so its expectation is the CIR transition's moment-generating function, each probability one Fourier integral (the user's rulings at the S-xeq run's stops 2 and 4) [executed: this run's `probes\heston3\fwd_mgf.py`, `probes\hfwd_stop4.txt`]. Checks: S-exo's Monte Carlo forward Heston engine within three standard errors on resets of a day to six months and R from 6 to 0.05, an independent quadrature of the closed form, the propagator's mass, QuantLib's values where its product is finite and where its nodes carry the mass, continuity at κ̂ = 0 and at a reset today. QuantLib's inner integral, 128 nodes to φ = 100, also fails short tenors (a one-day call at the money 0.297 against the vanilla's 0.420, calls out of the money below 0): its probabilities stand only where within 1e-7 of the resolved route's (the ruling at stop 7), the resolved integral on pieces scaled to the strike factor's period (the code review's O2-1). Checks: the analytic Heston vanilla at a reset today, the code review's own pieces, no call below 0 at short tenors.
+
+Facts:
+
+- `TheForwardStartPriceAgreesWithMonteCarlo`
+- `WhereQuantLibsNodesMissTheMassThePriceIsTheClosedFormsIndependentQuadrature`
+- `ThePriceIsContinuousAtAResetToday`
+- `ThePropagatorCarriesUnitMassWhereQuantLibsIsNaN`
+- `ThePropagatorIsQuantLibsWhereItsProductIsFinite`
+- `TheForwardStartPriceIsQuantLibsWhereItsNodesCarryTheMass`
+- `ThePriceIsContinuousAtAZeroKappaHat`
+- `AResetTodayIsTheAnalyticHestonVanilla`
+- `ShortTenorsArePricedOnTheResolvedIntegral`
+- `AtAResetTodayShortExpiriesAreTheAnalyticHestonVanilla`
+- `NoCallIsPricedBelowZeroOnShortTenors`
 
 ## HestonGeometricAsianCutoffTests
 
@@ -4994,6 +5049,17 @@ Facts:
 - `AWindowCountsCrossingsFromItsOpening`
 - `AWindowOpenTodayIsQuantLibs`
 
+## McDoubleBarrierTests
+
+[`Divergences/McDoubleBarrierTests.cs`](../tests/NanoQL.Tests/Divergences/McDoubleBarrierTests.cs)
+
+The Monte Carlo double-barrier engine's clock and exercise (the S-xeq plan's XER5 (xxxiii), and the S-xeq run's R1-4, fixed under R8). QuantLib runs the paths and the discounts on the risk-free curve's time and reads each structure there on its own clock (`mcdoublebarrierengine.hpp:164-201`), and prices any exercise to its last date, never reading its type. nanoql runs them on S-bar's engine clock, each structure read at the instants its times denote, and refuses a non-European exercise as S-bar's barrier engine does. Checks: the market restated onto the risk-free curve's day counter; the refusal's text.
+
+Facts:
+
+- `AnAct365VolatilityBesideAnAct360CurvePricesAsOnTheRestatedMarket`
+- `ANonEuropeanExerciseIsRefused`
+
 ## McHestonMismatchedTimesTests
 
 [`Divergences/McHestonMismatchedTimesTests.cs`](../tests/NanoQL.Tests/Divergences/McHestonMismatchedTimesTests.cs)
@@ -5614,6 +5680,22 @@ The perpetual futures engine on a curve dated apart (the playbook's dates row; t
 Facts:
 
 - `ADomesticCurveSettlingLaterIsReadFromItsOwnDate`
+
+## PerturbativeBarrierEngineTests
+
+[`Divergences/PerturbativeBarrierEngineTests.cs`](../tests/NanoQL.Tests/Divergences/PerturbativeBarrierEngineTests.cs)
+
+The perturbative barrier engine's distribution helpers and second-order derivatives (the S-xeq plan's XER5 (i), (ii) and XER3 (a), fixed under R8; the helpers internal, read through reflection). QuantLib's port of Genz's TVPACK has three lines that aren't Genz's: Plackett's integrand takes √(BA − R·BB) where Genz squares it (`perturbativebarrieroptionengine.cpp:1260`; upstream's own fix after v1.44, #2935, which re-caches QuantLib's two order-2 cases at 0.8943754 where v1.44 cached its defective code's 0.8943769); the Student branch belongs to the degrees-of-freedom test, where QuantLib's attaches it to the normal integrand's cut (`:1261-1268`), so a normal integrand past the cut returns 0.5 or NaN, not 0; and the bivariate normal's |ρ| ≥ 0.925 branch takes (1 − x²)² where Genz's `BVND` takes √(1 − x²) (`:1398`). QuantLib's trivariate normal misses an independent one by up to 0.0129 at six points (0.247037493575 against 0.253775665773, 0.051555378193 against 0.049633455514, 0 against 0.012895124168, 0 against 0.006207519614, 0.144908828458 against 0.144207845916, 0.001686899450 against 0.001348181042) and by up to 0.92 at 1,500 random ones; QuantLib's bivariate normal misses QuantLib's own We04DP by up to 5.1e-3 [executed: the planner's `xp_pert.cpp`, `xp_pert2935.cpp`, `xp_pert_nd2.cpp`, `xp_tvtl_time.cpp`]. The second-order term's derivative helpers aren't their functions' derivatives in a: the F helper's factor reads τ − p where its function reads τ − s, and the E helper's two normal limits carry a stray inner square root and its x-derivative of Φ₂(x, y) − Φ(x) the wrong sign. nanoql takes Genz's three lines and derives the helpers term by term from ∂Φ₂(h, k; ρ)/∂h = φ(h) Φ((k − ρh)/√(1 − ρ²)). Checks: We04DP; a trivariate normal integrated on 50 panels of 64-point Gauss-Legendre; five-point differences; the finite-difference barrier engine; S-rx's analytic barrier engine on a flat market.
+
+Facts:
+
+- `OrderTwoIsQuantLibMastersCacheNotItsV144Cache`
+- `TheBivariateNormalIsWe04DPPastPointNineTwoFive`
+- `TheTrivariateNormalIsGenzsAtThePlannersPoints`
+- `TheTrivariateNormalIsGenzsAtFifteenHundredPoints`
+- `TheSecondOrderHelpersAreTheirFunctionsDerivatives`
+- `OrderTwoApproachesTheFiniteDifferencesOnAStronglyTimeDependentMarket`
+- `OnAFlatMarketEachOrderIsTheAnalyticBarrierPrice`
 
 ## PolarStudentTSamplerTests
 
@@ -6660,6 +6742,23 @@ Facts:
 - `ACallIsTheZeroStrikeCallLessTheDiscountedStrike`
 - `APutIsWorthNothing`
 
+## SuoWangDoubleBarrierTests
+
+[`Divergences/SuoWangDoubleBarrierTests.cs`](../tests/NanoQL.Tests/Divergences/SuoWangDoubleBarrierTests.cs)
+
+The Suo-Wang double-barrier engine's four classes (the S-xeq plan's XER5 (iii)–(vi), fixed under R8). QuantLib clips one strike limit only (`suowangdoublebarrierengine.cpp:54-55`, #2881's class), so a knock-out call struck above H prices −0.1694572673, a put struck below L −0.3467932631, and the knock-in call 0.9992298671 against the analytic engine's 0.8297725998; it sums ten terms from −5 to 4 (`:77`), 0.004975355507 on a narrow corridor over two years where 50 terms give −3.5e-13 and the binomial engine 1e-70; it ignores the rebate, 1.454185879 with a rebate of 5 as without where the binomial Derman-Kani engine gives 3.982 (knock-in 6.818712906 against 9.194); and its powers overflow to NaN at a volatility of 1e-4 and of 0 [executed: the planner's `xp_c1.cpp sw`, `out_xp_c1_sw.txt`]. nanoql clips both limits to the corridor, converges the series, prices the rebate as S-bar's analytic engine does and takes the analytic engine's knock-out where a term overflows. Checks: S-bar's analytic engine, QuantLib's binomial Derman-Kani values, the deterministic limit.
+
+Facts:
+
+- `AKnockOutStruckOutsideTheCorridorPricesNothing`
+- `AKnockInStruckAboveTheCorridorIsTheAnalyticEngines`
+- `ANarrowCorridorOverTwoYearsIsWorthItsConvergedSeries`
+- `ARebateIsPaidAsTheAnalyticEnginePaysIt`
+- `AtLowVolatilityTheKnockOutIsTheAnalyticEngines`
+- `AtAVolatilityOfAFewPercentCancellingSumsGiveWayToTheAnalyticEngine`
+- `TheKnockOutIsTheAnalyticEnginesWithinTheSumsAgreement`
+- `QuantLibsValueStandsWhereItsTermsHaveConverged`
+
 ## SvdNonFiniteRefusalTests
 
 [`Divergences/SvdNonFiniteRefusalTests.cs`](../tests/NanoQL.Tests/Divergences/SvdNonFiniteRefusalTests.cs)
@@ -7138,6 +7237,21 @@ Facts:
 - `ACallableTarnPairsWithItsInertTwin`
 - `OnCoterminalAndCmsEvolversTheBoundIsQuantLibs`
 - `OnANormalEvolverEveryPathsGapIsAtLeastZero`
+
+## VannaVolgaDoubleBarrierTests
+
+[`Divergences/VannaVolgaDoubleBarrierTests.cs`](../tests/NanoQL.Tests/Divergences/VannaVolgaDoubleBarrierTests.cs)
+
+The Vanna-Volga double-barrier engine's classes (the S-xeq plan's XER5 (viii), (ix); the user's ruling at the S-xeq run's stop 1). QuantLib passes the foreign discount twice to the smile's interpolation (`vannavolgadoublebarrierengine.hpp:144`), whose constructor takes the domestic one first, as QuantLib's single-barrier engine passes it: the vanilla on the smile moves by 1.4e-4 at QuantLib's rates and 6.0e-4 at a foreign rate of 3% [executed: the planner's `xp_c1.cpp vv`]. nanoql passes the domestic discount first; its vanilla equals the single-barrier engine's on the same quotes. nanoql also carries S-rx's single-barrier classes (SRXR3 (xvi), (xx)): each curve read at the instant the quotes' time denotes on the volatility's clock, an out option on or beyond a barrier worth its rebate, an in option's rebate the inner engine's, and the already-out and already-in tests inclusive at the barriers. QuantLib's own case builds its curves on Actual360 beside the engine's Actual/365F volatility, where QuantLib's inner engine accrues the variance over 365/360 risk-free years and its own discounts read each curve's clock: the ruled reads (S-bar's BR5 (i), SRXR3 (xx)) move 16 of its 40 values past its 1e-4, by up to 1.11e-3 (eight strikes, each knock-in and knock-out: the calls at 1.13321 and 1.22687 and the puts at 1.38843 and 1.46047 over a year, the calls at 1.06145 and 1.19545 and the puts at 1.44298 and 1.56345 over two; QuantLib's cached 0.036217, 0.144130, 0.025532, 0.074560, 0.036798, 0.060490, 0.047325, 0.111030, 0.059136, 0.199810, 0.042694, 0.103890, 0.061539, 0.093460, 0.081464, 0.177040 against nanoql's 0.035420, 0.144927, 0.025147, 0.074945, 0.036576, 0.060712, 0.046837, 0.111519, 0.058023, 0.200923, 0.042200, 0.104384, 0.061129, 0.093870, 0.080606, 0.177897), and QuantLib's own engine misses 20 of the 40 on the case restated to Actual/365F (worst 1.04e-3): the cache belongs to QuantLib's mixed clocks [executed: this run's `probes\cxx\xq_vvdb_dc.cpp`, `out_vvdb_360.txt`, `out_vvdb_365.txt`; `probes\vvdb\`]. On the restated case nanoql is QuantLib's engine with the domestic discount, within 1e-12 on all 40.
+
+Facts:
+
+- `OnTheRestatedCaseTheEngineIsQuantLibsWithTheDomesticDiscount`
+- `TheSmilesVanillaIsTheSingleBarrierEngines`
+- `OnAFlatSmileTheEngineIsItsInnerEngineWithARebate`
+- `OnABarrierAnOutOptionIsItsRebateAndAnInOptionItsVanilla`
+- `EachCurveIsReadAtTheQuotesInstant`
+- `TheSurvivalProbabilityIsItsConvergedSeries`
 
 ## VannaVolgaMismatchedTimesTests
 

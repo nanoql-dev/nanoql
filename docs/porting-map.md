@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 139 | 17 |
-| partial | 22 | 18 |
-| ported | 1,099 | 145 |
+| not started | 130 | 17 |
+| partial | 22 | 14 |
+| ported | 1,108 | 149 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -144,7 +144,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `analytic_cont_geom_av_price_heston` | not started |  | no nanoql type: AnalyticContinuousGeometricAveragePriceAsianHestonEngine |
+| `analytic_cont_geom_av_price_heston` | ported | Experimental/Asian/AnalyticContinuousGeometricAveragePriceAsianHestonEngine.cs |  |
 | `analytic_discr_geom_av_price_heston` | ported | Experimental/Asian/AnalyticDiscreteGeometricAveragePriceAsianHestonEngine.cs |  |
 
 ### `ql/experimental/averageois/`
@@ -161,14 +161,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `binomialdoublebarrierengine` | not started |  | no nanoql type: BinomialDoubleBarrierEngine |
-| `discretizeddoublebarrieroption` | not started |  | no nanoql type: DiscretizedDoubleBarrierOption, DiscretizedDermanKaniDoubleBarrierOption |
-| `mcdoublebarrierengine` | not started |  | no nanoql type: MCDoubleBarrierEngine, MakeMCDoubleBarrierEngine, DoubleBarrierPathPricer |
-| `perturbativebarrieroptionengine` | not started |  | no nanoql type: PerturbativeBarrierOptionEngine |
-| `quantodoublebarrieroption` | not started |  | no nanoql type: QuantoDoubleBarrierOption |
-| `suowangdoublebarrierengine` | not started |  | no nanoql type: SuoWangDoubleBarrierEngine |
+| `binomialdoublebarrierengine` | ported | Experimental/BarrierOption/BinomialDoubleBarrierEngine.cs |  |
+| `discretizeddoublebarrieroption` | ported | Experimental/BarrierOption/DiscretizedDoubleBarrierOption/DiscretizedDermanKaniDoubleBarrierOption.cs, Experimental/BarrierOption/DiscretizedDoubleBarrierOption/DiscretizedDoubleBarrierOption.cs, Experimental/BarrierOption/DiscretizedDoubleBarrierOption/IDiscretizedDoubleBarrierAsset{TSelf}.cs |  |
+| `mcdoublebarrierengine` | ported | Experimental/BarrierOption/MCDoubleBarrierEngine/DoubleBarrierPathPricer.cs, Experimental/BarrierOption/MCDoubleBarrierEngine/MCDoubleBarrierEngine.cs, Experimental/BarrierOption/MCDoubleBarrierEngine/MakeMCDoubleBarrierEngine{TRng,TStats}.cs |  |
+| `perturbativebarrieroptionengine` | ported | Experimental/BarrierOption/PerturbativeBarrierOptionEngine.cs |  |
+| `quantodoublebarrieroption` | ported | Experimental/BarrierOption/QuantoDoubleBarrierOption.cs |  |
+| `suowangdoublebarrierengine` | ported | Experimental/BarrierOption/SuoWangDoubleBarrierEngine.cs |  |
 | `vannavolgabarrierengine` | ported | Experimental/BarrierOption/VannaVolgaBarrierEngine.cs |  |
-| `vannavolgadoublebarrierengine` | not started |  | no nanoql type: VannaVolgaDoubleBarrierEngine |
+| `vannavolgadoublebarrierengine` | ported | Experimental/BarrierOption/VannaVolgaDoubleBarrierEngine.cs |  |
 | `vannavolgainterpolation` | ported | Experimental/BarrierOption/VannaVolga.cs, Experimental/BarrierOption/VannaVolgaInterpolation.cs |  |
 
 ### `ql/experimental/basismodels/`
@@ -343,7 +343,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `analytichestonforwardeuropeanengine` | not started |  | no nanoql type: AnalyticHestonForwardEuropeanEngine |
+| `analytichestonforwardeuropeanengine` | ported | Experimental/Forward/AnalyticHestonForwardEuropeanEngine.cs |  |
 
 ### `ql/experimental/fx/`
 
@@ -2064,11 +2064,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `amortizingbond` | ported | TestSuite/AmortizingBondTests.cs | 3 of 3 cases |
 | `andreasenhugevolatilityinterpl` | ported | TestSuite/AndreasenHugeVolatilityInterplTests.cs | 14 of 14 cases |
 | `array` | ported | TestSuite/ArrayTests.cs | 4 of 4 cases |
-| `asianoptions` | partial | TestSuite/AsianOptionsTests.cs | 21 of 23 cases; not yet: testVecerEngine, testAnalyticContinuousGeometricAveragePriceHeston; moved: testAnalyticDiscreteGeometricAverageStrike line 488 to Divergences/GeometricAverageStrikeForwardStartTests.cs |
+| `asianoptions` | partial | TestSuite/AsianOptionsTests.cs | 22 of 23 cases; not yet: testVecerEngine; moved: testAnalyticDiscreteGeometricAverageStrike line 488 to Divergences/GeometricAverageStrikeForwardStartTests.cs |
 | `assetswap` | ported | TestSuite/AssetSwapTests.cs | 9 of 9 cases |
 | `autocovariances` | ported | TestSuite/AutocovariancesTests.cs | 3 of 3 cases |
 | `bacheliercalculator` | ported | TestSuite/BachelierCalculatorTests.cs | 8 of 8 cases; moved: testBachelierCalculatorGreeks line 173 to Divergences/BachelierGreeksTests.cs; testBachelierCalculatorGreeks line 213 to Divergences/BachelierGreeksTests.cs |
-| `barrieroption` | partial | TestSuite/BarrierOptionTests.cs | 11 of 15 cases; not yet: testPerturbativeOrder0, testPerturbativeOrder1, testPerturbativeOrder2Fast, testPerturbativeOrder2FullResolution |
+| `barrieroption` | ported | TestSuite/BarrierOptionTests.cs | 15 of 15 cases |
 | `basismodels` | not started |  | 4 cases |
 | `basisswapratehelpers` | ported | TestSuite/BasisSwapRateHelpersTests.cs | 24 of 24 cases; moved: testOvernightIborAveragingAndTelescopicValueDates line 767 to Divergences/TelescopicValueDatesTests.cs; testOvernightOvernightTelescopicValueDatesWithSimpleAveraging line 920 to Divergences/TelescopicValueDatesTests.cs |
 | `basketoption` | ported | TestSuite/BasketOptionTests.cs | 25 of 25 cases |
@@ -2116,7 +2116,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `digitaloption` | ported | TestSuite/DigitalOptionTests.cs | 10 of 10 cases |
 | `distributions` | ported | TestSuite/DistributionsTests.cs | 21 of 21 cases |
 | `dividendoption` | partial | TestSuite/DividendOptionTests.cs | 17 of 18 cases; not yet: testEuropeanEndLimit |
-| `doublebarrieroption` | partial | TestSuite/DoubleBarrierOptionTests.cs | 1 of 3 cases; not yet: testVannaVolgaDoubleBarrierValues, testMonteCarloDoubleBarrierWithAnalytical |
+| `doublebarrieroption` | ported | TestSuite/DoubleBarrierOptionTests.cs | 3 of 3 cases |
 | `doublebinaryoption` | ported | TestSuite/DoubleBinaryOptionTests.cs | 2 of 2 cases; moved: testHaugValues line 171 to Divergences/DoubleBinaryKnockedInTests.cs; testHaugValues line 172 to Divergences/DoubleBinaryKnockedInTests.cs |
 | `equitycashflow` | ported | TestSuite/EquityCashFlowTests.cs | 8 of 8 cases |
 | `equityindex` | ported | TestSuite/EquityIndexTests.cs | 11 of 12 cases; not ported: testFixingObservability (observer notifications, which an immutable index has no use for, R1) |
@@ -2135,7 +2135,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdsabr` | ported | TestSuite/FdSabrTests.cs | 5 of 5 cases |
 | `fittedbonddiscountcurve` | ported | TestSuite/FittedBondDiscountCurveTests.cs | 5 of 5 cases |
 | `floatfloatswap` | ported | TestSuite/FloatFloatSwapTests.cs | 6 of 6 cases |
-| `forwardoption` | partial | TestSuite/ForwardOptionTests.cs | 6 of 8 cases; not yet: testHestonMCPrices, testHestonAnalyticalVsMCPrices |
+| `forwardoption` | ported | TestSuite/ForwardOptionTests.cs | 8 of 8 cases |
 | `forwardrateagreement` | ported | TestSuite/ForwardRateAgreementTests.cs | 1 of 1 cases |
 | `functions` | ported | TestSuite/FunctionsTests.cs | 9 of 9 cases |
 | `fxforward` | ported | TestSuite/FxForwardTests.cs | 13 of 13 cases |
@@ -2210,7 +2210,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `quantlibbenchmark` | not ported: a timing runner |  |  |
 | `quantlibglobalfixture` | replaced: test infrastructure: xUnit and the vector harness |  |  |
 | `quantlibtestsuite` | replaced: test infrastructure: xUnit and the vector harness |  |  |
-| `quantooption` | partial | TestSuite/QuantoOptionTests.cs | 9 of 10 cases; not yet: testDoubleBarrierValues |
+| `quantooption` | ported | TestSuite/QuantoOptionTests.cs | 10 of 10 cases |
 | `quotes` | ported | TestSuite/QuoteTests.cs | 4 of 6 cases; not ported: testObservable (observer notifications, which values have no use for, R1); testObservableHandle (relinkable handles' notifications, which values have no use for, R1) |
 | `rangeaccrual` | ported | TestSuite/RangeAccrualTests.cs | 3 of 3 cases |
 | `riskneutraldensitycalculator` | ported | TestSuite/RiskNeutralDensityCalculatorTests.cs | 14 of 14 cases |
