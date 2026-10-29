@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using NanoQL.Coupons;
 using NanoQL.Experimental;
+using NanoQL.TermStructures;
 using NanoQL.Tests.Harness;
 using NanoQL.Time;
 
@@ -12,7 +13,7 @@ namespace NanoQL.Tests.Vectors;
 
 /// <summary>
 /// The CMS spread legs' vectors, <c>tests/vectors/experimental/coupons/cmsspreadcoupon.json</c>: legs on a 10Y-2Y swap
-/// spread index, their coupons' terms and index fixings; their rates refuse, without a pricer. And the pricers' base's
+/// spread index, their coupons' terms, index fixings and rates on the lognormal CMS spread pricer. And the pricer's
 /// correlation, as built and on a copy with another, against QuantLib's <c>correlation()</c> and <c>setCorrelation</c>.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
@@ -28,7 +29,7 @@ public class CmsSpreadCouponVectorTests
             EvaluationContext context = c.Context();
             if (c.Inputs.TryGetProperty("pricer", out JsonElement pricerSpec))
             {
-                CmsSpreadCouponPricer pricer = new BasePricer(pricerSpec.GetProperty("correlation").GetDouble());
+                CmsSpreadCouponPricer pricer = SpreadPricer(pricerSpec.GetProperty("correlation").GetDouble(), context);
                 check.Output(c, "correlation", pricer.Correlation);
                 JsonElement reset = pricerSpec.GetProperty("setCorrelation");
                 if (reset.ValueKind != JsonValueKind.Null)
@@ -39,7 +40,10 @@ public class CmsSpreadCouponVectorTests
                 continue;
             }
 
-            ImmutableArray<CashFlow> leg = LegOf(c.Input("leg"), context).ToLeg();
+            JsonElement spec = c.Input("leg");
+            ImmutableArray<CashFlow> leg = CouponPricerFunctions.SetCouponPricer(
+                LegOf(spec, context).ToLeg(),
+                SpreadPricer(spec.GetProperty("pricer").GetProperty("correlation").GetDouble(), context));
 
             Coupon[] coupons = [.. leg.Select(cf => (Coupon)cf)];
             check.Output(c, "floating", coupons.Select(x => x is FloatingRateCoupon).ToArray());
@@ -100,23 +104,13 @@ public class CmsSpreadCouponVectorTests
     private static Func<object?>[] FloatingAttempt(Coupon[] coupons, Func<FloatingRateCoupon, double> f) =>
         [.. coupons.Select(x => x is FloatingRateCoupon fc ? (Func<object?>)(() => f(fc)) : () => null)];
 
-    // The base's members alone, which the vectors read through QuantLib's lognormal pricer, S-xrt's port.
-    private sealed class BasePricer(double? correlation) : CmsSpreadCouponPricer(correlation)
-    {
-        public override double SwapletPrice(FloatingRateCoupon coupon, EvaluationContext context) => throw new NotSupportedException();
-
-        public override double SwapletRate(FloatingRateCoupon coupon, EvaluationContext context) => throw new NotSupportedException();
-
-        public override double CapletPrice(FloatingRateCoupon coupon, double effectiveCap, EvaluationContext context) =>
-            throw new NotSupportedException();
-
-        public override double CapletRate(FloatingRateCoupon coupon, double effectiveCap, EvaluationContext context) =>
-            throw new NotSupportedException();
-
-        public override double FloorletPrice(FloatingRateCoupon coupon, double effectiveFloor, EvaluationContext context) =>
-            throw new NotSupportedException();
-
-        public override double FloorletRate(FloatingRateCoupon coupon, double effectiveFloor, EvaluationContext context) =>
-            throw new NotSupportedException();
-    }
+    // The generator's spread_pricer: the lognormal pricer on a linear TSR pricer of a flat 20% swaption volatility at
+    // zero mean reversion.
+    private static LognormalCmsSpreadPricer SpreadPricer(double correlation, EvaluationContext context) =>
+        new(
+            new LinearTsrPricer(
+                new ConstantSwaptionVolatility(
+                    context.EvaluationDate, new TARGET(), BusinessDayConvention.Following, 0.20, new Actual365Fixed()),
+                0.0),
+            correlation);
 }

@@ -102,6 +102,7 @@ The licensing gate checks that this list and the files match.
 
 - `src/NanoQL/Experimental/CallableBonds/CallableBondVolatilityStructure.cs`: the constructor for a structure managing its own reference date, `(dc, bdc)`, which no QuantLib 1.44 class uses and which waits for its first user.
 - `src/NanoQL/Experimental/Commodities/EnergyCommodity/EnergyCommodity.cs`: `EnergyCommodity::arguments` and `EnergyCommodity::engine`, never ported: no engine derives from the engine class, and `setupArguments` fills no argument.
+- `src/NanoQL/Experimental/Coupons/LognormalCmsSpreadPricer.cs`: `LognormalCmsSpreadPricer::integrand_normal`, never ported: `lognormalcmsspreadpricer.cpp` defines it and nothing calls it.
 - `src/NanoQL/Experimental/Credit/BaseCorrelationTermStructure{TInterpolator}.cs`: `ImplicitCorrelation(Real, Real)`, never ported: `basecorrelationstructure.hpp` declares it and nothing defines it.
 - `src/NanoQL/Experimental/Credit/Basket.cs`: `densityTrancheLoss`, never ported: `basket.hpp` declares it and nothing defines it, so QuantLib never compiles a call to it.
 - `src/NanoQL/Experimental/Credit/CorrelationTermStructure.cs`: the constructor for a structure managing its own reference date, `(cal, bdc, dc)`, which no QuantLib 1.44 class uses and which waits for its first user.
@@ -110,6 +111,9 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Experimental/Credit/RecursiveLossModel{TCopula,TInitTraits}.cs`: `expectedConditionalLoss`, never ported: private and unused, its only call commented out.
 - `src/NanoQL/Experimental/Credit/SpotRecoveryLatentModel{TCopula,TInitTraits}.cs`: `expectedLoss`, `conditionalExpLossRR` and `conditionalExpLossRRInv`, never ported: they call `conditionalRecoveryInvPinvRR`, which QuantLib declares nowhere, so QuantLib never compiles them.
 - `src/NanoQL/Experimental/Inflation/KInterpolatedYoYOptionletVolatilitySurface{TInterpolator}.cs`: `KInterpolatedYoYOptionletVolatilitySurface::volatilityImpl(const Date&, Rate)`, never ported: only its time form calls it, and the time form reads the stripped curves by time (XRR5 (xiii)).
+- `src/NanoQL/Experimental/Swaptions/HaganIrregularSwaptionEngine.cs`: `HaganIrregularSwaptionEngine::LGMPrice` and `rStarFinder`, never ported: `haganirregularswaptionengine.hpp` declares them and nothing defines them.
+- `src/NanoQL/Experimental/Swaptions/IrregularSwap.cs`: `IrregularSwap::arguments` and `IrregularSwap::engine`, never ported: no engine derives from the engine class, and no engine reads the arguments' vectors (Hagan's engine reads the swaption's swap and exercise).
+- `src/NanoQL/Experimental/Swaptions/IrregularSwaption/IrregularSwaption.cs`: `IrregularSwaption::impliedVolatility`, never ported: every call throws, unpriced "null pricing engine", priced "wrong argument type" (its Black helper's arguments can't take an irregular swaption's); and `IrregularSwaption::arguments` and `IrregularSwaption::engine`, never ported: Hagan's engine reads the swaption's swap, exercise and settlement type, and derives from no engine class but the generic one.
 - `src/NanoQL/Methods/FiniteDifferences/StepCondition.cs`: `NullCondition`, which no QuantLib 1.44 class or test uses and which waits for its first user.
 - `src/NanoQL/Models/MarketModels/MarketModelDifferencesFunctions.cs`: `coterminalSwapPseudoRoots`, never ported: QuantLib declares it and defines none, and its two-argument definition, in no header, refuses every QuantLib correlation, reads past the variances otherwise, and scales the correlation, not a root of it.
 - `src/NanoQL/TermStructure.cs`: the constructors taking a day counter only.
@@ -127,10 +131,7 @@ The licensing gate checks that this list and the files match.
 - `src/NanoQL/Time/Date/Date.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Time/Date/DateFunctions.cs`: `io::formatted_date`, not ported.
 - `src/NanoQL/Utilities/DataParsers/DateParser.cs`: `parseFormatted`, not ported: a `DateOnly`'s `ParseExact` does its job.
-- `tests/NanoQL.Tests/TestSuite/CmsSpreadTests.cs`: `testCouponPricing`, which waits for S-xrt's `LognormalCmsSpreadPricer`.
-- `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testPiecewiseIntegral`, which waits for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: `testLaplaceInterpolation`, which waits for S-xrt's Laplace interpolation.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the Moore-Penrose case, which waits for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing cases, which wait for S-xrt's hybrid simulated annealing.
-- `tests/NanoQL.Tests/TestSuite/VppTests.cs`: `testGemanRoncoroniProcess`, which waits for S-xrt's Geman-Roncoroni process.

@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/gaussianquadratures.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes (S-xrt)
 
+using NanoQL.Experimental;
 using NanoQL.Numerics;
 
 namespace NanoQL.Tests.TestSuite;
@@ -152,6 +152,75 @@ public class GaussianQuadraturesTests
 
         TestSingle(quadSine, "f(x) = exp(-x)", InvExp, 1.0);
         TestSingle(quadSine, "f(x) = x*exp(-x)", XInvExp, 1.0);
+    }
+
+    // Adapted: Boost's non-central chi-squared density is the polynomial's weight function, the same Boost pdf.
+    [Fact]
+    public void TestNonCentralChiSquared()
+    {
+        // Testing Gauss non-central chi-squared integration...
+
+        var poly41 = new GaussNonCentralChiSquaredPolynomial(4.0, 1.0);
+        TestSingle(
+            new GaussianQuadrature(2, new GaussNonCentralChiSquaredPolynomial(4.0, 1.0)),
+            "f(x) = x^2 * nonCentralChiSquared(4, 1)(x)",
+            x => x * x * poly41.W(x),
+            37.0);
+
+        var poly11 = new GaussNonCentralChiSquaredPolynomial(1.0, 1.0);
+        TestSingle(
+            new GaussianQuadrature(14, new GaussNonCentralChiSquaredPolynomial(1.0, 1.0)),
+            "f(x) = x * sin(0.1*x)*exp(0.3*x)*nonCentralChiSquared(1, 1)(x)",
+            x => x * Math.Sin(0.1 * x) * Math.Exp(0.3 * x) * poly11.W(x),
+            17.408092);
+    }
+
+    [Fact]
+    public void TestNonCentralChiSquaredSumOfNodes()
+    {
+        // Testing Gauss non-central chi-squared sum of nodes...
+
+        // Walter Gautschi, How and How not to check Gaussian Quadrature Formulae
+        // https://www.cs.purdue.edu/homes/wxg/selected_works/section_08/084.pdf
+
+        // Expected results have been calculated with a multi precision library
+        // following the description of test #4 in the paper above.
+        // Using QuantLib's own determinant function will not work here
+        // as it supports only double precision.
+        Real[] expected =
+        [
+            47.53491786730293,
+            70.6103295419633383,
+            98.0593406849441607,
+            129.853401537905341,
+            165.96963582663912,
+            206.389183233992043,
+        ];
+
+        const Real nu = 4.0;
+        const Real lambda = 1.0;
+        var orthPoly = new GaussNonCentralChiSquaredPolynomial(nu, lambda);
+
+        const Real tol = 1e-5;
+
+        for (int n = 4; n < 10; ++n)
+        {
+            Vector x = new GaussianQuadrature(n, orthPoly).X();
+            Real calculated = 0.0;
+            for (int i = 0; i < x.Size; ++i)
+            {
+                calculated += x[i];
+            }
+
+            if (Math.Abs(calculated - expected[n - 4]) > tol)
+            {
+                Assert.Fail(
+                    "failed to reproduce rule of sum"
+                    + $"\n    calculated: {calculated}"
+                    + $"\n    expected:   {expected[n - 4]}"
+                    + $"\n    diff    :   {calculated - expected[n - 4]}");
+            }
+        }
     }
 
     [Fact]

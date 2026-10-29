@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Immutable;
+using System.Text.Json;
 using NanoQL.Coupons;
 using NanoQL.Experimental;
 using NanoQL.Tests.Harness;
@@ -44,39 +45,15 @@ public class DigitalLegNakedOptionTests
     [Fact]
     public void TheCmsSpreadLegDefaultsToACoveredOption()
     {
-        // no CMS spread pricer is ported before S-xrt, so a pricer of fixed rates prices the leg
         VectorCase c = VectorFile.Load("cxx/experimental/coupons/digitalcmsspreadcoupon").Cases.Single(x => x.Name == "cash calls at 5%");
         EvaluationContext context = c.Context();
-        DigitalCmsSpreadLeg leg = DigitalCmsSpreadCouponCxxVectorTests.BuilderOf(c.Input("leg"), context);
-        var pricer = new FixedRatesPricer();
-        double[] rates = Rates(CouponPricerFunctions.SetCouponPricer(leg.ToLeg(), pricer), context);
-        Assert.Equal(Rates(CouponPricerFunctions.SetCouponPricer(leg.WithNakedOption(false).ToLeg(), pricer), context), rates);
-        Assert.NotEqual(Rates(CouponPricerFunctions.SetCouponPricer(leg.WithNakedOption().ToLeg(), pricer), context), rates);
+        JsonElement spec = c.Input("leg");
+        DigitalCmsSpreadLeg leg = DigitalCmsSpreadCouponCxxVectorTests.BuilderOf(spec, context);
+        double[] rates = Rates(DigitalCmsSpreadCouponCxxVectorTests.Priced(leg, spec, context), context);
+        Assert.Equal(Rates(DigitalCmsSpreadCouponCxxVectorTests.Priced(leg.WithNakedOption(false), spec, context), context), rates);
+        Assert.NotEqual(Rates(DigitalCmsSpreadCouponCxxVectorTests.Priced(leg.WithNakedOption(), spec, context), context), rates);
     }
 
     private static double[] Rates(ImmutableArray<CashFlow> leg, EvaluationContext context) =>
         leg.OfType<DigitalCoupon>().Select(d => d.Rate(context)).ToArray();
-
-    // A swaplet rate of 2% and options of their intrinsic value plus 1bp.
-    private sealed class FixedRatesPricer : CmsSpreadCouponPricer
-    {
-        private const double Swaplet = 0.02;
-
-        public override double SwapletPrice(FloatingRateCoupon coupon, EvaluationContext context) =>
-            Swaplet * coupon.AccrualPeriod() * coupon.ContractNominal;
-
-        public override double SwapletRate(FloatingRateCoupon coupon, EvaluationContext context) => Swaplet;
-
-        public override double CapletPrice(FloatingRateCoupon coupon, double effectiveCap, EvaluationContext context) =>
-            CapletRate(coupon, effectiveCap, context) * coupon.AccrualPeriod() * coupon.ContractNominal;
-
-        public override double CapletRate(FloatingRateCoupon coupon, double effectiveCap, EvaluationContext context) =>
-            Math.Max(Swaplet - effectiveCap, 0.0) + 1e-4;
-
-        public override double FloorletPrice(FloatingRateCoupon coupon, double effectiveFloor, EvaluationContext context) =>
-            FloorletRate(coupon, effectiveFloor, context) * coupon.AccrualPeriod() * coupon.ContractNominal;
-
-        public override double FloorletRate(FloatingRateCoupon coupon, double effectiveFloor, EvaluationContext context) =>
-            Math.Max(effectiveFloor - Swaplet, 0.0) + 1e-4;
-    }
 }

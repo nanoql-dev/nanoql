@@ -2,22 +2,28 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // ql/experimental/coupons/digitalcmsspreadcoupon.hpp: the digital CMS spread leg, which the wheel doesn't bind, built
-// inside each call, its structure alone, since its rates need a CMS spread pricer, whose lognormal implementation
-// waits for S-xrt:
+// inside each call, priced by the lognormal CMS spread pricer (ql/experimental/coupons/lognormalcmsspreadpricer.hpp):
 //
-//     DigitalCmsSpreadLeg   (leg): per coupon, digitalspec.hpp's leg outputs without rates
+//     DigitalCmsSpreadLeg   (leg): per coupon, digitalspec.hpp's leg outputs, with rates when the leg has a pricer
 //
 // A leg is {"schedule" (cashflows/couponspec.hpp's schedule spec), "index1" and "index2" (cashflows/cmsspec.hpp's swap
 // indexes, combined as SwapSpreadIndex("CMS10Y2Y", index1, index2)), "notionals", "paymentDayCounter",
-// "paymentAdjustment", "fixingDays", "gearings", "spreads", "inArrears", digitalspec.hpp's leg settings}.
+// "paymentAdjustment", "fixingDays", "gearings", "spreads", "inArrears", digitalspec.hpp's leg settings, "pricer"}, the
+// pricer null for none or {"cms" (cashflows/cmsspec.hpp's pricer spec), "correlation"}: a LognormalCmsSpreadPricer on
+// that CMS pricer, at that correlation, with no coupon discount curve and its default 16 points.
 
 #include "cashflows/cmsspec.hpp"
 #include "cashflows/couponspec.hpp"
 #include "cashflows/digitalspec.hpp"
 #include "convert.hpp"
 
+#include <ql/cashflows/couponpricer.hpp>
 #include <ql/experimental/coupons/digitalcmsspreadcoupon.hpp>
+#include <ql/experimental/coupons/lognormalcmsspreadpricer.hpp>
 #include <ql/experimental/coupons/swapspreadindex.hpp>
+#include <ql/quotes/simplequote.hpp>
+
+#include <optional>
 
 #include <initializer_list>
 #include <string>
@@ -45,6 +51,8 @@ namespace harness {
             std::vector<Natural> fixingDays;
             bool inArrears = false;
             digital::LegTermsSpec terms;
+            std::optional<cms::PricerSpec> pricer;
+            Real correlation = 0.0;
         };
 
         LegSpec leg(const json::value& v) {
@@ -65,6 +73,14 @@ namespace harness {
             s.spreads = reals(key(o, "spreads", what));
             s.inArrears = boolean(key(o, "inArrears", what));
             s.terms = digital::legTerms(o, what);
+            const json::value& pricer = key(o, "pricer", what);
+            if (!pricer.is_null()) {
+                if (!pricer.is_object())
+                    throw InvalidParams("a spread pricer is {\"cms\", \"correlation\"}");
+                const json::object& po = pricer.get_object();
+                s.pricer = cms::pricer(key(po, "cms", "a spread pricer"));
+                s.correlation = real(key(po, "correlation", "a spread pricer"));
+            }
             return s;
         }
 
@@ -94,7 +110,12 @@ namespace harness {
                                  .withPutPayoffs(s.terms.putPayoffs)
                                  .withReplication(digital::makeReplication(s.terms.replication))
                                  .withNakedOption(s.terms.nakedOption);
-                     return digital::legOutputs(l, false);
+                     if (!s.pricer)
+                         return digital::legOutputs(l, false);
+                     setCouponPricer(l, ext::make_shared<LognormalCmsSpreadPricer>(
+                                            cms::makePricer(*s.pricer),
+                                            Handle<Quote>(ext::make_shared<SimpleQuote>(s.correlation))));
+                     return digital::legOutputs(l, true);
                  };
              }},
         });

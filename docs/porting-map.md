@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 31 | 5 |
-| partial | 24 | 11 |
-| ported | 1,205 | 164 |
+| not started | 14 | 1 |
+| partial | 28 | 9 |
+| ported | 1,218 | 170 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -237,10 +237,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `cmsspreadcoupon` | ported | Experimental/Coupons/CmsSpreadCoupon/CappedFlooredCmsSpreadCoupon.cs, Experimental/Coupons/CmsSpreadCoupon/CmsSpreadCoupon.cs, Experimental/Coupons/CmsSpreadCoupon/CmsSpreadCouponPricer.cs, Experimental/Coupons/CmsSpreadCoupon/CmsSpreadLeg.cs |  |
 | `digitalcmsspreadcoupon` | ported | Experimental/Coupons/DigitalCmsSpreadCoupon.cs, Experimental/Coupons/DigitalCmsSpreadLeg.cs |  |
-| `lognormalcmsspreadpricer` | not started |  | no nanoql type: LognormalCmsSpreadPricer |
-| `proxyibor` | not started |  | no nanoql type: ProxyIbor |
-| `quantocouponpricer` | not started |  | no nanoql type: BlackIborQuantoCouponPricer |
-| `strippedcapflooredcoupon` | not started |  | no nanoql type: StrippedCappedFlooredCoupon, StrippedCappedFlooredCouponLeg |
+| `lognormalcmsspreadpricer` | partial | Experimental/Coupons/LognormalCmsSpreadPricer.cs | partial: LognormalCmsSpreadPricer::integrand_normal, never ported: lognormalcmsspreadpricer.cpp defines it and nothing calls it |
+| `proxyibor` | ported | Experimental/Coupons/ProxyIbor.cs |  |
+| `quantocouponpricer` | ported | Experimental/Coupons/BlackIborQuantoCouponPricer.cs |  |
+| `strippedcapflooredcoupon` | ported | Experimental/Coupons/StrippedCappedFlooredCoupon.cs, Experimental/Coupons/StrippedCappedFlooredCouponLeg.cs |  |
 | `swapspreadindex` | ported | Experimental/Coupons/SwapSpreadIndex.cs |  |
 
 ### `ql/experimental/credit/`
@@ -378,7 +378,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `extendedbinomialtree` | not started |  | no nanoql type: ExtendedBinomialTree, ExtendedBinomialTreeBranches, ExtendedEqualProbabilitiesBinomialTree, ExtendedEqualJumpsBinomialTree, ExtendedJarrowRudd, ExtendedCoxRossRubinstein, ExtendedAdditiveEQPBinomialTree, ExtendedTrigeorgis, ExtendedTian, ExtendedLeisenReimer, ExtendedJoshi4 |
+| `extendedbinomialtree` | ported | Experimental/Lattices/ExtendedBinomialTree/ExtendedAdditiveEQPBinomialTree.cs, Experimental/Lattices/ExtendedBinomialTree/ExtendedBinomialTree{T}.cs, Experimental/Lattices/ExtendedBinomialTree/ExtendedCoxRossRubinstein.cs, Experimental/Lattices/ExtendedBinomialTree/ExtendedEqualJumpsBinomialTree{T}.cs, Experimental/Lattices/ExtendedBinomialTree/ExtendedEqualProbabilitiesBinomialTree{T}.cs, Experimental/Lattices/ExtendedBinomialTree/ExtendedJarrowRudd.cs, Experimental/Lattices/ExtendedBinomialTree/ExtendedJoshi4.cs, Experimental/Lattices/ExtendedBinomialTree/ExtendedLeisenReimer.cs, Experimental/Lattices/ExtendedBinomialTree/ExtendedTian.cs, Experimental/Lattices/ExtendedBinomialTree/ExtendedTrigeorgis.cs | no nanoql type: ExtendedBinomialTreeBranches |
 
 ### `ql/experimental/math/`
 
@@ -391,7 +391,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fireflyalgorithm` | not started |  | no nanoql type: FireflyAlgorithm, FireflyAlgorithmIntensity, ExponentialIntensity, InverseLawSquareIntensity, FireflyAlgorithmRandomWalk, DistributionRandomWalk, GaussianWalk, LevyFlightWalk, DecreasingGaussianWalk |
 | `frankcopularng` | not started |  | no nanoql type: FrankCopulaRng |
 | `gaussiancopulapolicy` | ported | Experimental/Math/GaussianCopulaPolicy.cs, Experimental/Math/GaussianCopulaPolicyInitTraits.cs |  |
-| `gaussiannoncentralchisquaredpolynomial` | not started |  | no nanoql type: GaussNonCentralChiSquaredPolynomial |
+| `gaussiannoncentralchisquaredpolynomial` | ported | Experimental/Math/GaussNonCentralChiSquaredPolynomial.cs |  |
 | `hybridsimulatedannealing` | not started |  | no nanoql type: HybridSimulatedAnnealing, HybridSimulatedAnnealingLocalOptimizeScheme, HybridSimulatedAnnealingResetScheme, GaussianSimulatedAnnealing, LogNormalSimulatedAnnealing, MirrorGaussianSimulatedAnnealing, GaussianSimulatedReAnnealing, VeryFastSimulatedAnnealing, VeryFastSimulatedReAnnealing |
 | `hybridsimulatedannealingfunctors` | not started |  | no nanoql type: SamplerLogNormal, SamplerGaussian, SamplerRingGaussian, SamplerMirrorGaussian, SamplerCauchy, SamplerVeryFastAnnealing, ProbabilityAlwaysDownhill, ProbabilityBoltzmann, ProbabilityBoltzmannDownhill, TemperatureBoltzmann, TemperatureCauchy, TemperatureCauchy1D, TemperatureExponential, TemperatureVeryFastAnnealing, ReannealingTrivial, ReannealingFiniteDifferences |
 | `isotropicrandomwalk` | not started |  | no nanoql type: IsotropicRandomWalk |
@@ -426,20 +426,20 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `normalclvmodel` | not started |  | no nanoql type: NormalCLVModel |
-| `squarerootclvmodel` | not started |  | no nanoql type: SquareRootCLVModel |
+| `normalclvmodel` | ported | Experimental/Models/NormalCLVModel.cs |  |
+| `squarerootclvmodel` | ported | Experimental/Models/SquareRootCLVModel.cs |  |
 
 ### `ql/experimental/processes/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `extendedblackscholesprocess` | not started |  | no nanoql type: ExtendedBlackScholesMertonProcess, ExtendedBlackScholesMertonProcessDiscretization |
+| `extendedblackscholesprocess` | ported | Experimental/Processes/ExtendedBlackScholesMertonProcess.cs, Experimental/Processes/ExtendedBlackScholesMertonProcessDiscretization.cs |  |
 | `extendedornsteinuhlenbeckprocess` | ported | Experimental/Processes/ExtendedOrnsteinUhlenbeckProcess.cs, Experimental/Processes/ExtendedOrnsteinUhlenbeckProcessDiscretization.cs |  |
 | `extouwithjumpsprocess` | ported | Experimental/Processes/ExtOUWithJumpsProcess.cs |  |
-| `gemanroncoroniprocess` | not started |  | no nanoql type: GemanRoncoroniProcess |
+| `gemanroncoroniprocess` | ported | Experimental/Processes/GemanRoncoroniProcess.cs |  |
 | `klugeextouprocess` | ported | Experimental/Processes/KlugeExtOUProcess.cs |  |
-| `vegastressedblackscholesprocess` | not started |  | no nanoql type: VegaStressedBlackScholesProcess |
+| `vegastressedblackscholesprocess` | ported | Experimental/Processes/VegaStressedBlackScholesProcess.cs |  |
 
 ### `ql/experimental/risk/`
 
@@ -454,17 +454,17 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `generalizedhullwhite` | not started |  | no nanoql type: InterpolationParameter, GeneralizedHullWhite, GeneralizedHullWhiteDynamics, GeneralizedHullWhiteFittingParameter, LinearFlatInterpolation, LinearFlat |
-| `generalizedornsteinuhlenbeckprocess` | not started |  | no nanoql type: GeneralizedOrnsteinUhlenbeckProcess |
+| `generalizedhullwhite` | ported | Experimental/ShortRate/GeneralizedHullWhite/GeneralizedHullWhite.cs, Experimental/ShortRate/GeneralizedHullWhite/InterpolationParameter.cs, Experimental/ShortRate/GeneralizedHullWhite/LinearFlat.cs, Experimental/ShortRate/GeneralizedHullWhite/LinearFlatInterpolation.cs | no nanoql type: GeneralizedHullWhiteDynamics, GeneralizedHullWhiteFittingParameter |
+| `generalizedornsteinuhlenbeckprocess` | ported | Experimental/ShortRate/GeneralizedOrnsteinUhlenbeckProcess.cs |  |
 
 ### `ql/experimental/swaptions/`
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `haganirregularswaptionengine` | not started |  | no nanoql type: HaganIrregularSwaptionEngine, HaganIrregularSwaptionEngineBasket |
-| `irregularswap` | not started |  | no nanoql type: IrregularSwap, IrregularSwapResults |
-| `irregularswaption` | not started |  | no nanoql type: IrregularSettlementType, IrregularSwaption |
+| `haganirregularswaptionengine` | partial | Experimental/Swaptions/HaganIrregularSwaptionEngine.cs | partial: HaganIrregularSwaptionEngine::LGMPrice and rStarFinder, never ported: haganirregularswaptionengine.hpp declares them and nothing defines them; no nanoql type: HaganIrregularSwaptionEngineBasket |
+| `irregularswap` | partial | Experimental/Swaptions/IrregularSwap.cs, Experimental/Swaptions/IrregularSwapResults.cs | partial: IrregularSwap::arguments and IrregularSwap::engine, never ported: no engine derives from the engine class, and no engine reads the arguments' vectors (Hagan's engine reads the swaption's swap and exercise) |
+| `irregularswaption` | partial | Experimental/Swaptions/IrregularSwaption/IrregularSettlementType.cs, Experimental/Swaptions/IrregularSwaption/IrregularSwaption.cs, Experimental/Swaptions/IrregularSwaption/IrregularSwaptionFunctions.cs | partial: IrregularSwaption::arguments and IrregularSwaption::engine, never ported: Hagan's engine reads the swaption's swap, exercise and settlement type, and derives from no engine class but the generic one |
 
 ### `ql/experimental/termstructures/`
 
@@ -473,7 +473,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `basisswapratehelpers` | ported | Experimental/TermStructures/BasisSwapRateHelpers/IborIborBasisSwapRateHelper.cs, Experimental/TermStructures/BasisSwapRateHelpers/OvernightIborBasisSwapRateHelper.cs, Experimental/TermStructures/BasisSwapRateHelpers/OvernightOvernightBasisSwapRateHelper.cs |  |
 | `crosscurrencyratehelpers` | ported | Experimental/TermStructures/CrossCurrencyRateHelpers/ConstNotionalCrossCurrencyBasisSwapRateHelper.cs, Experimental/TermStructures/CrossCurrencyRateHelpers/ConstNotionalCrossCurrencySwapRateHelper.cs, Experimental/TermStructures/CrossCurrencyRateHelpers/CrossCurrencyBasisSwapRateHelperBase.cs, Experimental/TermStructures/CrossCurrencyRateHelpers/CrossCurrencyRateHelpersFunctions.cs, Experimental/TermStructures/CrossCurrencyRateHelpers/CrossCurrencySwapRateHelperBase.cs, Experimental/TermStructures/CrossCurrencyRateHelpers/MtMCrossCurrencyBasisSwapRateHelper.cs |  |
-| `overnightindexedfundingratehelper` | not started |  | no nanoql type: OvernightIndexedFundingRateHelper |
+| `overnightindexedfundingratehelper` | ported | Experimental/TermStructures/OvernightIndexedFundingRateHelper.cs |  |
 
 ### `ql/experimental/variancegamma/`
 
@@ -2095,7 +2095,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `cliquetoption` | ported | TestSuite/CliquetOptionTests.cs | 4 of 4 cases |
 | `cms` | ported | TestSuite/CmsTests.cs | 5 of 5 cases |
 | `cms_normal` | ported | TestSuite/CmsNormalTests.cs | 3 of 3 cases |
-| `cmsspread` | partial | TestSuite/CmsSpreadTests.cs | 1 of 2 cases; not yet: testCouponPricing |
+| `cmsspread` | ported | TestSuite/CmsSpreadTests.cs | 2 of 2 cases |
 | `commodityunitofmeasure` | ported | TestSuite/CommodityUnitOfMeasureTests.cs | 2 of 2 cases |
 | `compiledboostversion` | not ported: tests the C++ platform |  |  |
 | `compoundoption` | ported | TestSuite/CompoundOptionTests.cs | 2 of 2 cases |
@@ -2125,7 +2125,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `everestoption` | ported | TestSuite/EverestOptionTests.cs | 1 of 1 cases |
 | `exchangerate` | ported | TestSuite/ExchangeRateTests.cs | 5 of 5 cases |
 | `extendedblackvariancesurface` | ported | TestSuite/ExtendedBlackVarianceSurfaceTests.cs | 1 of 1 cases |
-| `extendedtrees` | not started |  | 7 cases |
+| `extendedtrees` | ported | TestSuite/ExtendedTreesTests.cs | 7 of 7 cases |
 | `extensibleoptions` | ported | TestSuite/ExtensibleOptionsTests.cs | 2 of 2 cases |
 | `fastfouriertransform` | ported | TestSuite/FastFourierTransformTests.cs | 3 of 3 cases |
 | `fdcev` | ported | TestSuite/FdCevTests.cs | 2 of 2 cases |
@@ -2141,7 +2141,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fxforward` | ported | TestSuite/FxForwardTests.cs | 13 of 13 cases |
 | `g2process` | ported | TestSuite/G2ProcessTests.cs | 8 of 8 cases; replaced: testG2ProcessObservesTermStructure by Conventions/ModelRebuildTests.cs |
 | `garch` | ported | TestSuite/GarchTests.cs | 2 of 2 cases |
-| `gaussianquadratures` | partial | TestSuite/GaussianQuadraturesTests.cs | 10 of 12 cases; not yet: testNonCentralChiSquared, testNonCentralChiSquaredSumOfNodes |
+| `gaussianquadratures` | ported | TestSuite/GaussianQuadraturesTests.cs | 12 of 12 cases |
 | `gjrgarchmodel` | ported | TestSuite/GjrGarchModelTests.cs | 2 of 2 cases |
 | `gsr` | ported | TestSuite/GsrTests.cs | 13 of 13 cases |
 | `hestonmodel` | ported | TestSuite/HestonModelTests.cs | 39 of 39 cases |
@@ -2184,7 +2184,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `multipleresetscoupons` | ported | TestSuite/MultipleResetsCouponsTests.cs | 5 of 5 cases |
 | `multipleresetsswap` | ported | TestSuite/MultipleResetsSwapTests.cs | 8 of 8 cases |
 | `noarbsabr` | ported | TestSuite/NoArbSabrTests.cs | 2 of 2 cases |
-| `normalclvmodel` | not started |  | 5 cases |
+| `normalclvmodel` | ported | TestSuite/NormalCLVModelTests.cs | 5 of 5 cases |
 | `nthorderderivativeop` | ported | TestSuite/NthOrderDerivativeOpTests.cs | 15 of 15 cases |
 | `nthtodefault` | ported | TestSuite/NthToDefaultTests.cs | 2 of 2 cases |
 | `numericaldifferentiation` | ported | TestSuite/NumericalDifferentiationTests.cs | 7 of 7 cases |
@@ -2194,7 +2194,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `optimizers` | partial | TestSuite/OptimizersTests.cs | 7 of 10 cases; not yet: testHybridSimulatedAnnealingTemperatureTermination, testHybridSimulatedAnnealingIterationTermination, testHybridSimulatedAnnealingStationaryTermination |
 | `optionletstripper` | ported | TestSuite/OptionletStripperTests.cs | 19 of 19 cases |
 | `overnightindexedcoupon` | ported | TestSuite/OvernightIndexedCouponTests.cs | 45 of 45 cases; moved: testExCouponAccruedAmountAroundAccrualEndDate line 1936 to Divergences/TelescopicValueDatesTests.cs; testOvernightLegNPV line 1033 to Divergences/TelescopicValueDatesTests.cs |
-| `overnightindexedfundingratehelper` | not started |  | 3 cases |
+| `overnightindexedfundingratehelper` | ported | TestSuite/OvernightIndexedFundingRateHelperTests.cs | 3 of 3 cases |
 | `overnightindexedswap` | ported | TestSuite/OvernightIndexedSwapTests.cs | 25 of 25 cases; replaced: testNotifications by Vectors/Instruments/OvernightIndexedSwapVectorTests.cs |
 | `pagodaoption` | ported | TestSuite/PagodaOptionTests.cs | 1 of 1 cases |
 | `paralleltestrunner` | replaced: test infrastructure: xUnit and the vector harness |  |  |
@@ -2224,7 +2224,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `sofrfutures` | ported | TestSuite/SofrFuturesTests.cs | 5 of 6 cases; not ported: testOvernightIndexFutureRateHelperNotification (observer notifications, which an immutable helper has no use for, R1) |
 | `softbarrieroption` | ported | TestSuite/SoftBarrierOptionTests.cs | 1 of 1 cases |
 | `solvers` | ported | TestSuite/SolversTests.cs | 9 of 9 cases |
-| `squarerootclvmodel` | not started |  | 3 cases |
+| `squarerootclvmodel` | partial | TestSuite/SquareRootCLVModelTests.cs | 2 of 3 cases; not yet: testForwardSkew |
 | `stats` | ported | TestSuite/StatsTests.cs | 4 of 4 cases |
 | `svivolatility` | ported | TestSuite/SviVolatilityTests.cs | 1 of 1 cases |
 | `swap` | ported | TestSuite/SwapTests.cs | 15 of 15 cases; replaced: testNotifications by Vectors/Instruments/VanillaSwapVectorTests.cs |
@@ -2249,7 +2249,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `varianceoption` | ported | TestSuite/VarianceOptionTests.cs | 1 of 1 cases; moved: testIntegralHeston line 104 to Divergences/IntegralHestonVarianceOptionTests.cs |
 | `varianceswaps` | ported | TestSuite/VarianceSwapsTests.cs | 2 of 2 cases |
 | `volatilitymodels` | ported | TestSuite/VolatilityModelsTests.cs | 1 of 1 cases |
-| `vpp` | partial | TestSuite/VppTests.cs | 5 of 6 cases; not yet: testGemanRoncoroniProcess |
+| `vpp` | ported | TestSuite/VppTests.cs | 6 of 6 cases |
 | `xoshiro256starstar` | ported | TestSuite/Xoshiro256StarStarTests.cs | 3 of 3 cases |
 | `zabr` | ported | TestSuite/ZabrTests.cs | 1 of 1 cases |
 | `zerocouponswap` | ported | TestSuite/ZeroCouponSwapTests.cs | 6 of 6 cases |

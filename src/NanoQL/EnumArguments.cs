@@ -794,6 +794,20 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a scheme outside <see cref="ExtendedBlackScholesMertonProcessDiscretization"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's <c>evolve</c> refuses it at the first step ("unknown discretization scheme").</remarks>
+    internal static void Check(ExtendedBlackScholesMertonProcessDiscretization value, string paramName)
+    {
+        if (value is < ExtendedBlackScholesMertonProcessDiscretization.Euler
+            or > ExtendedBlackScholesMertonProcessDiscretization.PredictorCorrector)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown discretization scheme");
+        }
+    }
+
     /// <summary>Refuses a swap type outside <see cref="MtMCrossCurrencyBasisSwapType"/>.</summary>
     /// <param name="value">The value.</param>
     /// <param name="paramName">The parameter's name.</param>

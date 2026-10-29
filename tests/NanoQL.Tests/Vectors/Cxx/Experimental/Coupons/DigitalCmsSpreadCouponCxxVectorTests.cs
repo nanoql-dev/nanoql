@@ -13,7 +13,7 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The digital CMS spread legs' harness vectors,
 /// <c>tests/vectors/cxx/experimental/coupons/digitalcmsspreadcoupon.json</c>: legs on a 10Y-2Y swap spread
-/// index, their structure alone; per coupon the inspectors, and a fixed coupon's rate.
+/// index priced by the lognormal CMS spread pricer; per coupon the inspectors and the rates.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class DigitalCmsSpreadCouponCxxVectorTests
@@ -33,16 +33,31 @@ public class DigitalCmsSpreadCouponCxxVectorTests
                 continue;
             }
 
-            DigitalInputs.CheckLeg(check, c, LegOf(spec, context), context, false);
+            DigitalInputs.CheckLeg(check, c, LegOf(spec, context), context, true);
         }
 
         check.Complete();
     }
 
     // The leg a spec describes: tools/cxx/src/cashflows/digitalspec.hpp's leg spec, each list through the setter
-    // taking a list.
+    // taking a list, on the spec's lognormal pricer.
     private static ImmutableArray<CashFlow> LegOf(JsonElement spec, EvaluationContext context) =>
-        BuilderOf(spec, context).WithNakedOption(spec.GetProperty("nakedOption").GetBoolean()).ToLeg();
+        Priced(BuilderOf(spec, context).WithNakedOption(spec.GetProperty("nakedOption").GetBoolean()), spec, context);
+
+    /// <summary>A builder's leg on a spec's pricer: the lognormal CMS spread pricer over the spec's CMS pricer.</summary>
+    /// <param name="leg">The builder.</param>
+    /// <param name="spec">The leg spec, whose "pricer" is {"cms", "correlation"}.</param>
+    /// <param name="context">The evaluation context.</param>
+    /// <returns>The priced leg.</returns>
+    internal static ImmutableArray<CashFlow> Priced(DigitalCmsSpreadLeg leg, JsonElement spec, EvaluationContext context)
+    {
+        JsonElement pricer = spec.GetProperty("pricer");
+        return CouponPricerFunctions.SetCouponPricer(
+            leg.ToLeg(),
+            new LognormalCmsSpreadPricer(
+                ConundrumPricerCxxVectorTests.PricerOf(pricer.GetProperty("cms"), context),
+                pricer.GetProperty("correlation").GetDouble()));
+    }
 
     /// <summary>A leg spec's builder, every setting but the naked option flag.</summary>
     /// <param name="spec">The spec.</param>

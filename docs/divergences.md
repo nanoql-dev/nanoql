@@ -1838,6 +1838,26 @@ Facts:
 - `AnEmptyOrRaggedQuoteTableIsRefused`
 - `WeightsOfAnotherShapeAreRefused`
 
+## CmsSpreadCouponDiscountCurveTests
+
+[`Divergences/CmsSpreadCouponDiscountCurveTests.cs`](../tests/NanoQL.Tests/Divergences/CmsSpreadCouponDiscountCurveTests.cs)
+
+The lognormal CMS spread pricer without a coupon discount curve discounts each coupon on its own first swap index's curve (the S-xrt plan's XRR5 (xviii)). QuantLib's `initialize` fills its empty coupon curve handle with the first coupon's index's curve and keeps it (`lognormalcmsspreadpricer.cpp`, `couponDiscountCurve_ = …`), so one pricer serving coupons on different indexes discounts every later coupon on the first's curve: its price is the price on a pricer given that curve, which this fact computes as QuantLib's. Rates don't read the curve.
+
+Facts:
+
+- `EachCouponIsDiscountedOnItsOwnIndexCurve`
+
+## CmsSpreadUnequalShiftsTests
+
+[`Divergences/CmsSpreadUnequalShiftsTests.cs`](../tests/NanoQL.Tests/Divergences/CmsSpreadUnequalShiftsTests.cs)
+
+The lognormal CMS spread pricer with unequal shifts, as QuantLib's master after 1.44 (#2874, taken ahead of the pin: the S-xrt plan's XRR2 and XRR5 (xvii)). QuantLib 1.44's `optionletPrice` branches on the strike where the integrand's sign turns on the displaced strike k + g₁s₁ + g₂s₂, and its negative branch shifts the second rate by the first's shift. On QuantLib 1.44 (the S-xrt planner's `xp_c3.cpp`: #2874's set-up below, ρ 0.5) its caplets and floorlets are NaN at strikes 0.008 and 0.002 on shifts 0 and 0.01, and at −0.008 and −0.002 on shifts 0.01 and 0; the cap at −0.002 is 0.003275576228 on shifts 0 and 0.01, where #2874's case caches 0.0080778180, and put-call parity breaks by 2.032e-2 there and 2.040e-2 on shifts 0.01 and 0 at −0.012. nanoql's is #2874's: every price finite, parity to 1e-12, and #2874's two cached caplets to 1e-8. Equal shifts take the same branch either way, so QuantLib's `testCouponPricing` keeps 1.44's bits.
+
+Facts:
+
+- `TestShiftedLognormalDifferentShifts`
+
 ## CoinitialZedMatrixTests
 
 [`Divergences/CoinitialZedMatrixTests.cs`](../tests/NanoQL.Tests/Divergences/CoinitialZedMatrixTests.cs)
@@ -2839,6 +2859,19 @@ Facts:
 
 - `AFixedKappaDiscountsAsTheFreeMethodAtThatKappa`
 
+## ExtendedBlackScholesProcessTests
+
+[`Divergences/ExtendedBlackScholesProcessTests.cs`](../tests/NanoQL.Tests/Divergences/ExtendedBlackScholesProcessTests.cs)
+
+The extended Black-Scholes process's Milstein, Euler and predictor steps in the log price (the S-xrt plan's XRR5 (xxvi) and XRR7, fixed under R8). QuantLib's Milstein adds the asset's correction ½σ²(ΔW² − 1)Δt to the log price, its one-step mean 1.245e-3 high at Δt 0.25 and σ 0.4 (the S-xrt planner's XRP21 and XRP23); its Euler step and its predictor centre on the asset's mean x₀e^((r−q)Δt), which lacks the −σ²Δt/2, 2.02e-2 high a step there, and refuse a strike-dependent volatility ("not implemented"). On QuantLib 1.44 (the planner's `xp_c3.cpp`: x₀ 100, r 0.03, q 0, a flat 0.4, Δt 0.25, ΔW from −2 to 2) Milstein steps to 70.29285698, 80.85603163, 96.80224498, 120.6230249 and 156.4396302, Euler to 67.53663464, 82.48943182, 100.7528195, 123.0597717 and 150.3055446, and the predictor-corrector, the exact step there, to 66.19931967, 80.85603163, 98.75778005, 120.6230249 and 147.3292954. nanoql's three steps are that exact step, their one-step mean e^((r−q)Δt), and the predictor-corrector runs on a smile. There QuantLib's corrector, its diffusion the mean of the two ends' on the same increment, would converge to the Stratonovich equation, its error flat in the step count (9.7e-2 at 4, 16 and 64 steps on the first smile below, E[S_T] 0.097 low, and 0.565 low on the second); nanoql's takes each end's drift less ½σ·∂σ/∂ln S (the S-xrt run's B3-1, ruled 2026-10-29). On two SABR smiles each scheme converges, on the same Brownian increments, to a fine Milstein path of 16,384 steps, itself checked against the fine Euler path XRR7 names: Euler at order ½, Milstein and the predictor-corrector at order 1.
+
+Facts:
+
+- `EachStepIsTheExactStepOnFlatParameters`
+- `TheOneStepMeanIsTheForward`
+- `ThePredictorCorrectorRunsOnASmile`
+- `EachSchemeConvergesToTheProcessOnASmile`
+
 ## ExtendedOrnsteinUhlenbeckExpectationTests
 
 [`Divergences/ExtendedOrnsteinUhlenbeckExpectationTests.cs`](../tests/NanoQL.Tests/Divergences/ExtendedOrnsteinUhlenbeckExpectationTests.cs)
@@ -3680,6 +3713,28 @@ Facts:
 Facts:
 
 - `NoDimensionIsRefused`
+
+## GemanRoncoroniDeviationTests
+
+[`Divergences/GemanRoncoroniDeviationTests.cs`](../tests/NanoQL.Tests/Divergences/GemanRoncoroniDeviationTests.cs)
+
+The Geman-Roncoroni process's standard deviation over a step at small mean reversion θ₁, in its cancellation-free form through expm1 below 2θ₁Δt 1e-2, σ√Δt at θ₁ = 0 (the S-xrt plan's XRR5 (xxv), fixed under R8). QuantLib's √(σ²(1 − e^(−2θ₁Δt))/(2θ₁)) cancels as θ₁ falls and is 0/0 at 0. On QuantLib 1.44 (the S-xrt planner's `xp_c3.cpp`: σ² 10, a 0, Δt 0.004) the deviation is 0.19999999994736442 at θ₁ 1e-6, 0.20000056338475591 at 1e-9, 0.19992005623875167 at 1e-12 and NaN at 0, for 0.1999999996, 0.1999999999996, 0.1999999999999996 and 0.2; nanoql's meets 40-digit references (mpmath) to a few ulps at every θ₁, QuantLib's formula at 35.
+
+Facts:
+
+- `TheDeviationMeetsItsReference`
+
+## GeneralizedHullWhiteSmallReversionTests
+
+[`Divergences/GeneralizedHullWhiteSmallReversionTests.cs`](../tests/NanoQL.Tests/Divergences/GeneralizedHullWhiteSmallReversionTests.cs)
+
+Generalized Hull-White's analytical fitting parameter and its Ornstein-Uhlenbeck process's variance at small and negative reversion, in their cancellation-free forms through expm1 below |a| 1e-2 (the S-xrt plan's XRR5 (xix), fixed under R8). QuantLib cuts both at a < √ε to the zero-reversion forms σt and σ²Δt, which jump there and cancel just above, and which every negative reversion takes. On QuantLib 1.44 (the S-xrt planner's `xp_c3.cpp`: σ 0.01, a flat 3% curve, φ at 5 years, the variance over a year) the variance at −0.05 is 1e-4, 4.92e-2 low, and φ(5) 0.0312500000015574, 3.63e-4 low; at 1.4e-8 the variance is 1e-4, 1.4e-8 relative off; at 2e-8 4.47e-11. nanoql's values meet 40-digit references (mpmath) to a few ulps at every reversion from −0.1 to 0.1, QuantLib's formula from |a| 1e-2.
+
+Facts:
+
+- `TheProcessVarianceMeetsItsReference`
+- `TheFittingParameterMeetsItsReference`
+- `QuantLibsCutIsFarOffAtANegativeReversion`
 
 ## GenericLSRegressionBasisSizeTests
 
@@ -4781,6 +4836,17 @@ Facts:
 - `ConjugateGradientEndsAtItsLastAcceptedPoint`
 - `TheHypersphereAndLowerDiagonalRootsMoveWithIt`
 
+## LinearFlatPrimitiveTests
+
+[`Divergences/LinearFlatPrimitiveTests.cs`](../tests/NanoQL.Tests/Divergences/LinearFlatPrimitiveTests.cs)
+
+The linear-flat interpolation's primitive outside its range, the flat value's integral (the S-xrt run's R3-1, fixed under R8). QuantLib's `LinearFlatInterpolationImpl::primitive` extends the end intervals' lines past the ends, where its value is flat, so its primitive's slope there isn't its value: on x 1, 2, 3 and y 1, 3, 2 its primitive at 0.5 is −0.25 for the flat value's −0.5, and at 4 it is 6 for 6.5; on a single point its primitive and derivative read before their arrays (`generalizedhullwhite.hpp`). nanoql's primitive is the flat value's integral outside the range, its derivative there the value's 0, and a single point's the flat value's; inside the range all three are QuantLib's.
+
+Facts:
+
+- `OutsideTheRangeThePrimitiveIntegratesTheFlatValue`
+- `ASinglePointIsFlat`
+
 ## LinearTsrNormalVegaRatioTests
 
 [`Divergences/LinearTsrNormalVegaRatioTests.cs`](../tests/NanoQL.Tests/Divergences/LinearTsrNormalVegaRatioTests.cs)
@@ -5511,6 +5577,18 @@ Facts:
 - `AtShortExpiriesThePricesAreHagans`
 - `AtShortExpiriesTheNumericalForwardIsTheForward`
 
+## NonCentralChiSquaredPolynomialTests
+
+[`Divergences/NonCentralChiSquaredPolynomialTests.cs`](../tests/NanoQL.Tests/Divergences/NonCentralChiSquaredPolynomialTests.cs)
+
+The non-central χ² polynomial's recursion on exact moments, α and β rounded once (the S-xrt plan's XRR8, ruled 2026-10-28). QuantLib sums each moment's closed form in double and runs the ill-conditioned moment recursion in double: at QuantLib's own CLV cases its 14 nodes are 2.6e-2 relative off the exact ones at ν 6, λ 31.7, and 0.61 at ν 9, λ 31.7, the smallest node 2.97 for 7.66; at λ 50 and 75 Boost refuses a negative node and at λ 100 the rule doesn't return (the S-xrt planner's XRP23). nanoql's nodes meet references from the same exact moments by the Hankel matrix's Cholesky factor and the Jacobi matrix's eigenvalues at 160 digits (mpmath; the run's `c3\probes\xrr8_refs.py`), an independent route, to 1e-13 relative.
+
+Facts:
+
+- `TheNodesMeetTheirReferences`
+- `TheRuleHoldsAtALargeNonCentrality`
+- `TheMomentsStopAtQuantLibsTable`
+
 ## NonstandardInitialGuessTests
 
 [`Divergences/NonstandardInitialGuessTests.cs`](../tests/NanoQL.Tests/Divergences/NonstandardInitialGuessTests.cs)
@@ -5974,6 +6052,17 @@ Facts:
 
 - `TheProxyGreeksAreBlacksWithinTheirErrors`
 - `TheProxyVegasAreTheAccountingEnginesSamePathDifferences`
+
+## ProxyIborTests
+
+[`Divergences/ProxyIborTests.cs`](../tests/NanoQL.Tests/Divergences/ProxyIborTests.cs)
+
+`ProxyIbor`'s forecast, the gearing times the proxied fixing plus the spread, and its coupons forecasting through it (the S-xrt plan's XRR5 (xxi), fixed under R8). QuantLib's `forecastFixing` returns gearing × proxied × spread, and an Ibor coupon on the proxy forecasts from the proxy's forwarding curve, which it lacks. On QuantLib 1.44 (the S-xrt planner's `xp_c3.cpp`: gearing 2 on Euribor 6M, spread 0.001) the proxied fixing 0.0298114585668 forecasts 5.96229171335e-05 for 0.0606229171335, and the coupon's rate refuses "null term structure set to this instance of PX6M Actual/360". nanoql's forecast is gearing × proxied + spread, and the coupon's rate is it.
+
+Facts:
+
+- `TheForecastIsTheGearedProxiedFixingPlusTheSpread`
+- `ACouponOnTheProxyForecastsThroughIt`
 
 ## PseudoSqrtEmptyMatrixTests
 
@@ -6841,6 +6930,28 @@ Facts:
 
 - `ThePathTakesOneStepPerEvolutionTime`
 
+## SquareRootCLVNonCentralityTests
+
+[`Divergences/SquareRootCLVNonCentralityTests.cs`](../tests/NanoQL.Tests/Divergences/SquareRootCLVNonCentralityTests.cs)
+
+The square-root CLV model's non-centrality 4κe^(−κt)x₀/(σ²(1 − e^(−κt))) with 1 − e^(−κt) through expm1 below κt 1e-2 (the S-xrt plan's XRR5 (xxiv), fixed under R8). QuantLib's 1 − e^(−κt) cancels as κt falls: at κ 1e-4 and a day, κt 2.7e-7, its non-centrality is 7.0e-11 relative off the 40-digit value (mpmath; the run's `c3\probes\xxiv_refs.py`), 3284.99955000002, and the collocation points move with it. nanoql's points, on bounds that don't clamp, are the Gauss nodes at the reference non-centrality.
+
+Facts:
+
+- `ThePointsAreTheNodesAtTheReferenceNonCentrality`
+
+## SquareRootCLVRescaleTests
+
+[`Divergences/SquareRootCLVRescaleTests.cs`](../tests/NanoQL.Tests/Divergences/SquareRootCLVRescaleTests.cs)
+
+The square-root CLV model's collocation points raised to the pMin quantile where QuantLib's rescale puts them below it (the S-xrt plan's XRR15, ruled 2026-10-29). QuantLib maps the Gauss nodes by a·x + (xMin − x.front()), which keeps them inside [q(pMin), q(pMax)] at every date of QuantLib's two cases but breaks the lower bound the method states wherever pMin's quantile exceeds the map's lowest point: on the vanilla case's nodes at pMin 1e-3 and pMax 0.999 the lowest point falls at probability 6.5e-5, at pMin 1e-2 at 1.4e-3, and on the mapping case's year date at pMin 1e-3 at 3.5e-4 with no low clamp (the S-xrt planner's XRP28 and XRP29). nanoql's map is QuantLib's raised by the shortfall: its lowest point at the pMin quantile, the affine map onto [q(pMin), q(pMax)] where the low bound clamps, continuous in pMin.
+
+Facts:
+
+- `ALowClampMapsOntoTheQuantileBounds`
+- `TheBandRaisesTheLowestPointToTheQuantile`
+- `TheMapIsContinuousInPMin`
+
 ## SquareRootProcessTruncationTests
 
 [`Divergences/SquareRootProcessTruncationTests.cs`](../tests/NanoQL.Tests/Divergences/SquareRootProcessTruncationTests.cs)
@@ -7630,6 +7741,18 @@ The vega bump collection's checks (the S-mmp plan's MMPR4 (xii), ruled by the us
 Facts:
 
 - `TheChecksAreTrueWhereNoElementFails`
+
+## VegaStressedProcessTests
+
+[`Divergences/VegaStressedProcessTests.cs`](../tests/NanoQL.Tests/Divergences/VegaStressedProcessTests.cs)
+
+The vega-stressed process's stress reaching its standard deviation, variance and step (the S-xrt plan's XRR5 (xxvii), fixed under R8). QuantLib's take the exact forms from the term structures on a strike-independent volatility, which read no diffusion, so the stress never reaches them. On QuantLib 1.44 (the S-xrt planner's `xp_c3.cpp`: stress 0.1 on a flat 0.2, r − q 0.03) the diffusion is 0.3 but the deviation over a year 0.2 and the step from 100 at a draw of 1 123.367806, the unstressed process's. nanoql's go through the Euler discretization with the stressed diffusion inside the box and the plain one outside; with no stress they are QuantLib's, and the expectation is the unstressed one, the mean of the asset reading no volatility.
+
+Facts:
+
+- `TheStressReachesTheStepInsideTheBox`
+- `OutsideTheBoxTheStepIsThePlainOne`
+- `WithNoStressTheProcessIsQuantLibs`
 
 ## VolatilityBumpInstrumentJacobianTests
 

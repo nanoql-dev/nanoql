@@ -56,14 +56,19 @@ public class DigitalLegBuilderTests
         Assert.Equal(Shape(list, context, true), Shape(one, context, true));
         AssertSet(one);
 
-        // no CMS spread pricer before S-xrt: the terms alone
         (_, context, spec) = Case("cxx/experimental/coupons/digitalcmsspreadcoupon");
         DigitalCmsSpreadLeg spreadLeg = DigitalCmsSpreadCouponCxxVectorTests.BuilderOf(spec, context);
-        one = spreadLeg.WithNotionals(50.0).WithFixingDays(1).WithGearings(1.5).WithSpreads(0.001)
-            .WithCallStrikes(0.04).WithCallPayoffs(0.01).WithPutStrikes(0.02).WithPutPayoffs(0.005).ToLeg();
-        list = spreadLeg.WithNotionals([50.0]).WithFixingDays([1]).WithGearings([1.5]).WithSpreads([0.001])
-            .WithCallStrikes([0.04]).WithCallPayoffs([0.01]).WithPutStrikes([0.02]).WithPutPayoffs([0.005]).ToLeg();
-        Assert.Equal(Shape(list, context, false), Shape(one, context, false));
+        one = DigitalCmsSpreadCouponCxxVectorTests.Priced(
+            spreadLeg.WithNotionals(50.0).WithFixingDays(1).WithGearings(1.5).WithSpreads(0.001)
+                .WithCallStrikes(0.04).WithCallPayoffs(0.01).WithPutStrikes(0.02).WithPutPayoffs(0.005),
+            spec,
+            context);
+        list = DigitalCmsSpreadCouponCxxVectorTests.Priced(
+            spreadLeg.WithNotionals([50.0]).WithFixingDays([1]).WithGearings([1.5]).WithSpreads([0.001])
+                .WithCallStrikes([0.04]).WithCallPayoffs([0.01]).WithPutStrikes([0.02]).WithPutPayoffs([0.005]),
+            spec,
+            context);
+        Assert.Equal(Shape(list, context, true), Shape(one, context, true));
         AssertSet(one);
     }
 

@@ -3,12 +3,13 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/vpp.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testGemanRoncoroniProcess, which waits for S-xrt's Geman-Roncoroni process
 
+using System.Collections.Immutable;
 using NanoQL.Experimental;
 using NanoQL.Instruments;
 using NanoQL.Methods;
 using NanoQL.Numerics;
+using NanoQL.Processes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 using RsgType = NanoQL.Numerics.InverseCumulativeRsg<
@@ -74,6 +75,123 @@ public class VppTests
         53.72, 55.62, 55.89, 58.11, 54.46, 52.92, 49.61, 44.68,
         51.59, 57.44, 56.50, 55.12, 57.22, 54.61, 49.92, 45.20,
     ];
+
+    // Adapted: the evaluation date is the context's, which nothing here reads; the process's jump generator is the
+    // working state QuantLib's hidden generator is (the S-xrt plan's XRR3).
+    [Fact]
+    public void TestGemanRoncoroniProcess()
+    {
+        // Testing Geman-Roncoroni process...
+
+        /* Example induced by H. Geman, A. Roncoroni,
+           "Understanding the Fine Structure of Electricity Prices",
+           http://papers.ssrn.com/sol3/papers.cfm?abstract_id=638322
+           Results are verified against the authors MatLab-Code.
+           http://semeq.unipmn.it/files/Ch19_spark_spread.zip
+        */
+
+        var today = new Date(18, Month.December, 2011);
+        DayCounter dc = new ActualActual(ActualActualConvention.ISDA);
+        YieldTermStructure rTS = new FlatForward(today, 0.03, dc);
+
+        const Real x0 = 3.3;
+        const Real beta = 0.05;
+        const Real alpha = 3.1;
+        const Real gamma = -0.09;
+        const Real delta = 0.07;
+        const Real eps = -0.40;
+        const Real zeta = -0.40;
+        const Real d = 1.6;
+        const Real k = 1.0;
+        const Real tau = 0.5;
+        const Real sig2 = 10.0;
+        const Real a = -7.0;
+        const Real b = -0.3;
+        const Real theta1 = 35.0;
+        const Real theta2 = 9.0;
+        const Real theta3 = 0.10;
+        const Real psi = 1.9;
+
+        var grProcess = new GemanRoncoroniProcess(
+            x0, alpha, beta, gamma, delta, eps, zeta, d, k, tau, sig2, a, b, theta1, theta2, theta3, psi);
+
+        const Real speed = 5.0;
+        Real vol = Math.Sqrt(1.4);
+        const Real betaG = 0.08;
+        const Real alphaG = 1.0;
+        const Real x0G = 1.1;
+
+        Func<Real, Real> f = x => alphaG + (betaG * x);
+
+        StochasticProcess1D eouProcess = new ExtendedOrnsteinUhlenbeckProcess(
+            speed, vol, x0G, f, ExtendedOrnsteinUhlenbeckProcessDiscretization.Trapezodial);
+
+        ImmutableArray<StochasticProcess1D> processes = [grProcess, eouProcess];
+        var correlation = new Matrix(2, 2, 1.0);
+        correlation[0, 1] = correlation[1, 0] = 0.25;
+
+        var pArray = new StochasticProcessArray(processes, correlation);
+
+        const Real T = 10.0;
+        const int stepsPerYear = 250;
+        const int steps = (int)(T * stepsPerYear);
+
+        var grid = new TimeGrid(T, steps);
+
+        RsgType rsg = PseudoRandom.MakeSequenceGenerator(pArray.Size * (grid.Size - 1), 421);
+
+        var npv = new GeneralStatistics();
+        var onTime = new GeneralStatistics();
+        var generator = new MultiPathGenerator<RsgType>(pArray, grid, rsg, false);
+
+        const Real heatRate = 8.0;
+        const int nrTrails = 250;
+
+        for (int n = 0; n < nrTrails; ++n)
+        {
+            Real plantValue = 0.0;
+            Sample<MultiPath> path = generator.Next();
+
+            for (int i = 1; i <= steps; ++i)
+            {
+                Real t = (Real)i / stepsPerYear;
+                Real df = rTS.Discount(t);
+
+                Real fuelPrice = Math.Exp(path.Value[1][i]);
+                Real electricityPrice = Math.Exp(path.Value[0][i]);
+
+                Real sparkSpread = electricityPrice - (heatRate * fuelPrice);
+                plantValue += Math.Max(0.0, sparkSpread) * df;
+                onTime.Add(sparkSpread > 0.0 ? 1.0 : 0.0);
+            }
+
+            npv.Add(plantValue);
+        }
+
+        const Real expectedNPV = 12500;
+        Real calculatedNPV = npv.Mean();
+        Real errorEstimateNPV = npv.ErrorEstimate();
+
+        if (Math.Abs(calculatedNPV - expectedNPV) > 3.0 * errorEstimateNPV)
+        {
+            Assert.Fail(
+                "Failed to reproduce cached price with MC engine"
+                + $"\n    calculated: {calculatedNPV}"
+                + $"\n    expected:   {expectedNPV} +/- {errorEstimateNPV}");
+        }
+
+        const Real expectedOnTime = 0.43;
+        Real calculatedOnTime = onTime.Mean();
+        Real errorEstimateOnTime = Math.Sqrt(calculatedOnTime * (1 - calculatedOnTime)) / nrTrails;
+
+        if (Math.Abs(calculatedOnTime - expectedOnTime) > 3.0 * errorEstimateOnTime)
+        {
+            Assert.Fail(
+                "Failed to reproduce cached price with MC engine"
+                + $"\n    calculated: {calculatedNPV}"
+                + $"\n    expected:   {expectedNPV} +/- {errorEstimateNPV}");
+        }
+    }
 
     [Fact]
     public void TestSimpleExtOUStorageEngine()

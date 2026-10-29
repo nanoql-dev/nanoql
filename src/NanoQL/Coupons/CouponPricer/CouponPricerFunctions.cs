@@ -231,6 +231,9 @@ public static class CouponPricerFunctions
             ? c.SetPricer(pricer)
             : throw new ArgumentException("pricer not compatible with multiple-resets coupon", nameof(pricer)),
 
+        // The stripped coupon (strippedcapflooredcoupon.cpp's accept): its underlying is visited with the pricer, then
+        // the coupon takes it as a floating-rate coupon, its underlying too.
+        StrippedCappedFlooredCoupon c => VisitStrippedCappedFlooredCoupon(c, pricer),
         CappedFlooredCoupon c => VisitCappedFlooredCoupon(c, pricer),
         IborCoupon c => pricer is IborCouponPricer
             ? c.SetPricer(pricer)
@@ -265,6 +268,13 @@ public static class CouponPricerFunctions
         FloatingRateCoupon c => c.SetPricer(pricer),
         _ => cf,
     };
+
+    private static FloatingRateCoupon VisitStrippedCappedFlooredCoupon(
+        StrippedCappedFlooredCoupon c, FloatingRateCouponPricer? pricer)
+    {
+        _ = Visit(c.Underlying, pricer);
+        return c.SetPricer(pricer);
+    }
 
     private static CappedFlooredCoupon VisitCappedFlooredCoupon(CappedFlooredCoupon c, FloatingRateCouponPricer? pricer)
     {

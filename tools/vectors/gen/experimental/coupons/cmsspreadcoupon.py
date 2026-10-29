@@ -1,8 +1,9 @@
 # SPDX-FileCopyrightText: 2026 The nanoql Authors
 # SPDX-License-Identifier: Apache-2.0
 """Vectors for QuantLib's CmsSpreadLeg and its coupons (ql/experimental/coupons/cmsspreadcoupon.hpp, .cpp), the legs'
-structure and fixings: their rates need a CMS spread coupon pricer, whose lognormal implementation waits for S-xrt, so
-each rate is QuantLib's refusal "pricer not set". Legs on a 10Y-2Y EUR swap spread index (the swap indexes of
+structure, fixings and rates, priced by the lognormal CMS spread pricer
+(ql/experimental/coupons/lognormalcmsspreadpricer.hpp) at a correlation of 0.3 on a linear TSR pricer of a flat 20%
+swaption volatility at zero mean reversion. Legs on a 10Y-2Y EUR swap spread index (the swap indexes of
 tools/vectors/gen/cashflows/cmscoupon.py, on its curve and evaluation date): plain, with gearings and spreads per
 coupon, a payment day counter, convention and fixing days, caps and floors (capped CMS spread coupons), caps per coupon,
 in arrears, amortizing nominals, and a zero gearing, which QuantLib's leg builds as a fixed coupon at the spread. And
@@ -10,15 +11,15 @@ the pricers' base, CmsSpreadCouponPricer, abstract in QuantLib too, through its 
 built and after setCorrelation.
 
 Each case's outputs are, per coupon, whether it is a floating coupon, its payment, accrual and reference-period dates,
-its nominal, its rate (refused, or the fixed coupon's), and for a floating coupon its fixing date, fixing days, gearing,
-spread, whether it fixes in arrears and its index fixing, null for a fixed coupon. A pricer case's outputs are
+its nominal, its rate, and for a floating coupon its fixing date, fixing days, gearing, spread, whether it fixes in
+arrears and its index fixing, null for a fixed coupon. A pricer case's outputs are
 "correlation", as built, and "correlationAfterSet" where one is set.
 
 Each case's inputs hold its settings and "leg" ({"schedule", "index1", "index2", "nominals", "paymentDayCounter",
-"paymentConvention", "fixingDays", "gearings", "spreads", "caps", "floors", "inArrears"}), the indexes cmscoupon.py's
-swap index specs, combined as SwapSpreadIndex("CMS10Y2Y", index1, index2). The wheel's CmsSpreadLeg(nominals, schedule,
-index, paymentDayCounter, paymentConvention, fixingDays, gearings, spreads, caps, floors, isInArrears) is the C++
-builder's settings in one call. A pricer case's inputs hold its settings and "pricer" ({"correlation",
+"paymentConvention", "fixingDays", "gearings", "spreads", "caps", "floors", "inArrears", "pricer"}), the indexes
+cmscoupon.py's swap index specs, combined as SwapSpreadIndex("CMS10Y2Y", index1, index2), the pricer {"correlation"}.
+The wheel's CmsSpreadLeg(nominals, schedule, index, paymentDayCounter, paymentConvention, fixingDays, gearings,
+spreads, caps, floors, isInArrears) is the C++ builder's settings in one call. A pricer case's inputs hold its settings and "pricer" ({"correlation",
 "setCorrelation"}, the value set or null), on a linear TSR pricer of a flat 20% swaption volatility. Read back by
 tests/NanoQL.Tests/Vectors/Experimental/Coupons/CmsSpreadCouponVectorTests.cs."""
 import importlib.util
@@ -46,14 +47,23 @@ def leg(schedule, nominals, dc=irx.A365, convention=F, fixing_days=(), gearings=
     return {"schedule": schedule, "index1": cms.CMS10Y, "index2": cms.CMS2Y, "nominals": list(nominals),
             "paymentDayCounter": dc, "paymentConvention": int(convention), "fixingDays": list(fixing_days),
             "gearings": list(gearings), "spreads": list(spreads), "caps": list(caps), "floors": list(floors),
-            "inArrears": in_arrears}
+            "inArrears": in_arrears, "pricer": {"correlation": 0.3}}
+
+
+def spread_pricer(correlation):
+    vol = ql.SwaptionVolatilityStructureHandle(ql.ConstantSwaptionVolatility(
+        cms.TODAY, ql.TARGET(), ql.Following, 0.20, ql.Actual365Fixed()))
+    cms_pricer = ql.LinearTsrPricer(vol, ql.QuoteHandle(ql.SimpleQuote(0.0)))
+    return ql.LognormalCmsSpreadPricer(cms_pricer, ql.QuoteHandle(ql.SimpleQuote(correlation)))
 
 
 def make_leg(spec):
     index = ql.SwapSpreadIndex("CMS10Y2Y", swi.make_swap_index(spec["index1"]), swi.make_swap_index(spec["index2"]))
-    return ql.CmsSpreadLeg(spec["nominals"], fvf.schedule(spec["schedule"]), index,
-                           irx.day_counter(spec["paymentDayCounter"]), spec["paymentConvention"], spec["fixingDays"],
-                           spec["gearings"], spec["spreads"], spec["caps"], spec["floors"], spec["inArrears"])
+    leg = ql.CmsSpreadLeg(spec["nominals"], fvf.schedule(spec["schedule"]), index,
+                          irx.day_counter(spec["paymentDayCounter"]), spec["paymentConvention"], spec["fixingDays"],
+                          spec["gearings"], spec["spreads"], spec["caps"], spec["floors"], spec["inArrears"])
+    ql.setCouponPricer(leg, spread_pricer(spec["pricer"]["correlation"]))
+    return leg
 
 
 def legs():

@@ -98,6 +98,11 @@ public class IborIndex : InterestRateIndex
     public virtual IborIndex Clone(YieldTermStructure? forwarding) =>
         new(FamilyName, Tenor, FixingDays, Currency, FixingCalendar, BusinessDayConvention, EndOfMonth, DayCounter, forwarding);
 
+    // Whether a coupon on the index forecasts its fixing through ForecastFixing(fixingDate, context), the index's own
+    // forecast, rather than the curve-based forecast between its dates: false for an index forecasting from its
+    // forwarding curve, true for one whose forecast is its own (ProxyIbor, the S-xrt plan's XRR5 (xxi)).
+    internal virtual bool ForecastsThroughFixingDate => false;
+
     /// <summary>
     /// The forecast between given dates, for coupons that know their dates; QuantLib keeps it private to the index and
     /// its Ibor coupon, since wrong dates could ask a 6-month index for a 1-year fixing.
