@@ -47,7 +47,8 @@ public sealed class VectorAssert
 
     /// <summary>
     /// Gets how many of the real outputs compared so far are bit-identical to QuantLib's (the same IEEE 754 bits), a
-    /// reading beside the tolerance, as <c>tools/vectors/agree.py</c> gives for the twins.
+    /// reading beside the tolerance, as <c>tools/vectors/agree.py</c> gives for the twins. Any two NaNs count as
+    /// identical: a file writes a NaN as <c>"NaN"</c>, so the expected one's sign and payload are the reader's.
     /// </summary>
     public int BitIdentical { get; private set; }
 
@@ -345,7 +346,7 @@ public sealed class VectorAssert
 
         double a = Convert.ToDouble(actual, CultureInfo.InvariantCulture);
         Reals++;
-        if (BitConverter.DoubleToInt64Bits(e) == BitConverter.DoubleToInt64Bits(a))
+        if (BitConverter.DoubleToInt64Bits(e) == BitConverter.DoubleToInt64Bits(a) || (double.IsNaN(e) && double.IsNaN(a)))
         {
             BitIdentical++;
         }

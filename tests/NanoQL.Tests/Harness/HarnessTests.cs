@@ -77,6 +77,20 @@ public class HarnessTests
     }
 
     [Fact]
+    public void ANaNOfEitherSignIsBitIdentical()
+    {
+        var file = One("""{ "a": "NaN", "b": "NaN" }""");
+        var check = new VectorAssert(file);
+
+        // the reader's NaN with its sign bit flipped: a file's "NaN" carries no sign
+        check.Output(file.Cases[0], "a", double.NaN);
+        check.Output(file.Cases[0], "b", BitConverter.Int64BitsToDouble(BitConverter.DoubleToInt64Bits(double.NaN) ^ long.MinValue));
+
+        Assert.Empty(check.Mismatches);
+        Assert.Equal(2, check.BitIdentical);
+    }
+
+    [Fact]
     public void InfinityMatchesOnlyPositiveInfinity()
     {
         var file = One("""{ "a": "Infinity", "b": "Infinity", "c": "Infinity", "d": "-Infinity" }""");
