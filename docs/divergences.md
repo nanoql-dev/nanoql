@@ -1190,6 +1190,17 @@ Facts:
 - `ACountAfterAHolidayEditIsTheEditedCalendars`
 - `TwoCalendarsOfOneNameCountTheirOwnDays`
 
+## CPICapFloorPriceSurfaceTests
+
+[`Divergences/CPICapFloorPriceSurfaceTests.cs`](../tests/NanoQL.Tests/Divergences/CPICapFloorPriceSurfaceTests.cs)
+
+A CPI price surface's put-call fills compounded over the maturity in years (the S-xrt run's R2-1, fixed under R8). QuantLib's surface compounds the at-the-money rate and the strike over `mat.length()`, the maturity's length in its own unit (`cpicapfloortermpricesurface.hpp:248-252`), so a maturity in months compounds over its month count. On QuantLib 1.44 (the run's `c2\probes\xb_cpimonths.cpp` and `xb_cpiyears.cpp`: test-suite/inflationcpicapfloor.cpp's case with its maturities written as 36 to 360 months), the 36-month cap filled at the floor strike of −1% is 2.137020233466961, where the same surface on 3 to 30 years fills 0.11890267275321309; QuantLib's case passes either way, reading only the quoted strikes. nanoql compounds over QuantLib's own `years` of the period: 36 months price as 3 years, QuantLib's bits, and a maturity in weeks or days, which has no length in years, is refused.
+
+Facts:
+
+- `AMaturityInMonthsFillsAsTheSameInYears`
+- `AMaturityInWeeksIsRefused`
+
 ## CPISwapFairRateTests
 
 [`Divergences/CPISwapFairRateTests.cs`](../tests/NanoQL.Tests/Divergences/CPISwapFairRateTests.cs)
@@ -4566,6 +4577,16 @@ Facts:
 
 - `AtZeroVolatilityTheVegaAndThetaAreTheirLimits`
 
+## KInterpolatedYoYVolatilityTests
+
+[`Divergences/KInterpolatedYoYVolatilityTests.cs`](../tests/NanoQL.Tests/Divergences/KInterpolatedYoYVolatilityTests.cs)
+
+The k-interpolated year-on-year surface reads its stripped curves at its own time (the S-xrt plan's XRR5 (xiii), fixed under R8). QuantLib's `volatilityImpl(Time)` turns the time back into a date (whole years and the fraction's days at 365 a year) and reads each curve at that date through the curve's own lag, so the curves are read a lag early (`kinterpolatedyoyoptionletvolatilitysurface.hpp`). On QuantLib 1.44 (the run's `c2\probes\xd_c2.py` through the wheel: test-suite/inflationvolatility.cpp's euro surface observed flat, stripped at a slope of −0.5) the surface at 1 March 2009 and the strike of −1% is 0.011930033082068286, where its own strip, read through QuantLib's `Dslice`, is 0.011319592966991554. nanoql's surface at a date and a strike is that strike's stripped curve at the date, both through the public date route, wherever the two observe the index alike and the surface is on the stripper's clock, the price surface's reference date and day counter (settlement days 0, as here); on another clock it reads the curves early or late by the clocks' difference, up to 2.7e-5 at 2 settlement days and 4.2e-5 on Actual/360 on this market, within QuantLib's lag error. QuantLib's case reads `Dslice`, which is QuantLib's.
+
+Facts:
+
+- `TheSurfaceAtAStrikeIsItsStrippedCurve`
+
 ## KahaleAtmLevelTests
 
 [`Divergences/KahaleAtmLevelTests.cs`](../tests/NanoQL.Tests/Divergences/KahaleAtmLevelTests.cs)
@@ -5877,6 +5898,16 @@ Facts:
 - `OrderTwoApproachesTheFiniteDifferencesOnAStronglyTimeDependentMarket`
 - `OnAFlatMarketEachOrderIsTheAnalyticBarrierPrice`
 
+## PiecewiseYoYVolatilityNodesTests
+
+[`Divergences/PiecewiseYoYVolatilityNodesTests.cs`](../tests/NanoQL.Tests/Divergences/PiecewiseYoYVolatilityNodesTests.cs)
+
+A bootstrapped year-on-year volatility curve's nodes from its dates and data (the S-xrt plan's XRR2 (b): QuantLib's master's #2941, taken ahead of the pin). QuantLib 1.44's `nodes()` returns a list only the data constructor fills (`yoyinflationoptionletvolatilitystructure2.hpp`), so a `PiecewiseYoYOptionletVolatilityCurve`'s is empty: on QuantLib 1.44 (the run's `c2\probes\xb_nodes.cpp`, QuantLib's `testYoYPriceSurfaceToVol` with #2941's inspectable stripper) each of the 11 stripped curves has 0 nodes beside 8 dates and 8 data. nanoql's, as master's, are its dates with its data; #2941's own check is in `TestSuite/InflationVolatilityTests.cs`.
+
+Facts:
+
+- `AStrippedCurvesNodesAreItsDatesAndData`
+
 ## PolarStudentTSamplerTests
 
 [`Divergences/PolarStudentTSamplerTests.cs`](../tests/NanoQL.Tests/Divergences/PolarStudentTSamplerTests.cs)
@@ -7175,6 +7206,26 @@ Facts:
 - `TheBasisHelpersTelescopicCouponsListEveryDailyDate`
 - `ALockoutLegsNPVIsTheFullSchedules`
 
+## TenorOptionletExtrapolationTests
+
+[`Divergences/TenorOptionletExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/TenorOptionletExtrapolationTests.cs)
+
+The tenor optionlet structure's range checked once, by the query (the S-xrt run's R2-4, fixed under R8). QuantLib's `volatilityImpl` builds the section through `smileSection(optionTime)`, which checks the range again without the caller's extrapolation flag (`tenoroptionletvts.hpp`), so a query allowed to extrapolate past the base structure's last date refuses. On QuantLib 1.44 (the run's `c2\probes\xd_c2.py` through the harness: test-suite/basismodels.cpp's caplet volatilities on 29 October 2026, the case's indexes, ρ∞ 0.3 and β 0.9) the 30-year caplet's volatility with extrapolation refuses, "time (30.0219) is past max curve time (30.0137)", where its smile section built with extrapolation gives 0.0059574843004036775, 0.006438206493492846 and 0.006675293658033079 at 0, 1% and 2%; at 25 years the two agree. nanoql's volatility is that section's. QuantLib's own `testTenoroptionletvts` asks for its 30-year caplets so and refuses on every evaluation date of 29 October to 11 November 2026 but the two Wednesdays (`xb_tenor_d.cpp`); on its test runner's date, 16 September 2015, a Wednesday, it passes, so QuantLib's own run doesn't refuse.
+
+Facts:
+
+- `AThirtyYearCapletExtrapolatesToItsSmileSection`
+
+## TenorSwaptionLengthTests
+
+[`Divergences/TenorSwaptionLengthTests.cs`](../tests/NanoQL.Tests/Divergences/TenorSwaptionLengthTests.cs)
+
+The tenor swaption structure's swaps at the swap length in whole months (the S-xrt plan's XRR5 (xv), fixed under R8). QuantLib casts the swap length to whole years before it multiplies by twelve (`((BigInteger)swapLength * 12.0)`, `tenorswaptionvts.cpp`), so an 18-month tenor builds 12-month swaps: on QuantLib 1.44 (the run's `c2\probes\xd_c2.py` through the harness: test-suite/basismodels.cpp's markets on 15 June 2026, Euribor 6M volatilities to a true Euribor 3M) the at-the-money level at a 1-year option on an 18-month swap is −0.00018491732414727124, the 12-month swap's, and at a 5-year option 0.010348353529043619. nanoql's 18-month level is the fair rate of the 18-month target swap, the vanilla swap on the 18-month schedule; whole-year tenors are QuantLib's, the 12-month level QuantLib's to the last bits.
+
+Facts:
+
+- `AnEighteenMonthSwapIsEighteenMonthsLong`
+
 ## TimeSeriesFewerValuesTests
 
 [`Divergences/TimeSeriesFewerValuesTests.cs`](../tests/NanoQL.Tests/Divergences/TimeSeriesFewerValuesTests.cs)
@@ -7680,6 +7731,17 @@ Facts:
 - `AFixingBeforeTheCurvesBaseDateIsPriced`
 - `ALinearObservationInterpolatesTheForward`
 - `FixingDaysMoveTheFixingDateAlone`
+
+## YoYCapFloorPriceSurfaceTests
+
+[`Divergences/YoYCapFloorPriceSurfaceTests.cs`](../tests/NanoQL.Tests/Divergences/YoYCapFloorPriceSurfaceTests.cs)
+
+The year-on-year price surface's swap-rate dates and repricing check (the S-xrt plan's XRR5 (xii) and (xiv), fixed under R8). (xii): QuantLib takes a valid maturity's date as `cfMaturities_.at(counter)`, counting only the valid maturities (`yoycapfloortermpricesurface.hpp:506-508`), so once an intersection fails every later date is an earlier maturity's. On QuantLib 1.44 (the run's `c2\probes\xd_c2d.py` through the harness: test-suite/ inflationvolatility.cpp's euro market with the nominal curve's first date on the surface's reference date, observed flat, its 3-year caps ten times their quotes, so the 3-year intersection isn't found) the dates are 40505, 40505, 41236, 41966, 43062, 44888 and 46714, the 5-year rate on the 3-year date. nanoql's are each maturity's option date, 40505 to 50367, at the times QuantLib's time list gives; the rates are QuantLib's. (xiv): QuantLib checks the curve reprices its helpers at the surface's reference date plus whole years, where the helpers sit on the nominal curve's; with the nominal curve's dates 91 days later it refuses, "could not reprice helper 0, data 0.0244147, implied quote 0.0244373" (`xd_c2b.py`). nanoql checks each helper at its own maturity and builds the surface; where the two reference dates are 4 days apart, as in QuantLib's case, the check passes either way and the values are QuantLib's.
+
+Facts:
+
+- `ASwapRateIsDatedAtItsOwnMaturityAfterAFailedIntersection`
+- `ANominalCurveDatedLaterStillRepricesItsHelpers`
 
 ## YoYInflationCapFloorEmptyLegTests
 

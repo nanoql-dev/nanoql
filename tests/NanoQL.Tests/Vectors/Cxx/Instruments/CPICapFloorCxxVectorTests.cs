@@ -13,7 +13,7 @@ namespace NanoQL.Tests.Vectors;
 /// The CPI cap and floor's harness vectors, <c>tests/vectors/cxx/instruments/cpicapfloor.json</c>: caps and floors on
 /// the UK RPI, their members, fixing and payment dates and expiry, and the arguments QuantLib's
 /// <c>setupArguments</c> copies from them, read here from the members they copy (the instrument's arguments builder is
-/// internal, the S-xrt engine's contract); and the constructor's refusals.
+/// internal, the interpolating CPI cap and floor engine's contract); and the constructor's refusals.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class CPICapFloorCxxVectorTests

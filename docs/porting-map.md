@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 45 | 8 |
-| partial | 23 | 11 |
-| ported | 1,192 | 161 |
+| not started | 31 | 5 |
+| partial | 24 | 11 |
+| ported | 1,205 | 164 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -176,9 +176,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `swaptioncfs` | not started |  | no nanoql type: IborLegCashFlows, SwapCashFlows, SwaptionCashFlows |
-| `tenoroptionletvts` | not started |  | no nanoql type: TenorOptionletVTS, TenorOptionletVTSCorrelationStructure, TenorOptionletVTSTwoParameterCorrelation |
-| `tenorswaptionvts` | not started |  | no nanoql type: TenorSwaptionVTS |
+| `swaptioncfs` | ported | Experimental/BasisModels/SwaptionCFs/IborLegCashFlows.cs, Experimental/BasisModels/SwaptionCFs/SwapCashFlows.cs, Experimental/BasisModels/SwaptionCFs/SwaptionCashFlows.cs |  |
+| `tenoroptionletvts` | ported | Experimental/BasisModels/TenorOptionletVTS/TenorOptionletSmileSection.cs, Experimental/BasisModels/TenorOptionletVTS/TenorOptionletVTS.cs, Experimental/BasisModels/TenorOptionletVTS/TenorOptionletVTSCorrelationStructure.cs, Experimental/BasisModels/TenorOptionletVTS/TwoParameterCorrelation.cs | no nanoql type: TenorOptionletVTSTwoParameterCorrelation |
+| `tenorswaptionvts` | ported | Experimental/BasisModels/TenorSwaptionSmileSection.cs, Experimental/BasisModels/TenorSwaptionVTS.cs |  |
 
 ### `ql/experimental/callablebonds/`
 
@@ -361,17 +361,17 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `cpicapfloorengines` | not started |  | no nanoql type: InterpolatingCPICapFloorEngine |
-| `cpicapfloortermpricesurface` | not started |  | no nanoql type: CPICapFloorTermPriceSurface, InterpolatedCPICapFloorTermPriceSurface |
-| `genericindexes` | not started |  | no nanoql type: GenericRegion, GenericCPI, YYGenericCPI |
-| `interpolatedyoyoptionletstripper` | not started |  | no nanoql type: InterpolatedYoYOptionletStripper |
-| `kinterpolatedyoyoptionletvolatilitysurface` | not started |  | no nanoql type: KInterpolatedYoYOptionletVolatilitySurface |
-| `piecewiseyoyoptionletvolatility` | not started |  | no nanoql type: YoYInflationVolatilityTraits, PiecewiseYoYOptionletVolatilityCurve |
-| `polynomial2Dspline` | not started |  | no nanoql type: Polynomial2DSpline, Polynomial |
-| `yoycapfloortermpricesurface` | not started |  | no nanoql type: YoYCapFloorTermPriceSurface, InterpolatedYoYCapFloorTermPriceSurface |
-| `yoyinflationoptionletvolatilitystructure2` | not started |  | no nanoql type: InterpolatedYoYOptionletVolatilityCurve |
-| `yoyoptionlethelpers` | not started |  | no nanoql type: YoYOptionletHelper |
-| `yoyoptionletstripper` | not started |  | no nanoql type: YoYOptionletStripper |
+| `cpicapfloorengines` | ported | Experimental/Inflation/InterpolatingCPICapFloorEngine.cs |  |
+| `cpicapfloortermpricesurface` | ported | Experimental/Inflation/CPICapFloorTermPriceSurface.cs, Experimental/Inflation/InterpolatedCPICapFloorTermPriceSurface{TInterpolator2D}.cs |  |
+| `genericindexes` | ported | Experimental/Inflation/GenericIndexes/GenericCPI.cs, Experimental/Inflation/GenericIndexes/GenericRegion.cs, Experimental/Inflation/GenericIndexes/YYGenericCPI.cs |  |
+| `interpolatedyoyoptionletstripper` | ported | Experimental/Inflation/InterpolatedYoYOptionletStripper{TInterpolator}.cs |  |
+| `kinterpolatedyoyoptionletvolatilitysurface` | partial | Experimental/Inflation/KInterpolatedYoYOptionletVolatilitySurface{TInterpolator}.cs | partial: KInterpolatedYoYOptionletVolatilitySurface::volatilityImpl(const Date&, Rate), never ported: only its time form calls it, and the time form reads the stripped curves by time (XRR5 (xiii)) |
+| `piecewiseyoyoptionletvolatility` | ported | Experimental/Inflation/PiecewiseYoYOptionletVolatilityCurve{TInterpolator,TBootstrap,TTraits}.cs, Experimental/Inflation/YoYInflationVolatilityTraits.cs |  |
+| `polynomial2Dspline` | ported | Experimental/Inflation/Polynomial.cs, Experimental/Inflation/Polynomial2DSpline.cs |  |
+| `yoycapfloortermpricesurface` | ported | Experimental/Inflation/InterpolatedYoYCapFloorTermPriceSurface{TInterpolator2D,TInterpolator1D}.cs, Experimental/Inflation/YoYCapFloorTermPriceSurface.cs |  |
+| `yoyinflationoptionletvolatilitystructure2` | ported | Experimental/Inflation/InterpolatedYoYOptionletVolatilityCurve{TInterpolator}.cs |  |
+| `yoyoptionlethelpers` | ported | Experimental/Inflation/YoYOptionletHelper.cs |  |
+| `yoyoptionletstripper` | ported | Experimental/Inflation/StrippedYoYOptionlets.cs, Experimental/Inflation/YoYOptionletStripper.cs |  |
 
 ### `ql/experimental/lattices/`
 
@@ -2069,7 +2069,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `autocovariances` | ported | TestSuite/AutocovariancesTests.cs | 3 of 3 cases |
 | `bacheliercalculator` | ported | TestSuite/BachelierCalculatorTests.cs | 8 of 8 cases; moved: testBachelierCalculatorGreeks line 173 to Divergences/BachelierGreeksTests.cs; testBachelierCalculatorGreeks line 213 to Divergences/BachelierGreeksTests.cs |
 | `barrieroption` | ported | TestSuite/BarrierOptionTests.cs | 15 of 15 cases |
-| `basismodels` | not started |  | 4 cases |
+| `basismodels` | ported | TestSuite/BasisModelsTests.cs | 4 of 4 cases |
 | `basisswapratehelpers` | ported | TestSuite/BasisSwapRateHelpersTests.cs | 24 of 24 cases; moved: testOvernightIborAveragingAndTelescopicValueDates line 767 to Divergences/TelescopicValueDatesTests.cs; testOvernightOvernightTelescopicValueDatesWithSimpleAveraging line 920 to Divergences/TelescopicValueDatesTests.cs |
 | `basketoption` | ported | TestSuite/BasketOptionTests.cs | 25 of 25 cases |
 | `batesmodel` | ported | TestSuite/BatesModelTests.cs | 4 of 4 cases |
@@ -2153,9 +2153,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `inflationcapfloor` | ported | TestSuite/InflationCapFloorTests.cs | 4 of 4 cases; replaced: testVolatilityQuoteObservability by Conventions/YoYInflationCapFloorQuoteTests.cs |
 | `inflationcapflooredcoupon` | ported | TestSuite/InflationCapFlooredCouponTests.cs | 2 of 2 cases |
 | `inflationcpibond` | ported | TestSuite/InflationCPIBondTests.cs | 2 of 2 cases |
-| `inflationcpicapfloor` | not started |  | 2 cases |
+| `inflationcpicapfloor` | ported | TestSuite/InflationCPICapFloorTests.cs | 2 of 2 cases |
 | `inflationcpiswap` | ported | TestSuite/CPISwapTests.cs | 5 of 5 cases |
-| `inflationvolatility` | not started |  | 3 cases |
+| `inflationvolatility` | ported | TestSuite/InflationVolatilityTests.cs | 3 of 3 cases; replaced: testConstantVolatilityQuoteIsObserved by Conventions/ConstantInflationVolatilityQuoteTests.cs |
 | `instruments` | ported | TestSuite/InstrumentsTests.cs | 1 of 2 cases; not ported: testObservable (observer notifications and freezing, which an immutable instrument has no use for, R1) |
 | `integrals` | partial | TestSuite/IntegralsTests.cs | 20 of 21 cases; not yet: testPiecewiseIntegral |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |

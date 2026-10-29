@@ -12,7 +12,8 @@ namespace NanoQL.Instruments;
 
 /// <summary>
 /// QuantLib's <c>CPICapFloor::arguments</c>, which its <c>setupArguments</c> fills: the instrument's terms with its
-/// fixing and payment dates (the S-g1d plan's G1D6), the shape S-xrt's engines read (the S-cms plan's CMD16).
+/// fixing and payment dates (the S-g1d plan's G1D6), the shape the interpolating CPI cap and floor engine reads (the
+/// S-cms plan's CMD16).
 /// </summary>
 /// <remarks>QuantLib's <c>validate</c> checks nothing yet.</remarks>
 internal sealed class CPICapFloorArguments
