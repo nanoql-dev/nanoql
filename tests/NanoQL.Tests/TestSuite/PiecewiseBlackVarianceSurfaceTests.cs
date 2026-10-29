@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/piecewiseblackvariancesurface.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testSabrEquivalence, which waits for S-xeq's SABRVolTermStructure
 // Not ported: testObserver (observer notifications, which an immutable surface has no use for, R1); testSmileSectionRequiresSharedPtr (QuantLib's shared_ptr requirement, which a .NET reference has no counterpart for)
 
 using NanoQL.Experimental;
@@ -828,5 +827,50 @@ public class PiecewiseBlackVarianceSurfaceTests
         Exception e = Assert.ThrowsAny<Exception>(f);
         Assert.True(e is ArgumentException or NanoQLException, $"unexpected exception type {e.GetType()}");
         Assert.Contains(text, e.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TestSabrEquivalence()
+    {
+        // Testing equivalence with SABRVolTermStructure...
+        var today = new Date(15, Month.January, 2026);
+        DayCounter dc = new Actual365Fixed();
+
+        // SABR parameters
+        double alpha = 0.2;
+        double beta = 0.8;
+        double nu = 0.4;
+        double rho = -0.3;
+        double s0 = 100.0;
+        double r = 0.05;
+
+        // Build SABRVolTermStructure
+        var sabrSurface = new SABRVolTermStructure(alpha, beta, nu, rho, s0, r, today, dc);
+
+        double tol = 1.0e-10;
+        double[] strikes = [80.0, 90.0, 100.0, 110.0, 120.0];
+        Period[] tenors = [new(3, TimeUnit.Months), new(6, TimeUnit.Months), new(1, TimeUnit.Years), new(2, TimeUnit.Years)];
+
+        foreach (Period tenor in tenors)
+        {
+            Date expiry = today + tenor;
+            double t = dc.YearFraction(today, expiry);
+            double fwd = s0 * Math.Exp(r * t);
+
+            double[] sabrParams = [alpha, beta, nu, rho];
+            var smile = new SabrSmileSection(t, fwd, sabrParams);
+
+            var adapterSurface = new PiecewiseBlackVarianceSurface(today, expiry, smile, dc);
+
+            foreach (double strike in strikes)
+            {
+                double expected = sabrSurface.BlackVol(expiry, strike, true);
+                double calculated = adapterSurface.BlackVol(expiry, strike);
+                Assert.False(
+                    Math.Abs(calculated - expected) > tol,
+                    $"SABR equivalence failed: tenor {tenor}, strike {strike}, SABRVolTS {expected:F12}, adapter "
+                    + $"{calculated:F12}, difference {Math.Abs(calculated - expected):F12}, tolerance {tol}");
+            }
+        }
     }
 }

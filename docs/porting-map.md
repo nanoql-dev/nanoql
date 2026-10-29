@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 108 | 12 |
-| partial | 22 | 12 |
-| ported | 1,130 | 156 |
+| not started | 91 | 10 |
+| partial | 22 | 11 |
+| ported | 1,147 | 159 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -499,26 +499,26 @@ because the instrument and its static engine take their place (playbook §2.1).
 
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
-| `abcdatmvolcurve` | not started |  | no nanoql type: AbcdAtmVolCurve |
+| `abcdatmvolcurve` | ported | Experimental/Volatility/AbcdAtmVolCurve.cs |  |
 | `all` | not ported: include-only header |  |  |
-| `blackatmvolcurve` | not started |  | no nanoql type: BlackAtmVolCurve |
-| `blackvolsurface` | not started |  | no nanoql type: BlackVolSurface |
-| `equityfxvolsurface` | not started |  | no nanoql type: EquityFXVolSurface |
-| `extendedblackvariancecurve` | not started |  | no nanoql type: ExtendedBlackVarianceCurve |
-| `extendedblackvariancesurface` | not started |  | no nanoql type: ExtendedBlackVarianceSurface, ExtendedBlackVarianceSurfaceExtrapolation |
-| `interestratevolsurface` | not started |  | no nanoql type: InterestRateVolSurface |
-| `noarbsabr` | not started |  | no nanoql type: NoArbSabrModel |
-| `noarbsabrabsprobs` | not started |  |  |
-| `noarbsabrinterpolatedsmilesection` | not started |  | no nanoql type: NoArbSabrInterpolatedSmileSection |
-| `noarbsabrinterpolation` | not started |  | no nanoql type: NoArbSabrInterpolation, NoArbSabr |
-| `noarbsabrsmilesection` | not started |  | no nanoql type: NoArbSabrSmileSection |
-| `noarbsabrswaptionvolatilitycube` | not started |  | no nanoql type: SwaptionVolCubeNoArbSabrModel, NoArbSabrSwaptionVolatilityCube |
-| `sabrvolsurface` | not started |  | no nanoql type: SabrVolSurface |
-| `sabrvoltermstructure` | not started |  | no nanoql type: SABRVolTermStructure |
-| `sviinterpolatedsmilesection` | not started |  | no nanoql type: SviInterpolatedSmileSection |
+| `blackatmvolcurve` | ported | Experimental/Volatility/BlackAtmVolCurve.cs |  |
+| `blackvolsurface` | ported | Experimental/Volatility/BlackVolSurface.cs |  |
+| `equityfxvolsurface` | ported | Experimental/Volatility/EquityFXVolSurface.cs |  |
+| `extendedblackvariancecurve` | ported | Experimental/Volatility/ExtendedBlackVarianceCurve.cs |  |
+| `extendedblackvariancesurface` | ported | Experimental/Volatility/ExtendedBlackVarianceSurface.cs, Experimental/Volatility/ExtendedBlackVarianceSurfaceExtrapolation.cs |  |
+| `interestratevolsurface` | ported | Experimental/Volatility/InterestRateVolSurface.cs |  |
+| `noarbsabr` | ported | Experimental/Volatility/NoArbSabr/NoArbSabrD0Interpolator.cs, Experimental/Volatility/NoArbSabr/NoArbSabrModel.cs |  |
+| `noarbsabrabsprobs` | ported | Experimental/Volatility/NoArbSabrAbsProbs.cs |  |
+| `noarbsabrinterpolatedsmilesection` | ported | Experimental/Volatility/NoArbSabrInterpolatedSmileSection.cs |  |
+| `noarbsabrinterpolation` | ported | Experimental/Volatility/NoArbSabrInterpolation/NoArbSabr.cs, Experimental/Volatility/NoArbSabrInterpolation/NoArbSabrInterpolation.cs, Experimental/Volatility/NoArbSabrInterpolation/NoArbSabrSpecs.cs, Experimental/Volatility/NoArbSabrInterpolation/NoArbSabrWrapper.cs |  |
+| `noarbsabrsmilesection` | ported | Experimental/Volatility/NoArbSabrSmileSection.cs |  |
+| `noarbsabrswaptionvolatilitycube` | ported | Experimental/Volatility/NoArbSabrSwaptionVolatilityCube/NoArbSabrSwaptionVolatilityCube.cs, Experimental/Volatility/NoArbSabrSwaptionVolatilityCube/SwaptionVolCubeNoArbSabrModel.cs |  |
+| `sabrvolsurface` | ported | Experimental/Volatility/SabrVolSurface.cs |  |
+| `sabrvoltermstructure` | ported | Experimental/Volatility/SABRVolTermStructure.cs |  |
+| `sviinterpolatedsmilesection` | ported | Experimental/Volatility/SviInterpolatedSmileSection.cs |  |
 | `sviinterpolation` | ported | Experimental/Volatility/SviInterpolation/Svi.cs, Experimental/Volatility/SviInterpolation/SviInterpolation.cs, Experimental/Volatility/SviInterpolation/SviInterpolationFunctions.cs, Experimental/Volatility/SviInterpolation/SviSpecs.cs, Experimental/Volatility/SviInterpolation/SviWrapper.cs |  |
 | `svismilesection` | ported | Experimental/Volatility/SviSmileSection.cs |  |
-| `volcube` | not started |  | no nanoql type: VolatilityCube |
+| `volcube` | ported | Experimental/Volatility/VolatilityCube.cs |  |
 | `zabr` | not ported: deprecated |  |  |
 | `zabrinterpolatedsmilesection` | not ported: deprecated |  |  |
 | `zabrinterpolation` | not ported: deprecated |  |  |
@@ -2124,7 +2124,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `europeanoption` | ported | TestSuite/EuropeanOptionTests.cs | 26 of 27 cases; not ported: testFdEnginesWithNonStrikedPayoff (a vanilla option takes a striked payoff, so no engine can be given another, and Conventions/FdVanillaEngineErrorTests.cs asserts the type) |
 | `everestoption` | ported | TestSuite/EverestOptionTests.cs | 1 of 1 cases |
 | `exchangerate` | ported | TestSuite/ExchangeRateTests.cs | 5 of 5 cases |
-| `extendedblackvariancesurface` | not started |  | 1 cases |
+| `extendedblackvariancesurface` | ported | TestSuite/ExtendedBlackVarianceSurfaceTests.cs | 1 of 1 cases |
 | `extendedtrees` | not started |  | 7 cases |
 | `extensibleoptions` | ported | TestSuite/ExtensibleOptionsTests.cs | 2 of 2 cases |
 | `fastfouriertransform` | ported | TestSuite/FastFourierTransformTests.cs | 3 of 3 cases |
@@ -2160,7 +2160,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `integrals` | partial | TestSuite/IntegralsTests.cs | 20 of 21 cases; not yet: testPiecewiseIntegral |
 | `interestrates` | ported | TestSuite/InterestRatesTests.cs | 1 of 1 cases |
 | `interpolatedsmilesection` | ported | TestSuite/InterpolatedSmileSectionTests.cs | 8 of 8 cases; replaced: testHandlesUpdatePropagates by Conventions/InterpolatedSmileSectionQuoteTests.cs |
-| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 37 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testNoArbSabrInterpolation, testTransformations, testLaplaceInterpolation |
+| `interpolations` | partial | TestSuite/InterpolationsTests.cs | 39 of 40 cases; replaced: testInterpolateWithoutUpdate by Conventions/InterpolationConstructionTests.cs; testBicubicUpdate by Conventions/InterpolationConstructionTests.cs; not yet: testLaplaceInterpolation |
 | `jumpdiffusion` | ported | TestSuite/JumpDiffusionTests.cs | 2 of 2 cases |
 | `lazyobject` | not ported: tests LazyObject, which is replaced |  |  |
 | `libormarketmodel` | not ported: tests the legacy LIBOR market model, which isn't ported (D6) |  |  |
@@ -2183,7 +2183,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `mtmcrosscurrencybasisswap` | ported | TestSuite/MtMCrossCurrencyBasisSwapTests.cs | 14 of 15 cases; not ported: testFxResetCouponUpdates (observer notifications and deepUpdate, which immutable cash flows have no use for, R1) |
 | `multipleresetscoupons` | ported | TestSuite/MultipleResetsCouponsTests.cs | 5 of 5 cases |
 | `multipleresetsswap` | ported | TestSuite/MultipleResetsSwapTests.cs | 8 of 8 cases |
-| `noarbsabr` | not started |  | 2 cases |
+| `noarbsabr` | ported | TestSuite/NoArbSabrTests.cs | 2 of 2 cases |
 | `normalclvmodel` | not started |  | 5 cases |
 | `nthorderderivativeop` | ported | TestSuite/NthOrderDerivativeOpTests.cs | 15 of 15 cases |
 | `nthtodefault` | ported | TestSuite/NthToDefaultTests.cs | 2 of 2 cases |
@@ -2202,7 +2202,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `pathgenerator` | ported | TestSuite/PathGeneratorTests.cs | 2 of 2 cases |
 | `period` | ported | TestSuite/PeriodTests.cs | 9 of 9 cases |
 | `perpetualfutures` | ported | TestSuite/PerpetualFuturesTests.cs | 1 of 1 cases |
-| `piecewiseblackvariancesurface` | partial | TestSuite/PiecewiseBlackVarianceSurfaceTests.cs | 17 of 20 cases; not ported: testObserver (observer notifications, which an immutable surface has no use for, R1); testSmileSectionRequiresSharedPtr (QuantLib's shared_ptr requirement, which a .NET reference has no counterpart for); not yet: testSabrEquivalence |
+| `piecewiseblackvariancesurface` | ported | TestSuite/PiecewiseBlackVarianceSurfaceTests.cs | 18 of 20 cases; not ported: testObserver (observer notifications, which an immutable surface has no use for, R1); testSmileSectionRequiresSharedPtr (QuantLib's shared_ptr requirement, which a .NET reference has no counterpart for) |
 | `piecewiseyieldcurve` | partial | TestSuite/PiecewiseYieldCurveTests.cs | 36 of 38 cases; replaced: testObservability by Vectors/TermStructures/Yield/PiecewiseYieldCurveVectorTests.cs; not yet: testLogCubicDiscountConsistency, testSplineForwardConsistency |
 | `piecewisezerospreadedtermstructure` | ported | TestSuite/PiecewiseZeroSpreadedTermStructureTests.cs | 10 of 10 cases; replaced: testQuoteChanging by TestSuite/PiecewiseZeroSpreadedTermStructureTests.cs |
 | `preconditions` | replaced: test infrastructure: xUnit and the vector harness |  |  |

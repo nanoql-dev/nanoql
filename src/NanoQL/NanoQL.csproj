@@ -14,6 +14,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Numerics\RandomNumbers\PrimitivePolynomials.bin" LogicalName="NanoQL.Numerics.RandomNumbers.PrimitivePolynomials.bin" />
     <EmbeddedResource Include="Numerics\RandomNumbers\LatticeRules\LatticeRules.bin" LogicalName="NanoQL.Numerics.RandomNumbers.LatticeRules.LatticeRules.bin" />
+    <EmbeddedResource Include="Experimental\Volatility\NoArbSabrAbsProbs.bin" LogicalName="NanoQL.Experimental.Volatility.NoArbSabrAbsProbs.bin" />
     <EmbeddedResource Include="PricingEngines\Vanilla\ExponentialFittingHestonEngine\ExponentialFittingHestonEngineValues.bin" LogicalName="NanoQL.PricingEngines.Vanilla.ExponentialFittingHestonEngine.ExponentialFittingHestonEngineValues.bin" />
     <EmbeddedResource Include="Numerics\RandomNumbers\SobolRsg\AltPrimitivePolynomials.bin" LogicalName="NanoQL.Numerics.RandomNumbers.SobolRsg.AltPrimitivePolynomials.bin" />
     <EmbeddedResource Include="Numerics\RandomNumbers\SobolRsg\SLinitializers.bin" LogicalName="NanoQL.Numerics.RandomNumbers.SobolRsg.SLinitializers.bin" />

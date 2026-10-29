@@ -50,3 +50,11 @@ path = "src/NanoQL/Numerics/RandomNumbers/LatticeRules/LatticeRules.bin"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Copyright (C) 2007 Mark Joshi"
 SPDX-License-Identifier = "BSD-3-Clause"
+
+# QuantLib's absorption table for the no-arbitrage SABR model (Doust), generated from noarbsabrabsprobs.cpp by
+# tools/tables/noarbsabrabsprobs.py: data only.
+[[annotations]]
+path = "src/NanoQL/Experimental/Volatility/NoArbSabrAbsProbs.bin"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Copyright (C) 2014 Peter Caspers"
+SPDX-License-Identifier = "BSD-3-Clause"

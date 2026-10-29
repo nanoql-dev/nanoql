@@ -4316,6 +4316,17 @@ Facts:
 - `AStartTendingToTheEvaluationDateTendsToQuantLibsValue`
 - `TheDividendCurveIsntRead`
 
+## InterestRateVolSurfaceOptionDateTests
+
+[`Divergences/InterestRateVolSurfaceOptionDateTests.cs`](../tests/NanoQL.Tests/Divergences/InterestRateVolSurfaceOptionDateTests.cs)
+
+The interest-rate volatility surface's option dates (the S-xeq plan's XER5 (xxv)). QuantLib's `InterestRateVolSurface::optionDateFromTenor`, the index's fixing date, hides its base's non-virtual member, so `atmVol(Period)` and `smileSection(Period)`, defined on the bases, date the option on the calendar while the surface's own option dates and volatility spreads use the index's (`interestratevolsurface.hpp:69`, `blackatmvolcurve.cpp:40-44`); nanoql dates every tenor on the surface by the index. Checks: a tenor's at-the-money volatility and smile section are those at the index's date; at one month, where the calendar's date (15 June 2026) and the index's (17 June) differ, the calendar date's volatility differs.
+
+Facts:
+
+- `ATenorIsDatedByTheIndex`
+- `WhereTheCalendarsDateDiffersTheIndexsStands`
+
 ## InterpolatedSmileSectionCountTests
 
 [`Divergences/InterpolatedSmileSectionCountTests.cs`](../tests/NanoQL.Tests/Divergences/InterpolatedSmileSectionCountTests.cs)
@@ -5324,6 +5335,17 @@ Facts:
 - `NegativeSettlementDaysOfAVolatilityStructureAreRefused`
 - `NegativeMaximumIterationsOfTheCashFlowSolversAreRefused`
 
+## NoArbSabrShortExpiryTests
+
+[`Divergences/NoArbSabrShortExpiryTests.cs`](../tests/NanoQL.Tests/Divergences/NoArbSabrShortExpiryTests.cs)
+
+Doust's no-arbitrage SABR model at short expiries (the S-xeq plan's XER5 (xxvi)). QuantLib integrates the price, the digital and the forward error over [K, U] on one Gauss-Lobatto interval, which misses the density's spike as the expiry falls: out of the money from T 0.005 (2.18e-12 against Hagan's 2.18e-6), at the money from 0.003 (3.3e-9 against 1.97e-4), and at 0.001 its forward adjustment fails too, the numerical forward 8.8e-4 off [executed: the planner's XEP20]; nanoql splits each integral at the forward ± 8 widths Fσ_I√T where σ_I√T is below 0.1, QuantLib's single interval at and above. Checks: Hagan's prices (S7's SABR section) at strikes 0.9F to 1.1F within QuantLib's own consistency measure, 1e-5; the numerical forward within 1e-6 of the forward.
+
+Facts:
+
+- `AtShortExpiriesThePricesAreHagans`
+- `AtShortExpiriesTheNumericalForwardIsTheForward`
+
 ## NonstandardInitialGuessTests
 
 [`Divergences/NonstandardInitialGuessTests.cs`](../tests/NanoQL.Tests/Divergences/NonstandardInitialGuessTests.cs)
@@ -6121,6 +6143,17 @@ A SABR smile section given fewer than four parameters. QuantLib reads α, β, ν
 Facts:
 
 - `FewerThanFourParametersAreRefused`
+
+## SabrVolSurfaceFixingTests
+
+[`Divergences/SabrVolSurfaceFixingTests.cs`](../tests/NanoQL.Tests/Divergences/SabrVolSurfaceFixingTests.cs)
+
+The SABR volatility surface's fixing read (the S-xeq plan's XER5 (xxiv)). QuantLib's smile at time t reads the index's fixing on the date ⌊365t⌋ days after the reference date, which the index refuses ("Fixing date … is not valid") on two days in seven [executed: the planner's XEP19]; nanoql reads it on that date adjusted on the fixing calendar by Following, the adjustment QuantLib's interest-rate surface makes to its reference date, the identity on a fixing date. Checks: on a weekend the section's forward is Monday's fixing and its date the weekend's; on business days the forward is the day's own fixing.
+
+Facts:
+
+- `OnAWeekendTheSectionReadsMondaysFixing`
+- `OnABusinessDayTheSectionReadsItsOwnFixing`
 
 ## SabrVolatilityTypeTests
 

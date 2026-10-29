@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Text.Json;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
@@ -18,8 +19,8 @@ namespace NanoQL.Tests.Vectors;
 /// <remarks>
 /// A cube is <c>{"type", "atm", "optionTenors", "swapTenors", "strikeSpreads", "volSpreads", "swapIndex",
 /// "shortSwapIndex", "vegaWeightedSmileFit", "enableExtrapolation"}</c>, its type
-/// <c>"InterpolatedSwaptionVolatilityCube"</c>, or <c>"SabrSwaptionVolatilityCube"</c> or
-/// <c>"ZabrSwaptionVolatilityCube"</c>, each of which adds
+/// <c>"InterpolatedSwaptionVolatilityCube"</c>, or <c>"SabrSwaptionVolatilityCube"</c>,
+/// <c>"NoArbSabrSwaptionVolatilityCube"</c> or <c>"ZabrSwaptionVolatilityCube"</c>, each of which adds
 /// <c>"parametersGuess"</c>, <c>"isParameterFixed"</c>, <c>"isAtmCalibrated"</c>, <c>"endCriteria"</c>,
 /// <c>"maxErrorTolerance"</c>, <c>"optMethod"</c>, <c>"errorAccept"</c>, <c>"useMaxError"</c>, <c>"maxGuesses"</c>,
 /// <c>"backwardFlat"</c>, <c>"cutoffStrike"</c> and <c>"singlePassCalibration"</c>. Its at-the-money structure is a
@@ -58,6 +59,28 @@ internal static class CubeInputs
             "InterpolatedSwaptionVolatilityCube" => new InterpolatedSwaptionVolatilityCube(
                 atm, options, swaps, strikeSpreads, volSpreads, swapIndex, shortSwapIndex, vega, context),
             "SabrSwaptionVolatilityCube" => new SabrSwaptionVolatilityCube(
+                atm,
+                options,
+                swaps,
+                strikeSpreads,
+                volSpreads,
+                swapIndex,
+                shortSwapIndex,
+                vega,
+                Rows(spec.GetProperty("parametersGuess")),
+                [.. spec.GetProperty("isParameterFixed").EnumerateArray().Select(e => e.GetBoolean())],
+                spec.GetProperty("isAtmCalibrated").GetBoolean(),
+                context,
+                EndCriteriaOf(spec.GetProperty("endCriteria")),
+                SmileSectionInputs.NullableReal(spec.GetProperty("maxErrorTolerance")),
+                spec.GetProperty("optMethod").ValueKind == JsonValueKind.Null ? null : CalibrationInputs.MethodOf(spec.GetProperty("optMethod")),
+                SmileSectionInputs.NullableReal(spec.GetProperty("errorAccept")),
+                spec.GetProperty("useMaxError").GetBoolean(),
+                spec.GetProperty("maxGuesses").GetInt32(),
+                spec.GetProperty("backwardFlat").GetBoolean(),
+                IndexInputs.Real(spec.GetProperty("cutoffStrike")),
+                spec.GetProperty("singlePassCalibration").GetBoolean()),
+            "NoArbSabrSwaptionVolatilityCube" => new NoArbSabrSwaptionVolatilityCube(
                 atm,
                 options,
                 swaps,

@@ -19,7 +19,9 @@ namespace NanoQL.Numerics;
 /// <para>
 /// The fit runs when the interpolation is built: QuantLib's construction followed by its <c>update()</c>, which every
 /// QuantLib user calls at once. A new fit is a new interpolation, so <c>update()</c> isn't ported. A guess given as
-/// <see langword="null"/> takes QuantLib's default and is free, as QuantLib's <c>Null&lt;Real&gt;()</c>.
+/// <see langword="null"/> takes QuantLib's default and is free, as QuantLib's <c>Null&lt;Real&gt;()</c>. QuantLib's
+/// abcd volatility curve calls <c>update()</c> a second time, a refit from the first fit's coefficients without the
+/// constructor's guess check; an internal refit gives it (the S-xeq plan's §2.0).
 /// </para>
 /// <para>Immutable and thread-safe once built.</para>
 /// </remarks>
@@ -29,6 +31,13 @@ public sealed class AbcdInterpolation : Interpolation
     private const double NullReal = float.MaxValue;
 
     private readonly AbcdCalibration abcdCalibrator;
+    private readonly bool aIsFixed;
+    private readonly bool bIsFixed;
+    private readonly bool cIsFixed;
+    private readonly bool dIsFixed;
+    private readonly bool vegaWeighted;
+    private readonly EndCriteria? endCriteria;
+    private readonly OptimizationMethod? optMethod;
 
     /// <summary>Initializes a new instance of the <see cref="AbcdInterpolation"/> class, and fits it.</summary>
     /// <param name="x">The times, sorted.</param>
@@ -66,22 +75,34 @@ public sealed class AbcdInterpolation : Interpolation
     {
         // QuantLib's AbcdCoeffHolder
         AbcdMathFunction.Validate(a ?? NullReal, b ?? NullReal, c ?? NullReal, d ?? NullReal);
+        this.aIsFixed = a is not null && aIsFixed;
+        this.bIsFixed = b is not null && bIsFixed;
+        this.cIsFixed = c is not null && cIsFixed;
+        this.dIsFixed = d is not null && dIsFixed;
+        this.vegaWeighted = vegaWeighted;
+        this.endCriteria = endCriteria;
+        this.optMethod = optMethod;
 
         // QuantLib's update()
-        abcdCalibrator = new AbcdCalibration(
-            X.ToArray(),
-            Y.ToArray(),
-            a ?? -0.06,
-            b ?? 0.17,
-            c ?? 0.54,
-            d ?? 0.17,
-            a is not null && aIsFixed,
-            b is not null && bIsFixed,
-            c is not null && cIsFixed,
-            d is not null && dIsFixed,
-            vegaWeighted,
-            endCriteria,
-            optMethod).Compute();
+        abcdCalibrator = Fit(a ?? -0.06, b ?? 0.17, c ?? 0.54, d ?? 0.17);
+        K = abcdCalibrator.K(X.ToArray(), Y.ToArray());
+        RmsError = abcdCalibrator.Error();
+        MaxError = abcdCalibrator.MaxError();
+    }
+
+    // QuantLib's update() on a fitted interpolation: the fit run again from the fitted coefficients, with the same
+    // fixed flags, weighting and optimizer, and no guess check, as QuantLib's update() makes none
+    private AbcdInterpolation(AbcdInterpolation fitted)
+        : base(fitted.X, fitted.Y, 2)
+    {
+        aIsFixed = fitted.aIsFixed;
+        bIsFixed = fitted.bIsFixed;
+        cIsFixed = fitted.cIsFixed;
+        dIsFixed = fitted.dIsFixed;
+        vegaWeighted = fitted.vegaWeighted;
+        endCriteria = fitted.endCriteria;
+        optMethod = fitted.optMethod;
+        abcdCalibrator = Fit(fitted.A, fitted.B, fitted.C, fitted.D);
         K = abcdCalibrator.K(X.ToArray(), Y.ToArray());
         RmsError = abcdCalibrator.Error();
         MaxError = abcdCalibrator.MaxError();
@@ -111,6 +132,14 @@ public sealed class AbcdInterpolation : Interpolation
     /// <summary>Gets the end criterion the fit met.</summary>
     public EndCriteriaType EndCriteria => abcdCalibrator.EndCriteria;
 
+    /// <summary>
+    /// QuantLib's <c>update()</c> called again: a new interpolation fitted from this one's coefficients, on the same
+    /// points, fixed flags, weighting and optimizer, without the constructor's guess check.
+    /// </summary>
+    /// <returns>The refitted interpolation.</returns>
+    /// <exception cref="NanoQLException">The fit fails (<see cref="AbcdCalibration.Compute"/>).</exception>
+    internal AbcdInterpolation Refit() => new(this);
+
     /// <summary>The adjustment factor at a time, interpolated linearly between the factors at the given
     /// times.</summary>
     /// <param name="t">The time.</param>
@@ -139,6 +168,23 @@ public sealed class AbcdInterpolation : Interpolation
 
         return abcdCalibrator.Value(x);
     }
+
+    // the calibration from guesses, with this interpolation's flags, weighting and optimizer
+    private AbcdCalibration Fit(double a, double b, double c, double d) =>
+        new AbcdCalibration(
+            X.ToArray(),
+            Y.ToArray(),
+            a,
+            b,
+            c,
+            d,
+            aIsFixed,
+            bIsFixed,
+            cIsFixed,
+            dIsFixed,
+            vegaWeighted,
+            endCriteria,
+            optMethod).Compute();
 
     /// <inheritdoc/>
     /// <exception cref="NanoQLException">Always: QuantLib's abcd interpolation has no primitive.</exception>

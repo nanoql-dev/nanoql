@@ -128,8 +128,7 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/CmsSpreadTests.cs`: `testCouponPricing`, which waits for S-xrt's `LognormalCmsSpreadPricer`.
 - `tests/NanoQL.Tests/TestSuite/GaussianQuadraturesTests.cs`: `testNonCentralChiSquared` and `testNonCentralChiSquaredSumOfNodes`, which wait for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/IntegralsTests.cs`: `testPiecewiseIntegral`, which waits for S-xrt.
-- `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: the cases needing interpolations or extrapolators not yet ported (no-arbitrage SABR and the SABR transformations, Laplace).
+- `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: `testLaplaceInterpolation`, which waits for S-xrt's Laplace interpolation.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the Moore-Penrose case, which waits for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing cases, which wait for S-xrt's hybrid simulated annealing.
-- `tests/NanoQL.Tests/TestSuite/PiecewiseBlackVarianceSurfaceTests.cs`: `testSabrEquivalence`, which waits for S-xeq's `SABRVolTermStructure`.
 - `tests/NanoQL.Tests/TestSuite/SwingOptionTests.cs`: every case but `testFdBSSwingOption`, which wait for S-xeq's extended Ornstein-Uhlenbeck processes and engines.

@@ -467,6 +467,22 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a strike extrapolation outside <see cref="ExtendedBlackVarianceSurfaceExtrapolation"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>
+    /// QuantLib stores any value and compares it with <c>ConstantExtrapolation</c> alone, as for the landed surface's.
+    /// </remarks>
+    internal static void Check(ExtendedBlackVarianceSurfaceExtrapolation value, string paramName)
+    {
+        if (value is not (ExtendedBlackVarianceSurfaceExtrapolation.ConstantExtrapolation
+            or ExtendedBlackVarianceSurfaceExtrapolation.InterpolatorDefaultExtrapolation))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown extrapolation type");
+        }
+    }
+
     /// <summary>Refuses an eigenvector calculation outside
     /// <see cref="TqrEigenDecompositionEigenVectorCalculation"/>.</summary>
     /// <param name="value">The value.</param>

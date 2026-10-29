@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // ql/termstructures/volatility/swaption/sabrswaptionvolatilitycube.hpp and swaptionvolcube.hpp: what the wheel doesn't
-// reach of the swaption volatility cubes, on a cube spec built inside the call (tools/vectors/gen/termstructures/
-// volatility/swaption/swaptionvolcube.py's specs):
+// reach of the swaption volatility cubes, and ql/experimental/volatility/noarbsabrswaptionvolatilitycube.hpp's cube,
+// which the wheel doesn't expose, on a cube spec built inside the call (tools/vectors/gen/termstructures/volatility/
+// swaption/swaptionvolcube.py's specs):
 //
 //     XabrSwaptionVolatilityCube::marketVolCube(Size)   (cube, i): the i-th strike spread's market volatilities, a
 //                                                       list of rows, after the cube's calculation, which QuantLib's
@@ -14,10 +15,25 @@
 //                                                       refusals
 //     SwaptionVolatilityCube::maxSwapTenor              (cube): [length, units]
 //     SwaptionVolatilityCube::atmStrike(Period,Period)  (cube, optionTenor, swapTenor)
+//     NoArbSabrSwaptionVolatilityCube::outputs          (cube, gridOptions, gridSwaps, offOptions, offSwaps, offsets,
+//                                                       timePoints, timeStrikes, sectionTenors): a no-arbitrage SABR
+//                                                       cube's outputs, as tools/vectors/gen/termstructures/volatility/
+//                                                       swaption/sabrswaptionvolatilitycube.py takes them from the
+//                                                       wheel's SABR cube: {"shapes", its four matrices (the dense one
+//                                                       where at-the-money calibrated or in a single pass),
+//                                                       "volatilityGrid", "volatilityOffGrid" (each option and swap
+//                                                       tenor at the at-the-money strike plus each offset,
+//                                                       extrapolating), "volatilityTimeTime" (each [time, length,
+//                                                       extrapolate] at each strike), "sectionsPeriodPeriod" (each
+//                                                       [option, swap, extrapolate]) and "sectionsTimeTime" (each time
+//                                                       point), a section as its ATM level, exercise time, shift,
+//                                                       volatility type and volatility at its ATM level and 1% on
+//                                                       either side}, each value {"throws": true} where QuantLib refuses
 //
-// A cube is {"type" ("InterpolatedSwaptionVolatilityCube" or "SabrSwaptionVolatilityCube"), "atm", "optionTenors",
+// A cube is {"type" ("InterpolatedSwaptionVolatilityCube", "SabrSwaptionVolatilityCube" or
+// "NoArbSabrSwaptionVolatilityCube"), "atm", "optionTenors",
 // "swapTenors", "strikeSpreads", "volSpreads", "swapIndex", "shortSwapIndex", "vegaWeightedSmileFit",
-// "enableExtrapolation"}, and for a SABR cube "parametersGuess", "isParameterFixed", "isAtmCalibrated", "endCriteria",
+// "enableExtrapolation"}, and for a SABR or no-arbitrage SABR cube "parametersGuess", "isParameterFixed", "isAtmCalibrated", "endCriteria",
 // "maxErrorTolerance", "optMethod", "errorAccept", "useMaxError", "maxGuesses", "backwardFlat", "cutoffStrike" and
 // "singlePassCalibration". Its at-the-money structure is a matrix spec of swaptionvolmatrixspec.hpp (with its "form")
 // or a structure spec of swaptionvolspec.hpp; a swap index {"type": "EuriborSwapIsdaFixA", "tenor", "forwarding"},
@@ -35,6 +51,7 @@
 #include "termstructures/volatility/swaption/swaptionvolmatrixspec.hpp"
 #include "termstructures/volatility/swaption/swaptionvolspec.hpp"
 
+#include <ql/experimental/volatility/noarbsabrswaptionvolatilitycube.hpp>
 #include <ql/indexes/swap/euriborswap.hpp>
 #include <ql/math/matrix.hpp>
 #include <ql/math/optimization/levenbergmarquardt.hpp>
@@ -44,6 +61,7 @@
 #include <ql/termstructures/volatility/swaption/sabrswaptionvolatilitycube.hpp>
 
 #include <cstdint>
+#include <functional>
 #include <initializer_list>
 #include <optional>
 #include <string>
@@ -186,7 +204,7 @@ namespace harness {
             std::vector<std::string> keys = {"type", "atm", "optionTenors", "swapTenors", "strikeSpreads",
                                              "volSpreads", "swapIndex", "shortSwapIndex", "vegaWeightedSmileFit",
                                              "enableExtrapolation"};
-            bool sabr = s.type == "SabrSwaptionVolatilityCube";
+            bool sabr = s.type == "SabrSwaptionVolatilityCube" || s.type == "NoArbSabrSwaptionVolatilityCube";
             if (sabr) {
                 for (const char* k : {"parametersGuess", "isParameterFixed", "isAtmCalibrated", "endCriteria",
                                       "maxErrorTolerance", "optMethod", "errorAccept", "useMaxError", "maxGuesses",
@@ -272,6 +290,19 @@ namespace harness {
             return {};
         }
 
+        template <class Cube>
+        ext::shared_ptr<Cube> makeXabrCube(const CubeSpec& s, const Handle<SwaptionVolatilityStructure>& h) {
+            ext::shared_ptr<EndCriteria> criteria;
+            if (s.endCriteria)
+                criteria = ext::make_shared<EndCriteria>(optimization::makeEndCriteria(*s.endCriteria));
+            return ext::make_shared<Cube>(
+                h, periods(s.optionTenors), periods(s.swapTenors), s.strikeSpreads, quotes(s.volSpreads),
+                makeSwapIndex(s.swapIndex), makeSwapIndex(s.shortSwapIndex), s.vegaWeightedSmileFit,
+                quotes(s.parametersGuess), s.isParameterFixed, s.isAtmCalibrated, criteria, s.maxErrorTolerance,
+                makeMethod(s.optMethod), s.errorAccept, s.useMaxError, s.maxGuesses, s.backwardFlat, s.cutoffStrike,
+                s.singlePassCalibration);
+        }
+
         ext::shared_ptr<SwaptionVolatilityCube> makeCube(const CubeSpec& s) {
             ext::shared_ptr<SwaptionVolatilityStructure> atm =
                 s.matrix ? ext::shared_ptr<SwaptionVolatilityStructure>(termstructures::makeSwaptionVolMatrix(s.atmMatrix))
@@ -282,16 +313,10 @@ namespace harness {
                 out = ext::make_shared<InterpolatedSwaptionVolatilityCube>(
                     h, periods(s.optionTenors), periods(s.swapTenors), s.strikeSpreads, quotes(s.volSpreads),
                     makeSwapIndex(s.swapIndex), makeSwapIndex(s.shortSwapIndex), s.vegaWeightedSmileFit);
+            } else if (s.type == "SabrSwaptionVolatilityCube") {
+                out = makeXabrCube<SabrSwaptionVolatilityCube>(s, h);
             } else {
-                ext::shared_ptr<EndCriteria> criteria;
-                if (s.endCriteria)
-                    criteria = ext::make_shared<EndCriteria>(optimization::makeEndCriteria(*s.endCriteria));
-                out = ext::make_shared<SabrSwaptionVolatilityCube>(
-                    h, periods(s.optionTenors), periods(s.swapTenors), s.strikeSpreads, quotes(s.volSpreads),
-                    makeSwapIndex(s.swapIndex), makeSwapIndex(s.shortSwapIndex), s.vegaWeightedSmileFit,
-                    quotes(s.parametersGuess), s.isParameterFixed, s.isAtmCalibrated, criteria, s.maxErrorTolerance,
-                    makeMethod(s.optMethod), s.errorAccept, s.useMaxError, s.maxGuesses, s.backwardFlat,
-                    s.cutoffStrike, s.singlePassCalibration);
+                out = makeXabrCube<NoArbSabrSwaptionVolatilityCube>(s, h);
             }
             if (s.enableExtrapolation)
                 out->enableExtrapolation();
@@ -307,6 +332,73 @@ namespace harness {
                 out.emplace_back(std::move(row));
             }
             return json::value(std::move(out));
+        }
+
+        template <class F>
+        json::value attempted(F f) {
+            try {
+                return json::value(f());
+            } catch (const Error&) {
+                return json::object{{"throws", true}};
+            }
+        }
+
+        void flatInto(json::object& out, const char* name, const Matrix& m, json::array& shapes) {
+            json::array flat;
+            for (Size i = 0; i < m.rows(); ++i)
+                for (Size j = 0; j < m.columns(); ++j)
+                    flat.emplace_back(m[i][j]);
+            shapes.emplace_back(static_cast<std::int64_t>(m.rows()));
+            shapes.emplace_back(static_cast<std::int64_t>(m.columns()));
+            out[name] = json::value(std::move(flat));
+        }
+
+        // [time, length, extrapolate] or [[length, units], [length, units], extrapolate]
+        struct Point {
+            Real t = 0.0, length = 0.0;
+            PeriodSpec option, swap;
+            bool extrapolate = false;
+        };
+
+        std::vector<Point> points(const json::value& v, bool byTime) {
+            if (!v.is_array())
+                throw InvalidParams("expected a list of points, got " + json::serialize(v));
+            std::vector<Point> out;
+            for (const json::value& p : v.get_array()) {
+                if (!p.is_array() || p.get_array().size() != 3)
+                    throw InvalidParams("a point is three entries, got " + json::serialize(p));
+                const json::array& x = p.get_array();
+                Point q;
+                if (byTime) {
+                    q.t = real(x[0]);
+                    q.length = real(x[1]);
+                } else {
+                    q.option = tenor(x[0]);
+                    q.swap = tenor(x[1]);
+                }
+                q.extrapolate = boolean(x[2]);
+                out.push_back(q);
+            }
+            return out;
+        }
+
+        void sectionInto(json::array& out, const std::function<ext::shared_ptr<SmileSection>()>& make) {
+            ext::shared_ptr<SmileSection> s;
+            try {
+                s = make();
+            } catch (const Error&) {
+                for (int i = 0; i < 7; ++i)
+                    out.emplace_back(json::object{{"throws", true}});
+                return;
+            }
+            Real atm = s->atmLevel();
+            out.emplace_back(atm);
+            out.emplace_back(s->exerciseTime());
+            out.emplace_back(s->shift());
+            out.emplace_back(static_cast<std::int64_t>(s->volatilityType()));
+            out.push_back(attempted([&] { return s->volatility(atm - 0.01); }));
+            out.push_back(attempted([&] { return s->volatility(atm); }));
+            out.push_back(attempted([&] { return s->volatility(atm + 0.01); }));
         }
 
         CubeSpec sabrCube(const json::value& v) {
@@ -350,6 +442,61 @@ namespace harness {
                      out.emplace_back(static_cast<std::int64_t>(p.length()));
                      out.emplace_back(static_cast<std::int64_t>(p.units()));
                      return json::value(std::move(out));
+                 };
+             }},
+            {"NoArbSabrSwaptionVolatilityCube::outputs",
+             [](const Args& a) -> Call {
+                 arity(a, 9);
+                 CubeSpec s = cube(a[0]);
+                 if (s.type != "NoArbSabrSwaptionVolatilityCube")
+                     throw InvalidParams("expected a no-arbitrage SABR cube spec, got a " + s.type);
+                 std::vector<PeriodSpec> gridOptions = tenors(a[1]), gridSwaps = tenors(a[2]);
+                 std::vector<PeriodSpec> offOptions = tenors(a[3]), offSwaps = tenors(a[4]);
+                 std::vector<Real> offsets = reals(a[5]);
+                 std::vector<Point> timePoints = points(a[6], true);
+                 std::vector<Real> timeStrikes = reals(a[7]);
+                 std::vector<Point> sectionTenors = points(a[8], false);
+                 return [=] {
+                     auto c = ext::dynamic_pointer_cast<NoArbSabrSwaptionVolatilityCube>(makeCube(s));
+                     json::object out;
+                     json::array shapes;
+                     flatInto(out, "sparseSabrParameters", c->sparseSabrParameters(), shapes);
+                     if (s.isAtmCalibrated || s.singlePassCalibration)
+                         flatInto(out, "denseSabrParameters", c->denseSabrParameters(), shapes);
+                     flatInto(out, "marketVolCube", c->marketVolCube(), shapes);
+                     flatInto(out, "volCubeAtmCalibrated", c->volCubeAtmCalibrated(), shapes);
+                     out["shapes"] = json::value(std::move(shapes));
+                     auto volatilities = [&](const std::vector<PeriodSpec>& options,
+                                             const std::vector<PeriodSpec>& swaps) {
+                         json::array v;
+                         for (const PeriodSpec& o : options) {
+                             Date d = c->optionDateFromTenor(makePeriod(o));
+                             for (const PeriodSpec& w : swaps) {
+                                 Period p = makePeriod(w);
+                                 Real k = c->atmStrike(d, p);
+                                 for (Real sp : offsets)
+                                     v.push_back(attempted([&] { return c->volatility(d, p, k + sp, true); }));
+                             }
+                         }
+                         return v;
+                     };
+                     out["volatilityGrid"] = volatilities(gridOptions, gridSwaps);
+                     out["volatilityOffGrid"] = volatilities(offOptions, offSwaps);
+                     json::array byTime, sectionsPeriod, sectionsTime;
+                     for (const Point& q : timePoints)
+                         for (Real k : timeStrikes)
+                             byTime.push_back(
+                                 attempted([&] { return c->volatility(q.t, q.length, k, q.extrapolate); }));
+                     for (const Point& q : sectionTenors)
+                         sectionInto(sectionsPeriod, [&] {
+                             return c->smileSection(makePeriod(q.option), makePeriod(q.swap), q.extrapolate);
+                         });
+                     for (const Point& q : timePoints)
+                         sectionInto(sectionsTime, [&] { return c->smileSection(q.t, q.length, q.extrapolate); });
+                     out["volatilityTimeTime"] = byTime;
+                     out["sectionsPeriodPeriod"] = sectionsPeriod;
+                     out["sectionsTimeTime"] = sectionsTime;
+                     return json::value(out);
                  };
              }},
             {"SwaptionVolatilityCube::atmStrike(Period,Period)",

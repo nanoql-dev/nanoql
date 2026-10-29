@@ -8,10 +8,12 @@
 // SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
 // Upstream: test-suite/interpolations.cpp @ v1.44
 // Ported to C# from QuantLib and modified by the nanoql Authors.
-// Partial: testLaplaceInterpolation (S-xrt); testNoArbSabrInterpolation, testTransformations (S-xeq)
+// Partial: testLaplaceInterpolation (S-xrt)
 // Replaced: testInterpolateWithoutUpdate (Conventions/InterpolationConstructionTests.cs); testBicubicUpdate (Conventions/InterpolationConstructionTests.cs)
 
 using System.Collections.Immutable;
+using System.Reflection;
+using NanoQL.Experimental;
 using NanoQL.Numerics;
 using NanoQL.TermStructures;
 using NanoQL.Utilities;
@@ -1120,6 +1122,208 @@ public class InterpolationsTests
                 }
             }
         }
+    }
+
+    [Fact]
+    public void TestNoArbSabrInterpolation()
+    {
+        // Testing no-arbitrage Sabr interpolation...
+
+        // Test SABR function against input volatilities
+        Real tolerance = 1.0e-12;
+        Real[] strikes =
+        [
+            0.03, 0.032, 0.034, 0.036, 0.038, 0.04, 0.042, 0.044, 0.046, 0.048, 0.05, 0.052, 0.054, 0.056, 0.058, 0.06, 0.062,
+            0.064, 0.066, 0.068, 0.07, 0.072, 0.074, 0.076, 0.078, 0.08, 0.082, 0.084, 0.086, 0.088, 0.09,
+        ];
+
+        // input volatilities for noarb sabr (other than above
+        // alpha is 0.2 here due to the restriction sigmaI <= 1.0 !)
+        Real[] volatilities =
+        [
+            0.773729077752926, 0.763916242454194, 0.754773878663612, 0.746222305031368, 0.738193023523582,
+            0.730629785825930, 0.723484825471685, 0.716716812668892, 0.710290301049393, 0.704174528906769,
+            0.698342635400901, 0.692771033345972, 0.687438902593476, 0.682327777297265, 0.677421206991904,
+            0.672704476238547, 0.668164371832768, 0.663788984329375, 0.659567547226380, 0.655490294349232,
+            0.651548341349061, 0.647733583657137, 0.644038608699086, 0.640456620061898, 0.636981371712714,
+            0.633607110719560, 0.630328527192861, 0.627140710386248, 0.624039110072250, 0.621019502453590,
+            0.618077959983455,
+        ];
+
+        double expiry = 1.0;
+        Real forward = 0.039;
+
+        // input SABR coefficients (corresponding to the vols above)
+        Real initialAlpha = 0.2;
+        Real initialBeta = 0.6;
+        Real initialNu = 0.02;
+        Real initialRho = 0.01;
+
+        // calculate SABR vols and compare with input vols
+        var noarbSabr = new NoArbSabrSmileSection(expiry, forward, [initialAlpha, initialBeta, initialNu, initialRho]);
+        for (int i = 0; i < strikes.Length; i++)
+        {
+            Real calculatedVol = noarbSabr.Volatility(strikes[i]);
+            Assert.False(
+                Math.Abs(volatilities[i] - calculatedVol) > tolerance,
+                $"failed to calculate noarb-Sabr function at strike {strikes[i]}: expected {volatilities[i]}, calculated "
+                + $"{calculatedVol}, error {Math.Abs(calculatedVol - volatilities[i])}");
+        }
+
+        // Test SABR calibration against input parameters
+        Real betaGuess = 0.5;
+        Real alphaGuess = 0.2 / Math.Pow(forward, betaGuess - 1.0); // new default value for alpha
+        Real nuGuess = Math.Sqrt(0.4);
+        Real rhoGuess = 0.0;
+
+        bool[] vegaWeighted = [true, false];
+        bool[] isAlphaFixed = [true, false];
+        bool[] isBetaFixed = [true, false];
+        bool[] isNuFixed = [true, false];
+        bool[] isRhoFixed = [true, false];
+
+        Real calibrationTolerance = 5.0e-6;
+
+        // initialize optimization methods
+        OptimizationMethod[] methods = [new Simplex(0.01), new LevenbergMarquardt(1e-8, 1e-8, 1e-8)];
+
+        // Initialize end criteria
+        var endCriteria = new EndCriteria(100000, 100, 1e-8, 1e-8, 1e-8);
+
+        // Test looping over all possibilities
+        for (int j = 1; j < methods.Length; ++j)
+        {
+            // skip simplex (gets caught in some cases)
+            foreach (bool i in vegaWeighted)
+            {
+                foreach (bool k_a in isAlphaFixed)
+                {
+                    for (int k_b = 0; k_b < 1; ++k_b)
+                    {
+                        // keep beta fixed (all 4 params free is a problem for this kind of test)
+                        foreach (bool k_n in isNuFixed)
+                        {
+                            foreach (bool k_r in isRhoFixed)
+                            {
+                                var noarbSabrInterpolation = new NoArbSabrInterpolation(
+                                    strikes,
+                                    volatilities,
+                                    expiry,
+                                    forward,
+                                    k_a ? initialAlpha : alphaGuess,
+                                    isBetaFixed[k_b] ? initialBeta : betaGuess,
+                                    k_n ? initialNu : nuGuess,
+                                    k_r ? initialRho : rhoGuess,
+                                    k_a,
+                                    isBetaFixed[k_b],
+                                    k_n,
+                                    k_r,
+                                    i,
+                                    endCriteria,
+                                    methods[j],
+                                    1E-10);
+
+                                // Recover SABR calibration parameters
+                                var messages = new List<string>();
+                                (string Name, Real Expected, Real Calibrated)[] checks =
+                                [
+                                    ("alpha", initialAlpha, noarbSabrInterpolation.Alpha),
+                                    ("beta", initialBeta, noarbSabrInterpolation.Beta),
+                                    ("nu", initialNu, noarbSabrInterpolation.Nu),
+                                    ("rho", initialRho, noarbSabrInterpolation.Rho),
+                                ];
+                                foreach ((string name, Real expected, Real calibrated) in checks)
+                                {
+                                    Real error = Math.Abs(expected - calibrated);
+                                    if (error > calibrationTolerance)
+                                    {
+                                        messages.Add(
+                                            $"failed to calibrate {name} Sabr parameter: expected {expected}, calibrated "
+                                            + $"{calibrated}, error {error}");
+                                    }
+                                }
+
+                                Assert.True(
+                                    messages.Count == 0,
+                                    string.Join("\n", messages)
+                                    + $"\nnoarb-Sabr calibration failure: isAlphaFixed {k_a}, isBetaFixed {isBetaFixed[k_b]}, "
+                                    + $"isNuFixed {k_n}, isRhoFixed {k_r}, vegaWeighted {i}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void TestTransformations()
+    {
+        // Testing Sabr and no-arbitrage Sabr transformation functions...
+        Real size = 25.0; // test inputs from [-size,size]^4
+        int n = 100000;
+        var x = new Vector(4);
+        bool[] fixedParams = [false, false, false, false];
+        double[] parameters = [0.0, 0.0, 0.0, 0.0];
+        Real forward = 0.03;
+
+        // the specs are internal (QuantLib's detail::), reached by reflection
+        Transform sabrDirect = Specs("NanoQL.Numerics.SABRSpecs", "Direct");
+        Transform sabrInverse = Specs("NanoQL.Numerics.SABRSpecs", "Inverse");
+        Transform noArbDirect = Specs("NanoQL.Experimental.NoArbSabrSpecs", "Direct");
+        Transform noArbInverse = Specs("NanoQL.Experimental.NoArbSabrSpecs", "Inverse");
+        Real betaMin = Constant("BetaMin"), betaMax = Constant("BetaMax"), sigmaIMin = Constant("SigmaIMin");
+        Real sigmaIMax = Constant("SigmaIMax"), nuMin = Constant("NuMin"), nuMax = Constant("NuMax");
+        Real rhoMin = Constant("RhoMin"), rhoMax = Constant("RhoMax");
+
+        var h = new HaltonRsg(4, 42, false, false);
+        for (int i = 0; i < 1000000; ++i)
+        {
+            ReadOnlySpan<double> s = h.NextSequence().Value.Span;
+            for (int j = 0; j < 4; ++j)
+            {
+                x[j] = (2.0 * size * s[j]) - size;
+            }
+
+            // sabr
+            Vector y = sabrDirect(x, fixedParams, parameters, forward);
+            SabrFunctions.ValidateSabrParameters(y[0], y[1], y[2], y[3]);
+            Vector z = sabrInverse(y, fixedParams, parameters, forward);
+            z = sabrDirect(z, fixedParams, parameters, forward);
+            Assert.True(
+                ComparisonFunctions.Close(z[0], y[0], n) && ComparisonFunctions.Close(z[1], y[1], n)
+                && ComparisonFunctions.Close(z[2], y[2], n) && ComparisonFunctions.Close(z[3], y[3], n),
+                $"SabrInterpolation: direct(inverse({y[0]},{y[1]},{y[2]},{y[3]})) = ({z[0]},{z[1]},{z[2]},{z[3]})");
+
+            // noarb sabr
+            y = noArbDirect(x, fixedParams, parameters, forward);
+
+            // we can not invoke the constructor, this would be too slow, so
+            // we copy the parameter check here ...
+            Real alpha = y[0], beta = y[1], nu = y[2], rho = y[3];
+            Assert.True(beta >= betaMin && beta <= betaMax, $"beta ({beta}) out of bounds");
+            Real sigmaI = alpha * Math.Pow(forward, beta - 1.0);
+            Assert.True(
+                sigmaI >= sigmaIMin && sigmaI <= sigmaIMax,
+                $"sigmaI = alpha*forward^(beta-1.0) ({sigmaI}) out of bounds, alpha={alpha} beta={beta} forward={forward}");
+            Assert.True(nu >= nuMin && nu <= nuMax, $"nu ({nu}) out of bounds");
+            Assert.True(rho >= rhoMin && rho <= rhoMax, $"rho ({rho}) out of bounds");
+
+            z = noArbInverse(y, fixedParams, parameters, forward);
+            z = noArbDirect(z, fixedParams, parameters, forward);
+            Assert.True(
+                ComparisonFunctions.Close(z[0], y[0], n) && ComparisonFunctions.Close(z[1], y[1], n)
+                && ComparisonFunctions.Close(z[2], y[2], n) && ComparisonFunctions.Close(z[3], y[3], n),
+                $"NoArbSabrInterpolation: direct(inverse({y[0]},{y[1]},{y[2]},{y[3]})) = ({z[0]},{z[1]},{z[2]},{z[3]})");
+        }
+
+        static Transform Specs(string type, string method) =>
+            typeof(NoArbSabrModel).Assembly.GetType(type, throwOnError: true)!
+                .GetMethod(method, BindingFlags.Public | BindingFlags.Static)!
+                .CreateDelegate<Transform>();
+
+        static Real Constant(string name) =>
+            (Real)typeof(NoArbSabrModel).GetField(name, BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
     }
 
     [Fact]
@@ -2385,4 +2589,7 @@ public class InterpolationsTests
     // interpolations.cpp's multif (lines 193-197).
     private static Real Multif(Real s, Real t, Real u, Real v, Real w) =>
         Math.Sqrt((s * Math.Sinh(Math.Log(t))) + Math.Exp(Math.Sin(u) * Math.Sin(3 * v)) + Math.Sinh(Math.Log(v * w)));
+
+    // the XABR specs' direct and inverse transforms
+    private delegate Vector Transform(Vector x, ReadOnlySpan<bool> paramIsFixed, ReadOnlySpan<double> parameters, double forward);
 }
