@@ -483,6 +483,21 @@ internal static class EnumArguments
         }
     }
 
+    /// <summary>Refuses a discretization outside <see cref="ExtendedOrnsteinUhlenbeckProcessDiscretization"/>.</summary>
+    /// <param name="value">The value.</param>
+    /// <param name="paramName">The parameter's name.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The value isn't a member.</exception>
+    /// <remarks>QuantLib's expectation fails another value ("unknown discretization scheme") at its first use.</remarks>
+    internal static void Check(ExtendedOrnsteinUhlenbeckProcessDiscretization value, string paramName)
+    {
+        if (value is not (ExtendedOrnsteinUhlenbeckProcessDiscretization.MidPoint
+            or ExtendedOrnsteinUhlenbeckProcessDiscretization.Trapezodial
+            or ExtendedOrnsteinUhlenbeckProcessDiscretization.GaussLobatto))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "unknown discretization scheme");
+        }
+    }
+
     /// <summary>Refuses an eigenvector calculation outside
     /// <see cref="TqrEigenDecompositionEigenVectorCalculation"/>.</summary>
     /// <param name="value">The value.</param>

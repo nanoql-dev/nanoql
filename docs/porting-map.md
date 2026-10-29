@@ -20,9 +20,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Status | `ql/` units | `test-suite/` units |
 |---|---:|---:|
 | not ported | 175 | 8 |
-| not started | 91 | 10 |
+| not started | 67 | 9 |
 | partial | 22 | 11 |
-| ported | 1,147 | 159 |
+| ported | 1,171 | 160 |
 | replaced | 21 | 6 |
 | total | 1,456 | 194 |
 
@@ -313,30 +313,30 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `dynprogvppintrinsicvalueengine` | not started |  | no nanoql type: DynProgVPPIntrinsicValueEngine |
-| `fdextoujumpvanillaengine` | not started |  | no nanoql type: FdExtOUJumpVanillaEngine |
-| `fdklugeextouspreadengine` | not started |  | no nanoql type: FdKlugeExtOUSpreadEngine |
+| `dynprogvppintrinsicvalueengine` | ported | Experimental/FiniteDifferences/DynProgVPPIntrinsicValueEngine.cs |  |
+| `fdextoujumpvanillaengine` | ported | Experimental/FiniteDifferences/FdExtOUJumpVanillaEngine.cs |  |
+| `fdklugeextouspreadengine` | ported | Experimental/FiniteDifferences/FdKlugeExtOUSpreadEngine.cs |  |
 | `fdmdupire1dop` | ported | Experimental/FiniteDifferences/FdmDupire1dOp.cs |  |
-| `fdmexpextouinnervaluecalculator` | not started |  | no nanoql type: FdmExpExtOUInnerValueCalculator |
-| `fdmextendedornsteinuhlenbeckop` | not started |  | no nanoql type: FdmExtendedOrnsteinUhlenbeckOp |
-| `fdmextoujumpmodelinnervalue` | not started |  | no nanoql type: FdmExtOUJumpModelInnerValue |
-| `fdmextoujumpop` | not started |  | no nanoql type: FdmExtOUJumpOp |
-| `fdmextoujumpsolver` | not started |  | no nanoql type: FdmExtOUJumpSolver |
-| `fdmklugeextouop` | not started |  | no nanoql type: FdmKlugeExtOUOp |
-| `fdmklugeextousolver` | not started |  | no nanoql type: FdmKlugeExtOUSolver |
-| `fdmsimple2dextousolver` | not started |  | no nanoql type: FdmSimple2dExtOUSolver |
-| `fdmsimple3dextoujumpsolver` | not started |  | no nanoql type: FdmSimple3dExtOUJumpSolver |
-| `fdmspreadpayoffinnervalue` | not started |  | no nanoql type: FdmSpreadPayoffInnerValue |
-| `fdmvppstartlimitstepcondition` | not started |  | no nanoql type: FdmVPPStartLimitStepCondition |
-| `fdmvppstepcondition` | not started |  | no nanoql type: FdmVPPStepConditionParams, FdmVPPStepConditionMesher, FdmVPPStepCondition |
-| `fdmvppstepconditionfactory` | not started |  | no nanoql type: FdmVPPStepConditionFactory |
+| `fdmexpextouinnervaluecalculator` | ported | Experimental/FiniteDifferences/FdmExpExtOUInnerValueCalculator.cs |  |
+| `fdmextendedornsteinuhlenbeckop` | ported | Experimental/FiniteDifferences/FdmExtendedOrnsteinUhlenbeckOp.cs |  |
+| `fdmextoujumpmodelinnervalue` | ported | Experimental/FiniteDifferences/FdmExtOUJumpModelInnerValue.cs |  |
+| `fdmextoujumpop` | ported | Experimental/FiniteDifferences/FdmExtOUJumpOp.cs |  |
+| `fdmextoujumpsolver` | ported | Experimental/FiniteDifferences/FdmExtOUJumpSolver.cs |  |
+| `fdmklugeextouop` | ported | Experimental/FiniteDifferences/FdmKlugeExtOUOp.cs |  |
+| `fdmklugeextousolver` | ported | Experimental/FiniteDifferences/FdmKlugeExtOUSolver.cs |  |
+| `fdmsimple2dextousolver` | ported | Experimental/FiniteDifferences/FdmSimple2dExtOUSolver.cs |  |
+| `fdmsimple3dextoujumpsolver` | ported | Experimental/FiniteDifferences/FdmSimple3dExtOUJumpSolver.cs |  |
+| `fdmspreadpayoffinnervalue` | ported | Experimental/FiniteDifferences/FdmSpreadPayoffInnerValue.cs |  |
+| `fdmvppstartlimitstepcondition` | ported | Experimental/FiniteDifferences/FdmVPPStartLimitStepCondition.cs |  |
+| `fdmvppstepcondition` | ported | Experimental/FiniteDifferences/FdmVPPStepCondition.cs, Experimental/FiniteDifferences/FdmVPPStepConditionMesher.cs, Experimental/FiniteDifferences/FdmVPPStepConditionParams.cs |  |
+| `fdmvppstepconditionfactory` | ported | Experimental/FiniteDifferences/FdmVPPStepConditionFactory.cs |  |
 | `fdmzabrop` | ported | Experimental/FiniteDifferences/FdmZabrOp/FdmZabrOp.cs, Experimental/FiniteDifferences/FdmZabrOp/FdmZabrUnderlyingPart.cs, Experimental/FiniteDifferences/FdmZabrOp/FdmZabrVolatilityPart.cs |  |
-| `fdornsteinuhlenbeckvanillaengine` | not started |  | no nanoql type: FdOrnsteinUhlenbeckVanillaEngine |
-| `fdsimpleextoujumpswingengine` | not started |  | no nanoql type: FdSimpleExtOUJumpSwingEngine |
-| `fdsimpleextoustorageengine` | not started |  | no nanoql type: FdSimpleExtOUStorageEngine |
-| `fdsimpleklugeextouvppengine` | not started |  | no nanoql type: FdSimpleKlugeExtOUVPPEngine |
+| `fdornsteinuhlenbeckvanillaengine` | ported | Experimental/FiniteDifferences/FdOrnsteinUhlenbeckVanillaEngine.cs |  |
+| `fdsimpleextoujumpswingengine` | ported | Experimental/FiniteDifferences/FdSimpleExtOUJumpSwingEngine.cs |  |
+| `fdsimpleextoustorageengine` | ported | Experimental/FiniteDifferences/FdSimpleExtOUStorageEngine.cs |  |
+| `fdsimpleklugeextouvppengine` | ported | Experimental/FiniteDifferences/FdSimpleKlugeExtOUVPPEngine.cs |  |
 | `glued1dmesher` | ported | Experimental/FiniteDifferences/Glued1dMesher.cs |  |
-| `vanillavppoption` | not started |  | no nanoql type: VanillaVPPOption |
+| `vanillavppoption` | ported | Experimental/FiniteDifferences/VanillaVPPOption.cs |  |
 
 ### `ql/experimental/forward/`
 
@@ -435,10 +435,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
 | `extendedblackscholesprocess` | not started |  | no nanoql type: ExtendedBlackScholesMertonProcess, ExtendedBlackScholesMertonProcessDiscretization |
-| `extendedornsteinuhlenbeckprocess` | not started |  | no nanoql type: ExtendedOrnsteinUhlenbeckProcess, ExtendedOrnsteinUhlenbeckProcessDiscretization |
-| `extouwithjumpsprocess` | not started |  | no nanoql type: ExtOUWithJumpsProcess |
+| `extendedornsteinuhlenbeckprocess` | ported | Experimental/Processes/ExtendedOrnsteinUhlenbeckProcess.cs, Experimental/Processes/ExtendedOrnsteinUhlenbeckProcessDiscretization.cs |  |
+| `extouwithjumpsprocess` | ported | Experimental/Processes/ExtOUWithJumpsProcess.cs |  |
 | `gemanroncoroniprocess` | not started |  | no nanoql type: GemanRoncoroniProcess |
-| `klugeextouprocess` | not started |  | no nanoql type: KlugeExtOUProcess |
+| `klugeextouprocess` | ported | Experimental/Processes/KlugeExtOUProcess.cs |  |
 | `vegastressedblackscholesprocess` | not started |  | no nanoql type: VegaStressedBlackScholesProcess |
 
 ### `ql/experimental/risk/`
@@ -2233,7 +2233,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `swaptionvolatilitycube` | ported | TestSuite/SwaptionVolatilityCubeTests.cs | 17 of 17 cases; replaced: testObservability by Vectors/TermStructures/SabrSwaptionVolatilityCubeVectorTests.cs; testZabrObservability by Vectors/TermStructures/ZabrSwaptionVolatilityCubeVectorTests.cs |
 | `swaptionvolatilitymatrix` | ported | TestSuite/SwaptionVolatilityMatrixTests.cs | 2 of 2 cases; replaced: testSwaptionVolMatrixObservability by Vectors/TermStructures/SwaptionVolMatrixVectorTests.cs |
 | `swaptionvolstructuresutilities` | ported | TestSuite/SwaptionVolStructuresUtilitiesTests.cs | 0 of 0 cases |
-| `swingoption` | partial | TestSuite/SwingOptionTests.cs | 1 of 6 cases; not yet: testExtendedOrnsteinUhlenbeckProcess, testFdmExponentialJump1dMesher, testExtOUJumpVanillaEngine, testExtOUJumpSwingOption, testKlugeChFVanillaPricing |
+| `swingoption` | ported | TestSuite/SwingOptionTests.cs | 6 of 6 cases |
 | `termstructures` | ported | TestSuite/TermStructuresTests.cs | 15 of 15 cases; replaced: testReferenceChange by Vectors/TermStructures/FlatForwardVectorTests.cs; testImpliedObs by TestSuite/TermStructuresTests.cs; testFSpreadedObs by TestSuite/TermStructuresTests.cs; testZSpreadedObs by TestSuite/TermStructuresTests.cs; testCreateWithNullUnderlying by Conventions/ZeroSpreadedTermStructureTests.cs; testLinkToNullUnderlying by Conventions/ZeroSpreadedTermStructureTests.cs; moved: testBackwardFlatInterpolationZeroRate line 508 to Divergences/ForwardSpreadFirstDateTests.cs |
 | `timegrid` | ported | TestSuite/TimeGridTests.cs | 10 of 10 cases |
 | `timeseries` | ported | TestSuite/TimeSeriesTests.cs | 6 of 6 cases |
@@ -2249,7 +2249,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `varianceoption` | ported | TestSuite/VarianceOptionTests.cs | 1 of 1 cases; moved: testIntegralHeston line 104 to Divergences/IntegralHestonVarianceOptionTests.cs |
 | `varianceswaps` | ported | TestSuite/VarianceSwapsTests.cs | 2 of 2 cases |
 | `volatilitymodels` | ported | TestSuite/VolatilityModelsTests.cs | 1 of 1 cases |
-| `vpp` | not started |  | 6 cases |
+| `vpp` | partial | TestSuite/VppTests.cs | 5 of 6 cases; not yet: testGemanRoncoroniProcess |
 | `xoshiro256starstar` | ported | TestSuite/Xoshiro256StarStarTests.cs | 3 of 3 cases |
 | `zabr` | ported | TestSuite/ZabrTests.cs | 1 of 1 cases |
 | `zerocouponswap` | ported | TestSuite/ZeroCouponSwapTests.cs | 6 of 6 cases |

@@ -2707,6 +2707,19 @@ Facts:
 
 - `AFixedKappaDiscountsAsTheFreeMethodAtThatKappa`
 
+## ExtendedOrnsteinUhlenbeckExpectationTests
+
+[`Divergences/ExtendedOrnsteinUhlenbeckExpectationTests.cs`](../tests/NanoQL.Tests/Divergences/ExtendedOrnsteinUhlenbeckExpectationTests.cs)
+
+Documented divergences of `ExtendedOrnsteinUhlenbeckProcess`'s expectation (the S-xeq plan's XER5 (xxix), (xxx)). The trapezoidal rule's (1 − e^(−a·dt))/(a·dt) is 0/0 at a speed of 0 (QuantLib's NaN) and cancels below (2.2e-5 lost at 1e-12); here it is a series below a·dt of 1e-2. QuantLib's Gauss-Lobatto rule integrates b(x)e^(ax) to an absolute 1e-4, out of reach once e^(a(t₀+dt)) is large: it throws from a(t₀+dt) of 35; here it integrates the bounded b(x)e^(−a(t₀+dt−x)) past 30, at a relative 1e-10 beside the absolute accuracy. Both against the closed form x₀e^(−a·dt) + (c₀ + c₁T)(1 − e^(−a·dt)) − c₁((1 − e^(−a·dt))/a − dt·e^(−a·dt)) for b(t) = c₀ + c₁t, T = t₀ + dt, which the trapezoidal rule matches exactly for linear b.
+
+Facts:
+
+- `AtASpeedOfZeroTheTrapezoidalExpectationIsTheValue`
+- `TheTrapezoidalExpectationIsTheClosedFormForLinearLevels`
+- `PastTheCutTheGaussLobattoExpectationIsTheClosedForm`
+- `AtTheCutTheGaussLobattoExpectationIsContinuous`
+
 ## ExtrapolatorCopyTests
 
 [`Divergences/ExtrapolatorCopyTests.cs`](../tests/NanoQL.Tests/Divergences/ExtrapolatorCopyTests.cs)
@@ -4483,6 +4496,16 @@ Kahale's shifted puts (the S-g1d plan's G1R6 (viii)): where its own functions pr
 Facts:
 
 - `ThePutBranchsVolatilityGivesTheSectionsOwnPrices`
+
+## KlugeExtOUDiffusionTests
+
+[`Divergences/KlugeExtOUDiffusionTests.cs`](../tests/NanoQL.Tests/Divergences/KlugeExtOUDiffusionTests.cs)
+
+Documented divergence of `KlugeExtOUProcess.Diffusion` (the S-xeq plan's XER5 (xxviii)): QuantLib writes the gas row at row `size()` and column `factors()`, one past each end of its `size() × factors()` matrix, so its gas row is 0 (and the writes corrupt the heap); here the gas row is the last, ρσ_u in the first column and √(1 − ρ²)σ_u in the last, so the diffusion's square is the covariance of the power and gas Brownian motions.
+
+Facts:
+
+- `TheDiffusionsSquareIsTheCovariance`
 
 ## KronrodAdaptiveDepthTests
 

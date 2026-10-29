@@ -131,4 +131,4 @@ The licensing gate checks that this list and the files match.
 - `tests/NanoQL.Tests/TestSuite/InterpolationsTests.cs`: `testLaplaceInterpolation`, which waits for S-xrt's Laplace interpolation.
 - `tests/NanoQL.Tests/TestSuite/MatricesTests.cs`: the Moore-Penrose case, which waits for S-xrt.
 - `tests/NanoQL.Tests/TestSuite/OptimizersTests.cs`: the hybrid simulated annealing cases, which wait for S-xrt's hybrid simulated annealing.
-- `tests/NanoQL.Tests/TestSuite/SwingOptionTests.cs`: every case but `testFdBSSwingOption`, which wait for S-xeq's extended Ornstein-Uhlenbeck processes and engines.
+- `tests/NanoQL.Tests/TestSuite/VppTests.cs`: `testGemanRoncoroniProcess`, which waits for S-xrt's Geman-Roncoroni process.
