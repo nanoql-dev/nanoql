@@ -77,7 +77,7 @@ cut units:
 | S-mm | 5 | Market models: curve states, drifts, correlations, Brownian generators, models, evolvers and calibrations | 55 | 7,793 |
 | S-mmp | 5 | Market models: products, callability, accounting engines and pathwise Greeks | 65 | 7,971 |
 | S-core | 6 | The core remainder: optimisers, random numbers, copulas, statistics, quotes, integrals, interpolations, matrix utilities and the finite-difference remainder | 79 | 7,240 |
-| S-conv | — | Conventions as data: XML round-tripping of convention values, a resolver, and QuantLib's presets as generated XML records checked against the coded ones. It ports no QuantLib units, and starts the extensions layer. | — | — |
+| S-conv | — | Conventions as data: the core's `ConventionProvider`, which every preset and market builder reads when it is built, QuantLib's values by default; the `NanoQL.Extensions` package's XML format, its convention sets, and QuantLib's presets and builder defaults as generated records checked against the coded ones ([conventions.md](conventions.md), [the catalogue](conventions-catalogue.md)). It ports no QuantLib units, and starts the extensions layer. | — | — |
 | S-qlnet | — | QLNet's additions: mortgage-backed securities with prepayment, and accounting amortised cost, checked against QLNet with QLNet's notices kept. | — | — |
 | S-xcr | 7 | Experimental credit: latent and loss models, baskets, CDOs, n-th to default, CDS options; cat bonds | 55 | 9,685 |
 | S-xeq | 7 | Experimental equity, FX and energy: double barriers, exotics, variance gamma, path engines; volatility surfaces; energy finite differences | 72 | 10,107 |
