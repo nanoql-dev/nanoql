@@ -18,7 +18,11 @@ public sealed class HKDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="HKDCurrency"/> class.</summary>
     public HKDCurrency()
-        : base("Hong Kong dollar", "HKD", 344, "HK$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("HKD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Hong Kong dollar", "HKD", 344, "HK$", "", 100, DataRounding);
 }

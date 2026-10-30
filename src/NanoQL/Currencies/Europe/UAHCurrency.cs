@@ -18,7 +18,11 @@ public sealed class UAHCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="UAHCurrency"/> class.</summary>
     public UAHCurrency()
-        : base("Ukrainian hryvnia", "UAH", 980, "hrn", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("UAH", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Ukrainian hryvnia", "UAH", 980, "hrn", "", 100, DataRounding);
 }

@@ -18,7 +18,11 @@ public sealed class DKKCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="DKKCurrency"/> class.</summary>
     public DKKCurrency()
-        : base("Danish krone", "DKK", 208, "Dkr", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("DKK", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Danish krone", "DKK", 208, "Dkr", "", 100, DataRounding);
 }

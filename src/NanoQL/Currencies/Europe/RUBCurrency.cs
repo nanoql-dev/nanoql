@@ -18,7 +18,11 @@ public sealed class RUBCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="RUBCurrency"/> class.</summary>
     public RUBCurrency()
-        : base("Russian ruble", "RUB", 643, "", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("RUB", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Russian ruble", "RUB", 643, "", "", 100, DataRounding);
 }

@@ -51,6 +51,8 @@ public sealed class Poland : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Poland.{market}"));
     }
 
     /// <inheritdoc/>

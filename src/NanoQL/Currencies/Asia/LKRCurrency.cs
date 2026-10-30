@@ -18,7 +18,11 @@ public sealed class LKRCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="LKRCurrency"/> class.</summary>
     public LKRCurrency()
-        : base("Sri Lankan rupee", "LKR", 144, "LKR", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("LKR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Sri Lankan rupee", "LKR", 144, "LKR", "", 100, DataRounding);
 }

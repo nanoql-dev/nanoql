@@ -18,7 +18,11 @@ public sealed class QARCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="QARCurrency"/> class.</summary>
     public QARCurrency()
-        : base("Qatari riyal", "QAR", 634, "QAR", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("QAR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Qatari riyal", "QAR", 634, "QAR", "", 100, DataRounding);
 }

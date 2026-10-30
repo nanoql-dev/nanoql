@@ -38,11 +38,15 @@ public sealed record MakeMultipleResetsSwap
                 nameof(resetsPerCoupon), resetsPerCoupon, "a coupon needs at least one reset, so resetsPerCoupon must be positive");
         }
 
+        Provider = iborIndex.Provider;
         Tenor = tenor;
         IborIndex = iborIndex;
         ResetsPerCoupon = resetsPerCoupon;
         FixedDayCount = iborIndex.DayCounter;
     }
+
+    // The provider the builder takes its conventions from and builds inside: its index's.
+    private ConventionProvider Provider { get; init; }
 
     private Period Tenor { get; init; }
 
@@ -209,6 +213,10 @@ public sealed record MakeMultipleResetsSwap
     public MultipleResetsSwap ToSwap(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        // Built inside the builder's provider, so what the build constructs takes its conventions.
+        using IDisposable scope = ConventionProvider.Use(Provider);
+
         Calendar cal = IborIndex.FixingCalendar;
         BusinessDayConvention bdc = IborIndex.BusinessDayConvention;
         if (!(EffectiveDate is null || SettlementDays is null))

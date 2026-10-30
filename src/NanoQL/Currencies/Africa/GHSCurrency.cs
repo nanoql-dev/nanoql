@@ -19,7 +19,11 @@ public sealed class GHSCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="GHSCurrency"/> class.</summary>
     public GHSCurrency()
-        : base("Ghanaian cedi", "GHS", 936, "GHS", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("GHS", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Ghanaian cedi", "GHS", 936, "GHS", "", 100, DataRounding);
 }

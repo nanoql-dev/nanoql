@@ -19,7 +19,11 @@ public sealed class ZMWCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="ZMWCurrency"/> class.</summary>
     public ZMWCurrency()
-        : base("Zambian kwacha", "ZMW", 967, "ZMW", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("ZMW", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Zambian kwacha", "ZMW", 967, "ZMW", "", 100, DataRounding);
 }

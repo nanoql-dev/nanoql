@@ -18,7 +18,11 @@ public sealed class OMRCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="OMRCurrency"/> class.</summary>
     public OMRCurrency()
-        : base("Omani rial", "OMR", 512, "OMR", "", 1000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("OMR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Omani rial", "OMR", 512, "OMR", "", 1000, DataRounding);
 }

@@ -19,7 +19,11 @@ public sealed class MURCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="MURCurrency"/> class.</summary>
     public MURCurrency()
-        : base("Mauritian rupee", "MUR", 480, "MUR", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("MUR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Mauritian rupee", "MUR", 480, "MUR", "", 100, DataRounding);
 }

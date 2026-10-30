@@ -34,6 +34,20 @@ public abstract class InterestRateIndex : FinancialIndex
         Currency? currency,
         Calendar fixingCalendar,
         DayCounter dayCounter)
+        : this(familyName, tenor, settlementDays, currency, fixingCalendar, dayCounter, ConventionProvider.Current)
+    {
+    }
+
+    // An index keeping a given provider: a preset's, read once, or a clone's source's.
+    private protected InterestRateIndex(
+        string familyName,
+        Period tenor,
+        int settlementDays,
+        Currency? currency,
+        Calendar fixingCalendar,
+        DayCounter dayCounter,
+        ConventionProvider provider)
+        : base(provider)
     {
         ArgumentNullException.ThrowIfNull(familyName);
         ArgumentOutOfRangeException.ThrowIfNegative(settlementDays);

@@ -216,7 +216,13 @@ file static class StubIborCouponSelection
         Date fixingDate = selection.Indices[0].FixingCalendar.Advance(
             startDate, -fixingDays, TimeUnit.Days, fixingConvention);
 
-        return new StubIborCouponWeightedIndex(SelectComponents(selection, fixingDate, startDate, endDate));
+        (IborIndex Index, double Weight)[] components = SelectComponents(selection, fixingDate, startDate, endDate);
+
+        // built in the provider of its first component
+        using (ConventionProvider.Use(components[0].Index.Provider))
+        {
+            return new StubIborCouponWeightedIndex(components);
+        }
     }
 
     /// <summary>

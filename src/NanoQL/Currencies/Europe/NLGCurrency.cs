@@ -22,11 +22,14 @@ public sealed class NLGCurrency : Currency
 {
     // Built once and shared by every instance, as QuantLib's static data is.
     private static readonly Rounding DataRounding = new();
-    private static readonly EURCurrency DataTriangulationCurrency = new();
 
     /// <summary>Initializes a new instance of the <see cref="NLGCurrency"/> class.</summary>
     public NLGCurrency()
-        : base("Dutch guilder", "NLG", 528, "f", "", 100, DataRounding, DataTriangulationCurrency)
+        : base(ConventionProvider.ReadCurrency("NLG", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Dutch guilder", "NLG", 528, "f", "", 100, DataRounding, new EURCurrency());
 }

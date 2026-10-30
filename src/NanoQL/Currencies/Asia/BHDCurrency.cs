@@ -18,7 +18,11 @@ public sealed class BHDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="BHDCurrency"/> class.</summary>
     public BHDCurrency()
-        : base("Bahraini dinar", "BHD", 48, "BHD", "", 1000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("BHD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Bahraini dinar", "BHD", 48, "BHD", "", 1000, DataRounding);
 }

@@ -18,7 +18,11 @@ public sealed class CHFCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="CHFCurrency"/> class.</summary>
     public CHFCurrency()
-        : base("Swiss franc", "CHF", 756, "SwF", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("CHF", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Swiss franc", "CHF", 756, "SwF", "", 100, DataRounding);
 }

@@ -22,11 +22,14 @@ public sealed class DEMCurrency : Currency
 {
     // Built once and shared by every instance, as QuantLib's static data is.
     private static readonly Rounding DataRounding = new();
-    private static readonly EURCurrency DataTriangulationCurrency = new();
 
     /// <summary>Initializes a new instance of the <see cref="DEMCurrency"/> class.</summary>
     public DEMCurrency()
-        : base("Deutsche mark", "DEM", 276, "DM", "", 100, DataRounding, DataTriangulationCurrency)
+        : base(ConventionProvider.ReadCurrency("DEM", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Deutsche mark", "DEM", 276, "DM", "", 100, DataRounding, new EURCurrency());
 }

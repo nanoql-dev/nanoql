@@ -35,17 +35,8 @@ public class YoYInflationIndex : InflationIndex
     /// <param name="ts">The forecasting curve, or <see langword="null"/> for none.</param>
     /// <exception cref="ArgumentNullException"><paramref name="underlyingIndex"/> is null.</exception>
     public YoYInflationIndex(ZeroInflationIndex underlyingIndex, YoYInflationTermStructure? ts = null)
-        : base(
-            "YYR_" + (underlyingIndex ?? throw new ArgumentNullException(nameof(underlyingIndex))).FamilyName,
-            underlyingIndex.Region,
-            underlyingIndex.Revised,
-            underlyingIndex.Frequency,
-            underlyingIndex.AvailabilityLag,
-            underlyingIndex.Currency)
+        : this(underlyingIndex, ts, ConventionProvider.Current)
     {
-        Ratio = true;
-        UnderlyingIndex = underlyingIndex;
-        YoYInflationTermStructure = ts;
     }
 
     /// <summary>
@@ -70,7 +61,38 @@ public class YoYInflationIndex : InflationIndex
         Period availabilityLag,
         Currency currency,
         YoYInflationTermStructure? ts = null)
-        : base(familyName, region, revised, frequency, availabilityLag, currency)
+        : this(familyName, region, revised, frequency, availabilityLag, currency, ts, ConventionProvider.Current)
+    {
+    }
+
+    // A ratio of an index, keeping a given provider: a preset's, read once, or a clone's source's.
+    private protected YoYInflationIndex(
+        ZeroInflationIndex underlyingIndex, YoYInflationTermStructure? ts, ConventionProvider provider)
+        : base(
+            "YYR_" + (underlyingIndex ?? throw new ArgumentNullException(nameof(underlyingIndex))).FamilyName,
+            underlyingIndex.Region,
+            underlyingIndex.Revised,
+            underlyingIndex.Frequency,
+            underlyingIndex.AvailabilityLag,
+            underlyingIndex.Currency,
+            provider)
+    {
+        Ratio = true;
+        UnderlyingIndex = underlyingIndex;
+        YoYInflationTermStructure = ts;
+    }
+
+    // A quoted index, keeping a given provider: a preset's, read once, or a clone's source's.
+    private protected YoYInflationIndex(
+        string familyName,
+        Region region,
+        bool revised,
+        Frequency frequency,
+        Period availabilityLag,
+        Currency currency,
+        YoYInflationTermStructure? ts,
+        ConventionProvider provider)
+        : base(familyName, region, revised, frequency, availabilityLag, currency, provider)
     {
         Ratio = false;
         YoYInflationTermStructure = ts;
@@ -91,8 +113,8 @@ public class YoYInflationIndex : InflationIndex
     /// <returns>A plain year-on-year index: a ratio of the same underlying, or a quoted index.</returns>
     public YoYInflationIndex Clone(YoYInflationTermStructure? h) =>
         UnderlyingIndex is { } underlying
-            ? new YoYInflationIndex(underlying, h)
-            : new YoYInflationIndex(FamilyName, Region, Revised, Frequency, AvailabilityLag, Currency, h);
+            ? new YoYInflationIndex(underlying, h, Provider)
+            : new YoYInflationIndex(FamilyName, Region, Revised, Frequency, AvailabilityLag, Currency, h, Provider);
 
     /// <summary>The fixing for a date's inflation period: forecast when it needs a forecast, else the past one.</summary>
     /// <param name="fixingDate">The fixing date.</param>

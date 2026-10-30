@@ -18,7 +18,11 @@ public sealed class IQDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="IQDCurrency"/> class.</summary>
     public IQDCurrency()
-        : base("Iraqi dinar", "IQD", 368, "ID", "", 1000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("IQD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Iraqi dinar", "IQD", 368, "ID", "", 1000, DataRounding);
 }

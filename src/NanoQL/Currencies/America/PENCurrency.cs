@@ -18,7 +18,11 @@ public sealed class PENCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="PENCurrency"/> class.</summary>
     public PENCurrency()
-        : base("Peruvian nuevo sol", "PEN", 604, "S/.", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("PEN", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Peruvian nuevo sol", "PEN", 604, "S/.", "", 100, DataRounding);
 }

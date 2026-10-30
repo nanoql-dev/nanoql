@@ -38,6 +38,7 @@ public sealed class Hungary : Calendar
     public Hungary()
     {
         impl = HungaryImplInstance;
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("Hungary"));
     }
 
     /// <inheritdoc/>

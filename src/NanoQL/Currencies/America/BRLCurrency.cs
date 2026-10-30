@@ -18,7 +18,11 @@ public sealed class BRLCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="BRLCurrency"/> class.</summary>
     public BRLCurrency()
-        : base("Brazilian real", "BRL", 986, "R$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("BRL", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Brazilian real", "BRL", 986, "R$", "", 100, DataRounding);
 }

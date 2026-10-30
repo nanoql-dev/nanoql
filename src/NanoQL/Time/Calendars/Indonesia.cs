@@ -68,6 +68,9 @@ public sealed class Indonesia : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        // BEJ, JSX and IDX share QuantLib's one implementation, so they share its edits, BEJ's.
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("Indonesia.BEJ"));
     }
 
     /// <inheritdoc/>

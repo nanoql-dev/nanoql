@@ -55,6 +55,7 @@ public sealed class NewZealand : Calendar
             NewZealandMarket.Auckland => AucklandImplInstance,
             _ => throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market"),
         };
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"NewZealand.{market}"));
     }
 
     /// <inheritdoc/>

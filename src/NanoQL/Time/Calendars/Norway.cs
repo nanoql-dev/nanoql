@@ -38,6 +38,7 @@ public sealed class Norway : Calendar
     public Norway()
     {
         impl = NorwayImplInstance;
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("Norway"));
     }
 
     /// <inheritdoc/>

@@ -18,7 +18,11 @@ public sealed class JODCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="JODCurrency"/> class.</summary>
     public JODCurrency()
-        : base("Jordanian dinar", "JOD", 400, "JOD", "", 1000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("JOD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Jordanian dinar", "JOD", 400, "JOD", "", 1000, DataRounding);
 }

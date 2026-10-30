@@ -17,7 +17,11 @@ public sealed class BTCCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="BTCCurrency"/> class.</summary>
     public BTCCurrency()
-        : base("Bitcoin", "BTC", 10000, "BTC", "", 100000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("BTC", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Bitcoin", "BTC", 10000, "BTC", "", 100000, DataRounding);
 }

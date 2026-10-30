@@ -18,7 +18,11 @@ public sealed class TTDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="TTDCurrency"/> class.</summary>
     public TTDCurrency()
-        : base("Trinidad & Tobago dollar", "TTD", 780, "TT$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("TTD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Trinidad & Tobago dollar", "TTD", 780, "TT$", "", 100, DataRounding);
 }

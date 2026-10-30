@@ -18,7 +18,11 @@ public sealed class CZKCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="CZKCurrency"/> class.</summary>
     public CZKCurrency()
-        : base("Czech koruna", "CZK", 203, "Kc", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("CZK", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Czech koruna", "CZK", 203, "Kc", "", 100, DataRounding);
 }

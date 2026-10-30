@@ -68,6 +68,8 @@ public sealed class Malta : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Malta.{market}"));
     }
 
     /// <inheritdoc/>

@@ -31,11 +31,27 @@ public sealed class Shibor : IborIndex
     {
     }
 
+    // A clone: the source's conventions and provider, on another forwarding curve.
+    private Shibor(Shibor source, YieldTermStructure? forwarding)
+        : base(
+            source.FamilyName,
+            source.Tenor,
+            source.FixingDays,
+            source.Currency,
+            source.FixingCalendar,
+            source.BusinessDayConvention,
+            source.EndOfMonth,
+            source.DayCounter,
+            forwarding,
+            source.Provider)
+    {
+    }
+
     /// <summary>A copy of the index on another forwarding curve: a <see cref="Shibor"/> of the same tenor, as
     /// QuantLib's.</summary>
     /// <param name="forwarding">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <returns>The copy.</returns>
-    public override IborIndex Clone(YieldTermStructure? forwarding) => new Shibor(Tenor, forwarding);
+    public override IborIndex Clone(YieldTermStructure? forwarding) => new Shibor(this, forwarding);
 
     // Following for days and weeks, modified following for months and years.
     private static BusinessDayConvention ShiborConvention(Period p) => p.Units switch

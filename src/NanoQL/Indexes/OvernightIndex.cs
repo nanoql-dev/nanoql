@@ -31,6 +31,19 @@ public class OvernightIndex : IborIndex
         Calendar fixingCalendar,
         DayCounter dayCounter,
         YieldTermStructure? h = null)
+        : this(familyName, settlementDays, currency, fixingCalendar, dayCounter, h, ConventionProvider.Current)
+    {
+    }
+
+    // An index keeping a given provider: a preset's, read once, or a clone's source's.
+    private protected OvernightIndex(
+        string familyName,
+        int settlementDays,
+        Currency? currency,
+        Calendar fixingCalendar,
+        DayCounter dayCounter,
+        YieldTermStructure? h,
+        ConventionProvider provider)
         : base(
             familyName,
             new Period(1, TimeUnit.Days),
@@ -40,7 +53,8 @@ public class OvernightIndex : IborIndex
             BusinessDayConvention.Following,
             false,
             dayCounter,
-            h)
+            h,
+            provider)
     {
     }
 
@@ -74,5 +88,5 @@ public class OvernightIndex : IborIndex
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <returns>The copy.</returns>
     public override OvernightIndex Clone(YieldTermStructure? h) =>
-        new(FamilyName, FixingDays, Currency, FixingCalendar, DayCounter, h);
+        new(FamilyName, FixingDays, Currency, FixingCalendar, DayCounter, h, Provider);
 }

@@ -18,7 +18,11 @@ public sealed class BGNCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="BGNCurrency"/> class.</summary>
     public BGNCurrency()
-        : base("Bulgarian lev", "BGN", 975, "BGN", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("BGN", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Bulgarian lev", "BGN", 975, "BGN", "", 100, DataRounding);
 }

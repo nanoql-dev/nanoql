@@ -18,7 +18,11 @@ public sealed class GELCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="GELCurrency"/> class.</summary>
     public GELCurrency()
-        : base("Georgian lari", "GEL", 981, "GEL", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("GEL", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Georgian lari", "GEL", 981, "GEL", "", 100, DataRounding);
 }

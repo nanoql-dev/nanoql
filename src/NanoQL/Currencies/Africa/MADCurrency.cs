@@ -19,7 +19,11 @@ public sealed class MADCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="MADCurrency"/> class.</summary>
     public MADCurrency()
-        : base("Moroccan dirham", "MAD", 504, "MAD", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("MAD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Moroccan dirham", "MAD", 504, "MAD", "", 100, DataRounding);
 }

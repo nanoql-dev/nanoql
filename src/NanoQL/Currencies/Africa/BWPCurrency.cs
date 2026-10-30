@@ -19,7 +19,11 @@ public sealed class BWPCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="BWPCurrency"/> class.</summary>
     public BWPCurrency()
-        : base("Botswanan pula", "BWP", 72, "P", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("BWP", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Botswanan pula", "BWP", 72, "P", "", 100, DataRounding);
 }

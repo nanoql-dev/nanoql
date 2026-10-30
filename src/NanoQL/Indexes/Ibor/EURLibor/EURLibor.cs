@@ -26,7 +26,8 @@ namespace NanoQL.Indexes;
 /// </remarks>
 public class EURLibor : IborIndex
 {
-    private static readonly Calendar Target = new TARGET();
+    // QuantLib's target_ member, built at construction: the fixing, value and maturity dates' calendar.
+    private readonly Calendar target;
 
     /// <summary>Initializes a new instance of the <see cref="EURLibor"/> class.</summary>
     /// <param name="tenor">The tenor, in weeks, months or years.</param>
@@ -54,6 +55,25 @@ public class EURLibor : IborIndex
             throw new ArgumentException(
                 $"for daily tenors ({Tenor}) dedicated DailyTenor constructor must be used", nameof(tenor));
         }
+
+        target = new TARGET();
+    }
+
+    // A clone: the source's conventions, calendars and provider, on another forwarding curve.
+    private EURLibor(EURLibor source, YieldTermStructure? forwarding)
+        : base(
+            source.FamilyName,
+            source.Tenor,
+            source.FixingDays,
+            source.Currency,
+            source.FixingCalendar,
+            source.BusinessDayConvention,
+            source.EndOfMonth,
+            source.DayCounter,
+            forwarding,
+            source.Provider)
+    {
+        target = source.target;
     }
 
     /// <summary>
@@ -65,7 +85,7 @@ public class EURLibor : IborIndex
     {
         Date.ThrowIfDefault(valueDate, nameof(valueDate));
         return FixingCalendar.Adjust(
-            Target.Advance(valueDate, -FixingDays, TimeUnit.Days), BusinessDayConvention.Preceding);
+            target.Advance(valueDate, -FixingDays, TimeUnit.Days), BusinessDayConvention.Preceding);
     }
 
     /// <summary>The value date of a fixing: two TARGET business days after it, as ICE's rules have it.</summary>
@@ -83,7 +103,7 @@ public class EURLibor : IborIndex
         // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
         // In the case of EUR the Value Date shall be two TARGET
         // business days after the Fixing Date.
-        return Target.Advance(fixingDate, FixingDays, TimeUnit.Days);
+        return target.Advance(fixingDate, FixingDays, TimeUnit.Days);
     }
 
     /// <summary>The maturity date of a value date, advanced by the tenor on TARGET.</summary>
@@ -96,12 +116,12 @@ public class EURLibor : IborIndex
         // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
         // In the case of EUR only, maturity dates will be based on days in
         // which the Target system is open.
-        return Target.Advance(valueDate, Tenor, BusinessDayConvention, EndOfMonth);
+        return target.Advance(valueDate, Tenor, BusinessDayConvention, EndOfMonth);
     }
 
     /// <summary>A copy of the index on another forwarding curve: a <see cref="EURLibor"/> of the same tenor, as
     /// QuantLib's.</summary>
     /// <param name="forwarding">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <returns>The copy.</returns>
-    public override IborIndex Clone(YieldTermStructure? forwarding) => new EURLibor(Tenor, forwarding);
+    public override IborIndex Clone(YieldTermStructure? forwarding) => new EURLibor(this, forwarding);
 }

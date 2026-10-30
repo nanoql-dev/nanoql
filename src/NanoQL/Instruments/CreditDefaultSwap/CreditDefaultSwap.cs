@@ -44,6 +44,9 @@ namespace NanoQL.Instruments;
 /// </remarks>
 public sealed class CreditDefaultSwap : Instrument
 {
+    // The provider at the swap's construction, which the implied quantities' flat curve is built in.
+    private readonly ConventionProvider provider = ConventionProvider.Current;
+
     /// <summary>Initializes a new instance of the <see cref="CreditDefaultSwap"/> class quoted as a running spread
     /// only.</summary>
     /// <param name="side">Whether the protection is bought or sold.</param>
@@ -520,8 +523,18 @@ public sealed class CreditDefaultSwap : Instrument
         switch (model)
         {
             case CreditDefaultSwapPricingModel.Midpoint:
+            {
+                // the flat curve's calendar, built in the provider the swap was built with
+                Calendar weekendsOnly;
+                using (ConventionProvider.Use(provider))
+                {
+                    weekendsOnly = new WeekendsOnly();
+                }
+
                 return h => MidPointCdsEngine.Body(
-                    this, context, FlatHazardRate.Create(0, new WeekendsOnly(), h, dayCounter, context), recoveryRate, discountCurve, null);
+                    this, context, FlatHazardRate.Create(0, weekendsOnly, h, dayCounter, context), recoveryRate, discountCurve, null);
+            }
+
             case CreditDefaultSwapPricingModel.ISDA:
                 // the curve the ISDA engine requires, on the evaluation date
                 return h => IsdaCdsEngine.Body(

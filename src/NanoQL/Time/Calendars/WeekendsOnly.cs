@@ -16,6 +16,7 @@ public sealed class WeekendsOnly : Calendar
     /// <summary>Initializes a new instance of the <see cref="WeekendsOnly"/> class.</summary>
     public WeekendsOnly()
     {
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("WeekendsOnly"));
     }
 
     /// <inheritdoc/>

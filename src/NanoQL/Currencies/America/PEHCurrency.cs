@@ -26,7 +26,11 @@ public sealed class PEHCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="PEHCurrency"/> class.</summary>
     public PEHCurrency()
-        : base("Peruvian sol", "PEH", 999, "S./", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("PEH", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Peruvian sol", "PEH", 999, "S./", "", 100, DataRounding);
 }

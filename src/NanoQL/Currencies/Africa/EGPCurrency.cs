@@ -19,7 +19,11 @@ public sealed class EGPCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="EGPCurrency"/> class.</summary>
     public EGPCurrency()
-        : base("Egyptian pound", "EGP", 818, "EGP", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("EGP", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Egyptian pound", "EGP", 818, "EGP", "", 100, DataRounding);
 }

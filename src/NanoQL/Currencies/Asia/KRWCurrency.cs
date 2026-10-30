@@ -18,7 +18,11 @@ public sealed class KRWCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="KRWCurrency"/> class.</summary>
     public KRWCurrency()
-        : base("South-Korean won", "KRW", 410, "W", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("KRW", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("South-Korean won", "KRW", 410, "W", "", 100, DataRounding);
 }

@@ -18,7 +18,11 @@ public sealed class COUCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="COUCurrency"/> class.</summary>
     public COUCurrency()
-        : base("Unidad de Valor Real (UVR) (funds code)", "COU", 970, "COU", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("COU", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Unidad de Valor Real (UVR) (funds code)", "COU", 970, "COU", "", 100, DataRounding);
 }

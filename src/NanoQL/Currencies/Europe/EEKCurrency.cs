@@ -18,7 +18,11 @@ public sealed class EEKCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="EEKCurrency"/> class.</summary>
     public EEKCurrency()
-        : base("Estonian kroon", "EEK", 233, "KR", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("EEK", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Estonian kroon", "EEK", 233, "KR", "", 100, DataRounding);
 }

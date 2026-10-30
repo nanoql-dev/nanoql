@@ -18,7 +18,11 @@ public sealed class CADCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="CADCurrency"/> class.</summary>
     public CADCurrency()
-        : base("Canadian dollar", "CAD", 124, "Can$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("CAD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Canadian dollar", "CAD", 124, "Can$", "", 100, DataRounding);
 }

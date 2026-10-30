@@ -19,7 +19,11 @@ public sealed class AOACurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="AOACurrency"/> class.</summary>
     public AOACurrency()
-        : base("Angolan kwanza", "AOA", 973, "AOA", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("AOA", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Angolan kwanza", "AOA", 973, "AOA", "", 100, DataRounding);
 }

@@ -19,7 +19,11 @@ public sealed class ETBCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="ETBCurrency"/> class.</summary>
     public ETBCurrency()
-        : base("Ethiopian birr", "ETB", 230, "ETB", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("ETB", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Ethiopian birr", "ETB", 230, "ETB", "", 100, DataRounding);
 }

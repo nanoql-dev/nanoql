@@ -48,6 +48,8 @@ public sealed class NorthMacedonia : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"NorthMacedonia.{market}"));
     }
 
     /// <inheritdoc/>

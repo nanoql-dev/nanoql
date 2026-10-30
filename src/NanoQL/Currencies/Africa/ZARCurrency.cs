@@ -19,7 +19,11 @@ public sealed class ZARCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="ZARCurrency"/> class.</summary>
     public ZARCurrency()
-        : base("South-African rand", "ZAR", 710, "R", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("ZAR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("South-African rand", "ZAR", 710, "R", "", 100, DataRounding);
 }

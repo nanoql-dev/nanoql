@@ -17,7 +17,11 @@ public sealed class DASHCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="DASHCurrency"/> class.</summary>
     public DASHCurrency()
-        : base("Dash coin", "DASH", 10006, "DASH", "", 100000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("DASH", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Dash coin", "DASH", 10006, "DASH", "", 100000, DataRounding);
 }

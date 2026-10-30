@@ -52,6 +52,8 @@ public sealed class Taiwan : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Taiwan.{market}"));
     }
 
     /// <inheritdoc/>

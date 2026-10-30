@@ -18,7 +18,11 @@ public sealed class LTLCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="LTLCurrency"/> class.</summary>
     public LTLCurrency()
-        : base("Lithuanian litas", "LTL", 440, "Lt", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("LTL", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Lithuanian litas", "LTL", 440, "Lt", "", 100, DataRounding);
 }

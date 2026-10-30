@@ -22,11 +22,14 @@ public sealed class ITLCurrency : Currency
 {
     // Built once and shared by every instance, as QuantLib's static data is.
     private static readonly Rounding DataRounding = new();
-    private static readonly EURCurrency DataTriangulationCurrency = new();
 
     /// <summary>Initializes a new instance of the <see cref="ITLCurrency"/> class.</summary>
     public ITLCurrency()
-        : base("Italian lira", "ITL", 380, "L", "", 1, DataRounding, DataTriangulationCurrency)
+        : base(ConventionProvider.ReadCurrency("ITL", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Italian lira", "ITL", 380, "L", "", 1, DataRounding, new EURCurrency());
 }

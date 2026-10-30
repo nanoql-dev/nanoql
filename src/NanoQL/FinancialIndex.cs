@@ -28,9 +28,32 @@ namespace NanoQL;
 /// the caller not to see into the future. Two indexes are never compared as values: QuantLib compares their
 /// <see cref="Name"/>, and so does the port.
 /// </para>
+/// <para>
+/// An index keeps the <see cref="ConventionProvider"/> it was built with, <see cref="ConventionProvider.Current"/> at
+/// its construction, and every clone of it keeps the same one. Whatever is built on the index later (a builder's swap,
+/// a swap index's underlying swap) follows that provider.
+/// </para>
 /// </remarks>
 public abstract class FinancialIndex
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FinancialIndex"/> class, which keeps
+    /// <see cref="ConventionProvider.Current"/>.
+    /// </summary>
+    protected FinancialIndex()
+        : this(ConventionProvider.Current)
+    {
+    }
+
+    // An index keeping a given provider: a preset's, read once, or a clone's source's.
+    private protected FinancialIndex(ConventionProvider provider)
+    {
+        Provider = provider;
+    }
+
+    // The provider the index was built with, which what is built on it later follows.
+    internal ConventionProvider Provider { get; }
+
     /// <summary>
     /// Gets the index's name, which keys its stored fixings. It is meant for output and comparison, not for code that
     /// switches on the index's type.

@@ -69,7 +69,7 @@ public sealed class ExchangeRates : IEquatable<ExchangeRates>
 
     /// <summary>Gets the registry holding QuantLib's known rates alone, its state at start and after
     /// <c>clear()</c>.</summary>
-    public static ExchangeRates Default { get; } = KnownRates();
+    public static ExchangeRates Default { get; } = ConventionProvider.BuildUnderQuantLib(KnownRates);
 
     /// <summary>A registry with one more exchange rate, valid between two dates.</summary>
     /// <param name="rate">The rate.</param>

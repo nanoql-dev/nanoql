@@ -57,6 +57,7 @@ public sealed record MakeYoYInflationCapFloor
         ArgumentNullException.ThrowIfNull(index);
         ArgumentOutOfRangeException.ThrowIfNegative(length);
         EnumArguments.Check(interpolation, nameof(interpolation));
+        Provider = index.Provider;
         CapFloorType = capFloorType;
         Index = index;
         Length = length;
@@ -64,6 +65,9 @@ public sealed record MakeYoYInflationCapFloor
         ObservationLag = observationLag;
         Interpolation = interpolation;
     }
+
+    // The provider the builder takes its conventions from and builds inside: its index's.
+    private ConventionProvider Provider { get; init; }
 
     private YoYInflationCapFloorType CapFloorType { get; init; }
 
@@ -202,6 +206,9 @@ public sealed record MakeYoYInflationCapFloor
     public YoYInflationCapFloor ToYoYInflationCapFloor(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        // Built inside the builder's provider, so what the build constructs takes its conventions.
+        using IDisposable scope = ConventionProvider.Use(Provider);
 
         // QuantLib's empty calendar, null here, is used unchecked, as QuantLib uses it
         Calendar calendar = Calendar ?? EmptyCalendar.Instance;

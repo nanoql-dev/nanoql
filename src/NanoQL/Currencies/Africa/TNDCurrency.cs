@@ -19,7 +19,11 @@ public sealed class TNDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="TNDCurrency"/> class.</summary>
     public TNDCurrency()
-        : base("Tunisian dinar", "TND", 788, "TND", "", 1000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("TND", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Tunisian dinar", "TND", 788, "TND", "", 1000, DataRounding);
 }

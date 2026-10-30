@@ -14,7 +14,11 @@ public sealed class USDCurrency : Currency
 {
     /// <summary>Initializes a new instance of the <see cref="USDCurrency"/> class.</summary>
     public USDCurrency()
-        : base("U.S. dollar", "USD", 840, "$", "\u00A2", 100, new Rounding())
+        : base(ConventionProvider.ReadCurrency("USD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("U.S. dollar", "USD", 840, "$", "\u00A2", 100, new Rounding());
 }

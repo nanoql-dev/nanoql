@@ -18,7 +18,11 @@ public sealed class BDTCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="BDTCurrency"/> class.</summary>
     public BDTCurrency()
-        : base("Bangladesh taka", "BDT", 50, "Bt", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("BDT", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Bangladesh taka", "BDT", 50, "Bt", "", 100, DataRounding);
 }

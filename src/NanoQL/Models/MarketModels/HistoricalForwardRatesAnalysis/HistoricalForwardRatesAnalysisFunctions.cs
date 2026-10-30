@@ -173,15 +173,20 @@ public static class HistoricalForwardRatesAnalysisFunctions
                 for (int k = 0; k < iborIndexes.Length; ++k)
                 {
                     IborIndex ibor = iborIndexes[k];
-                    rateHelpers.Add(new DepositRateHelper(
-                        iborQuotes[k],
-                        ibor.Tenor,
-                        ibor.FixingDays,
-                        ibor.FixingCalendar,
-                        ibor.BusinessDayConvention,
-                        ibor.EndOfMonth,
-                        ibor.DayCounter,
-                        dayContext));
+
+                    // built in the provider of the index whose conventions it copies
+                    using (ConventionProvider.Use(ibor.Provider))
+                    {
+                        rateHelpers.Add(new DepositRateHelper(
+                            iborQuotes[k],
+                            ibor.Tenor,
+                            ibor.FixingDays,
+                            ibor.FixingCalendar,
+                            ibor.BusinessDayConvention,
+                            ibor.EndOfMonth,
+                            ibor.DayCounter,
+                            dayContext));
+                    }
                 }
 
                 for (int k = 0; k < swapIndexes.Length; ++k)

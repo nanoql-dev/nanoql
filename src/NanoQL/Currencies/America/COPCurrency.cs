@@ -18,7 +18,11 @@ public sealed class COPCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="COPCurrency"/> class.</summary>
     public COPCurrency()
-        : base("Colombian peso", "COP", 170, "Col$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("COP", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Colombian peso", "COP", 170, "Col$", "", 100, DataRounding);
 }

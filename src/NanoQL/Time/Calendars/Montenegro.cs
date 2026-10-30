@@ -46,6 +46,8 @@ public sealed class Montenegro : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Montenegro.{market}"));
     }
 
     /// <inheritdoc/>

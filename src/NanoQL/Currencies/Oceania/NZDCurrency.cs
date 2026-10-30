@@ -17,7 +17,11 @@ public sealed class NZDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="NZDCurrency"/> class.</summary>
     public NZDCurrency()
-        : base("New Zealand dollar", "NZD", 554, "NZ$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("NZD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("New Zealand dollar", "NZD", 554, "NZ$", "", 100, DataRounding);
 }

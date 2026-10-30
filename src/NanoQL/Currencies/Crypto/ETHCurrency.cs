@@ -17,7 +17,11 @@ public sealed class ETHCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="ETHCurrency"/> class.</summary>
     public ETHCurrency()
-        : base("Ethereum", "ETH", 10001, "ETH", "", 100000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("ETH", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Ethereum", "ETH", 10001, "ETH", "", 100000, DataRounding);
 }

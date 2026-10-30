@@ -18,7 +18,11 @@ public sealed class ISKCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="ISKCurrency"/> class.</summary>
     public ISKCurrency()
-        : base("Iceland krona", "ISK", 352, "IKr", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("ISK", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Iceland krona", "ISK", 352, "IKr", "", 100, DataRounding);
 }

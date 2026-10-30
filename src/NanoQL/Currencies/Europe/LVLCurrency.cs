@@ -18,7 +18,11 @@ public sealed class LVLCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="LVLCurrency"/> class.</summary>
     public LVLCurrency()
-        : base("Latvian lat", "LVL", 428, "Ls", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("LVL", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Latvian lat", "LVL", 428, "Ls", "", 100, DataRounding);
 }

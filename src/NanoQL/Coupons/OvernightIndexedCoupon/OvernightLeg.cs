@@ -365,7 +365,15 @@ public sealed record OvernightLeg
         Calendar? calendar = Schedule.Calendar;
         Calendar? paymentCalendar = PaymentCalendar;
         calendar ??= paymentCalendar;
-        calendar ??= new WeekendsOnly();
+        if (calendar is null)
+        {
+            // built in the provider of the leg's index
+            using (ConventionProvider.Use(OvernightIndex.Provider))
+            {
+                calendar = new WeekendsOnly();
+            }
+        }
+
         paymentCalendar ??= calendar;
 
         if (Schedule.Empty)

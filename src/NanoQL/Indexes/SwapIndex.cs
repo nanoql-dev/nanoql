@@ -79,7 +79,8 @@ public class SwapIndex : InterestRateIndex
             fixedLegDayCounter,
             iborIndex,
             false,
-            null)
+            null,
+            ConventionProvider.Current)
     {
     }
 
@@ -128,11 +129,13 @@ public class SwapIndex : InterestRateIndex
             fixedLegDayCounter,
             iborIndex,
             true,
-            discountingTermStructure)
+            discountingTermStructure,
+            ConventionProvider.Current)
     {
     }
 
-    private SwapIndex(
+    // An index keeping a given provider: a preset's, read once, or a clone's source's.
+    private protected SwapIndex(
         string familyName,
         Period tenor,
         int settlementDays,
@@ -143,8 +146,9 @@ public class SwapIndex : InterestRateIndex
         DayCounter fixedLegDayCounter,
         IborIndex iborIndex,
         bool exogenousDiscount,
-        YieldTermStructure? discount)
-        : base(familyName, tenor, settlementDays, currency, fixingCalendar, fixedLegDayCounter)
+        YieldTermStructure? discount,
+        ConventionProvider provider)
+        : base(familyName, tenor, settlementDays, currency, fixingCalendar, fixedLegDayCounter, provider)
     {
         // QuantLib accepts a null Ibor index and dereferences it later, which is undefined.
         ArgumentNullException.ThrowIfNull(iborIndex);
@@ -259,28 +263,19 @@ public class SwapIndex : InterestRateIndex
     /// <param name="forwarding">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <returns>The copy.</returns>
     public virtual SwapIndex Clone(YieldTermStructure? forwarding) =>
-        ExogenousDiscount
-            ? new SwapIndex(
-                FamilyName,
-                Tenor,
-                FixingDays,
-                Currency,
-                FixingCalendar,
-                FixedLegTenor,
-                FixedLegConvention,
-                DayCounter,
-                IborIndex.Clone(forwarding),
-                discount)
-            : new SwapIndex(
-                FamilyName,
-                Tenor,
-                FixingDays,
-                Currency,
-                FixingCalendar,
-                FixedLegTenor,
-                FixedLegConvention,
-                DayCounter,
-                IborIndex.Clone(forwarding));
+        new SwapIndex(
+            FamilyName,
+            Tenor,
+            FixingDays,
+            Currency,
+            FixingCalendar,
+            FixedLegTenor,
+            FixedLegConvention,
+            DayCounter,
+            IborIndex.Clone(forwarding),
+            ExogenousDiscount,
+            discount,
+            Provider);
 
     /// <summary>
     /// A copy of the index on other curves: a plain <see cref="SwapIndex"/>, its Ibor index cloned on the forwarding
@@ -300,7 +295,9 @@ public class SwapIndex : InterestRateIndex
             FixedLegConvention,
             DayCounter,
             IborIndex.Clone(forwarding),
-            discounting);
+            true,
+            discounting,
+            Provider);
 
     /// <summary>
     /// A copy of the index with another tenor: a plain <see cref="SwapIndex"/> on the same Ibor index, keeping the
@@ -309,34 +306,25 @@ public class SwapIndex : InterestRateIndex
     /// <param name="tenor">The tenor.</param>
     /// <returns>The copy.</returns>
     public virtual SwapIndex Clone(Period tenor) =>
-        ExogenousDiscount
-            ? new SwapIndex(
-                FamilyName,
-                tenor,
-                FixingDays,
-                Currency,
-                FixingCalendar,
-                FixedLegTenor,
-                FixedLegConvention,
-                DayCounter,
-                IborIndex,
-                DiscountingTermStructure)
-            : new SwapIndex(
-                FamilyName,
-                tenor,
-                FixingDays,
-                Currency,
-                FixingCalendar,
-                FixedLegTenor,
-                FixedLegConvention,
-                DayCounter,
-                IborIndex);
+        new SwapIndex(
+            FamilyName,
+            tenor,
+            FixingDays,
+            Currency,
+            FixingCalendar,
+            FixedLegTenor,
+            FixedLegConvention,
+            DayCounter,
+            IborIndex,
+            ExogenousDiscount,
+            DiscountingTermStructure,
+            Provider);
 
     // The underlying swap's builder, QuantLib's MakeVanillaSwap chain.
     private MakeVanillaSwap Builder(Date fixingDate)
     {
         Date.ThrowIfDefault(fixingDate, nameof(fixingDate));
-        MakeVanillaSwap builder = new MakeVanillaSwap(tenor, IborIndex)
+        MakeVanillaSwap builder = new MakeVanillaSwap(tenor, IborIndex, Provider)
             .WithFixedRate(0.0)
             .WithEffectiveDate(ValueDate(fixingDate))
             .WithFixedLegCalendar(FixingCalendar)

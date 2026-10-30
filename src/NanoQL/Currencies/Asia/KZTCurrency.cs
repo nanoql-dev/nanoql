@@ -17,7 +17,11 @@ public sealed class KZTCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="KZTCurrency"/> class.</summary>
     public KZTCurrency()
-        : base("Kazakstanti Tenge", "KZT", 398, "Kzt", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("KZT", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Kazakstanti Tenge", "KZT", 398, "Kzt", "", 100, DataRounding);
 }

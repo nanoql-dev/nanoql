@@ -18,7 +18,11 @@ public sealed class MKDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="MKDCurrency"/> class.</summary>
     public MKDCurrency()
-        : base("Macedonian denar", "MKD", 807, "den", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("MKD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Macedonian denar", "MKD", 807, "den", "", 100, DataRounding);
 }

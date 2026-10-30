@@ -18,7 +18,11 @@ public sealed class SEKCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="SEKCurrency"/> class.</summary>
     public SEKCurrency()
-        : base("Swedish krona", "SEK", 752, "kr", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("SEK", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Swedish krona", "SEK", 752, "kr", "", 100, DataRounding);
 }

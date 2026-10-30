@@ -22,11 +22,14 @@ public sealed class GRDCurrency : Currency
 {
     // Built once and shared by every instance, as QuantLib's static data is.
     private static readonly Rounding DataRounding = new();
-    private static readonly EURCurrency DataTriangulationCurrency = new();
 
     /// <summary>Initializes a new instance of the <see cref="GRDCurrency"/> class.</summary>
     public GRDCurrency()
-        : base("Greek drachma", "GRD", 300, "", "", 100, DataRounding, DataTriangulationCurrency)
+        : base(ConventionProvider.ReadCurrency("GRD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Greek drachma", "GRD", 300, "", "", 100, DataRounding, new EURCurrency());
 }

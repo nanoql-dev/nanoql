@@ -38,6 +38,7 @@ public sealed class Finland : Calendar
     public Finland()
     {
         impl = FinlandImplInstance;
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("Finland"));
     }
 
     /// <inheritdoc/>

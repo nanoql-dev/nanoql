@@ -17,7 +17,11 @@ public sealed class LTCCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="LTCCurrency"/> class.</summary>
     public LTCCurrency()
-        : base("Litecoin", "LTC", 10005, "LTC", "", 100000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("LTC", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Litecoin", "LTC", 10005, "LTC", "", 100000, DataRounding);
 }

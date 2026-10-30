@@ -44,6 +44,7 @@ public sealed class SouthAfrica : Calendar
     public SouthAfrica()
     {
         impl = SouthAfricaImplInstance;
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("SouthAfrica"));
     }
 
     /// <inheritdoc/>

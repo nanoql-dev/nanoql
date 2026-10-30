@@ -51,7 +51,18 @@ public sealed record MakeOIS
         FixedCalendar = overnightIndex.FixingCalendar;
         OvernightCalendar = overnightIndex.FixingCalendar;
         FixedDayCount = overnightIndex.DayCounter;
+        Provider = overnightIndex.Provider;
     }
+
+    // A builder taking an outer object's provider: an overnight-indexed swap index's, a swaption builder's.
+    internal MakeOIS(Period swapTenor, OvernightIndex overnightIndex, ConventionProvider provider)
+        : this(swapTenor, overnightIndex)
+    {
+        Provider = provider;
+    }
+
+    // The provider the builder takes its conventions from and builds inside: its index's, or an outer object's.
+    private ConventionProvider Provider { get; init; }
 
     private Period SwapTenor { get; init; }
 
@@ -517,6 +528,9 @@ public sealed record MakeOIS
     public OvernightIndexedSwap ToOvernightIndexedSwap(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        // Built inside the builder's provider, so what the build constructs takes its conventions.
+        using IDisposable scope = ConventionProvider.Use(Provider);
 
         // QuantLib's empty calendar, null here, is used unchecked, as QuantLib uses it
         Calendar overnightCalendar = OvernightCalendar ?? EmptyCalendar.Instance;

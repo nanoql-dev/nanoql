@@ -39,6 +39,20 @@ public abstract class InflationIndex : FinancialIndex
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="frequency"/> isn't a member of its type.</exception>
     protected InflationIndex(
         string familyName, Region region, bool revised, Frequency frequency, Period availabilityLag, Currency currency)
+        : this(familyName, region, revised, frequency, availabilityLag, currency, ConventionProvider.Current)
+    {
+    }
+
+    // An index keeping a given provider: a preset's, read once, or a clone's source's.
+    private protected InflationIndex(
+        string familyName,
+        Region region,
+        bool revised,
+        Frequency frequency,
+        Period availabilityLag,
+        Currency currency,
+        ConventionProvider provider)
+        : base(provider)
     {
         ArgumentNullException.ThrowIfNull(familyName);
         ArgumentNullException.ThrowIfNull(region);

@@ -103,6 +103,8 @@ public sealed class Philippines : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Philippines.{market}"));
     }
 
     /// <inheritdoc/>

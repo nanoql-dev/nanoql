@@ -81,6 +81,8 @@ public sealed class Malaysia : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Malaysia.{market}"));
     }
 
     /// <inheritdoc/>

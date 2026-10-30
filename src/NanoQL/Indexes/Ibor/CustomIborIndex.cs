@@ -52,7 +52,38 @@ public sealed class CustomIborIndex : IborIndex
         bool endOfMonth,
         DayCounter dayCounter,
         YieldTermStructure? h = null)
-        : base(familyName, tenor, settlementDays, currency, fixingCalendar, convention, endOfMonth, dayCounter, h)
+        : this(
+            familyName,
+            tenor,
+            settlementDays,
+            currency,
+            fixingCalendar,
+            valueCalendar,
+            maturityCalendar,
+            convention,
+            endOfMonth,
+            dayCounter,
+            h,
+            ConventionProvider.Current)
+    {
+    }
+
+    // An index keeping a given provider: a clone's source's.
+    private CustomIborIndex(
+        string familyName,
+        Period tenor,
+        int settlementDays,
+        Currency? currency,
+        Calendar fixingCalendar,
+        Calendar valueCalendar,
+        Calendar maturityCalendar,
+        BusinessDayConvention convention,
+        bool endOfMonth,
+        DayCounter dayCounter,
+        YieldTermStructure? h,
+        ConventionProvider provider)
+        : base(
+            familyName, tenor, settlementDays, currency, fixingCalendar, convention, endOfMonth, dayCounter, h, provider)
     {
         ArgumentNullException.ThrowIfNull(valueCalendar);
         ArgumentNullException.ThrowIfNull(maturityCalendar);
@@ -122,5 +153,6 @@ public sealed class CustomIborIndex : IborIndex
             BusinessDayConvention,
             EndOfMonth,
             DayCounter,
-            forwarding);
+            forwarding,
+            Provider);
 }

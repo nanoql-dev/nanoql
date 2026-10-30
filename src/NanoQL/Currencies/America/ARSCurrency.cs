@@ -18,7 +18,11 @@ public sealed class ARSCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="ARSCurrency"/> class.</summary>
     public ARSCurrency()
-        : base("Argentinian peso", "ARS", 32, "", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("ARS", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Argentinian peso", "ARS", 32, "", "", 100, DataRounding);
 }

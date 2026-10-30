@@ -48,6 +48,8 @@ public sealed class Iceland : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Iceland.{market}"));
     }
 
     /// <inheritdoc/>

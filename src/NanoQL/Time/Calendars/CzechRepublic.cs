@@ -48,6 +48,8 @@ public sealed class CzechRepublic : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"CzechRepublic.{market}"));
     }
 
     /// <inheritdoc/>

@@ -139,7 +139,13 @@ public sealed class BMASwapRateHelper : RelativeDateRateHelper
     protected internal override BootstrapHelper<YieldTermStructure> WithTermStructure(YieldTermStructure t)
     {
         var copy = (BMASwapRateHelper)base.WithTermStructure(t);
-        copy.swap = WithBmaIndex(swap, new BMAIndex(t));
+
+        // built in the provider of the helper's BMA index
+        using (ConventionProvider.Use(bmaIndex.Provider))
+        {
+            copy.swap = WithBmaIndex(swap, new BMAIndex(t));
+        }
+
         return copy;
     }
 
@@ -186,8 +192,12 @@ public sealed class BMASwapRateHelper : RelativeDateRateHelper
 
         Date maturity = earliest + tenor;
 
-        // dummy BMA index with curve/swap arguments
-        var clonedIndex = new BMAIndex(TermStructure);
+        // dummy BMA index with curve/swap arguments, built in the provider of the helper's BMA index
+        BMAIndex clonedIndex;
+        using (ConventionProvider.Use(bmaIndex.Provider))
+        {
+            clonedIndex = new BMAIndex(TermStructure);
+        }
 
         Schedule bmaSchedule = new MakeSchedule()
             .From(earliest)

@@ -18,7 +18,11 @@ public sealed class JPYCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="JPYCurrency"/> class.</summary>
     public JPYCurrency()
-        : base("Japanese yen", "JPY", 392, "\u00A5", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("JPY", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Japanese yen", "JPY", 392, "\u00A5", "", 100, DataRounding);
 }

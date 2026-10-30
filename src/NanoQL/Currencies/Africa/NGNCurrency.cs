@@ -19,7 +19,11 @@ public sealed class NGNCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="NGNCurrency"/> class.</summary>
     public NGNCurrency()
-        : base("Nigerian Naira", "NGN", 566, "N", "K", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("NGN", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Nigerian Naira", "NGN", 566, "N", "K", 100, DataRounding);
 }

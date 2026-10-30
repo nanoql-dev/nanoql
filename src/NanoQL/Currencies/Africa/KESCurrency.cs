@@ -19,7 +19,11 @@ public sealed class KESCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="KESCurrency"/> class.</summary>
     public KESCurrency()
-        : base("Kenyan shilling", "KES", 404, "KES", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("KES", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Kenyan shilling", "KES", 404, "KES", "", 100, DataRounding);
 }

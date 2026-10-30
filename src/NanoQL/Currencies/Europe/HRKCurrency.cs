@@ -25,7 +25,11 @@ public sealed class HRKCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="HRKCurrency"/> class.</summary>
     public HRKCurrency()
-        : base("Croatian kuna", "HRK", 191, "HRK", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("HRK", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Croatian kuna", "HRK", 191, "HRK", "", 100, DataRounding);
 }

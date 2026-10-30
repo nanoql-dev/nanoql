@@ -54,6 +54,9 @@ public abstract class CdsHelper : RelativeDateBootstrapHelper<DefaultProbability
     // Written on a bound copy (WithTermStructure), never after.
     private CreditDefaultSwap? swap;
 
+    // The provider at the helper's construction, which its swap is built in when the bootstrap binds it.
+    private readonly ConventionProvider provider = ConventionProvider.Current;
+
     /// <summary>Initializes a new instance of the <see cref="CdsHelper"/> class.</summary>
     /// <param name="quote">The helper's market quote.</param>
     /// <param name="tenor">The swap's tenor.</param>
@@ -180,7 +183,13 @@ public abstract class CdsHelper : RelativeDateBootstrapHelper<DefaultProbability
         DefaultProbabilityTermStructure t)
     {
         var copy = (CdsHelper)base.WithTermStructure(t);
-        copy.swap = copy.BuildSwap();
+
+        // built in the provider the helper was built with
+        using (ConventionProvider.Use(provider))
+        {
+            copy.swap = copy.BuildSwap();
+        }
+
         return copy;
     }
 

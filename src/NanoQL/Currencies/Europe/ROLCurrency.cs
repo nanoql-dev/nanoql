@@ -25,7 +25,11 @@ public sealed class ROLCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="ROLCurrency"/> class.</summary>
     public ROLCurrency()
-        : base("Romanian leu", "ROL", 642, "L", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("ROL", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Romanian leu", "ROL", 642, "L", "", 100, DataRounding);
 }

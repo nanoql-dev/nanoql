@@ -18,7 +18,11 @@ public sealed class PKRCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="PKRCurrency"/> class.</summary>
     public PKRCurrency()
-        : base("Pakistani rupee", "PKR", 586, "Rs", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("PKR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Pakistani rupee", "PKR", 586, "Rs", "", 100, DataRounding);
 }

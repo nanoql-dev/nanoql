@@ -25,7 +25,11 @@ public sealed class SKKCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="SKKCurrency"/> class.</summary>
     public SKKCurrency()
-        : base("Slovak koruna", "SKK", 703, "Sk", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("SKK", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Slovak koruna", "SKK", 703, "Sk", "", 100, DataRounding);
 }

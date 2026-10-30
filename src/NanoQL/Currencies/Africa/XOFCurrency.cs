@@ -19,7 +19,11 @@ public sealed class XOFCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="XOFCurrency"/> class.</summary>
     public XOFCurrency()
-        : base("West African CFA franc", "XOF", 952, "XOF", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("XOF", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("West African CFA franc", "XOF", 952, "XOF", "", 100, DataRounding);
 }

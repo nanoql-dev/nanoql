@@ -35,6 +35,7 @@ public sealed record MakeCreditDefaultSwap
     /// <param name="runningSpread">The running spread, in fractional units.</param>
     public MakeCreditDefaultSwap(Period tenor, double runningSpread)
     {
+        Provider = ConventionProvider.Current;
         Tenor = tenor;
         RunningSpread = runningSpread;
     }
@@ -47,6 +48,7 @@ public sealed record MakeCreditDefaultSwap
     public MakeCreditDefaultSwap(Date termDate, double runningSpread)
     {
         Date.ThrowIfDefault(termDate, nameof(termDate));
+        Provider = ConventionProvider.Current;
         TermDate = termDate;
         RunningSpread = runningSpread;
     }
@@ -59,9 +61,13 @@ public sealed record MakeCreditDefaultSwap
     public MakeCreditDefaultSwap(Schedule schedule, double runningSpread)
     {
         ArgumentNullException.ThrowIfNull(schedule);
+        Provider = ConventionProvider.Current;
         Schedule = schedule;
         RunningSpread = runningSpread;
     }
+
+    // The provider the builder takes its conventions from and builds inside: Current when it is created.
+    private ConventionProvider Provider { get; init; }
 
     private Period? Tenor { get; init; }
 
@@ -115,6 +121,10 @@ public sealed record MakeCreditDefaultSwap
     public CreditDefaultSwap ToCreditDefaultSwap(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        // Built inside the builder's provider, so what the build constructs takes its conventions.
+        using IDisposable scope = ConventionProvider.Use(Provider);
+
         Date tradeDate = TradeDate ?? context.EvaluationDate;
         Date upfrontDate = UpfrontDate ?? new WeekendsOnly().Advance(tradeDate, CashSettlementDays, TimeUnit.Days);
 

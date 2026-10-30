@@ -50,7 +50,18 @@ public sealed record MakeVanillaSwap
         FloatConvention = index.BusinessDayConvention;
         FloatTerminationDateConvention = index.BusinessDayConvention;
         FloatDayCount = index.DayCounter;
+        Provider = index.Provider;
     }
+
+    // A builder taking an outer object's provider: a swap index's, a swaption builder's, a cap builder's.
+    internal MakeVanillaSwap(Period swapTenor, IborIndex index, ConventionProvider provider)
+        : this(swapTenor, index)
+    {
+        Provider = provider;
+    }
+
+    // The provider the builder takes its conventions from and builds inside: its index's, or an outer object's.
+    private ConventionProvider Provider { get; init; }
 
     private Period SwapTenor { get; init; }
 
@@ -457,6 +468,9 @@ public sealed record MakeVanillaSwap
     public VanillaSwap ToVanillaSwap(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        // Built inside the builder's provider, so what the build constructs takes its conventions.
+        using IDisposable scope = ConventionProvider.Use(Provider);
 
         if (!(EffectiveDate is null || SettlementDays is null))
         {

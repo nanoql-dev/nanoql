@@ -32,6 +32,13 @@ public sealed class Cdi : OvernightIndex
     {
     }
 
+    // A clone: the source's conventions and provider, on another forwarding curve.
+    private Cdi(Cdi source, YieldTermStructure? h)
+        : base(
+            source.FamilyName, source.FixingDays, source.Currency, source.FixingCalendar, source.DayCounter, h, source.Provider)
+    {
+    }
+
     /// <summary>
     /// The fixing forecast from the forwarding curve: the annually compounded rate from the value date to the maturity
     /// on Business/252.
@@ -78,5 +85,5 @@ public sealed class Cdi : OvernightIndex
     /// <summary>A copy of the index on another forwarding curve: a <see cref="Cdi"/>.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <returns>The copy.</returns>
-    public override OvernightIndex Clone(YieldTermStructure? h) => new Cdi(h);
+    public override OvernightIndex Clone(YieldTermStructure? h) => new Cdi(this, h);
 }

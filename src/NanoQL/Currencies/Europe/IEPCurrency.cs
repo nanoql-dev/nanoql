@@ -22,11 +22,14 @@ public sealed class IEPCurrency : Currency
 {
     // Built once and shared by every instance, as QuantLib's static data is.
     private static readonly Rounding DataRounding = new();
-    private static readonly EURCurrency DataTriangulationCurrency = new();
 
     /// <summary>Initializes a new instance of the <see cref="IEPCurrency"/> class.</summary>
     public IEPCurrency()
-        : base("Irish punt", "IEP", 372, "", "", 100, DataRounding, DataTriangulationCurrency)
+        : base(ConventionProvider.ReadCurrency("IEP", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Irish punt", "IEP", 372, "", "", 100, DataRounding, new EURCurrency());
 }

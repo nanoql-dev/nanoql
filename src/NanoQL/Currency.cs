@@ -77,6 +77,25 @@ public class Currency : IEquatable<Currency>
         MinorUnitCodes = codes.ToImmutable();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Currency"/> class from a preset's data, which the preset reads
+    /// through <see cref="ConventionProvider"/>.
+    /// </summary>
+    /// <param name="data">The data.</param>
+    /// <exception cref="ArgumentNullException">The data, or one of its strings or its rounding, is null.</exception>
+    protected Currency(CurrencyData data)
+        : this(
+            (data ?? throw new ArgumentNullException(nameof(data))).Name,
+            data.Code,
+            data.NumericCode,
+            data.Symbol,
+            data.FractionSymbol,
+            data.FractionsPerUnit,
+            data.Rounding,
+            data.TriangulationCurrency)
+    {
+    }
+
     /// <summary>Gets the currency's name, such as "U.S. dollar".</summary>
     public string Name { get; }
 

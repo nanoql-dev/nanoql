@@ -120,6 +120,8 @@ public sealed class Israel : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Israel.{market}"));
     }
 
     /// <inheritdoc/>

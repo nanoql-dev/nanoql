@@ -58,6 +58,7 @@ public sealed class Thailand : Calendar
     public Thailand()
     {
         impl = SetImplInstance;
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("Thailand"));
     }
 
     /// <inheritdoc/>

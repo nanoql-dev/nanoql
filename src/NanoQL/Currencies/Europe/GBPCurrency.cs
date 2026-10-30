@@ -18,7 +18,11 @@ public sealed class GBPCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="GBPCurrency"/> class.</summary>
     public GBPCurrency()
-        : base("British pound sterling", "GBP", 826, "\u00A3", "p", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("GBP", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("British pound sterling", "GBP", 826, "\u00A3", "p", 100, DataRounding);
 }

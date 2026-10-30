@@ -18,7 +18,11 @@ public sealed class KWDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="KWDCurrency"/> class.</summary>
     public KWDCurrency()
-        : base("Kuwaiti dinar", "KWD", 414, "KD", "", 1000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("KWD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Kuwaiti dinar", "KWD", 414, "KD", "", 1000, DataRounding);
 }

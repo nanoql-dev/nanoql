@@ -18,7 +18,11 @@ public sealed class PHPCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="PHPCurrency"/> class.</summary>
     public PHPCurrency()
-        : base("Philippine peso", "PHP", 608, "PHP", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("PHP", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Philippine peso", "PHP", 608, "PHP", "", 100, DataRounding);
 }

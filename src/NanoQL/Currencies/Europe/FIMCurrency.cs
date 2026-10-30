@@ -22,11 +22,14 @@ public sealed class FIMCurrency : Currency
 {
     // Built once and shared by every instance, as QuantLib's static data is.
     private static readonly Rounding DataRounding = new();
-    private static readonly EURCurrency DataTriangulationCurrency = new();
 
     /// <summary>Initializes a new instance of the <see cref="FIMCurrency"/> class.</summary>
     public FIMCurrency()
-        : base("Finnish markka", "FIM", 246, "mk", "", 100, DataRounding, DataTriangulationCurrency)
+        : base(ConventionProvider.ReadCurrency("FIM", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Finnish markka", "FIM", 246, "mk", "", 100, DataRounding, new EURCurrency());
 }

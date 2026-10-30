@@ -90,6 +90,14 @@ public sealed class JointCalendar : Calendar
     /// <inheritdoc/>
     public override string Name => name;
 
+    /// <summary>Gets the joined calendars, in construction order.</summary>
+    /// <remarks>A nanoql addition: QuantLib keeps them private.</remarks>
+    public ImmutableArray<Calendar> Calendars => calendars;
+
+    /// <summary>Gets the rule joining the calendars.</summary>
+    /// <remarks>A nanoql addition: QuantLib keeps it private.</remarks>
+    public JointCalendarRule Rule => rule;
+
     /// <inheritdoc/>
     public override bool IsWeekend(Weekday w)
     {

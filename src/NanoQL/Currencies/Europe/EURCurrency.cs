@@ -14,7 +14,11 @@ public sealed class EURCurrency : Currency
 {
     /// <summary>Initializes a new instance of the <see cref="EURCurrency"/> class.</summary>
     public EURCurrency()
-        : base("European Euro", "EUR", 978, "", "", 100, new ClosestRounding(2))
+        : base(ConventionProvider.ReadCurrency("EUR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("European Euro", "EUR", 978, "", "", 100, new ClosestRounding(2));
 }

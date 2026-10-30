@@ -18,7 +18,11 @@ public sealed class MYRCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="MYRCurrency"/> class.</summary>
     public MYRCurrency()
-        : base("Malaysian Ringgit", "MYR", 458, "RM", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("MYR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Malaysian Ringgit", "MYR", 458, "RM", "", 100, DataRounding);
 }

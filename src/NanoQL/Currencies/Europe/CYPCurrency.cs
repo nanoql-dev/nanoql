@@ -25,7 +25,11 @@ public sealed class CYPCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="CYPCurrency"/> class.</summary>
     public CYPCurrency()
-        : base("Cyprus pound", "CYP", 196, "\u00A3C", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("CYP", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Cyprus pound", "CYP", 196, "\u00A3C", "", 100, DataRounding);
 }

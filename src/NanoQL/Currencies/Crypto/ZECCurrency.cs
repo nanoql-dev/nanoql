@@ -17,7 +17,11 @@ public sealed class ZECCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="ZECCurrency"/> class.</summary>
     public ZECCurrency()
-        : base("Zcash", "ZEC", 10007, "ZEC", "", 100000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("ZEC", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Zcash", "ZEC", 10007, "ZEC", "", 100000, DataRounding);
 }

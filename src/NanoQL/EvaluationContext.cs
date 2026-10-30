@@ -36,9 +36,13 @@ namespace NanoQL;
 /// </remarks>
 public sealed record EvaluationContext
 {
-    // QuantLib's defaults, immutable values shared by every context that keeps them.
-    private static readonly CommoditySettings DefaultCommoditySettings = new();
-    private static readonly QuantitySettings DefaultQuantitySettings = new();
+    // QuantLib's defaults, immutable values shared by every context that keeps them, built under QuantLib's
+    // conventions whatever is current when the type initializes.
+    private static readonly CommoditySettings DefaultCommoditySettings =
+        ConventionProvider.BuildUnderQuantLib(() => new CommoditySettings());
+
+    private static readonly QuantitySettings DefaultQuantitySettings =
+        ConventionProvider.BuildUnderQuantLib(() => new QuantitySettings());
 
     private readonly Date evaluationDate;
     private readonly IndexFixings fixings = IndexFixings.Empty;

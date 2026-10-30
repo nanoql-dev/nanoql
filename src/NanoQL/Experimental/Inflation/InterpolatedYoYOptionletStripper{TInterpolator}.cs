@@ -39,6 +39,9 @@ namespace NanoQL.Experimental;
 public sealed class InterpolatedYoYOptionletStripper<TInterpolator> : YoYOptionletStripper
     where TInterpolator : struct, IInterpolator
 {
+    // The provider at the stripper's construction, which a strip builds its index, caps and curves in.
+    private readonly ConventionProvider provider = ConventionProvider.Current;
+
     /// <inheritdoc/>
     /// <exception cref="ArgumentNullException">An argument is null.</exception>
     /// <exception cref="NanoQLException">A strike's first volatility can't be found ("failed to find solution here
@@ -53,6 +56,9 @@ public sealed class InterpolatedYoYOptionletStripper<TInterpolator> : YoYOptionl
         ArgumentNullException.ThrowIfNull(surface);
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(context);
+
+        // built in the provider the stripper was built with
+        using IDisposable scope = ConventionProvider.Use(provider);
         Period lag = surface.ObservationLag;
         Frequency frequency = surface.Frequency;
         bool indexIsInterpolated = surface.IndexIsInterpolated;

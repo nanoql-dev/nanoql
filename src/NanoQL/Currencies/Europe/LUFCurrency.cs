@@ -22,11 +22,14 @@ public sealed class LUFCurrency : Currency
 {
     // Built once and shared by every instance, as QuantLib's static data is.
     private static readonly Rounding DataRounding = new();
-    private static readonly EURCurrency DataTriangulationCurrency = new();
 
     /// <summary>Initializes a new instance of the <see cref="LUFCurrency"/> class.</summary>
     public LUFCurrency()
-        : base("Luxembourg franc", "LUF", 442, "F", "", 100, DataRounding, DataTriangulationCurrency)
+        : base(ConventionProvider.ReadCurrency("LUF", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Luxembourg franc", "LUF", 442, "F", "", 100, DataRounding, new EURCurrency());
 }

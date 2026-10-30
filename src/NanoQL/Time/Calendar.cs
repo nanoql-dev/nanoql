@@ -37,7 +37,8 @@ namespace NanoQL.Time;
 /// </remarks>
 public abstract class Calendar : IEquatable<Calendar>
 {
-    // Written only on a fresh copy (AddHoliday, RemoveHoliday, ResetAddedAndRemovedHolidays).
+    // Written only by a preset's constructor (ApplyEdits) or on a fresh copy (AddHoliday, RemoveHoliday,
+    // ResetAddedAndRemovedHolidays).
     private ImmutableSortedSet<Date> addedHolidays = ImmutableSortedSet<Date>.Empty;
     private ImmutableSortedSet<Date> removedHolidays = ImmutableSortedSet<Date>.Empty;
 
@@ -157,6 +158,32 @@ public abstract class Calendar : IEquatable<Calendar>
         }
 
         return copy;
+    }
+
+    /// <summary>
+    /// Applies a preset's holiday edits, read through <see cref="ConventionProvider"/>, as <see cref="AddHoliday"/> and
+    /// <see cref="RemoveHoliday"/> apply them: called last in the preset's constructor, once its rules are set.
+    /// </summary>
+    /// <param name="edits">The edits; QuantLib's presets have none.</param>
+    private protected void ApplyEdits(CalendarEdits edits)
+    {
+        foreach (Date d in edits.Added)
+        {
+            removedHolidays = removedHolidays.Remove(d);
+            if (IsBusinessDayCore(d))
+            {
+                addedHolidays = addedHolidays.Add(d);
+            }
+        }
+
+        foreach (Date d in edits.Removed)
+        {
+            addedHolidays = addedHolidays.Remove(d);
+            if (!IsBusinessDayCore(d))
+            {
+                removedHolidays = removedHolidays.Add(d);
+            }
+        }
     }
 
     /// <summary>A copy of the calendar with no added or removed holidays.</summary>

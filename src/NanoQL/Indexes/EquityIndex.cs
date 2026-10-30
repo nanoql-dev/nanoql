@@ -58,6 +58,20 @@ public class EquityIndex : FinancialIndex
         YieldTermStructure? interest = null,
         YieldTermStructure? dividend = null,
         double? spot = null)
+        : this(name, fixingCalendar, currency, interest, dividend, spot, ConventionProvider.Current)
+    {
+    }
+
+    // An index keeping a given provider: a clone's source's.
+    private EquityIndex(
+        string name,
+        Calendar fixingCalendar,
+        Currency? currency,
+        YieldTermStructure? interest,
+        YieldTermStructure? dividend,
+        double? spot,
+        ConventionProvider provider)
+        : base(provider)
     {
         ArgumentNullException.ThrowIfNull(name);
         ArgumentNullException.ThrowIfNull(fixingCalendar);
@@ -172,7 +186,7 @@ public class EquityIndex : FinancialIndex
     /// <param name="spot">The spot value, or <see langword="null"/> for none.</param>
     /// <returns>The copy.</returns>
     public virtual EquityIndex Clone(YieldTermStructure? interest, YieldTermStructure? dividend, double? spot) =>
-        new(Name, FixingCalendar, Currency, interest, dividend, spot);
+        new(Name, FixingCalendar, Currency, interest, dividend, spot, Provider);
 
     private static double ResolveSpot(double? spot, double? lastFixing)
     {

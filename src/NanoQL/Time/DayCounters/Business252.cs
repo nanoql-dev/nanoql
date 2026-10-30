@@ -46,11 +46,12 @@ public sealed class Business252 : DayCounter
     private readonly int[]? leftBefore;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Business252"/> class on the Brazilian settlement calendar,
-    /// QuantLib's default.
+    /// Initializes a new instance of the <see cref="Business252"/> class on the calendar
+    /// <see cref="ConventionProvider.ResolveBusiness252Calendar"/> returns: QuantLib's default, the Brazilian settlement
+    /// calendar, unless the provider configures another.
     /// </summary>
     public Business252()
-        : this(new Brazil())
+        : this(ConventionProvider.ReadBusiness252Calendar(Reference))
     {
     }
 
@@ -110,6 +111,10 @@ public sealed class Business252 : DayCounter
 
     /// <inheritdoc/>
     public override string Name => name;
+
+    /// <summary>Gets the calendar whose business days are counted.</summary>
+    /// <remarks>A nanoql addition: QuantLib keeps the calendar private.</remarks>
+    public Calendar Calendar => calendar;
 
     /// <inheritdoc/>
     public override int DayCount(Date d1, Date d2)
@@ -182,6 +187,9 @@ public sealed class Business252 : DayCounter
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), calendar);
+
+    // QuantLib's default calendar, the reference the provider resolves.
+    private static Calendar Reference() => new Brazil();
 
     private static bool SameMonth(Date d1, Date d2) => d1.Year == d2.Year && d1.Month == d2.Month;
 

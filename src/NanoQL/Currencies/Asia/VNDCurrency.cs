@@ -18,7 +18,11 @@ public sealed class VNDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="VNDCurrency"/> class.</summary>
     public VNDCurrency()
-        : base("Vietnamese Dong", "VND", 704, "", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("VND", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Vietnamese Dong", "VND", 704, "", "", 100, DataRounding);
 }

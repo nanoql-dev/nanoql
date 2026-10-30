@@ -18,7 +18,11 @@ public sealed class AEDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="AEDCurrency"/> class.</summary>
     public AEDCurrency()
-        : base("United Arab Emirates dirham", "AED", 784, "AED", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("AED", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("United Arab Emirates dirham", "AED", 784, "AED", "", 100, DataRounding);
 }

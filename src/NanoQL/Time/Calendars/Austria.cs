@@ -75,6 +75,8 @@ public sealed class Austria : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Austria.{market}"));
     }
 
     /// <inheritdoc/>

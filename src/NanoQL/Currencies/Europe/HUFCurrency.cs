@@ -18,7 +18,11 @@ public sealed class HUFCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="HUFCurrency"/> class.</summary>
     public HUFCurrency()
-        : base("Hungarian forint", "HUF", 348, "Ft", "", 1, DataRounding)
+        : base(ConventionProvider.ReadCurrency("HUF", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Hungarian forint", "HUF", 348, "Ft", "", 1, DataRounding);
 }

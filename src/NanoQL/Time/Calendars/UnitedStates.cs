@@ -151,6 +151,8 @@ public sealed class UnitedStates : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"UnitedStates.{market}"));
     }
 
     /// <inheritdoc/>

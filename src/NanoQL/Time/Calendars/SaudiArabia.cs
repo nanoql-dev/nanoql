@@ -53,6 +53,8 @@ public sealed class SaudiArabia : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"SaudiArabia.{market}"));
     }
 
     /// <inheritdoc/>

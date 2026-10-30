@@ -18,7 +18,11 @@ public sealed class BYRCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="BYRCurrency"/> class.</summary>
     public BYRCurrency()
-        : base("Belarussian ruble", "BYR", 974, "BR", "", 1, DataRounding)
+        : base(ConventionProvider.ReadCurrency("BYR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Belarussian ruble", "BYR", 974, "BR", "", 1, DataRounding);
 }

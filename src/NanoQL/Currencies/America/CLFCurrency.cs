@@ -18,7 +18,11 @@ public sealed class CLFCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="CLFCurrency"/> class.</summary>
     public CLFCurrency()
-        : base("Unidad de Fomento (funds code)", "CLF", 990, "CLF", "", 1, DataRounding)
+        : base(ConventionProvider.ReadCurrency("CLF", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Unidad de Fomento (funds code)", "CLF", 990, "CLF", "", 1, DataRounding);
 }

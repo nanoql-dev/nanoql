@@ -17,7 +17,11 @@ public sealed class XRPCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="XRPCurrency"/> class.</summary>
     public XRPCurrency()
-        : base("Ripple", "XRP", 10004, "XRP", "", 100000, DataRounding)
+        : base(ConventionProvider.ReadCurrency("XRP", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Ripple", "XRP", 10004, "XRP", "", 100000, DataRounding);
 }

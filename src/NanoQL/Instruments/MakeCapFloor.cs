@@ -43,16 +43,20 @@ public sealed record MakeCapFloor
     public MakeCapFloor(CapFloorType capFloorType, Period capFloorTenor, IborIndex iborIndex)
     {
         ArgumentNullException.ThrowIfNull(iborIndex);
+        Provider = iborIndex.Provider;
         CapFloorType = capFloorType;
 
         // setting the fixed leg tenor avoids that MakeVanillaSwap throws
         // because of an unknown fixed leg default tenor for a currency,
         // notice that only the floating leg of the swap is used anyway
-        SwapBuilder = new MakeVanillaSwap(capFloorTenor, iborIndex)
+        SwapBuilder = new MakeVanillaSwap(capFloorTenor, iborIndex, Provider)
             .WithFixedRate(0.0)
             .WithFixedLegTenor(new Period(1, TimeUnit.Years))
             .WithFixedLegDayCount(new Actual365Fixed());
     }
+
+    // The provider the builder takes its conventions from and builds inside: its index's.
+    private ConventionProvider Provider { get; init; }
 
     private CapFloorType CapFloorType { get; init; }
 
@@ -186,6 +190,9 @@ public sealed record MakeCapFloor
     public CapFloor ToCapFloor(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        // Built inside the builder's provider, so what the build constructs takes its conventions.
+        using IDisposable scope = ConventionProvider.Use(Provider);
 
         VanillaSwap swap = SwapBuilder.ToVanillaSwap(context);
 

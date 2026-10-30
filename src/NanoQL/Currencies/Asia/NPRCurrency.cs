@@ -18,7 +18,11 @@ public sealed class NPRCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="NPRCurrency"/> class.</summary>
     public NPRCurrency()
-        : base("Nepal rupee", "NPR", 524, "NRs", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("NPR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Nepal rupee", "NPR", 524, "NRs", "", 100, DataRounding);
 }

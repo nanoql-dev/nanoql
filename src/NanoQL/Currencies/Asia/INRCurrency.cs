@@ -18,7 +18,11 @@ public sealed class INRCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="INRCurrency"/> class.</summary>
     public INRCurrency()
-        : base("Indian rupee", "INR", 356, "Rs", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("INR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Indian rupee", "INR", 356, "Rs", "", 100, DataRounding);
 }

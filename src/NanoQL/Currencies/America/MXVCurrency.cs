@@ -18,7 +18,11 @@ public sealed class MXVCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="MXVCurrency"/> class.</summary>
     public MXVCurrency()
-        : base("Mexican Unidad de Inversion", "MXV", 979, "MXV", "", 1, DataRounding)
+        : base(ConventionProvider.ReadCurrency("MXV", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Mexican Unidad de Inversion", "MXV", 979, "MXV", "", 1, DataRounding);
 }

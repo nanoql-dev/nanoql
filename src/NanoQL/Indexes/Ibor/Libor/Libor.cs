@@ -78,6 +78,24 @@ public class Libor : IborIndex
     /// adjusted.</summary>
     public Calendar JointCalendar => jointCalendar;
 
+    // A clone: the source's conventions, calendars and provider, on another forwarding curve.
+    private Libor(Libor source, YieldTermStructure? forwarding)
+        : base(
+            source.FamilyName,
+            source.Tenor,
+            source.FixingDays,
+            source.Currency,
+            source.FixingCalendar,
+            source.BusinessDayConvention,
+            source.EndOfMonth,
+            source.DayCounter,
+            forwarding,
+            source.Provider)
+    {
+        financialCenterCalendar = source.financialCenterCalendar;
+        jointCalendar = source.jointCalendar;
+    }
+
     /// <summary>
     /// The value date of a fixing: the settlement days after it on the fixing calendar, then adjusted on the joint
     /// calendar, as ICE's rules have it.
@@ -125,6 +143,5 @@ public class Libor : IborIndex
     /// <summary>A copy of the index on another forwarding curve: a plain <see cref="Libor"/>, as QuantLib's.</summary>
     /// <param name="forwarding">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <returns>The copy.</returns>
-    public override IborIndex Clone(YieldTermStructure? forwarding) =>
-        new Libor(FamilyName, Tenor, FixingDays, Currency!, financialCenterCalendar, DayCounter, forwarding);
+    public override IborIndex Clone(YieldTermStructure? forwarding) => new Libor(this, forwarding);
 }

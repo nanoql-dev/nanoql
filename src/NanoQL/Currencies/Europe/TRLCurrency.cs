@@ -25,7 +25,11 @@ public sealed class TRLCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="TRLCurrency"/> class.</summary>
     public TRLCurrency()
-        : base("Turkish lira", "TRL", 792, "TL", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("TRL", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Turkish lira", "TRL", 792, "TL", "", 100, DataRounding);
 }

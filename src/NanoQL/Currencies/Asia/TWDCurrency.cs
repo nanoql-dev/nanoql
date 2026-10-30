@@ -18,7 +18,11 @@ public sealed class TWDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="TWDCurrency"/> class.</summary>
     public TWDCurrency()
-        : base("Taiwan dollar", "TWD", 901, "NT$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("TWD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Taiwan dollar", "TWD", 901, "NT$", "", 100, DataRounding);
 }

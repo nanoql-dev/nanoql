@@ -29,6 +29,7 @@ public sealed class Switzerland : Calendar
     /// <summary>Initializes a new instance of the <see cref="Switzerland"/> class.</summary>
     public Switzerland()
     {
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("Switzerland"));
     }
 
     /// <inheritdoc/>

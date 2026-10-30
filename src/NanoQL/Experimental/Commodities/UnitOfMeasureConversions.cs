@@ -61,7 +61,7 @@ public sealed class UnitOfMeasureConversions : IEquatable<UnitOfMeasureConversio
 
     /// <summary>Gets the registry holding QuantLib's known factors alone, as XRR4 stores them: its state at start and
     /// after <c>clear()</c>.</summary>
-    public static UnitOfMeasureConversions Default { get; } = KnownConversionFactors();
+    public static UnitOfMeasureConversions Default { get; } = ConventionProvider.BuildUnderQuantLib(KnownConversionFactors);
 
     /// <summary>Gets the conversions held, in the order lookups try them.</summary>
     public ImmutableList<UnitOfMeasureConversion> Conversions => data;

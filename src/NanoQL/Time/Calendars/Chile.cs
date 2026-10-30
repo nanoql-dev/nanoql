@@ -60,6 +60,8 @@ public sealed class Chile : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Chile.{market}"));
     }
 
     /// <inheritdoc/>

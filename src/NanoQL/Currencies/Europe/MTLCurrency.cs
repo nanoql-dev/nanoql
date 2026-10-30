@@ -25,7 +25,11 @@ public sealed class MTLCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="MTLCurrency"/> class.</summary>
     public MTLCurrency()
-        : base("Maltese lira", "MTL", 470, "Lm", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("MTL", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Maltese lira", "MTL", 470, "Lm", "", 100, DataRounding);
 }

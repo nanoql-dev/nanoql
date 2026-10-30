@@ -53,6 +53,8 @@ public sealed class Croatia : Calendar
             default:
                 throw new ArgumentOutOfRangeException(nameof(market), market, "unknown market");
         }
+
+        ApplyEdits(ConventionProvider.ReadCalendarEdits($"Croatia.{market}"));
     }
 
     /// <inheritdoc/>

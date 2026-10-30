@@ -26,6 +26,7 @@ public sealed class TARGET : Calendar
     /// <summary>Initializes a new instance of the <see cref="TARGET"/> class.</summary>
     public TARGET()
     {
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("TARGET"));
     }
 
     /// <inheritdoc/>

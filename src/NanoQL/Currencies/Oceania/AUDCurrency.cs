@@ -17,7 +17,11 @@ public sealed class AUDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="AUDCurrency"/> class.</summary>
     public AUDCurrency()
-        : base("Australian dollar", "AUD", 36, "A$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("AUD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Australian dollar", "AUD", 36, "A$", "", 100, DataRounding);
 }

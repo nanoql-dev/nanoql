@@ -45,6 +45,7 @@ public sealed record MakeSwaption
     public MakeSwaption(SwapIndex swapIndex, Period optionTenor, double? strike = null)
     {
         ArgumentNullException.ThrowIfNull(swapIndex);
+        Provider = swapIndex.Provider;
         SwapIndex = swapIndex;
         OptionTenor = optionTenor;
         Strike = strike;
@@ -62,10 +63,14 @@ public sealed record MakeSwaption
     {
         ArgumentNullException.ThrowIfNull(swapIndex);
         Date.ThrowIfDefault(fixingDate, nameof(fixingDate));
+        Provider = swapIndex.Provider;
         SwapIndex = swapIndex;
         FixingDate = fixingDate;
         Strike = strike;
     }
+
+    // The provider the builder takes its conventions from and builds inside: its swap index's.
+    private ConventionProvider Provider { get; init; }
 
     private SwapIndex SwapIndex { get; init; }
 
@@ -193,6 +198,9 @@ public sealed record MakeSwaption
     {
         ArgumentNullException.ThrowIfNull(context);
 
+        // Built inside the builder's provider, so what the build constructs takes its conventions.
+        using IDisposable scope = ConventionProvider.Use(Provider);
+
         Calendar calendar = ExerciseCalendar ?? SwapIndex.FixingCalendar;
         Date refDate = context.EvaluationDate;
 
@@ -244,7 +252,7 @@ public sealed record MakeSwaption
 
         BusinessDayConvention bdc = SwapIndex.FixedLegConvention;
         FixedVsFloatingSwap underlyingSwap = oisSwapIndex is not null
-            ? new MakeOIS(SwapIndex.Tenor, oisSwapIndex.OvernightIndex)
+            ? new MakeOIS(SwapIndex.Tenor, oisSwapIndex.OvernightIndex, Provider)
                 .WithFixedRate(usedStrike)
                 .WithEffectiveDate(SwapIndex.ValueDate(fixingDate))
                 .WithPaymentCalendar(SwapIndex.FixingCalendar)
@@ -255,7 +263,7 @@ public sealed record MakeSwaption
                 .WithType(UnderlyingType)
                 .WithNominal(Nominal)
                 .ToOvernightIndexedSwap(context)
-            : new MakeVanillaSwap(SwapIndex.Tenor, SwapIndex.IborIndex)
+            : new MakeVanillaSwap(SwapIndex.Tenor, SwapIndex.IborIndex, Provider)
                 .WithFixedRate(usedStrike)
                 .WithEffectiveDate(SwapIndex.ValueDate(fixingDate))
                 .WithFixedLegCalendar(SwapIndex.FixingCalendar)

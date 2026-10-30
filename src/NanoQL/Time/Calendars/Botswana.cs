@@ -58,6 +58,7 @@ public sealed class Botswana : Calendar
     public Botswana()
     {
         impl = BotswanaImplInstance;
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("Botswana"));
     }
 
     /// <inheritdoc/>

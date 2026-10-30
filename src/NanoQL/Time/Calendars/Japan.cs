@@ -48,6 +48,7 @@ public sealed class Japan : Calendar
     /// <summary>Initializes a new instance of the <see cref="Japan"/> class.</summary>
     public Japan()
     {
+        ApplyEdits(ConventionProvider.ReadCalendarEdits("Japan"));
     }
 
     /// <inheritdoc/>

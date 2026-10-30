@@ -18,7 +18,11 @@ public sealed class ILSCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="ILSCurrency"/> class.</summary>
     public ILSCurrency()
-        : base("Israeli shekel", "ILS", 376, "NIS", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("ILS", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Israeli shekel", "ILS", 376, "NIS", "", 100, DataRounding);
 }

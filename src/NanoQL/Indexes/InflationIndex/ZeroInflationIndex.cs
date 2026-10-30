@@ -44,7 +44,21 @@ public class ZeroInflationIndex : InflationIndex
         Period availabilityLag,
         Currency currency,
         ZeroInflationTermStructure? ts = null)
-        : base(familyName, region, revised, frequency, availabilityLag, currency)
+        : this(familyName, region, revised, frequency, availabilityLag, currency, ts, ConventionProvider.Current)
+    {
+    }
+
+    // An index keeping a given provider: a preset's, read once, or a clone's source's.
+    private protected ZeroInflationIndex(
+        string familyName,
+        Region region,
+        bool revised,
+        Frequency frequency,
+        Period availabilityLag,
+        Currency currency,
+        ZeroInflationTermStructure? ts,
+        ConventionProvider provider)
+        : base(familyName, region, revised, frequency, availabilityLag, currency, provider)
     {
         ZeroInflationTermStructure = ts;
     }
@@ -56,7 +70,7 @@ public class ZeroInflationIndex : InflationIndex
     /// <param name="h">The forecasting curve, or <see langword="null"/> for none.</param>
     /// <returns>The index.</returns>
     public ZeroInflationIndex Clone(ZeroInflationTermStructure? h) =>
-        new(FamilyName, Region, Revised, Frequency, AvailabilityLag, Currency, h);
+        new(FamilyName, Region, Revised, Frequency, AvailabilityLag, Currency, h, Provider);
 
     /// <summary>
     /// The fixing for a date's inflation period: the stored one when the period can't need a forecast, else the

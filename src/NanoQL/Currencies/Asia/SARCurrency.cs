@@ -18,7 +18,11 @@ public sealed class SARCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="SARCurrency"/> class.</summary>
     public SARCurrency()
-        : base("Saudi riyal", "SAR", 682, "SRls", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("SAR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Saudi riyal", "SAR", 682, "SRls", "", 100, DataRounding);
 }

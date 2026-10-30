@@ -18,7 +18,11 @@ public sealed class THBCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="THBCurrency"/> class.</summary>
     public THBCurrency()
-        : base("Thai baht", "THB", 764, "Bht", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("THB", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Thai baht", "THB", 764, "Bht", "", 100, DataRounding);
 }

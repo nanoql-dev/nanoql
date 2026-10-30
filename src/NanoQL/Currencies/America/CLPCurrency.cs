@@ -18,7 +18,11 @@ public sealed class CLPCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="CLPCurrency"/> class.</summary>
     public CLPCurrency()
-        : base("Chilean peso", "CLP", 152, "Ch$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("CLP", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Chilean peso", "CLP", 152, "Ch$", "", 100, DataRounding);
 }

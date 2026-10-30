@@ -18,7 +18,11 @@ public sealed class CNYCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="CNYCurrency"/> class.</summary>
     public CNYCurrency()
-        : base("Chinese yuan", "CNY", 156, "Y", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("CNY", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Chinese yuan", "CNY", 156, "Y", "", 100, DataRounding);
 }

@@ -94,7 +94,7 @@ public sealed class OvernightIndexedSwapIndex : SwapIndex
     {
         ArgumentNullException.ThrowIfNull(context);
         Date.ThrowIfDefault(fixingDate, nameof(fixingDate));
-        return new MakeOIS(SwapTenor, OvernightIndex)
+        return new MakeOIS(SwapTenor, OvernightIndex, Provider)
             .WithFixedRate(0.0)
             .WithEffectiveDate(ValueDate(fixingDate))
             .WithFixedLegDayCount(DayCounter)

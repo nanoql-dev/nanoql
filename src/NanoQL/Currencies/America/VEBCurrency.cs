@@ -18,7 +18,11 @@ public sealed class VEBCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="VEBCurrency"/> class.</summary>
     public VEBCurrency()
-        : base("Venezuelan bolivar", "VEB", 862, "Bs", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("VEB", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Venezuelan bolivar", "VEB", 862, "Bs", "", 100, DataRounding);
 }

@@ -18,7 +18,11 @@ public sealed class IDRCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="IDRCurrency"/> class.</summary>
     public IDRCurrency()
-        : base("Indonesian Rupiah", "IDR", 360, "Rp", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("IDR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Indonesian Rupiah", "IDR", 360, "Rp", "", 100, DataRounding);
 }

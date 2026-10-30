@@ -18,7 +18,11 @@ public sealed class UYUCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="UYUCurrency"/> class.</summary>
     public UYUCurrency()
-        : base("Uruguayan peso", "UYU", 858, "UYU", "", 1, DataRounding)
+        : base(ConventionProvider.ReadCurrency("UYU", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Uruguayan peso", "UYU", 858, "UYU", "", 1, DataRounding);
 }

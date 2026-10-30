@@ -18,7 +18,11 @@ public sealed class SGDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="SGDCurrency"/> class.</summary>
     public SGDCurrency()
-        : base("Singapore dollar", "SGD", 702, "S$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("SGD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Singapore dollar", "SGD", 702, "S$", "", 100, DataRounding);
 }

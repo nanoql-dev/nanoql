@@ -18,7 +18,11 @@ public sealed class IRRCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="IRRCurrency"/> class.</summary>
     public IRRCurrency()
-        : base("Iranian rial", "IRR", 364, "Rls", "", 1, DataRounding)
+        : base(ConventionProvider.ReadCurrency("IRR", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Iranian rial", "IRR", 364, "Rls", "", 1, DataRounding);
 }

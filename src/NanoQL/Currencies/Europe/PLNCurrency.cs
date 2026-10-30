@@ -18,7 +18,11 @@ public sealed class PLNCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="PLNCurrency"/> class.</summary>
     public PLNCurrency()
-        : base("Polish zloty", "PLN", 985, "zl", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("PLN", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Polish zloty", "PLN", 985, "zl", "", 100, DataRounding);
 }

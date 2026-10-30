@@ -18,7 +18,11 @@ public sealed class MXNCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="MXNCurrency"/> class.</summary>
     public MXNCurrency()
-        : base("Mexican peso", "MXN", 484, "Mex$", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("MXN", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Mexican peso", "MXN", 484, "Mex$", "", 100, DataRounding);
 }

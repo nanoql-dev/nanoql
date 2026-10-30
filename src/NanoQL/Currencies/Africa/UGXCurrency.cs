@@ -19,7 +19,11 @@ public sealed class UGXCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="UGXCurrency"/> class.</summary>
     public UGXCurrency()
-        : base("Ugandan shilling", "UGX", 800, "UGX", "", 1, DataRounding)
+        : base(ConventionProvider.ReadCurrency("UGX", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Ugandan shilling", "UGX", 800, "UGX", "", 1, DataRounding);
 }

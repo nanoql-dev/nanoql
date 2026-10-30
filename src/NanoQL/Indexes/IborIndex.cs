@@ -43,7 +43,33 @@ public class IborIndex : InterestRateIndex
         bool endOfMonth,
         DayCounter dayCounter,
         YieldTermStructure? forwardingTermStructure = null)
-        : base(familyName, tenor, settlementDays, currency, fixingCalendar, dayCounter)
+        : this(
+            familyName,
+            tenor,
+            settlementDays,
+            currency,
+            fixingCalendar,
+            convention,
+            endOfMonth,
+            dayCounter,
+            forwardingTermStructure,
+            ConventionProvider.Current)
+    {
+    }
+
+    // An index keeping a given provider: a preset's, read once, or a clone's source's.
+    private protected IborIndex(
+        string familyName,
+        Period tenor,
+        int settlementDays,
+        Currency? currency,
+        Calendar fixingCalendar,
+        BusinessDayConvention convention,
+        bool endOfMonth,
+        DayCounter dayCounter,
+        YieldTermStructure? forwardingTermStructure,
+        ConventionProvider provider)
+        : base(familyName, tenor, settlementDays, currency, fixingCalendar, dayCounter, provider)
     {
         EnumArguments.Check(convention, nameof(convention));
         BusinessDayConvention = convention;
@@ -96,7 +122,17 @@ public class IborIndex : InterestRateIndex
     /// <param name="forwarding">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <returns>The copy.</returns>
     public virtual IborIndex Clone(YieldTermStructure? forwarding) =>
-        new(FamilyName, Tenor, FixingDays, Currency, FixingCalendar, BusinessDayConvention, EndOfMonth, DayCounter, forwarding);
+        new(
+            FamilyName,
+            Tenor,
+            FixingDays,
+            Currency,
+            FixingCalendar,
+            BusinessDayConvention,
+            EndOfMonth,
+            DayCounter,
+            forwarding,
+            Provider);
 
     // Whether a coupon on the index forecasts its fixing through ForecastFixing(fixingDate, context), the index's own
     // forecast, rather than the curve-based forecast between its dates: false for an index forecasting from its

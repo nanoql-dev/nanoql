@@ -41,6 +41,7 @@ public sealed record MakeCms
     {
         // QuantLib reads the indexes' conventions here, which is undefined for a null swap index.
         ArgumentNullException.ThrowIfNull(swapIndex);
+        Provider = swapIndex.Provider;
         SwapTenor = swapTenor;
         SwapIndex = swapIndex;
         IborIndex = iborIndex ?? swapIndex.IborIndex;
@@ -55,6 +56,9 @@ public sealed record MakeCms
             ? DiscountingSwapEngine.CalculateWithoutCurve(swap, context)
             : DiscountingSwapEngine.Calculate(swap, context, forwarding);
     }
+
+    // The provider the builder takes its conventions from and builds inside: its swap index's.
+    private ConventionProvider Provider { get; init; }
 
     private Period SwapTenor { get; init; }
 
@@ -322,6 +326,9 @@ public sealed record MakeCms
     public Swap ToSwap(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        // Built inside the builder's provider, so what the build constructs takes its conventions.
+        using IDisposable scope = ConventionProvider.Use(Provider);
 
         Date startDate;
         if (EffectiveDate is Date effective)

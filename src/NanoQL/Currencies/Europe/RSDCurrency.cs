@@ -18,7 +18,11 @@ public sealed class RSDCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="RSDCurrency"/> class.</summary>
     public RSDCurrency()
-        : base("Serbian dinar", "RSD", 941, "RSD", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("RSD", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Serbian dinar", "RSD", 941, "RSD", "", 100, DataRounding);
 }

@@ -18,7 +18,11 @@ public sealed class SITCurrency : Currency
 
     /// <summary>Initializes a new instance of the <see cref="SITCurrency"/> class.</summary>
     public SITCurrency()
-        : base("Slovenian tolar", "SIT", 705, "SlT", "", 100, DataRounding)
+        : base(ConventionProvider.ReadCurrency("SIT", Reference))
     {
     }
+
+    // QuantLib's coded values, the reference the provider resolves.
+    private static CurrencyData Reference() =>
+        new("Slovenian tolar", "SIT", 705, "SlT", "", 100, DataRounding);
 }
