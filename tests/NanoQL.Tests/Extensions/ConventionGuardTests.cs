@@ -115,7 +115,7 @@ public class ConventionGuardTests
     public void TheExtensionsBuildAPresetOnlyThroughTheirFactoryTableAndNeverByReflection()
     {
         // the records build from their data a joint calendar, a bespoke one and Business252 on a calendar, and a user's
-        // own region and indexes as their base types
+        // own region, indexes and unit of measure as their base types
         ConstructorInfo[] fromData =
         [
             typeof(JointCalendar).GetConstructor([typeof(IEnumerable<Calendar>), typeof(JointCalendarRule)])!,
@@ -125,6 +125,7 @@ public class ConventionGuardTests
             {
                 typeof(CustomRegion), typeof(IborIndex), typeof(OvernightIndex), typeof(Libor), typeof(CustomIborIndex), typeof(SwapIndex),
                 typeof(OvernightIndexedSwapIndex), typeof(ZeroInflationIndex), typeof(YoYInflationIndex),
+                typeof(NanoQL.Experimental.CommodityIndex), typeof(NanoQL.Experimental.UnitOfMeasure),
             }.SelectMany(t => t.GetConstructors()),
         ];
         MethodBase[] reflection =
@@ -154,7 +155,8 @@ public class ConventionGuardTests
 
         static bool IsConvention(Type t) => t.Assembly == typeof(Calendar).Assembly
             && (typeof(Calendar).IsAssignableFrom(t) || typeof(DayCounter).IsAssignableFrom(t) || typeof(Currency).IsAssignableFrom(t)
-                || typeof(FinancialIndex).IsAssignableFrom(t) || typeof(Region).IsAssignableFrom(t));
+                || typeof(FinancialIndex).IsAssignableFrom(t) || typeof(Region).IsAssignableFrom(t)
+                || typeof(NanoQL.Experimental.UnitOfMeasure).IsAssignableFrom(t));
     }
 
     [Fact]

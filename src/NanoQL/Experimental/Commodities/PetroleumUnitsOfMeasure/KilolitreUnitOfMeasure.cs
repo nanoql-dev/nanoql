@@ -14,7 +14,11 @@ public sealed class KilolitreUnitOfMeasure : UnitOfMeasure
 {
     /// <summary>Initializes a new instance of the <see cref="KilolitreUnitOfMeasure"/> class.</summary>
     public KilolitreUnitOfMeasure()
-        : base("Kilolitres", "kl", UnitOfMeasureType.Volume, new BarrelUnitOfMeasure())
+        : base(ConventionProvider.ReadUnitOfMeasure("KilolitreUnitOfMeasure", Reference))
     {
     }
+
+    // QuantLib's data, built in the provider's scope.
+    private static UnitOfMeasureData Reference() =>
+        new("Kilolitres", "kl", UnitOfMeasureType.Volume, new BarrelUnitOfMeasure());
 }

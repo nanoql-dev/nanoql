@@ -17,6 +17,11 @@ namespace NanoQL.Experimental;
 /// <c>UnitOfMeasure?</c> null.
 /// </para>
 /// <para>
+/// QuantLib's units are presets: each reads its data from <see cref="ConventionProvider.Current"/> when it is built
+/// (<see cref="ConventionProvider.ResolveUnitOfMeasure"/>), QuantLib's unless a provider configures them, its code
+/// QuantLib's always.
+/// </para>
+/// <para>
 /// QuantLib keeps a process-wide registry keyed by name, so a second construction with a known name returns the first
 /// construction's data whatever it was given: <c>UnitOfMeasure("Barrels", "B2", Mass)</c> after
 /// <c>("Barrels", "BBL", Volume)</c> has code BBL and type Volume (<c>unitofmeasure.cpp:37-49</c>). There is no
@@ -69,6 +74,13 @@ public class UnitOfMeasure : IEquatable<UnitOfMeasure>
         Code = code;
         UnitType = unitType;
         TriangulationUnitOfMeasure = triangulationUnitOfMeasure;
+    }
+
+    /// <summary>Initializes a new instance of the <see cref="UnitOfMeasure"/> class from a preset's data.</summary>
+    /// <param name="data">The data, read from the provider.</param>
+    private protected UnitOfMeasure(UnitOfMeasureData data)
+        : this(data.Name, data.Code, data.UnitType, data.TriangulationUnitOfMeasure)
+    {
     }
 
     /// <summary>Gets the unit's name, such as "Barrels".</summary>

@@ -8,6 +8,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Numerics;
@@ -49,6 +50,7 @@ public static class ConventionsXml
         ("NanoQL.Extensions.Conventions.Presets.indexes.cxx.xml", "indexes.cxx.xml"),
         ("NanoQL.Extensions.Conventions.Presets.instruments.xml", "instruments.xml"),
         ("NanoQL.Extensions.Conventions.Presets.instruments.cxx.xml", "instruments.cxx.xml"),
+        ("NanoQL.Extensions.Conventions.Presets.commodities.cxx.xml", "commodities.cxx.xml"),
         ("NanoQL.Extensions.Conventions.Presets.aliases.xml", "aliases.xml"),
     ];
 
@@ -673,6 +675,52 @@ public static class ConventionsXml
                     ExCouponEndOfMonth = Bool(Field(e, "ExCouponEndOfMonth")),
                     PriceType = EnumOf<BondPriceType>(Field(e, "PriceType")),
                 },
+                "CommodityType" => new CommodityTypeRecord(name, @base)
+                {
+                    TypeName = Field(e, "TypeName"),
+                    Code = Field(e, "Code"),
+                },
+                "UnitOfMeasure" => new UnitOfMeasureRecord(name, @base)
+                {
+                    UnitName = Field(e, "UnitName"),
+                    Code = Field(e, "Code"),
+                    UnitType = EnumOf<UnitOfMeasureType>(Field(e, "UnitType")),
+                    TriangulationUnit = Field(e, "TriangulationUnit"),
+                },
+                "UnitOfMeasureConversion" => new UnitOfMeasureConversionRecord(name, @base)
+                {
+                    CommodityType = Field(e, "CommodityType"),
+                    Source = Field(e, "Source"),
+                    Target = Field(e, "Target"),
+                    Factor = Double(Field(e, "Factor")),
+                },
+                "PaymentTerm" => new PaymentTermRecord(name, @base)
+                {
+                    TermName = Field(e, "TermName"),
+                    EventType = EnumOf<PaymentTermEventType>(Field(e, "EventType")),
+                    OffsetDays = Int(Field(e, "OffsetDays")),
+                    Calendar = Field(e, "Calendar"),
+                },
+                "CommodityIndex" => new CommodityIndexRecord(name, @base)
+                {
+                    IndexName = Field(e, "IndexName"),
+                    CommodityType = Field(e, "CommodityType"),
+                    Currency = Field(e, "Currency"),
+                    UnitOfMeasure = Field(e, "UnitOfMeasure"),
+                    Calendar = Field(e, "Calendar"),
+                    LotQuantity = Double(Field(e, "LotQuantity")),
+                    NearbyOffset = Int(Field(e, "NearbyOffset")),
+                },
+                "CommoditySettings" => new CommoditySettingsRecord(name, @base)
+                {
+                    Currency = Field(e, "Currency"),
+                    UnitOfMeasure = Field(e, "UnitOfMeasure"),
+                },
+                "QuantitySettings" => new QuantitySettingsRecord(name, @base)
+                {
+                    ConversionType = EnumOf<QuantityConversionType>(Field(e, "ConversionType")),
+                    BaseUnitOfMeasure = Field(e, "BaseUnitOfMeasure"),
+                },
                 "Alias" => new AliasRecord(name, @base!),
                 _ => throw new ArgumentException($"unknown record kind {e.Name.LocalName}", nameof(e)),
             };
@@ -1032,6 +1080,45 @@ public static class ConventionsXml
                 Add(e, "ExCouponConvention", r.ExCouponConvention?.ToString());
                 Add(e, "ExCouponEndOfMonth", Text(r.ExCouponEndOfMonth));
                 Add(e, "PriceType", r.PriceType?.ToString());
+                break;
+            case CommodityTypeRecord r:
+                Add(e, "TypeName", r.TypeName);
+                Add(e, "Code", r.Code);
+                break;
+            case UnitOfMeasureRecord r:
+                Add(e, "UnitName", r.UnitName);
+                Add(e, "Code", r.Code);
+                Add(e, "UnitType", r.UnitType?.ToString());
+                Add(e, "TriangulationUnit", r.TriangulationUnit);
+                break;
+            case UnitOfMeasureConversionRecord r:
+                Add(e, "CommodityType", r.CommodityType);
+                Add(e, "Source", r.Source);
+                Add(e, "Target", r.Target);
+                Add(e, "Factor", Text(r.Factor));
+                break;
+            case PaymentTermRecord r:
+                Add(e, "TermName", r.TermName);
+                Add(e, "EventType", r.EventType?.ToString());
+                Add(e, "OffsetDays", Text(r.OffsetDays));
+                Add(e, "Calendar", r.Calendar);
+                break;
+            case CommodityIndexRecord r:
+                Add(e, "IndexName", r.IndexName);
+                Add(e, "CommodityType", r.CommodityType);
+                Add(e, "Currency", r.Currency);
+                Add(e, "UnitOfMeasure", r.UnitOfMeasure);
+                Add(e, "Calendar", r.Calendar);
+                Add(e, "LotQuantity", Text(r.LotQuantity));
+                Add(e, "NearbyOffset", Text(r.NearbyOffset));
+                break;
+            case CommoditySettingsRecord r:
+                Add(e, "Currency", r.Currency);
+                Add(e, "UnitOfMeasure", r.UnitOfMeasure);
+                break;
+            case QuantitySettingsRecord r:
+                Add(e, "ConversionType", r.ConversionType?.ToString());
+                Add(e, "BaseUnitOfMeasure", r.BaseUnitOfMeasure);
                 break;
             case AliasRecord:
                 break;

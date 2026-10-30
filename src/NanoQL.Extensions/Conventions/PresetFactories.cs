@@ -4,6 +4,7 @@
 
 using System.Collections.Frozen;
 using NanoQL.Currencies;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.TermStructures;
 using NanoQL.Time;
@@ -461,6 +462,13 @@ internal static class PresetFactories
             ["AUCPI"] = static (frequency, revised, ts) => new AUCPI(frequency, revised, ts),
         }.ToFrozenDictionary(StringComparer.Ordinal);
 
+    public static readonly FrozenDictionary<string, Func<Frequency, bool, Period, Currency, ZeroInflationTermStructure?, ZeroInflationIndex>>
+        ZeroInflationIndexesWithLagAndCurrency =
+        new Dictionary<string, Func<Frequency, bool, Period, Currency, ZeroInflationTermStructure?, ZeroInflationIndex>>(StringComparer.Ordinal)
+        {
+            ["GenericCPI"] = static (frequency, revised, lag, currency, ts) => new GenericCPI(frequency, revised, lag, currency, ts),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
     public static readonly FrozenDictionary<string, Func<YoYInflationTermStructure?, YoYInflationIndex>>
         YoYInflationIndexes =
         new Dictionary<string, Func<YoYInflationTermStructure?, YoYInflationIndex>>(StringComparer.Ordinal)
@@ -480,15 +488,36 @@ internal static class PresetFactories
             ["YYAUCPI"] = static (frequency, revised, ts) => new YYAUCPI(frequency, revised, ts),
         }.ToFrozenDictionary(StringComparer.Ordinal);
 
+    public static readonly FrozenDictionary<string, Func<Frequency, bool, Period, Currency, YoYInflationTermStructure?, YoYInflationIndex>>
+        YoYInflationIndexesWithLagAndCurrency =
+        new Dictionary<string, Func<Frequency, bool, Period, Currency, YoYInflationTermStructure?, YoYInflationIndex>>(StringComparer.Ordinal)
+        {
+            ["YYGenericCPI"] = static (frequency, revised, lag, currency, ts) => new YYGenericCPI(frequency, revised, lag, currency, ts),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
     public static readonly FrozenDictionary<string, Func<Region>> Regions =
         new Dictionary<string, Func<Region>>(StringComparer.Ordinal)
         {
             ["AustraliaRegion"] = static () => new AustraliaRegion(),
             ["EURegion"] = static () => new EURegion(),
             ["FranceRegion"] = static () => new FranceRegion(),
+            ["GenericRegion"] = static () => new GenericRegion(),
             ["UKRegion"] = static () => new UKRegion(),
             ["USRegion"] = static () => new USRegion(),
             ["ZARegion"] = static () => new ZARegion(),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<UnitOfMeasure>> UnitsOfMeasure =
+        new Dictionary<string, Func<UnitOfMeasure>>(StringComparer.Ordinal)
+        {
+            ["BarrelUnitOfMeasure"] = static () => new BarrelUnitOfMeasure(),
+            ["GallonUnitOfMeasure"] = static () => new GallonUnitOfMeasure(),
+            ["KilolitreUnitOfMeasure"] = static () => new KilolitreUnitOfMeasure(),
+            ["LitreUnitOfMeasure"] = static () => new LitreUnitOfMeasure(),
+            ["LotUnitOfMeasure"] = static () => new LotUnitOfMeasure(),
+            ["MBUnitOfMeasure"] = static () => new MBUnitOfMeasure(),
+            ["MTUnitOfMeasure"] = static () => new MTUnitOfMeasure(),
+            ["TokyoKilolitreUnitOfMeasure"] = static () => new TokyoKilolitreUnitOfMeasure(),
         }.ToFrozenDictionary(StringComparer.Ordinal);
 
     // The business-day conventions' FpML codes that map to one exactly, which the reader takes for the member.

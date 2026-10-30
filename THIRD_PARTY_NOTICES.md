@@ -547,9 +547,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## FpML
 
-nanoql's conventions extensions take codes from three of FpML's lists as aliases of nanoql's names: the
-`day-count-fraction` coding scheme 2-3, the `business-center` coding scheme 9-4 and FpML 5.9's
-`BusinessDayConventionEnum`. The codes are in `src/NanoQL.Extensions/Conventions/Presets/aliases.xml` and
+nanoql's conventions extensions take codes from four of FpML's lists as aliases of nanoql's names: the
+`day-count-fraction` coding scheme 2-3, the `business-center` coding scheme 9-4, the `floating-rate-index` coding
+scheme 3-14 and FpML 5.9's `BusinessDayConventionEnum`. The codes are in `src/NanoQL.Extensions/Conventions/Presets/aliases.xml` and
 `tools/vectors/gen/conventions/fpml-aliases.toml`, under the FpML® Public License, Version 3.0, whose text is in
 `LICENSES/LicenseRef-FpML-Public-License-3.0.txt`. The mapping of each code to a nanoql name is nanoql's own work, not
 part of the FpML Specifications, and is distributed under the Apache License, Version 2.0. The licence's Exhibit A

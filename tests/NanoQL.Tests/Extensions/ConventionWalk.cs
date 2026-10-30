@@ -4,15 +4,16 @@
 using System.Collections;
 using System.Collections.Immutable;
 using System.Reflection;
+using NanoQL.Experimental;
 using NanoQL.Extensions.Conventions;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Extensions;
 
 /// <summary>
-/// The no-bypass walk (CVD34): a set whose every calendar carries a marker holiday and whose every currency a marker
-/// symbol, and a walk over everything an object reaches, by reflection over its fields, that names each calendar, day
-/// counter and currency the set didn't give. The allowlist is the technical <see cref="NullCalendar"/> and the
+/// The no-bypass walk (CVD34): a set whose every calendar carries a marker holiday, whose every currency a marker
+/// symbol and whose every unit of measure a marker name, and a walk over everything an object reaches, by reflection
+/// over its fields, that names each calendar, day counter, currency and unit the set didn't give. The allowlist is the technical <see cref="NullCalendar"/> and the
 /// <see cref="Actual365Fixed"/> an engine or term structure builds for itself.
 /// </summary>
 internal static class ConventionWalk
@@ -24,8 +25,11 @@ internal static class ConventionWalk
     /// <summary>The marker symbol every currency carries.</summary>
     public const string MarkerSymbol = "marker";
 
+    /// <summary>The marker every unit of measure's name ends with.</summary>
+    public const string MarkerUnit = " (marker)";
+
     /// <summary>Gets the marker set: QuantLib's presets, each calendar preset with the marker holiday, each currency
-    /// with the marker symbol.</summary>
+    /// with the marker symbol, each unit of measure with the marker name.</summary>
     public static ConventionSet Set { get; } = ConventionSet.QuantLib.With(MarkerSnapshot());
 
     /// <summary>The day counter every index record of <see cref="IndexSet"/> takes, which no index preset uses.</summary>
@@ -34,7 +38,7 @@ internal static class ConventionWalk
     /// <summary>Gets the marker set with each index preset's record on the marker day counter, its fixed leg's too.</summary>
     public static ConventionSet IndexSet { get; } = Set.With(IndexMarkerSnapshot());
 
-    /// <summary>The calendars, day counters and currencies an object reaches that the marker set didn't give.</summary>
+    /// <summary>The calendars, day counters, currencies and units an object reaches that the marker set didn't give.</summary>
     /// <param name="root">The object.</param>
     /// <param name="dayCounters">Whether a day counter must be the marker one, the <see cref="Actual365Fixed"/> an
     /// engine or term structure builds for itself apart: an index's, not a calendar's or a currency's.</param>
@@ -64,6 +68,9 @@ internal static class ConventionWalk
                 break;
             case Currency c when c.Symbol != MarkerSymbol:
                 found.Add($"{path}: {c.Code}");
+                break;
+            case UnitOfMeasure u when !u.Name.EndsWith(MarkerUnit, StringComparison.Ordinal):
+                found.Add($"{path}: {u.Code}");
                 break;
             case DayCounter d when dayCounters && d is not SimpleDayCounter && d is not Actual365Fixed:
                 found.Add($"{path}: {d.Name}");
@@ -152,6 +159,11 @@ internal static class ConventionWalk
         foreach (CurrencyPresetRecord c in ConventionSet.QuantLib.Layers[0].Records.OfType<CurrencyPresetRecord>())
         {
             s = s.Add(new CurrencyPresetRecord(c.Name, c.Name) { Symbol = MarkerSymbol });
+        }
+
+        foreach (UnitOfMeasureRecord u in ConventionSet.QuantLib.Layers[0].Records.OfType<UnitOfMeasureRecord>())
+        {
+            s = s.Add(new UnitOfMeasureRecord(u.Name, u.Name) { UnitName = u.UnitName + MarkerUnit });
         }
 
         return s;

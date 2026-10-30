@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
@@ -182,12 +183,19 @@ public class ConventionsSchemaTests
     [Fact]
     public void NoSchemaNameHintsAtTimeOrVersioning()
     {
-        // CVR2: a convention has no validity dates and the format no version
+        // CVR2: a convention has no validity dates and the format no version: no word of a name starts with one of
+        // these, and no two read "as of" (QuantLib's unit conversions are no versions)
         string[] banned = ["valid", "known", "asof", "version", "effective", "expir"];
         string[] names = [.. SchemaDocument().Descendants().Attributes("name").Select(a => a.Value)];
 
         Assert.NotEmpty(names);
-        Assert.All(names, n => Assert.DoesNotContain(banned, b => n.Contains(b, StringComparison.OrdinalIgnoreCase)));
+        Assert.Contains("UnitOfMeasureConversion", names);
+        Assert.All(names, n =>
+        {
+            string[] words = [.. Regex.Split(n, "(?<=[a-z0-9])(?=[A-Z])|[^A-Za-z0-9]+").Where(w => w.Length > 0).Select(w => w.ToLowerInvariant())];
+            Assert.DoesNotContain(words, w => banned.Any(b => w.StartsWith(b, StringComparison.Ordinal)));
+            Assert.DoesNotContain(words.Zip(words.Skip(1)), p => p is ("as", "of"));
+        });
     }
 
     [Fact]

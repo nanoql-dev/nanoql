@@ -160,7 +160,7 @@ public class ConventionsXmlTests
         {
             ConventionsXml.WriteDefaults(folder);
             string[] files = [.. Directory.GetFiles(folder).Select(Path.GetFileName).Order(StringComparer.Ordinal)!];
-            Assert.Equal(["aliases.xml", "calendars.xml", "currencies.xml", "daycounters.xml", "indexes.cxx.xml", "indexes.xml", "instruments.cxx.xml", "instruments.xml", "nanoql-conventions.xsd"], files);
+            Assert.Equal(["aliases.xml", "calendars.xml", "commodities.cxx.xml", "currencies.xml", "daycounters.xml", "indexes.cxx.xml", "indexes.xml", "instruments.cxx.xml", "instruments.xml", "nanoql-conventions.xsd"], files);
             foreach (string file in files.Where(f => f.EndsWith(".xml", StringComparison.Ordinal)))
             {
                 byte[] bytes = File.ReadAllBytes(Path.Combine(folder, file));
@@ -182,7 +182,7 @@ public class ConventionsXmlTests
         }
 
         static int PresetOrder(string path) =>
-            Array.IndexOf(["calendars.xml", "daycounters.xml", "currencies.xml", "indexes.xml", "indexes.cxx.xml", "instruments.xml", "instruments.cxx.xml", "aliases.xml"], Path.GetFileName(path));
+            Array.IndexOf(["calendars.xml", "daycounters.xml", "currencies.xml", "indexes.xml", "indexes.cxx.xml", "instruments.xml", "instruments.cxx.xml", "commodities.cxx.xml", "aliases.xml"], Path.GetFileName(path));
     }
 
     [Fact]
@@ -190,7 +190,7 @@ public class ConventionsXmlTests
     {
         XmlSchemaSet schema = ConventionsXml.Schema();
         Type[] kinds = [.. typeof(ConventionRecord).Assembly.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(ConventionRecord))).OrderBy(t => t.Name, StringComparer.Ordinal)];
-        Assert.Equal(31, kinds.Length);
+        Assert.Equal(38, kinds.Length);
         foreach (Type kind in kinds)
         {
             var element = (XmlSchemaElement)schema.GlobalElements[new(kind.Name[..^"Record".Length], ConventionsXml.Namespace)]!;

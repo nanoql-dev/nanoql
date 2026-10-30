@@ -89,10 +89,9 @@ internal static class CodedPresets
     public static IReadOnlyDictionary<string, Func<YoYInflationIndex>> YoYInflationIndexes { get; } =
         Presets<YoYInflationIndex>([typeof(YoYInflationTermStructure)]);
 
-    /// <summary>Gets the regions, but batch 7's generic region, which C5's records take.</summary>
+    /// <summary>Gets the regions, batch 7's generic region among them.</summary>
     public static IReadOnlyDictionary<string, Func<Region>> Regions { get; } = typeof(Region).Assembly.GetTypes()
         .Where(t => t.IsPublic && t.IsSealed && typeof(Region).IsAssignableFrom(t) && t.GetConstructor(Type.EmptyTypes) is not null)
-        .Where(t => t.Name != "GenericRegion")
         .ToDictionary(t => t.Name, t => (Func<Region>)(() => (Region)Activator.CreateInstance(t)!), StringComparer.Ordinal);
 
     // The public non-abstract index classes whose one public constructor's parameters are the types given (the last

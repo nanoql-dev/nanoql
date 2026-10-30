@@ -291,9 +291,10 @@ public class FieldSensitivityTests
     public void TheTableHoldsEveryFieldOfEveryKind()
     {
         var expected = new List<(string, string)>();
-        // the instrument convention kinds are InstrumentFieldSensitivityTests'
+        // the instrument convention kinds are InstrumentFieldSensitivityTests', batch 7's CommodityFieldSensitivityTests'
         foreach (Type kind in typeof(ConventionRecord).Assembly.GetExportedTypes()
-            .Where(t => t.IsSubclassOf(typeof(ConventionRecord)) && !t.Name.EndsWith("ConventionRecord", StringComparison.Ordinal)))
+            .Where(t => t.IsSubclassOf(typeof(ConventionRecord)) && !t.Name.EndsWith("ConventionRecord", StringComparison.Ordinal)
+                && !CommodityFieldSensitivityTests.Kinds.Contains(t)))
         {
             string element = kind.Name[..^"Record".Length];
             expected.AddRange(Properties(kind).Select(p => (element, p)));

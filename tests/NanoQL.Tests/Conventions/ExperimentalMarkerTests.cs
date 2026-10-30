@@ -115,12 +115,16 @@ public class ExperimentalMarkerTests
     [Fact]
     public void TheExtensionsMarkWhatConfiguresOrReturnsAnExperimentalType()
     {
-        // CVD16: the cross-currency kinds configure the experimental helpers; a member returning or taking an
-        // experimental type carries the marker, on itself or its type
+        // CVD16: the cross-currency kinds configure the experimental helpers, and batch 7's kinds its commodity types;
+        // a member returning or taking an experimental type carries the marker, on itself or its type
         Type[] extensions = typeof(NanoQL.Extensions.Conventions.ConventionSet).Assembly.GetExportedTypes();
         string[] marked = [.. extensions.Where(Marked).Select(t => t.Name).Order(StringComparer.Ordinal)];
         Assert.Equal(
-            ["CrossCurrencyBasisSwapConvention", "CrossCurrencyBasisSwapConventionRecord", "CrossCurrencySwapConvention", "CrossCurrencySwapConventionRecord"],
+            [
+                "CommodityIndexRecord", "CommoditySettingsRecord", "CommodityTypeRecord", "CrossCurrencyBasisSwapConvention",
+                "CrossCurrencyBasisSwapConventionRecord", "CrossCurrencySwapConvention", "CrossCurrencySwapConventionRecord",
+                "PaymentTermRecord", "QuantitySettingsRecord", "UnitOfMeasureConversionRecord", "UnitOfMeasureRecord",
+            ],
             marked);
 
         string[] unmarked =

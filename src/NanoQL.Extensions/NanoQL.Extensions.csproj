@@ -24,6 +24,7 @@
     <EmbeddedResource Include="Conventions\Presets\indexes.cxx.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.indexes.cxx.xml" />
     <EmbeddedResource Include="Conventions\Presets\instruments.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.instruments.xml" />
     <EmbeddedResource Include="Conventions\Presets\instruments.cxx.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.instruments.cxx.xml" />
+    <EmbeddedResource Include="Conventions\Presets\commodities.cxx.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.commodities.cxx.xml" />
     <EmbeddedResource Include="Conventions\Presets\aliases.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.aliases.xml" />
   </ItemGroup>
 </Project>

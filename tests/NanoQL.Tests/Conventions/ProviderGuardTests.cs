@@ -30,7 +30,8 @@ public class ProviderGuardTests
             ["NanoQL.TermStructures.DepositRateHelper..ctor"] = ("1: its index from explicit conventions", "IborIndex"),
             ["NanoQL.TermStructures.FraRateHelper..ctor"] = ("1: its index from explicit conventions", "IborIndex"),
             ["NanoQL.Instruments.CCTEU..ctor"] = ("1: its Euribor6M indexes, at its construction", "Euribor6M"),
-            ["NanoQL.Experimental.CommoditySettings..ctor"] = ("1: its USD, at its construction", "USDCurrency"),
+            ["NanoQL.Experimental.CommoditySettings..ctor"] = (
+                "1: its USD and barrels, at its construction", "BarrelUnitOfMeasure, USDCurrency"),
 
             // 3: a builder, or a builder built on an index, building in the index's provider
             ["NanoQL.Instruments.MakeCreditDefaultSwap..ctor"] = ("3: no index, so Current when it is created", "Current"),
@@ -391,7 +392,7 @@ public class ProviderGuardTests
 
             bool preset = typeof(Calendar).IsAssignableFrom(type) || typeof(Currency).IsAssignableFrom(type)
                 || typeof(FinancialIndex).IsAssignableFrom(type) || typeof(Region).IsAssignableFrom(type) || type == typeof(Business252)
-                || type == typeof(BTP);
+                || type == typeof(BTP) || typeof(NanoQL.Experimental.UnitOfMeasure).IsAssignableFrom(type);
             return preset && (owner.EndsWith("..ctor", StringComparison.Ordinal) || owner.EndsWith(".Reference", StringComparison.Ordinal));
         }
     }

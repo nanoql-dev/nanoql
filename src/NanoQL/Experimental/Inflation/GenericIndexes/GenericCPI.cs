@@ -24,7 +24,25 @@ public sealed class GenericCPI : ZeroInflationIndex
     /// <param name="ts">The zero-inflation curve it forecasts through, or <see langword="null"/> for none.</param>
     /// <exception cref="ArgumentNullException"><paramref name="ccy"/> is null.</exception>
     public GenericCPI(Frequency frequency, bool revised, Period lag, Currency ccy, ZeroInflationTermStructure? ts = null)
-        : base("CPI", new GenericRegion(), revised, frequency, lag, ccy, ts)
+        : this(ConventionProvider.ReadInflationIndex("GenericCPI", () => Reference(frequency, revised, lag, ccy)), ts)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private GenericCPI((InflationIndexConventions Values, ConventionProvider Provider) read, ZeroInflationTermStructure? ts)
+        : base(
+            "CPI",
+            read.Values.Region,
+            read.Values.Revised,
+            read.Values.Frequency,
+            read.Values.AvailabilityLag,
+            read.Values.Currency,
+            ts,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, with the preset's arguments, built in the provider's scope.
+    private static InflationIndexConventions Reference(Frequency frequency, bool revised, Period lag, Currency ccy) =>
+        new(new GenericRegion(), revised, frequency, lag, ccy);
 }

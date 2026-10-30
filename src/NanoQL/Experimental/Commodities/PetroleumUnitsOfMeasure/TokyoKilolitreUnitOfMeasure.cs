@@ -14,7 +14,11 @@ public sealed class TokyoKilolitreUnitOfMeasure : UnitOfMeasure
 {
     /// <summary>Initializes a new instance of the <see cref="TokyoKilolitreUnitOfMeasure"/> class.</summary>
     public TokyoKilolitreUnitOfMeasure()
-        : base("Tokyo Kilolitres", "KL_tk", UnitOfMeasureType.Volume, new BarrelUnitOfMeasure())
+        : base(ConventionProvider.ReadUnitOfMeasure("TokyoKilolitreUnitOfMeasure", Reference))
     {
     }
+
+    // QuantLib's data, built in the provider's scope.
+    private static UnitOfMeasureData Reference() =>
+        new("Tokyo Kilolitres", "KL_tk", UnitOfMeasureType.Volume, new BarrelUnitOfMeasure());
 }

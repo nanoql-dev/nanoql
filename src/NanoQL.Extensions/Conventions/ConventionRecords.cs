@@ -4,6 +4,7 @@
 
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Time;
 
@@ -24,6 +25,8 @@ namespace NanoQL.Extensions.Conventions;
 /// record per code, and one whose name or numeric code isn't QuantLib's is refused.
 /// An instrument convention is records already: it is described as its record with every field its base chain gives,
 /// under the name, its names those of the set it was resolved in.
+/// A unit of measure of a preset's class is described as an override of the set's preset where its data differ, the set
+/// holding one record per preset, and an alias of it; QuantLib's null commodity type as no record, a field left out.
 /// </remarks>
 public static class ConventionRecords
 {
@@ -256,12 +259,124 @@ public static class ConventionRecords
         return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
     }
 
+    /// <summary>The records describing a commodity type under a name.</summary>
+    /// <param name="name">The name it takes.</param>
+    /// <param name="value">The commodity type.</param>
+    /// <param name="set">The set the records resolve in; <see cref="ConventionSet.QuantLib"/> when null.</param>
+    /// <returns>The records; the last defines <paramref name="name"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    /// <exception cref="ArgumentException">The commodity type is QuantLib's null commodity type, which a record gives by leaving it out.</exception>
+    [Experimental("NQL0001")]
+    public static ConventionSnapshot Describe(string name, CommodityType value, ConventionSet? set = null)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var d = new Describer(ConventionNames.Checked(name, nameof(name)), set ?? ConventionSet.QuantLib);
+        d.CommodityType(name, value);
+        return d.Snapshot;
+    }
+
+    /// <summary>The records describing a unit of measure under a name.</summary>
+    /// <param name="name">The name it takes.</param>
+    /// <param name="value">The unit of measure.</param>
+    /// <param name="set">The set the records resolve in; <see cref="ConventionSet.QuantLib"/> when null.</param>
+    /// <returns>The records; the last defines <paramref name="name"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    /// <exception cref="ArgumentException">The unit is a preset's whose triangulation unit the set's preset has and it has none, which no record gives.</exception>
+    [Experimental("NQL0001")]
+    public static ConventionSnapshot Describe(string name, UnitOfMeasure value, ConventionSet? set = null)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var d = new Describer(ConventionNames.Checked(name, nameof(name)), set ?? ConventionSet.QuantLib);
+        d.Unit(name, value);
+        return d.Snapshot;
+    }
+
+    /// <summary>The records describing a unit of measure conversion under a name.</summary>
+    /// <param name="name">The name it takes.</param>
+    /// <param name="value">The unit of measure conversion.</param>
+    /// <param name="set">The set the records resolve in; <see cref="ConventionSet.QuantLib"/> when null.</param>
+    /// <returns>The records; the last defines <paramref name="name"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    /// <exception cref="ArgumentException">The conversion is a derived one, the chain of two others, which no record gives.</exception>
+    [Experimental("NQL0001")]
+    public static ConventionSnapshot Describe(string name, UnitOfMeasureConversion value, ConventionSet? set = null)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var d = new Describer(ConventionNames.Checked(name, nameof(name)), set ?? ConventionSet.QuantLib);
+        d.Conversion(name, value);
+        return d.Snapshot;
+    }
+
+    /// <summary>The records describing a commodity payment term under a name.</summary>
+    /// <param name="name">The name it takes.</param>
+    /// <param name="value">The commodity payment term.</param>
+    /// <param name="set">The set the records resolve in; <see cref="ConventionSet.QuantLib"/> when null.</param>
+    /// <returns>The records; the last defines <paramref name="name"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    [Experimental("NQL0001")]
+    public static ConventionSnapshot Describe(string name, PaymentTerm value, ConventionSet? set = null)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var d = new Describer(ConventionNames.Checked(name, nameof(name)), set ?? ConventionSet.QuantLib);
+        d.PaymentTerm(name, value);
+        return d.Snapshot;
+    }
+
+    /// <summary>The records describing a commodity index under a name.</summary>
+    /// <param name="name">The name it takes.</param>
+    /// <param name="value">The index; its forward curve and exchange contracts are market and contract data, which no
+    /// record holds.</param>
+    /// <param name="set">The set the records resolve in; <see cref="ConventionSet.QuantLib"/> when null.</param>
+    /// <returns>The records; the last defines <paramref name="name"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    [Experimental("NQL0001")]
+    public static ConventionSnapshot Describe(string name, CommodityIndex value, ConventionSet? set = null)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var d = new Describer(ConventionNames.Checked(name, nameof(name)), set ?? ConventionSet.QuantLib);
+        d.CommodityIndex(name, value);
+        return d.Snapshot;
+    }
+
+    /// <summary>The records describing commodity settings under a name.</summary>
+    /// <param name="name">The name it takes.</param>
+    /// <param name="value">The commodity settings.</param>
+    /// <param name="set">The set the records resolve in; <see cref="ConventionSet.QuantLib"/> when null.</param>
+    /// <returns>The records; the last defines <paramref name="name"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    [Experimental("NQL0001")]
+    public static ConventionSnapshot Describe(string name, CommoditySettings value, ConventionSet? set = null)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var d = new Describer(ConventionNames.Checked(name, nameof(name)), set ?? ConventionSet.QuantLib);
+        d.CommoditySettings(name, value);
+        return d.Snapshot;
+    }
+
+    /// <summary>The records describing quantity settings under a name.</summary>
+    /// <param name="name">The name it takes.</param>
+    /// <param name="value">The quantity settings.</param>
+    /// <param name="set">The set the records resolve in; <see cref="ConventionSet.QuantLib"/> when null.</param>
+    /// <returns>The records; the last defines <paramref name="name"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    [Experimental("NQL0001")]
+    public static ConventionSnapshot Describe(string name, QuantitySettings value, ConventionSet? set = null)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var d = new Describer(ConventionNames.Checked(name, nameof(name)), set ?? ConventionSet.QuantLib);
+        d.QuantitySettings(name, value);
+        return d.Snapshot;
+    }
+
     // Writes records for a value and its parts, each part a preset's name where it equals one.
     private sealed class Describer(string root, ConventionSet set)
     {
         // QuantLib's aliases between presets sharing one implementation: a value equal to one is named by its target
         private readonly HashSet<string> aliases = [.. set.Layers.SelectMany(l => l.Records).OfType<AliasRecord>().Select(a => a.Name)];
         private int next;
+
+        // The unit presets already described, each once.
+        private readonly HashSet<string> units = new(StringComparer.Ordinal);
 
         public ConventionSnapshot Snapshot { get; private set; } = ConventionSnapshot.Empty;
 
@@ -531,6 +646,142 @@ public static class ConventionRecords
             }
 
             return null;
+        }
+
+        public void CommodityType(string name, CommodityType value)
+        {
+            if (value is NullCommodityType)
+            {
+                throw new ArgumentException(
+                    "QuantLib's null commodity type has no record: a conversion or an index takes it by leaving its commodity type out",
+                    nameof(value));
+            }
+
+            Add(new CommodityTypeRecord(name) { TypeName = value.Name, Code = value.Code });
+        }
+
+        public void Unit(string name, UnitOfMeasure value)
+        {
+            // a preset's class: its data over the set's preset, the set holding one record per preset, and its name an
+            // alias of the preset
+            string cls = value.GetType().Name;
+            if (PresetFactories.UnitsOfMeasure.ContainsKey(cls))
+            {
+                UnitOfMeasure preset = set.UnitOfMeasure(cls);
+                if (units.Add(cls) && !SameUnit(preset, value))
+                {
+                    UnitOfMeasure? tri = value.TriangulationUnitOfMeasure, presetTri = preset.TriangulationUnitOfMeasure;
+                    if (tri is null && presetTri is not null)
+                    {
+                        throw new ArgumentException(
+                            $"the {cls} unit has no triangulation unit where the set's has {presetTri.Code}, which no record gives", nameof(value));
+                    }
+
+                    Add(new UnitOfMeasureRecord(cls, cls)
+                    {
+                        UnitName = value.Name == preset.Name ? null : value.Name,
+                        UnitType = value.UnitType == preset.UnitType ? null : value.UnitType,
+                        TriangulationUnit = tri is null || tri.Code == presetTri?.Code ? null : UnitPart(tri),
+                    });
+                }
+
+                if (name != cls)
+                {
+                    Add(new AliasRecord(name, cls));
+                }
+
+                return;
+            }
+
+            // a unit of a user's own: its constructor's three fields
+            Add(new UnitOfMeasureRecord(name) { UnitName = value.Name, Code = value.Code, UnitType = value.UnitType });
+        }
+
+        public void Conversion(string name, UnitOfMeasureConversion value)
+        {
+            if (value.Type != UnitOfMeasureConversionType.Direct)
+            {
+                throw new ArgumentException("a derived conversion chains two others, which no record gives: describe those", nameof(value));
+            }
+
+            Add(new UnitOfMeasureConversionRecord(name)
+            {
+                CommodityType = CommodityTypePart(value.CommodityType),
+                Source = UnitPart(value.Source),
+                Target = UnitPart(value.Target),
+                Factor = value.ConversionFactor,
+            });
+        }
+
+        public void PaymentTerm(string name, PaymentTerm value) =>
+            Add(new PaymentTermRecord(name)
+            {
+                TermName = value.Name,
+                EventType = value.EventType,
+                OffsetDays = value.OffsetDays,
+                Calendar = Part(value.Calendar),
+            });
+
+        public void CommodityIndex(string name, CommodityIndex value)
+        {
+            Currency(value.Currency.Code, value.Currency);
+            Add(new CommodityIndexRecord(name)
+            {
+                IndexName = value.Name,
+                CommodityType = CommodityTypePart(value.CommodityType),
+                Currency = value.Currency.Code,
+                UnitOfMeasure = UnitPart(value.UnitOfMeasure),
+                Calendar = Part(value.FixingCalendar),
+                LotQuantity = value.LotQuantity,
+                NearbyOffset = value.NearbyOffset,
+            });
+        }
+
+        public void CommoditySettings(string name, CommoditySettings value)
+        {
+            Currency(value.Currency.Code, value.Currency);
+            Add(new CommoditySettingsRecord(name) { Currency = value.Currency.Code, UnitOfMeasure = UnitPart(value.UnitOfMeasure) });
+        }
+
+        public void QuantitySettings(string name, QuantitySettings value) =>
+            Add(new QuantitySettingsRecord(name)
+            {
+                ConversionType = value.ConversionType,
+                BaseUnitOfMeasure = value.BaseUnitOfMeasure is UnitOfMeasure u ? UnitPart(u) : null,
+            });
+
+        // Two units with equal data, their triangulation units by code.
+        private static bool SameUnit(UnitOfMeasure a, UnitOfMeasure b) =>
+            a.Name == b.Name && a.Code == b.Code && a.UnitType == b.UnitType
+            && a.TriangulationUnitOfMeasure?.Code == b.TriangulationUnitOfMeasure?.Code;
+
+        // A unit part's name: a preset's, its data an override of the set's where they differ, else a generated name
+        // with its record.
+        private string UnitPart(UnitOfMeasure part)
+        {
+            string cls = part.GetType().Name;
+            if (PresetFactories.UnitsOfMeasure.ContainsKey(cls))
+            {
+                Unit(cls, part);
+                return cls;
+            }
+
+            string generated = Generated();
+            Unit(generated, part);
+            return generated;
+        }
+
+        // A commodity type part's name: none for QuantLib's null commodity type, else a generated name with its record.
+        private string? CommodityTypePart(CommodityType? part)
+        {
+            if (part is null or NullCommodityType)
+            {
+                return null;
+            }
+
+            string generated = Generated();
+            CommodityType(generated, part);
+            return generated;
         }
 
         private string Generated()

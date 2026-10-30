@@ -3,11 +3,11 @@
 # The code below quotes licence tags as data; REUSE reads only the two lines above.
 # REUSE-IgnoreStart
 """The coded presets' constructors, by preset name, written from the presets files: every calendar, day counter,
-currency, index, family and region the files name, presets and QuantLib's own aliases alike (an FpML code names no
-coded preset), a constructor taking arguments in a table of its own; and the business-day conventions' FpML aliases. The table is
-the only place the extensions build a coded preset, so a set builds each as its own class, through no reflection.
-Writes src/NanoQL.Extensions/Conventions/PresetFactories.cs; the extensions' source guard checks that nothing else
-builds one."""
+currency, index, family, region and unit of measure the files name, presets and QuantLib's own aliases alike (an FpML
+code names no coded preset), a constructor taking arguments in a table of its own; and the business-day conventions'
+FpML aliases. The table is the only place the extensions build a coded preset, so a set builds each as its own class,
+through no reflection. Writes src/NanoQL.Extensions/Conventions/PresetFactories.cs; the extensions' source guard checks
+that nothing else builds one."""
 import os
 import re
 import sys
@@ -58,10 +58,11 @@ def bases(file, element):
 
 
 # The presets whose constructors take arguments, by QuantLib's shapes: a daily-tenor Libor's settlement days, and
-# AUCPI's and YYAUCPI's frequency and revised flag.
+# AUCPI's and YYAUCPI's frequency and revised flag, and the generic indexes' frequency, revised flag, lag and currency.
 SETTLEMENT_DAYS = {"DailyTenorCHFLibor", "DailyTenorEURLibor", "DailyTenorGBPLibor", "DailyTenorJPYLibor",
                    "DailyTenorUSDLibor"}
 FREQUENCY_REVISED = {"AUCPI", "YYAUCPI"}
+LAG_CURRENCY = {"GenericCPI", "YYGenericCPI"}
 # The BMA index is read by its class alone: no lookup builds it, and a set's validation builds it from its own table.
 NOT_LOOKED_UP = {"BMAIndex"}
 BUSINESS_DAY_CONVENTIONS = {"Following", "ModifiedFollowing", "Preceding", "ModifiedPreceding", "Unadjusted",
@@ -107,6 +108,7 @@ def source():
         "",
         "using System.Collections.Frozen;",
         "using NanoQL.Currencies;",
+        "using NanoQL.Experimental;",
         "using NanoQL.Indexes;",
         "using NanoQL.TermStructures;",
         "using NanoQL.Time;",
@@ -153,19 +155,32 @@ def source():
                    [(n, f"exogenous ? new {n}(tenor, forwarding, discounting) : new {n}(tenor, forwarding)")
                     for n in sorted(names("indexes.xml", {"SwapIndex"}))],
                    "Period tenor, YieldTermStructure? forwarding, bool exogenous, YieldTermStructure? discounting") + [""]
-    zero = sorted(names("indexes.xml", {"ZeroInflationIndex"}) + names("indexes.cxx.xml", {"ZeroInflationIndex"}))
-    yoy = sorted(names("indexes.xml", {"YoYInflationIndex"}) + names("indexes.cxx.xml", {"YoYInflationIndex"}))
+    zero = sorted(names("indexes.xml", {"ZeroInflationIndex"}) + names("indexes.cxx.xml", {"ZeroInflationIndex"})
+                  + names("commodities.cxx.xml", {"ZeroInflationIndex"}))
+    yoy = sorted(names("indexes.xml", {"YoYInflationIndex"}) + names("indexes.cxx.xml", {"YoYInflationIndex"})
+                 + names("commodities.cxx.xml", {"YoYInflationIndex"}))
     lines += table("ZeroInflationIndexes", "ZeroInflationIndex",
-                   [(n, f"new {n}(ts)") for n in zero if n not in FREQUENCY_REVISED], "ZeroInflationTermStructure? ts") + [""]
+                   [(n, f"new {n}(ts)") for n in zero if n not in FREQUENCY_REVISED | LAG_CURRENCY],
+                   "ZeroInflationTermStructure? ts") + [""]
     lines += table("ZeroInflationIndexesWithArguments", "ZeroInflationIndex",
                    [(n, f"new {n}(frequency, revised, ts)") for n in zero if n in FREQUENCY_REVISED],
                    "Frequency frequency, bool revised, ZeroInflationTermStructure? ts") + [""]
+    lines += table("ZeroInflationIndexesWithLagAndCurrency", "ZeroInflationIndex",
+                   [(n, f"new {n}(frequency, revised, lag, currency, ts)") for n in zero if n in LAG_CURRENCY],
+                   "Frequency frequency, bool revised, Period lag, Currency currency, ZeroInflationTermStructure? ts") + [""]
     lines += table("YoYInflationIndexes", "YoYInflationIndex",
-                   [(n, f"new {n}(ts)") for n in yoy if n not in FREQUENCY_REVISED], "YoYInflationTermStructure? ts") + [""]
+                   [(n, f"new {n}(ts)") for n in yoy if n not in FREQUENCY_REVISED | LAG_CURRENCY],
+                   "YoYInflationTermStructure? ts") + [""]
     lines += table("YoYInflationIndexesWithArguments", "YoYInflationIndex",
                    [(n, f"new {n}(frequency, revised, ts)") for n in yoy if n in FREQUENCY_REVISED],
                    "Frequency frequency, bool revised, YoYInflationTermStructure? ts") + [""]
-    lines += table("Regions", "Region", [(n, f"new {n}()") for n in sorted(names("indexes.xml", {"Region"}))]) + [""]
+    lines += table("YoYInflationIndexesWithLagAndCurrency", "YoYInflationIndex",
+                   [(n, f"new {n}(frequency, revised, lag, currency, ts)") for n in yoy if n in LAG_CURRENCY],
+                   "Frequency frequency, bool revised, Period lag, Currency currency, YoYInflationTermStructure? ts") + [""]
+    lines += table("Regions", "Region",
+                   [(n, f"new {n}()") for n in sorted(names("indexes.xml", {"Region"}) + names("commodities.cxx.xml", {"Region"}))]) + [""]
+    lines += table("UnitsOfMeasure", "UnitOfMeasure",
+                   [(n, f"new {n}()") for n in sorted(names("commodities.cxx.xml", {"UnitOfMeasure"}))]) + [""]
     aliases = bases("aliases.xml", "Alias")
     lines += ["    // The business-day conventions' FpML codes that map to one exactly, which the reader takes for the member.",
               "    public static readonly FrozenDictionary<string, BusinessDayConvention> BusinessDayConventionAliases =",

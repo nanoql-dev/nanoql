@@ -111,6 +111,27 @@ public class ConventionSetTests
     }
 
     [Fact]
+    public void TheSetsSnapshotsProvenanceAndForeignContentCompareByValueAsObjects()
+    {
+        // the members the slot's coverage report found no test reaching: the object overloads and the provenance's
+        const string A = "<Calendar name=\"Desk\" base=\"TARGET\" />";
+        ConventionSet x = ConventionsText.OnQuantLib(A), y = ConventionsText.OnQuantLib(A);
+        ConventionSnapshot s = ConventionsText.Records(A);
+
+        Assert.True(x.Equals((object)y));
+        Assert.False(x.Equals((object)s));
+        Assert.True(s.Equals((object)ConventionsText.Records(A)));
+        Assert.False(s.Equals((object)x));
+        Assert.Equal(x.Provenance(), y.Provenance());
+        Assert.Equal(x.Provenance().GetHashCode(), y.Provenance().GetHashCode());
+        Assert.NotEqual(x.Provenance(), ConventionSet.QuantLib.Provenance());
+
+        ConventionSnapshot foreign = ConventionsText.Records("<Calendar name=\"Desk\" base=\"TARGET\" xmlns:firm=\"urn:firm\" firm:id=\"7\" />");
+        Assert.False(foreign.Records[0].Foreign.IsEmpty);
+        Assert.True(s.Records[0].Foreign.IsEmpty);
+    }
+
+    [Fact]
     public void ALaterLayerOverridesAnEarlierOnesNameForEveryRecordThatReferencesIt()
     {
         // the joint calendar, from the first layer, reads the second's Desk
@@ -132,7 +153,7 @@ public class ConventionSetTests
     [InlineData("<JointCalendar name=\"J\"><Member>TARGET</Member><Member>J</Member></JointCalendar>", "JointCalendar J: J is part of a cycle")]
     [InlineData("<Calendar name=\"A\" base=\"Nowhere\" />", "Calendar A: unknown calendar Nowhere")]
     [InlineData("<DayCounter name=\"D\" base=\"Business252\"><Calendar>Nowhere</Calendar></DayCounter>", "DayCounter D: unknown calendar Nowhere")]
-    [InlineData("<Alias name=\"Desk\" base=\"Nowhere\" />", "Alias Desk: unknown calendar, day counter, currency, region, index or business-day convention Nowhere")]
+    [InlineData("<Alias name=\"Desk\" base=\"Nowhere\" />", "Alias Desk: unknown calendar, day counter, currency, region, index, unit of measure or business-day convention Nowhere")]
     [InlineData("<JointCalendar name=\"J\"><Member>TARGET</Member></JointCalendar>", "JointCalendar J: the joint calendar J needs two or more members")]
     [InlineData("<DayCounter name=\"D\" base=\"Actual360\"><Calendar>TARGET</Calendar></DayCounter>", "DayCounter D: the day counter D's base Actual360 counts no calendar's days: only Business252 does")]
     [InlineData("<CalendarPreset name=\"TARGET\"><QuantLibName>Target</QuantLibName></CalendarPreset>", "CalendarPreset TARGET: QuantLib's name is TARGET, not Target")]
@@ -245,6 +266,21 @@ public class ConventionSetTests
         {
             Assert.Equal("€", new DEMCurrency().TriangulationCurrency!.Symbol);
         }
+    }
+
+    [Fact]
+    public void ACurrencysIdentityCheckBuildsNoPresetThroughTheSet()
+    {
+        // F5-1: EUR through DEM and DEM through USD is no cycle, though QuantLib's DEM triangulates through EUR
+        ConventionSet set = ConventionsText.OnQuantLib(
+            "<CurrencyPreset name=\"EUR\" base=\"EUR\"><TriangulationCurrency>DEM</TriangulationCurrency></CurrencyPreset>"
+            + "<CurrencyPreset name=\"DEM\" base=\"DEM\"><TriangulationCurrency>USD</TriangulationCurrency></CurrencyPreset>");
+
+        Assert.Equal("DEM", set.Currency("EUR").TriangulationCurrency!.Code);
+        Assert.Equal("USD", set.Currency("DEM").TriangulationCurrency!.Code);
+        Assert.Equal("EUR", set.Currency("ATS").TriangulationCurrency!.Code);
+        Assert.Contains("part of a cycle of triangulation currencies", Assert.Throws<ArgumentException>(() => ConventionsText.OnQuantLib(
+            "<CurrencyPreset name=\"EUR\" base=\"EUR\"><TriangulationCurrency>DEM</TriangulationCurrency></CurrencyPreset>")).Message, StringComparison.Ordinal);
     }
 
     [Fact]

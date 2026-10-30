@@ -14,7 +14,10 @@ public sealed class MTUnitOfMeasure : UnitOfMeasure
 {
     /// <summary>Initializes a new instance of the <see cref="MTUnitOfMeasure"/> class.</summary>
     public MTUnitOfMeasure()
-        : base("Metric Tonnes", "MT", UnitOfMeasureType.Mass, null)
+        : base(ConventionProvider.ReadUnitOfMeasure("MTUnitOfMeasure", Reference))
     {
     }
+
+    // QuantLib's data, built in the provider's scope.
+    private static UnitOfMeasureData Reference() => new("Metric Tonnes", "MT", UnitOfMeasureType.Mass, null);
 }

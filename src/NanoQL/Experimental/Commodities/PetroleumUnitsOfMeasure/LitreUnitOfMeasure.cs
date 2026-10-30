@@ -14,7 +14,11 @@ public sealed class LitreUnitOfMeasure : UnitOfMeasure
 {
     /// <summary>Initializes a new instance of the <see cref="LitreUnitOfMeasure"/> class.</summary>
     public LitreUnitOfMeasure()
-        : base("Litres", "l", UnitOfMeasureType.Volume, new BarrelUnitOfMeasure())
+        : base(ConventionProvider.ReadUnitOfMeasure("LitreUnitOfMeasure", Reference))
     {
     }
+
+    // QuantLib's data, built in the provider's scope.
+    private static UnitOfMeasureData Reference() =>
+        new("Litres", "l", UnitOfMeasureType.Volume, new BarrelUnitOfMeasure());
 }

@@ -66,6 +66,27 @@ public enum ConventionKind
     /// <summary>Bond conventions, the defaults of a set's bonds and the bond presets.</summary>
     BondConvention,
 
+    /// <summary>Commodity types.</summary>
+    CommodityType,
+
+    /// <summary>Units of measure, QuantLib's eight presets and a user's own.</summary>
+    UnitOfMeasure,
+
+    /// <summary>Conversion factors between units of measure, QuantLib's known factors among them.</summary>
+    UnitOfMeasureConversion,
+
+    /// <summary>Commodity payment terms.</summary>
+    PaymentTerm,
+
+    /// <summary>Commodity indexes.</summary>
+    CommodityIndex,
+
+    /// <summary>Commodity settings, QuantLib's defaults among them.</summary>
+    CommoditySettings,
+
+    /// <summary>Quantity settings, QuantLib's defaults among them.</summary>
+    QuantitySettings,
+
     /// <summary>Aliases, each in its base's kind.</summary>
     Alias,
 

@@ -4,8 +4,8 @@
 namespace NanoQL.Extensions.Conventions;
 
 // The value kinds whose names are unique among their records: the calendar kinds share one, the day counter kinds
-// another; an alias joins its base's, so its name is unique among the value kinds an alias can name. Each instrument
-// convention kind has its own, which no alias joins.
+// another; an alias joins its base's, so its name is unique among the value kinds an alias can name, units of measure
+// among them. Each instrument convention kind and each other commodity kind has its own, which no alias joins.
 internal static class ConventionKinds
 {
     public static ConventionKind Of(ConventionRecord record) => record switch
@@ -31,6 +31,13 @@ internal static class ConventionKinds
         MultipleResetsSwapConventionRecord => ConventionKind.MultipleResetsSwapConvention,
         YoYInflationCapFloorConventionRecord => ConventionKind.YoYInflationCapFloorConvention,
         BondConventionRecord => ConventionKind.BondConvention,
+        CommodityTypeRecord => ConventionKind.CommodityType,
+        UnitOfMeasureRecord => ConventionKind.UnitOfMeasure,
+        UnitOfMeasureConversionRecord => ConventionKind.UnitOfMeasureConversion,
+        PaymentTermRecord => ConventionKind.PaymentTerm,
+        CommodityIndexRecord => ConventionKind.CommodityIndex,
+        CommoditySettingsRecord => ConventionKind.CommoditySettings,
+        QuantitySettingsRecord => ConventionKind.QuantitySettings,
         AliasRecord => ConventionKind.Alias,
         _ => throw new ArgumentException($"unknown record kind {record.GetType().Name}", nameof(record)),
     };
@@ -39,7 +46,16 @@ internal static class ConventionKinds
         a == b || (a == ConventionKind.Alias && Aliased(b)) || (b == ConventionKind.Alias && Aliased(a));
 
     // The kinds an alias's name shares a name space with: the values an alias can name.
-    public static bool Aliased(ConventionKind kind) => kind <= ConventionKind.Index || kind >= ConventionKind.Alias;
+    public static bool Aliased(ConventionKind kind) =>
+        kind <= ConventionKind.Index || kind == ConventionKind.UnitOfMeasure || kind >= ConventionKind.Alias;
+
+    // The instrument convention kinds, C4's.
+    public static bool IsInstrumentConvention(ConventionKind kind) =>
+        kind is >= ConventionKind.ScheduleConvention and <= ConventionKind.BondConvention;
+
+    // Batch 7's commodity kinds.
+    public static bool IsCommodity(ConventionKind kind) =>
+        kind is >= ConventionKind.CommodityType and <= ConventionKind.QuantitySettings;
 
     // The element a record is written as.
     public static string Element(ConventionRecord record) => record.GetType().Name[..^"Record".Length];

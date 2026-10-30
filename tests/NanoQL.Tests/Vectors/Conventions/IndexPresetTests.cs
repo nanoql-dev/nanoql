@@ -39,10 +39,10 @@ public class IndexPresetTests
         Assert.Equal(CodedPresets.OvernightIndexes.Keys.Order(StringComparer.Ordinal), Names<OvernightIndexRecord>());
         Assert.Equal(CodedPresets.IborFamilies.Keys.Order(StringComparer.Ordinal), Names<IborFamilyRecord>());
         Assert.Equal(CodedPresets.SwapIndexes.Keys.Order(StringComparer.Ordinal), Names<SwapIndexRecord>());
-        Assert.Equal(CodedPresets.ZeroInflationIndexes.Keys.Append("AUCPI").Order(StringComparer.Ordinal), Names<ZeroInflationIndexRecord>());
-        Assert.Equal(CodedPresets.YoYInflationIndexes.Keys.Append("YYAUCPI").Order(StringComparer.Ordinal), Names<YoYInflationIndexRecord>());
+        Assert.Equal(CodedPresets.ZeroInflationIndexes.Keys.Append("AUCPI").Append("GenericCPI").Order(StringComparer.Ordinal), Names<ZeroInflationIndexRecord>());
+        Assert.Equal(CodedPresets.YoYInflationIndexes.Keys.Append("YYAUCPI").Append("YYGenericCPI").Order(StringComparer.Ordinal), Names<YoYInflationIndexRecord>());
         Assert.Equal(CodedPresets.Regions.Keys.Order(StringComparer.Ordinal), Names<RegionRecord>());
-        Assert.Equal((27, 27, 16, 12, 6), (CodedPresets.IborFamilies.Count, CodedPresets.IborIndexes.Count - CodedPresets.OvernightIndexes.Count - 4, CodedPresets.OvernightIndexes.Count, CodedPresets.SwapIndexes.Count, CodedPresets.Regions.Count));
+        Assert.Equal((27, 27, 16, 12, 6), (CodedPresets.IborFamilies.Count, CodedPresets.IborIndexes.Count - CodedPresets.OvernightIndexes.Count - 4, CodedPresets.OvernightIndexes.Count, CodedPresets.SwapIndexes.Count, CodedPresets.Regions.Count - 1));
     }
 
     [Theory]

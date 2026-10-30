@@ -16,7 +16,10 @@ public sealed class GenericRegion : Region
 {
     /// <summary>Initializes a new instance of the <see cref="GenericRegion"/> class.</summary>
     public GenericRegion()
-        : base("Generic", "GENERIC")
+        : base(ConventionProvider.ReadRegion("GenericRegion", Reference))
     {
     }
+
+    // QuantLib's data.
+    private static RegionData Reference() => new("Generic", "GENERIC");
 }

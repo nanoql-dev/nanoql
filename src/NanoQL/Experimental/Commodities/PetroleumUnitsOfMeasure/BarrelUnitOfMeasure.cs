@@ -14,7 +14,10 @@ public sealed class BarrelUnitOfMeasure : UnitOfMeasure
 {
     /// <summary>Initializes a new instance of the <see cref="BarrelUnitOfMeasure"/> class.</summary>
     public BarrelUnitOfMeasure()
-        : base("Barrels", "BBL", UnitOfMeasureType.Volume, null)
+        : base(ConventionProvider.ReadUnitOfMeasure("BarrelUnitOfMeasure", Reference))
     {
     }
+
+    // QuantLib's data, built in the provider's scope.
+    private static UnitOfMeasureData Reference() => new("Barrels", "BBL", UnitOfMeasureType.Volume, null);
 }

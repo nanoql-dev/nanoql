@@ -14,7 +14,11 @@ public sealed class GallonUnitOfMeasure : UnitOfMeasure
 {
     /// <summary>Initializes a new instance of the <see cref="GallonUnitOfMeasure"/> class.</summary>
     public GallonUnitOfMeasure()
-        : base("US Gallons", "GAL", UnitOfMeasureType.Volume, new BarrelUnitOfMeasure())
+        : base(ConventionProvider.ReadUnitOfMeasure("GallonUnitOfMeasure", Reference))
     {
     }
+
+    // QuantLib's data, built in the provider's scope.
+    private static UnitOfMeasureData Reference() =>
+        new("US Gallons", "GAL", UnitOfMeasureType.Volume, new BarrelUnitOfMeasure());
 }

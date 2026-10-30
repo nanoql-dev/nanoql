@@ -9,12 +9,12 @@
            targetNamespace="https://nanoql.net/schemas/conventions"
            elementFormDefault="qualified">
   <xs:annotation>
-    <xs:documentation>nanoql's market conventions: calendars, day counters, currencies, regions, indexes and instruments' conventions, named by nanoql's API, each a record whose business fields are child elements. Other tools' elements and attributes in their own namespaces are kept.</xs:documentation>
+    <xs:documentation>nanoql's market conventions: calendars, day counters, currencies, regions, indexes, instruments' conventions and commodities' conventions, named by nanoql's API, each a record whose business fields are child elements. Other tools' elements and attributes in their own namespaces are kept.</xs:documentation>
   </xs:annotation>
 
   <xs:element name="Conventions">
     <xs:annotation>
-      <xs:documentation>A set of convention records, in any order, as a document's root or inside another document. Each name is unique within its value kind: calendars, day counters, currencies, regions, indexes, and each instrument convention kind; an alias's name among the calendars, day counters, currencies, regions and indexes.</xs:documentation>
+      <xs:documentation>A set of convention records, in any order, as a document's root or inside another document. Each name is unique within its value kind: calendars, day counters, currencies, regions, indexes, each instrument convention kind, units of measure, and each other commodity kind; an alias's name among the calendars, day counters, currencies, regions, indexes and units of measure.</xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -48,6 +48,13 @@
         <xs:element ref="MultipleResetsSwapConvention"/>
         <xs:element ref="YoYInflationCapFloorConvention"/>
         <xs:element ref="BondConvention"/>
+        <xs:element ref="CommodityType"/>
+        <xs:element ref="UnitOfMeasure"/>
+        <xs:element ref="UnitOfMeasureConversion"/>
+        <xs:element ref="PaymentTerm"/>
+        <xs:element ref="CommodityIndex"/>
+        <xs:element ref="CommoditySettings"/>
+        <xs:element ref="QuantitySettings"/>
         <xs:element ref="Alias"/>
         <xs:any namespace="##other" processContents="lax"/>
       </xs:choice>
@@ -131,6 +138,34 @@
     </xs:unique>
     <xs:unique name="BondConventionNames">
       <xs:selector xpath="c:BondConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="CommodityTypeNames">
+      <xs:selector xpath="c:CommodityType"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="UnitOfMeasureNames">
+      <xs:selector xpath="c:UnitOfMeasure|c:Alias"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="UnitOfMeasureConversionNames">
+      <xs:selector xpath="c:UnitOfMeasureConversion"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="PaymentTermNames">
+      <xs:selector xpath="c:PaymentTerm"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="CommodityIndexNames">
+      <xs:selector xpath="c:CommodityIndex"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="CommoditySettingsNames">
+      <xs:selector xpath="c:CommoditySettings"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="QuantitySettingsNames">
+      <xs:selector xpath="c:QuantitySettings"/>
       <xs:field xpath="@name"/>
     </xs:unique>
   </xs:element>
@@ -1807,6 +1842,215 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="CommodityType">
+    <xs:annotation>
+      <xs:documentation>A commodity type (CommodityType), which CommodityType takes: its name and code.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="TypeName" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The commodity type's name; the record's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Code" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Its code, its identity.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="UnitOfMeasure">
+    <xs:annotation>
+      <xs:documentation>A unit of measure (UnitOfMeasure): one of QuantLib's eight presets, by its class's name, or a unit of a user's own, which UnitOfMeasure takes.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="UnitName" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The unit's name; the record's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Code" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Its code, its identity: a preset's QuantLib's.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="UnitType" type="UnitOfMeasureType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>What it measures.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="TriangulationUnit" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The unit of measure conversions go through when no direct one is known; a preset's only.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="UnitOfMeasureConversion">
+    <xs:annotation>
+      <xs:documentation>A conversion factor between two units of measure (UnitOfMeasureConversion), which a set's UnitOfMeasureConversions adds to QuantLib's known factors.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="CommodityType" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The commodity type's name; QuantLib's null commodity type, which its known factors take, by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Source" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The source unit's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Target" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The target unit's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Factor" type="xs:double" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The value of one source unit in the target unit.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="PaymentTerm">
+    <xs:annotation>
+      <xs:documentation>A commodity payment term (PaymentTerm), which PaymentTerm takes.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="TermName" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment term's name, its identity; the record's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="EventType" type="PaymentTermEventType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The event the payment date is counted from.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="OffsetDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The days from the event to the payment.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The calendar the payment date is adjusted on.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CommodityIndex">
+    <xs:annotation>
+      <xs:documentation>A commodity index's conventions (CommodityIndex), which CommodityIndex takes; its forward curve and exchange contracts are market and contract data, which no record holds.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="IndexName" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The index's name; the record's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CommodityType" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The commodity type's name; QuantLib's null commodity type by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Currency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The currency's code.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="UnitOfMeasure" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The unit of measure's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="LotQuantity" type="xs:double" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The quantity of a lot.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="NearbyOffset" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The nearby offset into the exchange contracts.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CommoditySettings">
+    <xs:annotation>
+      <xs:documentation>The commodity settings (CommoditySettings), which CommoditySettings takes; named CommoditySettings, QuantLib's defaults.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Currency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The settings' currency's code; QuantLib's USD by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="UnitOfMeasure" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The settings' unit of measure's name; QuantLib's barrels by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="QuantitySettings">
+    <xs:annotation>
+      <xs:documentation>The quantity settings (QuantitySettings), which QuantitySettings takes; named QuantitySettings, QuantLib's defaults.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ConversionType" type="QuantityConversionType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>How quantities in different units combine; no conversion by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="BaseUnitOfMeasure" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The unit a base-unit conversion converts to; none by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
   <xs:attributeGroup name="OptionalBase">
     <xs:attribute name="name" type="Name" use="required">
       <xs:annotation>
@@ -2141,4 +2385,37 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+
+  <xs:simpleType name="PaymentTermEventType">
+    <xs:annotation>
+      <xs:documentation>The event a payment term's date is counted from.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="TradeDate"/>
+      <xs:enumeration value="PricingDate"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="QuantityConversionType">
+    <xs:annotation>
+      <xs:documentation>How quantities in different units of measure combine.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="NoConversion"/>
+      <xs:enumeration value="BaseUnitOfMeasureConversion"/>
+      <xs:enumeration value="AutomatedConversion"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="UnitOfMeasureType">
+    <xs:annotation>
+      <xs:documentation>What a unit of measure measures.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Mass"/>
+      <xs:enumeration value="Volume"/>
+      <xs:enumeration value="Energy"/>
+      <xs:enumeration value="Quantity"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>

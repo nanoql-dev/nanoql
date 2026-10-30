@@ -14,7 +14,10 @@ public sealed class LotUnitOfMeasure : UnitOfMeasure
 {
     /// <summary>Initializes a new instance of the <see cref="LotUnitOfMeasure"/> class.</summary>
     public LotUnitOfMeasure()
-        : base("Lot", "Lot", UnitOfMeasureType.Quantity, null)
+        : base(ConventionProvider.ReadUnitOfMeasure("LotUnitOfMeasure", Reference))
     {
     }
+
+    // QuantLib's data, built in the provider's scope.
+    private static UnitOfMeasureData Reference() => new("Lot", "Lot", UnitOfMeasureType.Quantity, null);
 }

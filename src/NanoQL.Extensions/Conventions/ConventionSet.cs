@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Immutable;
-using NanoQL.Coupons;
 using System.Diagnostics.CodeAnalysis;
+using NanoQL.Coupons;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.TermStructures;
@@ -47,6 +48,10 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
     // The currencies whose data this thread is building, within one synchronous construction.
     [ThreadStatic]
     private static HashSet<string>? resolvingCurrencies;
+
+    // The unit presets whose data this thread is building, within one synchronous construction.
+    [ThreadStatic]
+    private static HashSet<string>? resolvingUnits;
 
     private readonly bool onQuantLib;
     private readonly ImmutableArray<ConventionSnapshot> layers;
@@ -288,8 +293,8 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
     }
 
     /// <summary>A zero inflation index by name, built in the set on its curve.</summary>
-    /// <param name="name">The index's name (<c>EUHICP</c>, a record based on <c>AUCPI</c> giving its arguments) or an
-    /// alias.</param>
+    /// <param name="name">The index's name (<c>EUHICP</c>, a record based on <c>AUCPI</c> or <c>GenericCPI</c> giving its
+    /// arguments) or an alias.</param>
     /// <param name="ts">The zero inflation curve, or <see langword="null"/> for none.</param>
     /// <returns>A new index, of its preset's class.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
@@ -441,6 +446,158 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
     /// <exception cref="ArgumentException">No BondConvention record has the name.</exception>
     public BondConvention Bond(string name) =>
         new(this, Merged<BondConventionRecord>(ConventionKind.BondConvention, name, static (a, b) => a.Over(b)).Named(name), FixedRateBondDefaults(), BondPresetOf(name));
+
+    /// <summary>A commodity type by name, built from its record.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>A new commodity type.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No CommodityType record has the name.</exception>
+    /// <remarks>QuantLib's null commodity type, which its known factors take, has no record: a conversion or an index
+    /// takes it by leaving its commodity type out.</remarks>
+    [Experimental("NQL0001")]
+    public CommodityType CommodityType(string name)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        return CommodityTypeOf(name, nameof(name));
+    }
+
+    /// <summary>A unit of measure by name, built in the set: a preset as its own class, or a unit of a user's own.</summary>
+    /// <param name="name">The unit's record name (<c>BarrelUnitOfMeasure</c>) or an alias.</param>
+    /// <returns>A new unit.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No unit of measure has the name.</exception>
+    [Experimental("NQL0001")]
+    public UnitOfMeasure UnitOfMeasure(string name)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            return UnitOfMeasureOf(name, [], nameof(name));
+        }
+    }
+
+    /// <summary>A commodity payment term by name, built in the set.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>A new payment term.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No PaymentTerm record has the name.</exception>
+    [Experimental("NQL0001")]
+    public PaymentTerm PaymentTerm(string name)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            PaymentTermRecord r = Merged<PaymentTermRecord>(ConventionKind.PaymentTerm, name, static (a, b) => a.Over(b));
+            return new PaymentTerm(
+                r.TermName ?? name,
+                r.EventType ?? throw Missing("payment term", name, "EventType"),
+                r.OffsetDays ?? throw Missing("payment term", name, "OffsetDays"),
+                CalendarOf(r.Calendar ?? throw Missing("payment term", name, "Calendar"), layers.Length, [], "snapshot"));
+        }
+    }
+
+    /// <summary>A commodity index by name, built in the set, with no forward curve and no exchange contracts.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>A new index, keeping the set as its provider.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No CommodityIndex record has the name.</exception>
+    /// <remarks>The forward curve and the exchange contracts are market and contract data, which no record holds: build
+    /// the index with them from this one's fields.</remarks>
+    [Experimental("NQL0001")]
+    public CommodityIndex CommodityIndex(string name)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            CommodityIndexRecord r = Merged<CommodityIndexRecord>(ConventionKind.CommodityIndex, name, static (a, b) => a.Over(b));
+            return new CommodityIndex(
+                r.IndexName ?? name,
+                CommodityTypeOf(r.CommodityType, "snapshot"),
+                CurrencyOf(r.Currency ?? throw Missing("commodity index", name, "Currency"), [], "snapshot"),
+                UnitOfMeasureOf(r.UnitOfMeasure ?? throw Missing("commodity index", name, "UnitOfMeasure"), [], "snapshot"),
+                CalendarOf(r.Calendar ?? throw Missing("commodity index", name, "Calendar"), layers.Length, [], "snapshot"),
+                r.LotQuantity ?? throw Missing("commodity index", name, "LotQuantity"),
+                null,
+                null,
+                r.NearbyOffset ?? throw Missing("commodity index", name, "NearbyOffset"));
+        }
+    }
+
+    /// <summary>Commodity settings by name, built in the set: QuantLib's defaults' record by default.</summary>
+    /// <param name="name">The record's name; <c>CommoditySettings</c>, QuantLib's defaults, by default.</param>
+    /// <returns>New settings, a field the record's chain leaves out the type's own default built in the set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No CommoditySettings record has the name.</exception>
+    [Experimental("NQL0001")]
+    public CommoditySettings CommoditySettings(string name = "CommoditySettings")
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            CommoditySettingsRecord r = Merged<CommoditySettingsRecord>(ConventionKind.CommoditySettings, name, static (a, b) => a.Over(b));
+
+            // the type builds its USD and barrels when it is built: in the set where the record leaves one out, else
+            // under QuantLib's conventions, the record's replacing both
+            CommoditySettings defaults;
+            using (Use(r.Currency is not null && r.UnitOfMeasure is not null ? ConventionProvider.QuantLib : this))
+            {
+                defaults = new CommoditySettings();
+            }
+
+            return defaults with
+            {
+                Currency = r.Currency is string c ? CurrencyOf(c, [], "snapshot") : defaults.Currency,
+                UnitOfMeasure = r.UnitOfMeasure is string u ? UnitOfMeasureOf(u, [], "snapshot") : defaults.UnitOfMeasure,
+            };
+        }
+    }
+
+    /// <summary>Quantity settings by name, built in the set: QuantLib's defaults' record by default.</summary>
+    /// <param name="name">The record's name; <c>QuantitySettings</c>, QuantLib's defaults, by default.</param>
+    /// <returns>New settings, a field the record's chain leaves out the type's own default.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No QuantitySettings record has the name.</exception>
+    [Experimental("NQL0001")]
+    public QuantitySettings QuantitySettings(string name = "QuantitySettings")
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            QuantitySettingsRecord r = Merged<QuantitySettingsRecord>(ConventionKind.QuantitySettings, name, static (a, b) => a.Over(b));
+            var defaults = new QuantitySettings();
+            return defaults with
+            {
+                ConversionType = r.ConversionType ?? defaults.ConversionType,
+                BaseUnitOfMeasure = r.BaseUnitOfMeasure is string u ? UnitOfMeasureOf(u, [], "snapshot") : defaults.BaseUnitOfMeasure,
+            };
+        }
+    }
+
+    /// <summary>
+    /// The unit of measure conversions the set holds: QuantLib's known factors,
+    /// <see cref="Experimental.UnitOfMeasureConversions.Default"/>, with each of the set's conversion records added in
+    /// the order the set's layers first give them, as QuantLib's <c>add</c> adds one, so a record between a known
+    /// factor's two units replaces it.
+    /// </summary>
+    /// <returns>A new registry. The shipped records are the known factors, so on <see cref="QuantLib"/> it equals
+    /// <see cref="Experimental.UnitOfMeasureConversions.Default"/>.</returns>
+    /// <remarks>QuantLib's manager holds its known factors from its start and after <c>clear()</c>, so a set on
+    /// <see cref="Empty"/> holds them too, as code built under QuantLib's conventions, until its records replace
+    /// them.</remarks>
+    [Experimental("NQL0001")]
+    public UnitOfMeasureConversions UnitOfMeasureConversions()
+    {
+        using (Use(this))
+        {
+            Experimental.UnitOfMeasureConversions conversions = Experimental.UnitOfMeasureConversions.Default;
+            foreach (string name in ConversionNames())
+            {
+                conversions = conversions.Add(ConversionOf(name));
+            }
+
+            return conversions;
+        }
+    }
 
     /// <summary>
     /// Where each name the set defines comes from, QuantLib's presets or a file's record, and a warning for each
@@ -635,6 +792,42 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         RegionData? q = null;
         RegionData Q() => q ??= reference();
         return new RegionData(r.RegionName ?? Q().Name, r.Code ?? Q().Code);
+    }
+
+    /// <inheritdoc/>
+    [Experimental("NQL0001")]
+    public override UnitOfMeasureData ResolveUnitOfMeasure(string preset, Func<UnitOfMeasureData> reference)
+    {
+        ArgumentNullException.ThrowIfNull(preset);
+        ArgumentNullException.ThrowIfNull(reference);
+        if (UnitFieldsOf(preset, layers.Length, []) is not { } u)
+        {
+            return Undefined(preset, reference);
+        }
+
+        // a triangulation unit is built through this callback again, so a cycle of them is caught here
+        HashSet<string> resolving = resolvingUnits ??= new(StringComparer.Ordinal);
+        if (!resolving.Add(preset))
+        {
+            throw new ArgumentException($"the unit of measure {preset} is part of a cycle of triangulation units", "snapshot");
+        }
+
+        try
+        {
+            // QuantLib's data for a field the record leaves out: built in the set where the triangulation unit is
+            // QuantLib's, else under QuantLib's conventions, so a triangulation preset the record replaces isn't built
+            UnitOfMeasureData? q = null;
+            UnitOfMeasureData Q() => q ??= u.TriangulationUnit is null ? reference() : QuantLibData(reference);
+            return new UnitOfMeasureData(
+                u.UnitName ?? Q().Name,
+                u.Code ?? Q().Code,
+                u.UnitType ?? Q().UnitType,
+                u.TriangulationUnit is string t ? UnitOfMeasureOf(t, [], "preset") : Q().TriangulationUnitOfMeasure);
+        }
+        finally
+        {
+            resolving.Remove(preset);
+        }
     }
 
     /// <inheritdoc/>
@@ -853,7 +1046,8 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
 
     private static bool IsCodedPreset(string name) =>
         PresetFactories.Calendars.ContainsKey(name) || PresetFactories.DayCounters.ContainsKey(name)
-        || PresetFactories.Currencies.ContainsKey(name) || CodedIndexKind(name) is not null;
+        || PresetFactories.Currencies.ContainsKey(name) || CodedIndexKind(name) is not null
+        || PresetFactories.UnitsOfMeasure.ContainsKey(name);
 
     private static object Validate(ConventionSet set, string name)
     {
@@ -898,7 +1092,9 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
                         ConventionKind.Currency => set.CurrencyOf(name, [], "snapshot"),
                         ConventionKind.Region => set.RegionOf(name, [], "snapshot"),
                         ConventionKind.Index => Validate(set, name),
+                        ConventionKind.UnitOfMeasure => set.UnitOfMeasureOf(name, [], "snapshot"),
                         ConventionKind.Alias or ConventionKind.Enumeration => set.AliasTarget(name, []),
+                        _ when ConventionKinds.IsCommodity(kind) => ValidateCommodity(set, kind, name),
                         _ => ValidateConvention(set, kind, name),
                     };
                 }
@@ -1093,6 +1289,9 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
                 break;
             case ConventionRecord when IsInstrumentConvention(ConventionKinds.Of(r)):
                 CheckConvention(r, ConventionKinds.Of(r), Refuse);
+                break;
+            case UnitOfMeasureRecord u:
+                CheckUnit(u, Refuse);
                 break;
             case AliasRecord a:
                 // the shipped aliases are the ones QuantLib's shared implementations allow
@@ -1493,14 +1692,17 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         bool currency = Top(ConventionKind.Currency, b, layers.Length) is not null || PresetFactories.Currencies.ContainsKey(b);
         bool region = Top(ConventionKind.Region, b, layers.Length) is not null || PresetFactories.Regions.ContainsKey(b);
         bool index = Top(ConventionKind.Index, b, layers.Length) is not null || (CodedIndexKind(b) is not null && !PresetFactories.Regions.ContainsKey(b));
-        return (calendar, dayCounter, currency, region, index) switch
+        bool unit = Top(ConventionKind.UnitOfMeasure, b, layers.Length) is not null || PresetFactories.UnitsOfMeasure.ContainsKey(b);
+        return (calendar, dayCounter, currency, region, index, unit) switch
         {
-            (true, false, false, false, false) => CalendarOf(name, layers.Length, visiting, "snapshot"),
-            (false, true, false, false, false) => DayCounterOf(name, layers.Length, visiting, "snapshot"),
-            (false, false, true, false, false) => CurrencyOf(name, visiting, "snapshot"),
-            (false, false, false, true, false) => RegionOf(name, visiting, "snapshot"),
-            (false, false, false, false, true) => b,
-            (false, false, false, false, false) => throw Unknown("calendar, day counter, currency, region, index or business-day convention", b, "snapshot"),
+            (true, false, false, false, false, false) => CalendarOf(name, layers.Length, visiting, "snapshot"),
+            (false, true, false, false, false, false) => DayCounterOf(name, layers.Length, visiting, "snapshot"),
+            (false, false, true, false, false, false) => CurrencyOf(name, visiting, "snapshot"),
+            (false, false, false, true, false, false) => RegionOf(name, visiting, "snapshot"),
+            (false, false, false, false, true, false) => b,
+            (false, false, false, false, false, true) => UnitOfMeasureOf(name, visiting, "snapshot"),
+            (false, false, false, false, false, false) => throw Unknown(
+                "calendar, day counter, currency, region, index, unit of measure or business-day convention", b, "snapshot"),
             _ => throw new ArgumentException($"the alias {name}'s base {b} names values of more than one kind", "snapshot"),
         };
     }
@@ -1546,7 +1748,7 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         : name.StartsWith(OisDefaultsName + ".", StringComparison.Ordinal) && name.Length > OisDefaultsName.Length + 1 ? OisDefaultsName
         : null;
 
-    private static bool IsInstrumentConvention(ConventionKind kind) => !ConventionKinds.Aliased(kind);
+    private static bool IsInstrumentConvention(ConventionKind kind) => ConventionKinds.IsInstrumentConvention(kind);
 
     // Whether an index name is an overnight-indexed swap index's record, through its aliases.
     internal bool IsOvernightIndexedSwapIndex(string name) =>
@@ -1782,16 +1984,18 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         : PresetFactories.OvernightIndexes.ContainsKey(name) ? typeof(OvernightIndexRecord)
         : PresetFactories.SwapIndexes.ContainsKey(name) ? typeof(SwapIndexRecord)
         : PresetFactories.ZeroInflationIndexes.ContainsKey(name) || PresetFactories.ZeroInflationIndexesWithArguments.ContainsKey(name)
-            ? typeof(ZeroInflationIndexRecord)
+            || PresetFactories.ZeroInflationIndexesWithLagAndCurrency.ContainsKey(name) ? typeof(ZeroInflationIndexRecord)
         : PresetFactories.YoYInflationIndexes.ContainsKey(name) || PresetFactories.YoYInflationIndexesWithArguments.ContainsKey(name)
-            ? typeof(YoYInflationIndexRecord)
+            || PresetFactories.YoYInflationIndexesWithLagAndCurrency.ContainsKey(name) ? typeof(YoYInflationIndexRecord)
         : PresetFactories.Regions.ContainsKey(name) ? typeof(RegionRecord)
         : null;
 
     private static bool TakesArguments(string name) =>
         PresetFactories.IborIndexesWithSettlementDays.ContainsKey(name)
         || PresetFactories.ZeroInflationIndexesWithArguments.ContainsKey(name)
-        || PresetFactories.YoYInflationIndexesWithArguments.ContainsKey(name);
+        || PresetFactories.YoYInflationIndexesWithArguments.ContainsKey(name)
+        || PresetFactories.ZeroInflationIndexesWithLagAndCurrency.ContainsKey(name)
+        || PresetFactories.YoYInflationIndexesWithLagAndCurrency.ContainsKey(name);
 
     private static ArgumentException Missing(string kind, string name, string field) =>
         new($"the {kind} {name} gives no {field}", "snapshot");
@@ -2161,6 +2365,149 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
             : throw Unknown("region", name, paramName);
     }
 
+    // Batch 7's kinds. A unit preset's record answers the provider's member for its class, a field it leaves out
+    // QuantLib's reference; a unit of a user's own is built from its record's chain, and takes no triangulation unit,
+    // which its public constructor doesn't take. The other kinds are built from their records' chains.
+
+    // QuantLib's null commodity type for none, else a commodity type record's.
+    private CommodityType CommodityTypeOf(string? name, string paramName)
+    {
+        if (name is null)
+        {
+            return new NullCommodityType();
+        }
+
+        CommodityTypeRecord r = ConventionRecordOf<CommodityTypeRecord>(ConventionKind.CommodityType, name, layers.Length, [], static (a, b) => a.Over(b))
+            ?? throw Unknown("commodity type", name, paramName);
+        return new CommodityType(r.TypeName ?? name, r.Code ?? throw Missing("commodity type", name, "Code"));
+    }
+
+    private UnitOfMeasureRecord? UnitFieldsOf(string name, int upTo, HashSet<string> visiting)
+    {
+        string key = $"unit:{name}:{upTo}";
+        Enter(visiting, key, name);
+        try
+        {
+            Entry? e = Top(ConventionKind.UnitOfMeasure, name, upTo);
+            switch (e?.Record)
+            {
+                case null:
+                    return null;
+                case AliasRecord a:
+                    return UnitFieldsOf(a.Base!, layers.Length, visiting);
+                case UnitOfMeasureRecord u:
+                {
+                    UnitOfMeasureRecord? lower = u.Base switch
+                    {
+                        null => null,
+                        string b when b == name => UnitFieldsOf(name, e.Value.Layer, visiting),
+                        string b => UnitFieldsOf(b, layers.Length, visiting)
+                            ?? (PresetFactories.UnitsOfMeasure.ContainsKey(b) ? null : throw new ArgumentException($"unknown unit of measure {b}", "snapshot")),
+                    };
+                    return lower is null ? u : u.Over(lower);
+                }
+
+                default:
+                    throw new ArgumentException($"{name} is no unit of measure", "snapshot");
+            }
+        }
+        finally
+        {
+            visiting.Remove(key);
+        }
+    }
+
+    private UnitOfMeasure UnitOfMeasureOf(string name, HashSet<string> visiting, string paramName)
+    {
+        if (Top(ConventionKind.UnitOfMeasure, name, layers.Length)?.Record is AliasRecord alias)
+        {
+            return UnitOfMeasureOf(alias.Base!, visiting, paramName);
+        }
+
+        if (PresetFactories.UnitsOfMeasure.TryGetValue(name, out Func<UnitOfMeasure>? preset))
+        {
+            return preset();
+        }
+
+        UnitOfMeasureRecord u = UnitFieldsOf(name, layers.Length, visiting) ?? throw Unknown("unit of measure", name, paramName);
+        if (u.TriangulationUnit is not null)
+        {
+            throw new ArgumentException(
+                $"the unit of measure {name}'s chain gives a TriangulationUnit, which a unit of a user's own doesn't take: its constructor takes none, a preset's only",
+                "snapshot");
+        }
+
+        return new UnitOfMeasure(
+            u.UnitName ?? name,
+            u.Code ?? throw Missing("unit of measure", name, "Code"),
+            u.UnitType ?? throw Missing("unit of measure", name, "UnitType"));
+    }
+
+    private static T QuantLibData<T>(Func<T> reference)
+    {
+        using (Use(ConventionProvider.QuantLib))
+        {
+            return reference();
+        }
+    }
+
+    // The conversion records' names, in the order the set's layers first give them.
+    private IEnumerable<string> ConversionNames() =>
+        layers.SelectMany(l => l.Records).OfType<UnitOfMeasureConversionRecord>().Select(r => r.Name).Distinct(StringComparer.Ordinal);
+
+    private UnitOfMeasureConversion ConversionOf(string name)
+    {
+        UnitOfMeasureConversionRecord r = Merged<UnitOfMeasureConversionRecord>(
+            ConventionKind.UnitOfMeasureConversion, name, static (a, b) => a.Over(b));
+        return new UnitOfMeasureConversion(
+            CommodityTypeOf(r.CommodityType, "snapshot"),
+            UnitOfMeasureOf(r.Source ?? throw Missing("unit of measure conversion", name, "Source"), [], "snapshot"),
+            UnitOfMeasureOf(r.Target ?? throw Missing("unit of measure conversion", name, "Target"), [], "snapshot"),
+            r.Factor ?? throw Missing("unit of measure conversion", name, "Factor"));
+    }
+
+    // A unit preset's record: none or its own name as its base, its fields given without a base, its code QuantLib's;
+    // a unit of a user's own takes no triangulation unit.
+    private static void CheckUnit(UnitOfMeasureRecord u, Action<string> refuse)
+    {
+        if (PresetFactories.UnitsOfMeasure.TryGetValue(u.Name, out Func<UnitOfMeasure>? coded))
+        {
+            CheckBase(u, refuse);
+            if (u.Base is null && (u.UnitName is null || u.Code is null || u.UnitType is null))
+            {
+                refuse("a field is missing: UnitName, Code and UnitType are required without a base");
+            }
+
+            if (u.Code is string code)
+            {
+                string expected;
+                using (Use(ConventionProvider.QuantLib))
+                {
+                    expected = coded().Code;
+                }
+
+                if (code != expected)
+                {
+                    refuse($"its code is its identity, QuantLib's {expected}, not {code}");
+                }
+            }
+        }
+        else if (u.TriangulationUnit is not null)
+        {
+            refuse("a unit of a user's own takes no TriangulationUnit: its constructor takes none, a preset's only");
+        }
+    }
+
+    private static object ValidateCommodity(ConventionSet set, ConventionKind kind, string name) => kind switch
+    {
+        ConventionKind.CommodityType => set.CommodityTypeOf(name, "snapshot"),
+        ConventionKind.UnitOfMeasureConversion => set.ConversionOf(name),
+        ConventionKind.PaymentTerm => set.PaymentTerm(name),
+        ConventionKind.CommodityIndex => set.CommodityIndex(name),
+        ConventionKind.CommoditySettings => set.CommoditySettings(name),
+        _ => set.QuantitySettings(name),
+    };
+
     private IborIndex IborIndexOf(string name, HashSet<string> visiting, string paramName, YieldTermStructure? h)
     {
         Entry? e = Top(ConventionKind.Index, name, layers.Length);
@@ -2340,10 +2687,25 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
             throw new ArgumentException($"the {name} preset takes its frequency and revised flag: name a record based on it that gives them", paramName);
         }
 
+        if (PresetFactories.ZeroInflationIndexesWithLagAndCurrency.ContainsKey(name))
+        {
+            throw new ArgumentException($"the {name} preset takes its frequency, revised flag, lag and currency: name a record based on it that gives them", paramName);
+        }
+
         YoYInflationIndexRecord z = InflationFieldsOf(name, layers.Length, visiting) ?? throw Unknown("zero inflation index", name, paramName);
         if (Top(ConventionKind.Index, name, layers.Length)?.Record is not ZeroInflationIndexRecord)
         {
             throw new ArgumentException($"{name} is no zero inflation index", paramName);
+        }
+
+        if (ArgumentBaseOf(name, []) is string generic && PresetFactories.ZeroInflationIndexesWithLagAndCurrency.TryGetValue(generic, out var zeroGeneric))
+        {
+            return zeroGeneric(
+                z.Frequency ?? throw Missing("zero inflation index", name, "Frequency"),
+                z.Revised ?? throw Missing("zero inflation index", name, "Revised"),
+                z.AvailabilityLag ?? throw Missing("zero inflation index", name, "AvailabilityLag"),
+                CurrencyOf(z.Currency ?? throw Missing("zero inflation index", name, "Currency"), [], "snapshot"),
+                ts);
         }
 
         if (ArgumentBaseOf(name, []) is string withArguments)
@@ -2379,10 +2741,25 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
             throw new ArgumentException($"the {name} preset takes its frequency and revised flag: name a record based on it that gives them", paramName);
         }
 
+        if (PresetFactories.YoYInflationIndexesWithLagAndCurrency.ContainsKey(name))
+        {
+            throw new ArgumentException($"the {name} preset takes its frequency, revised flag, lag and currency: name a record based on it that gives them", paramName);
+        }
+
         YoYInflationIndexRecord y = InflationFieldsOf(name, layers.Length, visiting) ?? throw Unknown("year-on-year inflation index", name, paramName);
         if (Top(ConventionKind.Index, name, layers.Length)?.Record is not YoYInflationIndexRecord)
         {
             throw new ArgumentException($"{name} is no year-on-year inflation index", paramName);
+        }
+
+        if (ArgumentBaseOf(name, []) is string generic && PresetFactories.YoYInflationIndexesWithLagAndCurrency.TryGetValue(generic, out var yoyGeneric))
+        {
+            return yoyGeneric(
+                y.Frequency ?? throw Missing("year-on-year inflation index", name, "Frequency"),
+                y.Revised ?? throw Missing("year-on-year inflation index", name, "Revised"),
+                y.AvailabilityLag ?? throw Missing("year-on-year inflation index", name, "AvailabilityLag"),
+                CurrencyOf(y.Currency ?? throw Missing("year-on-year inflation index", name, "Currency"), [], "snapshot"),
+                ts);
         }
 
         if (ArgumentBaseOf(name, []) is string withArguments)
@@ -2438,11 +2815,17 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
             case ZeroInflationIndexRecord when PresetFactories.ZeroInflationIndexesWithArguments.TryGetValue(name, out var zero):
                 _ = zero(Frequency.Monthly, false, null);
                 break;
+            case ZeroInflationIndexRecord when PresetFactories.ZeroInflationIndexesWithLagAndCurrency.TryGetValue(name, out var zeroGeneric):
+                _ = zeroGeneric(Frequency.Monthly, false, new Period(3, TimeUnit.Months), CurrencyOf("EUR", [], "snapshot"), null);
+                break;
             case ZeroInflationIndexRecord:
                 _ = ZeroIndexOf(name, [], "snapshot", null);
                 break;
             case YoYInflationIndexRecord when PresetFactories.YoYInflationIndexesWithArguments.TryGetValue(name, out var yoy):
                 _ = yoy(Frequency.Monthly, false, null);
+                break;
+            case YoYInflationIndexRecord when PresetFactories.YoYInflationIndexesWithLagAndCurrency.TryGetValue(name, out var yoyGeneric):
+                _ = yoyGeneric(Frequency.Monthly, false, new Period(3, TimeUnit.Months), CurrencyOf("EUR", [], "snapshot"), null);
                 break;
             case YoYInflationIndexRecord:
                 _ = YoYIndexOf(name, [], "snapshot", null);
@@ -2483,6 +2866,14 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
                 case IborIndexRecord { Tenor: Period t } when FixedPresetTenor(r.Name) is Period own && t != own:
                     refuse($"its tenor is its class's, {own}");
                     break;
+                case ZeroInflationIndexRecord z when PresetFactories.ZeroInflationIndexesWithLagAndCurrency.ContainsKey(r.Name)
+                    && (z.Frequency is not null || z.Revised is not null || z.AvailabilityLag is not null || z.Currency is not null):
+                    refuse("its frequency, revised flag, availability lag and currency are its constructor's arguments");
+                    break;
+                case YoYInflationIndexRecord y when PresetFactories.YoYInflationIndexesWithLagAndCurrency.ContainsKey(r.Name)
+                    && (y.Frequency is not null || y.Revised is not null || y.AvailabilityLag is not null || y.Currency is not null):
+                    refuse("its frequency, revised flag, availability lag and currency are its constructor's arguments");
+                    break;
                 case ZeroInflationIndexRecord z when PresetFactories.ZeroInflationIndexesWithArguments.ContainsKey(r.Name) && (z.Frequency is not null || z.Revised is not null):
                     refuse("its frequency and revised flag are its constructor's arguments");
                     break;
@@ -2516,14 +2907,19 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
             }
         }
 
-        // a record of a user's own based on a preset taking arguments gives only them
+        // a record of a user's own based on a preset taking arguments gives only them: the generic indexes' lag and
+        // currency among them
         if (ArgumentBaseOf(r.Name, []) is string withArguments)
         {
+            bool generic = PresetFactories.ZeroInflationIndexesWithLagAndCurrency.ContainsKey(withArguments)
+                || PresetFactories.YoYInflationIndexesWithLagAndCurrency.ContainsKey(withArguments);
             bool onlyArguments = r switch
             {
                 IborIndexRecord i => i with { FixingDays = null } == new IborIndexRecord(i.Name, i.Base) { Foreign = i.Foreign },
-                ZeroInflationIndexRecord z => z with { Frequency = null, Revised = null } == new ZeroInflationIndexRecord(z.Name, z.Base) { Foreign = z.Foreign },
-                YoYInflationIndexRecord y => y with { Frequency = null, Revised = null } == new YoYInflationIndexRecord(y.Name, y.Base) { Foreign = y.Foreign },
+                ZeroInflationIndexRecord z => z with { Frequency = null, Revised = null, AvailabilityLag = generic ? null : z.AvailabilityLag, Currency = generic ? null : z.Currency }
+                    == new ZeroInflationIndexRecord(z.Name, z.Base) { Foreign = z.Foreign },
+                YoYInflationIndexRecord y => y with { Frequency = null, Revised = null, AvailabilityLag = generic ? null : y.AvailabilityLag, Currency = generic ? null : y.Currency }
+                    == new YoYInflationIndexRecord(y.Name, y.Base) { Foreign = y.Foreign },
                 _ => false,
             };
             if (!onlyArguments)

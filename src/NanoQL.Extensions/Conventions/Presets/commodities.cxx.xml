@@ -1,0 +1,105 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Conventions xmlns="https://nanoql.net/schemas/conventions">
+  <Region name="GenericRegion">
+    <RegionName>Generic</RegionName>
+    <Code>GENERIC</Code>
+  </Region>
+  <ZeroInflationIndex name="GenericCPI">
+    <Family>CPI</Family>
+    <Region>GenericRegion</Region>
+  </ZeroInflationIndex>
+  <YoYInflationIndex name="YYGenericCPI">
+    <Family>YY_CPI</Family>
+    <Region>GenericRegion</Region>
+  </YoYInflationIndex>
+  <UnitOfMeasure name="BarrelUnitOfMeasure">
+    <UnitName>Barrels</UnitName>
+    <Code>BBL</Code>
+    <UnitType>Volume</UnitType>
+  </UnitOfMeasure>
+  <UnitOfMeasure name="MTUnitOfMeasure">
+    <UnitName>Metric Tonnes</UnitName>
+    <Code>MT</Code>
+    <UnitType>Mass</UnitType>
+  </UnitOfMeasure>
+  <UnitOfMeasure name="MBUnitOfMeasure">
+    <UnitName>1000 Barrels</UnitName>
+    <Code>MB</Code>
+    <UnitType>Volume</UnitType>
+    <TriangulationUnit>BarrelUnitOfMeasure</TriangulationUnit>
+  </UnitOfMeasure>
+  <UnitOfMeasure name="GallonUnitOfMeasure">
+    <UnitName>US Gallons</UnitName>
+    <Code>GAL</Code>
+    <UnitType>Volume</UnitType>
+    <TriangulationUnit>BarrelUnitOfMeasure</TriangulationUnit>
+  </UnitOfMeasure>
+  <UnitOfMeasure name="LitreUnitOfMeasure">
+    <UnitName>Litres</UnitName>
+    <Code>l</Code>
+    <UnitType>Volume</UnitType>
+    <TriangulationUnit>BarrelUnitOfMeasure</TriangulationUnit>
+  </UnitOfMeasure>
+  <UnitOfMeasure name="KilolitreUnitOfMeasure">
+    <UnitName>Kilolitres</UnitName>
+    <Code>kl</Code>
+    <UnitType>Volume</UnitType>
+    <TriangulationUnit>BarrelUnitOfMeasure</TriangulationUnit>
+  </UnitOfMeasure>
+  <UnitOfMeasure name="TokyoKilolitreUnitOfMeasure">
+    <UnitName>Tokyo Kilolitres</UnitName>
+    <Code>KL_tk</Code>
+    <UnitType>Volume</UnitType>
+    <TriangulationUnit>BarrelUnitOfMeasure</TriangulationUnit>
+  </UnitOfMeasure>
+  <UnitOfMeasure name="LotUnitOfMeasure">
+    <UnitName>Lot</UnitName>
+    <Code>Lot</Code>
+    <UnitType>Quantity</UnitType>
+  </UnitOfMeasure>
+  <UnitOfMeasureConversion name="MB-BBL">
+    <Source>MBUnitOfMeasure</Source>
+    <Target>BarrelUnitOfMeasure</Target>
+    <Factor>1000</Factor>
+  </UnitOfMeasureConversion>
+  <UnitOfMeasureConversion name="BBL-GAL">
+    <Source>BarrelUnitOfMeasure</Source>
+    <Target>GallonUnitOfMeasure</Target>
+    <Factor>42</Factor>
+  </UnitOfMeasureConversion>
+  <UnitOfMeasureConversion name="MB-GAL">
+    <Source>MBUnitOfMeasure</Source>
+    <Target>GallonUnitOfMeasure</Target>
+    <Factor>42000</Factor>
+  </UnitOfMeasureConversion>
+  <UnitOfMeasureConversion name="GAL-l">
+    <Source>GallonUnitOfMeasure</Source>
+    <Target>LitreUnitOfMeasure</Target>
+    <Factor>3.78541</Factor>
+  </UnitOfMeasureConversion>
+  <UnitOfMeasureConversion name="BBL-l">
+    <Source>BarrelUnitOfMeasure</Source>
+    <Target>LitreUnitOfMeasure</Target>
+    <Factor>158.987</Factor>
+  </UnitOfMeasureConversion>
+  <UnitOfMeasureConversion name="kl-BBL">
+    <Source>KilolitreUnitOfMeasure</Source>
+    <Target>BarrelUnitOfMeasure</Target>
+    <Factor>6.28981</Factor>
+  </UnitOfMeasureConversion>
+  <UnitOfMeasureConversion name="KL_tk-BBL">
+    <Source>TokyoKilolitreUnitOfMeasure</Source>
+    <Target>BarrelUnitOfMeasure</Target>
+    <Factor>6.28981</Factor>
+  </UnitOfMeasureConversion>
+  <CommoditySettings name="CommoditySettings">
+    <Currency>USD</Currency>
+    <UnitOfMeasure>BarrelUnitOfMeasure</UnitOfMeasure>
+  </CommoditySettings>
+  <QuantitySettings name="QuantitySettings">
+    <ConversionType>NoConversion</ConversionType>
+  </QuantitySettings>
+</Conventions>

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics.CodeAnalysis;
+using NanoQL.Experimental;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Time;
@@ -210,6 +211,19 @@ public abstract class ConventionProvider
         return reference();
     }
 
+    /// <summary>The data of a unit of measure preset.</summary>
+    /// <param name="preset">The preset's class name (<c>BarrelUnitOfMeasure</c>).</param>
+    /// <param name="reference">Builds QuantLib's data.</param>
+    /// <returns>The unit's data. Its code is its identity, which its equality and the conversions' lookups read, so it
+    /// is QuantLib's, and the preset refuses data that changes it; the name, the type and the triangulation unit are
+    /// the provider's to configure.</returns>
+    [Experimental("NQL0001")]
+    public virtual UnitOfMeasureData ResolveUnitOfMeasure(string preset, Func<UnitOfMeasureData> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
     /// <summary>The defaults a <see cref="MakeVanillaSwap"/> takes on an index of a currency.</summary>
     /// <param name="currency">The index's currency, or <see langword="null"/> for none.</param>
     /// <param name="reference">Builds QuantLib's defaults for the currency.</param>
@@ -314,12 +328,13 @@ public abstract class ConventionProvider
         ConventionProvider provider = Current;
         using (Use(provider))
         {
-            // QuantLib's data is built once, when the provider asks for it or the identity check needs it
+            // QuantLib's data is built in the provider's scope when the provider asks for it; the identity check reads
+            // that, or else data built under QuantLib's conventions, so it builds no preset through the provider
             CurrencyData? built = null;
             CurrencyData QuantLibs() => built ??= reference();
             CurrencyData data = provider.ResolveCurrency(code, QuantLibs)
                 ?? throw new NanoQLException($"no data for the {code} currency");
-            CurrencyData quantLibs = QuantLibs();
+            CurrencyData quantLibs = built ?? Identity(reference);
 
             // the codes and the name are the currency's identity, which its equality and the registries read
             return data.Code == code && data.Name == quantLibs.Name && data.NumericCode == quantLibs.NumericCode
@@ -384,6 +399,36 @@ public abstract class ConventionProvider
             return data.Name == QuantLibs().Name
                 ? data
                 : throw new NanoQLException($"the data for the {preset} region changes its name: \"{data.Name}\" for QuantLib's \"{QuantLibs().Name}\"");
+        }
+    }
+
+    internal static UnitOfMeasureData ReadUnitOfMeasure(string preset, Func<UnitOfMeasureData> reference)
+    {
+        ConventionProvider provider = Current;
+        using (Use(provider))
+        {
+            // QuantLib's data is built in the provider's scope when the provider asks for it; the identity check reads
+            // that, or else data built under QuantLib's conventions, so it builds no preset through the provider
+            UnitOfMeasureData? built = null;
+            UnitOfMeasureData QuantLibs() => built ??= reference();
+            UnitOfMeasureData data = provider.ResolveUnitOfMeasure(preset, QuantLibs)
+                ?? throw new NanoQLException($"no data for the {preset} unit of measure");
+            string code = (built ?? Identity(reference)).Code;
+
+            // the code is the unit's identity, which its equality and the conversions' lookups read
+            return data.Code == code
+                ? data
+                : throw new NanoQLException($"the data for the {preset} unit of measure changes its code: {data.Code} for QuantLib's {code}");
+        }
+    }
+
+    // A preset's QuantLib data for its identity check, built under QuantLib's conventions: its nested presets (a
+    // triangulation unit or currency) read no provider.
+    private static T Identity<T>(Func<T> reference)
+    {
+        using (Use(QuantLib))
+        {
+            return reference();
         }
     }
 
