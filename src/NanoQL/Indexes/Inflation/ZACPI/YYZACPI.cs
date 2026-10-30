@@ -21,14 +21,29 @@ public sealed class YYZACPI : YoYInflationIndex
     /// <param name="ts">The year-on-year inflation curve the index forecasts through, or <see langword="null"/> for
     /// none.</param>
     public YYZACPI(YoYInflationTermStructure? ts = null)
-        : base(
-            "YY_CPI",
-            new ZARegion(),
-            false,
-            Frequency.Monthly,
-            new Period(1, TimeUnit.Months),
-            new ZARCurrency(),
-            ts)
+        : this(ConventionProvider.ReadInflationIndex("YYZACPI", Reference), ts)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private YYZACPI((InflationIndexConventions Values, ConventionProvider Provider) read, YoYInflationTermStructure? ts)
+        : base(
+            "YY_CPI",
+            read.Values.Region,
+            read.Values.Revised,
+            read.Values.Frequency,
+            read.Values.AvailabilityLag,
+            read.Values.Currency,
+            ts,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static InflationIndexConventions Reference() => new(
+        new ZARegion(),
+        false,
+        Frequency.Monthly,
+        new Period(1, TimeUnit.Months),
+        new ZARCurrency());
 }

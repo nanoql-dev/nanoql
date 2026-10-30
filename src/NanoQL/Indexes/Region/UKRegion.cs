@@ -12,7 +12,10 @@ public sealed class UKRegion : Region
 {
     /// <summary>Initializes a new instance of the <see cref="UKRegion"/> class.</summary>
     public UKRegion()
-        : base("UK", "UK")
+        : base(ConventionProvider.ReadRegion("UKRegion", Reference))
     {
     }
+
+    // QuantLib's data.
+    private static RegionData Reference() => new("UK", "UK");
 }

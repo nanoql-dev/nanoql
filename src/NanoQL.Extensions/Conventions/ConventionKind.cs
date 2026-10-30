@@ -15,6 +15,12 @@ public enum ConventionKind
     /// <summary>Currencies: presets.</summary>
     Currency,
 
+    /// <summary>Regions: presets and regions of a user's own.</summary>
+    Region,
+
+    /// <summary>Indexes: Ibor, overnight, swap and inflation indexes and Ibor families, which share one name space.</summary>
+    Index,
+
     /// <summary>Aliases, each in its base's kind.</summary>
     Alias,
 

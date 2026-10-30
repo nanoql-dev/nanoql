@@ -59,4 +59,31 @@ public class DailyTenorLibor : IborIndex
             throw new ArgumentException("for EUR Libor dedicated EurLibor constructor must be used", nameof(currency));
         }
     }
+
+    // A preset's: the conventions it read, London's fixing calendar and the currency's financial centre among them,
+    // joined as the public constructor joins them, with the provider they came from, which the index keeps.
+    private protected DailyTenorLibor(
+        string familyName, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base(
+            familyName,
+            new Period(1, TimeUnit.Days),
+            read.Values.FixingDays,
+            read.Values.Currency,
+            new JointCalendar(
+                read.Values.FixingCalendar,
+                read.Values.FinancialCenterCalendar
+                    ?? throw new NanoQLException($"the {familyName} conventions name no financial-centre calendar"),
+                JointCalendarRule.JoinHolidays),
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
+    {
+        // a currency's code is its identity, which no provider changes
+        if (!(read.Values.Currency.Code != "EUR"))
+        {
+            throw new NanoQLException("for EUR Libor dedicated EurLibor constructor must be used");
+        }
+    }
 }

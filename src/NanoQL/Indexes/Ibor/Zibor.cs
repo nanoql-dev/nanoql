@@ -21,16 +21,32 @@ public sealed class Zibor : IborIndex
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Zibor(Period tenor, YieldTermStructure? h = null)
+        : this(tenor, ConventionProvider.ReadIborFamily("Zibor", tenor, Reference), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Zibor(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "Zibor",
             tenor,
-            2,
-            new CHFCurrency(),
-            new Switzerland(),
-            BusinessDayConvention.ModifiedFollowing,
-            false,
-            new Actual360(),
-            h)
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
     {
     }
+
+    // QuantLib's conventions, the same at every tenor, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        2,
+        new CHFCurrency(),
+        new Switzerland(),
+        BusinessDayConvention.ModifiedFollowing,
+        false,
+        new Actual360());
 }

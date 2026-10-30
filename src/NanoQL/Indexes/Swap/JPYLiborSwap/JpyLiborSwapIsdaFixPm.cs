@@ -26,16 +26,7 @@ public sealed class JpyLiborSwapIsdaFixPm : SwapIndex
     /// <param name="tenor">The swap's tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public JpyLiborSwapIsdaFixPm(Period tenor, YieldTermStructure? h = null)
-        : base(
-            "JpyLiborSwapIsdaFixPm", // familyName
-            tenor,
-            2, // settlementDays
-            new JPYCurrency(),
-            new TARGET(),
-            new Period(6, TimeUnit.Months), // fixedLegTenor
-            BusinessDayConvention.ModifiedFollowing, // fixedLegConvention
-            new ActualActual(ActualActualConvention.ISDA), // fixedLegDaycounter
-            new JPYLibor(new Period(6, TimeUnit.Months), h))
+        : this(tenor, ConventionProvider.ReadSwapIndex("JpyLiborSwapIsdaFixPm", tenor, () => Reference(h)), false, null)
     {
     }
 
@@ -47,17 +38,39 @@ public sealed class JpyLiborSwapIsdaFixPm : SwapIndex
     /// <param name="forwarding">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <param name="discounting">The discounting curve, or <see langword="null"/>, QuantLib's empty handle.</param>
     public JpyLiborSwapIsdaFixPm(Period tenor, YieldTermStructure? forwarding, YieldTermStructure? discounting)
-        : base(
-            "JpyLiborSwapIsdaFixPm", // familyName
-            tenor,
-            2, // settlementDays
-            new JPYCurrency(),
-            new TARGET(),
-            new Period(6, TimeUnit.Months), // fixedLegTenor
-            BusinessDayConvention.ModifiedFollowing, // fixedLegConvention
-            new ActualActual(ActualActualConvention.ISDA), // fixedLegDaycounter
-            new JPYLibor(new Period(6, TimeUnit.Months), forwarding),
-            discounting)
+        : this(tenor, ConventionProvider.ReadSwapIndex("JpyLiborSwapIsdaFixPm", tenor, () => Reference(forwarding)), true, discounting)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private JpyLiborSwapIsdaFixPm(
+        Period tenor,
+        (SwapIndexConventions Values, ConventionProvider Provider) read,
+        bool exogenousDiscount,
+        YieldTermStructure? discounting)
+        : base(
+            "JpyLiborSwapIsdaFixPm",
+            tenor,
+            read.Values.SettlementDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.FixedLegTenor,
+            read.Values.FixedLegConvention,
+            read.Values.FixedLegDayCounter,
+            read.Values.IborIndex,
+            exogenousDiscount,
+            discounting,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope, the Ibor index on the forwarding curve.
+    private static SwapIndexConventions Reference(YieldTermStructure? forwarding) => new(
+        2,
+        new JPYCurrency(),
+        new TARGET(),
+        new Period(6, TimeUnit.Months),
+        BusinessDayConvention.ModifiedFollowing,
+        new ActualActual(ActualActualConvention.ISDA),
+        new JPYLibor(new Period(6, TimeUnit.Months), forwarding));
 }

@@ -21,16 +21,7 @@ public class Bibor : IborIndex
     /// <exception cref="ArgumentException">The tenor is in days.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The tenor's unit is shorter than a day.</exception>
     public Bibor(Period tenor, YieldTermStructure? h = null)
-        : base(
-            "Bibor",
-            tenor,
-            2, // settlement days
-            new THBCurrency(),
-            new Thailand(),
-            BiborConvention(tenor),
-            BiborEOM(tenor),
-            new Actual365Fixed(),
-            h)
+        : this(tenor, ConventionProvider.ReadIborFamily("Bibor", tenor, () => Reference(tenor)), h)
     {
         if (!(Tenor.Units != TimeUnit.Days))
         {
@@ -38,6 +29,31 @@ public class Bibor : IborIndex
                 $"for daily tenors ({Tenor}) dedicated DailyTenor constructor must be used", nameof(tenor));
         }
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Bibor(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base(
+            "Bibor",
+            tenor,
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        2,
+        new THBCurrency(),
+        new Thailand(),
+        BiborConvention(tenor),
+        BiborEOM(tenor),
+        new Actual365Fixed());
 
     // Following for days and weeks, modified following for months and years.
     private static BusinessDayConvention BiborConvention(Period p) => p.Units switch

@@ -28,9 +28,24 @@ public sealed class Cdi : OvernightIndex
     /// <summary>Initializes a new instance of the <see cref="Cdi"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Cdi(YieldTermStructure? h = null)
-        : base("CDI", 0, new BRLCurrency(), new Brazil(BrazilMarket.Settlement), new Business252(), h)
+        : this(ConventionProvider.ReadOvernightIndex("Cdi", Reference), h)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Cdi((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base("CDI", read.Values.FixingDays, read.Values.Currency, read.Values.FixingCalendar, read.Values.DayCounter, h, read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new BRLCurrency(),
+        new Brazil(BrazilMarket.Settlement),
+        BusinessDayConvention.Following,
+        false,
+        new Business252());
 
     // A clone: the source's conventions and provider, on another forwarding curve.
     private Cdi(Cdi source, YieldTermStructure? h)

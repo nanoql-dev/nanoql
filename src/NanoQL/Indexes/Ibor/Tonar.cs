@@ -17,7 +17,22 @@ public sealed class Tonar : OvernightIndex
     /// <summary>Initializes a new instance of the <see cref="Tonar"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Tonar(YieldTermStructure? h = null)
-        : base("Tonar", 0, new JPYCurrency(), new Japan(), new Actual365Fixed(), h)
+        : this(ConventionProvider.ReadOvernightIndex("Tonar", Reference), h)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Tonar((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base("Tonar", read.Values.FixingDays, read.Values.Currency, read.Values.FixingCalendar, read.Values.DayCounter, h, read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new JPYCurrency(),
+        new Japan(),
+        BusinessDayConvention.Following,
+        false,
+        new Actual365Fixed());
 }

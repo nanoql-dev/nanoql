@@ -20,6 +20,8 @@
     <EmbeddedResource Include="Conventions\Presets\calendars.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.calendars.xml" />
     <EmbeddedResource Include="Conventions\Presets\daycounters.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.daycounters.xml" />
     <EmbeddedResource Include="Conventions\Presets\currencies.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.currencies.xml" />
+    <EmbeddedResource Include="Conventions\Presets\indexes.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.indexes.xml" />
+    <EmbeddedResource Include="Conventions\Presets\indexes.cxx.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.indexes.cxx.xml" />
     <EmbeddedResource Include="Conventions\Presets\aliases.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.aliases.xml" />
   </ItemGroup>
 </Project>

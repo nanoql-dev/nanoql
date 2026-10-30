@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Diagnostics.CodeAnalysis;
+using NanoQL.Indexes;
 using NanoQL.Time;
 
 namespace NanoQL;
@@ -138,6 +139,74 @@ public abstract class ConventionProvider
         return reference();
     }
 
+    /// <summary>The conventions of an index preset its class names: a daily-tenor Libor, or the BMA index.</summary>
+    /// <param name="preset">The preset's name, its class's (<c>DailyTenorUSDLibor</c>, <c>USDLiborON</c>,
+    /// <c>BMAIndex</c>).</param>
+    /// <param name="reference">Builds QuantLib's conventions, a daily-tenor Libor's settlement days its argument.</param>
+    /// <returns>The conventions the preset is built on.</returns>
+    public virtual IborIndexConventions ResolveIborIndex(string preset, Func<IborIndexConventions> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The conventions of an Ibor or Libor family at a tenor, its fixed-tenor presets' among them.</summary>
+    /// <param name="family">The family's class name (<c>Euribor</c>, <c>USDLibor</c>).</param>
+    /// <param name="tenor">The tenor.</param>
+    /// <param name="reference">Builds QuantLib's conventions at the tenor.</param>
+    /// <returns>The conventions the index is built on.</returns>
+    /// <remarks>A fixed-tenor preset (<see cref="Euribor6M"/>) is its family at its tenor, so the two read one
+    /// member.</remarks>
+    public virtual IborIndexConventions ResolveIborFamily(string family, Period tenor, Func<IborIndexConventions> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The conventions of an overnight index preset.</summary>
+    /// <param name="preset">The preset's class name (<c>Sofr</c>).</param>
+    /// <param name="reference">Builds QuantLib's conventions.</param>
+    /// <returns>The conventions the index is built on: an overnight index's convention is Following, without end of
+    /// month, which the preset refuses to change.</returns>
+    public virtual IborIndexConventions ResolveOvernightIndex(string preset, Func<IborIndexConventions> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The conventions of a swap index family at a tenor.</summary>
+    /// <param name="family">The family's class name (<c>EuriborSwapIsdaFixA</c>).</param>
+    /// <param name="tenor">The swap's tenor.</param>
+    /// <param name="reference">Builds QuantLib's conventions at the tenor, the Ibor index on the swap index's
+    /// forwarding curve.</param>
+    /// <returns>The conventions the index is built on.</returns>
+    public virtual SwapIndexConventions ResolveSwapIndex(string family, Period tenor, Func<SwapIndexConventions> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The conventions of a zero or quoted year-on-year inflation index preset.</summary>
+    /// <param name="preset">The preset's class name (<c>EUHICP</c>, <c>YYEUHICP</c>).</param>
+    /// <param name="reference">Builds QuantLib's conventions, with the preset's arguments.</param>
+    /// <returns>The conventions the index is built on.</returns>
+    public virtual InflationIndexConventions ResolveInflationIndex(string preset, Func<InflationIndexConventions> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The data of a region preset.</summary>
+    /// <param name="preset">The preset's class name (<c>EURegion</c>).</param>
+    /// <param name="reference">Builds QuantLib's data.</param>
+    /// <returns>The region's data. Its name is its identity, which its equality and its inflation indexes' names read,
+    /// so it is QuantLib's, and the preset refuses data that changes it; the code is the provider's to configure.</returns>
+    public virtual RegionData ResolveRegion(string preset, Func<RegionData> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
     // The presets' reads, each of Current once, inside its scope.
     internal static CalendarEdits ReadCalendarEdits(string preset)
     {
@@ -177,6 +246,63 @@ public abstract class ConventionProvider
         {
             return provider.ResolveBusiness252Calendar(reference)
                 ?? throw new NanoQLException("no calendar for the Business/252 day counter");
+        }
+    }
+
+    // An index preset's conventions with the provider they came from, which the index keeps.
+    internal static (IborIndexConventions Values, ConventionProvider Provider) ReadIborIndex(
+        string preset, Func<IborIndexConventions> reference) =>
+        Read(p => p.ResolveIborIndex(preset, reference), $"the {preset} index");
+
+    internal static (IborIndexConventions Values, ConventionProvider Provider) ReadIborFamily(
+        string family, Period tenor, Func<IborIndexConventions> reference) =>
+        Read(p => p.ResolveIborFamily(family, tenor, reference), $"the {family} family at {tenor}");
+
+    internal static (IborIndexConventions Values, ConventionProvider Provider) ReadOvernightIndex(
+        string preset, Func<IborIndexConventions> reference)
+    {
+        (IborIndexConventions values, ConventionProvider provider) = Read(p => p.ResolveOvernightIndex(preset, reference), $"the {preset} index");
+
+        // QuantLib's overnight index fixes both, so a provider's other values would be ignored
+        return values.Convention == BusinessDayConvention.Following && !values.EndOfMonth
+            ? (values, provider)
+            : throw new NanoQLException(
+                $"the {preset} overnight index's convention is Following without end of month, not {values.Convention}"
+                + (values.EndOfMonth ? " with end of month" : ""));
+    }
+
+    internal static (SwapIndexConventions Values, ConventionProvider Provider) ReadSwapIndex(
+        string family, Period tenor, Func<SwapIndexConventions> reference) =>
+        Read(p => p.ResolveSwapIndex(family, tenor, reference), $"the {family} family at {tenor}");
+
+    internal static (InflationIndexConventions Values, ConventionProvider Provider) ReadInflationIndex(
+        string preset, Func<InflationIndexConventions> reference) =>
+        Read(p => p.ResolveInflationIndex(preset, reference), $"the {preset} index");
+
+    internal static RegionData ReadRegion(string preset, Func<RegionData> reference)
+    {
+        ConventionProvider provider = Current;
+        using (Use(provider))
+        {
+            RegionData? built = null;
+            RegionData QuantLibs() => built ??= reference();
+            RegionData data = provider.ResolveRegion(preset, QuantLibs)
+                ?? throw new NanoQLException($"no data for the {preset} region");
+
+            // the name is the region's identity, which its equality and its indexes' names read
+            return data.Name == QuantLibs().Name
+                ? data
+                : throw new NanoQLException($"the data for the {preset} region changes its name: \"{data.Name}\" for QuantLib's \"{QuantLibs().Name}\"");
+        }
+    }
+
+    private static (T Values, ConventionProvider Provider) Read<T>(Func<ConventionProvider, T?> resolve, string what)
+        where T : class
+    {
+        ConventionProvider provider = Current;
+        using (Use(provider))
+        {
+            return (resolve(provider) ?? throw new NanoQLException($"no conventions for {what}"), provider);
         }
     }
 

@@ -4,6 +4,8 @@
 
 using System.Collections.Frozen;
 using NanoQL.Currencies;
+using NanoQL.Indexes;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 
 namespace NanoQL.Extensions.Conventions;
@@ -245,5 +247,258 @@ internal static class PresetFactories
             ["ZAR"] = static () => new ZARCurrency(),
             ["ZEC"] = static () => new ZECCurrency(),
             ["ZMW"] = static () => new ZMWCurrency(),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<YieldTermStructure?, InterestRateIndex>> OtherIndexes =
+        new Dictionary<string, Func<YieldTermStructure?, InterestRateIndex>>(StringComparer.Ordinal)
+        {
+            ["BMAIndex"] = static (h) => new BMAIndex(h),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    // The fixed-tenor Ibor presets, each its family at its tenor.
+    public static readonly FrozenDictionary<string, (string Family, Period Tenor)> FixedTenorPresets =
+        new Dictionary<string, (string Family, Period Tenor)>(StringComparer.Ordinal)
+        {
+            ["Bbsw1M"] = ("Bbsw", new Period(1, TimeUnit.Months)),
+            ["Bbsw2M"] = ("Bbsw", new Period(2, TimeUnit.Months)),
+            ["Bbsw3M"] = ("Bbsw", new Period(3, TimeUnit.Months)),
+            ["Bbsw4M"] = ("Bbsw", new Period(4, TimeUnit.Months)),
+            ["Bbsw5M"] = ("Bbsw", new Period(5, TimeUnit.Months)),
+            ["Bbsw6M"] = ("Bbsw", new Period(6, TimeUnit.Months)),
+            ["Bibor1M"] = ("Bibor", new Period(1, TimeUnit.Months)),
+            ["Bibor1Y"] = ("Bibor", new Period(1, TimeUnit.Years)),
+            ["Bibor2M"] = ("Bibor", new Period(2, TimeUnit.Months)),
+            ["Bibor3M"] = ("Bibor", new Period(3, TimeUnit.Months)),
+            ["Bibor6M"] = ("Bibor", new Period(6, TimeUnit.Months)),
+            ["BiborSW"] = ("Bibor", new Period(1, TimeUnit.Weeks)),
+            ["Bkbm1M"] = ("Bkbm", new Period(1, TimeUnit.Months)),
+            ["Bkbm2M"] = ("Bkbm", new Period(2, TimeUnit.Months)),
+            ["Bkbm3M"] = ("Bkbm", new Period(3, TimeUnit.Months)),
+            ["Bkbm4M"] = ("Bkbm", new Period(4, TimeUnit.Months)),
+            ["Bkbm5M"] = ("Bkbm", new Period(5, TimeUnit.Months)),
+            ["Bkbm6M"] = ("Bkbm", new Period(6, TimeUnit.Months)),
+            ["EURLibor1M"] = ("EURLibor", new Period(1, TimeUnit.Months)),
+            ["EURLibor1Y"] = ("EURLibor", new Period(1, TimeUnit.Years)),
+            ["EURLibor3M"] = ("EURLibor", new Period(3, TimeUnit.Months)),
+            ["EURLibor6M"] = ("EURLibor", new Period(6, TimeUnit.Months)),
+            ["Euribor1M"] = ("Euribor", new Period(1, TimeUnit.Months)),
+            ["Euribor1W"] = ("Euribor", new Period(1, TimeUnit.Weeks)),
+            ["Euribor1Y"] = ("Euribor", new Period(1, TimeUnit.Years)),
+            ["Euribor3M"] = ("Euribor", new Period(3, TimeUnit.Months)),
+            ["Euribor6M"] = ("Euribor", new Period(6, TimeUnit.Months)),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    // The index presets QuantLib's records base on another preset: a fixed tenor on its family, EURLiborON on its
+    // daily-tenor class. A record of a coded preset takes its own name, or this one, as its base.
+    public static readonly FrozenDictionary<string, string> PresetBases =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["Bbsw1M"] = "Bbsw",
+            ["Bbsw2M"] = "Bbsw",
+            ["Bbsw3M"] = "Bbsw",
+            ["Bbsw4M"] = "Bbsw",
+            ["Bbsw5M"] = "Bbsw",
+            ["Bbsw6M"] = "Bbsw",
+            ["Bibor1M"] = "Bibor",
+            ["Bibor1Y"] = "Bibor",
+            ["Bibor2M"] = "Bibor",
+            ["Bibor3M"] = "Bibor",
+            ["Bibor6M"] = "Bibor",
+            ["BiborSW"] = "Bibor",
+            ["Bkbm1M"] = "Bkbm",
+            ["Bkbm2M"] = "Bkbm",
+            ["Bkbm3M"] = "Bkbm",
+            ["Bkbm4M"] = "Bkbm",
+            ["Bkbm5M"] = "Bkbm",
+            ["Bkbm6M"] = "Bkbm",
+            ["EURLibor1M"] = "EURLibor",
+            ["EURLibor1Y"] = "EURLibor",
+            ["EURLibor3M"] = "EURLibor",
+            ["EURLibor6M"] = "EURLibor",
+            ["EURLiborON"] = "DailyTenorEURLibor",
+            ["Euribor1M"] = "Euribor",
+            ["Euribor1W"] = "Euribor",
+            ["Euribor1Y"] = "Euribor",
+            ["Euribor3M"] = "Euribor",
+            ["Euribor6M"] = "Euribor",
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<YieldTermStructure?, IborIndex>> IborIndexes =
+        new Dictionary<string, Func<YieldTermStructure?, IborIndex>>(StringComparer.Ordinal)
+        {
+            ["Bbsw1M"] = static (h) => new Bbsw1M(h),
+            ["Bbsw2M"] = static (h) => new Bbsw2M(h),
+            ["Bbsw3M"] = static (h) => new Bbsw3M(h),
+            ["Bbsw4M"] = static (h) => new Bbsw4M(h),
+            ["Bbsw5M"] = static (h) => new Bbsw5M(h),
+            ["Bbsw6M"] = static (h) => new Bbsw6M(h),
+            ["Bibor1M"] = static (h) => new Bibor1M(h),
+            ["Bibor1Y"] = static (h) => new Bibor1Y(h),
+            ["Bibor2M"] = static (h) => new Bibor2M(h),
+            ["Bibor3M"] = static (h) => new Bibor3M(h),
+            ["Bibor6M"] = static (h) => new Bibor6M(h),
+            ["BiborSW"] = static (h) => new BiborSW(h),
+            ["Bkbm1M"] = static (h) => new Bkbm1M(h),
+            ["Bkbm2M"] = static (h) => new Bkbm2M(h),
+            ["Bkbm3M"] = static (h) => new Bkbm3M(h),
+            ["Bkbm4M"] = static (h) => new Bkbm4M(h),
+            ["Bkbm5M"] = static (h) => new Bkbm5M(h),
+            ["Bkbm6M"] = static (h) => new Bkbm6M(h),
+            ["CADLiborON"] = static (h) => new CADLiborON(h),
+            ["EURLibor1M"] = static (h) => new EURLibor1M(h),
+            ["EURLibor1Y"] = static (h) => new EURLibor1Y(h),
+            ["EURLibor3M"] = static (h) => new EURLibor3M(h),
+            ["EURLibor6M"] = static (h) => new EURLibor6M(h),
+            ["EURLiborON"] = static (h) => new EURLiborON(h),
+            ["Euribor1M"] = static (h) => new Euribor1M(h),
+            ["Euribor1W"] = static (h) => new Euribor1W(h),
+            ["Euribor1Y"] = static (h) => new Euribor1Y(h),
+            ["Euribor3M"] = static (h) => new Euribor3M(h),
+            ["Euribor6M"] = static (h) => new Euribor6M(h),
+            ["GBPLiborON"] = static (h) => new GBPLiborON(h),
+            ["USDLiborON"] = static (h) => new USDLiborON(h),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<int, YieldTermStructure?, IborIndex>>
+        IborIndexesWithSettlementDays =
+        new Dictionary<string, Func<int, YieldTermStructure?, IborIndex>>(StringComparer.Ordinal)
+        {
+            ["DailyTenorCHFLibor"] = static (settlementDays, h) => new DailyTenorCHFLibor(settlementDays, h),
+            ["DailyTenorEURLibor"] = static (settlementDays, h) => new DailyTenorEURLibor(settlementDays, h),
+            ["DailyTenorGBPLibor"] = static (settlementDays, h) => new DailyTenorGBPLibor(settlementDays, h),
+            ["DailyTenorJPYLibor"] = static (settlementDays, h) => new DailyTenorJPYLibor(settlementDays, h),
+            ["DailyTenorUSDLibor"] = static (settlementDays, h) => new DailyTenorUSDLibor(settlementDays, h),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<Period, YieldTermStructure?, IborIndex>> IborFamilies =
+        new Dictionary<string, Func<Period, YieldTermStructure?, IborIndex>>(StringComparer.Ordinal)
+        {
+            ["AUDLibor"] = static (tenor, h) => new AUDLibor(tenor, h),
+            ["Bbsw"] = static (tenor, h) => new Bbsw(tenor, h),
+            ["Bibor"] = static (tenor, h) => new Bibor(tenor, h),
+            ["Bkbm"] = static (tenor, h) => new Bkbm(tenor, h),
+            ["CADLibor"] = static (tenor, h) => new CADLibor(tenor, h),
+            ["CHFLibor"] = static (tenor, h) => new CHFLibor(tenor, h),
+            ["Cdor"] = static (tenor, h) => new Cdor(tenor, h),
+            ["DKKLibor"] = static (tenor, h) => new DKKLibor(tenor, h),
+            ["EURLibor"] = static (tenor, h) => new EURLibor(tenor, h),
+            ["Euribor"] = static (tenor, h) => new Euribor(tenor, h),
+            ["Euribor365"] = static (tenor, h) => new Euribor365(tenor, h),
+            ["GBPLibor"] = static (tenor, h) => new GBPLibor(tenor, h),
+            ["JPYLibor"] = static (tenor, h) => new JPYLibor(tenor, h),
+            ["Jibar"] = static (tenor, h) => new Jibar(tenor, h),
+            ["Mosprime"] = static (tenor, h) => new Mosprime(tenor, h),
+            ["NZDLibor"] = static (tenor, h) => new NZDLibor(tenor, h),
+            ["Nibor"] = static (tenor, h) => new Nibor(tenor, h),
+            ["Pribor"] = static (tenor, h) => new Pribor(tenor, h),
+            ["Robor"] = static (tenor, h) => new Robor(tenor, h),
+            ["SEKLibor"] = static (tenor, h) => new SEKLibor(tenor, h),
+            ["Shibor"] = static (tenor, h) => new Shibor(tenor, h),
+            ["THBFIX"] = static (tenor, h) => new THBFIX(tenor, h),
+            ["TRLibor"] = static (tenor, h) => new TRLibor(tenor, h),
+            ["Tibor"] = static (tenor, h) => new Tibor(tenor, h),
+            ["USDLibor"] = static (tenor, h) => new USDLibor(tenor, h),
+            ["Wibor"] = static (tenor, h) => new Wibor(tenor, h),
+            ["Zibor"] = static (tenor, h) => new Zibor(tenor, h),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<YieldTermStructure?, OvernightIndex>> OvernightIndexes =
+        new Dictionary<string, Func<YieldTermStructure?, OvernightIndex>>(StringComparer.Ordinal)
+        {
+            ["Aonia"] = static (h) => new Aonia(h),
+            ["Cdi"] = static (h) => new Cdi(h),
+            ["Corra"] = static (h) => new Corra(h),
+            ["Destr"] = static (h) => new Destr(h),
+            ["Eonia"] = static (h) => new Eonia(h),
+            ["Estr"] = static (h) => new Estr(h),
+            ["FedFunds"] = static (h) => new FedFunds(h),
+            ["Kofr"] = static (h) => new Kofr(h),
+            ["Nzocr"] = static (h) => new Nzocr(h),
+            ["Saron"] = static (h) => new Saron(h),
+            ["Shir"] = static (h) => new Shir(h),
+            ["Sofr"] = static (h) => new Sofr(h),
+            ["Sonia"] = static (h) => new Sonia(h),
+            ["Swestr"] = static (h) => new Swestr(h),
+            ["Tonar"] = static (h) => new Tonar(h),
+            ["Zaronia"] = static (h) => new Zaronia(h),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<Period, YieldTermStructure?, bool, YieldTermStructure?, SwapIndex>>
+        SwapIndexes =
+        new Dictionary<string, Func<Period, YieldTermStructure?, bool, YieldTermStructure?, SwapIndex>>(StringComparer.Ordinal)
+        {
+            ["ChfLiborSwapIsdaFix"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new ChfLiborSwapIsdaFix(tenor, forwarding, discounting) : new ChfLiborSwapIsdaFix(tenor, forwarding),
+            ["EurLiborSwapIfrFix"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new EurLiborSwapIfrFix(tenor, forwarding, discounting) : new EurLiborSwapIfrFix(tenor, forwarding),
+            ["EurLiborSwapIsdaFixA"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new EurLiborSwapIsdaFixA(tenor, forwarding, discounting) : new EurLiborSwapIsdaFixA(tenor, forwarding),
+            ["EurLiborSwapIsdaFixB"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new EurLiborSwapIsdaFixB(tenor, forwarding, discounting) : new EurLiborSwapIsdaFixB(tenor, forwarding),
+            ["EuriborSwapIfrFix"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new EuriborSwapIfrFix(tenor, forwarding, discounting) : new EuriborSwapIfrFix(tenor, forwarding),
+            ["EuriborSwapIsdaFixA"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new EuriborSwapIsdaFixA(tenor, forwarding, discounting) : new EuriborSwapIsdaFixA(tenor, forwarding),
+            ["EuriborSwapIsdaFixB"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new EuriborSwapIsdaFixB(tenor, forwarding, discounting) : new EuriborSwapIsdaFixB(tenor, forwarding),
+            ["GbpLiborSwapIsdaFix"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new GbpLiborSwapIsdaFix(tenor, forwarding, discounting) : new GbpLiborSwapIsdaFix(tenor, forwarding),
+            ["JpyLiborSwapIsdaFixAm"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new JpyLiborSwapIsdaFixAm(tenor, forwarding, discounting) : new JpyLiborSwapIsdaFixAm(tenor, forwarding),
+            ["JpyLiborSwapIsdaFixPm"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new JpyLiborSwapIsdaFixPm(tenor, forwarding, discounting) : new JpyLiborSwapIsdaFixPm(tenor, forwarding),
+            ["UsdLiborSwapIsdaFixAm"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new UsdLiborSwapIsdaFixAm(tenor, forwarding, discounting) : new UsdLiborSwapIsdaFixAm(tenor, forwarding),
+            ["UsdLiborSwapIsdaFixPm"] = static (tenor, forwarding, exogenous, discounting) => exogenous ? new UsdLiborSwapIsdaFixPm(tenor, forwarding, discounting) : new UsdLiborSwapIsdaFixPm(tenor, forwarding),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<ZeroInflationTermStructure?, ZeroInflationIndex>>
+        ZeroInflationIndexes =
+        new Dictionary<string, Func<ZeroInflationTermStructure?, ZeroInflationIndex>>(StringComparer.Ordinal)
+        {
+            ["EUHICP"] = static (ts) => new EUHICP(ts),
+            ["EUHICPXT"] = static (ts) => new EUHICPXT(ts),
+            ["FRHICP"] = static (ts) => new FRHICP(ts),
+            ["UKHICP"] = static (ts) => new UKHICP(ts),
+            ["UKRPI"] = static (ts) => new UKRPI(ts),
+            ["USCPI"] = static (ts) => new USCPI(ts),
+            ["ZACPI"] = static (ts) => new ZACPI(ts),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<Frequency, bool, ZeroInflationTermStructure?, ZeroInflationIndex>>
+        ZeroInflationIndexesWithArguments =
+        new Dictionary<string, Func<Frequency, bool, ZeroInflationTermStructure?, ZeroInflationIndex>>(StringComparer.Ordinal)
+        {
+            ["AUCPI"] = static (frequency, revised, ts) => new AUCPI(frequency, revised, ts),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<YoYInflationTermStructure?, YoYInflationIndex>>
+        YoYInflationIndexes =
+        new Dictionary<string, Func<YoYInflationTermStructure?, YoYInflationIndex>>(StringComparer.Ordinal)
+        {
+            ["YYEUHICP"] = static (ts) => new YYEUHICP(ts),
+            ["YYEUHICPXT"] = static (ts) => new YYEUHICPXT(ts),
+            ["YYFRHICP"] = static (ts) => new YYFRHICP(ts),
+            ["YYUKRPI"] = static (ts) => new YYUKRPI(ts),
+            ["YYUSCPI"] = static (ts) => new YYUSCPI(ts),
+            ["YYZACPI"] = static (ts) => new YYZACPI(ts),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<Frequency, bool, YoYInflationTermStructure?, YoYInflationIndex>>
+        YoYInflationIndexesWithArguments =
+        new Dictionary<string, Func<Frequency, bool, YoYInflationTermStructure?, YoYInflationIndex>>(StringComparer.Ordinal)
+        {
+            ["YYAUCPI"] = static (frequency, revised, ts) => new YYAUCPI(frequency, revised, ts),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    public static readonly FrozenDictionary<string, Func<Region>> Regions =
+        new Dictionary<string, Func<Region>>(StringComparer.Ordinal)
+        {
+            ["AustraliaRegion"] = static () => new AustraliaRegion(),
+            ["EURegion"] = static () => new EURegion(),
+            ["FranceRegion"] = static () => new FranceRegion(),
+            ["UKRegion"] = static () => new UKRegion(),
+            ["USRegion"] = static () => new USRegion(),
+            ["ZARegion"] = static () => new ZARegion(),
+        }.ToFrozenDictionary(StringComparer.Ordinal);
+
+    // The business-day conventions' FpML codes that map to one exactly, which the reader takes for the member.
+    public static readonly FrozenDictionary<string, BusinessDayConvention> BusinessDayConventionAliases =
+        new Dictionary<string, BusinessDayConvention>(StringComparer.Ordinal)
+        {
+            ["FOLLOWING"] = BusinessDayConvention.Following,
+            ["MODFOLLOWING"] = BusinessDayConvention.ModifiedFollowing,
+            ["MODPRECEDING"] = BusinessDayConvention.ModifiedPreceding,
+            ["NONE"] = BusinessDayConvention.Unadjusted,
+            ["PRECEDING"] = BusinessDayConvention.Preceding,
         }.ToFrozenDictionary(StringComparer.Ordinal);
 }

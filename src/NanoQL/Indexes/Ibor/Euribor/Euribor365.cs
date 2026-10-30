@@ -29,17 +29,33 @@ public sealed class Euribor365 : IborIndex
     /// <exception cref="ArgumentException">The tenor is in days.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The tenor's unit is shorter than a day.</exception>
     public Euribor365(Period tenor, YieldTermStructure? h = null)
-        : base(
-            "Euribor365",
-            tenor,
-            2, // settlement days
-            new EURCurrency(),
-            new TARGET(),
-            EuriborConventions.Convention(tenor),
-            EuriborConventions.EndOfMonth(tenor),
-            new Actual365Fixed(),
-            h)
+        : this(tenor, ConventionProvider.ReadIborFamily("Euribor365", tenor, () => Reference(tenor)), h)
     {
         EuriborConventions.CheckTenor(this);
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Euribor365(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base(
+            "Euribor365",
+            tenor,
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        2,
+        new EURCurrency(),
+        new TARGET(),
+        EuriborConventions.Convention(tenor),
+        EuriborConventions.EndOfMonth(tenor),
+        new Actual365Fixed());
 }

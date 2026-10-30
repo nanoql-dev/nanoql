@@ -74,6 +74,38 @@ public class Libor : IborIndex
         }
     }
 
+    // A preset's: the conventions it read, London's fixing calendar and the currency's financial centre among them,
+    // with the provider they came from, which the index keeps.
+    private protected Libor(
+        string familyName, Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base(
+            familyName,
+            tenor,
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
+    {
+        financialCenterCalendar = read.Values.FinancialCenterCalendar
+            ?? throw new NanoQLException($"the {familyName} conventions name no financial-centre calendar");
+        jointCalendar = new JointCalendar(read.Values.FixingCalendar, financialCenterCalendar, JointCalendarRule.JoinHolidays);
+        if (!(Tenor.Units != TimeUnit.Days))
+        {
+            throw new ArgumentException(
+                $"for daily tenors ({Tenor}) dedicated DailyTenor constructor must be used", nameof(tenor));
+        }
+
+        // a currency's code is its identity, which no provider changes
+        if (!(read.Values.Currency.Code != "EUR"))
+        {
+            throw new NanoQLException("for EUR Libor dedicated EurLibor constructor must be used");
+        }
+    }
+
     /// <summary>Gets the joint calendar of London and the financial center, on which the value and maturity dates are
     /// adjusted.</summary>
     public Calendar JointCalendar => jointCalendar;

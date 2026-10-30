@@ -16,7 +16,22 @@ public sealed class Sofr : OvernightIndex
     /// <summary>Initializes a new instance of the <see cref="Sofr"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Sofr(YieldTermStructure? h = null)
-        : base("SOFR", 0, new USDCurrency(), new UnitedStates(UnitedStatesMarket.SOFR), new Actual360(), h)
+        : this(ConventionProvider.ReadOvernightIndex("Sofr", Reference), h)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Sofr((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base("SOFR", read.Values.FixingDays, read.Values.Currency, read.Values.FixingCalendar, read.Values.DayCounter, h, read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new USDCurrency(),
+        new UnitedStates(UnitedStatesMarket.SOFR),
+        BusinessDayConvention.Following,
+        false,
+        new Actual360());
 }

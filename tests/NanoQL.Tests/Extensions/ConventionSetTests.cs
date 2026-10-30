@@ -132,7 +132,7 @@ public class ConventionSetTests
     [InlineData("<JointCalendar name=\"J\"><Member>TARGET</Member><Member>J</Member></JointCalendar>", "JointCalendar J: J is part of a cycle")]
     [InlineData("<Calendar name=\"A\" base=\"Nowhere\" />", "Calendar A: unknown calendar Nowhere")]
     [InlineData("<DayCounter name=\"D\" base=\"Business252\"><Calendar>Nowhere</Calendar></DayCounter>", "DayCounter D: unknown calendar Nowhere")]
-    [InlineData("<Alias name=\"Desk\" base=\"Nowhere\" />", "Alias Desk: unknown calendar, day counter, currency or business-day convention Nowhere")]
+    [InlineData("<Alias name=\"Desk\" base=\"Nowhere\" />", "Alias Desk: unknown calendar, day counter, currency, region, index or business-day convention Nowhere")]
     [InlineData("<JointCalendar name=\"J\"><Member>TARGET</Member></JointCalendar>", "JointCalendar J: the joint calendar J needs two or more members")]
     [InlineData("<DayCounter name=\"D\" base=\"Actual360\"><Calendar>TARGET</Calendar></DayCounter>", "DayCounter D: the day counter D's base Actual360 counts no calendar's days: only Business252 does")]
     [InlineData("<CalendarPreset name=\"TARGET\"><QuantLibName>Target</QuantLibName></CalendarPreset>", "CalendarPreset TARGET: QuantLib's name is TARGET, not Target")]

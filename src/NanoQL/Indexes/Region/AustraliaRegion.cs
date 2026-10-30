@@ -12,7 +12,10 @@ public sealed class AustraliaRegion : Region
 {
     /// <summary>Initializes a new instance of the <see cref="AustraliaRegion"/> class.</summary>
     public AustraliaRegion()
-        : base("Australia", "AU")
+        : base(ConventionProvider.ReadRegion("AustraliaRegion", Reference))
     {
     }
+
+    // QuantLib's data.
+    private static RegionData Reference() => new("Australia", "AU");
 }

@@ -23,7 +23,18 @@ public sealed class CHFLibor : Libor
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public CHFLibor(Period tenor, YieldTermStructure? h = null)
-        : base("CHFLibor", tenor, 2, new CHFCurrency(), new Switzerland(), new Actual360(), h)
+        : base("CHFLibor", tenor, ConventionProvider.ReadIborFamily("CHFLibor", tenor, () => Reference(tenor)), h)
     {
     }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope: London's fixing calendar, Libor's rules
+    // by the tenor and the currency's financial centre.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        2,
+        new CHFCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        LiborConventions.Convention(tenor),
+        LiborConventions.EndOfMonth(tenor),
+        new Actual360(),
+        new Switzerland());
 }

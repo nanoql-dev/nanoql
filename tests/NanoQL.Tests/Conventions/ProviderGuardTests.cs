@@ -226,7 +226,7 @@ public class ProviderGuardTests
                 foreach ((MethodBase m, List<(OpCode OpCode, MethodBase Member)> refs) in Bodies)
                 {
                     if (m.DeclaringType == typeof(ConventionProvider) && m.IsStatic && !currentReaders.Contains(m)
-                        && refs.Any(r => currentReaders.Contains(r.Member)))
+                        && refs.Any(r => currentReaders.Contains(Definition(r.Member))))
                     {
                         changed |= currentReaders.Add(m);
                     }
@@ -293,7 +293,8 @@ public class ProviderGuardTests
         }
 
         // A direct read of Current: the property, or one of the provider's own members that reads it.
-        public bool ReadsCurrent(MethodBase member) => currentReaders.Contains(member);
+        // A generic provider member reads as its definition does.
+        public bool ReadsCurrent(MethodBase member) => currentReaders.Contains(Definition(member));
 
         // What each member, its lambdas' and state machines' bodies included, builds of provider-reading constructions
         // and builders, and whether it reads Current: the presets' own constructors and reference factories, the
@@ -388,7 +389,7 @@ public class ProviderGuardTests
             }
 
             bool preset = typeof(Calendar).IsAssignableFrom(type) || typeof(Currency).IsAssignableFrom(type)
-                || typeof(FinancialIndex).IsAssignableFrom(type) || type == typeof(Business252);
+                || typeof(FinancialIndex).IsAssignableFrom(type) || typeof(Region).IsAssignableFrom(type) || type == typeof(Business252);
             return preset && (owner.EndsWith("..ctor", StringComparison.Ordinal) || owner.EndsWith(".Reference", StringComparison.Ordinal));
         }
     }

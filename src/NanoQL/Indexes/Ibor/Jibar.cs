@@ -21,16 +21,32 @@ public sealed class Jibar : IborIndex
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Jibar(Period tenor, YieldTermStructure? h = null)
+        : this(tenor, ConventionProvider.ReadIborFamily("Jibar", tenor, Reference), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Jibar(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "Jibar",
             tenor,
-            0,
-            new ZARCurrency(),
-            new SouthAfrica(),
-            BusinessDayConvention.ModifiedFollowing,
-            false,
-            new Actual365Fixed(),
-            h)
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
     {
     }
+
+    // QuantLib's conventions, the same at every tenor, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new ZARCurrency(),
+        new SouthAfrica(),
+        BusinessDayConvention.ModifiedFollowing,
+        false,
+        new Actual365Fixed());
 }

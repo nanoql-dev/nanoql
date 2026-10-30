@@ -135,9 +135,18 @@ public partial class ConventionPresetTests
         {
             Assert.Equal(Set.DayCounter(target), Set.DayCounter(name));
         }
+        else if (CodedPresets.OvernightIndexes.ContainsKey(target))
+        {
+            Assert.Equal(IndexFields.Of(Set.OvernightIndex(target)), IndexFields.Of(Set.OvernightIndex(name)));
+        }
+        else if (CodedPresets.IborFamilies.ContainsKey(target))
+        {
+            // a family's code, taken at a tenor
+            Assert.Equal(IndexFields.Of(Set.IborIndex(target, new Period(6, TimeUnit.Months))), IndexFields.Of(Set.IborIndex(name, new Period(6, TimeUnit.Months))));
+        }
         else
         {
-            // a business-day convention's member, which C3's and C4's records read
+            // a business-day convention's member, which C4's records read
             Assert.True(Enum.TryParse(target, false, out BusinessDayConvention c) && c.ToString() == target, $"{name}: {target}");
         }
 

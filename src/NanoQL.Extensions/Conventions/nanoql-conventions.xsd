@@ -9,12 +9,12 @@
            targetNamespace="https://nanoql.net/schemas/conventions"
            elementFormDefault="qualified">
   <xs:annotation>
-    <xs:documentation>nanoql's market conventions: calendars, day counters and currencies, named by nanoql's API, each a record whose business fields are child elements. Other tools' elements and attributes in their own namespaces are kept.</xs:documentation>
+    <xs:documentation>nanoql's market conventions: calendars, day counters, currencies, regions and indexes, named by nanoql's API, each a record whose business fields are child elements. Other tools' elements and attributes in their own namespaces are kept.</xs:documentation>
   </xs:annotation>
 
   <xs:element name="Conventions">
     <xs:annotation>
-      <xs:documentation>A set of convention records, in any order, as a document's root or inside another document. Each name is unique within its value kind: calendars, day counters, currencies; an alias's name among all of them.</xs:documentation>
+      <xs:documentation>A set of convention records, in any order, as a document's root or inside another document. Each name is unique within its value kind: calendars, day counters, currencies, regions, indexes; an alias's name among all of them.</xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -25,6 +25,14 @@
         <xs:element ref="DayCounterPreset"/>
         <xs:element ref="DayCounter"/>
         <xs:element ref="CurrencyPreset"/>
+        <xs:element ref="Region"/>
+        <xs:element ref="IborIndex"/>
+        <xs:element ref="IborFamily"/>
+        <xs:element ref="OvernightIndex"/>
+        <xs:element ref="SwapIndex"/>
+        <xs:element ref="OvernightIndexedSwapIndex"/>
+        <xs:element ref="ZeroInflationIndex"/>
+        <xs:element ref="YoYInflationIndex"/>
         <xs:element ref="Alias"/>
         <xs:any namespace="##other" processContents="lax"/>
       </xs:choice>
@@ -40,6 +48,14 @@
     </xs:unique>
     <xs:unique name="CurrencyNames">
       <xs:selector xpath="c:CurrencyPreset|c:Alias"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="RegionNames">
+      <xs:selector xpath="c:Region|c:Alias"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="IndexNames">
+      <xs:selector xpath="c:IborIndex|c:IborFamily|c:OvernightIndex|c:SwapIndex|c:OvernightIndexedSwapIndex|c:ZeroInflationIndex|c:YoYInflationIndex|c:Alias"/>
       <xs:field xpath="@name"/>
     </xs:unique>
   </xs:element>
@@ -240,6 +256,392 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="Region">
+    <xs:annotation>
+      <xs:documentation>One of QuantLib's regions by its class (EURegion), keeping its name, or a region of a user's own.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="RegionName" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The region's name, QuantLib's for a preset, which is its identity; the base's when left out.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Code" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The region's code; the base's when left out.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="IborIndex">
+    <xs:annotation>
+      <xs:documentation>An Ibor index: one of QuantLib's presets by its class (Euribor6M, DailyTenorUSDLibor, BMAIndex), usually its family at a tenor, or an index of a user's own. A field left out is the base's, then QuantLib's.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Family" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The family name the index reports.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Tenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The tenor.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixingDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Currency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The currency's code.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixingCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Convention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="EndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the end-of-month rule applies.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="DayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Style" type="IborIndexStyle" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A user's own index's class: Ibor, Libor or Custom; Ibor when left out without a base.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FinancialCenterCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A Libor's financial-centre calendar's name, which London's joins.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ValueCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A custom index's value calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="MaturityCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A custom index's maturity calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="IborFamily">
+    <xs:annotation>
+      <xs:documentation>An Ibor index family: one of QuantLib's families by its class (Euribor, USDLibor), built at any tenor its units take, or a family of a user's own.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Family" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The family name the index reports.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixingDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixingDaysAtOneDay" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing days at a tenor of one day, where they differ.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Currency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The currency's code.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixingCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing calendar's name; a Libor's, London's.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FinancialCenterCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A Libor family's financial-centre calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="DayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Unit" type="IborFamilyUnit" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>A tenor unit the family takes, with its convention and end of month; none to take the base's.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="OvernightIndex">
+    <xs:annotation>
+      <xs:documentation>An overnight index: one of QuantLib's presets by its class (Sofr), or an index of a user's own; its convention is Following, without end of month.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Family" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The family name the index reports.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixingDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Currency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The currency's code.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixingCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="DayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="SwapIndex">
+    <xs:annotation>
+      <xs:documentation>A swap index family: one of QuantLib's families by its class (EuriborSwapIsdaFixA), or a family of a user's own, built at a tenor on an Ibor index's name.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Family" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The family name the index reports.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="SettlementDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The settlement days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Currency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The currency's code.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixingCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's tenor.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="IborIndex" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's Ibor index's name, or an Ibor family's.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="IborIndexTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The tenor of the Ibor family IborIndex names; none for an index.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ShortIborIndex" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's Ibor index's name, or an Ibor family's, up to and including one year, where it differs.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ShortIborIndexTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The tenor of the Ibor family ShortIborIndex names; none for an index.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ShortFixedLegTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's tenor up to and including one year, where it differs.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="OvernightIndexedSwapIndex">
+    <xs:annotation>
+      <xs:documentation>An overnight-indexed swap index of a user's own, built at a tenor on an overnight index's name.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Family" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The family name the index reports.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="SettlementDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The settlement days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Currency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The currency's code.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="OvernightIndex" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The overnight index's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="TelescopicValueDates" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the swap's value dates telescope.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Averaging" type="RateAveragingType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>How the overnight rates are averaged: Simple or Compound.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ZeroInflationIndex">
+    <xs:annotation>
+      <xs:documentation>A zero inflation index: one of QuantLib's presets by its class (EUHICP), or an index of a user's own on a region's name.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Family" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The family name the index reports.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Region" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The region's record name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Revised" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether its fixings are revised.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Frequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The publication frequency.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AvailabilityLag" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The availability lag.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Currency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The currency's code.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="YoYInflationIndex">
+    <xs:annotation>
+      <xs:documentation>A year-on-year inflation index: one of QuantLib's quoted presets by its class (YYEUHICP), or an index of a user's own, quoted from its fields or the ratio of an underlying zero index's.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="UnderlyingIndex" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A ratio index's zero inflation index's name; none for a quoted index.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Family" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A quoted index's family name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Region" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A quoted index's region's record name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Revised" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether a quoted index's fixings are revised.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Frequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A quoted index's publication frequency.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AvailabilityLag" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A quoted index's availability lag.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Currency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A quoted index's currency's code.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
   <xs:attributeGroup name="OptionalBase">
     <xs:attribute name="name" type="Name" use="required">
       <xs:annotation>
@@ -363,6 +765,92 @@
       <xs:enumeration value="Closest"/>
       <xs:enumeration value="Floor"/>
       <xs:enumeration value="Ceiling"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="IborFamilyUnit">
+    <xs:annotation>
+      <xs:documentation>A tenor unit an Ibor family takes, with its business-day convention and end-of-month rule.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="TimeUnit" type="TimeUnit">
+        <xs:annotation>
+          <xs:documentation>The tenor's unit.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Convention" type="BusinessDayConvention">
+        <xs:annotation>
+          <xs:documentation>The convention at that unit.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="EndOfMonth" type="xs:boolean">
+        <xs:annotation>
+          <xs:documentation>Whether the end-of-month rule applies at that unit.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="Period">
+    <xs:annotation>
+      <xs:documentation>A period in QuantLib's short form, one or more of a length and a unit: D, W, M or Y (6M, 1Y6M).</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:pattern value="([0-9]+[DdWwMmYy])+"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TimeUnit">
+    <xs:annotation>
+      <xs:documentation>A tenor's unit.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Days"/>
+      <xs:enumeration value="Weeks"/>
+      <xs:enumeration value="Months"/>
+      <xs:enumeration value="Years"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Frequency">
+    <xs:annotation>
+      <xs:documentation>A frequency, by nanoql's names.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="NoFrequency"/>
+      <xs:enumeration value="Once"/>
+      <xs:enumeration value="Annual"/>
+      <xs:enumeration value="Semiannual"/>
+      <xs:enumeration value="EveryFourthMonth"/>
+      <xs:enumeration value="Quarterly"/>
+      <xs:enumeration value="Bimonthly"/>
+      <xs:enumeration value="Monthly"/>
+      <xs:enumeration value="EveryFourthWeek"/>
+      <xs:enumeration value="Biweekly"/>
+      <xs:enumeration value="Weekly"/>
+      <xs:enumeration value="Daily"/>
+      <xs:enumeration value="OtherFrequency"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="IborIndexStyle">
+    <xs:annotation>
+      <xs:documentation>The class a user's own Ibor index is built as.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Ibor"/>
+      <xs:enumeration value="Libor"/>
+      <xs:enumeration value="Custom"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="RateAveragingType">
+    <xs:annotation>
+      <xs:documentation>How an overnight leg averages its rates.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Simple"/>
+      <xs:enumeration value="Compound"/>
     </xs:restriction>
   </xs:simpleType>
 

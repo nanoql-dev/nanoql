@@ -30,20 +30,7 @@ public sealed class GbpLiborSwapIsdaFix : SwapIndex
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <exception cref="NanoQLException">The tenor can't be compared with one year, as 365 or 366 days can't.</exception>
     public GbpLiborSwapIsdaFix(Period tenor, YieldTermStructure? h = null)
-        : base(
-            "GbpLiborSwapIsdaFix", // familyName
-            tenor,
-            0, // settlementDays
-            new GBPCurrency(),
-            new UnitedKingdom(UnitedKingdomMarket.Exchange),
-            tenor > new Period(1, TimeUnit.Years) // fixedLegTenor
-                ? new Period(6, TimeUnit.Months)
-                : new Period(1, TimeUnit.Years),
-            BusinessDayConvention.ModifiedFollowing, // fixedLegConvention
-            new Actual365Fixed(), // fixedLegDaycounter
-            tenor > new Period(1, TimeUnit.Years)
-                ? new GBPLibor(new Period(6, TimeUnit.Months), h)
-                : new GBPLibor(new Period(3, TimeUnit.Months), h))
+        : this(tenor, ConventionProvider.ReadSwapIndex("GbpLiborSwapIsdaFix", tenor, () => Reference(tenor, h)), false, null)
     {
     }
 
@@ -56,21 +43,39 @@ public sealed class GbpLiborSwapIsdaFix : SwapIndex
     /// <param name="discounting">The discounting curve, or <see langword="null"/>, QuantLib's empty handle.</param>
     /// <exception cref="NanoQLException">The tenor can't be compared with one year, as 365 or 366 days can't.</exception>
     public GbpLiborSwapIsdaFix(Period tenor, YieldTermStructure? forwarding, YieldTermStructure? discounting)
-        : base(
-            "GbpLiborSwapIsdaFix", // familyName
-            tenor,
-            0, // settlementDays
-            new GBPCurrency(),
-            new UnitedKingdom(UnitedKingdomMarket.Exchange),
-            tenor > new Period(1, TimeUnit.Years) // fixedLegTenor
-                ? new Period(6, TimeUnit.Months)
-                : new Period(1, TimeUnit.Years),
-            BusinessDayConvention.ModifiedFollowing, // fixedLegConvention
-            new Actual365Fixed(), // fixedLegDaycounter
-            tenor > new Period(1, TimeUnit.Years)
-                ? new GBPLibor(new Period(6, TimeUnit.Months), forwarding)
-                : new GBPLibor(new Period(3, TimeUnit.Months), forwarding),
-            discounting)
+        : this(tenor, ConventionProvider.ReadSwapIndex("GbpLiborSwapIsdaFix", tenor, () => Reference(tenor, forwarding)), true, discounting)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private GbpLiborSwapIsdaFix(
+        Period tenor,
+        (SwapIndexConventions Values, ConventionProvider Provider) read,
+        bool exogenousDiscount,
+        YieldTermStructure? discounting)
+        : base(
+            "GbpLiborSwapIsdaFix",
+            tenor,
+            read.Values.SettlementDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.FixedLegTenor,
+            read.Values.FixedLegConvention,
+            read.Values.FixedLegDayCounter,
+            read.Values.IborIndex,
+            exogenousDiscount,
+            discounting,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope, the Ibor index on the forwarding curve.
+    private static SwapIndexConventions Reference(Period tenor, YieldTermStructure? forwarding) => new(
+        0,
+        new GBPCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        tenor > new Period(1, TimeUnit.Years) ? new Period(6, TimeUnit.Months) : new Period(1, TimeUnit.Years),
+        BusinessDayConvention.ModifiedFollowing,
+        new Actual365Fixed(),
+        tenor > new Period(1, TimeUnit.Years) ? new GBPLibor(new Period(6, TimeUnit.Months), forwarding) : new GBPLibor(new Period(3, TimeUnit.Months), forwarding));
 }

@@ -3,13 +3,14 @@
 // Own-tested: Extensions/ConventionRecordsTests.cs (nanoql's own description of built objects as records)
 
 using System.Collections.Immutable;
+using NanoQL.Indexes;
 using NanoQL.Time;
 
 namespace NanoQL.Extensions.Conventions;
 
 /// <summary>
 /// Built objects back to records: <see cref="Describe(string, Calendar, ConventionSet?)"/> and its overloads give the
-/// records that resolve, in a set, to an object equal to the one given.
+/// records that resolve, in a set, to an object equal to the one given, an index field by field.
 /// </summary>
 /// <remarks>
 /// A value equal to a preset's resolved object (a calendar by type, name and edits, a day counter by its own
@@ -50,6 +51,22 @@ public static class ConventionRecords
         ArgumentNullException.ThrowIfNull(value);
         var d = new Describer(ConventionNames.Checked(name, nameof(name)), set ?? ConventionSet.QuantLib);
         d.DayCounter(name, value);
+        return d.Snapshot;
+    }
+
+    /// <summary>The records describing an Ibor or overnight index under a name.</summary>
+    /// <param name="name">The name the index takes.</param>
+    /// <param name="value">The index; its forwarding curve is a market object, which no record holds.</param>
+    /// <param name="set">The set the records resolve in; <see cref="ConventionSet.QuantLib"/> when null.</param>
+    /// <returns>The records; the last defines <paramref name="name"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    /// <exception cref="ArgumentException">The index is a EUR Libor or the CDI index, whose behaviour its fields don't
+    /// give, and equals none of the set's presets; or it has no currency.</exception>
+    public static ConventionSnapshot Describe(string name, IborIndex value, ConventionSet? set = null)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        var d = new Describer(ConventionNames.Checked(name, nameof(name)), set ?? ConventionSet.QuantLib);
+        d.Index(name, value);
         return d.Snapshot;
     }
 
@@ -195,6 +212,109 @@ public static class ConventionRecords
             {
                 Add(new AliasRecord(name, value.Code));
             }
+        }
+
+        public void Index(string name, IborIndex value)
+        {
+            // a preset of the value's class, equal by every field
+            foreach (string preset in PresetFactories.IborIndexes.Keys.Concat(PresetFactories.OvernightIndexes.Keys)
+                .Where(k => !aliases.Contains(k)).Order(StringComparer.Ordinal))
+            {
+                if (SameIndex(set.IborIndex(preset), value))
+                {
+                    Add(new AliasRecord(name, preset));
+                    return;
+                }
+            }
+
+            if (value is EURLibor or Cdi)
+            {
+                throw new ArgumentException(
+                    $"the {value.Name} index, a {value.GetType().Name} equal to none of the set's presets, has behaviour no record gives",
+                    nameof(value));
+            }
+
+            Currency currency = value.Currency ?? throw new ArgumentException($"the {value.Name} index has no currency", nameof(value));
+            Currency(currency.Code, currency);
+            string dayCounter = DayCounterPart(value.DayCounter);
+            switch (value)
+            {
+                case OvernightIndex:
+                    Add(new OvernightIndexRecord(name)
+                    {
+                        Family = value.FamilyName,
+                        FixingDays = value.FixingDays,
+                        Currency = currency.Code,
+                        FixingCalendar = Part(value.FixingCalendar),
+                        DayCounter = dayCounter,
+                    });
+                    break;
+                case Libor libor:
+                    // its fixing calendar is London's, which the public constructor joins to its financial centre
+                    Add(new IborIndexRecord(name)
+                    {
+                        Family = value.FamilyName,
+                        Tenor = value.Tenor,
+                        FixingDays = value.FixingDays,
+                        Currency = currency.Code,
+                        DayCounter = dayCounter,
+                        Style = IborIndexStyle.Libor,
+                        FinancialCenterCalendar = Part(((JointCalendar)libor.JointCalendar).Calendars[1]),
+                    });
+                    break;
+                case CustomIborIndex custom:
+                    Add(new IborIndexRecord(name)
+                    {
+                        Family = value.FamilyName,
+                        Tenor = value.Tenor,
+                        FixingDays = value.FixingDays,
+                        Currency = currency.Code,
+                        FixingCalendar = Part(value.FixingCalendar),
+                        Convention = value.BusinessDayConvention,
+                        EndOfMonth = value.EndOfMonth,
+                        DayCounter = dayCounter,
+                        Style = IborIndexStyle.Custom,
+                        ValueCalendar = Part(custom.ValueCalendar),
+                        MaturityCalendar = Part(custom.MaturityCalendar),
+                    });
+                    break;
+                default:
+                    Add(new IborIndexRecord(name)
+                    {
+                        Family = value.FamilyName,
+                        Tenor = value.Tenor,
+                        FixingDays = value.FixingDays,
+                        Currency = currency.Code,
+                        FixingCalendar = Part(value.FixingCalendar),
+                        Convention = value.BusinessDayConvention,
+                        EndOfMonth = value.EndOfMonth,
+                        DayCounter = dayCounter,
+                    });
+                    break;
+            }
+        }
+
+        // Two indexes of one class and every field equal: a Libor's joint calendar among them.
+        private static bool SameIndex(IborIndex a, IborIndex b) =>
+            a.GetType() == b.GetType() && a.FamilyName == b.FamilyName && a.Tenor == b.Tenor && a.FixingDays == b.FixingDays
+            && a.Currency == b.Currency && a.FixingCalendar == b.FixingCalendar && a.BusinessDayConvention == b.BusinessDayConvention
+            && a.EndOfMonth == b.EndOfMonth && a.DayCounter == b.DayCounter
+            && (a is not Libor la || la.JointCalendar == ((Libor)b).JointCalendar);
+
+        // A day counter part's name: a preset's where it equals one, else a generated name with its record.
+        private string DayCounterPart(DayCounter part)
+        {
+            foreach (string preset in PresetFactories.DayCounters.Keys.Where(k => !aliases.Contains(k)))
+            {
+                if (set.DayCounter(preset) == part)
+                {
+                    return preset;
+                }
+            }
+
+            string generated = Generated();
+            DayCounter(generated, part);
+            return generated;
         }
 
         private static bool SameData(Currency a, Currency b) =>

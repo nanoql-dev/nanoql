@@ -23,7 +23,29 @@ public sealed class AUCPI : ZeroInflationIndex
     /// <param name="ts">The zero-inflation curve the index forecasts through, or <see langword="null"/> for
     /// none.</param>
     public AUCPI(Frequency frequency, bool revised, ZeroInflationTermStructure? ts = null)
-        : base("CPI", new AustraliaRegion(), revised, frequency, new Period(2, TimeUnit.Months), new AUDCurrency(), ts)
+        : this(ConventionProvider.ReadInflationIndex("AUCPI", () => Reference(frequency, revised)), ts)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private AUCPI((InflationIndexConventions Values, ConventionProvider Provider) read, ZeroInflationTermStructure? ts)
+        : base(
+            "CPI",
+            read.Values.Region,
+            read.Values.Revised,
+            read.Values.Frequency,
+            read.Values.AvailabilityLag,
+            read.Values.Currency,
+            ts,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, with the preset's arguments, built in the provider's scope.
+    private static InflationIndexConventions Reference(Frequency frequency, bool revised) => new(
+        new AustraliaRegion(),
+        revised,
+        frequency,
+        new Period(2, TimeUnit.Months),
+        new AUDCurrency());
 }

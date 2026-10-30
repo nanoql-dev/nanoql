@@ -21,14 +21,29 @@ public sealed class YYUKRPI : YoYInflationIndex
     /// <param name="ts">The year-on-year inflation curve the index forecasts through, or <see langword="null"/> for
     /// none.</param>
     public YYUKRPI(YoYInflationTermStructure? ts = null)
-        : base(
-            "YY_RPI",
-            new UKRegion(),
-            false,
-            Frequency.Monthly,
-            new Period(1, TimeUnit.Months),
-            new GBPCurrency(),
-            ts)
+        : this(ConventionProvider.ReadInflationIndex("YYUKRPI", Reference), ts)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private YYUKRPI((InflationIndexConventions Values, ConventionProvider Provider) read, YoYInflationTermStructure? ts)
+        : base(
+            "YY_RPI",
+            read.Values.Region,
+            read.Values.Revised,
+            read.Values.Frequency,
+            read.Values.AvailabilityLag,
+            read.Values.Currency,
+            ts,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static InflationIndexConventions Reference() => new(
+        new UKRegion(),
+        false,
+        Frequency.Monthly,
+        new Period(1, TimeUnit.Months),
+        new GBPCurrency());
 }

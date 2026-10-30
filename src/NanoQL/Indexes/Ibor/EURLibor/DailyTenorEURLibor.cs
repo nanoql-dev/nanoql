@@ -30,20 +30,42 @@ public class DailyTenorEURLibor : IborIndex
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="settlementDays"/> is negative.</exception>
     public DailyTenorEURLibor(int settlementDays, YieldTermStructure? h = null)
+        : this("DailyTenorEURLibor", settlementDays, h)
+    {
+    }
+
+    // A preset deriving this one reads its own name's conventions.
+    private protected DailyTenorEURLibor(string preset, int settlementDays, YieldTermStructure? h)
+        : this(ConventionProvider.ReadIborIndex(preset, () => Reference(settlementDays)), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private DailyTenorEURLibor((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "EURLibor",
             new Period(1, TimeUnit.Days),
-            settlementDays,
-            new EURCurrency(),
-            // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
-            // no o/n or s/n fixings (as the case may be) will take place
-            // when the principal centre of the currency concerned is
-            // closed but London is open on the fixing day.
-            new TARGET(),
-            EURLiborConventions.Convention(new Period(1, TimeUnit.Days)),
-            EURLiborConventions.EndOfMonth(new Period(1, TimeUnit.Days)),
-            new Actual360(),
-            h)
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
     {
     }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static IborIndexConventions Reference(int settlementDays) => new(
+        settlementDays,
+        new EURCurrency(),
+        // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
+        // no o/n or s/n fixings (as the case may be) will take place
+        // when the principal centre of the currency concerned is
+        // closed but London is open on the fixing day.
+        new TARGET(),
+        EURLiborConventions.Convention(new Period(1, TimeUnit.Days)),
+        EURLiborConventions.EndOfMonth(new Period(1, TimeUnit.Days)),
+        new Actual360());
 }

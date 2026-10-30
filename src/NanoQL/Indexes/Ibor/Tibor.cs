@@ -25,16 +25,32 @@ public sealed class Tibor : IborIndex
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Tibor(Period tenor, YieldTermStructure? h = null)
+        : this(tenor, ConventionProvider.ReadIborFamily("Tibor", tenor, Reference), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Tibor(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "Tibor",
             tenor,
-            2,
-            new JPYCurrency(),
-            new Japan(),
-            BusinessDayConvention.ModifiedFollowing,
-            false,
-            new Actual365Fixed(),
-            h)
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
     {
     }
+
+    // QuantLib's conventions, the same at every tenor, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        2,
+        new JPYCurrency(),
+        new Japan(),
+        BusinessDayConvention.ModifiedFollowing,
+        false,
+        new Actual365Fixed());
 }

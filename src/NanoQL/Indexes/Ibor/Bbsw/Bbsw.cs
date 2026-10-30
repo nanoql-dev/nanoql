@@ -20,16 +20,7 @@ public class Bbsw : IborIndex
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <exception cref="ArgumentException">The tenor is in days.</exception>
     public Bbsw(Period tenor, YieldTermStructure? h = null)
-        : base(
-            "Bbsw",
-            tenor,
-            0, // settlement days
-            new AUDCurrency(),
-            new Australia(),
-            BusinessDayConvention.HalfMonthModifiedFollowing,
-            true,
-            new Actual365Fixed(),
-            h)
+        : this(tenor, ConventionProvider.ReadIborFamily("Bbsw", tenor, Reference), h)
     {
         if (!(Tenor.Units != TimeUnit.Days))
         {
@@ -37,4 +28,29 @@ public class Bbsw : IborIndex
                 $"for daily tenors ({Tenor}) dedicated DailyTenor constructor must be used", nameof(tenor));
         }
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Bbsw(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base(
+            "Bbsw",
+            tenor,
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, the same at every tenor, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new AUDCurrency(),
+        new Australia(),
+        BusinessDayConvention.HalfMonthModifiedFollowing,
+        true,
+        new Actual365Fixed());
 }

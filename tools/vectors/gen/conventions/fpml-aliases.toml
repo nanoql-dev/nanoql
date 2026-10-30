@@ -10,7 +10,9 @@
 # the last day of February when it is the termination date, which a day counter preset doesn't know, so
 # Thirty360.German counts 180 days where the convention counts 178 on a final period to the end of February; and
 # a business centre that is a city's banking days has none. Each scheme's codes are as fpml.org publishes them
-# at the version given, so each alias's code is checked verbatim against its scheme's list.
+# at the version given, so each alias's code is checked verbatim against its scheme's list. A floating rate index's
+# code names its overnight index, or EUR-EURIBOR the Euribor family, taken at a tenor; a code for an average,
+# a compounded index or a term rate has none.
 
 [schemes.day-count-fraction]
 version = "2-3"
@@ -47,6 +49,195 @@ version = "5-9"
 uri = "https://www.fpml.org/spec/fpml-5-9-6-rec-1/html/confirmation/schemaDocumentation/schemas/fpml-enum-5-9_xsd/simpleTypes/BusinessDayConventionEnum.html"
 codes = [
   "FOLLOWING", "FRN", "MODFOLLOWING", "PRECEDING", "MODPRECEDING", "NEAREST", "NONE", "NotApplicable"
+]
+
+[schemes.floating-rate-index]
+version = "3-14"
+uri = "http://www.fpml.org/coding-scheme/floating-rate-index-3-14"
+codes = [
+  "AED-EBOR-Reuters", "AED-EIBOR", "AUD-AONIA", "AUD-AONIA-OIS Compound", "AUD-AONIA-OIS-COMPOUND",
+  "AUD-AONIA-OIS-COMPOUND-SwapMarker", "AUD-BBR-AUBBSW", "AUD-BBR-BBSW", "AUD-BBR-BBSW-Bloomberg",
+  "AUD-BBR-BBSY (BID)", "AUD-BBR-ISDC", "AUD-BBSW", "AUD-BBSW Quarterly Swap Rate ICAP",
+  "AUD-BBSW Semi Annual Swap Rate ICAP", "AUD-BBSY Bid", "AUD-LIBOR-BBA", "AUD-LIBOR-BBA-Bloomberg",
+  "AUD-LIBOR-Reference Banks", "AUD-Quarterly Swap Rate-ICAP", "AUD-Quarterly Swap Rate-ICAP-Reference Banks",
+  "AUD-Semi-Annual Swap Rate-11:00-BGCANTOR", "AUD-Semi-Annual Swap Rate-BGCANTOR-Reference Banks",
+  "AUD-Semi-annual Swap Rate-ICAP", "AUD-Semi-Annual Swap Rate-ICAP-Reference Banks", "AUD-Swap Rate-Reuters",
+  "BRL-CDI", "CAD-BA-CDOR", "CAD-BA-CDOR-Bloomberg", "CAD-BA-ISDD", "CAD-BA-Reference Banks", "CAD-BA-Reuters",
+  "CAD-BA-Telerate", "CAD-CDOR", "CAD-CORRA", "CAD-CORRA CanDeal TMX Term", "CAD-CORRA Compounded Index",
+  "CAD-CORRA-OIS Compound", "CAD-CORRA-OIS-COMPOUND", "CAD-ISDA-Swap Rate", "CAD-LIBOR-BBA",
+  "CAD-LIBOR-BBA-Bloomberg", "CAD-LIBOR-BBA-SwapMarker", "CAD-LIBOR-Reference Banks", "CAD-REPO-CORRA",
+  "CAD-TBILL-ISDD", "CAD-TBILL-Reference Banks", "CAD-TBILL-Reuters", "CAD-TBILL-Telerate",
+  "CHF-3M LIBOR SWAP-CME vs LCH-ICAP", "CHF-3M LIBOR SWAP-CME vs LCH-ICAP-Bloomberg",
+  "CHF-3M LIBOR SWAP-EUREX vs LCH-ICAP", "CHF-3M LIBOR SWAP-EUREX vs LCH-ICAP-Bloomberg",
+  "CHF-6M LIBOR SWAP-CME vs LCH-ICAP", "CHF-6M LIBORSWAP-CME vs LCH-ICAP-Bloomberg",
+  "CHF-6M LIBOR SWAP-EUREX vs LCH-ICAP", "CHF-6M LIBOR SWAP-EUREX vs LCH-ICAP-Bloomberg", "CHF-Annual Swap Rate",
+  "CHF-Annual Swap Rate-11:00-ICAP", "CHF-Annual Swap Rate-Reference Banks",
+  "CHF-Basis Swap-3m vs 6m-LIBOR-11:00-ICAP", "CHF-ISDAFIX-Swap Rate", "CHF-LIBOR", "CHF-LIBOR-BBA",
+  "CHF-LIBOR-BBA-Bloomberg", "CHF-LIBOR-ISDA", "CHF-LIBOR-Reference Banks", "CHF-OIS-11:00-ICAP", "CHF-SARON",
+  "CHF-SARON Average 12M", "CHF-SARON Average 1M", "CHF-SARON Average 1W", "CHF-SARON Average 2M",
+  "CHF-SARON Average 3M", "CHF-SARON Average 6M", "CHF-SARON Average 9M", "CHF-SARON Compounded Index",
+  "CHF-SARON-OIS Compound", "CHF-SARON-OIS-COMPOUND", "CHF-TOIS-OIS-COMPOUND", "CHF USD-Basis Swaps-11:00-ICAP",
+  "CL-CLICP-Bloomberg", "CLP-ICP", "CLP-TNA", "CNH-HIBOR", "CNH-HIBOR-Reference Banks", "CNH-HIBOR-TMA",
+  "CNY 7-Repo Compounding Date", "CNY-CNREPOFIX=CFXS-Reuters", "CNY-Deposit Rate", "CNY-Fixing Repo Rate", "CNY-LPR",
+  "CNY-PBOCB-Reuters", "CNY-Quarterly 7 day Repo Non Deliverable Swap Rate-TRADITION",
+  "CNY-Quarterly 7 day Repo Non Deliverable Swap Rate-TRADITION-Reference Banks",
+  "CNY-Quarterly 7D Repo NDS Rate Tradition", "CNY-Semi-Annual Swap Rate-11:00-BGCANTOR",
+  "CNY-Semi-Annual Swap Rate-Reference Banks", "CNY-SHIBOR", "CNY-SHIBOR-OIS Compound", "CNY-Shibor-OIS-Compounding",
+  "CNY-SHIBOR-Reuters", "COP-IBR-OIS Compound", "COP-IBR-OIS-COMPOUND", "CZK-Annual Swap Rate-11:00-BGCANTOR",
+  "CZK-Annual Swap Rate-Reference Banks", "CZK-CZEONIA", "CZK-CZEONIA-OIS Compound", "CZK-PRIBOR", "CZK-PRIBOR-PRBO",
+  "CZK-PRIBOR-Reference Banks", "DKK-CIBOR", "DKK-CIBOR2", "DKK-CIBOR2-Bloomberg", "DKK-CIBOR2-DKNA13",
+  "DKK-CIBOR-DKNA13", "DKK-CIBOR-DKNA13-Bloomberg", "DKK-CIBOR-Reference Banks", "DKK-CITA",
+  "DKK-CITA-DKNA14-COMPOUND", "DKK-DESTR", "DKK-DESTR Compounded Index", "DKK-DESTR-OIS Compound",
+  "DKK-DKKOIS-OIS-COMPOUND", "DKK-Tom Next-OIS Compound", "EUR-3M EURIBOR SWAP-CME vs LCH-ICAP",
+  "EUR-3M EURIBOR SWAP-CME vs LCH-ICAP-Bloomberg", "EUR-3M EURIBOR SWAP-EUREX vs LCH-ICAP",
+  "EUR-3M EURIBOR SWAP-EUREX vs LCH-ICAP-Bloomberg", "EUR-6M EURIBOR SWAP-CME vs LCH-ICAP",
+  "EUR-6M EURIBOR SWAP-CME vs LCH-ICAP-Bloomberg", "EUR-6M EURIBOR SWAP-EUREX vs LCH-ICAP",
+  "EUR-6M EURIBOR SWAP-EUREX vs LCH-ICAP-Bloomberg", "EUR-Annual Swap Rate-10:00",
+  "EUR-Annual Swap Rate-10:00-BGCANTOR", "EUR-Annual Swap Rate-10:00-Bloomberg", "EUR-Annual Swap Rate-10:00-ICAP",
+  "EUR-Annual Swap Rate-10:00-SwapMarker", "EUR-Annual Swap Rate-10:00-TRADITION", "EUR-Annual Swap Rate-11:00",
+  "EUR-Annual Swap Rate-11:00-Bloomberg", "EUR-Annual Swap Rate-11:00-ICAP", "EUR-Annual Swap Rate-11:00-SwapMarker",
+  "EUR-Annual Swap Rate-3 Month", "EUR-Annual Swap Rate-3 Month-SwapMarker", "EUR-Annual Swap Rate-4:15-TRADITION",
+  "EUR-Annual Swap Rate-Reference Banks", "EUR Basis Swap-EONIA vs 3m EUR+IBOR Swap Rates-A/360-10:00-ICAP",
+  "EUR-CNO TEC10", "EUR-EONIA", "EUR-EONIA-AVERAGE", "EUR-EONIA-Average", "EUR-EONIA-OIS-10:00-BGCANTOR",
+  "EUR-EONIA-OIS-10:00-ICAP", "EUR-EONIA-OIS-10:00-TRADITION", "EUR-EONIA-OIS-11:00-ICAP",
+  "EUR-EONIA-OIS-4:15-TRADITION", "EUR-EONIA-OIS Compound", "EUR-EONIA-OIS-COMPOUND",
+  "EUR-EONIA-OIS-COMPOUND-Bloomberg", "EUR-EONIA-Swap-Index", "EUR-EURIBOR", "EUR-EURIBOR-Act/365",
+  "EUR-EURIBOR-Act/365-Bloomberg", "EUR EURIBOR-Annual Bond Swap vs 1m-11:00-ICAP",
+  "EUR EURIBOR-Basis Swap-1m vs 3m-Euribor-11:00-ICAP", "EUR EURIBOR-Basis Swap-3m vs 6m-11:00-ICAP",
+  "EUR-EURIBOR ICE Swap Rate-11:00", "EUR-EURIBOR ICE Swap Rate-12:00", "EUR-EURIBOR-Reference Banks",
+  "EUR-EURIBOR-Reuters", "EUR-EURIBOR-Telerate", "EUR-EURONIA-OIS Compound", "EUR-EURONIA-OIS-COMPOUND",
+  "EUR-EuroSTR", "EUR-EuroSTR Average 12M", "EUR-EuroSTR Average 1M", "EUR-EuroSTR Average 1W",
+  "EUR-EuroSTR Average 3M", "EUR-EuroSTR Average 6M", "EUR-EuroSTR-COMPOUND", "EUR-EuroSTR Compounded Index",
+  "EUR-EuroSTR FTSE Term", "EUR-EuroSTR ICE Compounded Index", "EUR-EuroSTR ICE Compounded Index 0 Floor",
+  "EUR-EuroSTR ICE Compounded Index 0 Floor 2D Lag", "EUR-EuroSTR ICE Compounded Index 0 Floor 5D Lag",
+  "EUR-EuroSTR ICE Compounded Index 2D Lag", "EUR-EuroSTR ICE Compounded Index 5D Lag", "EUR-EuroSTR ICE Swap Rate",
+  "EUR-EuroSTR-OIS Compound", "EUR-EuroSTR Term", "EUR-ISDA-EURIBOR Swap Rate-11:00",
+  "EUR-ISDA-EURIBOR Swap Rate-12:00", "EUR-ISDA-LIBOR Swap Rate-10:00", "EUR-ISDA-LIBOR Swap Rate-11:00",
+  "EUR-LIBOR", "EUR-LIBOR-BBA", "EUR-LIBOR-BBA-Bloomberg", "EUR-LIBOR-Reference Banks", "EUR-TAM-CDC",
+  "EUR-TEC10-CNO", "EUR-TEC10-CNO-SwapMarker", "EUR-TEC10-Reference Banks", "EUR-TEC5-CNO",
+  "EUR-TEC5-CNO-SwapMarker", "EUR-TEC5-Reference Banks", "EUR-TMM-CDC-COMPOUND", "EUR USD-Basis Swaps-11:00-ICAP",
+  "GBP-6M LIBOR SWAP-CME vs LCH-ICAP", "GBP-6M LIBOR SWAP-CME vs LCH-ICAP-Bloomberg",
+  "GBP-6M LIBOR SWAP-EUREX vs LCH-ICAP", "GBP-6M LIBOR SWAP-EUREX vs LCH-ICAP-Bloomberg", "GBP-ISDA-Swap Rate",
+  "GBP-LIBOR", "GBP-LIBOR-BBA", "GBP-LIBOR-BBA-Bloomberg", "GBP-LIBOR ICE Swap Rate", "GBP-LIBOR-ISDA",
+  "GBP-LIBOR-Reference Banks", "GBP-RONIA", "GBP-RONIA-OIS Compound", "GBP-Semi-Annual Swap Rate",
+  "GBP-Semi-Annual Swap Rate-11:00-ICAP", "GBP-Semi Annual Swap Rate-11:00-TRADITION",
+  "GBP-Semi Annual Swap Rate-4:15-TRADITION", "GBP-Semi-Annual Swap Rate-Reference Banks",
+  "GBP-Semi-Annual Swap Rate-SwapMarker26", "GBP-SONIA", "GBP-SONIA-COMPOUND", "GBP-SONIA Compounded Index",
+  "GBP-SONIA FTSE Term", "GBP-SONIA ICE Compounded Index", "GBP-SONIA ICE Compounded Index 0 Floor",
+  "GBP-SONIA ICE Compounded Index 0 Floor 2D Lag", "GBP-SONIA ICE Compounded Index 0 Floor 5D Lag",
+  "GBP-SONIA ICE Compounded Index 2D Lag", "GBP-SONIA ICE Compounded Index 5D Lag", "GBP-SONIA ICE Swap Rate",
+  "GBP-SONIA ICE Term", "GBP-SONIA-OIS-11:00-ICAP", "GBP-SONIA-OIS-11:00-TRADITION", "GBP-SONIA-OIS-4:15-TRADITION",
+  "GBP-SONIA-OIS Compound", "GBP-SONIA Swap Rate", "GBP-UK Base Rate", "GBP USD-Basis Swaps-11:00-ICAP",
+  "GBP-WMBA-RONIA-COMPOUND", "GBP-WMBA-SONIA-COMPOUND", "GRD-ATHIBOR-ATHIBOR", "GRD-ATHIBOR-Reference Banks",
+  "GRD-ATHIBOR-Telerate", "GRD-ATHIMID-Reference Banks", "GRD-ATHIMID-Reuters", "HKD-HIBOR", "HKD-HIBOR-HIBOR=",
+  "HKD-HIBOR-HIBOR-Bloomberg", "HKD-HIBOR-HKAB", "HKD-HIBOR-HKAB-Bloomberg", "HKD-HIBOR-ISDC",
+  "HKD-HIBOR-Reference Banks", "HKD-HONIA", "HKD-HONIA-OIS Compound", "HKD-HONIX-OIS-COMPOUND",
+  "HKD-ISDA-Swap Rate-11:00", "HKD-ISDA-Swap Rate-4:00", "HKD-Quarterly-Annual Swap Rate-11:00-BGCANTOR",
+  "HKD-Quarterly-Annual Swap Rate-11:00-TRADITION", "HKD-Quarterly-Annual Swap Rate-4:00-BGCANTOR",
+  "HKD-Quarterly-Annual Swap Rate-Reference Banks", "HKD-Quarterly-Quarterly Swap Rate-11:00-ICAP",
+  "HKD-Quarterly-Quarterly Swap Rate-4:00-ICAP", "HKD-Quarterly-Quarterly Swap Rate-Reference Banks", "HUF-BUBOR",
+  "HUF-BUBOR-Reference Banks", "HUF-BUBOR-Reuters", "HUF-HUFONIA", "HUF-HUFONIA-OIS Compound", "IDR-IDMA-Bloomberg",
+  "IDR-IDRFIX", "IDR-INDONIA", "IDR-INDONIA-OIS Compound", "IDR-JIBOR", "IDR-JIBOR-Reuters", "IDR-SBI-Reuters",
+  "IDR-Semi-Annual Swap Rate-11:00-BGCANTOR", "IDR-Semi Annual Swap Rate-Non-deliverable-16:00-Tullett Prebon",
+  "IDR-Semi-Annual Swap Rate-Reference Banks", "IDR-SOR-Reference Banks", "IDR-SOR-Reuters", "IDR-SOR-Telerate",
+  "ILS-SHIR", "ILS-SHIR-OIS Compound", "ILS-TELBOR", "ILS-TELBOR01-Reuters", "ILS-TELBOR-Reference Banks", "INR-BMK",
+  "INR-CMT", "INR-FBIL-MIBOR-OIS-COMPOUND", "INR-INBMK-REUTERS", "INR-MIBOR", "INR-MIBOR OIS",
+  "INR-MIBOR-OIS Compound", "INR-MIBOR-OIS-COMPOUND", "INR-MIFOR", "INR-MIOIS", "INR-MITOR-OIS-COMPOUND",
+  "INR-Modified MIFOR", "INR-Reference Banks", "INR-Semi-Annual Swap Rate-11:30-BGCANTOR",
+  "INR-Semi Annual Swap Rate-Non-deliverable-16:00-Tullett Prebon", "INR-Semi-Annual Swap Rate-Reference Banks",
+  "INR-SORR", "INR-SORR-OIS Compound", "ISK-REIBOR", "ISK-REIBOR-Reference Banks", "ISK-REIBOR-Reuters",
+  "JPY-Annual Swap Rate-11:00-TRADITION", "JPY-Annual Swap Rate-3:00-TRADITION", "JPY-BBSF-Bloomberg-10:00",
+  "JPY-BBSF-Bloomberg-15:00", "JPY-Euroyen TIBOR", "JPY-ISDA-Swap Rate-10:00", "JPY-ISDA-Swap Rate-15:00",
+  "JPY-LIBOR", "JPY-LIBOR-BBA", "JPY-LIBOR-BBA-Bloomberg", "JPY-LIBOR-FRASETT", "JPY-LIBOR-ISDA",
+  "JPY-LIBOR-Reference Banks", "JPY-LIBOR TSR-10:00", "JPY-LIBOR TSR-15:00", "JPY-LTPR MHBK", "JPY-LTPR-MHCB",
+  "JPY-LTPR-TBC", "JPY-MUTANCALL-TONAR", "JPY-OIS-11:00-ICAP", "JPY-OIS-11:00-TRADITION", "JPY-OIS-3:00-TRADITION",
+  "JPY-Quoting Banks-LIBOR", "JPY-STPR-Quoting Banks", "JPY-TIBOR", "JPY-TIBOR-17096", "JPY-TIBOR-17097",
+  "JPY-TIBOR-DTIBOR01", "JPY-TIBOR-TIBM", "JPY-TIBOR-TIBM (10 Banks)", "JPY-TIBOR-TIBM (5 Banks)",
+  "JPY-TIBOR-TIBM (All Banks)", "JPY-TIBOR-TIBM (All Banks)-Bloomberg", "JPY-TIBOR-TIBM-Reference Banks",
+  "JPY-TIBOR-ZTIBOR", "JPY-TONA", "JPY-TONA Average 180D", "JPY-TONA Average 30D", "JPY-TONA Average 90D",
+  "JPY-TONA Compounded Index", "JPY-TONA ICE Compounded Index", "JPY-TONA ICE Compounded Index 0 Floor",
+  "JPY-TONA ICE Compounded Index 0 Floor 2D Lag", "JPY-TONA ICE Compounded Index 0 Floor 5D Lag",
+  "JPY-TONA ICE Compounded Index 2D Lag", "JPY-TONA ICE Compounded Index 5D Lag", "JPY-TONA-OIS Compound",
+  "JPY-TONA-OIS-COMPOUND", "JPY-TONA TSR-10:00", "JPY-TONA TSR-15:00", "JPY-TORF QUICK", "JPY-TSR-Reference Banks",
+  "JPY-TSR-Reuters-10:00", "JPY-TSR-Reuters-15:00", "JPY-TSR-Telerate-10:00", "JPY-TSR-Telerate-15:00",
+  "JPY USD-Basis Swaps-11:00-ICAP", "KRW-Bond-3222", "KRW-CD-3220", "KRW-CD 91D", "KRW-CD-KSDA-Bloomberg",
+  "KRW-KOFR", "KRW-KOFR-OIS Compound", "KRW-Quarterly Annual Swap Rate-3:30-ICAP", "MXN-TIIE", "MXN-TIIE-Banxico",
+  "MXN-TIIE-Banxico-Bloomberg", "MXN-TIIE-Banxico-Reference Banks", "MXN-TIIE ON", "MXN-TIIE ON-OIS Compound",
+  "MXN-TIIE-Reference Banks", "MYR-KLIBOR", "MYR-KLIBOR-BNM", "MYR-KLIBOR-Reference Banks", "MYR-MYOR",
+  "MYR-MYOR-OIS Compound", "MYR-Quarterly Swap Rate-11:00-TRADITION",
+  "MYR-Quarterly Swap Rate-TRADITION-Reference Banks", "NOK-NIBOR", "NOK-NIBOR-NIBR", "NOK-NIBOR-NIBR-Bloomberg",
+  "NOK-NIBOR-NIBR-Reference Banks", "NOK-NIBOR-OIBOR", "NOK-NIBOR-Reference Banks", "NOK-NOWA",
+  "NOK-NOWA-OIS Compound", "NZD-BBR-BID", "NZD-BBR-FRA", "NZD-BBR-ISDC", "NZD-BBR-Reference Banks",
+  "NZD-BBR-Telerate", "NZD-BKBM Bid", "NZD-BKBM FRA", "NZD-BKBM FRA Swap Rate ICAP", "NZD-NZIONA",
+  "NZD-NZIONA-OIS Compound", "NZD-NZIONA-OIS-COMPOUND", "NZD-Semi-Annual Swap Rate-11:00-BGCANTOR",
+  "NZD-Semi-Annual Swap Rate-BGCANTOR-Reference Banks", "NZD-Swap Rate-ICAP", "NZD-Swap Rate-ICAP-Reference Banks",
+  "PHP-ORR", "PHP-ORR-OIS Compound", "PHP-PHIREF", "PHP-PHIREF-BAP", "PHP-PHIREF-Bloomberg",
+  "PHP-PHIREF-Reference Banks", "PHP-Semi-Annual Swap Rate-11:00-BGCANTOR",
+  "PHP-Semi-Annual Swap Rate-Reference Banks", "PLN-POLONIA", "PLN-POLONIA-OIS Compound", "PLN-POLONIA-OIS-COMPOUND",
+  "PLN-POLSTR", "PLN-POLSTR-OIS Compound", "PLN-WIBID", "PLN-WIBOR", "PLN-WIBOR-Reference Banks", "PLN-WIBOR-WIBO",
+  "PLN-WIRON", "PLN-WIRON-OIS Compound", "PLZ-WIBOR-Reference Banks", "PLZ-WIBOR-WIBO",
+  "REPOFUNDS RATE-FRANCE-OIS-COMPOUND", "REPOFUNDS RATE-GERMANY-OIS-COMPOUND", "REPOFUNDS RATE-ITALY-OIS-COMPOUND",
+  "RON-Annual Swap Rate-11:00-BGCANTOR", "RON-Annual Swap Rate-Reference Banks", "RON-RBOR-Reuters", "RON-ROBID",
+  "RON-ROBOR", "RUB-Annual Swap Rate-11:00-BGCANTOR", "RUB-Annual Swap Rate-12:45-TRADITION",
+  "RUB-Annual Swap Rate-4:15-TRADITION", "RUB-Annual Swap Rate-Reference Banks",
+  "RUB-Annual Swap Rate-TRADITION-Reference Banks", "RUB-Key Rate CBRF", "RUB-MosPrime", "RUB-MOSPRIME-NFEA",
+  "RUB-MOSPRIME-Reference Banks", "RUB-RUONIA", "RUB-RUONIA-OIS Compound", "RUB-RUONIA-OIS-COMPOUND", "SAR-SAIBOR",
+  "SAR-SRIOR-Reference Banks", "SAR-SRIOR-SUAA", "SEK-Annual Swap Rate", "SEK-Annual Swap Rate-SESWFI",
+  "SEK-SIOR-OIS-COMPOUND", "SEK-STIBOR", "SEK-STIBOR-Bloomberg", "SEK-STIBOR-OIS Compound",
+  "SEK-STIBOR-Reference Banks", "SEK-STIBOR-SIDE", "SEK-SWESTR", "SEK-SWESTR Average 1M", "SEK-SWESTR Average 1W",
+  "SEK-SWESTR Average 2M", "SEK-SWESTR Average 3M", "SEK-SWESTR Average 6M", "SEK-SWESTR Compounded Index",
+  "SEK-SWESTR-OIS Compound", "SGD-Semi-Annual Currency Basis Swap Rate-11:00-Tullett Prebon",
+  "SGD-Semi-Annual Currency Basis Swap Rate-16:00-Tullett Prebon", "SGD-Semi-Annual Swap Rate-11:00-BGCANTOR",
+  "SGD-Semi-Annual Swap Rate-11:00-Tullett Prebon", "SGD-Semi-Annual Swap Rate-11.00-TRADITION",
+  "SGD-Semi-Annual Swap Rate-16:00-Tullett Prebon", "SGD-Semi-Annual Swap Rate-ICAP",
+  "SGD-Semi-Annual Swap Rate-ICAP-Reference Banks", "SGD-Semi-Annual Swap Rate-Reference Banks",
+  "SGD-Semi-Annual Swap Rate-TRADITION-Reference Banks", "SGD-SIBOR", "SGD-SIBOR-Reference Banks",
+  "SGD-SIBOR-Reuters", "SGD-SIBOR-Telerate", "SGD-SONAR-OIS-COMPOUND", "SGD-SONAR-OIS-VWAP-COMPOUND", "SGD-SOR",
+  "SGD-SORA", "SGD-SORA-COMPOUND", "SGD-SORA-OIS Compound", "SGD-SOR-Reference Banks", "SGD-SOR-Reuters",
+  "SGD-SOR-Telerate", "SGD-SOR-VWAP", "SGD-SOR-VWAP-Reference Banks", "SKK-BRIBOR-Bloomberg", "SKK-BRIBOR-BRBO",
+  "SKK-BRIBOR-NBSK07", "SKK-BRIBOR-Reference Banks", "THB-Semi-Annual Swap Rate-11:00-BGCANTOR",
+  "THB-Semi-Annual Swap Rate-Reference Banks", "THB-SOR-Reference Banks", "THB-SOR-Reuters", "THB-SOR-Telerate",
+  "THB-THBFIX", "THB-THBFIX-Reference Banks", "THB-THBFIX-Reuters", "THB-THOR", "THB-THOR-COMPOUND",
+  "THB-THOR-OIS Compound", "TRY Annual Swap Rate-11:00-TRADITION", "TRY-Annual Swap Rate-11:15-BGCANTOR",
+  "TRY-Annual Swap Rate-Reference Banks", "TRY-Semi-Annual Swap Rate-TRADITION-Reference Banks", "TRY-TLREF",
+  "TRY-TLREF-OIS Compound", "TRY-TLREF-OIS-COMPOUND", "TRY-TRLIBOR", "TRY-TRYIBOR-Reference Banks",
+  "TRY-TRYIBOR-Reuters", "TWD-Quarterly-Annual Swap Rate-11:00-BGCANTOR",
+  "TWD-Quarterly-Annual Swap Rate-Reference Banks", "TWD-Reference Dealers", "TWD-Reuters-6165", "TWD-TAIBIR01",
+  "TWD-TAIBIR02", "TWD-TAIBOR", "TWD-TAIBOR-Bloomberg", "TWD-TAIBOR-Reuters", "TWD-Telerate-6165", "TWD-TWCPBA",
+  "UK Base Rate", "USD-3M LIBOR SWAP-CME vs LCH-ICAP", "USD-3M LIBOR SWAP-CME vs LCH-ICAP-Bloomberg",
+  "USD-6M LIBOR SWAP-CME vs LCH-ICAP", "USD-6M LIBOR SWAP-CME vs LCH-ICAP-Bloomberg", "USD-AMERIBOR",
+  "USD-AMERIBOR Average 30D", "USD-AMERIBOR Average 90D", "USD-AMERIBOR Term", "USD-AMERIBOR Term Structure",
+  "USD-Annual Swap Rate-11:00-BGCANTOR", "USD-Annual Swap Rate-11:00-TRADITION",
+  "USD-Annual Swap Rate-4:00-TRADITION", "USD-AXI Term", "USD-BA-H.15", "USD-BA-Reference Dealers",
+  "USD-BMA Municipal Swap Index", "USD-BSBY", "USD-CD-H.15", "USD-CD-Reference Dealers", "USD-CMS-Reference Banks",
+  "USD-CMS-Reference Banks-ICAP SwapPX", "USD-CMS-Reuters", "USD-CMS-Telerate", "USD-CMT", "USD-CMT Average 1W",
+  "USD-CMT-T7051", "USD-CMT-T7052", "USD-COF11-FHLBSF", "USD-COF11-Reuters", "USD-COF11-Telerate", "USD-COFI",
+  "USD-CP-H.15", "USD-CP-Money Market Yield", "USD-CP-Reference Dealers", "USD-CRITR", "USD-Federal Funds",
+  "USD-Federal Funds-H.15", "USD-Federal Funds-H.15-Bloomberg", "USD-Federal Funds-H.15-OIS-COMPOUND",
+  "USD-Federal Funds-OIS Compound", "USD-Federal Funds-Reference Dealers", "USD-FFCB-DISCO", "USD-FXI Term",
+  "USD-ISDAFIX3-Swap Rate", "USD-ISDAFIX3-Swap Rate-3:00", "USD-ISDA-Swap Rate", "USD-ISDA-Swap Rate-3:00",
+  "USD-LIBOR", "USD-LIBOR-BBA", "USD-LIBOR-BBA-Bloomberg", "USD-LIBOR ICE Swap Rate-11:00",
+  "USD-LIBOR ICE Swap Rate-15:00", "USD-LIBOR-ISDA", "USD-LIBOR-LIBO", "USD-LIBOR-Reference Banks",
+  "USD-Municipal Swap Index", "USD-Municipal Swap Libor Ratio-11:00-ICAP", "USD-Municipal Swap Rate-11:00-ICAP",
+  "USD-OIS-11:00-BGCANTOR", "USD-OIS-11:00-LON-ICAP", "USD-OIS-11:00-NY-ICAP", "USD-OIS-11:00-TRADITION",
+  "USD-OIS-3:00-BGCANTOR", "USD-OIS-3:00-NY-ICAP", "USD-OIS-4:00-TRADITION", "USD-Overnight Bank Funding Rate",
+  "USD-Prime", "USD-Prime-H.15", "USD-Prime-Reference Banks", "USD-S&P Index-High Grade",
+  "USD-SandP Index High Grade", "USD-SIBOR-Reference Banks", "USD-SIBOR-SIBO", "USD-SIFMA Municipal Swap Index",
+  "USD-SOFR", "USD-SOFR Average 180D", "USD-SOFR Average 30D", "USD-SOFR Average 90D", "USD-SOFR CME Term",
+  "USD-SOFR-COMPOUND", "USD-SOFR Compounded Index", "USD-SOFR ICE Compounded Index",
+  "USD-SOFR ICE Compounded Index 0 Floor", "USD-SOFR ICE Compounded Index 0 Floor 2D Lag",
+  "USD-SOFR ICE Compounded Index 0 Floor 5D Lag", "USD-SOFR ICE Compounded Index 2D Lag",
+  "USD-SOFR ICE Compounded Index 5D Lag", "USD-SOFR ICE Swap Rate", "USD-SOFR ICE Swap Rate Spreads",
+  "USD-SOFR ICE Term", "USD-SOFR-OIS Compound", "USD Swap Rate-BCMP1", "USD-TBILL Auction High Rate",
+  "USD-TBILL-H.15", "USD-TBILL-H.15-Bloomberg", "USD-TBILL-Secondary Market",
+  "USD-TBILL Secondary Market-Bond Equivalent Yield", "USD-TIBOR-ISDC", "USD-TIBOR-Reference Banks",
+  "USD-Treasury-19901-3:00-ICAP", "USD Treasury Rate-BCMP1", "USD-Treasury Rate-ICAP BrokerTec",
+  "USD-Treasury Rate-SwapMarker100", "USD-Treasury Rate-SwapMarker99", "USD-Treasury Rate-T19901",
+  "USD-Treasury Rate-T500", "VND-Semi-Annual Swap Rate-11:00-BGCANTOR", "VND-Semi-Annual Swap Rate-Reference Banks",
+  "ZAR-DEPOSIT-Reference Banks", "ZAR-DEPOSIT-SAFEX", "ZAR-JIBAR", "ZAR-JIBAR-Reference Banks", "ZAR-JIBAR-SAFEX",
+  "ZAR-Prime Average", "ZAR-PRIME-AVERAGE", "ZAR-PRIME-AVERAGE-Reference Banks",
+  "ZAR-Quarterly Swap Rate-1:00-TRADITION", "ZAR-Quarterly Swap Rate-5:30-TRADITION",
+  "ZAR-Quarterly Swap Rate-TRADITION-Reference Banks", "ZAR-ZARONIA", "ZAR-ZARONIA-OIS Compound"
 ]
 
 [[alias]]
@@ -133,3 +324,33 @@ name = "ModifiedPreceding"
 code = "NONE"
 scheme = "BusinessDayConventionEnum"
 name = "Unadjusted"
+
+[[alias]]
+code = "USD-SOFR"
+scheme = "floating-rate-index"
+name = "Sofr"
+
+[[alias]]
+code = "GBP-SONIA"
+scheme = "floating-rate-index"
+name = "Sonia"
+
+[[alias]]
+code = "EUR-EuroSTR"
+scheme = "floating-rate-index"
+name = "Estr"
+
+[[alias]]
+code = "JPY-TONA"
+scheme = "floating-rate-index"
+name = "Tonar"
+
+[[alias]]
+code = "CHF-SARON"
+scheme = "floating-rate-index"
+name = "Saron"
+
+[[alias]]
+code = "EUR-EURIBOR"
+scheme = "floating-rate-index"
+name = "Euribor"

@@ -21,16 +21,32 @@ public sealed class Mosprime : IborIndex
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Mosprime(Period tenor, YieldTermStructure? h = null)
+        : this(tenor, ConventionProvider.ReadIborFamily("Mosprime", tenor, () => Reference(tenor)), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Mosprime(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "MOSPRIME",
             tenor,
-            tenor == new Period(1, TimeUnit.Days) ? 0 : 1,
-            new RUBCurrency(),
-            new Russia(),
-            BusinessDayConvention.ModifiedFollowing,
-            false,
-            new ActualActual(ActualActualConvention.ISDA),
-            h)
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
     {
     }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        tenor == new Period(1, TimeUnit.Days) ? 0 : 1,
+        new RUBCurrency(),
+        new Russia(),
+        BusinessDayConvention.ModifiedFollowing,
+        false,
+        new ActualActual(ActualActualConvention.ISDA));
 }

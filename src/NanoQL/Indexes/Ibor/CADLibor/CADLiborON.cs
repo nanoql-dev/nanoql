@@ -17,7 +17,18 @@ public sealed class CADLiborON : DailyTenorLibor
     /// <summary>Initializes a new instance of the <see cref="CADLiborON"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public CADLiborON(YieldTermStructure? h = null)
-        : base("CADLibor", 0, new CADCurrency(), new Canada(), new Actual365Fixed(), h)
+        : base("CADLibor", ConventionProvider.ReadIborIndex("CADLiborON", () => Reference()), h)
     {
     }
+
+    // QuantLib's conventions, built in the provider's scope: London's fixing calendar, Libor's rules at a day and
+    // the currency's financial centre.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new CADCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        LiborConventions.Convention(new Period(1, TimeUnit.Days)),
+        LiborConventions.EndOfMonth(new Period(1, TimeUnit.Days)),
+        new Actual365Fixed(),
+        new Canada());
 }

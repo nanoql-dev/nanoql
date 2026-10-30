@@ -15,7 +15,7 @@ public sealed class GBPLiborON : DailyTenorGBPLibor
     /// <summary>Initializes a new instance of the <see cref="GBPLiborON"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public GBPLiborON(YieldTermStructure? h = null)
-        : base(0, h)
+        : base("GBPLiborON", 0, h)
     {
     }
 }

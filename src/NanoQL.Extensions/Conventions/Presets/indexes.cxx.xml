@@ -1,0 +1,64 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Conventions xmlns="https://nanoql.net/schemas/conventions">
+  <IborIndex name="DailyTenorCHFLibor">
+    <Family>CHFLibor</Family>
+    <Tenor>1D</Tenor>
+    <Currency>CHF</Currency>
+    <FixingCalendar>UnitedKingdom.Exchange</FixingCalendar>
+    <Convention>Following</Convention>
+    <EndOfMonth>false</EndOfMonth>
+    <DayCounter>Actual360</DayCounter>
+    <FinancialCenterCalendar>Switzerland</FinancialCenterCalendar>
+  </IborIndex>
+  <IborIndex name="DailyTenorEURLibor">
+    <Family>EURLibor</Family>
+    <Tenor>1D</Tenor>
+    <Currency>EUR</Currency>
+    <FixingCalendar>TARGET</FixingCalendar>
+    <Convention>Following</Convention>
+    <EndOfMonth>false</EndOfMonth>
+    <DayCounter>Actual360</DayCounter>
+  </IborIndex>
+  <IborIndex name="DailyTenorGBPLibor">
+    <Family>GBPLibor</Family>
+    <Tenor>1D</Tenor>
+    <Currency>GBP</Currency>
+    <FixingCalendar>UnitedKingdom.Exchange</FixingCalendar>
+    <Convention>Following</Convention>
+    <EndOfMonth>false</EndOfMonth>
+    <DayCounter>Actual365Fixed</DayCounter>
+    <FinancialCenterCalendar>UnitedKingdom.Exchange</FinancialCenterCalendar>
+  </IborIndex>
+  <IborIndex name="DailyTenorJPYLibor">
+    <Family>JPYLibor</Family>
+    <Tenor>1D</Tenor>
+    <Currency>JPY</Currency>
+    <FixingCalendar>UnitedKingdom.Exchange</FixingCalendar>
+    <Convention>Following</Convention>
+    <EndOfMonth>false</EndOfMonth>
+    <DayCounter>Actual360</DayCounter>
+    <FinancialCenterCalendar>Japan</FinancialCenterCalendar>
+  </IborIndex>
+  <IborIndex name="DailyTenorUSDLibor">
+    <Family>USDLibor</Family>
+    <Tenor>1D</Tenor>
+    <Currency>USD</Currency>
+    <FixingCalendar>UnitedKingdom.Exchange</FixingCalendar>
+    <Convention>Following</Convention>
+    <EndOfMonth>false</EndOfMonth>
+    <DayCounter>Actual360</DayCounter>
+    <FinancialCenterCalendar>UnitedStates.LiborImpact</FinancialCenterCalendar>
+  </IborIndex>
+  <IborIndex name="EURLiborON" base="DailyTenorEURLibor">
+    <FixingDays>0</FixingDays>
+  </IborIndex>
+  <YoYInflationIndex name="YYAUCPI">
+    <Family>YY_CPI</Family>
+    <Region>AustraliaRegion</Region>
+    <AvailabilityLag>2M</AvailabilityLag>
+    <Currency>AUD</Currency>
+  </YoYInflationIndex>
+</Conventions>

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using NanoQL.Currencies;
 using NanoQL.Extensions.Conventions;
+using NanoQL.Indexes;
 using NanoQL.Tests.Conventions;
 using NanoQL.Time;
 
@@ -74,14 +75,57 @@ public class ConventionGuardTests
     }
 
     [Fact]
+    public void EveryIndexKindBuiltInTheMarkerSetReachesOnlyTheSetsCalendarsCurrenciesAndDayCounters()
+    {
+        // each index, and a swap index's underlying swap, the instrument it builds
+        ConventionSet set = ConventionWalk.IndexSet;
+        var context = new EvaluationContext { EvaluationDate = new Date(15, Month.October, 2026) };
+        var built = new List<object>();
+        built.AddRange(CodedPresets.IborIndexes.Keys.Select(n => set.IborIndex(n)));
+        foreach (string family in CodedPresets.IborFamilies.Keys)
+        {
+            built.AddRange(new[] { new Period(1, TimeUnit.Months), new Period(6, TimeUnit.Months), new Period(1, TimeUnit.Years) }
+                .Select(t => set.IborIndex(family, t)));
+        }
+
+        foreach (string swap in CodedPresets.SwapIndexes.Keys)
+        {
+            foreach (SwapIndex index in new[] { set.SwapIndex(swap, new Period(1, TimeUnit.Years)), set.SwapIndex(swap, new Period(10, TimeUnit.Years)) })
+            {
+                built.Add(index);
+                built.Add(index.UnderlyingSwap(index.FixingCalendar.Adjust(new Date(16, Month.October, 2026)), context));
+            }
+        }
+
+        built.AddRange(CodedPresets.ZeroInflationIndexes.Keys.Select(n => set.ZeroInflationIndex(n)));
+        built.AddRange(CodedPresets.YoYInflationIndexes.Keys.Select(n => set.YoYInflationIndex(n)));
+        using (ConventionProvider.Use(set))
+        {
+            built.AddRange(CodedPresets.DailyTenorLibors.Values.Select(f => (object)f(2)));
+            built.Add(new BMAIndex());
+            built.Add(new AUCPI(Frequency.Monthly, false));
+            built.AddRange(CodedPresets.Regions.Values.Select(f => (object)f()));
+        }
+
+        Assert.Empty(ConventionWalk.Unmarked(built, dayCounters: true));
+        Assert.NotEmpty(ConventionWalk.Unmarked(new object[] { new Euribor6M() }, dayCounters: true));
+    }
+
+    [Fact]
     public void TheExtensionsBuildAPresetOnlyThroughTheirFactoryTableAndNeverByReflection()
     {
-        // the records build three kinds from their data: a joint calendar, a bespoke one and Business252 on a calendar
+        // the records build from their data a joint calendar, a bespoke one and Business252 on a calendar, and a user's
+        // own region and indexes as their base types
         ConstructorInfo[] fromData =
         [
             typeof(JointCalendar).GetConstructor([typeof(IEnumerable<Calendar>), typeof(JointCalendarRule)])!,
             typeof(BespokeCalendar).GetConstructor([typeof(string)])!,
             typeof(Business252).GetConstructor([typeof(Calendar)])!,
+            .. new[]
+            {
+                typeof(CustomRegion), typeof(IborIndex), typeof(OvernightIndex), typeof(Libor), typeof(CustomIborIndex), typeof(SwapIndex),
+                typeof(OvernightIndexedSwapIndex), typeof(ZeroInflationIndex), typeof(YoYInflationIndex),
+            }.SelectMany(t => t.GetConstructors()),
         ];
         MethodBase[] reflection =
         [
@@ -109,7 +153,8 @@ public class ConventionGuardTests
             && IlScanner.References(m).Any(r => r.OpCode == OpCodes.Newobj && r.Member.DeclaringType == typeof(TARGET)));
 
         static bool IsConvention(Type t) => t.Assembly == typeof(Calendar).Assembly
-            && (typeof(Calendar).IsAssignableFrom(t) || typeof(DayCounter).IsAssignableFrom(t) || typeof(Currency).IsAssignableFrom(t));
+            && (typeof(Calendar).IsAssignableFrom(t) || typeof(DayCounter).IsAssignableFrom(t) || typeof(Currency).IsAssignableFrom(t)
+                || typeof(FinancialIndex).IsAssignableFrom(t) || typeof(Region).IsAssignableFrom(t));
     }
 
     [Fact]

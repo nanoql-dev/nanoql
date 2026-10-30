@@ -24,4 +24,10 @@
   <Alias name="PRECEDING" base="Preceding" />
   <Alias name="MODPRECEDING" base="ModifiedPreceding" />
   <Alias name="NONE" base="Unadjusted" />
+  <Alias name="USD-SOFR" base="Sofr" />
+  <Alias name="GBP-SONIA" base="Sonia" />
+  <Alias name="EUR-EuroSTR" base="Estr" />
+  <Alias name="JPY-TONA" base="Tonar" />
+  <Alias name="CHF-SARON" base="Saron" />
+  <Alias name="EUR-EURIBOR" base="Euribor" />
 </Conventions>

@@ -12,7 +12,10 @@ public sealed class ZARegion : Region
 {
     /// <summary>Initializes a new instance of the <see cref="ZARegion"/> class.</summary>
     public ZARegion()
-        : base("South Africa", "ZA")
+        : base(ConventionProvider.ReadRegion("ZARegion", Reference))
     {
     }
+
+    // QuantLib's data.
+    private static RegionData Reference() => new("South Africa", "ZA");
 }

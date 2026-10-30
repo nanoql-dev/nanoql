@@ -35,20 +35,31 @@ public class EURLibor : IborIndex
     /// <exception cref="ArgumentException">The tenor is in days.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The tenor's unit is shorter than a day.</exception>
     public EURLibor(Period tenor, YieldTermStructure? h = null)
+        : this(tenor, ConventionProvider.ReadIborFamily("EURLibor", tenor, () => Reference(tenor)), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps: London's calendar and TARGET,
+    // joined for the fixing dates, and TARGET for the value and maturity dates.
+    private EURLibor(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "EURLibor",
             tenor,
-            2,
-            new EURCurrency(),
+            read.Values.FixingDays,
+            read.Values.Currency,
             // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
             // JoinHolidays is the fixing calendar for
             // all indexes but o/n
             new JointCalendar(
-                new UnitedKingdom(UnitedKingdomMarket.Exchange), new TARGET(), JointCalendarRule.JoinHolidays),
-            EURLiborConventions.Convention(tenor),
-            EURLiborConventions.EndOfMonth(tenor),
-            new Actual360(),
-            h)
+                read.Values.FixingCalendar,
+                read.Values.FinancialCenterCalendar
+                    ?? throw new NanoQLException("the EURLibor conventions name no financial-centre calendar"),
+                JointCalendarRule.JoinHolidays),
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
     {
         if (!(Tenor.Units != TimeUnit.Days))
         {
@@ -56,8 +67,18 @@ public class EURLibor : IborIndex
                 $"for daily tenors ({Tenor}) dedicated DailyTenor constructor must be used", nameof(tenor));
         }
 
-        target = new TARGET();
+        target = read.Values.FinancialCenterCalendar;
     }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope: London's fixing calendar and TARGET.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        2,
+        new EURCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        EURLiborConventions.Convention(tenor),
+        EURLiborConventions.EndOfMonth(tenor),
+        new Actual360(),
+        new TARGET());
 
     // A clone: the source's conventions, calendars and provider, on another forwarding curve.
     private EURLibor(EURLibor source, YieldTermStructure? forwarding)

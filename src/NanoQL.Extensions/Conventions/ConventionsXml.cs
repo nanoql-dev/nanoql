@@ -7,8 +7,10 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
+using NanoQL.Coupons;
 using NanoQL.Numerics;
 using NanoQL.Time;
+using NanoQL.Utilities;
 
 namespace NanoQL.Extensions.Conventions;
 
@@ -41,6 +43,8 @@ public static class ConventionsXml
         ("NanoQL.Extensions.Conventions.Presets.calendars.xml", "calendars.xml"),
         ("NanoQL.Extensions.Conventions.Presets.daycounters.xml", "daycounters.xml"),
         ("NanoQL.Extensions.Conventions.Presets.currencies.xml", "currencies.xml"),
+        ("NanoQL.Extensions.Conventions.Presets.indexes.xml", "indexes.xml"),
+        ("NanoQL.Extensions.Conventions.Presets.indexes.cxx.xml", "indexes.cxx.xml"),
         ("NanoQL.Extensions.Conventions.Presets.aliases.xml", "aliases.xml"),
     ];
 
@@ -354,6 +358,90 @@ public static class ConventionsXml
                         : null,
                     TriangulationCurrency = Field(e, "TriangulationCurrency"),
                 },
+                "Region" => new RegionRecord(name, @base) { RegionName = Field(e, "RegionName"), Code = Field(e, "Code") },
+                "IborIndex" => new IborIndexRecord(name, @base)
+                {
+                    Family = Field(e, "Family"),
+                    Tenor = PeriodOf(Field(e, "Tenor")),
+                    FixingDays = Int(Field(e, "FixingDays")),
+                    Currency = Field(e, "Currency"),
+                    FixingCalendar = Field(e, "FixingCalendar"),
+                    Convention = ConventionOf(Field(e, "Convention")),
+                    EndOfMonth = Bool(Field(e, "EndOfMonth")),
+                    DayCounter = Field(e, "DayCounter"),
+                    Style = Field(e, "Style") is string style ? Enum.Parse<IborIndexStyle>(style) : null,
+                    FinancialCenterCalendar = Field(e, "FinancialCenterCalendar"),
+                    ValueCalendar = Field(e, "ValueCalendar"),
+                    MaturityCalendar = Field(e, "MaturityCalendar"),
+                },
+                "IborFamily" => new IborFamilyRecord(name, @base)
+                {
+                    Family = Field(e, "Family"),
+                    FixingDays = Int(Field(e, "FixingDays")),
+                    FixingDaysAtOneDay = Int(Field(e, "FixingDaysAtOneDay")),
+                    Currency = Field(e, "Currency"),
+                    FixingCalendar = Field(e, "FixingCalendar"),
+                    FinancialCenterCalendar = Field(e, "FinancialCenterCalendar"),
+                    DayCounter = Field(e, "DayCounter"),
+                    Units =
+                    [
+                        .. e.Elements(Ns + "Unit").Select(u => new IborFamilyUnit(
+                            Enum.Parse<TimeUnit>(Field(u, "TimeUnit")!),
+                            ConventionOf(Field(u, "Convention"))!.Value,
+                            Bool(Field(u, "EndOfMonth"))!.Value)),
+                    ],
+                },
+                "OvernightIndex" => new OvernightIndexRecord(name, @base)
+                {
+                    Family = Field(e, "Family"),
+                    FixingDays = Int(Field(e, "FixingDays")),
+                    Currency = Field(e, "Currency"),
+                    FixingCalendar = Field(e, "FixingCalendar"),
+                    DayCounter = Field(e, "DayCounter"),
+                },
+                "SwapIndex" => new SwapIndexRecord(name, @base)
+                {
+                    Family = Field(e, "Family"),
+                    SettlementDays = Int(Field(e, "SettlementDays")),
+                    Currency = Field(e, "Currency"),
+                    FixingCalendar = Field(e, "FixingCalendar"),
+                    FixedLegTenor = PeriodOf(Field(e, "FixedLegTenor")),
+                    FixedLegConvention = ConventionOf(Field(e, "FixedLegConvention")),
+                    FixedLegDayCounter = Field(e, "FixedLegDayCounter"),
+                    IborIndex = Field(e, "IborIndex"),
+                    IborIndexTenor = PeriodOf(Field(e, "IborIndexTenor")),
+                    ShortIborIndex = Field(e, "ShortIborIndex"),
+                    ShortIborIndexTenor = PeriodOf(Field(e, "ShortIborIndexTenor")),
+                    ShortFixedLegTenor = PeriodOf(Field(e, "ShortFixedLegTenor")),
+                },
+                "OvernightIndexedSwapIndex" => new OvernightIndexedSwapIndexRecord(name, @base)
+                {
+                    Family = Field(e, "Family"),
+                    SettlementDays = Int(Field(e, "SettlementDays")),
+                    Currency = Field(e, "Currency"),
+                    OvernightIndex = Field(e, "OvernightIndex"),
+                    TelescopicValueDates = Bool(Field(e, "TelescopicValueDates")),
+                    Averaging = Field(e, "Averaging") is string averaging ? Enum.Parse<RateAveragingType>(averaging) : null,
+                },
+                "ZeroInflationIndex" => new ZeroInflationIndexRecord(name, @base)
+                {
+                    Family = Field(e, "Family"),
+                    Region = Field(e, "Region"),
+                    Revised = Bool(Field(e, "Revised")),
+                    Frequency = Field(e, "Frequency") is string frequency ? Enum.Parse<Frequency>(frequency) : null,
+                    AvailabilityLag = PeriodOf(Field(e, "AvailabilityLag")),
+                    Currency = Field(e, "Currency"),
+                },
+                "YoYInflationIndex" => new YoYInflationIndexRecord(name, @base)
+                {
+                    UnderlyingIndex = Field(e, "UnderlyingIndex"),
+                    Family = Field(e, "Family"),
+                    Region = Field(e, "Region"),
+                    Revised = Bool(Field(e, "Revised")),
+                    Frequency = Field(e, "Frequency") is string yoyFrequency ? Enum.Parse<Frequency>(yoyFrequency) : null,
+                    AvailabilityLag = PeriodOf(Field(e, "AvailabilityLag")),
+                    Currency = Field(e, "Currency"),
+                },
                 "Alias" => new AliasRecord(name, @base!),
                 _ => throw new ArgumentException($"unknown record kind {e.Name.LocalName}", nameof(e)),
             };
@@ -420,6 +508,88 @@ public static class ConventionsXml
 
                 Add(e, "TriangulationCurrency", r.TriangulationCurrency);
                 break;
+            case RegionRecord r:
+                Add(e, "RegionName", r.RegionName);
+                Add(e, "Code", r.Code);
+                break;
+            case IborIndexRecord r:
+                Add(e, "Family", r.Family);
+                Add(e, "Tenor", r.Tenor?.ToString());
+                Add(e, "FixingDays", Text(r.FixingDays));
+                Add(e, "Currency", r.Currency);
+                Add(e, "FixingCalendar", r.FixingCalendar);
+                Add(e, "Convention", r.Convention?.ToString());
+                Add(e, "EndOfMonth", Text(r.EndOfMonth));
+                Add(e, "DayCounter", r.DayCounter);
+                Add(e, "Style", r.Style?.ToString());
+                Add(e, "FinancialCenterCalendar", r.FinancialCenterCalendar);
+                Add(e, "ValueCalendar", r.ValueCalendar);
+                Add(e, "MaturityCalendar", r.MaturityCalendar);
+                break;
+            case IborFamilyRecord r:
+                Add(e, "Family", r.Family);
+                Add(e, "FixingDays", Text(r.FixingDays));
+                Add(e, "FixingDaysAtOneDay", Text(r.FixingDaysAtOneDay));
+                Add(e, "Currency", r.Currency);
+                Add(e, "FixingCalendar", r.FixingCalendar);
+                Add(e, "FinancialCenterCalendar", r.FinancialCenterCalendar);
+                Add(e, "DayCounter", r.DayCounter);
+                foreach (IborFamilyUnit u in r.Units)
+                {
+                    var ue = new XElement(Ns + "Unit");
+                    Add(ue, "TimeUnit", u.TimeUnit.ToString());
+                    Add(ue, "Convention", u.Convention.ToString());
+                    Add(ue, "EndOfMonth", Text(u.EndOfMonth));
+                    e.Add(ue);
+                }
+
+                break;
+            case OvernightIndexRecord r:
+                Add(e, "Family", r.Family);
+                Add(e, "FixingDays", Text(r.FixingDays));
+                Add(e, "Currency", r.Currency);
+                Add(e, "FixingCalendar", r.FixingCalendar);
+                Add(e, "DayCounter", r.DayCounter);
+                break;
+            case SwapIndexRecord r:
+                Add(e, "Family", r.Family);
+                Add(e, "SettlementDays", Text(r.SettlementDays));
+                Add(e, "Currency", r.Currency);
+                Add(e, "FixingCalendar", r.FixingCalendar);
+                Add(e, "FixedLegTenor", r.FixedLegTenor?.ToString());
+                Add(e, "FixedLegConvention", r.FixedLegConvention?.ToString());
+                Add(e, "FixedLegDayCounter", r.FixedLegDayCounter);
+                Add(e, "IborIndex", r.IborIndex);
+                Add(e, "IborIndexTenor", r.IborIndexTenor?.ToString());
+                Add(e, "ShortIborIndex", r.ShortIborIndex);
+                Add(e, "ShortIborIndexTenor", r.ShortIborIndexTenor?.ToString());
+                Add(e, "ShortFixedLegTenor", r.ShortFixedLegTenor?.ToString());
+                break;
+            case OvernightIndexedSwapIndexRecord r:
+                Add(e, "Family", r.Family);
+                Add(e, "SettlementDays", Text(r.SettlementDays));
+                Add(e, "Currency", r.Currency);
+                Add(e, "OvernightIndex", r.OvernightIndex);
+                Add(e, "TelescopicValueDates", Text(r.TelescopicValueDates));
+                Add(e, "Averaging", r.Averaging?.ToString());
+                break;
+            case ZeroInflationIndexRecord r:
+                Add(e, "Family", r.Family);
+                Add(e, "Region", r.Region);
+                Add(e, "Revised", Text(r.Revised));
+                Add(e, "Frequency", r.Frequency?.ToString());
+                Add(e, "AvailabilityLag", r.AvailabilityLag?.ToString());
+                Add(e, "Currency", r.Currency);
+                break;
+            case YoYInflationIndexRecord r:
+                Add(e, "UnderlyingIndex", r.UnderlyingIndex);
+                Add(e, "Family", r.Family);
+                Add(e, "Region", r.Region);
+                Add(e, "Revised", Text(r.Revised));
+                Add(e, "Frequency", r.Frequency?.ToString());
+                Add(e, "AvailabilityLag", r.AvailabilityLag?.ToString());
+                Add(e, "Currency", r.Currency);
+                break;
             case AliasRecord:
                 break;
             default:
@@ -480,6 +650,18 @@ public static class ConventionsXml
     private static ImmutableArray<Date> Dates(XElement e, string field) => [.. Fields(e, field).Select(ParseDate)];
 
     private static int? Int(string? text) => text is null ? null : int.Parse(text, NumberStyles.Integer, CultureInfo.InvariantCulture);
+
+    private static bool? Bool(string? text) => text is null ? null : XmlConvert.ToBoolean(text);
+
+    private static Period? PeriodOf(string? text) => text is null ? null : PeriodParser.Parse(text);
+
+    // a business-day convention by its member's name or by a shipped FpML code that maps to one exactly
+    private static BusinessDayConvention? ConventionOf(string? text) =>
+        text is null ? null : PresetFactories.BusinessDayConventionAliases.TryGetValue(text, out BusinessDayConvention c) ? c : Enum.Parse<BusinessDayConvention>(text);
+
+    private static string? Text(int? value) => value?.ToString(CultureInfo.InvariantCulture);
+
+    private static string? Text(bool? value) => value is bool b ? (b ? "true" : "false") : null;
 
     private static Date ParseDate(string text)
     {

@@ -17,7 +17,7 @@ public sealed class USDLiborON : DailyTenorUSDLibor
     /// <summary>Initializes a new instance of the <see cref="USDLiborON"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public USDLiborON(YieldTermStructure? h = null)
-        : base(0, h)
+        : base("USDLiborON", 0, h)
     {
     }
 }

@@ -23,7 +23,18 @@ public sealed class CADLibor : Libor
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public CADLibor(Period tenor, YieldTermStructure? h = null)
-        : base("CADLibor", tenor, 0, new CADCurrency(), new Canada(), new Actual365Fixed(), h)
+        : base("CADLibor", tenor, ConventionProvider.ReadIborFamily("CADLibor", tenor, () => Reference(tenor)), h)
     {
     }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope: London's fixing calendar, Libor's rules
+    // by the tenor and the currency's financial centre.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        0,
+        new CADCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        LiborConventions.Convention(tenor),
+        LiborConventions.EndOfMonth(tenor),
+        new Actual365Fixed(),
+        new Canada());
 }

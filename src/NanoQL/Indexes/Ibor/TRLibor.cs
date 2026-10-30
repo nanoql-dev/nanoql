@@ -17,16 +17,32 @@ public sealed class TRLibor : IborIndex
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public TRLibor(Period tenor, YieldTermStructure? h = null)
+        : this(tenor, ConventionProvider.ReadIborFamily("TRLibor", tenor, Reference), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private TRLibor(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "TRLibor",
             tenor,
-            0,
-            new TRYCurrency(),
-            new Turkey(),
-            BusinessDayConvention.ModifiedFollowing,
-            false,
-            new Actual360(),
-            h)
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
     {
     }
+
+    // QuantLib's conventions, the same at every tenor, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new TRYCurrency(),
+        new Turkey(),
+        BusinessDayConvention.ModifiedFollowing,
+        false,
+        new Actual360());
 }

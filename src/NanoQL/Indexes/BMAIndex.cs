@@ -25,16 +25,38 @@ public sealed class BMAIndex : InterestRateIndex
     /// <summary>Initializes a new instance of the <see cref="BMAIndex"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public BMAIndex(YieldTermStructure? h = null)
+        : this(ConventionProvider.ReadIborIndex("BMAIndex", Reference), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps. The index has no convention or
+    // end-of-month rule of its own, so it refuses conventions that set them.
+    private BMAIndex((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "BMA",
             new Period(1, TimeUnit.Weeks),
-            1,
-            new USDCurrency(),
-            new UnitedStates(UnitedStatesMarket.GovernmentBond),
-            new ActualActual(ActualActualConvention.ISDA))
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.DayCounter,
+            read.Provider)
     {
+        if (read.Values.Convention != BusinessDayConvention.Following || read.Values.EndOfMonth)
+        {
+            throw new NanoQLException("the BMA index's conventions take no convention or end of month but QuantLib's");
+        }
+
         ForwardingTermStructure = h;
     }
+
+    // QuantLib's conventions, built in the provider's scope; its convention and end of month are none of the index's.
+    private static IborIndexConventions Reference() => new(
+        1,
+        new USDCurrency(),
+        new UnitedStates(UnitedStatesMarket.GovernmentBond),
+        BusinessDayConvention.Following,
+        false,
+        new ActualActual(ActualActualConvention.ISDA));
 
     /// <summary>Gets the curve that forecasts fixings, or <see langword="null"/> for none.</summary>
     public YieldTermStructure? ForwardingTermStructure { get; }

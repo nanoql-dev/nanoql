@@ -28,18 +28,26 @@ internal static class ConventionWalk
     /// with the marker symbol.</summary>
     public static ConventionSet Set { get; } = ConventionSet.QuantLib.With(MarkerSnapshot());
 
+    /// <summary>The day counter every index record of <see cref="IndexSet"/> takes, which no index preset uses.</summary>
+    public const string MarkerDayCounter = "SimpleDayCounter";
+
+    /// <summary>Gets the marker set with each index preset's record on the marker day counter, its fixed leg's too.</summary>
+    public static ConventionSet IndexSet { get; } = Set.With(IndexMarkerSnapshot());
+
     /// <summary>The calendars, day counters and currencies an object reaches that the marker set didn't give.</summary>
     /// <param name="root">The object.</param>
+    /// <param name="dayCounters">Whether a day counter must be the marker one, the <see cref="Actual365Fixed"/> an
+    /// engine or term structure builds for itself apart: an index's, not a calendar's or a currency's.</param>
     /// <returns>Each one's path from the root and its value, empty when the set gave all.</returns>
-    public static IReadOnlyList<string> Unmarked(object root)
+    public static IReadOnlyList<string> Unmarked(object root, bool dayCounters = false)
     {
         var found = new List<string>();
         var seen = new HashSet<object>(ReferenceEqualityComparer.Instance);
-        Walk(root, root.GetType().Name, found, seen, 0);
+        Walk(root, root.GetType().Name, found, seen, 0, dayCounters);
         return found;
     }
 
-    private static void Walk(object value, string path, List<string> found, HashSet<object> seen, int depth)
+    private static void Walk(object value, string path, List<string> found, HashSet<object> seen, int depth, bool dayCounters)
     {
         Type type = value.GetType();
         if (type.IsPrimitive || type.IsEnum || value is string or Date || depth > 40 || (!type.IsValueType && !seen.Add(value)))
@@ -57,6 +65,9 @@ internal static class ConventionWalk
             case Currency c when c.Symbol != MarkerSymbol:
                 found.Add($"{path}: {c.Code}");
                 break;
+            case DayCounter d when dayCounters && d is not SimpleDayCounter && d is not Actual365Fixed:
+                found.Add($"{path}: {d.Name}");
+                break;
         }
 
         if (value is IEnumerable items and not string)
@@ -66,7 +77,7 @@ internal static class ConventionWalk
             {
                 if (item is not null)
                 {
-                    Walk(item, $"{path}[{i}]", found, seen, depth + 1);
+                    Walk(item, $"{path}[{i}]", found, seen, depth + 1, dayCounters);
                 }
 
                 ++i;
@@ -89,7 +100,7 @@ internal static class ConventionWalk
 
                 if (f.GetValue(value) is { } child)
                 {
-                    Walk(child, $"{path}.{f.Name}", found, seen, depth + 1);
+                    Walk(child, $"{path}.{f.Name}", found, seen, depth + 1, dayCounters);
                 }
             }
         }
@@ -105,6 +116,29 @@ internal static class ConventionWalk
                 return d;
             }
         }
+    }
+
+    // Each index preset's record, on its own, with the marker day counter.
+    private static ConventionSnapshot IndexMarkerSnapshot()
+    {
+        ConventionSnapshot s = ConventionSnapshot.Empty;
+        foreach (ConventionRecord r in ConventionSet.QuantLib.Layers[0].Records)
+        {
+            ConventionRecord? marked = r switch
+            {
+                IborIndexRecord => new IborIndexRecord(r.Name, r.Name) { DayCounter = MarkerDayCounter },
+                IborFamilyRecord => new IborFamilyRecord(r.Name, r.Name) { DayCounter = MarkerDayCounter },
+                OvernightIndexRecord => new OvernightIndexRecord(r.Name, r.Name) { DayCounter = MarkerDayCounter },
+                SwapIndexRecord => new SwapIndexRecord(r.Name, r.Name) { FixedLegDayCounter = MarkerDayCounter },
+                _ => null,
+            };
+            if (marked is not null)
+            {
+                s = s.Add(marked);
+            }
+        }
+
+        return s;
     }
 
     private static ConventionSnapshot MarkerSnapshot()

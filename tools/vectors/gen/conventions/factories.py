@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # The code below quotes licence tags as data; REUSE reads only the two lines above.
 # REUSE-IgnoreStart
-"""The coded presets' constructors, by preset name, written from the presets files: every calendar, day counter and
-currency the files name, presets and QuantLib's own aliases alike (an FpML code names no coded preset). The table is
+"""The coded presets' constructors, by preset name, written from the presets files: every calendar, day counter,
+currency, index, family and region the files name, presets and QuantLib's own aliases alike (an FpML code names no
+coded preset), a constructor taking arguments in a table of its own; and the business-day conventions' FpML aliases. The table is
 the only place the extensions build a coded preset, so a set builds each as its own class, through no reflection.
 Writes src/NanoQL.Extensions/Conventions/PresetFactories.cs; the extensions' source guard checks that nothing else
 builds one."""
@@ -26,8 +27,45 @@ CONVENTIONS = {"Actual365Fixed": "Actual365FixedConvention", "ActualActual": "Ac
 
 
 def names(file, elements):
-    text = open(os.path.join(PRESETS, file), encoding="utf-8").read()
+    path = os.path.join(PRESETS, file)
+    if not os.path.isfile(path):
+        return []
+    text = open(path, encoding="utf-8").read()
     return [m.group(2) for m in re.finditer(r'<(\w+) name="([^"]+)"', text) if m.group(1) in elements]
+
+
+def tenors_of(file):
+    """Each Ibor index record's tenor, by name."""
+    path = os.path.join(PRESETS, file)
+    text = open(path, encoding="utf-8").read() if os.path.isfile(path) else ""
+    return {m.group(1): m.group(2) for m in
+            re.finditer(r'<IborIndex name="([^"]+)"[^>]*>\s*<Tenor>([^<]+)</Tenor>', text)}
+
+
+def period(text):
+    m = re.fullmatch(r"(\d+)([DWMY])", text)
+    unit = {"D": "Days", "W": "Weeks", "M": "Months", "Y": "Years"}[m.group(2)]
+    return f"new Period({m.group(1)}, TimeUnit.{unit})"
+
+
+def bases(file, element):
+    """Each record's base, by name, in a file's records of one element."""
+    path = os.path.join(PRESETS, file)
+    if not os.path.isfile(path):
+        return {}
+    text = open(path, encoding="utf-8").read()
+    return {m.group(1): m.group(3) for m in re.finditer(rf'<{element} name="([^"]+)"( base="([^"]+)")?', text)}
+
+
+# The presets whose constructors take arguments, by QuantLib's shapes: a daily-tenor Libor's settlement days, and
+# AUCPI's and YYAUCPI's frequency and revised flag.
+SETTLEMENT_DAYS = {"DailyTenorCHFLibor", "DailyTenorEURLibor", "DailyTenorGBPLibor", "DailyTenorJPYLibor",
+                   "DailyTenorUSDLibor"}
+FREQUENCY_REVISED = {"AUCPI", "YYAUCPI"}
+# The BMA index is read by its class alone: no lookup builds it, and a set's validation builds it from its own table.
+NOT_LOOKED_UP = {"BMAIndex"}
+BUSINESS_DAY_CONVENTIONS = {"Following", "ModifiedFollowing", "Preceding", "ModifiedPreceding", "Unadjusted",
+               "HalfMonthModifiedFollowing", "Nearest"}
 
 
 def calendar(name):
@@ -45,10 +83,15 @@ def day_counter(name):
     return f"new {t}({CONVENTIONS[t]}.{member})"
 
 
-def table(field, kind, entries):
-    lines = [f"    public static readonly FrozenDictionary<string, Func<{kind}>> {field} =",
-             f"        new Dictionary<string, Func<{kind}>>(StringComparer.Ordinal)", "        {"]
-    lines += [f'            ["{n}"] = static () => {e},' for n, e in entries]
+def table(field, kind, entries, parameters=""):
+    pairs = [a.split() for a in parameters.split(", ")] if parameters else []
+    signature = "Func<" + "".join(t + ", " for t, _ in pairs) + kind + ">"
+    args = ", ".join(name for _, name in pairs)
+    head = f"    public static readonly FrozenDictionary<string, {signature}> {field} ="
+    if len(head) > 120:
+        head = f"    public static readonly FrozenDictionary<string, {signature}>\n        {field} ="
+    lines = [head, f"        new Dictionary<string, {signature}>(StringComparer.Ordinal)", "        {"]
+    lines += [f'            ["{n}"] = static ({args}) => {e},' for n, e in entries]
     lines += ["        }.ToFrozenDictionary(StringComparer.Ordinal);"]
     return lines
 
@@ -64,6 +107,8 @@ def source():
         "",
         "using System.Collections.Frozen;",
         "using NanoQL.Currencies;",
+        "using NanoQL.Indexes;",
+        "using NanoQL.TermStructures;",
         "using NanoQL.Time;",
         "",
         "namespace NanoQL.Extensions.Conventions;",
@@ -75,7 +120,58 @@ def source():
     ]
     lines += table("Calendars", "Calendar", [(n, calendar(n)) for n in calendars]) + [""]
     lines += table("DayCounters", "DayCounter", [(n, day_counter(n)) for n in day_counters]) + [""]
-    lines += table("Currencies", "Currency", [(n, f"new {n}Currency()") for n in currencies])
+    lines += table("Currencies", "Currency", [(n, f"new {n}Currency()") for n in currencies]) + [""]
+    ibor = {**bases("indexes.xml", "IborIndex"), **bases("indexes.cxx.xml", "IborIndex")}
+    families = sorted(names("indexes.xml", {"IborFamily"}))
+    tenors = tenors_of("indexes.xml")
+    lines += table("OtherIndexes", "InterestRateIndex", [(n, f"new {n}(h)") for n in sorted(ibor) if n in NOT_LOOKED_UP],
+                   "YieldTermStructure? h") + [""]
+    fixed = sorted((n, b) for n, b in ibor.items() if b in families and n != b)
+    lines += ["    // The fixed-tenor Ibor presets, each its family at its tenor.",
+              "    public static readonly FrozenDictionary<string, (string Family, Period Tenor)> FixedTenorPresets =",
+              "        new Dictionary<string, (string Family, Period Tenor)>(StringComparer.Ordinal)", "        {"]
+    lines += [f'            ["{n}"] = ("{b}", {period(tenors[n])}),' for n, b in fixed]
+    lines += ["        }.ToFrozenDictionary(StringComparer.Ordinal);", ""]
+    lines += ["    // The index presets QuantLib's records base on another preset: a fixed tenor on its family, EURLiborON on its",
+              "    // daily-tenor class. A record of a coded preset takes its own name, or this one, as its base.",
+              "    public static readonly FrozenDictionary<string, string> PresetBases =",
+              "        new Dictionary<string, string>(StringComparer.Ordinal)", "        {"]
+    lines += [f'            ["{n}"] = "{b}",' for n, b in sorted(ibor.items()) if b is not None and b != n]
+    lines += ["        }.ToFrozenDictionary(StringComparer.Ordinal);", ""]
+    lines += table("IborIndexes", "IborIndex",
+                   [(n, f"new {n}(h)") for n in sorted(ibor) if n not in SETTLEMENT_DAYS | NOT_LOOKED_UP],
+                   "YieldTermStructure? h") + [""]
+    lines += table("IborIndexesWithSettlementDays", "IborIndex",
+                   [(n, f"new {n}(settlementDays, h)") for n in sorted(ibor) if n in SETTLEMENT_DAYS],
+                   "int settlementDays, YieldTermStructure? h") + [""]
+    lines += table("IborFamilies", "IborIndex", [(n, f"new {n}(tenor, h)") for n in families],
+                   "Period tenor, YieldTermStructure? h") + [""]
+    lines += table("OvernightIndexes", "OvernightIndex",
+                   [(n, f"new {n}(h)") for n in sorted(names("indexes.xml", {"OvernightIndex"}))],
+                   "YieldTermStructure? h") + [""]
+    lines += table("SwapIndexes", "SwapIndex",
+                   [(n, f"exogenous ? new {n}(tenor, forwarding, discounting) : new {n}(tenor, forwarding)")
+                    for n in sorted(names("indexes.xml", {"SwapIndex"}))],
+                   "Period tenor, YieldTermStructure? forwarding, bool exogenous, YieldTermStructure? discounting") + [""]
+    zero = sorted(names("indexes.xml", {"ZeroInflationIndex"}) + names("indexes.cxx.xml", {"ZeroInflationIndex"}))
+    yoy = sorted(names("indexes.xml", {"YoYInflationIndex"}) + names("indexes.cxx.xml", {"YoYInflationIndex"}))
+    lines += table("ZeroInflationIndexes", "ZeroInflationIndex",
+                   [(n, f"new {n}(ts)") for n in zero if n not in FREQUENCY_REVISED], "ZeroInflationTermStructure? ts") + [""]
+    lines += table("ZeroInflationIndexesWithArguments", "ZeroInflationIndex",
+                   [(n, f"new {n}(frequency, revised, ts)") for n in zero if n in FREQUENCY_REVISED],
+                   "Frequency frequency, bool revised, ZeroInflationTermStructure? ts") + [""]
+    lines += table("YoYInflationIndexes", "YoYInflationIndex",
+                   [(n, f"new {n}(ts)") for n in yoy if n not in FREQUENCY_REVISED], "YoYInflationTermStructure? ts") + [""]
+    lines += table("YoYInflationIndexesWithArguments", "YoYInflationIndex",
+                   [(n, f"new {n}(frequency, revised, ts)") for n in yoy if n in FREQUENCY_REVISED],
+                   "Frequency frequency, bool revised, YoYInflationTermStructure? ts") + [""]
+    lines += table("Regions", "Region", [(n, f"new {n}()") for n in sorted(names("indexes.xml", {"Region"}))]) + [""]
+    aliases = bases("aliases.xml", "Alias")
+    lines += ["    // The business-day conventions' FpML codes that map to one exactly, which the reader takes for the member.",
+              "    public static readonly FrozenDictionary<string, BusinessDayConvention> BusinessDayConventionAliases =",
+              "        new Dictionary<string, BusinessDayConvention>(StringComparer.Ordinal)", "        {"]
+    lines += [f'            ["{n}"] = BusinessDayConvention.{b},' for n, b in sorted(aliases.items()) if b in BUSINESS_DAY_CONVENTIONS]
+    lines += ["        }.ToFrozenDictionary(StringComparer.Ordinal);"]
     lines += ["}"]
     return "\n".join(lines) + "\n"
 

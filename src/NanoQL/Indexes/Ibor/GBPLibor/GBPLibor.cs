@@ -20,7 +20,18 @@ public sealed class GBPLibor : Libor
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <exception cref="ArgumentException">The tenor is in days.</exception>
     public GBPLibor(Period tenor, YieldTermStructure? h = null)
-        : base("GBPLibor", tenor, 0, new GBPCurrency(), new UnitedKingdom(UnitedKingdomMarket.Exchange), new Actual365Fixed(), h)
+        : base("GBPLibor", tenor, ConventionProvider.ReadIborFamily("GBPLibor", tenor, () => Reference(tenor)), h)
     {
     }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope: London's fixing calendar, Libor's rules
+    // by the tenor and the currency's financial centre.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        0,
+        new GBPCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        LiborConventions.Convention(tenor),
+        LiborConventions.EndOfMonth(tenor),
+        new Actual365Fixed(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange));
 }

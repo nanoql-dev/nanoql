@@ -21,7 +21,29 @@ public sealed class USCPI : ZeroInflationIndex
     /// <param name="ts">The zero-inflation curve the index forecasts through, or <see langword="null"/> for
     /// none.</param>
     public USCPI(ZeroInflationTermStructure? ts = null)
-        : base("CPI", new USRegion(), false, Frequency.Monthly, new Period(1, TimeUnit.Months), new USDCurrency(), ts)
+        : this(ConventionProvider.ReadInflationIndex("USCPI", Reference), ts)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private USCPI((InflationIndexConventions Values, ConventionProvider Provider) read, ZeroInflationTermStructure? ts)
+        : base(
+            "CPI",
+            read.Values.Region,
+            read.Values.Revised,
+            read.Values.Frequency,
+            read.Values.AvailabilityLag,
+            read.Values.Currency,
+            ts,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static InflationIndexConventions Reference() => new(
+        new USRegion(),
+        false,
+        Frequency.Monthly,
+        new Period(1, TimeUnit.Months),
+        new USDCurrency());
 }

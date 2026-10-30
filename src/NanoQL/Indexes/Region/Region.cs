@@ -32,6 +32,12 @@ public abstract class Region : IEquatable<Region>
         Code = code;
     }
 
+    // A preset's, on the data it read.
+    private protected Region(RegionData data)
+        : this((data ?? throw new ArgumentNullException(nameof(data))).Name, data.Code)
+    {
+    }
+
     /// <summary>Gets the region's name.</summary>
     public string Name { get; }
 

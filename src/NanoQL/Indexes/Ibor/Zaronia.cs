@@ -18,7 +18,22 @@ public sealed class Zaronia : OvernightIndex
     /// <summary>Initializes a new instance of the <see cref="Zaronia"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Zaronia(YieldTermStructure? h = null)
-        : base("ZARONIA", 0, new ZARCurrency(), new SouthAfrica(), new Actual365Fixed(), h)
+        : this(ConventionProvider.ReadOvernightIndex("Zaronia", Reference), h)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Zaronia((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base("ZARONIA", read.Values.FixingDays, read.Values.Currency, read.Values.FixingCalendar, read.Values.DayCounter, h, read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new ZARCurrency(),
+        new SouthAfrica(),
+        BusinessDayConvention.Following,
+        false,
+        new Actual365Fixed());
 }

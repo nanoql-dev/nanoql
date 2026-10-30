@@ -43,7 +43,43 @@ public class ConventionsXmlTests
             TriangulationCurrency = "",
             Foreign = Foreign,
         })
-        .Add(new AliasRecord("TGT", "TARGET") { Foreign = Foreign });
+        .Add(new AliasRecord("TGT", "TARGET") { Foreign = Foreign })
+        .Add(new RegionRecord("Atlantis", "Atlantis") { RegionName = "Atlantis", Code = "AT", Foreign = Foreign })
+        .Add(new IborIndexRecord("Desk6M", "Desk")
+        {
+            Family = "Desk", Tenor = new Period(6, TimeUnit.Months), FixingDays = 2, Currency = "EUR", FixingCalendar = "TARGET",
+            Convention = BusinessDayConvention.ModifiedFollowing, EndOfMonth = true, DayCounter = "Actual360", Style = IborIndexStyle.Custom,
+            FinancialCenterCalendar = "Switzerland", ValueCalendar = "TARGET", MaturityCalendar = "UnitedKingdom.Settlement", Foreign = Foreign,
+        })
+        .Add(new IborFamilyRecord("Desk", "Euribor")
+        {
+            Family = "Desk", FixingDays = 2, FixingDaysAtOneDay = 0, Currency = "EUR", FixingCalendar = "TARGET", FinancialCenterCalendar = "TARGET",
+            DayCounter = "Actual360", Units = [new IborFamilyUnit(TimeUnit.Weeks, BusinessDayConvention.Following, false), new IborFamilyUnit(TimeUnit.Months, BusinessDayConvention.ModifiedFollowing, true)],
+            Foreign = Foreign,
+        })
+        .Add(new OvernightIndexRecord("DeskON", "Estr") { Family = "DeskON", FixingDays = 0, Currency = "EUR", FixingCalendar = "TARGET", DayCounter = "Actual360", Foreign = Foreign })
+        .Add(new SwapIndexRecord("DeskSwap", "EuriborSwapIsdaFixA")
+        {
+            Family = "DeskSwap", SettlementDays = 2, Currency = "EUR", FixingCalendar = "TARGET", FixedLegTenor = new Period(1, TimeUnit.Years),
+            FixedLegConvention = BusinessDayConvention.ModifiedFollowing, FixedLegDayCounter = "Thirty360.BondBasis", IborIndex = "Euribor",
+            IborIndexTenor = new Period(6, TimeUnit.Months), ShortIborIndex = "Euribor", ShortIborIndexTenor = new Period(3, TimeUnit.Months),
+            ShortFixedLegTenor = new Period(6, TimeUnit.Months), Foreign = Foreign,
+        })
+        .Add(new OvernightIndexedSwapIndexRecord("DeskOis", "DeskOis")
+        {
+            Family = "DeskOis", SettlementDays = 2, Currency = "EUR", OvernightIndex = "Estr", TelescopicValueDates = true,
+            Averaging = Coupons.RateAveragingType.Simple, Foreign = Foreign,
+        })
+        .Add(new ZeroInflationIndexRecord("DeskCPI", "EUHICP")
+        {
+            Family = "CPI", Region = "Atlantis", Revised = true, Frequency = Frequency.Quarterly, AvailabilityLag = new Period(2, TimeUnit.Months),
+            Currency = "EUR", Foreign = Foreign,
+        })
+        .Add(new YoYInflationIndexRecord("YYDeskCPI", "YYEUHICP")
+        {
+            UnderlyingIndex = "DeskCPI", Family = "YY_CPI", Region = "Atlantis", Revised = true, Frequency = Frequency.Quarterly,
+            AvailabilityLag = new Period(2, TimeUnit.Months), Currency = "EUR", Foreign = Foreign,
+        });
 
     [Fact]
     public void EveryKindFullyPopulatedRoundTripsWithItsRecordsEqualAndItsTextCanonical()
@@ -124,7 +160,7 @@ public class ConventionsXmlTests
         {
             ConventionsXml.WriteDefaults(folder);
             string[] files = [.. Directory.GetFiles(folder).Select(Path.GetFileName).Order(StringComparer.Ordinal)!];
-            Assert.Equal(["aliases.xml", "calendars.xml", "currencies.xml", "daycounters.xml", "nanoql-conventions.xsd"], files);
+            Assert.Equal(["aliases.xml", "calendars.xml", "currencies.xml", "daycounters.xml", "indexes.cxx.xml", "indexes.xml", "nanoql-conventions.xsd"], files);
             foreach (string file in files.Where(f => f.EndsWith(".xml", StringComparison.Ordinal)))
             {
                 byte[] bytes = File.ReadAllBytes(Path.Combine(folder, file));
@@ -145,7 +181,7 @@ public class ConventionsXmlTests
             Directory.Delete(folder, true);
         }
 
-        static int PresetOrder(string path) => Array.IndexOf(["calendars.xml", "daycounters.xml", "currencies.xml", "aliases.xml"], Path.GetFileName(path));
+        static int PresetOrder(string path) => Array.IndexOf(["calendars.xml", "daycounters.xml", "currencies.xml", "indexes.xml", "indexes.cxx.xml", "aliases.xml"], Path.GetFileName(path));
     }
 
     [Fact]
@@ -153,7 +189,7 @@ public class ConventionsXmlTests
     {
         XmlSchemaSet schema = ConventionsXml.Schema();
         Type[] kinds = [.. typeof(ConventionRecord).Assembly.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(ConventionRecord))).OrderBy(t => t.Name, StringComparer.Ordinal)];
-        Assert.Equal(8, kinds.Length);
+        Assert.Equal(16, kinds.Length);
         foreach (Type kind in kinds)
         {
             var element = (XmlSchemaElement)schema.GlobalElements[new(kind.Name[..^"Record".Length], ConventionsXml.Namespace)]!;
@@ -163,9 +199,12 @@ public class ConventionsXmlTests
             Assert.True(kind.IsSealed, kind.Name);
         }
 
-        var rounding = (XmlSchemaComplexType)schema.GlobalTypes[new("Rounding", ConventionsXml.Namespace)]!;
-        Assert.Equal(["Digit", "Precision", "Type"], Items(rounding).Order(StringComparer.Ordinal));
-        Assert.Equal(["Digit", "Precision", "Type"], typeof(CurrencyRounding).GetProperties().Where(p => p.Name != "EqualityContract").Select(p => p.Name).Order(StringComparer.Ordinal));
+        // the nested types: a currency's rounding and an Ibor family's unit
+        foreach ((string name, Type type) in new[] { ("Rounding", typeof(CurrencyRounding)), ("IborFamilyUnit", typeof(IborFamilyUnit)) })
+        {
+            var complex = (XmlSchemaComplexType)schema.GlobalTypes[new(name, ConventionsXml.Namespace)]!;
+            Assert.Equal(type.GetProperties().Where(p => p.Name != "EqualityContract").Select(p => p.Name).Order(StringComparer.Ordinal), Items(complex).Order(StringComparer.Ordinal));
+        }
 
         // a record's properties as the schema names them: its name, its base and its fields, a list by its item
         static string[] Properties(Type kind) => [.. kind.GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -194,6 +233,13 @@ public class ConventionsXmlTests
         Assert.Equal(Enum.GetNames<Weekday>().Order(StringComparer.Ordinal), Values("Weekday").Order(StringComparer.Ordinal));
         Assert.Equal(Enum.GetNames<JointCalendarRule>().Order(StringComparer.Ordinal), Values("JointCalendarRule").Order(StringComparer.Ordinal));
         Assert.Equal(Enum.GetNames<RoundingType>().Order(StringComparer.Ordinal), Values("RoundingType").Order(StringComparer.Ordinal));
+        Assert.Equal(Enum.GetNames<Frequency>().Order(StringComparer.Ordinal), Values("Frequency").Order(StringComparer.Ordinal));
+        Assert.Equal(Enum.GetNames<IborIndexStyle>().Order(StringComparer.Ordinal), Values("IborIndexStyle").Order(StringComparer.Ordinal));
+        Assert.Equal(Enum.GetNames<Coupons.RateAveragingType>().Order(StringComparer.Ordinal), Values("RateAveragingType").Order(StringComparer.Ordinal));
+
+        // a tenor's units, those a period's short form writes
+        Assert.Equal(["Days", "Months", "Weeks", "Years"], Values("TimeUnit").Order(StringComparer.Ordinal));
+        Assert.All(Values("TimeUnit"), u => Assert.True(Enum.IsDefined(Enum.Parse<TimeUnit>(u))));
 
         // a business-day convention by its member's name, or by the shipped alias of one
         string[] aliases = [.. ConventionSet.QuantLib.Layers[0].Records.OfType<AliasRecord>()

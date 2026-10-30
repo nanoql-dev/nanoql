@@ -23,14 +23,29 @@ public sealed class YYAUCPI : YoYInflationIndex
     /// <param name="ts">The year-on-year inflation curve the index forecasts through, or <see langword="null"/> for
     /// none.</param>
     public YYAUCPI(Frequency frequency, bool revised, YoYInflationTermStructure? ts = null)
-        : base(
-            "YY_CPI",
-            new AustraliaRegion(),
-            revised,
-            frequency,
-            new Period(2, TimeUnit.Months),
-            new AUDCurrency(),
-            ts)
+        : this(ConventionProvider.ReadInflationIndex("YYAUCPI", () => Reference(frequency, revised)), ts)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private YYAUCPI((InflationIndexConventions Values, ConventionProvider Provider) read, YoYInflationTermStructure? ts)
+        : base(
+            "YY_CPI",
+            read.Values.Region,
+            read.Values.Revised,
+            read.Values.Frequency,
+            read.Values.AvailabilityLag,
+            read.Values.Currency,
+            ts,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, with the preset's arguments, built in the provider's scope.
+    private static InflationIndexConventions Reference(Frequency frequency, bool revised) => new(
+        new AustraliaRegion(),
+        revised,
+        frequency,
+        new Period(2, TimeUnit.Months),
+        new AUDCurrency());
 }

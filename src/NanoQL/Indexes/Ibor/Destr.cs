@@ -16,7 +16,22 @@ public sealed class Destr : OvernightIndex
     /// <summary>Initializes a new instance of the <see cref="Destr"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Destr(YieldTermStructure? h = null)
-        : base("DESTR", 0, new DKKCurrency(), new Denmark(), new Actual360(), h)
+        : this(ConventionProvider.ReadOvernightIndex("Destr", Reference), h)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Destr((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base("DESTR", read.Values.FixingDays, read.Values.Currency, read.Values.FixingCalendar, read.Values.DayCounter, h, read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new DKKCurrency(),
+        new Denmark(),
+        BusinessDayConvention.Following,
+        false,
+        new Actual360());
 }

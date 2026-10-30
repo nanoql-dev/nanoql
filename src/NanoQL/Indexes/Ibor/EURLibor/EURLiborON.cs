@@ -19,7 +19,7 @@ public sealed class EURLiborON : DailyTenorEURLibor
     /// <summary>Initializes a new instance of the <see cref="EURLiborON"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public EURLiborON(YieldTermStructure? h = null)
-        : base(0, h)
+        : base("EURLiborON", 0, h)
     {
     }
 }

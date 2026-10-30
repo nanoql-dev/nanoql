@@ -22,7 +22,18 @@ public sealed class JPYLibor : Libor
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <exception cref="ArgumentException">The tenor is in days.</exception>
     public JPYLibor(Period tenor, YieldTermStructure? h = null)
-        : base("JPYLibor", tenor, 2, new JPYCurrency(), new Japan(), new Actual360(), h)
+        : base("JPYLibor", tenor, ConventionProvider.ReadIborFamily("JPYLibor", tenor, () => Reference(tenor)), h)
     {
     }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope: London's fixing calendar, Libor's rules
+    // by the tenor and the currency's financial centre.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        2,
+        new JPYCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        LiborConventions.Convention(tenor),
+        LiborConventions.EndOfMonth(tenor),
+        new Actual360(),
+        new Japan());
 }

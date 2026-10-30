@@ -18,7 +18,18 @@ public sealed class DailyTenorCHFLibor : DailyTenorLibor
     /// <param name="settlementDays">The settlementDays.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public DailyTenorCHFLibor(int settlementDays, YieldTermStructure? h = null)
-        : base("CHFLibor", settlementDays, new CHFCurrency(), new Switzerland(), new Actual360(), h)
+        : base("CHFLibor", ConventionProvider.ReadIborIndex("DailyTenorCHFLibor", () => Reference(settlementDays)), h)
     {
     }
+
+    // QuantLib's conventions, built in the provider's scope: London's fixing calendar, Libor's rules at a day and
+    // the currency's financial centre.
+    private static IborIndexConventions Reference(int settlementDays) => new(
+        settlementDays,
+        new CHFCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        LiborConventions.Convention(new Period(1, TimeUnit.Days)),
+        LiborConventions.EndOfMonth(new Period(1, TimeUnit.Days)),
+        new Actual360(),
+        new Switzerland());
 }

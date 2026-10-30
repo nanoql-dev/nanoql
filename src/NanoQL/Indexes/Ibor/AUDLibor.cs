@@ -18,7 +18,18 @@ public sealed class AUDLibor : Libor
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public AUDLibor(Period tenor, YieldTermStructure? h = null)
-        : base("AUDLibor", tenor, 2, new AUDCurrency(), new Australia(), new Actual360(), h)
+        : base("AUDLibor", tenor, ConventionProvider.ReadIborFamily("AUDLibor", tenor, () => Reference(tenor)), h)
     {
     }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope: London's fixing calendar, Libor's rules
+    // by the tenor and the currency's financial centre.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        2,
+        new AUDCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        LiborConventions.Convention(tenor),
+        LiborConventions.EndOfMonth(tenor),
+        new Actual360(),
+        new Australia());
 }

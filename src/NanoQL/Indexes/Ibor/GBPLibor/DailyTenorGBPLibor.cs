@@ -18,7 +18,24 @@ public class DailyTenorGBPLibor : DailyTenorLibor
     /// <param name="settlementDays">The settlement days.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public DailyTenorGBPLibor(int settlementDays, YieldTermStructure? h = null)
-        : base("GBPLibor", settlementDays, new GBPCurrency(), new UnitedKingdom(UnitedKingdomMarket.Exchange), new Actual365Fixed(), h)
+        : this("DailyTenorGBPLibor", settlementDays, h)
     {
     }
+
+    // A preset deriving this one reads its own name's conventions.
+    private protected DailyTenorGBPLibor(string preset, int settlementDays, YieldTermStructure? h)
+        : base("GBPLibor", ConventionProvider.ReadIborIndex(preset, () => Reference(settlementDays)), h)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope: London's fixing calendar, Libor's rules at a day and
+    // the currency's financial centre.
+    private static IborIndexConventions Reference(int settlementDays) => new(
+        settlementDays,
+        new GBPCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        LiborConventions.Convention(new Period(1, TimeUnit.Days)),
+        LiborConventions.EndOfMonth(new Period(1, TimeUnit.Days)),
+        new Actual365Fixed(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange));
 }

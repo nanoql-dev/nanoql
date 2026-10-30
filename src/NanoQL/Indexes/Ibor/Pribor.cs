@@ -21,16 +21,32 @@ public sealed class Pribor : IborIndex
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Pribor(Period tenor, YieldTermStructure? h = null)
+        : this(tenor, ConventionProvider.ReadIborFamily("Pribor", tenor, () => Reference(tenor)), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Pribor(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "PRIBOR",
             tenor,
-            tenor == new Period(1, TimeUnit.Days) ? 0 : 2,
-            new CZKCurrency(),
-            new CzechRepublic(),
-            BusinessDayConvention.ModifiedFollowing,
-            false,
-            new Actual360(),
-            h)
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
     {
     }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        tenor == new Period(1, TimeUnit.Days) ? 0 : 2,
+        new CZKCurrency(),
+        new CzechRepublic(),
+        BusinessDayConvention.ModifiedFollowing,
+        false,
+        new Actual360());
 }

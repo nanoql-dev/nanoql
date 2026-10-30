@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Concurrent;
+using NanoQL.Indexes;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Conventions;
@@ -35,7 +36,16 @@ public sealed class TestConventions : ConventionProvider
     /// <summary>Gets the calendar a <see cref="Business252"/> built without one takes, or null for QuantLib's.</summary>
     public Func<Calendar>? Business252Calendar { get; init; }
 
-    /// <summary>Gets each resolve answered, in order: <c>calendar:TARGET</c>, <c>currency:EUR</c>, <c>business252</c>.</summary>
+    /// <summary>Gets the changes to an Ibor, family or overnight preset's QuantLib conventions, by preset or family.</summary>
+    public IReadOnlyDictionary<string, Func<IborIndexConventions, IborIndexConventions>> Indexes { get; init; } =
+        new Dictionary<string, Func<IborIndexConventions, IborIndexConventions>>();
+
+    /// <summary>Gets the changes to a region preset's QuantLib data, by preset.</summary>
+    public IReadOnlyDictionary<string, Func<RegionData, RegionData>> Regions { get; init; } =
+        new Dictionary<string, Func<RegionData, RegionData>>();
+
+    /// <summary>Gets each resolve answered, in order: <c>calendar:TARGET</c>, <c>currency:EUR</c>, <c>business252</c>,
+    /// <c>family:Euribor@6M</c>, <c>overnight:Sofr</c>, <c>swap:EuriborSwapIsdaFixA@10Y</c>.</summary>
     public IReadOnlyCollection<string> Resolved => resolved;
 
     /// <summary>A provider adding one holiday to one calendar preset.</summary>
@@ -105,5 +115,50 @@ public sealed class TestConventions : ConventionProvider
     }
 
     /// <inheritdoc/>
+    public override IborIndexConventions ResolveIborIndex(string preset, Func<IborIndexConventions> reference)
+    {
+        resolved.Enqueue("ibor:" + preset);
+        return Change(Indexes, preset, reference());
+    }
+
+    /// <inheritdoc/>
+    public override IborIndexConventions ResolveIborFamily(string family, Period tenor, Func<IborIndexConventions> reference)
+    {
+        resolved.Enqueue($"family:{family}@{tenor}");
+        return Change(Indexes, family, reference());
+    }
+
+    /// <inheritdoc/>
+    public override IborIndexConventions ResolveOvernightIndex(string preset, Func<IborIndexConventions> reference)
+    {
+        resolved.Enqueue("overnight:" + preset);
+        return Change(Indexes, preset, reference());
+    }
+
+    /// <inheritdoc/>
+    public override SwapIndexConventions ResolveSwapIndex(string family, Period tenor, Func<SwapIndexConventions> reference)
+    {
+        resolved.Enqueue($"swap:{family}@{tenor}");
+        return reference();
+    }
+
+    /// <inheritdoc/>
+    public override InflationIndexConventions ResolveInflationIndex(string preset, Func<InflationIndexConventions> reference)
+    {
+        resolved.Enqueue("inflation:" + preset);
+        return reference();
+    }
+
+    /// <inheritdoc/>
+    public override RegionData ResolveRegion(string preset, Func<RegionData> reference)
+    {
+        resolved.Enqueue("region:" + preset);
+        return Change(Regions, preset, reference());
+    }
+
+    /// <inheritdoc/>
     public override string ToString() => Name;
+
+    private static T Change<T>(IReadOnlyDictionary<string, Func<T, T>> changes, string name, T data) =>
+        changes.TryGetValue(name, out Func<T, T>? change) ? change(data) : data;
 }

@@ -18,18 +18,34 @@ public sealed class Shibor : IborIndex
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <exception cref="ArgumentOutOfRangeException">The tenor's unit is shorter than a day.</exception>
     public Shibor(Period tenor, YieldTermStructure? h = null)
+        : this(tenor, ConventionProvider.ReadIborFamily("Shibor", tenor, () => Reference(tenor)), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Shibor(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "Shibor",
             tenor,
-            tenor == new Period(1, TimeUnit.Days) ? 0 : 1,
-            new CNYCurrency(),
-            new China(ChinaMarket.IB),
-            ShiborConvention(tenor),
-            false,
-            new Actual360(),
-            h)
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
     {
     }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        tenor == new Period(1, TimeUnit.Days) ? 0 : 1,
+        new CNYCurrency(),
+        new China(ChinaMarket.IB),
+        ShiborConvention(tenor),
+        false,
+        new Actual360());
 
     // A clone: the source's conventions and provider, on another forwarding curve.
     private Shibor(Shibor source, YieldTermStructure? forwarding)

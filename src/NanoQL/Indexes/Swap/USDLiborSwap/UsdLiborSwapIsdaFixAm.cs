@@ -26,16 +26,7 @@ public sealed class UsdLiborSwapIsdaFixAm : SwapIndex
     /// <param name="tenor">The swap's tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public UsdLiborSwapIsdaFixAm(Period tenor, YieldTermStructure? h = null)
-        : base(
-            "UsdLiborSwapIsdaFixAm", // familyName
-            tenor,
-            2, // settlementDays
-            new USDCurrency(),
-            new UnitedStates(UnitedStatesMarket.GovernmentBond),
-            new Period(6, TimeUnit.Months), // fixedLegTenor
-            BusinessDayConvention.ModifiedFollowing, // fixedLegConvention
-            new Thirty360(Thirty360Convention.BondBasis), // fixedLegDaycounter
-            new USDLibor(new Period(3, TimeUnit.Months), h))
+        : this(tenor, ConventionProvider.ReadSwapIndex("UsdLiborSwapIsdaFixAm", tenor, () => Reference(h)), false, null)
     {
     }
 
@@ -47,17 +38,39 @@ public sealed class UsdLiborSwapIsdaFixAm : SwapIndex
     /// <param name="forwarding">The forwarding curve, or <see langword="null"/> for none.</param>
     /// <param name="discounting">The discounting curve, or <see langword="null"/>, QuantLib's empty handle.</param>
     public UsdLiborSwapIsdaFixAm(Period tenor, YieldTermStructure? forwarding, YieldTermStructure? discounting)
-        : base(
-            "UsdLiborSwapIsdaFixAm", // familyName
-            tenor,
-            2, // settlementDays
-            new USDCurrency(),
-            new UnitedStates(UnitedStatesMarket.GovernmentBond),
-            new Period(6, TimeUnit.Months), // fixedLegTenor
-            BusinessDayConvention.ModifiedFollowing, // fixedLegConvention
-            new Thirty360(Thirty360Convention.BondBasis), // fixedLegDaycounter
-            new USDLibor(new Period(3, TimeUnit.Months), forwarding),
-            discounting)
+        : this(tenor, ConventionProvider.ReadSwapIndex("UsdLiborSwapIsdaFixAm", tenor, () => Reference(forwarding)), true, discounting)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private UsdLiborSwapIsdaFixAm(
+        Period tenor,
+        (SwapIndexConventions Values, ConventionProvider Provider) read,
+        bool exogenousDiscount,
+        YieldTermStructure? discounting)
+        : base(
+            "UsdLiborSwapIsdaFixAm",
+            tenor,
+            read.Values.SettlementDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.FixedLegTenor,
+            read.Values.FixedLegConvention,
+            read.Values.FixedLegDayCounter,
+            read.Values.IborIndex,
+            exogenousDiscount,
+            discounting,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope, the Ibor index on the forwarding curve.
+    private static SwapIndexConventions Reference(YieldTermStructure? forwarding) => new(
+        2,
+        new USDCurrency(),
+        new UnitedStates(UnitedStatesMarket.GovernmentBond),
+        new Period(6, TimeUnit.Months),
+        BusinessDayConvention.ModifiedFollowing,
+        new Thirty360(Thirty360Convention.BondBasis),
+        new USDLibor(new Period(3, TimeUnit.Months), forwarding));
 }

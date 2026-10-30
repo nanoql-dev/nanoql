@@ -23,16 +23,32 @@ public sealed class THBFIX : IborIndex
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public THBFIX(Period tenor, YieldTermStructure? h = null)
+        : this(tenor, ConventionProvider.ReadIborFamily("THBFIX", tenor, Reference), h)
+    {
+    }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private THBFIX(Period tenor, (IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
         : base(
             "THBFIX",
             tenor,
-            2,
-            new THBCurrency(),
-            new Thailand(),
-            BusinessDayConvention.ModifiedFollowing,
-            true,
-            new Actual365Fixed(),
-            h)
+            read.Values.FixingDays,
+            read.Values.Currency,
+            read.Values.FixingCalendar,
+            read.Values.Convention,
+            read.Values.EndOfMonth,
+            read.Values.DayCounter,
+            h,
+            read.Provider)
     {
     }
+
+    // QuantLib's conventions, the same at every tenor, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        2,
+        new THBCurrency(),
+        new Thailand(),
+        BusinessDayConvention.ModifiedFollowing,
+        true,
+        new Actual365Fixed());
 }

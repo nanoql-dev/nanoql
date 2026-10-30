@@ -7,6 +7,10 @@
 src/NanoQL/ConventionProvider.cs
 src/NanoQL/CurrencyData.cs
 src/NanoQL/EnumArguments.cs
+src/NanoQL/Indexes/IborIndexConventions.cs
+src/NanoQL/Indexes/InflationIndex/InflationIndexConventions.cs
+src/NanoQL/Indexes/Region/RegionData.cs
+src/NanoQL/Indexes/SwapIndexConventions.cs
 src/NanoQL/Models/MarketModels/Products/MultiStep/MultiStepProductChecks.cs
 src/NanoQL/MsvcConversions.cs
 src/NanoQL/MsvcNormalDistribution.cs

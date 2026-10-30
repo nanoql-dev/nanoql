@@ -16,7 +16,22 @@ public sealed class Swestr : OvernightIndex
     /// <summary>Initializes a new instance of the <see cref="Swestr"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Swestr(YieldTermStructure? h = null)
-        : base("SWESTR", 0, new SEKCurrency(), new Sweden(), new Actual360(), h)
+        : this(ConventionProvider.ReadOvernightIndex("Swestr", Reference), h)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Swestr((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base("SWESTR", read.Values.FixingDays, read.Values.Currency, read.Values.FixingCalendar, read.Values.DayCounter, h, read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new SEKCurrency(),
+        new Sweden(),
+        BusinessDayConvention.Following,
+        false,
+        new Actual360());
 }

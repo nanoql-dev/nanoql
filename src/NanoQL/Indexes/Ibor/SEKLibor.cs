@@ -19,7 +19,18 @@ public sealed class SEKLibor : Libor
     /// <param name="tenor">The tenor.</param>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public SEKLibor(Period tenor, YieldTermStructure? h = null)
-        : base("SEKLibor", tenor, 2, new SEKCurrency(), new Sweden(), new Actual360(), h)
+        : base("SEKLibor", tenor, ConventionProvider.ReadIborFamily("SEKLibor", tenor, () => Reference(tenor)), h)
     {
     }
+
+    // QuantLib's conventions at the tenor, built in the provider's scope: London's fixing calendar, Libor's rules
+    // by the tenor and the currency's financial centre.
+    private static IborIndexConventions Reference(Period tenor) => new(
+        2,
+        new SEKCurrency(),
+        new UnitedKingdom(UnitedKingdomMarket.Exchange),
+        LiborConventions.Convention(tenor),
+        LiborConventions.EndOfMonth(tenor),
+        new Actual360(),
+        new Sweden());
 }

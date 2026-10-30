@@ -16,7 +16,22 @@ public sealed class Saron : OvernightIndex
     /// <summary>Initializes a new instance of the <see cref="Saron"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Saron(YieldTermStructure? h = null)
-        : base("SARON", 0, new CHFCurrency(), new Switzerland(), new Actual360(), h)
+        : this(ConventionProvider.ReadOvernightIndex("Saron", Reference), h)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Saron((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base("SARON", read.Values.FixingDays, read.Values.Currency, read.Values.FixingCalendar, read.Values.DayCounter, h, read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new CHFCurrency(),
+        new Switzerland(),
+        BusinessDayConvention.Following,
+        false,
+        new Actual360());
 }

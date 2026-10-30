@@ -22,14 +22,29 @@ public sealed class EUHICPXT : ZeroInflationIndex
     /// <param name="ts">The zero-inflation curve the index forecasts through, or <see langword="null"/> for
     /// none.</param>
     public EUHICPXT(ZeroInflationTermStructure? ts = null)
-        : base(
-            "HICPXT",
-            new EURegion(),
-            false,
-            Frequency.Monthly,
-            new Period(1, TimeUnit.Months),
-            new EURCurrency(),
-            ts)
+        : this(ConventionProvider.ReadInflationIndex("EUHICPXT", Reference), ts)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private EUHICPXT((InflationIndexConventions Values, ConventionProvider Provider) read, ZeroInflationTermStructure? ts)
+        : base(
+            "HICPXT",
+            read.Values.Region,
+            read.Values.Revised,
+            read.Values.Frequency,
+            read.Values.AvailabilityLag,
+            read.Values.Currency,
+            ts,
+            read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static InflationIndexConventions Reference() => new(
+        new EURegion(),
+        false,
+        Frequency.Monthly,
+        new Period(1, TimeUnit.Months),
+        new EURCurrency());
 }

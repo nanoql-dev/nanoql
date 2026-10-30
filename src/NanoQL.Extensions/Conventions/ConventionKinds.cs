@@ -12,6 +12,9 @@ internal static class ConventionKinds
         CalendarPresetRecord or CalendarRecord or JointCalendarRecord or BespokeCalendarRecord => ConventionKind.Calendar,
         DayCounterPresetRecord or DayCounterRecord => ConventionKind.DayCounter,
         CurrencyPresetRecord => ConventionKind.Currency,
+        RegionRecord => ConventionKind.Region,
+        IborIndexRecord or IborFamilyRecord or OvernightIndexRecord or SwapIndexRecord or OvernightIndexedSwapIndexRecord
+            or ZeroInflationIndexRecord or YoYInflationIndexRecord => ConventionKind.Index,
         AliasRecord => ConventionKind.Alias,
         _ => throw new ArgumentException($"unknown record kind {record.GetType().Name}", nameof(record)),
     };

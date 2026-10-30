@@ -16,7 +16,22 @@ public sealed class Corra : OvernightIndex
     /// <summary>Initializes a new instance of the <see cref="Corra"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Corra(YieldTermStructure? h = null)
-        : base("CORRA", 0, new CADCurrency(), new Canada(), new Actual365Fixed(), h)
+        : this(ConventionProvider.ReadOvernightIndex("Corra", Reference), h)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Corra((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base("CORRA", read.Values.FixingDays, read.Values.Currency, read.Values.FixingCalendar, read.Values.DayCounter, h, read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new CADCurrency(),
+        new Canada(),
+        BusinessDayConvention.Following,
+        false,
+        new Actual365Fixed());
 }

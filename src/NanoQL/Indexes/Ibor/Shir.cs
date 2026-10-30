@@ -20,7 +20,22 @@ public sealed class Shir : OvernightIndex
     /// <summary>Initializes a new instance of the <see cref="Shir"/> class.</summary>
     /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
     public Shir(YieldTermStructure? h = null)
-        : base("Shir", 0, new ILSCurrency(), new Israel(IsraelMarket.SHIR), new Actual365Fixed(), h)
+        : this(ConventionProvider.ReadOvernightIndex("Shir", Reference), h)
     {
     }
+
+    // The conventions read, with the provider they came from, which the index keeps.
+    private Shir((IborIndexConventions Values, ConventionProvider Provider) read, YieldTermStructure? h)
+        : base("Shir", read.Values.FixingDays, read.Values.Currency, read.Values.FixingCalendar, read.Values.DayCounter, h, read.Provider)
+    {
+    }
+
+    // QuantLib's conventions, built in the provider's scope.
+    private static IborIndexConventions Reference() => new(
+        0,
+        new ILSCurrency(),
+        new Israel(IsraelMarket.SHIR),
+        BusinessDayConvention.Following,
+        false,
+        new Actual365Fixed());
 }
