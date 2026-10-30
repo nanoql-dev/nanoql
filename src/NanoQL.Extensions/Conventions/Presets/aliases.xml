@@ -1,0 +1,27 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-FileCopyrightText: International Swaps and Derivatives Association, Inc.
+  SPDX-License-Identifier: Apache-2.0 AND LicenseRef-FpML-Public-License-3.0
+
+  FpML's codes, under the FpML Public License (LICENSES/LicenseRef-FpML-Public-License-3.0.txt), each an alias
+  of the nanoql name it maps to exactly; the mapping is nanoql's own work.
+-->
+<Conventions xmlns="https://nanoql.net/schemas/conventions">
+  <Alias name="1/1" base="OneDayCounter" />
+  <Alias name="30/360" base="Thirty360.BondBasis" />
+  <Alias name="30E/360" base="Thirty360.European" />
+  <Alias name="ACT/360" base="Actual360" />
+  <Alias name="ACT/365.FIXED" base="Actual365Fixed" />
+  <Alias name="ACT/ACT.AFB" base="ActualActual.AFB" />
+  <Alias name="ACT/ACT.ICMA" base="ActualActual.ISMA" />
+  <Alias name="ACT/ACT.ISDA" base="ActualActual.ISDA" />
+  <Alias name="ACT/ACT.ISMA" base="ActualActual.ISMA" />
+  <Alias name="BUS/252" base="Business252" />
+  <Alias name="EUTA" base="TARGET" />
+  <Alias name="USGS" base="UnitedStates.GovernmentBond" />
+  <Alias name="FOLLOWING" base="Following" />
+  <Alias name="MODFOLLOWING" base="ModifiedFollowing" />
+  <Alias name="PRECEDING" base="Preceding" />
+  <Alias name="MODPRECEDING" base="ModifiedPreceding" />
+  <Alias name="NONE" base="Unadjusted" />
+</Conventions>

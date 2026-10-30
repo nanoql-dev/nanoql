@@ -20,7 +20,9 @@ The members report reads the two reports merged, each line's hits the most eithe
 run of the whole suite; a whole-suite report in --all's folder reads the same.
 
 The types it checks are the top-level public types of the .cs files under src/NanoQL/ that the commit adds or
-changes (the working tree against HEAD, untracked files included) and that carry an Upstream line. Report entries
+changes (the working tree against HEAD, untracked files included) and that carry an Upstream line, and of every such
+file under src/NanoQL.Extensions/, the extensions layer, whose types the tagged tests reach or an "// Own-tested:" line
+lists apart. Report entries
 match those files by path, so nested, file and compiler-generated classes count toward their file's type.
 
 Red when: the folder doesn't hold exactly one report; the commit ports a public type and the report doesn't list the
@@ -54,6 +56,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sources  # noqa: E402
 
 SRC = "src/NanoQL/"
+# The extensions layer, nanoql's own code with no Upstream line, whose types the gate checks as it checks ported ones.
+EXTENSIONS = "src/NanoQL.Extensions/"
+CHECKED = (SRC, EXTENSIONS)
 EQUALITY = {"Equals", "GetHashCode", "op_Equality", "op_Inequality"}
 # The member line's reading of C# declarations.
 MODIFIERS = {"public", "private", "protected", "internal", "file", "static", "sealed", "abstract", "readonly",
@@ -82,25 +87,27 @@ def changed_files(root):
         status, path = entry[:2], entry[3:]
         if "R" in status or "C" in status:
             i += 1  # the rename's source path follows
-        if "D" in status or not path.startswith(SRC) or not path.endswith(".cs"):
+        if "D" in status or not path.startswith(CHECKED) or not path.endswith(".cs"):
             continue
         paths.append(path)
     return sorted(paths)
 
 
 def files_since(root, commit):
-    """The .cs files under src/NanoQL/ that the working tree adds or changes against commit, committed or not."""
+    """The .cs files under src/NanoQL/ and src/NanoQL.Extensions/ that the working tree adds or changes against commit,
+    committed or not."""
     tracked = subprocess.run(["git", "-C", root, "diff", "--name-only", "--diff-filter=AMR", "-z", commit],
                              capture_output=True, check=True).stdout.decode("utf-8").split("\0")
     untracked = subprocess.run(["git", "-C", root, "ls-files", "--others", "--exclude-standard", "-z"],
                                capture_output=True, check=True).stdout.decode("utf-8").split("\0")
-    return sorted({p for p in tracked + untracked if p.startswith(SRC) and p.endswith(".cs")})
+    return sorted({p for p in tracked + untracked if p.startswith(CHECKED) and p.endswith(".cs")})
 
 
 def ported_files(root):
-    """Every .cs file under src/NanoQL/ that carries an Upstream line."""
+    """Every .cs file under src/NanoQL/ that carries an Upstream line, and every one under src/NanoQL.Extensions/."""
     return [p for p in sources.git_files(root)
-            if p.startswith(SRC) and p.endswith(".cs") and sources.Header(os.path.join(root, p)).upstream]
+            if p.endswith(".cs") and (p.startswith(EXTENSIONS)
+                                      or (p.startswith(SRC) and sources.Header(os.path.join(root, p)).upstream))]
 
 
 def read_report(path):
@@ -116,7 +123,7 @@ def read_report(path):
             filename = cls.get("filename") or ""
             candidates = [os.path.join(r, filename) for r in roots] if roots else [filename]
             found = next((c for c in candidates if os.path.isfile(c)), None)
-            if found is None and package.get("name") == "NanoQL":
+            if found is None and package.get("name") in ("NanoQL", "NanoQL.Extensions"):
                 unresolved.append(f"{cls.get('name')} ({filename})")
             key = os.path.normcase(os.path.normpath(found or candidates[0]))
             read_class(cls, by_file.setdefault(key, {"lines": {}, "methods": {}, "report methods": []}))
@@ -486,7 +493,7 @@ def unreached_members(root, paths, by_file):
         full = os.path.join(root, path)
         header = sources.Header(full)
         entry = by_file.get(os.path.normcase(os.path.normpath(full)))
-        if not header.upstream or entry is None:
+        if not (header.upstream or path.startswith(EXTENSIONS)) or entry is None:
             continue
         decls = declarations(header.text)
         members, generated = [], {}
@@ -531,7 +538,7 @@ def check(root, results, commit_files, all_files, whole=None, member_files=None)
         for path in paths:
             full = os.path.join(root, path)
             header = sources.Header(full)
-            if not header.upstream:
+            if not (header.upstream or path.startswith(EXTENSIONS)):
                 continue
             types = public_types(header.text)
             if not types:
@@ -572,6 +579,8 @@ def check(root, results, commit_files, all_files, whole=None, member_files=None)
     t, tc, lc, lv, apart, equality_only = assess(commit_files, True)
     if t + len(equality_only) and "NanoQL" not in packages:
         errors.append("the commit ports a public type, and the report doesn't list the NanoQL package")
+    if any(p.startswith(EXTENSIONS) for p in commit_files) and t and "NanoQL.Extensions" not in packages:
+        errors.append("the commit changes an extensions type, and the report doesn't list the NanoQL.Extensions package")
     out.append(f"commit: types {tc}/{t}; lines {lc}/{lv}")
     out.append(f"  listed apart, not in the report: {len(apart)}" + (f": {', '.join(apart)}" if apart else ""))
     out.append(f"  listed apart, equality only: {len(equality_only)}"

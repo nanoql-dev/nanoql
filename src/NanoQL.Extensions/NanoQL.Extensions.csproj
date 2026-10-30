@@ -1,0 +1,25 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>NanoQL.Extensions</RootNamespace>
+    <IsAotCompatible>true</IsAotCompatible>
+    <!-- The extensions may use the core's experimental types (NQL0001); consumers still get the diagnostic. -->
+    <NoWarn>$(NoWarn);NQL0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NanoQL\NanoQL.csproj" />
+  </ItemGroup>
+
+  <!-- The conventions' schema and QuantLib's presets, read at first use under these fixed names. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Conventions\nanoql-conventions.xsd" LogicalName="NanoQL.Extensions.Conventions.nanoql-conventions.xsd" />
+    <EmbeddedResource Include="Conventions\Presets\calendars.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.calendars.xml" />
+    <EmbeddedResource Include="Conventions\Presets\daycounters.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.daycounters.xml" />
+    <EmbeddedResource Include="Conventions\Presets\currencies.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.currencies.xml" />
+    <EmbeddedResource Include="Conventions\Presets\aliases.xml" LogicalName="NanoQL.Extensions.Conventions.Presets.aliases.xml" />
+  </ItemGroup>
+</Project>

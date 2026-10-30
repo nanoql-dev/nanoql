@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="https://nanoql.net/schemas/conventions"
+           xmlns:c="https://nanoql.net/schemas/conventions"
+           targetNamespace="https://nanoql.net/schemas/conventions"
+           elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:documentation>nanoql's market conventions: calendars, day counters and currencies, named by nanoql's API, each a record whose business fields are child elements. Other tools' elements and attributes in their own namespaces are kept.</xs:documentation>
+  </xs:annotation>
+
+  <xs:element name="Conventions">
+    <xs:annotation>
+      <xs:documentation>A set of convention records, in any order, as a document's root or inside another document. Each name is unique within its value kind: calendars, day counters, currencies; an alias's name among all of them.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="CalendarPreset"/>
+        <xs:element ref="Calendar"/>
+        <xs:element ref="JointCalendar"/>
+        <xs:element ref="BespokeCalendar"/>
+        <xs:element ref="DayCounterPreset"/>
+        <xs:element ref="DayCounter"/>
+        <xs:element ref="CurrencyPreset"/>
+        <xs:element ref="Alias"/>
+        <xs:any namespace="##other" processContents="lax"/>
+      </xs:choice>
+      <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+    <xs:unique name="CalendarNames">
+      <xs:selector xpath="c:CalendarPreset|c:Calendar|c:JointCalendar|c:BespokeCalendar|c:Alias"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="DayCounterNames">
+      <xs:selector xpath="c:DayCounterPreset|c:DayCounter|c:Alias"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="CurrencyNames">
+      <xs:selector xpath="c:CurrencyPreset|c:Alias"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+  </xs:element>
+
+  <xs:element name="CalendarPreset">
+    <xs:annotation>
+      <xs:documentation>One of QuantLib's calendars, by its type and market (TARGET, UnitedStates.NYSE): its rules are code, its holiday edits data.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="QuantLibName" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>QuantLib's name of the calendar, which a preset keeps; the base's when left out.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AddedHoliday" type="Date" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>A date added to the calendar's holidays, as addHoliday adds it.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="RemovedHoliday" type="Date" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>A date removed from the calendar's holidays, as removeHoliday removes it.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Calendar">
+    <xs:annotation>
+      <xs:documentation>A named calendar: its base calendar with holidays added or removed. Under the base's own name, an edit of that calendar wherever it is built.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="AddedHoliday" type="Date" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>A date added to the base's holidays.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="RemovedHoliday" type="Date" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>A date removed from the base's holidays.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="RequiredBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="JointCalendar">
+    <xs:annotation>
+      <xs:documentation>Two or more calendars joined by a rule.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Rule" type="JointCalendarRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The rule joining the members: JoinHolidays when left out without a base.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Member" type="Name" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>A joined calendar's name, in order; two or more, or none to take the base's.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="BespokeCalendar">
+    <xs:annotation>
+      <xs:documentation>A calendar whose weekend days and holidays are data; its name is the calendar's own.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Weekend" type="Weekday" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>A weekend day.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Holiday" type="Date" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>A holiday.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="RemovedHoliday" type="Date" minOccurs="0" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>A date removed from the holidays, a weekend day among them.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="DayCounterPreset">
+    <xs:annotation>
+      <xs:documentation>One of QuantLib's day counters, by its type and convention or flag (Thirty360.BondBasis, Actual360.IncludeLastDay): its formula is code.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="QuantLibName" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>QuantLib's name of the day counter, which a preset keeps; the base's when left out.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>For Business252 only: the calendar whose business days are counted.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="DayCounter">
+    <xs:annotation>
+      <xs:documentation>A named day counter on a base: the base itself, or Business252 counting another calendar's business days.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>On a Business252 base only: the calendar whose business days are counted.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="RequiredBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CurrencyPreset">
+    <xs:annotation>
+      <xs:documentation>One of QuantLib's currencies, by its ISO 4217 code, with the data its constructor reads. A record based on a currency gives only the fields it changes.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="QuantLibName" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>QuantLib's name of the currency, which a preset keeps; the base's when left out.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="NumericCode" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The ISO 4217 numeric code, QuantLib's, which a preset keeps; the base's when left out.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Symbol" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The currency's symbol.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FractionSymbol" type="xs:string" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The symbol of its fraction.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FractionsPerUnit" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The number of fractions in a unit.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Rounding" type="Rounding" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The rounding convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="TriangulationCurrency" type="OptionalName" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The code of the currency used for triangulated exchange; empty for none.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Alias">
+    <xs:annotation>
+      <xs:documentation>Another name for its base, in the base's value kind: an FpML or ISDA code, one of QuantLib's aliases, or a firm's own code.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="RequiredBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:attributeGroup name="OptionalBase">
+    <xs:attribute name="name" type="Name" use="required">
+      <xs:annotation>
+        <xs:documentation>The record's name, unique within its value kind.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="base" type="Name">
+      <xs:annotation>
+        <xs:documentation>The record this one is based on, whose fields it takes where it gives none; its own name for the record it replaces.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:anyAttribute namespace="##other" processContents="lax"/>
+  </xs:attributeGroup>
+
+  <xs:attributeGroup name="RequiredBase">
+    <xs:attribute name="name" type="Name" use="required">
+      <xs:annotation>
+        <xs:documentation>The record's name, unique within its value kind.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="base" type="Name" use="required">
+      <xs:annotation>
+        <xs:documentation>The record this one is based on; its own name for the record it replaces.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:anyAttribute namespace="##other" processContents="lax"/>
+  </xs:attributeGroup>
+
+  <xs:complexType name="Rounding">
+    <xs:annotation>
+      <xs:documentation>A rounding convention: its type, and for every type but None its precision and rounding digit.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Type" type="RoundingType">
+        <xs:annotation>
+          <xs:documentation>How a value is rounded.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Precision" type="xs:int" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The decimal places kept.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Digit" type="xs:int" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The digit at and above which a value rounds up.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="Name">
+    <xs:annotation>
+      <xs:documentation>A record's name: not empty, without leading or trailing white space.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\S(.*\S)?"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="OptionalName">
+    <xs:annotation>
+      <xs:documentation>A name, or empty for none.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="(\S(.*\S)?)?"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Date">
+    <xs:annotation>
+      <xs:documentation>A date from 1 January 1901 to 31 December 2199, QuantLib's range, without a time zone.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:date">
+      <xs:pattern value="\d{4}-\d{2}-\d{2}"/>
+      <xs:minInclusive value="1901-01-01"/>
+      <xs:maxInclusive value="2199-12-31"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Weekday">
+    <xs:annotation>
+      <xs:documentation>A day of the week, by nanoql's names.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Sunday"/>
+      <xs:enumeration value="Monday"/>
+      <xs:enumeration value="Tuesday"/>
+      <xs:enumeration value="Wednesday"/>
+      <xs:enumeration value="Thursday"/>
+      <xs:enumeration value="Friday"/>
+      <xs:enumeration value="Saturday"/>
+      <xs:enumeration value="Sun"/>
+      <xs:enumeration value="Mon"/>
+      <xs:enumeration value="Tue"/>
+      <xs:enumeration value="Wed"/>
+      <xs:enumeration value="Thu"/>
+      <xs:enumeration value="Fri"/>
+      <xs:enumeration value="Sat"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="JointCalendarRule">
+    <xs:annotation>
+      <xs:documentation>How a joint calendar joins its members.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="JoinHolidays"/>
+      <xs:enumeration value="JoinBusinessDays"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="RoundingType">
+    <xs:annotation>
+      <xs:documentation>A rounding's type.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="None"/>
+      <xs:enumeration value="Up"/>
+      <xs:enumeration value="Down"/>
+      <xs:enumeration value="Closest"/>
+      <xs:enumeration value="Floor"/>
+      <xs:enumeration value="Ceiling"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="BusinessDayConvention">
+    <xs:annotation>
+      <xs:documentation>A business-day convention, by nanoql's names or by the FpML codes that are their exact aliases.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Following"/>
+      <xs:enumeration value="ModifiedFollowing"/>
+      <xs:enumeration value="Preceding"/>
+      <xs:enumeration value="ModifiedPreceding"/>
+      <xs:enumeration value="Unadjusted"/>
+      <xs:enumeration value="HalfMonthModifiedFollowing"/>
+      <xs:enumeration value="Nearest"/>
+      <xs:enumeration value="FOLLOWING"/>
+      <xs:enumeration value="MODFOLLOWING"/>
+      <xs:enumeration value="PRECEDING"/>
+      <xs:enumeration value="MODPRECEDING"/>
+      <xs:enumeration value="NONE"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

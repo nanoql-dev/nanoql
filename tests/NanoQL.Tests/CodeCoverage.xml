@@ -3,12 +3,13 @@
   SPDX-FileCopyrightText: 2026 The nanoql Authors
   SPDX-License-Identifier: Apache-2.0
 -->
-<!-- The coverage gate's settings (docs/porting-playbook.md §8, G7): the library alone is instrumented. -->
+<!-- The coverage gate's settings (docs/porting-playbook.md §8, G7): the library and its extensions are instrumented. -->
 <Configuration>
   <CodeCoverage>
     <ModulePaths>
       <Include>
         <ModulePath>.*[\\/]NanoQL\.dll$</ModulePath>
+        <ModulePath>.*[\\/]NanoQL\.Extensions\.dll$</ModulePath>
       </Include>
     </ModulePaths>
   </CodeCoverage>

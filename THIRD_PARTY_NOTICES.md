@@ -544,3 +544,28 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
+
+## FpML
+
+nanoql's conventions extensions take codes from three of FpML's lists as aliases of nanoql's names: the
+`day-count-fraction` coding scheme 2-3, the `business-center` coding scheme 9-4 and FpML 5.9's
+`BusinessDayConventionEnum`. The codes are in `src/NanoQL.Extensions/Conventions/Presets/aliases.xml` and
+`tools/vectors/gen/conventions/fpml-aliases.toml`, under the FpML® Public License, Version 3.0, whose text is in
+`LICENSES/LicenseRef-FpML-Public-License-3.0.txt`. The mapping of each code to a nanoql name is nanoql's own work, not
+part of the FpML Specifications, and is distributed under the Apache License, Version 2.0. The licence's Exhibit A
+notice:
+
+```text
+The FpML Specifications of this document are subject to the FpML Public
+License (the “License”); you may not use the FpML Specifications except in
+compliance with the License. You may obtain a copy of the License at
+https://www.FpML.org.
+
+The FpML Specifications distributed under the License are distributed on an
+“AS IS” basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
+the License for the specific language governing rights and limitations under
+the License.
+
+The Licensor of the FpML Specifications is the International Swaps and
+Derivatives Association, Inc. All Rights Reserved.
+```

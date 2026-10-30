@@ -620,10 +620,12 @@ NanoQL/
   - `TestSuite/`: QuantLib's own test cases, one class per QuantLib test file
     (`test-suite/daycounters.cpp` → `DayCountersTests.cs`). Methods keep the case name, capitalised
     (`testConsistency` → `TestConsistency`). Only this folder's files carry Upstream lines.
-  - `Vectors/`: one test class per vector file; `Vectors/Cxx/` for the C++ harness's.
+  - `Vectors/`: one test class per vector file; `Vectors/Cxx/` for the C++ harness's; `Vectors/Conventions/` for
+    the conventions extensions' presets, checked against QuantLib's coded presets (namespace `NanoQL.Tests.Vectors`).
   - `Harness/`: the vector loader's and the tolerance's own tests.
   - `Divergences/`: each documented divergence from QuantLib.
   - `Conventions/`: nanoql's own types and rules.
+  - `Extensions/`: the extensions' own tests (`NanoQL.Extensions`), nanoql's own.
   - `NoOracle/`: members the C++ harness can't drive, ported with nanoql's own tests (§9.4); none today.
 - **The `Oracle` trait:** `[Trait("Oracle", "QuantLib")]` sits on the class, on every test class in `TestSuite/` and
   `Vectors/`, and on nothing else. A ported case asserts only QuantLib's expectations; where nanoql diverges, the

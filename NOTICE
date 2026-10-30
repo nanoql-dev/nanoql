@@ -4,3 +4,7 @@ Copyright 2026 The nanoql Authors
 This product is derived from QuantLib (https://www.quantlib.org/), distributed
 under a modified BSD license. QuantLib's copyright notices and license are
 reproduced in THIRD_PARTY_NOTICES.md.
+
+Its conventions extensions carry codes from FpML's coding schemes and
+enumerations, under the FpML Public License, Version 3.0; FpML's notice is
+reproduced in THIRD_PARTY_NOTICES.md.

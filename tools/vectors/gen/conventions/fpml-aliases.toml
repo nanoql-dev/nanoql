@@ -1,0 +1,135 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-FileCopyrightText: International Swaps and Derivatives Association, Inc.
+# SPDX-License-Identifier: Apache-2.0 AND LicenseRef-FpML-Public-License-3.0
+#
+# FpML's codes that nanoql takes as aliases of its own names, read by tools/vectors/gen/conventions/aliases.py,
+# which writes src/NanoQL.Extensions/Conventions/Presets/aliases.xml. The codes are FpML's, under the FpML Public
+# License (LICENSES/LicenseRef-FpML-Public-License-3.0.txt); the mapping of each code to a nanoql name is nanoql's
+# own work. A code gets an alias only where it maps exactly: FpML's NEAREST adjusts a holiday to the preceding
+# business day unless it falls on a Sunday or a Monday, which QuantLib's Nearest doesn't; 30E/360.ISDA keeps
+# the last day of February when it is the termination date, which a day counter preset doesn't know, so
+# Thirty360.German counts 180 days where the convention counts 178 on a final period to the end of February; and
+# a business centre that is a city's banking days has none. Each scheme's codes are as fpml.org publishes them
+# at the version given, so each alias's code is checked verbatim against its scheme's list.
+
+[schemes.day-count-fraction]
+version = "2-3"
+uri = "http://www.fpml.org/coding-scheme/day-count-fraction-2-3"
+codes = [
+  "1/1", "30/360", "30E/360", "30E/360.ISDA", "ACT/360", "ACT/365.FIXED", "ACT/365L", "ACT/ACT.AFB", "ACT/ACT.ICMA",
+  "ACT/ACT.ISDA", "ACT/ACT.ISMA", "BUS/252", "RBA"
+]
+
+[schemes.business-center]
+version = "9-4"
+uri = "http://www.fpml.org/coding-scheme/business-center-9-4"
+codes = [
+  "AEAB", "AEAD", "AEDU", "AMYE", "AOLU", "ARBA", "ATVI", "AUAD", "AUBR", "AUCA", "AUDA", "AUME", "AUPE", "AUSY",
+  "AZBA", "BBBR", "BDDH", "BEBR", "BGSO", "BHMA", "BMHA", "BNBS", "BOLP", "BRBD", "BRBR", "BRRJ", "BRSP", "BSNA",
+  "BWGA", "BYMI", "CACL", "CAFR", "CAMO", "CAOT", "CATO", "CAVA", "CAWI", "CHBA", "CHGE", "CHZU", "CIAB", "CLSA",
+  "CMYA", "CNBE", "CNSH", "COBO", "CRSJ", "CWWI", "CYNI", "CZPR", "DECO", "DEDU", "DEFR", "DEHA", "DEHH", "DELE",
+  "DEMA", "DEMU", "DEST", "DKCO", "DOSD", "DZAL", "ECGU", "EETA", "EGCA", "ESAS", "ESBA", "ESMA", "ESSS", "ETAA",
+  "EUR-ICESWAP", "EUTA", "FIHE", "FRPA", "GBED", "GBLO", "GBP-ICESWAP", "GETB", "GGSP", "GHAC", "GIGI", "GMBA",
+  "GNCO", "GRAT", "GTGC", "GUGC", "HKHK", "HNTE", "HRZA", "HUBU", "IDJA", "IEDU", "ILJE", "ILS-SHIR", "ILS-TELBOR",
+  "ILTA", "INAH", "INBA", "INCH", "INHY", "INKO", "INMU", "INND", "IQBA", "IRTE", "ISRE", "ITMI", "ITRO", "ITTU",
+  "JESH", "JMKI", "JOAM", "JPTO", "KENA", "KHPP", "KRSE", "KWKC", "KYGE", "KZAL", "LAVI", "LBBE", "LKCO", "LULU",
+  "LVRI", "MACA", "MARA", "MCMO", "MNUB", "MOMA", "MTVA", "MUPL", "MVMA", "MWLI", "MXMC", "MYKL", "MYLA", "MZMA",
+  "NAWI", "NGAB", "NGLA", "NLAM", "NLRO", "NOOS", "NPKA", "NYFD", "NYSE", "NZAU", "NZBD", "NZWE", "OMMU", "PAPC",
+  "PELI", "PHMA", "PHMK", "PKKA", "PLWA", "PRSJ", "PTLI", "QADO", "ROBU", "RSBE", "RUMO", "SAAB", "SAJE", "SARI",
+  "SEST", "SGSI", "SILJ", "SKBR", "SLFR", "SNDA", "SVSS", "THBA", "TNTU", "TRAN", "TRIS", "TTPS", "TWTA", "TZDA",
+  "TZDO", "UAKI", "UGKA", "USBO", "USCH", "USCR", "USDC", "USD-ICESWAP", "USD-MUNI", "USDN", "USDT", "USGS", "USHL",
+  "USHO", "USLA", "USMB", "USMN", "USNY", "USPO", "USSA", "USSE", "USSF", "USWT", "UYMO", "UZTA", "VECA", "VGRT",
+  "VNHA", "VNHC", "YEAD", "ZAJO", "ZMLU", "ZWHA"
+]
+
+[schemes.BusinessDayConventionEnum]
+version = "5-9"
+uri = "https://www.fpml.org/spec/fpml-5-9-6-rec-1/html/confirmation/schemaDocumentation/schemas/fpml-enum-5-9_xsd/simpleTypes/BusinessDayConventionEnum.html"
+codes = [
+  "FOLLOWING", "FRN", "MODFOLLOWING", "PRECEDING", "MODPRECEDING", "NEAREST", "NONE", "NotApplicable"
+]
+
+[[alias]]
+code = "1/1"
+scheme = "day-count-fraction"
+name = "OneDayCounter"
+
+[[alias]]
+code = "30/360"
+scheme = "day-count-fraction"
+name = "Thirty360.BondBasis"
+
+[[alias]]
+code = "30E/360"
+scheme = "day-count-fraction"
+name = "Thirty360.European"
+
+[[alias]]
+code = "ACT/360"
+scheme = "day-count-fraction"
+name = "Actual360"
+
+[[alias]]
+code = "ACT/365.FIXED"
+scheme = "day-count-fraction"
+name = "Actual365Fixed"
+
+[[alias]]
+code = "ACT/ACT.AFB"
+scheme = "day-count-fraction"
+name = "ActualActual.AFB"
+
+[[alias]]
+code = "ACT/ACT.ICMA"
+scheme = "day-count-fraction"
+name = "ActualActual.ISMA"
+
+[[alias]]
+code = "ACT/ACT.ISDA"
+scheme = "day-count-fraction"
+name = "ActualActual.ISDA"
+
+[[alias]]
+code = "ACT/ACT.ISMA"
+scheme = "day-count-fraction"
+name = "ActualActual.ISMA"
+
+[[alias]]
+code = "BUS/252"
+scheme = "day-count-fraction"
+name = "Business252"
+
+[[alias]]
+code = "EUTA"
+scheme = "business-center"
+name = "TARGET"
+
+[[alias]]
+code = "USGS"
+scheme = "business-center"
+name = "UnitedStates.GovernmentBond"
+
+[[alias]]
+code = "FOLLOWING"
+scheme = "BusinessDayConventionEnum"
+name = "Following"
+
+[[alias]]
+code = "MODFOLLOWING"
+scheme = "BusinessDayConventionEnum"
+name = "ModifiedFollowing"
+
+[[alias]]
+code = "PRECEDING"
+scheme = "BusinessDayConventionEnum"
+name = "Preceding"
+
+[[alias]]
+code = "MODPRECEDING"
+scheme = "BusinessDayConventionEnum"
+name = "ModifiedPreceding"
+
+[[alias]]
+code = "NONE"
+scheme = "BusinessDayConventionEnum"
+name = "Unadjusted"

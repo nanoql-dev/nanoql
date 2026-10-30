@@ -1,0 +1,1130 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Conventions xmlns="https://nanoql.net/schemas/conventions">
+  <CurrencyPreset name="AED">
+    <QuantLibName>United Arab Emirates dirham</QuantLibName>
+    <NumericCode>784</NumericCode>
+    <Symbol>AED</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="AOA">
+    <QuantLibName>Angolan kwanza</QuantLibName>
+    <NumericCode>973</NumericCode>
+    <Symbol>AOA</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ARS">
+    <QuantLibName>Argentinian peso</QuantLibName>
+    <NumericCode>32</NumericCode>
+    <Symbol></Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ATS">
+    <QuantLibName>Austrian shilling</QuantLibName>
+    <NumericCode>40</NumericCode>
+    <Symbol></Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="AUD">
+    <QuantLibName>Australian dollar</QuantLibName>
+    <NumericCode>36</NumericCode>
+    <Symbol>A$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="BCH">
+    <QuantLibName>Bitcoin Cash</QuantLibName>
+    <NumericCode>10003</NumericCode>
+    <Symbol>BCH</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="BDT">
+    <QuantLibName>Bangladesh taka</QuantLibName>
+    <NumericCode>50</NumericCode>
+    <Symbol>Bt</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="BEF">
+    <QuantLibName>Belgian franc</QuantLibName>
+    <NumericCode>56</NumericCode>
+    <Symbol></Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="BGL">
+    <QuantLibName>Bulgarian lev</QuantLibName>
+    <NumericCode>100</NumericCode>
+    <Symbol>lv</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="BGN">
+    <QuantLibName>Bulgarian lev</QuantLibName>
+    <NumericCode>975</NumericCode>
+    <Symbol>BGN</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="BHD">
+    <QuantLibName>Bahraini dinar</QuantLibName>
+    <NumericCode>48</NumericCode>
+    <Symbol>BHD</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="BRL">
+    <QuantLibName>Brazilian real</QuantLibName>
+    <NumericCode>986</NumericCode>
+    <Symbol>R$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="BTC">
+    <QuantLibName>Bitcoin</QuantLibName>
+    <NumericCode>10000</NumericCode>
+    <Symbol>BTC</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="BWP">
+    <QuantLibName>Botswanan pula</QuantLibName>
+    <NumericCode>72</NumericCode>
+    <Symbol>P</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="BYR">
+    <QuantLibName>Belarussian ruble</QuantLibName>
+    <NumericCode>974</NumericCode>
+    <Symbol>BR</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="CAD">
+    <QuantLibName>Canadian dollar</QuantLibName>
+    <NumericCode>124</NumericCode>
+    <Symbol>Can$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="CHF">
+    <QuantLibName>Swiss franc</QuantLibName>
+    <NumericCode>756</NumericCode>
+    <Symbol>SwF</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="CLF">
+    <QuantLibName>Unidad de Fomento (funds code)</QuantLibName>
+    <NumericCode>990</NumericCode>
+    <Symbol>CLF</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="CLP">
+    <QuantLibName>Chilean peso</QuantLibName>
+    <NumericCode>152</NumericCode>
+    <Symbol>Ch$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="CNH">
+    <QuantLibName>Chinese yuan (Hong Kong)</QuantLibName>
+    <NumericCode>156</NumericCode>
+    <Symbol>CNH</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="CNY">
+    <QuantLibName>Chinese yuan</QuantLibName>
+    <NumericCode>156</NumericCode>
+    <Symbol>Y</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="COP">
+    <QuantLibName>Colombian peso</QuantLibName>
+    <NumericCode>170</NumericCode>
+    <Symbol>Col$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="COU">
+    <QuantLibName>Unidad de Valor Real (UVR) (funds code)</QuantLibName>
+    <NumericCode>970</NumericCode>
+    <Symbol>COU</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="CYP">
+    <QuantLibName>Cyprus pound</QuantLibName>
+    <NumericCode>196</NumericCode>
+    <Symbol>£C</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="CZK">
+    <QuantLibName>Czech koruna</QuantLibName>
+    <NumericCode>203</NumericCode>
+    <Symbol>Kc</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="DASH">
+    <QuantLibName>Dash coin</QuantLibName>
+    <NumericCode>10006</NumericCode>
+    <Symbol>DASH</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="DEM">
+    <QuantLibName>Deutsche mark</QuantLibName>
+    <NumericCode>276</NumericCode>
+    <Symbol>DM</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="DKK">
+    <QuantLibName>Danish krone</QuantLibName>
+    <NumericCode>208</NumericCode>
+    <Symbol>Dkr</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="EEK">
+    <QuantLibName>Estonian kroon</QuantLibName>
+    <NumericCode>233</NumericCode>
+    <Symbol>KR</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="EGP">
+    <QuantLibName>Egyptian pound</QuantLibName>
+    <NumericCode>818</NumericCode>
+    <Symbol>EGP</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ESP">
+    <QuantLibName>Spanish peseta</QuantLibName>
+    <NumericCode>724</NumericCode>
+    <Symbol>Pta</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="ETB">
+    <QuantLibName>Ethiopian birr</QuantLibName>
+    <NumericCode>230</NumericCode>
+    <Symbol>ETB</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ETC">
+    <QuantLibName>Ethereum Classic</QuantLibName>
+    <NumericCode>10002</NumericCode>
+    <Symbol>ETC</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ETH">
+    <QuantLibName>Ethereum</QuantLibName>
+    <NumericCode>10001</NumericCode>
+    <Symbol>ETH</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="EUR">
+    <QuantLibName>European Euro</QuantLibName>
+    <NumericCode>978</NumericCode>
+    <Symbol></Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>Closest</Type>
+      <Precision>2</Precision>
+      <Digit>5</Digit>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="FIM">
+    <QuantLibName>Finnish markka</QuantLibName>
+    <NumericCode>246</NumericCode>
+    <Symbol>mk</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="FRF">
+    <QuantLibName>French franc</QuantLibName>
+    <NumericCode>250</NumericCode>
+    <Symbol></Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="GBP">
+    <QuantLibName>British pound sterling</QuantLibName>
+    <NumericCode>826</NumericCode>
+    <Symbol>£</Symbol>
+    <FractionSymbol>p</FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="GEL">
+    <QuantLibName>Georgian lari</QuantLibName>
+    <NumericCode>981</NumericCode>
+    <Symbol>GEL</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="GHS">
+    <QuantLibName>Ghanaian cedi</QuantLibName>
+    <NumericCode>936</NumericCode>
+    <Symbol>GHS</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="GRD">
+    <QuantLibName>Greek drachma</QuantLibName>
+    <NumericCode>300</NumericCode>
+    <Symbol></Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="HKD">
+    <QuantLibName>Hong Kong dollar</QuantLibName>
+    <NumericCode>344</NumericCode>
+    <Symbol>HK$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="HRK">
+    <QuantLibName>Croatian kuna</QuantLibName>
+    <NumericCode>191</NumericCode>
+    <Symbol>HRK</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="HUF">
+    <QuantLibName>Hungarian forint</QuantLibName>
+    <NumericCode>348</NumericCode>
+    <Symbol>Ft</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="IDR">
+    <QuantLibName>Indonesian Rupiah</QuantLibName>
+    <NumericCode>360</NumericCode>
+    <Symbol>Rp</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="IEP">
+    <QuantLibName>Irish punt</QuantLibName>
+    <NumericCode>372</NumericCode>
+    <Symbol></Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="ILS">
+    <QuantLibName>Israeli shekel</QuantLibName>
+    <NumericCode>376</NumericCode>
+    <Symbol>NIS</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="INR">
+    <QuantLibName>Indian rupee</QuantLibName>
+    <NumericCode>356</NumericCode>
+    <Symbol>Rs</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="IQD">
+    <QuantLibName>Iraqi dinar</QuantLibName>
+    <NumericCode>368</NumericCode>
+    <Symbol>ID</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="IRR">
+    <QuantLibName>Iranian rial</QuantLibName>
+    <NumericCode>364</NumericCode>
+    <Symbol>Rls</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ISK">
+    <QuantLibName>Iceland krona</QuantLibName>
+    <NumericCode>352</NumericCode>
+    <Symbol>IKr</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ITL">
+    <QuantLibName>Italian lira</QuantLibName>
+    <NumericCode>380</NumericCode>
+    <Symbol>L</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="JOD">
+    <QuantLibName>Jordanian dinar</QuantLibName>
+    <NumericCode>400</NumericCode>
+    <Symbol>JOD</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="JPY">
+    <QuantLibName>Japanese yen</QuantLibName>
+    <NumericCode>392</NumericCode>
+    <Symbol>¥</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="KES">
+    <QuantLibName>Kenyan shilling</QuantLibName>
+    <NumericCode>404</NumericCode>
+    <Symbol>KES</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="KRW">
+    <QuantLibName>South-Korean won</QuantLibName>
+    <NumericCode>410</NumericCode>
+    <Symbol>W</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="KWD">
+    <QuantLibName>Kuwaiti dinar</QuantLibName>
+    <NumericCode>414</NumericCode>
+    <Symbol>KD</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="KZT">
+    <QuantLibName>Kazakstanti Tenge</QuantLibName>
+    <NumericCode>398</NumericCode>
+    <Symbol>Kzt</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="LKR">
+    <QuantLibName>Sri Lankan rupee</QuantLibName>
+    <NumericCode>144</NumericCode>
+    <Symbol>LKR</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="LTC">
+    <QuantLibName>Litecoin</QuantLibName>
+    <NumericCode>10005</NumericCode>
+    <Symbol>LTC</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="LTL">
+    <QuantLibName>Lithuanian litas</QuantLibName>
+    <NumericCode>440</NumericCode>
+    <Symbol>Lt</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="LUF">
+    <QuantLibName>Luxembourg franc</QuantLibName>
+    <NumericCode>442</NumericCode>
+    <Symbol>F</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="LVL">
+    <QuantLibName>Latvian lat</QuantLibName>
+    <NumericCode>428</NumericCode>
+    <Symbol>Ls</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="MAD">
+    <QuantLibName>Moroccan dirham</QuantLibName>
+    <NumericCode>504</NumericCode>
+    <Symbol>MAD</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="MKD">
+    <QuantLibName>Macedonian denar</QuantLibName>
+    <NumericCode>807</NumericCode>
+    <Symbol>den</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="MTL">
+    <QuantLibName>Maltese lira</QuantLibName>
+    <NumericCode>470</NumericCode>
+    <Symbol>Lm</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="MUR">
+    <QuantLibName>Mauritian rupee</QuantLibName>
+    <NumericCode>480</NumericCode>
+    <Symbol>MUR</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="MXN">
+    <QuantLibName>Mexican peso</QuantLibName>
+    <NumericCode>484</NumericCode>
+    <Symbol>Mex$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="MXV">
+    <QuantLibName>Mexican Unidad de Inversion</QuantLibName>
+    <NumericCode>979</NumericCode>
+    <Symbol>MXV</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="MYR">
+    <QuantLibName>Malaysian Ringgit</QuantLibName>
+    <NumericCode>458</NumericCode>
+    <Symbol>RM</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="NGN">
+    <QuantLibName>Nigerian Naira</QuantLibName>
+    <NumericCode>566</NumericCode>
+    <Symbol>N</Symbol>
+    <FractionSymbol>K</FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="NLG">
+    <QuantLibName>Dutch guilder</QuantLibName>
+    <NumericCode>528</NumericCode>
+    <Symbol>f</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="NOK">
+    <QuantLibName>Norwegian krone</QuantLibName>
+    <NumericCode>578</NumericCode>
+    <Symbol>NKr</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="NPR">
+    <QuantLibName>Nepal rupee</QuantLibName>
+    <NumericCode>524</NumericCode>
+    <Symbol>NRs</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="NZD">
+    <QuantLibName>New Zealand dollar</QuantLibName>
+    <NumericCode>554</NumericCode>
+    <Symbol>NZ$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="OMR">
+    <QuantLibName>Omani rial</QuantLibName>
+    <NumericCode>512</NumericCode>
+    <Symbol>OMR</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="PEH">
+    <QuantLibName>Peruvian sol</QuantLibName>
+    <NumericCode>999</NumericCode>
+    <Symbol>S./</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="PEI">
+    <QuantLibName>Peruvian inti</QuantLibName>
+    <NumericCode>998</NumericCode>
+    <Symbol>I/.</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="PEN">
+    <QuantLibName>Peruvian nuevo sol</QuantLibName>
+    <NumericCode>604</NumericCode>
+    <Symbol>S/.</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="PHP">
+    <QuantLibName>Philippine peso</QuantLibName>
+    <NumericCode>608</NumericCode>
+    <Symbol>PHP</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="PKR">
+    <QuantLibName>Pakistani rupee</QuantLibName>
+    <NumericCode>586</NumericCode>
+    <Symbol>Rs</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="PLN">
+    <QuantLibName>Polish zloty</QuantLibName>
+    <NumericCode>985</NumericCode>
+    <Symbol>zl</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="PTE">
+    <QuantLibName>Portuguese escudo</QuantLibName>
+    <NumericCode>620</NumericCode>
+    <Symbol>Esc</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+    <TriangulationCurrency>EUR</TriangulationCurrency>
+  </CurrencyPreset>
+  <CurrencyPreset name="QAR">
+    <QuantLibName>Qatari riyal</QuantLibName>
+    <NumericCode>634</NumericCode>
+    <Symbol>QAR</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ROL">
+    <QuantLibName>Romanian leu</QuantLibName>
+    <NumericCode>642</NumericCode>
+    <Symbol>L</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="RON">
+    <QuantLibName>Romanian new leu</QuantLibName>
+    <NumericCode>946</NumericCode>
+    <Symbol>L</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="RSD">
+    <QuantLibName>Serbian dinar</QuantLibName>
+    <NumericCode>941</NumericCode>
+    <Symbol>RSD</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="RUB">
+    <QuantLibName>Russian ruble</QuantLibName>
+    <NumericCode>643</NumericCode>
+    <Symbol></Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="SAR">
+    <QuantLibName>Saudi riyal</QuantLibName>
+    <NumericCode>682</NumericCode>
+    <Symbol>SRls</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="SEK">
+    <QuantLibName>Swedish krona</QuantLibName>
+    <NumericCode>752</NumericCode>
+    <Symbol>kr</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="SGD">
+    <QuantLibName>Singapore dollar</QuantLibName>
+    <NumericCode>702</NumericCode>
+    <Symbol>S$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="SIT">
+    <QuantLibName>Slovenian tolar</QuantLibName>
+    <NumericCode>705</NumericCode>
+    <Symbol>SlT</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="SKK">
+    <QuantLibName>Slovak koruna</QuantLibName>
+    <NumericCode>703</NumericCode>
+    <Symbol>Sk</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="THB">
+    <QuantLibName>Thai baht</QuantLibName>
+    <NumericCode>764</NumericCode>
+    <Symbol>Bht</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="TND">
+    <QuantLibName>Tunisian dinar</QuantLibName>
+    <NumericCode>788</NumericCode>
+    <Symbol>TND</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="TRL">
+    <QuantLibName>Turkish lira</QuantLibName>
+    <NumericCode>792</NumericCode>
+    <Symbol>TL</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="TRY">
+    <QuantLibName>New Turkish lira</QuantLibName>
+    <NumericCode>949</NumericCode>
+    <Symbol>YTL</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="TTD">
+    <QuantLibName>Trinidad &amp; Tobago dollar</QuantLibName>
+    <NumericCode>780</NumericCode>
+    <Symbol>TT$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="TWD">
+    <QuantLibName>Taiwan dollar</QuantLibName>
+    <NumericCode>901</NumericCode>
+    <Symbol>NT$</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="UAH">
+    <QuantLibName>Ukrainian hryvnia</QuantLibName>
+    <NumericCode>980</NumericCode>
+    <Symbol>hrn</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="UGX">
+    <QuantLibName>Ugandan shilling</QuantLibName>
+    <NumericCode>800</NumericCode>
+    <Symbol>UGX</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="USD">
+    <QuantLibName>U.S. dollar</QuantLibName>
+    <NumericCode>840</NumericCode>
+    <Symbol>$</Symbol>
+    <FractionSymbol>¢</FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="UYU">
+    <QuantLibName>Uruguayan peso</QuantLibName>
+    <NumericCode>858</NumericCode>
+    <Symbol>UYU</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>1</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="UZS">
+    <QuantLibName>Uzbekistani Som</QuantLibName>
+    <NumericCode>860</NumericCode>
+    <Symbol>UZS</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="VEB">
+    <QuantLibName>Venezuelan bolivar</QuantLibName>
+    <NumericCode>862</NumericCode>
+    <Symbol>Bs</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="VND">
+    <QuantLibName>Vietnamese Dong</QuantLibName>
+    <NumericCode>704</NumericCode>
+    <Symbol></Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="XOF">
+    <QuantLibName>West African CFA franc</QuantLibName>
+    <NumericCode>952</NumericCode>
+    <Symbol>XOF</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="XRP">
+    <QuantLibName>Ripple</QuantLibName>
+    <NumericCode>10004</NumericCode>
+    <Symbol>XRP</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ZAR">
+    <QuantLibName>South-African rand</QuantLibName>
+    <NumericCode>710</NumericCode>
+    <Symbol>R</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ZEC">
+    <QuantLibName>Zcash</QuantLibName>
+    <NumericCode>10007</NumericCode>
+    <Symbol>ZEC</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100000</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+  <CurrencyPreset name="ZMW">
+    <QuantLibName>Zambian kwacha</QuantLibName>
+    <NumericCode>967</NumericCode>
+    <Symbol>ZMW</Symbol>
+    <FractionSymbol></FractionSymbol>
+    <FractionsPerUnit>100</FractionsPerUnit>
+    <Rounding>
+      <Type>None</Type>
+    </Rounding>
+  </CurrencyPreset>
+</Conventions>

@@ -1,0 +1,239 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Conventions xmlns="https://nanoql.net/schemas/conventions">
+  <CalendarPreset name="Argentina.Merval">
+    <QuantLibName>Buenos Aires stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Australia.Settlement">
+    <QuantLibName>Australia settlement</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Australia.ASX">
+    <QuantLibName>Australia exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Austria.Settlement">
+    <QuantLibName>Austrian settlement</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Austria.Exchange">
+    <QuantLibName>Vienna stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Botswana">
+    <QuantLibName>Botswana</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Brazil.Settlement">
+    <QuantLibName>Brazil</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Brazil.Exchange">
+    <QuantLibName>BOVESPA</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Canada.Settlement">
+    <QuantLibName>Canada</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Canada.TSX">
+    <QuantLibName>TSX</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Chile.SSE">
+    <QuantLibName>Santiago Stock Exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="China.SSE">
+    <QuantLibName>Shanghai stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="China.IB">
+    <QuantLibName>China inter bank market</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Croatia.ZSE">
+    <QuantLibName>Zagreb stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="CzechRepublic.PSE">
+    <QuantLibName>Prague stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Denmark">
+    <QuantLibName>Denmark</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Finland">
+    <QuantLibName>Finland</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="France.Settlement">
+    <QuantLibName>French settlement</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="France.Exchange">
+    <QuantLibName>Paris stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Germany.Settlement">
+    <QuantLibName>German settlement</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Germany.FrankfurtStockExchange">
+    <QuantLibName>Frankfurt stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Germany.Xetra">
+    <QuantLibName>Xetra</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Germany.Eurex">
+    <QuantLibName>Eurex</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Germany.Euwax">
+    <QuantLibName>Euwax</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="HongKong.HKEx">
+    <QuantLibName>Hong Kong stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Hungary">
+    <QuantLibName>Hungary</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Iceland.ICEX">
+    <QuantLibName>Iceland stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="India.NSE">
+    <QuantLibName>National Stock Exchange of India</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Indonesia.BEJ">
+    <QuantLibName>Jakarta stock exchange</QuantLibName>
+  </CalendarPreset>
+  <Alias name="Indonesia.JSX" base="Indonesia.BEJ" />
+  <Alias name="Indonesia.IDX" base="Indonesia.BEJ" />
+  <CalendarPreset name="Israel.TASE">
+    <QuantLibName>Tel Aviv stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Israel.SHIR">
+    <QuantLibName>SHIR fixing calendar</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Israel.Telbor">
+    <QuantLibName>Telbor fixing calendar</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Italy.Settlement">
+    <QuantLibName>Italian settlement</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Japan">
+    <QuantLibName>Japan</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Malaysia.KLSE">
+    <QuantLibName>Kuala Lumpur stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Malta.MSE">
+    <QuantLibName>Malta Stock Exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Mexico.BMV">
+    <QuantLibName>Mexican stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Montenegro.MNSE">
+    <QuantLibName>Montenegro Stock Exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="NewZealand.Wellington">
+    <QuantLibName>New Zealand (Wellington)</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="NewZealand.Auckland">
+    <QuantLibName>New Zealand (Auckland)</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="NorthMacedonia.MSE">
+    <QuantLibName>Macedonian Stock Exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Norway">
+    <QuantLibName>Norway</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="NullCalendar">
+    <QuantLibName>Null</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Philippines.PSE">
+    <QuantLibName>Philippine stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Poland.Settlement">
+    <QuantLibName>Poland Settlement</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Poland.WSE">
+    <QuantLibName>Warsaw stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Romania.Public">
+    <QuantLibName>Romania</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Romania.BVB">
+    <QuantLibName>Bucharest stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Russia.Settlement">
+    <QuantLibName>Russian settlement</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Russia.MOEX">
+    <QuantLibName>Moscow exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="SaudiArabia.Tadawul">
+    <QuantLibName>Tadawul</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Serbia.BSE">
+    <QuantLibName>Belgrade stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Singapore.SGX">
+    <QuantLibName>Singapore exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Slovakia.BSSE">
+    <QuantLibName>Bratislava stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Slovenia.LSE">
+    <QuantLibName>Ljubljana stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="SouthAfrica">
+    <QuantLibName>South Africa</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="SouthKorea.Settlement">
+    <QuantLibName>South-Korean settlement</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="SouthKorea.KRX">
+    <QuantLibName>South-Korea exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Sweden">
+    <QuantLibName>Sweden</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Switzerland">
+    <QuantLibName>Switzerland</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="TARGET">
+    <QuantLibName>TARGET</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Taiwan.TSEC">
+    <QuantLibName>Taiwan stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Thailand">
+    <QuantLibName>Thailand stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Turkey">
+    <QuantLibName>Turkey</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Ukraine.USE">
+    <QuantLibName>Ukrainian stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="UnitedKingdom.Settlement">
+    <QuantLibName>UK settlement</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="UnitedKingdom.Exchange">
+    <QuantLibName>London stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="UnitedKingdom.Metals">
+    <QuantLibName>London metals exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="UnitedStates.Settlement">
+    <QuantLibName>US settlement</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="UnitedStates.NYSE">
+    <QuantLibName>New York stock exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="UnitedStates.GovernmentBond">
+    <QuantLibName>US government bond market</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="UnitedStates.NERC">
+    <QuantLibName>North American Energy Reliability Council</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="UnitedStates.LiborImpact">
+    <QuantLibName>US with Libor impact</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="UnitedStates.FederalReserve">
+    <QuantLibName>Federal Reserve Bankwire System</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="UnitedStates.SOFR">
+    <QuantLibName>SOFR fixing calendar</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="Uzbekistan.UZSE">
+    <QuantLibName>Uzbekistan Stock Exchange</QuantLibName>
+  </CalendarPreset>
+  <CalendarPreset name="WeekendsOnly">
+    <QuantLibName>weekends only</QuantLibName>
+  </CalendarPreset>
+</Conventions>

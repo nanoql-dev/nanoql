@@ -1,0 +1,83 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Conventions xmlns="https://nanoql.net/schemas/conventions">
+  <DayCounterPreset name="Actual360">
+    <QuantLibName>Actual/360</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Actual360.IncludeLastDay">
+    <QuantLibName>Actual/360 (inc)</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Actual364">
+    <QuantLibName>Actual/364</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Actual36525">
+    <QuantLibName>Actual/365.25</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Actual36525.IncludeLastDay">
+    <QuantLibName>Actual/365.25 (inc)</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Actual365Fixed">
+    <QuantLibName>Actual/365 (Fixed)</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Actual365Fixed.Canadian">
+    <QuantLibName>Actual/365 (Fixed) Canadian Bond</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Actual365Fixed.NoLeap">
+    <QuantLibName>Actual/365 (No Leap)</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Actual366">
+    <QuantLibName>Actual/366</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Actual366.IncludeLastDay">
+    <QuantLibName>Actual/366 (inc)</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="ActualActual.ISMA">
+    <QuantLibName>Actual/Actual (ISMA)</QuantLibName>
+  </DayCounterPreset>
+  <Alias name="ActualActual.Bond" base="ActualActual.ISMA" />
+  <DayCounterPreset name="ActualActual.ISDA">
+    <QuantLibName>Actual/Actual (ISDA)</QuantLibName>
+  </DayCounterPreset>
+  <Alias name="ActualActual.Historical" base="ActualActual.ISDA" />
+  <Alias name="ActualActual.Actual365" base="ActualActual.ISDA" />
+  <DayCounterPreset name="ActualActual.AFB">
+    <QuantLibName>Actual/Actual (AFB)</QuantLibName>
+  </DayCounterPreset>
+  <Alias name="ActualActual.Euro" base="ActualActual.AFB" />
+  <DayCounterPreset name="Business252">
+    <QuantLibName>Business/252(Brazil)</QuantLibName>
+    <Calendar>Brazil.Settlement</Calendar>
+  </DayCounterPreset>
+  <DayCounterPreset name="OneDayCounter">
+    <QuantLibName>1/1</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="SimpleDayCounter">
+    <QuantLibName>Simple</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Thirty360.USA">
+    <QuantLibName>30/360 (US)</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Thirty360.BondBasis">
+    <QuantLibName>30/360 (Bond Basis)</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Thirty360.European">
+    <QuantLibName>30E/360 (Eurobond Basis)</QuantLibName>
+  </DayCounterPreset>
+  <Alias name="Thirty360.EurobondBasis" base="Thirty360.European" />
+  <DayCounterPreset name="Thirty360.Italian">
+    <QuantLibName>30/360 (Italian)</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Thirty360.German">
+    <QuantLibName>30E/360 (ISDA)</QuantLibName>
+  </DayCounterPreset>
+  <Alias name="Thirty360.ISMA" base="Thirty360.BondBasis" />
+  <Alias name="Thirty360.ISDA" base="Thirty360.German" />
+  <DayCounterPreset name="Thirty360.NASD">
+    <QuantLibName>30/360 (NASD)</QuantLibName>
+  </DayCounterPreset>
+  <DayCounterPreset name="Thirty365">
+    <QuantLibName>30/365</QuantLibName>
+  </DayCounterPreset>
+</Conventions>

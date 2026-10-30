@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\NanoQL\NanoQL.csproj" />
+    <ProjectReference Include="..\..\src\NanoQL.Extensions\NanoQL.Extensions.csproj" />
   </ItemGroup>
 
   <!-- Ported tests keep QuantLib's type names (Real, Rate, Size, ...): the library's global aliases. -->
@@ -33,5 +34,10 @@
   <!-- The committed vectors, read beside the test assembly. -->
   <ItemGroup>
     <None Include="..\vectors\**\*.json" Link="vectors\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- The FpML alias table the alias generator reads, which the aliases' tests check the shipped codes against. -->
+  <ItemGroup>
+    <None Include="..\..\tools\vectors\gen\conventions\fpml-aliases.toml" Link="conventions\fpml-aliases.toml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

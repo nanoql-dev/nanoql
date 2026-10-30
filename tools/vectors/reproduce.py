@@ -6,7 +6,9 @@ working tree's, byte for byte (docs/porting-playbook.md §8).
 Usage: .venv\\Scripts\\python -I tools/vectors/reproduce.py [--jobs <n>] [<generator> ...]
 
 A generator is named by its path under tools/vectors/gen/ without ".py" (for example time/date), and a folder by its
-path ending in "/" (cxx/ reruns every harness generator); with none, every generator runs. A harness generator needs
+path ending in "/" (cxx/ reruns every harness generator); with none, every generator runs. A generator under
+conventions/ or cxx/conventions/ writes the file its OUTPUT constant names, a path from the repository root (a
+presets file of the extensions), and every other generator tests/vectors/<name>.json. A harness generator needs
 NANOQL_HARNESS (docs/porting-playbook.md §7.2). The comparison reads the files themselves, outside git, so it sees
 untracked files and line endings. Prints files V/V and exits 1 on any difference. --jobs runs n generators at once,
 the processor count by default; each runs in its own process and folders, so the files they write don't depend on it.
@@ -14,6 +16,7 @@ the processor count by default; each runs in its own process and folders, so the
 import concurrent.futures
 import filecmp
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -47,6 +50,16 @@ def written(root):
                   for dp, _, fns in os.walk(root) for fn in fns)
 
 
+def output_of(name, script):
+    """The file a generator writes, relative to its output root and to the repository: a conventions generator's own
+    OUTPUT, a path from the repository root, and every other's tests/vectors/<name>.json."""
+    if name.startswith(("conventions/", "cxx/conventions/")):
+        with open(script, encoding="utf-8") as f:
+            found = re.findall(r'^OUTPUT = "([^"]+)"$', f.read(), re.M)
+        return found[0] if len(found) == 1 else None
+    return "tests/vectors/" + name + ".json"
+
+
 def reproduce(name):
     """The generator's failure, or None when it writes only its file, equal to the committed one byte for byte."""
     script = os.path.join(GEN_ROOT, *name.split("/")) + ".py"
@@ -54,6 +67,29 @@ def reproduce(name):
         return f"{name}: no generator under tools/vectors/gen/{name}"
     if not os.path.isfile(script):
         return f"{name}: no generator at {script}"
+    output = output_of(name, script)
+    if output is None:
+        return f"{name}: a conventions generator names its file in one OUTPUT constant"
+    if output.startswith("tests/vectors/"):
+        return reproduce_vector(name, script)
+    with tempfile.TemporaryDirectory() as out, tempfile.TemporaryDirectory() as cache:
+        run = subprocess.run([sys.executable, "-I", "-X", f"pycache_prefix={cache}", script, out],
+                             capture_output=True, text=True)
+        if run.returncode != 0:
+            return f"{name}: the generator failed\n{run.stderr.strip()}"
+        files = written(out)
+        if files != [output]:
+            return f"{name}: wrote {files}, expected only {output}"
+        committed = os.path.join(REPO, *output.split("/"))
+        if not os.path.isfile(committed):
+            return f"{name}: {output} is missing"
+        if not filecmp.cmp(committed, os.path.join(out, *output.split("/")), shallow=False):
+            return f"{name}: {output} differs from a fresh generation"
+    return None
+
+
+def reproduce_vector(name, script):
+    """A vector generator's failure, or None when it writes only its vector file, equal to the committed one."""
     with tempfile.TemporaryDirectory() as out, tempfile.TemporaryDirectory() as cache:
         # A fresh bytecode cache: a .pyc whose source changed within the same second, at the same size, would
         # otherwise be read as current, and the run would not see the change.
