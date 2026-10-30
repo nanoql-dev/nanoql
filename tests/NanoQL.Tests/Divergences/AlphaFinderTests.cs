@@ -7,13 +7,16 @@ using NanoQL.Numerics;
 namespace NanoQL.Tests.Divergences;
 
 /// <summary>
-/// <see cref="AlphaFinder"/>'s three fixes (the S-mm plan's MR3 (ix), (x), (xii), under R8) and its b where a final
-/// part fails (MR3 (viii) as the user ruled it on 2026-10-27, and the run's R4-4).
+/// <see cref="AlphaFinder"/>'s fixes (the S-mm plan's MR3 (ix), (x), (xii), under R8), QuantLib's master's finder after
+/// the pin (#2910, <c>dbe958954</c>, the upstream sweep's SWR2 (a)), and its b where a final part fails (the S-mm run's
+/// R4-4). QuantLib's master fixes (ix) and (x) on the same quantities, returns from its bisection at an exact root and
+/// where its point stops moving, and returns the final part's success; its cases are below.
 /// <list type="bullet">
 /// <item>(viii) <c>alphafinder.cpp:335-346</c>, <c>:405-415</c>: where the turning point's value at α₀ is at most the
-/// target, QuantLib returns α₀ without checking <c>finalPart</c>'s result, which fails where the variance left is
-/// negative, and its search returns its α unchecked too. nanoql returns QuantLib's α, its b NaN, which the alpha
-/// calibration counts as a failure (<c>Divergences/CTSMMCapletAlphaFormCalibrationTests.cs</c>).</item>
+/// target, QuantLib 1.44 returns α₀ without checking <c>finalPart</c>'s result, which fails where the variance left is
+/// negative, and its search returns its α unchecked too. nanoql returns false there, as QuantLib's master does, its α
+/// QuantLib's and its b NaN; the alpha calibration refuses the step, as the master's does
+/// (<c>Divergences/CTSMMCapletAlphaFormCalibrationTests.cs</c>).</item>
 /// <item>(ix) <c>:372-373</c>: the downward search's loop tests <c>topValue</c>, which it never changes; on the
 /// planner's MP25 inputs QuantLib's <c>solve</c> returns false where the acceptable α lie strictly below α₀, and
 /// nanoql's loop, testing <c>bottomValue</c>, finds α −0.3111 at the target; on round 1's m10 inputs (the
@@ -28,6 +31,8 @@ namespace NanoQL.Tests.Divergences;
 /// <item>(xii) <c>:30-111</c>: the bisections and <c>Minimize</c> loop on the bracket's width alone, so at tolerance 0
 /// QuantLib's search never ends (MP8: killed after 20 s); nanoql's also stops when the bracket no longer moves.</item>
 /// <item>R4-4: where a final part fails QuantLib leaves b at its caller's value; nanoql's is NaN.</item>
+/// <item>The master's minimization tests the trial α before it reads the objective there, as nanoql's does; the alpha
+/// calibration's fallback keeps 1.44's order, the objective's value read first and tested.</item>
 /// </list>
 /// Checks: QuantLib's arithmetic restated at an α (the turning point's value, the final part, the homogeneity failure),
 /// and the alpha-form calibration's QuantLib case at tolerance 0 against 1e-15.
@@ -42,7 +47,7 @@ public class AlphaFinderTests
     private const double Target = 0.0182;
 
     [Fact]
-    public void AHalfSolvedInitialAlphaIsQuantLibsWithNoB()
+    public void AHalfSolvedInitialAlphaIsRefused()
     {
         // the variance left at alpha0 negative: alpha0's final part fails although its turning point is below the
         // target
@@ -54,10 +59,11 @@ public class AlphaFinderTests
         Assert.False(Restated.FinalPart(form, 0.0, rateOne, rateTwo, Correlations, target, out _));
 
         double[] vols = [0.5, 0.5, 0.5];
-        Assert.True(new AlphaFinder(form).Solve(
+        Assert.False(new AlphaFinder(form).Solve(
             0.0, 1, rateOne, rateTwo, Correlations, 1.0, 1.0, target, 1e-8, 1.0, -1.0, 100, out double alpha, out _, out double b, vols));
 
-        // QuantLib's alpha0, its b NaN where QuantLib leaves the caller's, and the last volatility the caller's
+        // false, as QuantLib's master returns, where 1.44 returns true; QuantLib's alpha0, its b NaN where QuantLib
+        // leaves the caller's, and the last volatility the caller's
         Assert.Equal(0.0, alpha);
         Assert.True(double.IsNaN(b));
         Assert.Equal(0.5, vols[2]);
@@ -66,9 +72,11 @@ public class AlphaFinderTests
     [Fact]
     public void TheDownwardSearchOnRoundOnesInput()
     {
-        // m10: the inverse-linear form on 0.5 and 1, alpha0 0.8 in [-0.9, 1], ten steps; QuantLib's solve returns false
+        // m10: the inverse-linear form on 0.5 and 1, alpha0 0.8 in [-0.9, 1], ten steps; QuantLib 1.44's search finds
+        // no bracket and returns false; the fixed search finds alpha 0.41286, whose final part fails, so it returns
+        // false too, as QuantLib's master does
         double[] vols = new double[3];
-        Assert.True(new AlphaFinder(new AlphaFormInverseLinear([0.5, 1.0])).Solve(
+        Assert.False(new AlphaFinder(new AlphaFormInverseLinear([0.5, 1.0])).Solve(
             0.8, 1, [0.2, 0.2], [0.2, 0.2, 0.2], Correlations, 1.0, -0.5, 0.0156, 1e-10, 1.0, -0.9, 10, out double alpha, out _, out double b, vols));
         Assert.Equal(0.41286, alpha, 5);
         Assert.True(double.IsNaN(b));
@@ -171,6 +179,220 @@ public class AlphaFinderTests
             return alpha;
         });
         Assert.Equal(-0.7519, await homogeneous.WaitAsync(TimeSpan.FromSeconds(60), TestContext.Current.CancellationToken), 4);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void TestAlphaFinderExactBisectionRoot(bool increasing)
+    {
+        // Upstream: QuantLib's master's case for #2910 (marketmodel_smmcapletalphacalibration.cpp's
+        // testAlphaFinderExactBisectionRoot)
+        var finder = new AlphaFinder(new BoundedLinearAlphaForm(increasing ? 0.0 : 1.0, increasing ? 1.0 : -1.0));
+        double[] calibratedVols = new double[3];
+        bool success = finder.Solve(
+            increasing ? 1.0 : 0.0, 1, [1.0, 0.0], [1.0, 1.0, 1.0], [-1.0, 0.0], 1.0, 1.0, 1.0 - 0.8, 1.0e-12, 1.0, 0.0, 100,
+            out double alpha, out _, out _, calibratedVols);
+        Assert.True(success);
+        Assert.True(Math.Abs(alpha - 0.5) < 1.0e-12, $"{alpha}");
+        Assert.True(Math.Abs(calibratedVols[0] - 0.8) < 1.0e-12);
+        Assert.True(Math.Abs(calibratedVols[1] - 0.4) < 1.0e-12);
+        Assert.True(Math.Abs(calibratedVols[2] - Math.Sqrt(2.2)) < 1.0e-12);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void TestAlphaFinderBisectionStagnation(bool increasing)
+    {
+        // Upstream: QuantLib's master's case for #2910 (marketmodel_smmcapletalphacalibration.cpp's
+        // testAlphaFinderBisectionStagnation)
+        var finder = new AlphaFinder(new BoundedLinearAlphaForm(increasing ? 0.0 : 1.0, increasing ? 1.0 : -1.0));
+        double[] calibratedVols = new double[3];
+        bool success = finder.Solve(
+            increasing ? 1.0 : 0.0, 1, [1.0, 0.0], [1.0, 1.0, 1.0], [-1.0, 0.0], 1.0, 1.0, 0.3, 1.0e-20, 1.0, 0.0, 100,
+            out double alpha, out _, out _, calibratedVols);
+        Assert.True(success);
+        double expectedAlpha = increasing ? Math.Sqrt(3.0 / 7.0) : 1.0 - Math.Sqrt(3.0 / 7.0);
+        Assert.True(Math.Abs(alpha - expectedAlpha) < 1.0e-12, $"{alpha}");
+        double targetVariance = ((1.0 - calibratedVols[0]) * (1.0 - calibratedVols[0])) + (calibratedVols[1] * calibratedVols[1]);
+        double totalVariance = 0.0;
+        foreach (double volatility in calibratedVols)
+        {
+            Assert.True(double.IsFinite(volatility));
+            totalVariance += volatility * volatility;
+        }
+
+        Assert.True(Math.Abs(targetVariance - 0.3) < 1.0e-12);
+        Assert.True(Math.Abs(totalVariance - 3.0) < 1.0e-12);
+    }
+
+    [Theory]
+    [InlineData(false, -1.0, -1.5, -0.5)]
+    [InlineData(true, -1.0, -1.5, -0.5)]
+    [InlineData(true, -1.0, -1.2, -0.8)]
+    [InlineData(false, -1.4, -1.5, -0.5)]
+    [InlineData(true, -0.6, -1.5, -0.5)]
+    [InlineData(true, -0.75, -1.0, -0.5)]
+    [InlineData(false, -1.25, -1.5, -1.0)]
+    public void TestAlphaFinderMaximumHomogeneity(bool increasing, double initial, double minimum, double maximum)
+    {
+        // Upstream: QuantLib's master's case for #2910 (marketmodel_smmcapletalphacalibration.cpp's
+        // testAlphaFinderMaximumHomogeneity)
+        var finder = new AlphaFinder(new BoundedLinearAlphaForm(increasing ? 2.0 : 0.0, increasing ? 1.0 : -1.0));
+        double[] calibratedVols = new double[3];
+        Assert.True(finder.SolveWithMaxHomogeneity(
+            initial, 1, [2.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0], 1.0, -1.0, 1.0, 1.0e-10, maximum, minimum, 100,
+            out double alpha, out double scale, out double lastScale, calibratedVols));
+        Assert.True(alpha >= minimum);
+        Assert.True(alpha <= maximum);
+        Assert.True(Math.Abs(alpha + 1.0) < 1.0e-6, $"{alpha}");
+        Assert.True(Math.Abs(scale - 1.0) < 1.0e-6);
+        Assert.True(Math.Abs(lastScale - 1.0) < 1.0e-6);
+        double totalVariance = 0.0;
+        foreach (double volatility in calibratedVols)
+        {
+            Assert.True(Math.Abs(volatility - 1.0) < 1.0e-6);
+            totalVariance += volatility * volatility;
+        }
+
+        double targetVariance = ((2.0 - calibratedVols[0]) * (2.0 - calibratedVols[0]))
+            + ((1.0 - calibratedVols[1]) * (1.0 - calibratedVols[1]));
+        Assert.True(Math.Abs(targetVariance - 1.0) < 1.0e-10);
+        Assert.True(Math.Abs(totalVariance - 3.0) < 1.0e-10);
+    }
+
+    [Fact]
+    public void TestAlphaFinderDownwardInteriorSearch()
+    {
+        // Upstream: QuantLib's master's case for #2910 (marketmodel_smmcapletalphacalibration.cpp's
+        // testAlphaFinderDownwardInteriorSearch)
+        var finder = new AlphaFinder(new InteriorTestAlphaForm(-0.5));
+        double[] calibratedVols = new double[3];
+        Assert.True(finder.Solve(
+            0.0, 1, [1.0, 0.0], [1.0, 1.0, 1.0], [-1.0, 0.0], 1.0, 1.0, 0.3, 1.0e-10, 1.0, -1.0, 100,
+            out double alpha, out _, out _, calibratedVols));
+        double expectedAlpha = -0.5 + (0.5 * Math.Sqrt(Math.Sqrt(3.0 / 7.0) - 0.2));
+        Assert.True(Math.Abs(alpha - expectedAlpha) < 1.0e-8, $"{alpha}");
+        AssertInteriorFit(calibratedVols);
+    }
+
+    [Theory]
+    [InlineData(0.5, false)]
+    [InlineData(-0.5, true)]
+    [InlineData(0.5, true)]
+    public void TestAlphaFinderInteriorSearch(double center, bool maximizeHomogeneity)
+    {
+        // Upstream: QuantLib's master's case for #2910 (marketmodel_smmcapletalphacalibration.cpp's
+        // testAlphaFinderInteriorSearch)
+        var finder = new AlphaFinder(new InteriorTestAlphaForm(center));
+        double[] calibratedVols = new double[3];
+        double alpha, scale, lastScale;
+        bool success = maximizeHomogeneity
+            ? finder.SolveWithMaxHomogeneity(
+                0.0, 1, [1.0, 0.0], [1.0, 1.0, 1.0], [-1.0, 0.0], 1.0, 1.0, 0.3, 1.0e-10, 1.0, -1.0, 100,
+                out alpha, out scale, out lastScale, calibratedVols)
+            : finder.Solve(
+                0.0, 1, [1.0, 0.0], [1.0, 1.0, 1.0], [-1.0, 0.0], 1.0, 1.0, 0.3, 1.0e-10, 1.0, -1.0, 100,
+                out alpha, out scale, out lastScale, calibratedVols);
+        Assert.True(success);
+        double halfWidth = 0.5 * Math.Sqrt(Math.Sqrt(3.0 / 7.0) - 0.2);
+        Assert.True(alpha >= center - halfWidth - 1.0e-8, $"{alpha}");
+        Assert.True(alpha <= center + halfWidth + 1.0e-8, $"{alpha}");
+        if (!maximizeHomogeneity)
+        {
+            Assert.True(Math.Abs(alpha - (center - halfWidth)) < 1.0e-8, $"{alpha}");
+        }
+
+        Assert.True(double.IsFinite(scale));
+        Assert.True(double.IsFinite(lastScale));
+        AssertInteriorFit(calibratedVols);
+    }
+
+    [Fact]
+    public void TestAlphaFinderRejectsNegativeRemainingVariance()
+    {
+        // Upstream: QuantLib's master's case for #2910 (marketmodel_smmcapletalphacalibration.cpp's
+        // testAlphaFinderRejectsNegativeRemainingVariance)
+        var finder = new AlphaFinder(new AlphaFormInverseLinear([1.0, 2.0]));
+        double[] calibratedVols = new double[2];
+        Assert.False(finder.Solve(
+            0.0, 0, [1.0], [0.1, 0.1], [-1.0], 1.0, 1.0, 0.25, 1.0e-10, 1.0, -0.5, 100, out _, out _, out _, calibratedVols));
+        Assert.False(finder.SolveWithMaxHomogeneity(
+            0.0, 0, [1.0], [0.1, 0.1], [-1.0], 1.0, 1.0, 0.25, 1.0e-10, 1.0, -0.5, 100, out _, out _, out _, calibratedVols));
+    }
+
+    [Fact]
+    public void TestAlphaFinderNoRealSolution()
+    {
+        // Upstream: QuantLib's master's case for #2910 (marketmodel_smmcapletalphacalibration.cpp's
+        // testAlphaFinderNoRealSolution)
+        var finder = new AlphaFinder(new AlphaFormInverseLinear([1.0, 2.0]));
+        double[] calibratedVols = new double[2];
+        Assert.False(finder.Solve(
+            0.0, 0, [1.0], [1.0, 1.0], [0.0], 1.0, 1.0, 0.5, 1.0e-10, 1.0, -0.5, 100, out _, out _, out _, calibratedVols));
+        Assert.False(finder.SolveWithMaxHomogeneity(
+            0.0, 0, [1.0], [1.0, 1.0], [0.0], 1.0, 1.0, 0.5, 1.0e-10, 1.0, -0.5, 100, out _, out _, out _, calibratedVols));
+    }
+
+    [Fact]
+    public void TestMaximumHomogeneityCalibration()
+    {
+        // Upstream: QuantLib's master's case for #2910 (marketmodel_smmcapletalphacalibration.cpp's
+        // testMaximumHomogeneityCalibration)
+        TestSuite.MarketModelSmmCapletAlphaCalibrationTests.TestAlphaCalibration(true);
+    }
+
+    private static void AssertInteriorFit(double[] calibratedVols)
+    {
+        double totalVariance = 0.0;
+        foreach (double volatility in calibratedVols)
+        {
+            Assert.True(double.IsFinite(volatility));
+            totalVariance += volatility * volatility;
+        }
+
+        double targetVariance = ((1.0 - calibratedVols[0]) * (1.0 - calibratedVols[0])) + (calibratedVols[1] * calibratedVols[1]);
+        Assert.True(Math.Abs(totalVariance - 3.0) < 1.0e-8);
+        Assert.True(Math.Abs(targetVariance - 0.3) < 1.0e-8);
+    }
+
+    // The master's test form: 1 at the first rate, offset + slope α after it; at most 10,000 evaluations, so a search
+    // that never ends fails.
+    private sealed class BoundedLinearAlphaForm(double offset, double slope) : AlphaForm
+    {
+        private double alpha;
+        private int evaluations;
+
+        public override double Evaluate(int i) => i == 0 ? 1.0 : offset + (slope * alpha);
+
+        public override void SetAlpha(double alpha)
+        {
+            if (++evaluations > 10000)
+            {
+                throw new InvalidOperationException("alpha evaluation limit exceeded");
+            }
+
+            this.alpha = alpha;
+        }
+
+        public override AlphaForm Clone() => new BoundedLinearAlphaForm(offset, slope) { alpha = alpha, evaluations = evaluations };
+    }
+
+    // The master's test form: 1 at the first rate, 0.2 + 4 (α − centre)² after it.
+    private sealed class InteriorTestAlphaForm(double center) : AlphaForm
+    {
+        private double alpha;
+
+        public override double Evaluate(int i)
+        {
+            double distance = alpha - center;
+            return i == 0 ? 1.0 : 0.2 + (4.0 * distance * distance);
+        }
+
+        public override void SetAlpha(double alpha) => this.alpha = alpha;
+
+        public override AlphaForm Clone() => new InteriorTestAlphaForm(center) { alpha = alpha };
     }
 
     // QuantLib's AlphaFinder arithmetic at an alpha, restated (alphafinder.cpp:183-208, :210-229, :232-273), w0 = w1 =

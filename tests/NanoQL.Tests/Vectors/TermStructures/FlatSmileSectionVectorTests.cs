@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Text.Json;
 using NanoQL.Tests.Harness;
 using NanoQL.TermStructures;
 
@@ -64,10 +65,22 @@ public class FlatSmileSectionVectorTests
         check.Output(c, "density", AtStrikes(strikes, k => s.Density(k, discount)));
         check.Output(
             c, "lognormalVolatility", AtStrikes(strikes, k => s.Volatility(k, VolatilityType.ShiftedLognormal, targetShift)));
-        check.Output(c, "normalVolatility", AtStrikes(strikes, k => s.Volatility(k, VolatilityType.Normal, 0.0)));
+        check.Output(c, "normalVolatility", Skipped(c, AtStrikes(strikes, k => s.Volatility(k, VolatilityType.Normal, 0.0))));
     }
 
     // Each value computed when compared, so that a throw is checked.
     private static Func<object?>[] AtStrikes(double[] strikes, Func<double, double> f) =>
         [.. strikes.Select(k => (Func<object?>)(() => f(k)))];
+
+    // The case's "skip" strikes null: QuantLib's master's Bachelier inversions where 1.44 returns 0 (#2924), which the
+    // generator leaves out (Divergences/BlackFormulaUpstreamFixesTests.cs).
+    private static Func<object?>[] Skipped(VectorCase c, Func<object?>[] outputs)
+    {
+        foreach (JsonElement j in c.Input("skip").EnumerateArray())
+        {
+            outputs[j.GetInt32()] = () => null;
+        }
+
+        return outputs;
+    }
 }

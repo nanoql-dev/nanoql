@@ -15,7 +15,10 @@ namespace NanoQL.Tests.Divergences;
 /// 0.02307 bumped at Q₁ = 2, a second of 0.02136 against 0.06409 at Q₂ = 3, and a theta of −8.361 against −9.013 by a
 /// date bump, on the plan's market; QuantLib's own case pins the spreadsheet's values, which reproduce its formulas
 /// (<c>margrabeoption.cpp:250</c>, <c>:259</c>, <c>:268</c>, moved here). nanoql takes each quantity once (the S-exo
-/// plan's ER5 (xvi)): QuantLib's own prices bumped are the check, and its bits at quantities of 1.
+/// plan's ER5 (xvi)): QuantLib's own prices bumped are the check, and its bits at quantities of 1. QuantLib's master
+/// makes the same fix after the pin (#2918, <c>17a720edf</c>), upstream's three expressions token for token, and
+/// restates the spreadsheet rows' gammas and theta, the rows above them with each spot divided by its quantity: its
+/// rows are below, as a check of the fix.
 /// </summary>
 public class MargrabeGreeksQuantityTests
 {
@@ -52,6 +55,28 @@ public class MargrabeGreeksQuantityTests
                 - Price(option, 22.0, 20.0, Today - 1).NPV!.Value) / dT;
             Assert.Equal(expected, theta, 1e-4 * 22.0);
         }
+    }
+
+    [Theory]
+    [InlineData(22.0, 10.0, 1, 2, 0.15, 0.106, 0.511, -0.416)]
+    [InlineData(11.0, 20.0, 2, 1, 0.20, 0.397, 0.120, -0.550)]
+    [InlineData(11.0, 10.0, 2, 2, 0.25, 0.361, 0.437, -0.741)]
+    public void TestEuroExchangeTwoAssetsQuantityRows(
+        double s1, double s2, int q1, int q2, double v2, double gamma1, double gamma2, double theta)
+    {
+        // Upstream: QuantLib's master's rows for #2918 (margrabeoption.cpp's testEuroExchangeTwoAssets, its quantity
+        // tests): q1 6%, q2 4%, r 10%, half a year, v1 20%, rho 0.5, tolerance 1e-3
+        var context = new EvaluationContext { EvaluationDate = Today };
+        YieldTermStructure rTS = new FlatForward(Today, 0.10, Dc);
+        var p1 = new BlackScholesMertonProcess(
+            s1, new FlatForward(Today, 0.06, Dc), rTS, new BlackConstantVol(Today, new NullCalendar(), 0.20, Dc));
+        var p2 = new BlackScholesMertonProcess(
+            s2, new FlatForward(Today, 0.04, Dc), rTS, new BlackConstantVol(Today, new NullCalendar(), v2, Dc));
+        MargrabeOptionResults r = AnalyticEuropeanMargrabeEngine.Calculate(
+            new MargrabeOption(q1, q2, new EuropeanExercise(ExDate)), context, p1, p2, 0.5);
+        Assert.True(Math.Abs(r.Gamma1!.Value - gamma1) <= 1.0e-3, $"gamma1 {r.Gamma1}");
+        Assert.True(Math.Abs(r.Gamma2!.Value - gamma2) <= 1.0e-3, $"gamma2 {r.Gamma2}");
+        Assert.True(Math.Abs(r.Theta!.Value - theta) <= 1.0e-3, $"theta {r.Theta}");
     }
 
     // QuantLib's testGreeks market: curves moving with the evaluation date.

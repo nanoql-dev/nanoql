@@ -91,8 +91,7 @@ public readonly struct MixedLinearCubic : IInterpolator
     /// switch point isn't one of the points, or a part has too few points.
     /// </exception>
     /// <exception cref="NanoQLException">
-    /// The cubic part's scheme or a condition isn't implemented, its spline's system has a zero pivot, or a not-a-knot
-    /// end under its spline has only 2 points (a divergence: QuantLib reads past its arrays there).
+    /// The cubic part's scheme or a condition isn't implemented, or its spline's system has a zero pivot.
     /// </exception>
     public Interpolation Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y) =>
         new MixedLinearCubicInterpolation(

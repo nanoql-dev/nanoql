@@ -22,7 +22,10 @@ smilesectionspec.hpp reads: {"type": "FlatSmileSection", "form" ("date", "floati
 "shift"}, the day counter as in tools/vectors/gen/indexes/interestrateindex.py, the ATM level null for none. The
 wheel's FlatSmileSection is the proxy of the C++ class's constructors (volatilities.i), positional only, so a type or
 shift without an ATM level passes QuantLib's Null<Real>() for it, as the default does. The section functions here are
-shared by the harness generators of cxx/termstructures/volatility/, which import this file. Read back by
+shared by the harness generators of cxx/termstructures/volatility/, which import this file. The case's "skip" input lists the strikes whose
+normal volatility QuantLib's master's Bachelier inversion moves (#2924, taken ahead of the pin as the upstream sweep's
+SWD14 and SWI3 rule; tools/vectors/gen/pricingengines/blackformula.py's smile_normal_moved): QuantLib 1.44's 0, null in
+"normalVolatility", which the reader nulls too. Read back by
 tests/NanoQL.Tests/Vectors/TermStructures/FlatSmileSectionVectorTests.cs."""
 import importlib.util
 import os
@@ -41,6 +44,10 @@ _spec = importlib.util.spec_from_file_location("wheel_interestrateindex",
                                                os.path.join(v.GEN_ROOT, "indexes", "interestrateindex.py"))
 irx = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(irx)
+_spec = importlib.util.spec_from_file_location("wheel_blackformula",
+                                               os.path.join(v.GEN_ROOT, "pricingengines", "blackformula.py"))
+bf = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(bf)
 
 A360, A365, THIRTY360_BB = irx.A360, irx.A365, irx.THIRTY360_BB
 ACT_ISDA = {"type": "ActualActual", "convention": int(ql.ActualActual.ISDA)}
@@ -153,30 +160,34 @@ def section_case(k, evaluation_date, spec, discount, target_shift):
     def at_strikes(f):
         return [v.attempt(lambda x=x: f(x)) for x in ks]
 
+    expected = {
+        "exerciseDate": v.enc(s.exerciseDate()),
+        "referenceDate": v.attempt(lambda: s.referenceDate()),
+        "exerciseTime": s.exerciseTime(),
+        "dayCounter": s.dayCounter().name(),
+        "volatilityType": int(s.volatilityType()),
+        "shift": s.shift(),
+        "minStrike": s.minStrike(),
+        "maxStrike": s.maxStrike(),
+        "atmLevel": v.enc(s.atmLevel()),
+        "variance": at_strikes(s.variance),
+        "volatility": at_strikes(s.volatility),
+        "callPrice": at_strikes(lambda x: s.optionPrice(x, ql.Option.Call, discount)),
+        "putPrice": at_strikes(lambda x: s.optionPrice(x, ql.Option.Put, discount)),
+        "digitalCallPrice": at_strikes(lambda x: s.digitalOptionPrice(x, ql.Option.Call, discount)),
+        "digitalPutPrice": at_strikes(lambda x: s.digitalOptionPrice(x, ql.Option.Put, discount)),
+        "vega": at_strikes(lambda x: s.vega(x, discount)),
+        "density": at_strikes(lambda x: s.density(x, discount)),
+        "lognormalVolatility": at_strikes(lambda x: s.volatility(x, ql.ShiftedLognormal, target_shift)),
+        "normalVolatility": at_strikes(lambda x: s.volatility(x, ql.Normal, 0.0))}
+    skip = [j for j, x in enumerate(ks) if bf.smile_normal_moved(s, x)]
+    for j in skip:
+        expected["normalVolatility"][j] = None
     return {"name": f"{spec['form']} {evaluation_date.ISO()} "
                     f"{'Normal' if spec['volatilityType'] == N else 'ShiftedLognormal'} {spec['shift']!r} / {k}",
             "inputs": {"settings": st, "kind": "section", "section": v.enc(spec), "strikes": ks,
-                       "discount": discount, "targetShift": target_shift},
-            "expected": {
-                "exerciseDate": v.enc(s.exerciseDate()),
-                "referenceDate": v.attempt(lambda: s.referenceDate()),
-                "exerciseTime": s.exerciseTime(),
-                "dayCounter": s.dayCounter().name(),
-                "volatilityType": int(s.volatilityType()),
-                "shift": s.shift(),
-                "minStrike": s.minStrike(),
-                "maxStrike": s.maxStrike(),
-                "atmLevel": v.enc(s.atmLevel()),
-                "variance": at_strikes(s.variance),
-                "volatility": at_strikes(s.volatility),
-                "callPrice": at_strikes(lambda x: s.optionPrice(x, ql.Option.Call, discount)),
-                "putPrice": at_strikes(lambda x: s.optionPrice(x, ql.Option.Put, discount)),
-                "digitalCallPrice": at_strikes(lambda x: s.digitalOptionPrice(x, ql.Option.Call, discount)),
-                "digitalPutPrice": at_strikes(lambda x: s.digitalOptionPrice(x, ql.Option.Put, discount)),
-                "vega": at_strikes(lambda x: s.vega(x, discount)),
-                "density": at_strikes(lambda x: s.density(x, discount)),
-                "lognormalVolatility": at_strikes(lambda x: s.volatility(x, ql.ShiftedLognormal, target_shift)),
-                "normalVolatility": at_strikes(lambda x: s.volatility(x, ql.Normal, 0.0))}}
+                       "discount": discount, "targetShift": target_shift, "skip": skip},
+            "expected": expected}
 
 
 def refusal_case(k, evaluation_date, spec):

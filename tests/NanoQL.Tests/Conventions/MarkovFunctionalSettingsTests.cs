@@ -11,7 +11,8 @@ namespace NanoQL.Tests.Conventions;
 /// <see cref="MarkovFunctionalModelSettings.Validate"/> completes the flags (Kahale's interpolation implies Kahale's
 /// smile; Kahale's smile with the deletion of arbitrage points implies Kahale's interpolation) and refuses QuantLib's
 /// cases, each with QuantLib's text (<c>markovfunctional.hpp:152-199</c>), as <see cref="NanoQLException"/>: the
-/// settings' own state, as a model's constructor raises it.
+/// settings' own state, as a model's constructor raises it; the grid's minimum and its text QuantLib's master's, two
+/// points (#2912, <c>Divergences/MarkovFunctionalUpstreamFixesTests.cs</c>).
 /// </summary>
 public class MarkovFunctionalSettingsTests
 {
@@ -21,7 +22,7 @@ public class MarkovFunctionalSettingsTests
         var s = new MarkovFunctionalModelSettings();
         (MarkovFunctionalModelSettings Settings, string Message)[] cases =
         [
-            (s.WithYGridPoints(0), "At least one grid point (0) for the state process discretization must be given"),
+            (s.WithYGridPoints(1), "At least two grid points (1) for the state process discretization must be given"),
             (s.WithYStdDevs(0.0), "Multiple of standard deviations covered by state process discretization (0) must be positive"),
             (s.WithGaussHermitePoints(0), "Number of gauss hermite integration points (0) must be positive"),
             (s.WithDigitalGap(-1e-5), "Digital gap (-1E-05) must be positive"),

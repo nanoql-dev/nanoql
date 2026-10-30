@@ -54,6 +54,12 @@ namespace NanoQL.Models;
 /// given curve too. The settings refuse any two smile pretreatments (<see cref="MarkovFunctionalModelSettings"/>), and the state
 /// process is its equation's (<see cref="MfStateProcess"/>), its variance continuous in a small reversion.
 /// </para>
+/// <para>
+/// From QuantLib's master after the pin (#2912, <c>Divergences/MarkovFunctionalUpstreamFixesTests.cs</c>): the upper
+/// rate bound's digital is struck at the bound, as the rest of the model reads it, where QuantLib 1.44 subtracts the
+/// smile's shift (<c>:432-436</c>), so a shifted smile capped its rates below the bound; and the settings ask for two
+/// grid points, the master's minimum.
+/// </para>
 /// </remarks>
 public sealed class MarkovFunctional : Gaussian1dModel, ICalibratedModel
 {
@@ -873,8 +879,10 @@ public sealed class MarkovFunctional : Gaussian1dModel, ICalibratedModel
             {
                 minRateDigital = pretreated.DigitalOptionPrice(
                     modelSettings.LowerRateBound - pretreated.Shift, OptionType.Call, annuity, modelSettings.DigitalGap);
+                // QuantLib's fix after v1.44 (#2912): the upper bound's digital struck at the bound, as the model reads
+                // the bound unshifted, where 1.44 subtracts the smile's shift
                 maxRateDigital = pretreated.DigitalOptionPrice(
-                    modelSettings.UpperRateBound - pretreated.Shift, OptionType.Call, annuity, modelSettings.DigitalGap);
+                    modelSettings.UpperRateBound, OptionType.Call, annuity, modelSettings.DigitalGap);
             }
 
             points[p] = new SmilePoint(atm, annuity, pretreated, rawSmileSection, minRateDigital, maxRateDigital);

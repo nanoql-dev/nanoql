@@ -122,10 +122,10 @@ public sealed class MarkovFunctionalModelSettings
     /// deletion of arbitrage points implies Kahale's interpolation.
     /// </summary>
     /// <returns>The completed copy; the receiver doesn't change.</returns>
-    /// <exception cref="NanoQLException">More than one of Kahale's, SABR's and a custom smile is set; a grid or
-    /// integration count, the grid's width, the digital gap or the accuracy isn't positive; Kahale's smile is set with a
-    /// lower rate bound other than 0; the lower rate bound isn't below the upper; or a custom smile has no
-    /// factory.</exception>
+    /// <exception cref="NanoQLException">More than one of Kahale's, SABR's and a custom smile is set; there are fewer
+    /// than two grid points; the integration count, the grid's width, the digital gap or the accuracy isn't positive;
+    /// Kahale's smile is set with a lower rate bound other than 0; the lower rate bound isn't below the upper; or a
+    /// custom smile has no factory.</exception>
     public MarkovFunctionalModelSettings Validate()
     {
         MarkovFunctionalModelSettings s = this;
@@ -141,10 +141,11 @@ public sealed class MarkovFunctionalModelSettings
 
         int smiles = ((s.Adjustments & SabrSmile) != 0 ? 1 : 0) + ((s.Adjustments & KahaleSmile) != 0 ? 1 : 0)
             + ((s.Adjustments & CustomSmile) != 0 ? 1 : 0);
-        Require(smiles <= 1, "Only one of KahaleSmile, SabrSmile and CustomSmilecan be specified at the same time");
+        // QuantLib's master's texts and grid minimum (#2912): on one grid point the grid's spacing divides by zero
+        Require(smiles <= 1, "At most one of KahaleSmile, SabrSmile and CustomSmile can be specified at the same time");
         Require(
-            s.YGridPoints > 0,
-            $"At least one grid point ({s.YGridPoints}) for the state process discretization must be given");
+            s.YGridPoints >= 2,
+            $"At least two grid points ({s.YGridPoints}) for the state process discretization must be given");
         Require(
             s.YStdDevs > 0.0,
             $"Multiple of standard deviations covered by state process discretization ({Show(s.YStdDevs)}) must be positive");

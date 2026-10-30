@@ -27,7 +27,10 @@ reads too. Fewer than four parameters, which QuantLib reads past (0xC0000005 for
 the enum, which QuantLib reads as lognormal for the volatility and as normal for the prices, are never cases. The
 wheel's SabrSmileSection is the proxy of the C++ class's two constructors (volatilities.i:795-814), positional only.
 The section functions here are shared by tools/vectors/gen/cxx/termstructures/volatility/spreadedsmilesection.py.
-Read back by tests/NanoQL.Tests/Vectors/TermStructures/SabrSmileSectionVectorTests.cs."""
+The case's "skip" input lists the strikes whose
+normal volatility QuantLib's master's Bachelier inversion moves (#2924, taken ahead of the pin as the upstream sweep's
+SWD14 and SWI3 rule; tools/vectors/gen/pricingengines/blackformula.py's smile_normal_moved): QuantLib 1.44's 0, null in
+"normalVolatility", which the reader nulls too. Read back by tests/NanoQL.Tests/Vectors/TermStructures/SabrSmileSectionVectorTests.cs."""
 import importlib.util
 import os
 import sys
@@ -45,6 +48,10 @@ _spec = importlib.util.spec_from_file_location("wheel_interestrateindex",
                                                os.path.join(v.GEN_ROOT, "indexes", "interestrateindex.py"))
 irx = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(irx)
+_spec = importlib.util.spec_from_file_location("wheel_blackformula",
+                                               os.path.join(v.GEN_ROOT, "pricingengines", "blackformula.py"))
+bf = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(bf)
 
 A360, A365, THIRTY360_BB = irx.A360, irx.A365, irx.THIRTY360_BB
 ACT_ISDA = {"type": "ActualActual", "convention": int(ql.ActualActual.ISDA)}
@@ -180,9 +187,12 @@ def section_case(k, evaluation_date, spec, discount, target_shift):
     expected.update(at_strikes(s, ks, discount, target_shift))
     expected["flooredVolatility"] = [v.attempt(lambda x=x: s.volatility(x)) for x in fs]
     expected["flooredVariance"] = [v.attempt(lambda x=x: s.variance(x)) for x in fs]
+    skip = [j for j, x in enumerate(ks) if bf.smile_normal_moved(s, x)]
+    for j in skip:
+        expected["normalVolatility"][j] = None
     return {"name": f"{form_name(spec)} {evaluation_date.ISO()} / {k}",
             "inputs": {"settings": st, "kind": "section", "section": v.enc(spec), "strikes": ks,
-                       "floorStrikes": v.enc(fs), "discount": discount, "targetShift": target_shift},
+                       "floorStrikes": v.enc(fs), "discount": discount, "targetShift": target_shift, "skip": skip},
             "expected": expected}
 
 

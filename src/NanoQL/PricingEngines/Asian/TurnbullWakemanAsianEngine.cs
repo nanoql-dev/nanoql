@@ -23,12 +23,21 @@ namespace NanoQL.PricingEngines;
 /// certain exercise, priced in closed form (Haug, "Option Pricing Formulas", 2nd ed., p. 193).
 /// </para>
 /// <para>
-/// Documented divergences (the S-bar plan's BR5). With every fixing past and the effective strike positive, the known
-/// payoff discounted, as Choi's engine prices it, where QuantLib's reads the last of no fixing times and crashes the
-/// process ((xxix), <c>Divergences/TurnbullWakemanPastFixingsTests.cs</c>). A seasoned option reads its variances at
-/// the future average's own strike, K_f = (K − A/m)·m/f for f of m fixings to come, so it prices as (f/m) times the
+/// Documented divergences (the S-bar plan's BR5). With every fixing past, the known payoff discounted, as Choi's engine
+/// prices it, where QuantLib's reads the last of no fixing times and crashes the process ((xxix),
+/// <c>Divergences/TurnbullWakemanPastFixingsTests.cs</c>); QuantLib's master prices it so after 1.44 (#2954), its
+/// branch ahead of the certain exercise's, as here. A seasoned option reads its variances and spot volatilities at the
+/// future average's own strike, K_f = (K − A/m)·m/f for f of m fixings to come, so it prices as (f/m) times the
 /// unseasoned option at K_f, where QuantLib reads them at K − A/m, +42% and +1,302% off on a smile varying with
-/// maturity ((xxx), <c>Divergences/SeasonedAsianSmileTests.cs</c>).
+/// maturity ((xxx),
+/// <c>Divergences/SeasonedAsianSmileTests.cs</c>).
+/// </para>
+/// <para>
+/// The last fixing on the evaluation date, at time 0, is priced with a zero standard deviation and σ, its delta
+/// discount · α · E[A] / S, as QuantLib's master prices it after 1.44 (#2954,
+/// <c>Divergences/AsianUpstreamFixesTests.cs</c>), where QuantLib 1.44 divides by the last time and refuses the NaN
+/// standard deviation; the standard deviation is the master's, √log(E[A²]/E[A]²), and each spot volatility the
+/// structure's volatility, so the price's last bits differ from 1.44's.
 /// </para>
 /// <para>
 /// A fixing dated from the evaluation date to the latest structure's date, where the structures settle after the
@@ -109,6 +118,24 @@ public static class TurnbullWakemanAsianEngine
         additional["strike"] = payoff.Strike;
         additional["effective_strike"] = effectiveStrike;
 
+        // every fixing past: the known payoff discounted, QuantLib's master's (#2954) and Choi's engine's, where
+        // QuantLib 1.44 reads the last of no fixing times (BR5 (xxix))
+        if (futureFixings == 0)
+        {
+            if (!(pastFixings > 0))
+            {
+                throw new NanoQLException("no fixings given");
+            }
+
+            return new OneAssetOptionResults
+            {
+                NPV = discount * payoff.Evaluate(accruedAverage),
+                Delta = 0,
+                Gamma = 0,
+                AdditionalResults = additional.ToImmutable(),
+            };
+        }
+
         // If the effective strike is negative, exercise resp. permanent OTM is guaranteed and the
         // valuation is made easy
         int m = futureFixings + pastFixings;
@@ -137,19 +164,6 @@ public static class TurnbullWakemanAsianEngine
             return new OneAssetOptionResults { NPV = value, Delta = delta, Gamma = 0, AdditionalResults = additional.ToImmutable() };
         }
 
-        // every fixing past, the effective strike positive: the known payoff discounted, as Choi's engine prices it
-        // (BR5 (xxix)), where QuantLib reads the last of no fixing times
-        if (futureFixings == 0)
-        {
-            return new OneAssetOptionResults
-            {
-                NPV = payoff.Evaluate(accruedAverage) * discount,
-                Delta = 0,
-                Gamma = 0,
-                AdditionalResults = additional.ToImmutable(),
-            };
-        }
-
         // the future average's own strike, where the smile is read (BR5 (xxx)), where QuantLib reads it at K − A/m
         double futureStrike = effectiveStrike * m / futureFixings;
 
@@ -172,7 +186,9 @@ public static class TurnbullWakemanAsianEngine
             times.Add(process.BlackVolatility.TimeFromReference(fd));
 
             spotVars[k] = process.BlackVolatility.BlackVariance(times[^1], futureStrike);
-            spotVolsVec.Add(Math.Sqrt(spotVars[k] / times[^1]));
+
+            // QuantLib's master (#2954): the volatility itself, defined at time 0
+            spotVolsVec.Add(process.BlackVolatility.BlackVol(times[^1], futureStrike));
 
             ea += forwards[^1];
             ++k;
@@ -197,10 +213,13 @@ public static class TurnbullWakemanAsianEngine
 
         // Calculate value
         double tn = times[^1];
-        double sigma = Math.Sqrt(Math.Log(ea2 / (ea * ea)) / tn);
+
+        // QuantLib's master (#2954): a zero standard deviation and σ where the last fixing is today
+        double stdDev = tn > 0.0 ? Math.Sqrt(Math.Log(ea2 / (ea * ea))) : 0.0;
+        double sigma = tn > 0.0 ? stdDev / Math.Sqrt(tn) : 0.0;
 
         // Populate results
-        var black = new BlackCalculator(payoff.OptionType, effectiveStrike, ea, sigma * Math.Sqrt(tn), discount);
+        var black = new BlackCalculator(payoff.OptionType, effectiveStrike, ea, stdDev, discount);
 
         additional["forward"] = ea;
         additional["exp_A_2"] = ea2;
@@ -213,7 +232,7 @@ public static class TurnbullWakemanAsianEngine
         return new OneAssetOptionResults
         {
             NPV = black.Value,
-            Delta = black.Delta(spot),
+            Delta = stdDev > 0.0 ? black.Delta(spot) : discount * black.Alpha * ea / spot,
             Gamma = black.Gamma(spot),
             AdditionalResults = additional.ToImmutable(),
         };

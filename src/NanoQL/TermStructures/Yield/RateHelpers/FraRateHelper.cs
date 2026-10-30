@@ -412,15 +412,17 @@ public sealed class FraRateHelper : RelativeDateRateHelper
 
     /// <inheritdoc/>
     /// <exception cref="ArgumentException">The fixing date isn't a valid fixing date of the index.</exception>
-    /// <exception cref="NanoQLException">A fixing before the evaluation date isn't stored, or a date is outside the
-    /// curve's range.</exception>
+    /// <exception cref="NanoQLException">A date is outside the curve's range.</exception>
     public override double ImpliedQuote(EvaluationContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
         RequireTermStructure();
         if (useIndexedCoupon)
         {
-            return iborIndex.Fixing(fixingDate, context, true);
+            // The fixing can be historical on a non-business evaluation date.
+            // Always derive the quote from the curve being bootstrapped
+            // (QuantLib's fix after v1.44, #2899).
+            return iborIndex.ForecastFixing(fixingDate, context);
         }
 
         YieldTermStructure termStructure = TermStructure!;

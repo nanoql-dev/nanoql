@@ -72,8 +72,8 @@ public class BlackFormulaVectorTests
                     double[] strikes = c.Doubles("strikes");
                     check.Output(c, "impliedVolChoi", OnPrices(prices, strikes, (p, k) =>
                         BlackFormulaFunctions.BachelierBlackFormulaImpliedVolChoi(type, k, forward, tte, p, discount)));
-                    check.Output(c, "impliedVol", OnPrices(prices, strikes, (p, k) =>
-                        BlackFormulaFunctions.BachelierBlackFormulaImpliedVol(type, k, forward, tte, p, discount)));
+                    check.Output(c, "impliedVol", Skipped(c, OnPrices(prices, strikes, (p, k) =>
+                        BlackFormulaFunctions.BachelierBlackFormulaImpliedVol(type, k, forward, tte, p, discount))));
                     break;
                 }
 
@@ -118,9 +118,17 @@ public class BlackFormulaVectorTests
                         BlackFormulaFunctions.BachelierBlackFormulaImpliedVolChoi((OptionType)(int)a[0], a[1], a[2], a[3], a[4], a[5])));
                     break;
                 case "bachelierBlackFormulaImpliedVol":
-                    check.Output(c, "bachelierBlackFormulaImpliedVol", Each(c.Input("arguments"), a =>
-                        BlackFormulaFunctions.BachelierBlackFormulaImpliedVol((OptionType)(int)a[0], a[1], a[2], a[3], a[4], a[5])));
+                {
+                    Func<object?>[] outputs = Each(c.Input("arguments"), a =>
+                        BlackFormulaFunctions.BachelierBlackFormulaImpliedVol((OptionType)(int)a[0], a[1], a[2], a[3], a[4], a[5]));
+                    foreach (JsonElement i in c.Input("skip").EnumerateArray())
+                    {
+                        outputs[i.GetInt32()] = () => null;
+                    }
+
+                    check.Output(c, "bachelierBlackFormulaImpliedVol", outputs);
                     break;
+                }
                 case "bachelierBlackFormulaAssetItmProbability":
                     check.Output(c, "bachelierBlackFormulaAssetItmProbability", Each(c.Input("arguments"), a =>
                         BlackFormulaFunctions.BachelierBlackFormulaAssetItmProbability((OptionType)(int)a[0], a[1], a[2], a[3])));
@@ -184,6 +192,18 @@ public class BlackFormulaVectorTests
     // One output per price, [stdDev][strike], each with its strike.
     private static Func<object?>[][] OnPrices(double[][] prices, double[] strikes, Func<double, double, double> f) =>
         prices.Select(row => row.Select((p, j) => (Func<object?>)(() => f(p, strikes[j]))).ToArray()).ToArray();
+
+    // The outputs with the case's "skip" entries, [stdDev, strike], null: QuantLib's master's inversions where 1.44
+    // returns 0 (#2924), which the generator leaves out (Divergences/BlackFormulaUpstreamFixesTests.cs).
+    private static Func<object?>[][] Skipped(VectorCase c, Func<object?>[][] outputs)
+    {
+        foreach (JsonElement entry in c.Input("skip").EnumerateArray())
+        {
+            outputs[entry[0].GetInt32()][entry[1].GetInt32()] = () => null;
+        }
+
+        return outputs;
+    }
 
     // One output per argument list, each list's numbers read as reals ("NaN" and the infinities among them).
     private static Func<object?>[] Each(JsonElement arguments, Func<double[], double> f) =>

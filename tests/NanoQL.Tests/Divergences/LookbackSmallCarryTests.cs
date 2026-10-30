@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Instruments;
+using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.Processes;
 using NanoQL.TermStructures;
@@ -21,7 +22,9 @@ namespace NanoQL.Tests.Divergences;
 /// carry at a cut of 6e-4 to 2e-3 in u. Checks: the formulas at 50 digits, the bivariate normal by quadrature (the
 /// S-bar run's <c>c2_smallcarry_refs.py</c>), within 1e-12 of max(|value|, 1); over the run's fit, corner and holdout
 /// grids the worst is 1.6e-13 for the full engines and 1.1e-12 for the partial ones (<c>c2_smallcarry_cut.py</c>,
-/// <c>c2_smallcarry_rule.py</c>, and the engines on the holdout grid).
+/// <c>c2_smallcarry_rule.py</c>, and the engines on the holdout grid). QuantLib's master fixes the partial engines
+/// after the pin (#2925, <c>2d86c20e3</c>): the limit below |2b/σ²| of 1e-7 and 1.44's form above it; nanoql keeps its
+/// cubic (the user's ruling (b) of 2026-10-26), and the master's three cases below check it.
 /// </summary>
 public class LookbackSmallCarryTests
 {
@@ -76,6 +79,152 @@ public class LookbackSmallCarryTests
     {
         var option = new ContinuousPartialFixedLookbackOption(Today + 182, new PlainVanillaPayoff(OptionType.Call, 100.0), AYear);
         Check(expected, AnalyticContinuousPartialFixedLookbackEngine.Calculate(option, Context, Process(carry)).NPV!.Value);
+    }
+
+    [Fact]
+    public void TestPartialLookbackZeroCarry()
+    {
+        // Upstream: QuantLib's master's case for #2925 (lookbackoptions.cpp's testPartialLookbackZeroCarry)
+        var today = new Date(20, October, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual360();
+        GeneralizedBlackScholesProcess ProcessAt(double q) => new BlackScholesMertonProcess(
+            100.0, new FlatForward(today, q, dc), new FlatForward(today, 0.05, dc), new BlackConstantVol(today, new NullCalendar(), 0.20, dc));
+        var exercise = new EuropeanExercise(today + 360);
+
+        foreach (OptionType type in new[] { OptionType.Call, OptionType.Put })
+        {
+            var fixedOption = new ContinuousPartialFixedLookbackOption(today + 180, new PlainVanillaPayoff(type, 100.0), exercise);
+            var floating = new ContinuousPartialFloatingLookbackOption(100.0, 1.0, today + 180, new FloatingTypePayoff(type), exercise);
+
+            // Discretely sampled extrema bias the MC reference downwards. The 0.60 tolerance allows for that bias and
+            // sampling error on a spot of 100.
+            foreach (double yield in new[] { 0.02, 0.05 })
+            {
+                GeneralizedBlackScholesProcess process = ProcessAt(yield);
+                double fixedReference = new MakeMCLookbackEngine<ContinuousPartialFixedLookbackOption, PseudoRandom, GeneralStatistics>(process, 42)
+                    .WithSteps(1024).WithSamples(4095).WithAntitheticVariate().ToEngine()(fixedOption, context).NPV!.Value;
+                double fixedValue = AnalyticContinuousPartialFixedLookbackEngine.Calculate(fixedOption, context, process).NPV!.Value;
+                Assert.True(
+                    Math.Abs(fixedValue - fixedReference) < 0.60,
+                    $"partial fixed {type}, q={yield}: calculated {fixedValue}, MC reference {fixedReference}");
+                double floatingReference = new MakeMCLookbackEngine<ContinuousPartialFloatingLookbackOption, PseudoRandom, GeneralStatistics>(process, 42)
+                    .WithSteps(1024).WithSamples(4095).WithAntitheticVariate().ToEngine()(floating, context).NPV!.Value;
+                double floatingValue = AnalyticContinuousPartialFloatingLookbackEngine.Calculate(floating, context, process).NPV!.Value;
+                Assert.True(
+                    Math.Abs(floatingValue - floatingReference) < 0.60,
+                    $"partial floating {type}, q={yield}: calculated {floatingValue}, MC reference {floatingReference}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestPartialLookbackZeroCarryBoundaryLimits()
+    {
+        // Upstream: QuantLib's master's case for #2925 (lookbackoptions.cpp's testPartialLookbackZeroCarryBoundaryLimits)
+        var today = new Date(20, October, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual360();
+        GeneralizedBlackScholesProcess ProcessAt(double q) => new BlackScholesMertonProcess(
+            100.0, new FlatForward(today, q, dc), new FlatForward(today, 0.05, dc), new BlackConstantVol(today, new NullCalendar(), 0.20, dc));
+        var exercise = new EuropeanExercise(today + 360);
+
+        foreach (OptionType type in new[] { OptionType.Call, OptionType.Put })
+        {
+            var payoff = new PlainVanillaPayoff(type, 100.0);
+            var fixedOption = new ContinuousPartialFixedLookbackOption(today + 360, payoff, exercise);
+            var vanilla = new VanillaOption(payoff, exercise);
+            var floatingPayoff = new FloatingTypePayoff(type);
+            double minmax = type == OptionType.Call ? 90.0 : 110.0;
+            var partial = new ContinuousPartialFloatingLookbackOption(minmax, 1.0, today + 360, floatingPayoff, exercise);
+            var full = new ContinuousFloatingLookbackOption(minmax, floatingPayoff, exercise);
+            foreach (double yield in new[] { 0.02, 0.05, 0.05 - 1.0e-12, 0.05 + 1.0e-12 })
+            {
+                GeneralizedBlackScholesProcess process = ProcessAt(yield);
+
+                // A single observation is a vanilla option. Observing to expiry with unit lambda is the full floating
+                // lookback contract.
+                double fixedValue = AnalyticContinuousPartialFixedLookbackEngine.Calculate(fixedOption, context, process).NPV!.Value;
+                double vanillaValue = AnalyticEuropeanEngine.Calculate(vanilla, context, process).NPV!.Value;
+                Assert.True(Math.Abs(fixedValue - vanillaValue) < 1.0e-8, $"{type}, q={yield}: {fixedValue} against {vanillaValue}");
+                double partialValue = AnalyticContinuousPartialFloatingLookbackEngine.Calculate(partial, context, process).NPV!.Value;
+                double fullValue = AnalyticContinuousFloatingLookbackEngine.Calculate(full, context, process).NPV!.Value;
+                Assert.True(Math.Abs(partialValue - fullValue) < 1.0e-8, $"{type}, q={yield}: {partialValue} against {fullValue}");
+            }
+        }
+    }
+
+    [Fact]
+    public void TestPartialLookbackZeroCarryContinuity()
+    {
+        // Upstream: QuantLib's master's case for #2925 (lookbackoptions.cpp's testPartialLookbackZeroCarryContinuity)
+        var today = new Date(20, October, 2026);
+        var context = new EvaluationContext { EvaluationDate = today };
+        DayCounter dc = new Actual360();
+        const double r = 0.05;
+        const double sigma = 0.20;
+        GeneralizedBlackScholesProcess ProcessAt(double q) => new BlackScholesMertonProcess(
+            100.0, new FlatForward(today, q, dc), new FlatForward(today, r, dc), new BlackConstantVol(today, new NullCalendar(), sigma, dc));
+        var exercise = new EuropeanExercise(today + 360);
+
+        void CheckContinuity(Func<GeneralizedBlackScholesProcess, double> price, string label)
+        {
+            double ValueAt(double yield)
+            {
+                double value = price(ProcessAt(yield));
+                Assert.True(double.IsFinite(value), $"{label}, q={yield}");
+                return value;
+            }
+
+            double zero = ValueAt(r);
+            foreach (double epsilon in new[] { 1.0e-4, 1.0e-6 })
+            {
+                double left = ValueAt(r - epsilon);
+                double right = ValueAt(r + epsilon);
+
+                // Both prices use the existing nonsingular formula. Individual differences are O(epsilon); their mean
+                // is O(epsilon^2).
+                Assert.True(Math.Abs(left - zero) < (100.0 * epsilon) + 1.0e-8, $"{label}, epsilon={epsilon}");
+                Assert.True(Math.Abs(right - zero) < (100.0 * epsilon) + 1.0e-8, $"{label}, epsilon={epsilon}");
+                Assert.True(
+                    Math.Abs((0.5 * (left + right)) - zero) < (200.0 * epsilon * epsilon) + 1.0e-8, $"{label}, epsilon={epsilon}");
+            }
+
+            // Exercise both sides of the implementation's dimensionless cutoff.
+            const double carryCutoff = 0.5 * sigma * sigma * 1.0e-7;
+            foreach (double sign in new[] { -1.0, 1.0 })
+            {
+                double inside = ValueAt(r + (sign * 0.99 * carryCutoff));
+                double outside = ValueAt(r + (sign * 1.01 * carryCutoff));
+                Assert.True(Math.Abs(outside - inside) < 1.0e-6, $"{label}, sign={sign}");
+            }
+        }
+
+        foreach (OptionType type in new[] { OptionType.Call, OptionType.Put })
+        {
+            foreach (int boundary in new[] { 90, 180, 270, 360 })
+            {
+                foreach (double strike in new[] { 90.0, 100.0, 110.0 })
+                {
+                    var option = new ContinuousPartialFixedLookbackOption(today + boundary, new PlainVanillaPayoff(type, strike), exercise);
+                    CheckContinuity(
+                        p => AnalyticContinuousPartialFixedLookbackEngine.Calculate(option, context, p).NPV!.Value,
+                        $"fixed {type}, boundary={boundary}, strike={strike}");
+                }
+
+                foreach (double minmax in new[] { 100.0, type == OptionType.Call ? 90.0 : 110.0 })
+                {
+                    foreach (double lambda in new[] { 1.0, type == OptionType.Call ? 1.1 : 0.9 })
+                    {
+                        var option = new ContinuousPartialFloatingLookbackOption(
+                            minmax, lambda, today + boundary, new FloatingTypePayoff(type), exercise);
+                        CheckContinuity(
+                            p => AnalyticContinuousPartialFloatingLookbackEngine.Calculate(option, context, p).NPV!.Value,
+                            $"floating {type}, boundary={boundary}, minmax={minmax}, lambda={lambda}");
+                    }
+                }
+            }
+        }
     }
 
     private static void Check(double expected, double actual) =>

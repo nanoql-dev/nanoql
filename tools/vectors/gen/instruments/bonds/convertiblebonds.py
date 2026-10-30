@@ -12,8 +12,12 @@ last only). Each case's outputs are the bond's inspectors without a date (tools/
 outputs, amounts at the notional of 100), its settlement date, and its NPV and settlement value on the
 Cox-Ross-Rubinstein convertible engine with 101 steps, a credit spread of 1% and no dividends on
 tools/vectors/gen/processes/blackscholesprocess.py's first process (Merton, flat, constant, on Actual/365 (Fixed)
-throughout), which reads the arguments setupArguments computes. Then the refusal of a last callability after maturity,
-QuantLib's "last callability date (...) later than maturity (...)", at construction.
+throughout), which reads the arguments setupArguments computes. The engine prices the bond settling on the
+evaluation date ("pricedBond", priced_at_evaluation's spec: "settlementDays" 0, an issue date after the evaluation
+date moved to it), where QuantLib's master's spot at the settlement date (#2752, taken ahead of the pin as the upstream
+sweep's SWR1 (a) and SWI2 rule) is QuantLib 1.44's, divided by a discount of 1; a lag is checked in
+tests/NanoQL.Tests/Divergences/ConvertibleUpstreamFixesTests.cs. Then the refusal of a last callability
+after maturity, QuantLib's "last callability date (...) later than maturity (...)", at construction.
 
 Generated and left out: an engine price under an American exercise whose time grid's last time rounds below the tree's
 maturity, where QuantLib 1.44 skips the conversion at expiry and nanoql takes upstream's fix after v1.44 (#2878, the S-sr
@@ -133,6 +137,18 @@ def make_bond(spec):
                                           schedule, spec["redemption"], *ex_coupon)
 
 
+def priced_at_evaluation(spec):
+    """The spec the engine prices: settlement lag 0, and an issue date after the evaluation date moved to it, so that
+    the bond settles on the evaluation date (a bond settles on the later of the two), where QuantLib's master's spot
+    roll divides by a discount of 1 (#2752); and a callability on the lagged bond's settlement date moved to it, so
+    that the tree still applies a callability at its time 0, which QuantLib keeps on the settlement date."""
+    issue = spec["issueDate"]
+    settlement = make_bond(spec).settlementDate().serialNumber()
+    calls = [dict(c, date=v.enc(R)) if c["date"] == settlement else c for c in spec["callability"]]
+    return dict(spec, settlementDays=0, issueDate=issue if issue is None or issue <= R.serialNumber() else v.enc(R),
+                callability=calls)
+
+
 def american_grid_short(spec, bond, process, steps):
     """Whether an American exercise's tree, from the bond's settlement over the risk-free curve's year fraction to the
     last exercise date, has its grid's last time below that maturity: (T/N)·N < T, where QuantLib 1.44 skips the
@@ -215,14 +231,16 @@ def cases():
         bond = make_bond(spec)
         expected = bd.static_outputs(bond, 100.0)
         expected["settlementDate"] = v.enc(bond.settlementDate())
-        if not american_grid_short(spec, bond, process, 101):
-            bond.setPricingEngine(ql.BinomialConvertibleEngine(process, "crr", 101, ql.QuoteHandle(
+        inputs = {"settings": st, "bond": spec, "process": pspec, "creditSpread": CREDIT_SPREAD, "timeSteps": 101}
+        priced_spec = priced_at_evaluation(spec)
+        priced = make_bond(priced_spec)
+        if not american_grid_short(priced_spec, priced, process, 101):
+            priced.setPricingEngine(ql.BinomialConvertibleEngine(process, "crr", 101, ql.QuoteHandle(
                 ql.SimpleQuote(CREDIT_SPREAD))))
-            expected["NPV"] = v.result(bond.NPV)
-            expected["settlementValue"] = v.result(bond.settlementValue)
-        out.append({"name": name, "inputs": {"settings": st, "bond": spec, "process": pspec,
-                                              "creditSpread": CREDIT_SPREAD, "timeSteps": 101},
-                    "expected": expected})
+            expected["NPV"] = v.result(priced.NPV)
+            expected["settlementValue"] = v.result(priced.settlementValue)
+            inputs["pricedBond"] = priced_spec
+        out.append({"name": name, "inputs": inputs, "expected": expected})
     for name, spec in refusals():
         out.append({"name": name, "inputs": {"settings": st, "bond": spec},
                     "expected": {"construct": v.attempt(lambda: make_bond(spec))}})

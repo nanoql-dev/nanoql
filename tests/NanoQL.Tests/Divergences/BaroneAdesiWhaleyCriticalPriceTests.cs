@@ -64,6 +64,57 @@ public class BaroneAdesiWhaleyCriticalPriceTests
         Assert.True(Math.Abs(value - 900.0000000000001) <= 1e-9 * 900.0, $"{value}");
     }
 
+    [Fact]
+    public void TestBaroneAdesiWhaleyAndJuWithCarryAboveVolatility()
+    {
+        // Upstream: QuantLib's master's case for #2907 (americanoption.cpp's
+        // testBaroneAdesiWhaleyAndJuWithCarryAboveVolatility), the master's fix of VR4 (vii)'s throws: its seed moved
+        // to the right side of the strike, where nanoql takes the equation's root by Brent's method (the user's ruling
+        // SWR3 (b) of 2026-10-29)
+
+        // When |b|T exceeds 2*sigma*sqrt(T), with the sign that makes early exercise worth considering, the seed of the
+        // critical-price iteration used to land on the wrong side of the strike: negative for calls, or far above the
+        // strike for puts. The engines then threw instead of returning a price; see
+        // <https://github.com/lballabio/QuantLib/issues/2905>.
+        (OptionType Type, double Strike, double R, double Q, double V, int Years)[] cases =
+        [
+            (OptionType.Call, 100.0, 0.0257, 0.0571, 0.0166, 3),
+            (OptionType.Call, 100.0, 0.0257, 0.0571, 0.0100, 3),
+            (OptionType.Put, 100.0, 0.0647, 0.0234, 0.0089, 3),
+            (OptionType.Put, 120.0, 0.1077, 0.0329, 0.0149, 10),
+        ];
+
+        // The approximations are not exact. The relative tolerances are the accuracy each engine already reaches just
+        // above the threshold, where the seed was valid: about 5% for Barone-Adesi-Whaley and 0.5% for Ju for the first
+        // call at sigma = 1.8% and 2%.
+        const double bawTolerance = 5.0e-2;
+        const double juTolerance = 1.0e-2;
+
+        foreach (var c in cases)
+        {
+            GeneralizedBlackScholesProcess process = Process(100.0, c.Q, c.R, c.V);
+            var payoff = new PlainVanillaPayoff(c.Type, c.Strike);
+            var option = new VanillaOption(
+                payoff, new AmericanExercise(Today, Today + new Period(c.Years, TimeUnit.Years)));
+            double expected = QdFpAmericanEngine.Calculate(option, Context, process, QdFpAmericanEngine.HighPrecisionScheme()).NPV!.Value;
+
+            (string Name, Func<double> Value, double Tolerance)[] engines =
+            [
+                ("Barone-Adesi-Whaley", () => BaroneAdesiWhaleyApproximationEngine.Calculate(option, Context, process).NPV!.Value, bawTolerance),
+                ("Ju", () => JuQuadraticApproximationEngine.Calculate(option, Context, process).NPV!.Value, juTolerance),
+            ];
+            foreach ((string name, Func<double> value, double tolerance) in engines)
+            {
+                double calculated = value();
+                double error = Math.Abs(calculated - expected);
+                Assert.True(
+                    error <= tolerance * expected,
+                    $"{name}, {c.Type} {c.Strike}, r {c.R}, q {c.Q}, vol {c.V}, {c.Years} years: {calculated} against "
+                    + $"{expected}, error {error}");
+            }
+        }
+    }
+
     // QuantLib's equation LHS − RHS at the critical price nanoql returns, within QuantLib's tolerance 1e-6 of the strike,
     // the root inside the range
     private static void AssertRoot(StrikedTypePayoff payoff, GeneralizedBlackScholesProcess process, Date expiry)

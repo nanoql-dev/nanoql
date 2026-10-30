@@ -17,7 +17,10 @@ namespace NanoQL.Time;
 /// <item><description>Sundays</description></item>
 /// <item><description>New Year's Day, January 1st</description></item>
 /// <item><description>Day after New Year's Day, January 2nd</description></item>
+/// <item><description>Epiphany, January 6th (since 2024)</description></item>
+/// <item><description>St John the Baptist, January 7th (since 2024)</description></item>
 /// <item><description>Unification Day, January 24th</description></item>
+/// <item><description>Orthodox Good Friday (since 2018)</description></item>
 /// <item><description>Orthodox Easter (only Sunday and Monday)</description></item>
 /// <item><description>Labour Day, May 1st</description></item>
 /// <item><description>Pentecost with Monday (50th and 51st days after the Othodox Easter)</description></item>
@@ -32,6 +35,10 @@ namespace NanoQL.Time;
 /// <para>
 /// Holidays for the Bucharest stock exchange (data from http://www.bvb.ro/Marketplace/TradingCalendar/index.aspx): all
 /// public holidays, plus a few one-off closing days (2014 only).
+/// </para>
+/// <para>
+/// Epiphany, St John the Baptist and Orthodox Good Friday are QuantLib's master's (#2919), which nanoql takes ahead of
+/// the pin (<c>Divergences/RomaniaUpstreamHolidaysTests.cs</c>); QuantLib 1.44 has none of them.
 /// </para>
 /// </remarks>
 public sealed class Romania : Calendar
@@ -97,8 +104,14 @@ public sealed class Romania : Calendar
                 || (d == 1 && m == Month.January)
                 // Day after New Year's Day
                 || (d == 2 && m == Month.January)
+                // Epiphany (since 2024)
+                || (d == 6 && m == Month.January && y >= 2024)
+                // St John the Baptist (since 2024)
+                || (d == 7 && m == Month.January && y >= 2024)
                 // Unification Day
                 || (d == 24 && m == Month.January)
+                // Orthodox Good Friday (since 2018)
+                || (dd == em - 3 && y >= 2018)
                 // Orthodox Easter Monday
                 || (dd == em)
                 // Labour Day

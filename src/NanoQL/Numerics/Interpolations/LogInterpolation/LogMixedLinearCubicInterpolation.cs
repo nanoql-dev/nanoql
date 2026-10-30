@@ -42,8 +42,7 @@ public class LogMixedLinearCubicInterpolation : Interpolation
     /// has too few points, or a y value isn't positive.
     /// </exception>
     /// <exception cref="NanoQLException">
-    /// The cubic part's scheme or a condition isn't implemented, its spline's system has a zero pivot, or a not-a-knot
-    /// end under its spline has only 2 points (a divergence: QuantLib reads past its arrays there).
+    /// The cubic part's scheme or a condition isn't implemented, or its spline's system has a zero pivot.
     /// </exception>
     public LogMixedLinearCubicInterpolation(
         ReadOnlySpan<double> x,

@@ -93,16 +93,24 @@ Facts:
 
 [`Divergences/AlphaFinderTests.cs`](../tests/NanoQL.Tests/Divergences/AlphaFinderTests.cs)
 
-`AlphaFinder`'s three fixes (the S-mm plan's MR3 (ix), (x), (xii), under R8) and its b where a final part fails (MR3 (viii) as the user ruled it on 2026-10-27, and the run's R4-4). (viii) `alphafinder.cpp:335-346`, `:405-415`: where the turning point's value at α₀ is at most the target, QuantLib returns α₀ without checking `finalPart`'s result, which fails where the variance left is negative, and its search returns its α unchecked too. nanoql returns QuantLib's α, its b NaN, which the alpha calibration counts as a failure (`Divergences/CTSMMCapletAlphaFormCalibrationTests.cs`). (ix) `:372-373`: the downward search's loop tests `topValue`, which it never changes; on the planner's MP25 inputs QuantLib's `solve` returns false where the acceptable α lie strictly below α₀, and nanoql's loop, testing `bottomValue`, finds α −0.3111 at the target; on round 1's m10 inputs (the reviewer's), QuantLib's returns false and nanoql's α 0.41286, whose final part fails. (x) `:117`, `:145`: `Minimize` calls the feasibility test on the objective's value, not on the trial α, so where that value isn't an acceptable α it stops at its first trial: on MP25's inputs QuantLib returns α −0.48497 with homogeneity failure 3.3880, where the acceptable α run from −0.7519 to −0.3112 and the least failure is 3.3628 at −0.7519 (MP25; the run's harness gives QuantLib's alpha-form calibration at maximum homogeneity, and nanoql with QuantLib's test restored reproduces it bit for bit, the run's R4-2); on round 1's m15 inputs, QuantLib's α 0.5168373510089983 fails by 0.12497903935064759 and nanoql's 0.4467697074628475 by 0.12229674463151122, and where the small α QuantLib's test reads are acceptable both return 1.2307430953608208e-08. (xii) `:30-111`: the bisections and `Minimize` loop on the bracket's width alone, so at tolerance 0 QuantLib's search never ends (MP8: killed after 20 s); nanoql's also stops when the bracket no longer moves. R4-4: where a final part fails QuantLib leaves b at its caller's value; nanoql's is NaN. Checks: QuantLib's arithmetic restated at an α (the turning point's value, the final part, the homogeneity failure), and the alpha-form calibration's QuantLib case at tolerance 0 against 1e-15.
+`AlphaFinder`'s fixes (the S-mm plan's MR3 (ix), (x), (xii), under R8), QuantLib's master's finder after the pin (#2910, `dbe958954`, the upstream sweep's SWR2 (a)), and its b where a final part fails (the S-mm run's R4-4). QuantLib's master fixes (ix) and (x) on the same quantities, returns from its bisection at an exact root and where its point stops moving, and returns the final part's success; its cases are below. (viii) `alphafinder.cpp:335-346`, `:405-415`: where the turning point's value at α₀ is at most the target, QuantLib 1.44 returns α₀ without checking `finalPart`'s result, which fails where the variance left is negative, and its search returns its α unchecked too. nanoql returns false there, as QuantLib's master does, its α QuantLib's and its b NaN; the alpha calibration refuses the step, as the master's does (`Divergences/CTSMMCapletAlphaFormCalibrationTests.cs`). (ix) `:372-373`: the downward search's loop tests `topValue`, which it never changes; on the planner's MP25 inputs QuantLib's `solve` returns false where the acceptable α lie strictly below α₀, and nanoql's loop, testing `bottomValue`, finds α −0.3111 at the target; on round 1's m10 inputs (the reviewer's), QuantLib's returns false and nanoql's α 0.41286, whose final part fails. (x) `:117`, `:145`: `Minimize` calls the feasibility test on the objective's value, not on the trial α, so where that value isn't an acceptable α it stops at its first trial: on MP25's inputs QuantLib returns α −0.48497 with homogeneity failure 3.3880, where the acceptable α run from −0.7519 to −0.3112 and the least failure is 3.3628 at −0.7519 (MP25; the run's harness gives QuantLib's alpha-form calibration at maximum homogeneity, and nanoql with QuantLib's test restored reproduces it bit for bit, the run's R4-2); on round 1's m15 inputs, QuantLib's α 0.5168373510089983 fails by 0.12497903935064759 and nanoql's 0.4467697074628475 by 0.12229674463151122, and where the small α QuantLib's test reads are acceptable both return 1.2307430953608208e-08. (xii) `:30-111`: the bisections and `Minimize` loop on the bracket's width alone, so at tolerance 0 QuantLib's search never ends (MP8: killed after 20 s); nanoql's also stops when the bracket no longer moves. R4-4: where a final part fails QuantLib leaves b at its caller's value; nanoql's is NaN. The master's minimization tests the trial α before it reads the objective there, as nanoql's does; the alpha calibration's fallback keeps 1.44's order, the objective's value read first and tested. Checks: QuantLib's arithmetic restated at an α (the turning point's value, the final part, the homogeneity failure), and the alpha-form calibration's QuantLib case at tolerance 0 against 1e-15.
 
 Facts:
 
-- `AHalfSolvedInitialAlphaIsQuantLibsWithNoB`
+- `AHalfSolvedInitialAlphaIsRefused`
 - `TheDownwardSearchOnRoundOnesInput`
 - `MaximumHomogeneityOnRoundOnesInputs`
 - `TheDownwardSearchFindsTheAcceptableAlphaBelowAlphaZero`
 - `MaximumHomogeneityFindsTheAcceptableMinimum`
 - `ToleranceZeroEnds`
+- `TestAlphaFinderExactBisectionRoot`
+- `TestAlphaFinderBisectionStagnation`
+- `TestAlphaFinderMaximumHomogeneity`
+- `TestAlphaFinderDownwardInteriorSearch`
+- `TestAlphaFinderInteriorSearch`
+- `TestAlphaFinderRejectsNegativeRemainingVariance`
+- `TestAlphaFinderNoRealSolution`
+- `TestMaximumHomogeneityCalibration`
 
 ## AmericanBasketStrikeScalingTests
 
@@ -402,6 +410,17 @@ Facts:
 - `TurnbullWakemanPricesReversedDatesAsSorted`
 - `TheFiniteDifferenceEnginePricesReversedDatesAsSorted`
 
+## AsianUpstreamFixesTests
+
+[`Divergences/AsianUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/AsianUpstreamFixesTests.cs)
+
+The fix QuantLib's master made to Turnbull and Wakeman's engine after the pin, which nanoql takes (R8, the upstream sweep): #2954 (`f461b7852`) prices the last fixing on the evaluation date, at time 0, with a zero standard deviation, its σ 0, its delta `discount · α · E[A] / S` and its spot volatilities read as volatilities. QuantLib 1.44 divides the log moment ratio by the last time, 0, and its Black calculator refuses the NaN standard deviation (`turnbullwakemanasianengine.cpp:117-120`). nanoql reads the spot volatilities at the future average's own strike (BR5 (xxx)), where master reads them at K − A/m; on a flat volatility they agree. Master's every-fixing-past branch refuses an option with no fixings at all, "no fixings given", which nanoql's `DiscreteAveragingAsianOption` accepts and 1.44's engine priced on an average of 0.
+
+Facts:
+
+- `AnOptionWithNoFixingsIsRefused`
+- `TestTurnbullWakemanLastFixingToday`
+
 ## AssetSwapNonParRepaymentTests
 
 [`Divergences/AssetSwapNonParRepaymentTests.cs`](../tests/NanoQL.Tests/Divergences/AssetSwapNonParRepaymentTests.cs)
@@ -524,6 +543,7 @@ Facts:
 - `APutWhoseNewtonStepLeavesZeroToKIsPricedOnTheEquationsRoot`
 - `ACallWhoseSeedLeavesKToInfinityIsPricedOnTheEquationsRoot`
 - `JusEngineSharesTheRoot`
+- `TestBaroneAdesiWhaleyAndJuWithCarryAboveVolatility`
 
 ## BarrierClosedFormMismatchedTimesTests
 
@@ -991,6 +1011,21 @@ Facts:
 
 - `ANullPayoffIsRefusedBeforeItIsRead`
 
+## BlackFormulaUpstreamFixesTests
+
+[`Divergences/BlackFormulaUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/BlackFormulaUpstreamFixesTests.cs)
+
+The fix QuantLib's master made to the exact Bachelier implied volatility after the pin, which nanoql takes as written (R8, the upstream sweep): #2924 (`e61abd2f5`) returns 0 only where the time value isn't positive and the price is close to its intrinsic value. QuantLib 1.44 returns 0 wherever the price is close to the intrinsic value (`blackformula.cpp:919-920`), so a deep in-the-money price just above it, or a tiny real time value out of the money, inverts to 0 in place of its volatility. Of the vectors' 600 Bachelier implied volatilities, 23 leave 1.44's 0 (the plan's SWP9, F1-4), which the generator leaves out of the file. In 14 the time value is real and tiny, and the fix recovers the generating volatility; in 9 a deep in-the-money price sits one ulp above its intrinsic value after the division by a discount of 0.95, and the fix inverts that rounding into a volatility of about 0.09, where the generating one is far smaller and 1.44 returns 0. At a discount of 1 those prices are exact, and the fix returns 0 too. One of each kind is below, from the vectors' inputs. Two of the vectors' argument cases move too: an infinite price after the division by the discount (a discount of 0, or an infinite price), which 1.44 finds close to the intrinsic value and returns 0 for, and which the fix's positive time value inverts to NaN, as QuantLib's master's arithmetic does. And a smile section's normal volatility, whose conversion inverts the section's price at a discount of 1 (`smilesection.cpp:131-155`): 16 of the flat, SABR and ZABR sections' vectors leave 1.44's 0 (the sweep's SWI3), one of them below.
+
+Facts:
+
+- `TestBachelierImpliedVolJustAboveIntrinsic`
+- `TestBachelierImpliedVolJustAboveIntrinsicDiscounted`
+- `ATinyRealTimeValueInvertsToItsVolatility`
+- `AnInTheMoneyPriceOneUlpAboveIntrinsicInvertsItsRounding`
+- `AnInfinitePriceIsNoLongerZero`
+- `ASmileSectionsTinyPremiumConvertsToItsNormalVolatility`
+
 ## BlackIborBelowShiftTests
 
 [`Divergences/BlackIborBelowShiftTests.cs`](../tests/NanoQL.Tests/Divergences/BlackIborBelowShiftTests.cs)
@@ -1215,11 +1250,14 @@ Facts:
 
 [`Divergences/CTSMMCapletAlphaFormCalibrationTests.cs`](../tests/NanoQL.Tests/Divergences/CTSMMCapletAlphaFormCalibrationTests.cs)
 
-The alpha-form calibration's two departures, as the user ruled them on 2026-10-27. A step whose final part fails (S-mm plan MR3 (viii)): QuantLib's solve returns it as solved, the swap rate's last volatility left at its buffer's 0, and its calibration returns `true` with no failure (`alphafinder.cpp:335-346`, `:405-415`; `capletcoterminalalphacalibration.cpp:202-203`, its count commented out beside its throw). In the code review's 7,800-input sweep, 517 calibrations return so, their swaptions missing by 6.3e-4 to 0.249. One at QuantLib's own α₀ and bounds: displaced 2%, caplets × 0.95, three factors, QuantLib's swaptions missing by 0.0347198 and its caplet root-mean-square error 0.0109794 (the run's harness). nanoql returns QuantLib's numbers, counting each such step as a failure, so `Converged` is false. Maximum homogeneity (MR3 (x)): the fixed minimization's α at one caplet can leave a later caplet no α where QuantLib's first trial leaves room, so the fixed calibration throws on 50 of the sweep's inputs QuantLib calibrates; the pass then runs again on QuantLib's test of the objective's value. On caplets × 0.95 and eight factors QuantLib's caplet error is 3.4739757936758017e-07 and its swaptions exact (the run's harness; the vectors hold the case bit for bit). On QuantLib's case the fixed calibration completes, more homogeneous: its deformation, the sum over rates and steps of the squared change of each step's standard deviation, 0.0010560 against QuantLib's 0.0018891 (the code review's run and the run's harness). Checks: QuantLib's numbers on the half-solved case and the fallback; the fit and the deformation on QuantLib's case.
+The alpha-form calibration where a step's final part fails, which QuantLib's master refuses after the pin and nanoql refuses in the pass the calibration returns, and its fallback at maximum homogeneity, as the user ruled it on 2026-10-27. A step whose final part fails (S-mm plan MR3 (viii), re-ruled by the upstream sweep's SWR2 (a)): QuantLib 1.44's solve returns it as solved, the swap rate's last volatility left at its buffer's 0, and its calibration returns `true` with no failure (`alphafinder.cpp:335-346`, `:405-415`; `capletcoterminalalphacalibration.cpp:202-203`, its count commented out beside its throw). In the S-mm code review's 7,800-input sweep, 517 calibrations return so, their swaptions missing by 6.3e-4 to 0.249. One at QuantLib's own α₀ and bounds: displaced 2%, caplets × 0.95, three factors, QuantLib 1.44's swaptions missing by 0.0347198 and its caplet root-mean-square error 0.0109794 (the S-mm run's harness). QuantLib's master's solve returns false there (#2910, `dbe958954`), so its calibration throws "alpha form failure", and so does nanoql's where the pass it returns has such a step (the sweep's ruling SWI4 (b)): on that sweep 4,091 calibrations at QuantLib's settings, 517 on the linear-hyperbolic form and 3,574 on the inverse-linear one; and so does the inverse-linear form at α₀ 0 in [−1, 1], whose calibration and pass function the vectors held with 1.44's numbers (the generator now has them at ±0.5, where every step solves). Master throws at the first such step in any pass; nanoql counts one in an earlier pass, whose successor re-targets the caplets and can fit, so a calibration whose returned pass fits keeps QuantLib 1.44's numbers: displaced 2%, caplets × 1.2, five factors, α₀ 0.5, which QuantLib converges to a caplet root-mean-square error of 4.6924312876899316e-05 (the run's harness) and master refuses; at α-solving tolerances of 0.05 and 0.2 up to 172 more, at maximum homogeneity too (the sweep's code review's B1-1). Maximum homogeneity (MR3 (x)): the fixed minimization's α at one caplet can leave a later caplet no α where QuantLib's first trial leaves room, so the fixed calibration throws on 50 of the sweep's inputs QuantLib calibrates; the pass then runs again on QuantLib's test of the objective's value, for a caplet with no α, not for a failed final part, which is counted (the trigger the sweep's SWR2 (a) keeps): at α-solving tolerances of 0.01 and above, 147 of 33,600 maximum-homogeneity calibrations have a failed final part at the first pass, and on 18 of them a fallback for it too would complete where nanoql refuses, QuantLib 1.44's numbers on 15 (the sweep's code review's F1-1). On caplets × 0.95 and eight factors QuantLib's caplet error is 3.4739757936758017e-07 and its swaptions exact (the run's harness; the vectors hold the case bit for bit). On QuantLib's case the fixed calibration completes, more homogeneous: its deformation, the sum over rates and steps of the squared change of each step's standard deviation, 0.0010560 against QuantLib's 0.0018891 (the code review's run and the run's harness). Checks: the master's refusal on the half-solved cases; QuantLib's numbers on the fallback; the fit and the deformation on QuantLib's case.
 
 Facts:
 
-- `AHalfSolvedStepIsAFailure`
+- `AHalfSolvedStepIsRefused`
+- `ACalibrationWhoseReturnedPassFitsKeepsQuantLibsNumbers`
+- `AFailedFinalPartIsNotTheFallbacksTrigger`
+- `TheInverseLinearFormsHalfSolvedStepsAreRefused`
 - `MaximumHomogeneityOnQuantLibsCaseIsMoreHomogeneous`
 - `WhereTheFixLeavesACapletNoAlphaQuantLibsTestRuns`
 
@@ -2017,12 +2055,23 @@ Facts:
 
 [`Divergences/ConvertibleClockTests.cs`](../tests/NanoQL.Tests/Divergences/ConvertibleClockTests.cs)
 
-The binomial convertible engine's clock (the S-sr plan's SSR8, ruled by the user on 2026-10-22, (a)). QuantLib's engine flattens the volatility at the last exercise date on its own day counter, σ = blackVol(T), and its tree reads it over the risk-free curve's year fraction, so a volatility on another day counter integrates the wrong variance (`binomialconvertibleengine.hpp:80-125`): on the wheel, a 5-year zero-coupon convertible (conversion ratio 2, redemption 100, three settlement days) on a spot of 50, flat 5% and 2% curves on Actual/360 and a 15% volatility on Actual/365 (Fixed), from 15 January 2025, a credit spread of 0.5%, Cox-Ross-Rubinstein at 101 steps, prices 95.56792008293525, its price with the volatility read on Actual/360; on the market restated on one clock, the volatility 0.15·√(τ365/τ360) = 0.14896905994842624 on Actual/360, it prices 95.50250080004932. nanoql flattens a structure on another day counter or reference date from its variance or discount between the risk-free curve's reference date and the last exercise date, over that interval on the risk-free day counter. QuantLib's check: its own engine on the restated market. The engine's NPV stays QuantLib's, the bond's value at its settlement date, which its settlement value equals: a named departure from the playbook's lattice clock, which QuantLib's convertible cases assert (`convertiblebonds.cpp:170`, `:178`, `:218`, against the plain bond's settlement value); on the wheel, the deep out-of-the-money convertible (a conversion ratio of 1e-16, 1,001 steps) prices 75.69370775331546, within 3e-3 of the plain zero-coupon bond's settlement value on the spreaded curve, 75.69077550691921, and 0.06 above its NPV at the curve's date, 75.63297824267259.
+The binomial convertible engine's clock (the S-sr plan's SSR8, ruled by the user on 2026-10-22, (a)). QuantLib's engine flattens the volatility at the last exercise date on its own day counter, σ = blackVol(T), and its tree reads it over the risk-free curve's year fraction, so a volatility on another day counter integrates the wrong variance (`binomialconvertibleengine.hpp:80-125`): on the wheel, a 5-year zero-coupon convertible (conversion ratio 2, redemption 100, three settlement days) on a spot of 50, flat 5% and 2% curves on Actual/360 and a 15% volatility on Actual/365 (Fixed), from 15 January 2025, a credit spread of 0.5%, Cox-Ross-Rubinstein at 101 steps, prices 95.56792008293525, its price with the volatility read on Actual/360; on the market restated on one clock, the volatility 0.15·√(τ365/τ360) = 0.14896905994842624 on Actual/360, it prices 95.50250080004932. With QuantLib's master's spot at the settlement date (#2752, which nanoql takes ahead of the pin, the upstream sweep's SWR1 (a)), master's engine prices 95.61364905182225 and 95.548271017185556 on the two markets (the sweep's master-header probe, `Divergences/ConvertibleUpstreamFixesTests.cs`). nanoql flattens a structure on another day counter or reference date from its variance or discount between the risk-free curve's reference date and the last exercise date, over that interval on the risk-free day counter. QuantLib's check: its own engine on the restated market. The engine's NPV stays QuantLib's, the bond's value at its settlement date, which its settlement value equals: a named departure from the playbook's lattice clock, which QuantLib's convertible cases assert (`convertiblebonds.cpp:170`, `:178`, `:218`, against the plain bond's settlement value); on the wheel, the deep out-of-the-money convertible (a conversion ratio of 1e-16, 1,001 steps) prices 75.69370775331546, within 3e-3 of the plain zero-coupon bond's settlement value on the spreaded curve, 75.69077550691921, and 0.06 above its NPV at the curve's date, 75.63297824267259.
 
 Facts:
 
 - `AVolatilityOnAnotherDayCounterIsFlattenedOnTheRiskFreeClock`
 - `TheNPVIsTheValueAtSettlement`
+
+## ConvertibleUpstreamFixesTests
+
+[`Divergences/ConvertibleUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/ConvertibleUpstreamFixesTests.cs)
+
+The fix QuantLib's master made to the binomial convertible engine after the pin, which nanoql takes (R8, the upstream sweep; the user's ruling SWR1 (a) of 2026-10-29): #2752 (`d51f02be2`, issue #2701) rolls the spot to the bond's settlement date, `s0 /= D_r(settlement)`, after the dividends' present values are subtracted. The tree's times run from the settlement date, and QuantLib 1.44 starts its stock at the evaluation date's spot (`binomialconvertibleengine.hpp:93-104`), so a bond with a settlement lag prices its conversion on a spot short of the carry over the lag. QuantLib's check: master's engine itself, its header and its discretized convertible (#2878 among master's changes there) compiled, renamed, against the 1.44 install beside the install's own engine (the sweep's SWR1 (a)), on lagged bonds whose structures share the risk-free curve's day counter and reference date: a callable fixed-coupon convertible under each exercise on three trees, one with a dividend in the lag, and master's own case, each master's price within R7 and 1.44's past it. Master's case below passes on 1.44 too: a dividend in the lag is subtracted from the spot and never paid in the tree, as 1.44 has it. The vectors price each bond settling on the evaluation date, where the fix divides by a discount of 1 (SWI2).
+
+Facts:
+
+- `TestDividendBetweenEvaluationAndSettlement`
+- `ALaggedBondIsPricedOnTheSettlementDatesSpot`
 
 ## ConvexMonotoneTests
 
@@ -2224,11 +2273,12 @@ Facts:
 
 [`Divergences/CubicNotAKnotTwoPointsTests.cs`](../tests/NanoQL.Tests/Divergences/CubicNotAKnotTwoPointsTests.cs)
 
-A cubic spline on 2 points with a not-a-knot end condition: QuantLib's rows for that condition read `dx_[1]` and `dx_[n_-3]` (`cubicinterpolation.hpp:428-431,460-463`), past the end of `dx_`, whose one element is the only interval, a result C++ leaves undefined. nanoql refuses it with `NanoQLException`, directly and through the log-cubic interpolation, which builds the same spline.
+A cubic spline on 2 points with a not-a-knot end condition: QuantLib 1.44's rows for that condition read `dx_[1]` and `dx_[n_-3]` (`cubicinterpolation.hpp:428-431,460-463`), past the end of `dx_`, whose one element is the only interval, a result C++ leaves undefined, and on 3 points two not-a-knot ends make the system singular. QuantLib's master refuses both at construction, a not-a-knot end needing 3 points and two needing 4 (#2888, `7b21b6145`), which nanoql takes (R8, the upstream sweep): an `ArgumentException` on `x` with QuantLib's text, as nanoql maps the constructor's Lagrange and Akima counts beside it, directly and through the log-cubic interpolation, which builds the same spline. Its place is master's, among the constructor's checks, so it comes before a Periodic end's "not implemented yet", which update raises. One departure from master (the sweep's ruling SWI3): the count applies under the spline alone, where master's applies under every scheme, as only the spline's rows read the conditions (`cubicinterpolation.hpp:425`, `:457`), so the local and overshooting schemes keep QuantLib 1.44's values on 2 and 3 points, which the C++ vectors check, where master refuses them; a refusal of inputs 1.44 prices right fixes no defect (the sweep's SWD10).
 
 Facts:
 
 - `ANotAKnotSplineOnTwoPointsIsRefused`
+- `TestNotAKnotWithFewPoints`
 - `ACubicCurveWithANotAKnotEndBuildsThroughTheFirstPassFallback`
 
 ## CurrencyNameAndCodeTests
@@ -3346,10 +3396,11 @@ Facts:
 
 [`Divergences/FlatPayoffExtrapolationTests.cs`](../tests/NanoQL.Tests/Divergences/FlatPayoffExtrapolationTests.cs)
 
-Flat payoff extrapolation's right tail (the S-g1d plan's G1R6 (xxi)): with `flatPayoffExtrapolation`, QuantLib's Gaussian1d engines integrate past the grid's last node the constant `p[n − 2]`, the second-last node's value (the swaption engine `gaussian1dswaptionengine.cpp:166-171`, the nonstandard, float-float and cap/floor engines, `Gaussian1dModel::zerobondOption` and the Markov-functional model alike), where the left tail takes `p[0]`, its boundary node. On the wheel, a 5Y into 10Y payer at 2% on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12 standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168, and so on the nonstandard engine; on the float-float engine, the same payer with its first leg fixed in all but name (a zero gearing on Euribor 1Y), 0.10173470853181348 against 0.10416117493270043; a 5-year cap at 2% on Euribor 6M from the same start, 0.060558824087763516 against 0.06245438129328943; a put struck at 0.8 on the 10-year bond from the same exercise, on the model's `zerobondOption`, 0.07911771510819356 against 0.08048473087856346; on the harness, the Markov-functional model's own premium of its first calibration point's call at 4.57%, calibrated to five CMS 10y swaptions at 20% on 32 points a side, on 3 standard deviations 0.0004285947663144643 and on 7 0.0004751894691285253. nanoql takes `p[n − 1]`. For a payoff that increases past the grid, the fixed tail lies between QuantLib's and the true one, the one assertion the two values can't both pass; the nonstandard and cap/floor facts ask a tenth of the way from QuantLib's at least, since QuantLib's own tail ties its value only within `erf`'s last bits (G1R3). No QuantLib case sets the flag. QuantLib's check: the same engine on the widened grid. The Markov-functional model's calibration reads the tail too (`markovfunctional.cpp:516-519`), seen alone in its puts, whose payoff vanishes past the grid: on 2 standard deviations, QuantLib's puts on 32 points move as the grid refines, its second-last node meeting the last, and nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from 2.3% to 15%, by up to fifteen times. QuantLib's check: its own section on the refined grid.
+Flat payoff extrapolation's right tail (the S-g1d plan's G1R6 (xxi)): with `flatPayoffExtrapolation`, QuantLib's Gaussian1d engines integrate past the grid's last node the constant `p[n − 2]`, the second-last node's value (the swaption engine `gaussian1dswaptionengine.cpp:166-171`, the nonstandard, float-float and cap/floor engines, `Gaussian1dModel::zerobondOption` and the Markov-functional model alike), where the left tail takes `p[0]`, its boundary node. On the wheel, a 5Y into 10Y payer at 2% on a GSR model (a = 0.02, σ = 0.01) on a flat 3% curve, on a grid of 3 standard deviations and 16 points a side, is worth 0.102661800916881; on a grid of 12 standard deviations and 256 points, where the tail's weight vanishes, 0.10415806152703168, and so on the nonstandard engine; on the float-float engine, the same payer with its first leg fixed in all but name (a zero gearing on Euribor 1Y), 0.10173470853181348 against 0.10416117493270043; a 5-year cap at 2% on Euribor 6M from the same start, 0.060558824087763516 against 0.06245438129328943; a put struck at 0.8 on the 10-year bond from the same exercise, on the model's `zerobondOption`, 0.07911771510819356 against 0.08048473087856346; on the harness, the Markov-functional model's own premium of its first calibration point's call at 4.57%, calibrated to five CMS 10y swaptions at 20% on 32 points a side, on 3 standard deviations 0.0004285947663144643 and on 7 0.0004751894691285253. nanoql takes `p[n − 1]`. For a payoff that increases past the grid, the fixed tail lies between QuantLib's and the true one, the one assertion the two values can't both pass; the nonstandard and cap/floor facts ask a tenth of the way from QuantLib's at least, since QuantLib's own tail ties its value only within `erf`'s last bits (G1R3). No QuantLib 1.44 case sets the flag. QuantLib's check: the same engine on the widened grid. The Markov-functional model's calibration reads the tail too (`markovfunctional.cpp:516-519`), seen alone in its puts, whose payoff vanishes past the grid: on 2 standard deviations, QuantLib's puts on 32 points move as the grid refines, its second-last node meeting the last, and nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from 2.3% to 15%, by up to fifteen times. QuantLib's check: its own section on the refined grid. QuantLib's master fixes the Markov-functional model's two price functions after the pin (#2916, `0bbf88cb3`), the same expression; its case is below, a check of nanoql's model.
 
 Facts:
 
+- `TestFlatPayoffExtrapolationUsesLastGridPoint`
 - `TheSwaptionEnginesRightTailTakesTheLastNode`
 - `TheNonstandardEnginesRightTailTakesTheLastNode`
 - `TheFloatFloatEnginesRightTailTakesTheLastNode`
@@ -4495,6 +4546,16 @@ Facts:
 
 - `AReadOfAMissingDateDoesntMoveTheLastFixingDate`
 
+## InflationUpstreamFixesTests
+
+[`Divergences/InflationUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/InflationUpstreamFixesTests.cs)
+
+The fix QuantLib's master made to the YoY inflation cap/floor engines after the pin, which nanoql takes (R8, the upstream sweep): #2877 (`5c93960e2`), the optionlet's time from the volatility's base date read with no lag, `timeFromBase(fixingDate, Period(0, Days))`, as the engine's own variance is. QuantLib 1.44 reads it with the structure's default lag (`inflationcapfloorengines.cpp:85-89`), so a fixing within one lag of the base date has a negative time, its square root NaN, and the engine's `sqrtTime > 0` test leaves the optionlet at its intrinsic value.
+
+Facts:
+
+- `TestTimeValueNearVolatilityBaseDate`
+
 ## InitialGuessSizeTests
 
 [`Divergences/InitialGuessSizeTests.cs`](../tests/NanoQL.Tests/Divergences/InitialGuessSizeTests.cs)
@@ -4540,6 +4601,16 @@ Facts:
 - `AStartTendingToTheEvaluationDateTendsToQuantLibsValue`
 - `TheDividendCurveIsntRead`
 
+## InterestRateUpstreamFixesTests
+
+[`Divergences/InterestRateUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/InterestRateUpstreamFixesTests.cs)
+
+The fix QuantLib's master made to `InterestRate.ImpliedRate(double, DayCounter, Compounding, Frequency, double)` after the pin, which nanoql takes (R8, the upstream sweep): #2898 (`588c2dd5b`) refuses the mixed compoundings, `Compounding.SimpleThenCompounded` and `Compounding.CompoundedThenSimple`, before its unit compound factor's branch. QuantLib 1.44 refuses them only in its other branch (`interestrate.cpp:127-129`), so at a compound factor of 1 it returns a zero rate on a rule it can't apply to any other factor. #2898's null-rate checks have no counterpart: a nanoql rate is never null, so its two null-rate cases aren't ported.
+
+Facts:
+
+- `TestImpliedRateRejectsMixedCompoundingAtUnity`
+
 ## InterestRateVolSurfaceOptionDateTests
 
 [`Divergences/InterestRateVolSurfaceOptionDateTests.cs`](../tests/NanoQL.Tests/Divergences/InterestRateVolSurfaceOptionDateTests.cs)
@@ -4570,6 +4641,16 @@ A bilinear or bicubic-spline interpolation over a matrix smaller than its grid. 
 Facts:
 
 - `AMatrixSmallerThanTheGridIsRefused`
+
+## InterpolationUpstreamFixesTests
+
+[`Divergences/InterpolationUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/InterpolationUpstreamFixesTests.cs)
+
+The fix QuantLib's master made to Kruger's cubic after the pin, which nanoql takes (R8, the upstream sweep): #2952 (`32de8d923`), a zero derivative at a node where the adjacent slopes' product is at most 0, as the harmonic scheme has it. QuantLib 1.44 tests `S_[i-1]*S_[i] < 0.0` (`cubicinterpolation.hpp:634`), so where a −0 slope meets a +0 one the harmonic mean 2/(1/S₀ + 1/S₁) is 2/(−∞ + ∞), NaN, and the interpolation is NaN on both adjacent intervals.
+
+Facts:
+
+- `TestKrugerZeroSlope`
 
 ## IsdaImpliedWeekendTests
 
@@ -5060,7 +5141,7 @@ Facts:
 
 [`Divergences/LookbackSmallCarryTests.cs`](../tests/NanoQL.Tests/Divergences/LookbackSmallCarryTests.cs)
 
-The analytic lookback engines near zero carry (the S-bar plan's BR5 (xxiii), the user's ruling (b) of 2026-10-26). As the carry b = r − q vanishes, each formula's terms over 2b/σ² cancel: over a year at σ 20%, QuantLib's floating call (spot 100, minimum 95) is off its 50-digit value by 2.0e-9 at b = 1e-7 and 1.4e-4 at 1e-12, its partial fixed call (strike 100, the window from half a year) by 1.4e-9 and 1.9e-4, and every engine is NaN at b = 0 (#2856 takes the full engines' limit below |λ| of 1e-7; the partial engines stay NaN). nanoql evaluates the full engines' formulas in double-double below u = |2b√T/σ| of 1e-3, the cubic through double-double values below 1e-18, and #2856's limit at 0; and the partial engines' as the cubic in b through QuantLib's double values at ±c and ±2c, c the carry at a cut of 6e-4 to 2e-3 in u. Checks: the formulas at 50 digits, the bivariate normal by quadrature (the S-bar run's `c2_smallcarry_refs.py`), within 1e-12 of max(|value|, 1); over the run's fit, corner and holdout grids the worst is 1.6e-13 for the full engines and 1.1e-12 for the partial ones (`c2_smallcarry_cut.py`, `c2_smallcarry_rule.py`, and the engines on the holdout grid).
+The analytic lookback engines near zero carry (the S-bar plan's BR5 (xxiii), the user's ruling (b) of 2026-10-26). As the carry b = r − q vanishes, each formula's terms over 2b/σ² cancel: over a year at σ 20%, QuantLib's floating call (spot 100, minimum 95) is off its 50-digit value by 2.0e-9 at b = 1e-7 and 1.4e-4 at 1e-12, its partial fixed call (strike 100, the window from half a year) by 1.4e-9 and 1.9e-4, and every engine is NaN at b = 0 (#2856 takes the full engines' limit below |λ| of 1e-7; the partial engines stay NaN). nanoql evaluates the full engines' formulas in double-double below u = |2b√T/σ| of 1e-3, the cubic through double-double values below 1e-18, and #2856's limit at 0; and the partial engines' as the cubic in b through QuantLib's double values at ±c and ±2c, c the carry at a cut of 6e-4 to 2e-3 in u. Checks: the formulas at 50 digits, the bivariate normal by quadrature (the S-bar run's `c2_smallcarry_refs.py`), within 1e-12 of max(|value|, 1); over the run's fit, corner and holdout grids the worst is 1.6e-13 for the full engines and 1.1e-12 for the partial ones (`c2_smallcarry_cut.py`, `c2_smallcarry_rule.py`, and the engines on the holdout grid). QuantLib's master fixes the partial engines after the pin (#2925, `2d86c20e3`): the limit below |2b/σ²| of 1e-7 and 1.44's form above it; nanoql keeps its cubic (the user's ruling (b) of 2026-10-26), and the master's three cases below check it.
 
 Facts:
 
@@ -5068,6 +5149,9 @@ Facts:
 - `TheFixedLookbackHoldsItsDigits`
 - `ThePartialFloatingLookbackHoldsItsDigitsAndPricesZeroCarry`
 - `ThePartialFixedLookbackHoldsItsDigitsAndPricesZeroCarry`
+- `TestPartialLookbackZeroCarry`
+- `TestPartialLookbackZeroCarryBoundaryLimits`
+- `TestPartialLookbackZeroCarryContinuity`
 
 ## LookbackSmallVolatilityTests
 
@@ -5147,12 +5231,13 @@ Facts:
 
 [`Divergences/MargrabeGreeksQuantityTests.cs`](../tests/NanoQL.Tests/Divergences/MargrabeGreeksQuantityTests.cs)
 
-The European Margrabe engine's Greeks at quantities other than 1. QuantLib's gammas drop the quantities and its theta takes them squared (`analyticeuropeanmargrabeengine.cpp:101-104`): a first gamma of 0.01154 against 0.02307 bumped at Q₁ = 2, a second of 0.02136 against 0.06409 at Q₂ = 3, and a theta of −8.361 against −9.013 by a date bump, on the plan's market; QuantLib's own case pins the spreadsheet's values, which reproduce its formulas (`margrabeoption.cpp:250`, `:259`, `:268`, moved here). nanoql takes each quantity once (the S-exo plan's ER5 (xvi)): QuantLib's own prices bumped are the check, and its bits at quantities of 1.
+The European Margrabe engine's Greeks at quantities other than 1. QuantLib's gammas drop the quantities and its theta takes them squared (`analyticeuropeanmargrabeengine.cpp:101-104`): a first gamma of 0.01154 against 0.02307 bumped at Q₁ = 2, a second of 0.02136 against 0.06409 at Q₂ = 3, and a theta of −8.361 against −9.013 by a date bump, on the plan's market; QuantLib's own case pins the spreadsheet's values, which reproduce its formulas (`margrabeoption.cpp:250`, `:259`, `:268`, moved here). nanoql takes each quantity once (the S-exo plan's ER5 (xvi)): QuantLib's own prices bumped are the check, and its bits at quantities of 1. QuantLib's master makes the same fix after the pin (#2918, `17a720edf`), upstream's three expressions token for token, and restates the spreadsheet rows' gammas and theta, the rows above them with each spot divided by its quantity: its rows are below, as a check of the fix.
 
 Facts:
 
 - `EachGammaIsItsDeltasDerivative`
 - `TheThetaIsTheValuesDecay`
+- `TestEuroExchangeTwoAssetsQuantityRows`
 
 ## MarketModelCompositeEndTests
 
@@ -5253,6 +5338,22 @@ The Markov-functional model's outputs after a recalculation (the S-g1d plan's G1
 Facts:
 
 - `ARecalibratedCopysOutputsAreAFreshModels`
+
+## MarkovFunctionalUpstreamFixesTests
+
+[`Divergences/MarkovFunctionalUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/MarkovFunctionalUpstreamFixesTests.cs)
+
+The fixes QuantLib's master made to the Markov-functional model after the pin, which nanoql takes (R8, the upstream sweep): #2912 (`b762b0b02`) strikes the upper rate bound's digital at the bound, where QuantLib 1.44 subtracts the smile's shift (`markovfunctional.cpp:432-436`), so on a shifted smile the model's rates are capped below the bound the rest of the model reads unshifted; it asks for at least two grid points, where 1.44 asks for one (`markovfunctional.hpp:168-172`), and on one the grid's spacing divides by zero; and its refusal of two smile pretreatments is restated, "At most one of …". Its count of the pretreatments nanoql has (`MfSmileFlagsTests`). The master's cases below are its tests of the settings, the grid points, the shifted smile's bound, the SABR and payoff-extrapolation fits and the trace. Not ported: `testNullSwapIndex` and `testNullIborIndex` (nanoql's constructors refuse a null index before the model reads it), `testTimeZeroNumeraireAfterDateChange`, `testModelOutputsAfterRecalculation` and `testModelOutputsAfterMarketUpdate` (R1: no observers; nanoql's outputs are computed once from the model's own state, `MarkovFunctionalOutputsTests`).
+
+Facts:
+
+- `TestConflictingSmileSettings`
+- `TestSmileSettingsValidation`
+- `TestMinimumYGridPoints`
+- `TestModelOutputsTrace`
+- `TestSabrSmileCalibration`
+- `TestShiftedSmileUpperRateBound`
+- `TestPayoffExtrapolation`
 
 ## McAsianControlVariateTests
 
@@ -5484,7 +5585,7 @@ Facts:
 
 [`Divergences/MfSmileFlagsTests.cs`](../tests/NanoQL.Tests/Divergences/MfSmileFlagsTests.cs)
 
-The Markov-functional model's smile pretreatments (the S-g1d plan's G1R6 (vii)): QuantLib's settings refuse only all three of Kahale's, SABR's and a custom smile, though the refusal's text says "Only one … can be specified" (`markovfunctional.hpp:162-167`), so on the wheel Kahale's smile with SABR's validates, and the model then pretreats with Kahale's and ignores SABR's. nanoql refuses any two, with QuantLib's text. QuantLib's check: its own text.
+The Markov-functional model's smile pretreatments (the S-g1d plan's G1R6 (vii)): QuantLib's settings refuse only all three of Kahale's, SABR's and a custom smile, though the refusal's text says "Only one … can be specified" (`markovfunctional.hpp:162-167`), so on the wheel Kahale's smile with SABR's validates, and the model then pretreats with Kahale's and ignores SABR's. nanoql refuses any two, as QuantLib's master does after 1.44 (#2912, `Divergences/MarkovFunctionalUpstreamFixesTests.cs`), with the master's text, "At most one of …". QuantLib's check: the master's own cases.
 
 Facts:
 
@@ -5654,6 +5755,16 @@ A nonstandard swap converted from an overnight-indexed swap with a rounding prec
 Facts:
 
 - `TheConversionKeepsTheRoundingPrecision`
+
+## NonstandardSwapUpstreamFixesTests
+
+[`Divergences/NonstandardSwapUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/NonstandardSwapUpstreamFixesTests.cs)
+
+The fix QuantLib's master made to the nonstandard swap's conversion from a vanilla or overnight-indexed swap after the pin, which nanoql takes (R8, the upstream sweep): #2956 (`a069a0955`), each leg's own nominals, the last one repeated to the leg's length. QuantLib 1.44 repeats the swap's `nominal()` on every coupon (`nonstandardswap.cpp:39-44`), which refuses an amortizing swap, "nominal is not constant".
+
+Facts:
+
+- `TestNonstandardCopyOfAmortisingOvernightSwap`
 
 ## NormalFwdRatePcInitialStateTests
 
@@ -5966,12 +6077,14 @@ Facts:
 
 [`Divergences/PearsonNegativeStrikePutTests.cs`](../tests/NanoQL.Tests/Divergences/PearsonNegativeStrikePutTests.cs)
 
-Pearson's spread engine where the conditional strike, the second forward at a node plus the strike, is zero or less. QuantLib's integrand takes the call's intrinsic value there whatever the type (`pearsonspreadengine.cpp:73-75`), so a put prices that intrinsic (136.84 on the plan's market where Choi's engine gives 0.00304, Deng-Li-Zhou's 0.00303 and a quadrature 0.00313). nanoql's put takes its conditional value, 0 there (the S-exo plan's ER5 (ix)): Choi's engine and the put-call parity, which QuantLib's put breaks, are the checks.
+Pearson's spread engine where the conditional strike, the second forward at a node plus the strike, is zero or less. QuantLib's integrand takes the call's intrinsic value there whatever the type (`pearsonspreadengine.cpp:73-75`), so a put prices that intrinsic (136.84 on the plan's market where Choi's engine gives 0.00304, Deng-Li-Zhou's 0.00303 and a quadrature 0.00313). nanoql's put takes its conditional value, 0 there (the S-exo plan's ER5 (ix)): Choi's engine and the put-call parity, which QuantLib's put breaks, are the checks. QuantLib's master makes the same fix after the pin (#2955, `8d98cbd3c`), its cases below as a check of nanoql's.
 
 Facts:
 
 - `APutAtNegativeConditionalStrikesMeetsChoi`
 - `PutCallParityHoldsAtNegativeConditionalStrikes`
+- `TestPearsonSpreadEngineNegativeStrikes`
+- `TestPearsonSpreadEngineVanillaLimit`
 
 ## PeriodEqualityTests
 
@@ -6329,6 +6442,17 @@ Facts:
 - `AHelperGivenANullIndexIsRefused`
 - `AFuturesFraOrOisHelperGivenANullIndexIsRefused`
 
+## RateHelperUpstreamFixesTests
+
+[`Divergences/RateHelperUpstreamFixesTests.cs`](../tests/NanoQL.Tests/Divergences/RateHelperUpstreamFixesTests.cs)
+
+The fix QuantLib's master made to the rate helpers after the pin, which nanoql takes (R8, the upstream sweep): #2899 (`46ef4b7b6`), the deposit's and the indexed FRA's implied quote forecast from the curve being bootstrapped, `forecastFixing`. QuantLib 1.44 reads `fixing(fixingDate, true)`, which takes a stored fixing for a fixing date before the evaluation date (`ratehelpers.cpp:210-215`, `:360-364`): on a weekend or holiday evaluation date the helpers' fixing date is the business day before it, so a bootstrap without that day's fixing throws, and one with it quotes the stored fixing in place of the curve's forecast. The C++ vectors' three deposits whose fixing precedes 15 January 2024, Martin Luther King Day on the US SOFR calendar, or a given Friday, leave their implied quotes out (the sweep's SWD14 and SWI3), two of them below.
+
+Facts:
+
+- `TestWeekendDepositAndIndexedFraForecast`
+- `ADepositFixingBeforeAHolidayEvaluationDateForecastsItsQuote`
+
 ## RatePseudoRootJacobianTests
 
 [`Divergences/RatePseudoRootJacobianTests.cs`](../tests/NanoQL.Tests/Divergences/RatePseudoRootJacobianTests.cs)
@@ -6425,6 +6549,16 @@ Facts:
 - `AT2DiscountCurveReadsAsItsRestatement`
 - `ASeasonedSwapsPastPeriodsAreRefused`
 - `AnExpiredSwapHasNoFairSpread`
+
+## RomaniaUpstreamHolidaysTests
+
+[`Divergences/RomaniaUpstreamHolidaysTests.cs`](../tests/NanoQL.Tests/Divergences/RomaniaUpstreamHolidaysTests.cs)
+
+Romania's Epiphany and St John the Baptist, January 6th and 7th from 2024, and Orthodox Good Friday from 2018. QuantLib 1.44 has none of them (`romania.cpp:45-78`); QuantLib's master adds them to the public calendar (#2919, `657346746`), and so to the Bucharest stock exchange's, which derives from it, with nine new test lines, which nanoql takes ahead of the pin, as R8 directs. The lines below are upstream's; QuantLib 1.44's answers are recorded beside them.
+
+Facts:
+
+- `EpiphanyStJohnAndOrthodoxGoodFriday`
 
 ## RoughHestonTimeFormTests
 
@@ -7562,17 +7696,19 @@ Turnbull-Wakeman with every fixing past (the S-bar plan's BR5 (xxix), fixed unde
 Facts:
 
 - `EveryFixingPastPricesTheKnownPayoff`
+- `TestTurnbullWakemanAllFixingsInThePast`
 
 ## TwoAssetBarrierDividendTests
 
 [`Divergences/TwoAssetBarrierDividendTests.cs`](../tests/NanoQL.Tests/Divergences/TwoAssetBarrierDividendTests.cs)
 
-The two-asset knock-in's vanilla (the S-bar plan's BR5 (viii), fixed under R8). QuantLib's `call()` and `put()` drop asset 1's dividend yield, S₁N(d₁) for S₁e^((b₁−r)T)N(d₁), so its knock-in breaks in-out parity: a down-and-in call at 100, barrier 90 on asset 2, prices 6.497953 and 6.961125 at q₁ of 3% and 8% where vanilla − knock-out is 4.785982 and 3.270239, above the vanilla itself at 8% (the planner's P2); an up-and-in put at barrier 110 prices 1.466729 at 8% for 5.464209 (the S-bar run's `c1_ta_bb.py`). nanoql carries the dividends. Check: in-out parity against QuantLib's knock-out and its analytic European engine on process 1. At q₁ 3% QuantLib's put is NaN: its d₂ is −5.6e-17, where Drezner's 1978 algorithm returns NaN (the S-bar run's `c1_dr78_zero.py`), and nanoql's bivariate normal is We04DP (BR4 (e)).
+The two-asset knock-in's vanilla (the S-bar plan's BR5 (viii), fixed under R8). QuantLib's `call()` and `put()` drop asset 1's dividend yield, S₁N(d₁) for S₁e^((b₁−r)T)N(d₁), so its knock-in breaks in-out parity: a down-and-in call at 100, barrier 90 on asset 2, prices 6.497953 and 6.961125 at q₁ of 3% and 8% where vanilla − knock-out is 4.785982 and 3.270239, above the vanilla itself at 8% (the planner's P2); an up-and-in put at barrier 110 prices 1.466729 at 8% for 5.464209 (the S-bar run's `c1_ta_bb.py`). nanoql carries the dividends. Check: in-out parity against QuantLib's knock-out and its analytic European engine on process 1. At q₁ 3% QuantLib's put is NaN: its d₂ is −5.6e-17, where Drezner's 1978 algorithm returns NaN (the S-bar run's `c1_dr78_zero.py`), and nanoql's bivariate normal is We04DP (BR4 (e)). QuantLib's master makes the same fix after the pin (#2917, `48010e233`), its case below as a check of nanoql's.
 
 Facts:
 
 - `ACallKnockInIsTheVanillaLessTheKnockOut`
 - `APutKnockInIsTheVanillaLessTheKnockOut`
+- `TestInOutParityWithDividends`
 
 ## TwoAssetBarrierExerciseTests
 

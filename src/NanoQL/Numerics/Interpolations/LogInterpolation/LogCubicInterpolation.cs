@@ -31,8 +31,7 @@ public class LogCubicInterpolation : Interpolation
     /// <exception cref="ArgumentException">The sizes differ, there are too few points, or a y value isn't positive.</exception>
     /// <exception cref="ArgumentOutOfRangeException">An enum argument isn't a member of its type.</exception>
     /// <exception cref="NanoQLException">
-    /// The scheme or a condition isn't implemented, or the spline's system has a zero pivot, or a not-a-knot end under the
-    /// spline has only 2 points, where QuantLib reads past its arrays (a divergence: nanoql refuses it).
+    /// The scheme or a condition isn't implemented, or the spline's system has a zero pivot.
     /// </exception>
     public LogCubicInterpolation(
         ReadOnlySpan<double> x,

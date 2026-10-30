@@ -26,17 +26,24 @@ Then the other functions the wheel wraps, in cases after these, so that the case
   their payoff forms.
 - "bachelierImplied" cases: for each option type, forward and discount, the prices bachelierBlackFormula gives at 3
   normal standard deviations (1e-4, 0.005 and 0.02) x the 10 strikes over a time to expiry of 2, and
-  bachelierBlackFormulaImpliedVolChoi and bachelierBlackFormulaImpliedVol of each.
+  bachelierBlackFormulaImpliedVolChoi and bachelierBlackFormulaImpliedVol of each. The case's "skip" input lists the
+  [stdDev, strike] entries where QuantLib 1.44's exact inversion returns 0 on a positive time value, its price close
+  to the intrinsic value, which QuantLib's master inverts (#2924, taken ahead of the pin as the upstream sweep's
+  SWD14 rules); each is null in "impliedVol", and the reader nulls the same entries, its fixed value checked in
+  tests/NanoQL.Tests/Divergences/BlackFormulaUpstreamFixesTests.cs.
 - "bachelierItm" cases: for each option type and forward, bachelierBlackFormulaAssetItmProbability at 3 normal
   standard deviations (0, 0.005 and 0.02) x the 10 strikes; on the forward 1, also its payoff form.
 - argument cases for the same functions: lists of arguments with their refusals (each parameter check, the put-call
   parity check, a guess outside the solver's [0, 24], no accuracy, too few iterations, the in-out duality's negative
   price, an inverse normal of a NaN probability) and edge values (a zero strike, a price at intrinsic value, infinite
   inputs, a zero or negative time and discount the Bachelier inversions don't check, and strikes so close to the
-  forward that Choi's moneyness ratio takes Boost's series for atanh).
+  forward that Choi's moneyness ratio takes Boost's series for atanh). bachelierBlackFormulaImpliedVol's case lists in
+  "skip" the arguments #2924 moves, as the "bachelierImplied" cases do: an infinite price after the division by the
+  discount, which QuantLib 1.44 finds close to its intrinsic value and returns 0 for, and QuantLib's master inverts.
 
 A refused value is {"throws": true}. The wheel's functions are the proxies of the C++ functions of the same names,
 with no logic of their own. Read back by tests/NanoQL.Tests/Vectors/PricingEngines/BlackFormulaVectorTests.cs."""
+import math
 import os
 import sys
 
@@ -58,6 +65,7 @@ STDDEVS = [0.0, 1e-3, 0.2, 1.0, 5.0]
 NORMAL_STDDEVS = [0.0, 1e-4, 0.005, 0.02, 0.5]
 DISPLACEMENTS = [0.0, 0.01]
 DISCOUNTS = [1.0, 0.95]
+QL_EPSILON = 2.220446049250313e-16
 
 CALL, PUT = int(ql.Option.Call), int(ql.Option.Put)
 # [type, strike, forward, stdDev, discount, displacement]
@@ -244,6 +252,51 @@ def itm_cases(st):
     return out
 
 
+def close_enough(x, y, n=42):
+    """QuantLib's close_enough(x, y, n)."""
+    if x == y:
+        return True
+    diff, tolerance = abs(x - y), n * QL_EPSILON
+    if x * y == 0.0:
+        return diff < tolerance * tolerance
+    return diff <= tolerance * abs(x) or diff <= tolerance * abs(y)
+
+
+def moved(t, k, f, p, df):
+    """Whether QuantLib 1.44's bachelierBlackFormulaImpliedVol returns 0 on a positive time value
+    (blackformula.cpp:903-920), which QuantLib's master inverts (#2924)."""
+    # C++'s division, infinite at a zero discount
+    p = p / df if df != 0.0 else (NAN if p == 0.0 or p != p else math.copysign(INF, p) * math.copysign(1.0, df))
+    if close_enough(k, f):
+        return False
+    intrinsic = max((1.0 if t == ql.Option.Call else -1.0) * (f - k), 0.0)
+    return close_enough(p, intrinsic) and p - intrinsic > 0.0
+
+
+def close(x, y, n=42):
+    """QuantLib's close(x, y, n)."""
+    if x == y:
+        return True
+    diff, tolerance = abs(x - y), n * QL_EPSILON
+    return diff <= tolerance * abs(x) and diff <= tolerance * abs(y)
+
+
+def smile_normal_moved(s, x):
+    """Whether a smile section's normal volatility at x, s.volatility(x, Normal, 0.0), is QuantLib 1.44's 0 that
+    QuantLib's master inverts (#2924): the conversion's bachelierBlackFormulaImpliedVol on the section's price at a
+    discount of 1 (smilesection.cpp:131-155), where moved() holds. The smile generators' "skip" lists."""
+    if s.volatilityType() == ql.Normal and close(0.0, s.shift()):
+        return False
+    try:
+        atm = s.atmLevel()
+        if atm is None:
+            return False
+        t = ql.Option.Call if x >= atm else ql.Option.Put
+        return moved(t, x, atm, s.optionPrice(x, t), 1.0)
+    except RuntimeError:
+        return False
+
+
 def bachelier_implied_cases(st):
     out = []
     for tn, t in TYPES:
@@ -251,15 +304,20 @@ def bachelier_implied_cases(st):
             for df in DISCOUNTS:
                 prices = [[bachelier_price(t, k, f, sd, df) for k in STRIKES] for sd in BACHELIER_IMPLIED_STDDEVS]
                 pairs = [list(zip(STRIKES, row)) for row in prices]
+                skip = [[r, j] for r, row in enumerate(pairs) for j, (k, p) in enumerate(row) if moved(t, k, f, p, df)]
+                implied = [[v.attempt(lambda k=k, p=p: ql.bachelierBlackFormulaImpliedVol(
+                    t, k, f, BACHELIER_TTE, p, df)) for k, p in row] for row in pairs]
+                for r, j in skip:
+                    implied[r][j] = None
                 out.append({
                     "name": f"bachelierImplied {tn} forward {f!r} discount {df!r}",
                     "inputs": {"settings": st, "kind": "bachelierImplied", "optionType": int(t), "forward": f,
-                               "discount": df, "tte": BACHELIER_TTE, "strikes": STRIKES, "prices": v.enc(prices)},
+                               "discount": df, "tte": BACHELIER_TTE, "strikes": STRIKES, "prices": v.enc(prices),
+                               "skip": skip},
                     "expected": {
                         "impliedVolChoi": [[v.attempt(lambda k=k, p=p: ql.bachelierBlackFormulaImpliedVolChoi(
                             t, k, f, BACHELIER_TTE, p, df)) for k, p in row] for row in pairs],
-                        "impliedVol": [[v.attempt(lambda k=k, p=p: ql.bachelierBlackFormulaImpliedVol(
-                            t, k, f, BACHELIER_TTE, p, df)) for k, p in row] for row in pairs]}})
+                        "impliedVol": implied}})
     return out
 
 
@@ -287,6 +345,15 @@ def other_argument_cases(st):
                 "inputs": {"settings": st, "kind": output, "arguments": v.enc(arguments)},
                 "expected": {output: [v.attempt(lambda a=a: f(*a)) for a in arguments]}}
 
+    def skipped(case):
+        output = case["inputs"]["kind"]
+        arguments = BACHELIER_IMPLIED_ARGUMENTS
+        skip = [i for i, (t, k, f, _, p, df) in enumerate(arguments) if moved(t, k, f, p, df)]
+        for i in skip:
+            case["expected"][output][i] = None
+        case["inputs"]["skip"] = skip
+        return case
+
     return [
         listed("blackFormulaImpliedStdDev", IMPLIED_ARGUMENTS, ql.blackFormulaImpliedStdDev),
         listed("blackFormulaImpliedStdDevLiRS", LIRS_ARGUMENTS, ql.blackFormulaImpliedStdDevLiRS),
@@ -294,8 +361,8 @@ def other_argument_cases(st):
         listed("blackFormulaAssetItmProbability", ITM_ARGUMENTS, ql.blackFormulaAssetItmProbability),
         listed("bachelierBlackFormulaImpliedVolChoi", BACHELIER_IMPLIED_ARGUMENTS,
                ql.bachelierBlackFormulaImpliedVolChoi),
-        listed("bachelierBlackFormulaImpliedVol", BACHELIER_IMPLIED_ARGUMENTS,
-               ql.bachelierBlackFormulaImpliedVol),
+        skipped(listed("bachelierBlackFormulaImpliedVol", BACHELIER_IMPLIED_ARGUMENTS,
+                       ql.bachelierBlackFormulaImpliedVol)),
         listed("bachelierBlackFormulaAssetItmProbability", BACHELIER_ITM_ARGUMENTS,
                ql.bachelierBlackFormulaAssetItmProbability)]
 

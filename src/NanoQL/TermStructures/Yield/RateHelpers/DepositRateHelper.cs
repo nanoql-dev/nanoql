@@ -114,9 +114,11 @@ public sealed class DepositRateHelper : RelativeDateRateHelper
         ArgumentNullException.ThrowIfNull(context);
         RequireTermStructure();
 
-        // the forecast fixing flag is set to true because
-        // we do not want to take fixing into account
-        return iborIndex.Fixing(fixingDate, context, true);
+        // The fixing date can precede the evaluation date when the latter
+        // is not a business day.  A rate helper must forecast the quote
+        // from the bootstrapped curve even if a historical fixing exists
+        // (QuantLib's fix after v1.44, #2899).
+        return iborIndex.ForecastFixing(fixingDate, context);
     }
 
     /// <inheritdoc/>

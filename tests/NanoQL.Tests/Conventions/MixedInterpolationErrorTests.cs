@@ -98,11 +98,11 @@ public class MixedInterpolationErrorTests
             "x",
             "Lagrange boundary condition requires at least 4 points (3 are given)",
             () => new MixedLinearCubic(2, Split, Spline, false, CubicInterpolationBoundaryCondition.Lagrange).CheckPoints(5));
-        Assert.Equal(
-            "the not-a-knot end condition needs at least 3 points",
-            Assert.Throws<NanoQLException>(
-                () => new MixedLinearCubic(3, Split, Spline, false, Second, 0.0, CubicInterpolationBoundaryCondition.NotAKnot)
-                    .CheckPoints(5)).Message);
+        AssertArgument(
+            "x",
+            "not-a-knot boundary condition requires at least 3 points (2 are given)",
+            () => new MixedLinearCubic(3, Split, Spline, false, Second, 0.0, CubicInterpolationBoundaryCondition.NotAKnot)
+                .CheckPoints(5));
         AssertArgument(
             "x",
             "not enough points to interpolate: at least 3 required, 2 provided",

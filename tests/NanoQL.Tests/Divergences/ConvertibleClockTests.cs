@@ -12,21 +12,24 @@ namespace NanoQL.Tests.Divergences;
 
 /// <summary>
 /// The binomial convertible engine's clock (the S-sr plan's SSR8, ruled by the user on 2026-10-22, (a)). QuantLib's
-/// engine flattens the volatility at the last exercise date on its own day counter, σ = blackVol(T), and its tree reads it
-/// over the risk-free curve's year fraction, so a volatility on another day counter integrates the wrong variance
+/// engine flattens the volatility at the last exercise date on its own day counter, σ = blackVol(T), and its tree reads
+/// it over the risk-free curve's year fraction, so a volatility on another day counter integrates the wrong variance
 /// (<c>binomialconvertibleengine.hpp:80-125</c>): on the wheel, a 5-year zero-coupon convertible (conversion ratio 2,
 /// redemption 100, three settlement days) on a spot of 50, flat 5% and 2% curves on Actual/360 and a 15% volatility on
 /// Actual/365 (Fixed), from 15 January 2025, a credit spread of 0.5%, Cox-Ross-Rubinstein at 101 steps, prices
 /// 95.56792008293525, its price with the volatility read on Actual/360; on the market restated on one clock, the
-/// volatility 0.15·√(τ365/τ360) = 0.14896905994842624 on Actual/360, it prices 95.50250080004932. nanoql flattens a
-/// structure on another day counter or reference date from its variance or discount between the risk-free curve's
-/// reference date and the last exercise date, over that interval on the risk-free day counter. QuantLib's check: its own
-/// engine on the restated market. The engine's NPV stays QuantLib's, the bond's value at its settlement date, which its
-/// settlement value equals: a named departure from the playbook's lattice clock, which QuantLib's convertible cases
-/// assert (<c>convertiblebonds.cpp:170</c>, <c>:178</c>, <c>:218</c>, against the plain bond's settlement value); on the
+/// volatility 0.15·√(τ365/τ360) = 0.14896905994842624 on Actual/360, it prices 95.50250080004932. With QuantLib's
+/// master's spot at the settlement date (#2752, which nanoql takes ahead of the pin, the upstream sweep's SWR1 (a)),
+/// master's engine prices 95.61364905182225 and 95.548271017185556 on the two markets (the sweep's master-header probe,
+/// <c>Divergences/ConvertibleUpstreamFixesTests.cs</c>). nanoql flattens a structure on another day counter or
+/// reference date from its variance or discount between the risk-free curve's reference date and the last exercise
+/// date, over that interval on the risk-free day counter. QuantLib's check: its own engine on the restated market. The
+/// engine's NPV stays QuantLib's, the bond's value at its settlement date, which its settlement value equals: a named
+/// departure from the playbook's lattice clock, which QuantLib's convertible cases assert
+/// (<c>convertiblebonds.cpp:170</c>, <c>:178</c>, <c>:218</c>, against the plain bond's settlement value); on the
 /// wheel, the deep out-of-the-money convertible (a conversion ratio of 1e-16, 1,001 steps) prices 75.69370775331546,
-/// within 3e-3 of the plain zero-coupon bond's settlement value on the spreaded curve, 75.69077550691921, and 0.06 above
-/// its NPV at the curve's date, 75.63297824267259.
+/// within 3e-3 of the plain zero-coupon bond's settlement value on the spreaded curve, 75.69077550691921, and 0.06
+/// above its NPV at the curve's date, 75.63297824267259.
 /// </summary>
 public class ConvertibleClockTests
 {
@@ -42,8 +45,8 @@ public class ConvertibleClockTests
     {
         GeneralizedBlackScholesProcess process = Process(new BlackConstantVol(Today, new NullCalendar(), 0.15, new Actual365Fixed()));
         BondResults results = BinomialConvertibleEngine.Calculate<CoxRossRubinstein>(Bond(2.0), Context, process, 101, 0.005);
-        Assert.True(Math.Abs((results.NPV!.Value / 95.50250080004932) - 1.0) <= 1e-12, $"{results.NPV}");
-        Assert.True(Math.Abs(results.NPV!.Value - 95.56792008293525) > 0.05, $"{results.NPV}");
+        Assert.True(Math.Abs((results.NPV!.Value / 95.548271017185556) - 1.0) <= 1e-12, $"{results.NPV}");
+        Assert.True(Math.Abs(results.NPV!.Value - 95.61364905182225) > 0.05, $"{results.NPV}");
     }
 
     [Fact]

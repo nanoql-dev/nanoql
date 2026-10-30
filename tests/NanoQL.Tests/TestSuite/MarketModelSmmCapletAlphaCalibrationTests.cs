@@ -19,7 +19,12 @@ namespace NanoQL.Tests.TestSuite;
 public class MarketModelSmmCapletAlphaCalibrationTests
 {
     [Fact]
-    public void TestFunction()
+    public void TestFunction() => TestAlphaCalibration(false);
+
+    // QuantLib's master's testFunction with its homogeneity flag a parameter (#2910, dbe958954), which its
+    // testMaximumHomogeneityCalibration runs with true (Divergences/AlphaFinderTests.cs); testFunction, false, is
+    // 1.44's case.
+    internal static void TestAlphaCalibration(bool maximizeHomogeneity)
     {
         // Testing alpha caplet calibration in a lognormal coterminal swap market model...
         var setup = new CommonVars(alpha: 0.0);
@@ -45,7 +50,6 @@ public class MarketModelSmmCapletAlphaCalibrationTests
         double[] alphaInitial = [.. Enumerable.Repeat(setup.Alpha, numberOfRates)];
         double[] alphaMax = [.. Enumerable.Repeat(1.0, numberOfRates)];
         double[] alphaMin = [.. Enumerable.Repeat(-1.0, numberOfRates)];
-        bool maximizeHomogeneity = false; // ?
         var calibrator = new CTSMMCapletAlphaFormCalibration(
             evolution, corr, swapVariances, setup.CapletVols, cs, setup.Displacement, alphaInitial, alphaMax, alphaMin, maximizeHomogeneity);
 

@@ -290,6 +290,7 @@ public abstract class CTSMMCapletCalibration
         }
         while (iterations < maxIterations && capletRmsError > tolerance);
 
+        CheckReturnedStep(step);
         ImmutableArray<Matrix> swapPseudoRoots = step.SwapCovariancePseudoRoots();
         var model = new PseudoRootFacade(swapPseudoRoots, rateTimes.AsSpan(), coterminalSwapRates.AsSpan(), Displacements.AsSpan());
         var timeDependentCalibratedSwaptionVols = new ImmutableArray<double>[NumberOfRates];
@@ -321,6 +322,12 @@ public abstract class CTSMMCapletCalibration
     /// <returns>The pass's pseudo-roots and failures, and what the calibration computes besides.</returns>
     protected abstract CTSMMCapletCalibrationStep CalibrationImpl(
         int numberOfFactors, int innerMaxIterations, double innerTolerance, ReadOnlySpan<double> usedCapletVols);
+
+    /// <summary>A refusal of the pass the calibration returns, after its last pass; none by default.</summary>
+    /// <param name="step">The pass the calibration returns.</param>
+    private protected virtual void CheckReturnedStep(CTSMMCapletCalibrationStep step)
+    {
+    }
 
     /// <summary>The calibrations' check of the factors: from 1 to the rates.</summary>
     /// <param name="numberOfFactors">The factors.</param>

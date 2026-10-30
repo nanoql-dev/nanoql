@@ -145,7 +145,8 @@ internal static class PresetInputs
 
     /// <summary>
     /// Checks one case: the preset's name, conventions and fixing calendar, and its fixing, value and maturity dates
-    /// at the case's dates; or, for a refused construction, the name's throw.
+    /// at the case's dates; or, for a refused construction, the name's throw. A case's <c>"skip"</c> entries, the
+    /// outputs QuantLib's master moves ahead of the pin (ROBOR's, #2919), are null on both sides.
     /// </summary>
     /// <param name="check">The file's check.</param>
     /// <param name="c">The case.</param>
@@ -169,22 +170,43 @@ internal static class PresetInputs
         check.Output(c, "dayCounter", index.DayCounter.Name);
         check.Output(c, "businessDayConvention", index.BusinessDayConvention);
         check.Output(c, "endOfMonth", index.EndOfMonth);
-        check.Output(c, "fixingDate", Each(dates, index.FixingDate));
-        check.Output(c, "valueDate", Each(dates, index.ValueDate));
-        check.Output(c, "maturityDate", Each(dates, index.MaturityDate));
+        var outputs = new Dictionary<string, Func<object?>[]>
+        {
+            ["fixingDate"] = Each(dates, index.FixingDate),
+            ["valueDate"] = Each(dates, index.ValueDate),
+            ["maturityDate"] = Each(dates, index.MaturityDate),
+        };
+        var forecasts = new List<Func<object?>[]>();
         if (c.Inputs.TryGetProperty("curves", out JsonElement curves))
         {
             // the forecasts on each curve: index_forecast_case's, the preset built on the first curve and cloned onto the
             // others, QuantLib's two routes to an index on a curve
             EvaluationContext context = c.Context();
-            var forecasts = new List<Func<object?>[]>();
             foreach (JsonElement curve in curves.EnumerateArray())
             {
                 YieldTermStructure h = EquityInputs.CurveOf(curve);
                 IborIndex onCurve = forecasts.Count == 0 ? PresetOf(spec, h) : PresetOf(spec).Clone(h);
                 forecasts.Add(Each(dates, d => onCurve.Fixing(d, context)));
             }
+        }
 
+        if (c.Inputs.TryGetProperty("skip", out JsonElement skip))
+        {
+            foreach (JsonElement entry in skip.EnumerateArray())
+            {
+                string output = entry[0].GetString()!;
+                Func<object?>[] row = output == "forecast" ? forecasts[entry[1].GetInt32()] : outputs[output];
+                row[entry[entry.GetArrayLength() - 1].GetInt32()] = () => null;
+            }
+        }
+
+        foreach (string name in (string[])["fixingDate", "valueDate", "maturityDate"])
+        {
+            check.Output(c, name, outputs[name]);
+        }
+
+        if (curves.ValueKind != JsonValueKind.Undefined)
+        {
             check.Output(c, "forecast", forecasts);
         }
     }

@@ -1243,11 +1243,14 @@ public static class BlackFormulaFunctions
     /// <param name="tte">The time to expiry; unchecked.</param>
     /// <param name="bachelierPrice">The option's price.</param>
     /// <param name="discount">The discount factor; unchecked.</param>
-    /// <returns>The implied normal volatility.</returns>
+    /// <returns>The implied normal volatility; 0 where the time value isn't positive and the price is close to its
+    /// intrinsic value.</returns>
     /// <exception cref="NanoQLException">The price implies a negative time value.</exception>
     /// <remarks>
     /// The refusal's text names <c>bachelierBlackFormulaImpliedVolExact</c> and the price divided by the discount, as
-    /// QuantLib's does.
+    /// QuantLib's does. A price just above its intrinsic value inverts to its volatility, as QuantLib's master does
+    /// after 1.44 (#2924), where 1.44 returns 0: a deep in-the-money price one ulp above its intrinsic value after the
+    /// division by the discount inverts that rounding (<c>Divergences/BlackFormulaUpstreamFixesTests.cs</c>).
     /// </remarks>
     public static double BachelierBlackFormulaImpliedVol(
         OptionType optionType,
@@ -1277,8 +1280,9 @@ public static class BlackFormulaFunctions
 
         // the subtraction above cancels, so compare the two operands directly:
         // close_enough against 0 degrades to an absolute tolerance of
-        // (n*epsilon)^2, far below the rounding error of the difference itself
-        if (CloseEnough(bachelierPrice, intrinsicValue))
+        // (n*epsilon)^2, far below the rounding error of the difference itself;
+        // QuantLib's fix after v1.44 (#2924): a positive time value inverts
+        if (timeValue <= 0.0 && CloseEnough(bachelierPrice, intrinsicValue))
         {
             return 0.0;
         }

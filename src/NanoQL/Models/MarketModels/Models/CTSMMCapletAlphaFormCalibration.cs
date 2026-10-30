@@ -24,14 +24,17 @@ namespace NanoQL.Models;
 /// out-parameters, and solves on a copy of the form given.
 /// </para>
 /// <para>
-/// As in QuantLib, a caplet no α fits throws ("alpha form failure"), where the other calibrations count a failure.
-/// Two departures (<c>Divergences/CTSMMCapletAlphaFormCalibrationTests.cs</c>): a step whose final part fails, which
-/// QuantLib's solve returns as solved with the swap rate's last volatility left as it was, counts as a failure, so the
-/// calibration's <c>Converged</c> reads false where QuantLib's returns true beside its swaption misfit (MR3 (viii), as
-/// the user ruled it on 2026-10-27); and at maximum homogeneity, where the fixed minimization (MR3 (x)) leaves a caplet
-/// no α, the pass runs again on QuantLib's test of the objective's value, as QuantLib does, before it throws (the
-/// user's ruling of the same day). α bounds shorter than the rates, which QuantLib's function reads unchecked, are
-/// refused (MR3 (xx)).
+/// As in QuantLib, a caplet no α fits throws ("alpha form failure"), where the other calibrations count a failure; and,
+/// as in QuantLib's master after 1.44 (#2910, the upstream sweep's SWR2 (a), which re-rules MR3 (viii)), so does a step
+/// whose final part fails, which QuantLib 1.44's solve returns as solved with the swap rate's last volatility left as
+/// it was, its swaptions missed (<c>Divergences/CTSMMCapletAlphaFormCalibrationTests.cs</c>). Two departures from
+/// master: the calibration refuses such a step in the pass it returns, and counts it in an earlier pass, whose
+/// successor re-targets the caplets and can fit, where master throws in any pass (the sweep's ruling SWI4 (b)), so a
+/// calibration whose returned pass fits keeps QuantLib 1.44's numbers; and at maximum homogeneity, where the fixed
+/// minimization (MR3 (x)) leaves a caplet no α, the pass runs again on QuantLib 1.44's test of the objective's value
+/// before it throws (the user's ruling of 2026-10-27), where master throws. <see cref="CapletAlphaFormCalibration"/>,
+/// one pass alone, refuses a failed final part as master does. α bounds shorter than the rates, which QuantLib's
+/// function reads unchecked, are refused (MR3 (xx)).
 /// </para>
 /// </remarks>
 public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
@@ -96,12 +99,12 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
     /// <param name="steps">The solver's grid points.</param>
     /// <param name="toleranceForAlphaSolving">The solver's tolerance.</param>
     /// <returns>
-    /// The swap rates' pseudo-roots, each rate's α, a and b (b NaN where the step's final part fails), and the
-    /// failures: the steps whose final part fails.
+    /// The swap rates' pseudo-roots, each rate's α, a and b, and the failures, 0 as in QuantLib, which throws where a
+    /// step fails.
     /// </returns>
     /// <exception cref="ArgumentException">The inputs don't fit, an α vector isn't one per rate, or the factors aren't
     /// from 1 to the rates.</exception>
-    /// <exception cref="NanoQLException">No α fits a caplet.</exception>
+    /// <exception cref="NanoQLException">No α fits a caplet, or a step's final part fails at its α.</exception>
     public static CTSMMCapletCalibrationStep CapletAlphaFormCalibration(
         EvolutionDescription evolution,
         PiecewiseConstantCorrelation corr,
@@ -116,7 +119,72 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
         AlphaForm parametricForm,
         int numberOfFactors,
         int steps,
-        double toleranceForAlphaSolving)
+        double toleranceForAlphaSolving) =>
+        Pass(
+            evolution,
+            corr,
+            displacedSwapVariances,
+            capletVols,
+            cs,
+            displacement,
+            alphaInitial,
+            alphaMax,
+            alphaMin,
+            maximizeHomogeneity,
+            parametricForm,
+            numberOfFactors,
+            steps,
+            toleranceForAlphaSolving,
+            false);
+
+    /// <inheritdoc/>
+    protected override CTSMMCapletCalibrationStep CalibrationImpl(
+        int numberOfFactors, int innerMaxIterations, double innerTolerance, ReadOnlySpan<double> usedCapletVols) =>
+        Pass(
+            Evolution,
+            Correlation,
+            DisplacedSwapVariances.AsSpan(),
+
+            // not mktCapletVols_ but...
+            usedCapletVols,
+            CurveState(),
+            Displacement,
+            alphaInitial.AsSpan(),
+            alphaMax.AsSpan(),
+            alphaMin.AsSpan(),
+            maximizeHomogeneity,
+            parametricForm,
+            numberOfFactors,
+            innerMaxIterations,
+            innerTolerance,
+            true);
+
+    // The calibration's pass counts a step whose final part fails, and refuses it in the pass it returns
+    // (CheckReturnedStep, SWI4 (b)); the pass alone refuses it at once, as QuantLib's master does.
+    private protected override void CheckReturnedStep(CTSMMCapletCalibrationStep step)
+    {
+        if (step.Failures > 0)
+        {
+            throw new NanoQLException("alpha form failure");
+        }
+    }
+
+    private static CTSMMCapletCalibrationStep Pass(
+        EvolutionDescription evolution,
+        PiecewiseConstantCorrelation corr,
+        ReadOnlySpan<PiecewiseConstantVariance> displacedSwapVariances,
+        ReadOnlySpan<double> capletVols,
+        CurveState cs,
+        double displacement,
+        ReadOnlySpan<double> alphaInitial,
+        ReadOnlySpan<double> alphaMax,
+        ReadOnlySpan<double> alphaMin,
+        bool maximizeHomogeneity,
+        AlphaForm parametricForm,
+        int numberOfFactors,
+        int steps,
+        double toleranceForAlphaSolving,
+        bool countFailedFinalParts)
     {
         ArgumentNullException.ThrowIfNull(parametricForm);
         PerformChecks(evolution, corr, displacedSwapVariances, capletVols, cs);
@@ -245,17 +313,29 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
                         theseNewVols);
                 }
 
-                if (!success)
+                // a caplet no α fits: QuantLib's refusal, at maximum homogeneity after the pass again on 1.44's test
+                // (MR3 (x))
+                if (!success && double.IsNaN(alpha[i + 1]))
                 {
+                    if (!(maximizeHomogeneity && attempt == 0))
+                    {
+                        throw new NanoQLException("alpha form failure");
+                    }
+
                     passed = false;
                     break;
                 }
 
-                // a step whose final part fails, which QuantLib's solve returns as solved: counted, where QuantLib's
-                // count is commented out beside its throw (capletcoterminalalphacalibration.cpp:202-203; MR3 (viii) as
-                // the user ruled it on 2026-10-27)
-                if (double.IsNaN(b[i + 1]))
+                // a step whose final part fails, its α found: QuantLib's master's refusal (#2910; SWR2 (a)), where
+                // its failure count is commented out beside its throw (capletcoterminalalphacalibration.cpp:202-203);
+                // a calibration's pass counts it, refused where the calibration returns this pass (SWI4 (b))
+                if (!success)
                 {
+                    if (!countFailedFinalParts)
+                    {
+                        throw new NanoQLException("alpha form failure");
+                    }
+
                     ++failures;
                 }
 
@@ -263,16 +343,12 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
                 firstRateVols = (double[])theseNewVols.Clone();
             }
 
+            // the fixed minimization's α at one caplet can leave a later one none where QuantLib's first trial leaves
+            // room: the pass again on QuantLib's test (MR3 (x) as the user ruled it on 2026-10-27), unless this one
+            // passed
             if (passed)
             {
                 break;
-            }
-
-            // the fixed minimization's α at one caplet can leave a later one none where QuantLib's first trial leaves
-            // room: the pass again on QuantLib's test (MR3 (x) as the user ruled it on 2026-10-27)
-            if (!(maximizeHomogeneity && attempt == 0))
-            {
-                throw new NanoQLException("alpha form failure");
             }
         }
 
@@ -299,27 +375,6 @@ public sealed class CTSMMCapletAlphaFormCalibration : CTSMMCapletCalibration
             a: ImmutableArray.Create(a),
             b: ImmutableArray.Create(b));
     }
-
-    /// <inheritdoc/>
-    protected override CTSMMCapletCalibrationStep CalibrationImpl(
-        int numberOfFactors, int innerMaxIterations, double innerTolerance, ReadOnlySpan<double> usedCapletVols) =>
-        CapletAlphaFormCalibration(
-            Evolution,
-            Correlation,
-            DisplacedSwapVariances.AsSpan(),
-
-            // not mktCapletVols_ but...
-            usedCapletVols,
-            CurveState(),
-            Displacement,
-            alphaInitial.AsSpan(),
-            alphaMax.AsSpan(),
-            alphaMin.AsSpan(),
-            maximizeHomogeneity,
-            parametricForm,
-            numberOfFactors,
-            innerMaxIterations,
-            innerTolerance);
 
     private static void CheckAlphas(
         int numberOfRates, ReadOnlySpan<double> alphaInitial, ReadOnlySpan<double> alphaMax, ReadOnlySpan<double> alphaMin)

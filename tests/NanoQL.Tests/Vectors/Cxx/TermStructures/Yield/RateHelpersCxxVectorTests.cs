@@ -43,11 +43,18 @@ public class RateHelpersCxxVectorTests
             check.Output(c, "pillarDate", helper.PillarDate);
             YieldTermStructure[] curves = [.. c.Input("curves").EnumerateArray().Select(CurveOf)];
             BootstrapHelper<YieldTermStructure> unbound = helper;
+
+            // the outputs QuantLib's master moves (#2899), null on both sides
+            HashSet<string> skip = c.Inputs.TryGetProperty("skip", out JsonElement skipped)
+                ? [.. skipped.EnumerateArray().Select(e => e.GetString()!)]
+                : [];
             foreach ((string name, YieldTermStructure curve) in new[] { "Flat", "Curve" }.Zip(curves))
             {
                 // binding can refuse too: an FX swap helper with no collateral curve
-                check.Output(c, "impliedQuote" + name, () => unbound.SetTermStructure(curve).ImpliedQuote(context));
-                check.Output(c, "quoteError" + name, () => unbound.SetTermStructure(curve).QuoteError(context));
+                Func<object?> quote = () => unbound.SetTermStructure(curve).ImpliedQuote(context);
+                Func<object?> error = () => unbound.SetTermStructure(curve).QuoteError(context);
+                check.Output(c, "impliedQuote" + name, skip.Contains("impliedQuote" + name) ? () => null : quote);
+                check.Output(c, "quoteError" + name, skip.Contains("quoteError" + name) ? () => null : error);
             }
 
             if (helper is SwapRateHelper swap)

@@ -11,9 +11,8 @@ call and a put) on each of the seven binomial trees, at 100 and 101 steps, the L
 only, with two fixed dividends and a credit spread of 1%, on the first process of
 tools/vectors/gen/processes/blackscholesprocess.py (Merton, flat, constant); then the fixed-coupon bond under each
 exercise on the Cox-Ross-Rubinstein tree at 101 steps on four more processes (zero curves, a variance curve and a
-surface; the Black-Scholes and Black processes), with no dividends, with a dividend before the settlement date (which
-the engine subtracts from the spot and the discretized bond leaves out) and one on a coupon date, at credit spreads of
-0 and 5%; an expired bond, whose results are zero; and the refusals: no time step ("timeSteps must be positive, 0 not
+surface; the Black-Scholes and Black processes), with no dividends, with a dividend the day after the evaluation date
+and one on a coupon date, at credit spreads of 0 and 5%; an expired bond, whose results are zero; and the refusals: no time step ("timeSteps must be positive, 0 not
 allowed"), a dividend larger than the spot ("negative value after subtracting dividends"), a fractional dividend, whose
 amount QuantLib can't compute without a nominal; and the fixed-coupon bond at QuantLib's regression case's volatility
 of 2,168% and credit spread, priced on this process. The variance-curve and surface processes refuse the volatility at
@@ -22,6 +21,10 @@ date.
 
 Every structure shares the risk-free curve's day counter and reference date, where nanoql flattens a structure on
 another clock from its discount or variance (the S-sr plan's SSR8; tests/NanoQL.Tests/Divergences/ConvertibleClockTests.cs).
+Every bond settles on the evaluation date (convertiblebonds.py's priced_at_evaluation: "settlementDays" 0, an issue
+date after the evaluation date moved to it), where QuantLib's master's spot at the settlement date (#2752, taken ahead
+of the pin as the upstream sweep's SWR1 (a) and SWI2 rule) is QuantLib 1.44's, divided by a discount of 1; a lag, and a
+dividend inside it, are checked in tests/NanoQL.Tests/Divergences/ConvertibleUpstreamFixesTests.cs.
 Generated and left out: the Leisen-Reimer and Joshi trees at an even count, on which QuantLib rolls back a tree built for
 one more step (the S-eq plan's SEQR7 (x), which nanoql's engine applies); and an American exercise whose grid's last
 time rounds below the tree's maturity (#2878, convertiblebonds.py's test).
@@ -104,7 +107,7 @@ def case(name, bond_spec, pspec, tree, steps, spread, dividends, st):
 
 def cases():
     st = v.settings(R)
-    bonds = dict(cvb.bonds())
+    bonds = {name: cvb.priced_at_evaluation(spec) for name, spec in cvb.bonds()}
     out = []
     p0 = bsp.PROCESSES[0][1]
     chosen = ["zero-coupon, American, callable", "fixed annual 4%, European, callable",
@@ -127,7 +130,7 @@ def cases():
                 out.append(case(f"fixed, {ex}, {pname}", spec, pspec, "crr", 101, cvb.CREDIT_SPREAD, DIVIDENDS, st))
         before = [fixed_dividend(2.0, CAL.advance(R, 1, ql.Days))]
         on_coupon = [fixed_dividend(2.0, CAL.advance(cvb.ISSUE, 2, ql.Years))]
-        for dname, dividends in (("no dividends", []), ("a dividend before settlement", before),
+        for dname, dividends in (("no dividends", []), ("a dividend the day after the evaluation date", before),
                                  ("a dividend on a coupon date", on_coupon)):
             if not short(spec, p0, 101):
                 out.append(case(f"fixed, {ex}, {dname}", spec, p0, "crr", 101, cvb.CREDIT_SPREAD, dividends, st))
@@ -135,7 +138,7 @@ def cases():
             if not short(spec, p0, 101):
                 out.append(case(f"fixed, {ex}, credit spread {spread}", spec, p0, "crr", 101, spread, DIVIDENDS, st))
     expired = cvb.bond_spec("ConvertibleFixedCouponBond", cvb.exercise_spec("European", [ql.Date(15, ql.March, 2026)]),
-                            1.0, [], ql.Date(15, ql.March, 2021), 3,
+                            1.0, [], ql.Date(15, ql.March, 2021), 0,
                             cvb.schedule(ql.Date(15, ql.March, 2021), ql.Date(15, ql.March, 2026), (1, ql.Years)),
                             coupons=[0.04])
     out.append(case("expired", expired, p0, "crr", 101, cvb.CREDIT_SPREAD, [], st))

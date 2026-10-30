@@ -70,6 +70,9 @@ public sealed record InterestRate
     /// <param name="t">The time.</param>
     /// <returns>The implied rate.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
+    /// <exception cref="NanoQLException">The compounding is <see cref="Compounding.SimpleThenCompounded"/> or
+    /// <see cref="Compounding.CompoundedThenSimple"/>, at any compound factor (QuantLib's master's refusal, #2898,
+    /// where 1.44 returns a zero rate at a factor of 1).</exception>
     public static InterestRate ImpliedRate(double compound, DayCounter resultDC, Compounding comp, Frequency freq, double t)
     {
         ArgumentNullException.ThrowIfNull(resultDC);
@@ -78,6 +81,12 @@ public sealed record InterestRate
         if (!(compound > 0.0))
         {
             throw new ArgumentException("positive compound factor required", nameof(compound));
+        }
+
+        // QuantLib's fix after v1.44 (#2898): the mixed compoundings refused before the unit factor's branch
+        if (comp is Compounding.SimpleThenCompounded or Compounding.CompoundedThenSimple)
+        {
+            throw new NanoQLException($"{comp} is not supported for direct calculations: use the CashFlow methods");
         }
 
         double r;
@@ -131,6 +140,8 @@ public sealed record InterestRate
     /// <param name="refEnd">The reference period's end, for day counters that use one.</param>
     /// <returns>The implied rate.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
+    /// <exception cref="NanoQLException">The compounding is <see cref="Compounding.SimpleThenCompounded"/> or
+    /// <see cref="Compounding.CompoundedThenSimple"/>.</exception>
     public static InterestRate ImpliedRate(
         double compound,
         DayCounter resultDC,
@@ -265,6 +276,8 @@ public sealed record InterestRate
     /// <param name="t">The time, measured by the rate's day counter.</param>
     /// <returns>The equivalent rate.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
+    /// <exception cref="NanoQLException">The compounding is <see cref="Compounding.SimpleThenCompounded"/> or
+    /// <see cref="Compounding.CompoundedThenSimple"/>.</exception>
     public InterestRate EquivalentRate(Compounding comp, Frequency freq, double t) =>
         ImpliedRate(CompoundFactor(t), DayCounter, comp, freq, t);
 
@@ -278,6 +291,8 @@ public sealed record InterestRate
     /// <param name="refEnd">The reference period's end, for day counters that use one.</param>
     /// <returns>The equivalent rate.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The compounding or the frequency isn't a member of its enum.</exception>
+    /// <exception cref="NanoQLException">The compounding is <see cref="Compounding.SimpleThenCompounded"/> or
+    /// <see cref="Compounding.CompoundedThenSimple"/>.</exception>
     public InterestRate EquivalentRate(
         DayCounter resultDC,
         Compounding comp,

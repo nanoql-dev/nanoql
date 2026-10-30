@@ -6,10 +6,11 @@
 
 The calibration on QuantLib's case (marketmodel_smmcapletalphacalibration.cpp: capletcoterminalswaptioncalibration.py's
 setup, α 0 in [−1, 1], the linear-hyperbolic form, three factors, ten passes) and on varied ones: the inverse-linear
-form, bounds ±0.2, α from 0.1, one factor, six annual rates; five and ten factors, another abcd, displaced 1% and the
-caplets at 70%, where no α fits a caplet (QuantLib's "alpha form failure"); each the calibration's results and α
-(calibrations.cpp). The pass function alone (capletAlphaFormCalibration) on QuantLib's case and two varied ones: its α,
-a, b and pseudo-roots. Throws: α bounds short of the rates.
+form at bounds ±0.5, bounds ±0.2, α from 0.1, one factor, six annual rates; five and ten factors, another abcd,
+displaced 1% and the caplets at 70%, where no α fits a caplet (QuantLib's "alpha form failure"); each the calibration's
+results and α (calibrations.cpp). The pass function alone (capletAlphaFormCalibration) on QuantLib's case and two varied
+ones, the inverse-linear form at bounds ±0.5 among them: its α, a, b and pseudo-roots. Throws: α bounds short of the
+rates.
 
 Maximum homogeneity is left out: QuantLib's Minimize tests the objective's value where it means the trial α, so it stops
 at its first trial where that value isn't an acceptable α, its α and pseudo-roots then other than the fix's (the S-mm
@@ -18,11 +19,12 @@ both cases bit for bit. One maximum-homogeneity case stays, caplets × 0.95 on e
 minimization leaves a caplet no α and the pass runs again on QuantLib's test (the user's ruling of 2026-10-27), so
 nanoql's results are QuantLib's; and the pass function on it.
 
-Where a step's final part fails, QuantLib's solve returns it as solved, and nanoql counts it as a failure (MR3 (viii) as
-the user ruled it on 2026-10-27; tests/NanoQL.Tests/Divergences/CTSMMCapletAlphaFormCalibrationTests.cs): a calibration
-whose swaptions miss by more than 1e-10, the mark of such a step, leaves its failures and convergence out, and the pass
-function's b and failures are left out where a b is QuantLib's caller's 0 (nanoql's NaN). One such case, displaced 2%
-and caplets × 0.95 at QuantLib's own α₀ and bounds, is among the calibrations.
+Where a step's final part fails, QuantLib 1.44's solve returns it as solved, and QuantLib's master's, which nanoql
+takes, returns false, so the calibration throws "alpha form failure" (#2910, the upstream sweep's SWR2 (a) and SWD14;
+tests/NanoQL.Tests/Divergences/CTSMMCapletAlphaFormCalibrationTests.cs). So no case has such a step: a calibration
+whose swaptions miss by more than 1e-10, the mark of one, or a pass whose b is QuantLib's caller's 0 stops the
+generator. The inverse-linear form's cases are at bounds ±0.5, where every step solves; at ±1 six of its steps are
+half-solved, and the refusal on those inputs is checked in that class.
 
 The harness unit is tools/cxx/src/models/marketmodels/models/calibrations.cpp. Read back by
 tests/NanoQL.Tests/Vectors/Cxx/Models/MarketModels/CTSMMCapletAlphaFormCalibrationCxxVectorTests.cs."""
@@ -62,20 +64,16 @@ def outcome(f):
 
 
 def final_parts(e):
-    """The pass function's outputs, b and the failures left out where a step's final part failed (QuantLib's b there
-    the caller's 0, a solved step's positive; nanoql counts the step)."""
-    if "b" in e and any(x == 0.0 for x in e["b"][1:]):
-        del e["b"]
-        del e["failures"]
+    """The pass function's outputs, refused where a step's final part failed (QuantLib 1.44's b there the caller's 0, a
+    solved step's positive), which nanoql refuses with QuantLib's master."""
+    assert not ("b" in e and any(x == 0.0 for x in e["b"][1:])), "a half-solved pass"
     return e
 
 
 def half_solved(e):
-    """A calibration's outputs, its failures and convergence left out where its swaptions miss by more than 1e-10, the
-    mark of a step whose final part failed, which nanoql counts."""
-    if e.get("swaptionMaxError", 0.0) > 1e-10:
-        del e["converged"]
-        del e["failures"]
+    """A calibration's outputs, refused where its swaptions miss by more than 1e-10, the mark of a step whose final
+    part failed, which nanoql refuses with QuantLib's master."""
+    assert not e.get("swaptionMaxError", 0.0) > 1e-10, "a half-solved calibration"
     return e
 
 
@@ -86,7 +84,7 @@ def cases():
         settings = [3, 10, 1e-4, 100, 1e-8]
         variations = [
             ("QuantLib's case", {}, 0.0, 1.0, -1.0, False, "LinearHyperbolic", settings),
-            ("the inverse-linear form", {}, 0.0, 1.0, -1.0, False, "InverseLinear", settings),
+            ("the inverse-linear form, bounds 0.5", {}, 0.0, 0.5, -0.5, False, "InverseLinear", settings),
             ("bounds 0.2", {}, 0.0, 0.2, -0.2, False, "LinearHyperbolic", settings),
             ("alpha from 0.1", {}, 0.1, 1.0, -1.0, False, "LinearHyperbolic", settings),
             ("one factor", {}, 0.0, 1.0, -1.0, False, "LinearHyperbolic", [1, 10, 1e-4, 100, 1e-8]),
@@ -94,8 +92,6 @@ def cases():
             ("another abcd (no fit)", {"abcd": OTHER_ABCD}, 0.0, 1.0, -1.0, False, "LinearHyperbolic", settings),
             ("six annual rates", {"times": ANNUAL}, 0.0, 1.0, -1.0, False, "LinearHyperbolic", settings),
             ("ten factors (no fit)", {}, 0.0, 1.0, -1.0, False, "LinearHyperbolic", [10, 10, 1e-4, 100, 1e-8]),
-            ("displaced 2%, caplets at 95% (a half-solved step)", {"displacement": 0.02, "scale": 0.95}, 0.0, 1.0,
-             -1.0, False, "LinearHyperbolic", settings),
             ("maximum homogeneity, caplets at 95%, eight factors (QuantLib's test)", {"scale": 0.95}, 0.0, 1.0, -1.0,
              True, "LinearHyperbolic", [8, 10, 1e-4, 100, 1e-8]),
             ("displaced 1% (no fit)", {"displacement": 0.01}, 0.0, 1.0, -1.0, False, "LinearHyperbolic", settings),
@@ -112,18 +108,18 @@ def cases():
                                    "innerMaxIterations": s[3], "innerTolerance": s[4]},
                         "expected": half_solved(outcome(lambda a=args: H.call(
                             "CTSMMCapletAlphaFormCalibration.calibrate", *a)))})
-        for name, kw, homogeneity, form, factors in [
-                ("QuantLib's case", {}, False, "LinearHyperbolic", 3),
-                ("the inverse-linear form", {}, False, "InverseLinear", 3),
-                ("six annual rates, two factors", {"times": ANNUAL}, False, "LinearHyperbolic", 2),
+        for name, kw, homogeneity, form, factors, bound in [
+                ("QuantLib's case", {}, False, "LinearHyperbolic", 3, 1.0),
+                ("the inverse-linear form, bounds 0.5", {}, False, "InverseLinear", 3, 0.5),
+                ("six annual rates, two factors", {"times": ANNUAL}, False, "LinearHyperbolic", 2, 1.0),
                 ("maximum homogeneity, caplets at 95%, eight factors (QuantLib's test)", {"scale": 0.95}, True,
-                 "LinearHyperbolic", 8)]:
+                 "LinearHyperbolic", 8, 1.0)]:
             c = spec(H, **kw)
             n = len(c["rateTimes"]) - 1
-            args = [c, [0.0] * n, [1.0] * n, [-1.0] * n, homogeneity, form, factors, 100, 1e-8]
+            args = [c, [0.0] * n, [bound] * n, [-bound] * n, homogeneity, form, factors, 100, 1e-8]
             out.append({"name": "capletAlphaFormCalibration, " + name,
                         "inputs": {"settings": st, "call": "capletAlphaFormCalibration", "spec": c,
-                                   "alphaInitial": [0.0] * n, "alphaMax": [1.0] * n, "alphaMin": [-1.0] * n,
+                                   "alphaInitial": [0.0] * n, "alphaMax": [bound] * n, "alphaMin": [-bound] * n,
                                    "maximizeHomogeneity": homogeneity, "form": form, "factors": factors, "steps": 100,
                                    "tolerance": 1e-8},
                         "expected": final_parts(outcome(lambda a=args: H.call(

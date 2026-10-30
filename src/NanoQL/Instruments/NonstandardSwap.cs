@@ -37,11 +37,13 @@ public sealed class NonstandardSwap : Swap
     private readonly bool singleSpreadAndGearing;
 
     /// <summary>Initializes a new instance of the <see cref="NonstandardSwap"/> class from a fixed-versus-floating
-    /// swap: its constant nominal, rate and spread repeated on every coupon, a unit gearing.</summary>
+    /// swap: each leg's nominals, the last repeated to the leg's length, its rate and spread repeated on every coupon,
+    /// a unit gearing.</summary>
     /// <param name="fromVanilla">The swap: a vanilla or an overnight-indexed swap.</param>
     /// <param name="context">The evaluation context, whose at-par switch the Ibor leg reads.</param>
     /// <exception cref="ArgumentNullException">An argument is null.</exception>
-    /// <exception cref="NanoQLException">The swap's nominal isn't constant.</exception>
+    /// <remarks>Each leg's nominals are QuantLib's master's (#2956), where QuantLib 1.44 repeats the swap's constant
+    /// nominal and refuses an amortizing swap (<c>Divergences/NonstandardSwapUpstreamFixesTests.cs</c>).</remarks>
     public NonstandardSwap(FixedVsFloatingSwap fromVanilla, EvaluationContext context)
         : this(Terms.OfVanilla(fromVanilla, context))
     {
@@ -317,14 +319,13 @@ public sealed class NonstandardSwap : Swap
             ArgumentNullException.ThrowIfNull(fromVanilla);
             ArgumentNullException.ThrowIfNull(context);
             int fixedCount = fromVanilla.FixedLeg.Length, floatingCount = fromVanilla.FloatingLeg.Length;
-            double nominal = fromVanilla.Nominal();
             OvernightConventions conventions = fromVanilla is OvernightIndexedSwap ois
                 ? new OvernightConventions(ois.TelescopicValueDates, ois.AveragingMethod, ois.LookbackDays, ois.LockoutDays, ois.ApplyObservationShift, ois.RoundingPrecision)
                 : OvernightConventions.Default;
             return Of(
                 fromVanilla.Type,
-                [.. Enumerable.Repeat(nominal, fixedCount)],
-                [.. Enumerable.Repeat(nominal, floatingCount)],
+                Resized(fromVanilla.FixedNominals, fixedCount),
+                Resized(fromVanilla.FloatingNominals, floatingCount),
                 fromVanilla.FixedSchedule,
                 [.. Enumerable.Repeat(fromVanilla.FixedRate, fixedCount)],
                 fromVanilla.FixedDayCount,
@@ -342,6 +343,11 @@ public sealed class NonstandardSwap : Swap
                 fromVanilla.PaymentCalendar,
                 conventions);
         }
+
+        // QuantLib's fix after v1.44 (#2956): standard legs repeat the last notional when the input vector is shorter,
+        // and resize cuts a longer one
+        private static List<double> Resized(ImmutableArray<double> nominals, int count) =>
+            [.. Enumerable.Range(0, count).Select(i => nominals[Math.Min(i, nominals.Length - 1)])];
 
         public static Terms OfConstants(
             SwapType type,

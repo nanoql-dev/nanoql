@@ -21,15 +21,18 @@ namespace NanoQL.Models;
 /// the alpha calibration builds one per calibration around its own copy of the form. It isn't thread-safe.
 /// </para>
 /// <para>
-/// Three departures from QuantLib (<c>Divergences/AlphaFinderTests.cs</c>): the downward bracket search stops at its
-/// first acceptable α, testing the value it moves, where QuantLib's tests the upward one's (MR3 (ix);
-/// <c>alphafinder.cpp:372-373</c>); the minimization's feasibility test reads the trial α, where QuantLib's reads the
-/// objective's value there (MR3 (x); <c>:117</c>, <c>:145</c>); and each bisection and the minimization also stop when
-/// their point no longer moves, where QuantLib's never end (MR3 (xii); <c>:30-111</c>). As in QuantLib,
-/// <see cref="Solve"/> returns true where its final part fails, at α₀ or at the search's α (<c>:335-346</c>,
-/// <c>:405-415</c>), the swap rate's last volatility then left as the caller's; nanoql's b is NaN there, where QuantLib
-/// leaves the caller's value, and the alpha calibration counts the step as a failure (MR3 (viii) as the user ruled it
-/// on 2026-10-27). Inputs shorter than the step index reads, which QuantLib reads past, are refused (MR3 (xx)).
+/// QuantLib's master's finder (#2910, the upstream sweep's SWR2 (a); <c>Divergences/AlphaFinderTests.cs</c>), which
+/// fixes four of QuantLib 1.44's defects: the downward bracket search stops at its first acceptable α, testing the
+/// value it moves, where 1.44's tests the upward one's (MR3 (ix); <c>alphafinder.cpp:372-373</c>); the minimization's
+/// feasibility test reads the trial α, where 1.44's reads the objective's value there (MR3 (x); <c>:117</c>,
+/// <c>:145</c>); the bisection returns at an exact root and where its point no longer moves; and
+/// <see cref="Solve"/> and <see cref="SolveWithMaxHomogeneity"/> return their final part's success, where 1.44's
+/// return true where it fails, at α₀ or at the search's α (<c>:335-346</c>, <c>:405-415</c>, <c>:550-561</c>), the
+/// swap rate's last volatility then left as the caller's. Two of nanoql's own: the searches and the minimization also
+/// stop where their point no longer moves, where QuantLib's never end at a tolerance of 0 (MR3 (xii); <c>:30-111</c>);
+/// and b is NaN where the final part fails, where QuantLib leaves the caller's value (the S-mm run's R4-4). The alpha
+/// calibration's fallback minimizes on 1.44's test of the objective's value (MR3 (x), as the user ruled it on
+/// 2026-10-27). Inputs shorter than the step index reads, which QuantLib reads past, are refused (MR3 (xx)).
 /// </para>
 /// </remarks>
 public sealed class AlphaFinder
@@ -87,11 +90,12 @@ public sealed class AlphaFinder
     /// <param name="alphaMax">The largest α.</param>
     /// <param name="alphaMin">The smallest α.</param>
     /// <param name="steps">The bracket search's steps.</param>
-    /// <param name="alpha">The α found.</param>
+    /// <param name="alpha">The α found; NaN where none is.</param>
     /// <param name="a">The multiplier of the second rate's volatilities to the caplet's reset.</param>
     /// <param name="b">The multiplier of its volatility after it; NaN where the final part fails.</param>
     /// <param name="rateTwoVols">The second rate's new volatilities, written to the step index plus one.</param>
-    /// <returns>Whether an α was found.</returns>
+    /// <returns>Whether an α was found and its final part, the variance left for the second rate's last volatility,
+    /// succeeded.</returns>
     /// <exception cref="ArgumentException">A vector is shorter than the step index reads.</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="stepIndex"/> is negative.</exception>
     public bool Solve(
@@ -118,11 +122,10 @@ public sealed class AlphaFinder
         // compute linear part with initial alpha
         double valueAtTP = ValueAtTurningPoint(alpha0);
 
-        // a final part that fails leaves b NaN, which the alpha calibration counts as a failure (MR3 (viii))
+        // QuantLib's master (#2910): the final part's success, where 1.44 returns true
         if (valueAtTP <= targetVariance)
         {
-            FinalPart(alpha0, stepIndex, quadraticPart, linearPart, constantPart, out alpha, out a, out b, rateTwoVols);
-            return true;
+            return FinalPart(alpha0, stepIndex, quadraticPart, linearPart, constantPart, out alpha, out a, out b, rateTwoVols);
         }
 
         // we now have to solve
@@ -183,8 +186,7 @@ public sealed class AlphaFinder
             alpha = Bisection(-targetVariance, bilimit, topAlpha, tolerance, MinusValueAtTurningPoint);
         }
 
-        FinalPart(alpha, stepIndex, quadraticPart, linearPart, constantPart, out alpha, out a, out b, rateTwoVols);
-        return true;
+        return FinalPart(alpha, stepIndex, quadraticPart, linearPart, constantPart, out alpha, out a, out b, rateTwoVols);
     }
 
     /// <summary>
@@ -204,11 +206,12 @@ public sealed class AlphaFinder
     /// <param name="alphaMax">The largest α.</param>
     /// <param name="alphaMin">The smallest α.</param>
     /// <param name="steps">The search's steps where no end works.</param>
-    /// <param name="alpha">The α found.</param>
+    /// <param name="alpha">The α found; NaN where none is.</param>
     /// <param name="a">The multiplier of the second rate's volatilities to the caplet's reset.</param>
     /// <param name="b">The multiplier of its volatility after it; NaN where the final part fails.</param>
     /// <param name="rateTwoVols">The second rate's new volatilities, written to the step index plus one.</param>
-    /// <returns>Whether an α was found.</returns>
+    /// <returns>Whether an α was found and its final part, the variance left for the second rate's last volatility,
+    /// succeeded.</returns>
     /// <exception cref="ArgumentException">A vector is shorter than the step index reads.</exception>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="stepIndex"/> or <paramref name="steps"/> is
     /// negative.</exception>
@@ -313,12 +316,11 @@ public sealed class AlphaFinder
         // interval
         alpha = Minimize(alpha1, alpha2, tolerance, HomogeneityFailure, TestIfSolutionExists, quantLibsMinimizeTest, out _);
 
-        FinalPart(alpha, stepIndex, ComputeQuadraticPart(alpha), ComputeLinearPart(alpha), constantPart, out alpha, out a, out b, rateTwoVols);
-
-        return true;
+        return FinalPart(alpha, stepIndex, ComputeQuadraticPart(alpha), ComputeLinearPart(alpha), constantPart, out alpha, out a, out b, rateTwoVols);
     }
 
-    // QuantLib's anonymous Bisection, also stopping where its point no longer moves (MR3 (xii)).
+    // QuantLib's anonymous Bisection, returning at an exact root and where its point no longer moves (QuantLib's
+    // master, #2910; MR3 (xii)): neither end moves at an exact root, so its next point is its last.
     private static double Bisection(double target, double low, double high, double tolerance, Func<double, double> value)
     {
         double x = 0.5 * (low + high);
@@ -411,9 +413,9 @@ public sealed class AlphaFinder
         return x;
     }
 
-    // QuantLib's anonymous Minimize, its feasibility test on the trial α (MR3 (x)), on the objective's value as
-    // QuantLib's where asked (the alpha calibration's fallback), and also stopping where its interval and point no
-    // longer move (MR3 (xii)).
+    // QuantLib's anonymous Minimize, its feasibility test on the trial α before its value, QuantLib's master's (#2910;
+    // MR3 (x)), or on the objective's value as 1.44's where asked (the alpha calibration's fallback), and also stopping
+    // where its interval and point no longer move (MR3 (xii)).
     private static double Minimize(
         double low,
         double high,
@@ -438,7 +440,7 @@ public sealed class AlphaFinder
             {
                 // left interval is bigger
                 double tentativeNewMid = (w * low) + ((1 - w) * x);
-                double tentativeNewMidValue = value(tentativeNewMid);
+                double tentativeNewMidValue = testTheValue ? value(tentativeNewMid) : double.NaN;
                 bool conditioner = condition(testTheValue ? tentativeNewMidValue : tentativeNewMid);
                 if (!conditioner)
                 {
@@ -448,6 +450,11 @@ public sealed class AlphaFinder
                     }
 
                     return leftValue < rightValue ? low : high;
+                }
+
+                if (!testTheValue)
+                {
+                    tentativeNewMidValue = value(tentativeNewMid);
                 }
 
                 if (tentativeNewMidValue < midValue)
@@ -468,7 +475,7 @@ public sealed class AlphaFinder
             else
             {
                 double tentativeNewMid = (w * x) + ((1 - w) * high);
-                double tentativeNewMidValue = value(tentativeNewMid);
+                double tentativeNewMidValue = testTheValue ? value(tentativeNewMid) : double.NaN;
                 bool conditioner = condition(testTheValue ? tentativeNewMidValue : tentativeNewMid);
                 if (!conditioner)
                 {
@@ -478,6 +485,11 @@ public sealed class AlphaFinder
                     }
 
                     return leftValue < rightValue ? low : high;
+                }
+
+                if (!testTheValue)
+                {
+                    tentativeNewMidValue = value(tentativeNewMid);
                 }
 
                 if (tentativeNewMidValue < midValue)

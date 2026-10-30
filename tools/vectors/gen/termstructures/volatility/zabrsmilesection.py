@@ -34,7 +34,10 @@ Each case's input "section" is {"kernel" ("ShortMaturityLognormal", "ShortMaturi
 "FullFd"), "form" ("time" or
 "floating"), "exerciseTime" or "exerciseDate", "forward", "parameters", "dayCounter" (the floating form's, as in
 tools/vectors/gen/indexes/interestrateindex.py), "moneyness", "fdRefinement"}. The wheel's classes are the proxies of
-the C++ constructors (volatilities.i), positional only. Read back by
+the C++ constructors (volatilities.i), positional only. The case's "skip" input lists the strikes whose
+normal volatility QuantLib's master's Bachelier inversion moves (#2924, taken ahead of the pin as the upstream sweep's
+SWD14 and SWI3 rule; tools/vectors/gen/pricingengines/blackformula.py's smile_normal_moved): QuantLib 1.44's 0, null in
+"normalVolatility", which the reader nulls too. Read back by
 tests/NanoQL.Tests/Vectors/TermStructures/ZabrSmileSectionVectorTests.cs."""
 import importlib.util
 import math
@@ -54,6 +57,10 @@ _spec = importlib.util.spec_from_file_location("wheel_interestrateindex",
                                                os.path.join(v.GEN_ROOT, "indexes", "interestrateindex.py"))
 irx = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(irx)
+_spec = importlib.util.spec_from_file_location("wheel_blackformula",
+                                               os.path.join(v.GEN_ROOT, "pricingengines", "blackformula.py"))
+bf = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(bf)
 
 A360, A365, THIRTY360_BB = irx.A360, irx.A365, irx.THIRTY360_BB
 KERNELS = {"ShortMaturityLognormal": ql.ZabrShortMaturityLognormalSmileSection,
@@ -224,19 +231,24 @@ def section_case(k, spec):
         print(f"FullFd section {k}: dropped {len(all_ks) - len(ks)} of {len(all_ks)} strikes, "
               f"{8 * (len(all_ks) - len(ks))} of {8 * len(all_ks)} outputs")
     dc = s.dayCounter()
+    expected = {
+        "exerciseDate": v.enc(s.exerciseDate()),
+        "referenceDate": v.attempt(lambda: s.referenceDate()),
+        "exerciseTime": s.exerciseTime(),
+        "dayCounter": None if dc.empty() else dc.name(),
+        "volatilityType": int(s.volatilityType()),
+        "shift": s.shift(),
+        "minStrike": s.minStrike(),
+        "maxStrike": s.maxStrike(),
+        "atmLevel": v.enc(s.atmLevel()),
+        **strike_outputs(s, ks, discount)}
+    skip = [j for j, x in enumerate(ks) if bf.smile_normal_moved(s, x)]
+    for j in skip:
+        expected["normalVolatility"][j] = None
     return {"name": f"{spec['kernel']} {spec['form']} {spec['parameters']} / {k}",
-            "inputs": {"settings": st, "kind": "section", "section": v.enc(spec), "strikes": ks, "discount": discount},
-            "expected": {
-                "exerciseDate": v.enc(s.exerciseDate()),
-                "referenceDate": v.attempt(lambda: s.referenceDate()),
-                "exerciseTime": s.exerciseTime(),
-                "dayCounter": None if dc.empty() else dc.name(),
-                "volatilityType": int(s.volatilityType()),
-                "shift": s.shift(),
-                "minStrike": s.minStrike(),
-                "maxStrike": s.maxStrike(),
-                "atmLevel": v.enc(s.atmLevel()),
-                **strike_outputs(s, ks, discount)}}
+            "inputs": {"settings": st, "kind": "section", "section": v.enc(spec), "strikes": ks, "discount": discount,
+                       "skip": skip},
+            "expected": expected}
 
 
 def refusal_case(k, spec):

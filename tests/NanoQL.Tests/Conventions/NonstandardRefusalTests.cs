@@ -117,10 +117,13 @@ public class NonstandardRefusalTests
         Assert.Equal("spread is a vector, use spreads inspector instead", Assert.Throws<NanoQLException>(() => vectors.Spread()).Message);
         Assert.Equal("gearing is a vector, use gearings inspector instead", Assert.Throws<NanoQLException>(() => vectors.Gearing()).Message);
 
-        // an amortizing overnight-indexed swap has no one nominal to repeat
+        // an amortizing overnight-indexed swap converts with its legs' nominals, QuantLib's master's (#2956,
+        // Divergences/NonstandardSwapUpstreamFixesTests.cs), where 1.44 refuses it, "nominal is not constant"
         var sofr = new Sofr(Curve);
         var amortizing = new OvernightIndexedSwap(SwapType.Payer, [1e6, 9e5], Schedule(12, 2), 0.03, new Actual360(), sofr);
-        Assert.Equal("nominal is not constant", Assert.Throws<NanoQLException>(() => new NonstandardSwap(amortizing, Context)).Message);
+        var converted = new NonstandardSwap(amortizing, Context);
+        Assert.Equal([1e6, 9e5], converted.FixedNominal);
+        Assert.Equal([1e6, 9e5], converted.FloatingNominal);
     }
 
     [Fact]

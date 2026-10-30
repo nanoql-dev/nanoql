@@ -1000,7 +1000,12 @@ public class SwaptionTests
     // call it (Price).
     private sealed class CommonVars
     {
-        // The fixture on today's date, or on the given dates, as the cases that set them after the fixture.
+        // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+        private static readonly Date RunnerDate = new(16, September, 2015);
+
+        // The fixture on the runner's evaluation date, as QuantLib's master's (9b7836ad9, "Fix test date") reads its
+        // global fixture's date, where 1.44's reads the clock; or on the given dates, as the cases that set them after
+        // the fixture.
         public CommonVars(Date? today = null, Date? settlement = null)
         {
             SettlementDays = 2;
@@ -1013,7 +1018,7 @@ public class SwaptionTests
             FloatingConvention = conventions.BusinessDayConvention;
             FloatingTenor = conventions.Tenor;
             Calendar = conventions.FixingCalendar;
-            Today = today ?? Calendar.Adjust(Date.TodaysDate());
+            Today = today ?? RunnerDate;
             Context = new EvaluationContext { EvaluationDate = Today };
             Settlement = settlement ?? Calendar.Advance(Today, SettlementDays, TimeUnit.Days);
             TermStructure = new FlatForward(Settlement, 0.05, new Actual365Fixed());

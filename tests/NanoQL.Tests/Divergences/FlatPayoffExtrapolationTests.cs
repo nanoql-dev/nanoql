@@ -6,6 +6,7 @@ using NanoQL.Coupons;
 using NanoQL.Indexes;
 using NanoQL.Instruments;
 using NanoQL.Models;
+using NanoQL.Numerics;
 using NanoQL.PricingEngines;
 using NanoQL.TermStructures;
 using NanoQL.Tests.Vectors;
@@ -31,17 +32,90 @@ namespace NanoQL.Tests.Divergences;
 /// nanoql takes <c>p[n − 1]</c>. For a payoff that increases past the grid, the fixed tail lies between QuantLib's and
 /// the true one, the one assertion the two values can't both pass; the nonstandard and cap/floor facts ask a tenth of
 /// the way from QuantLib's at least, since QuantLib's own tail ties its value only within <c>erf</c>'s last bits
-/// (G1R3). No QuantLib case sets the flag. QuantLib's check: the same engine on the widened grid. The Markov-functional
-/// model's calibration reads the tail too (<c>markovfunctional.cpp:516-519</c>), seen alone in its puts, whose payoff
-/// vanishes past the grid: on 2 standard deviations, QuantLib's puts on 32 points move as the grid refines, its
-/// second-last node meeting the last, and nanoql's on 32 points lie closer to QuantLib's on 512 at each strike from
-/// 2.3% to 15%, by up to fifteen times. QuantLib's check: its own section on the refined grid.
+/// (G1R3). No QuantLib 1.44 case sets the flag. QuantLib's check: the same engine on the widened grid. The
+/// Markov-functional model's calibration reads the tail too (<c>markovfunctional.cpp:516-519</c>), seen alone in its
+/// puts, whose payoff vanishes past the grid: on 2 standard deviations, QuantLib's puts on 32 points move as the grid
+/// refines, its second-last node meeting the last, and nanoql's on 32 points lie closer to QuantLib's on 512 at each
+/// strike from 2.3% to 15%, by up to fifteen times. QuantLib's check: its own section on the refined grid. QuantLib's
+/// master fixes the Markov-functional model's two price functions after the pin (#2916, <c>0bbf88cb3</c>), the same
+/// expression; its case is below, a check of nanoql's model.
 /// </summary>
 public class FlatPayoffExtrapolationTests
 {
     private static readonly Date Today = new(15, Month.January, 2025);
     private static readonly EvaluationContext Context = new() { EvaluationDate = Today };
     private static readonly YieldTermStructure Curve = new FlatForward(Today, 0.03, new Actual365Fixed());
+
+    [Fact]
+    public void TestFlatPayoffExtrapolationUsesLastGridPoint()
+    {
+        // Upstream: QuantLib's master's case for #2916 (markovfunctional.cpp's
+        // testFlatPayoffExtrapolationUsesLastGridPoint)
+        var referenceDate = new Date(14, Month.November, 2012);
+        var context = new EvaluationContext { EvaluationDate = referenceDate };
+        YieldTermStructure yts = TestSuite.MarkovFunctionalTests.FlatYts(context);
+        OptionletVolatilityStructure optionletVol = TestSuite.MarkovFunctionalTests.FlatOptionletVts(context);
+        var iborIndex = new Euribor(new Period(6, TimeUnit.Months));
+        const int gridPoints = 16;
+        const double yStdDevs = 1.0;
+
+        MarkovFunctionalModelSettings settings = new MarkovFunctionalModelSettings()
+            .WithYGridPoints(gridPoints)
+            .WithYStdDevs(yStdDevs)
+            .WithAdjustments(MarkovFunctionalModelSettingsAdjustments.ExtrapolatePayoffFlat)
+            .WithSmileMoneynessCheckpoints([0.1, 0.25, 0.50, 0.75, 1.0, 1.25, 1.50, 2.0, 5.0]);
+
+        Date expiry = new TARGET().Advance(referenceDate, 18, TimeUnit.Months);
+        var model = new MarkovFunctional(yts, 0.01, [], [1.0], optionletVol, [expiry], iborIndex, context, settings);
+        MarkovFunctionalModelOutputs outputs = model.ModelOutputs(context);
+
+        double strike = outputs.SmileStrikes[0][0];
+        double fixingTime = yts.TimeFromReference(expiry);
+        Vector z = model.YGrid(yStdDevs, gridPoints);
+        Vector yg = model.YGrid(yStdDevs, gridPoints, fixingTime);
+        double[] p = new double[yg.Size];
+
+        Date valueDate = iborIndex.ValueDate(expiry);
+        Date endDate = iborIndex.FixingCalendar.Advance(valueDate, iborIndex.Tenor, iborIndex.BusinessDayConvention, iborIndex.EndOfMonth);
+        double dcf = iborIndex.DayCounter.YearFraction(expiry, endDate);
+
+        for (int i = 0; i < yg.Size; ++i)
+        {
+            double annuity = model.Zerobond(endDate, expiry, yg[i]) * dcf;
+            double forward = (model.Zerobond(expiry, expiry, yg[i]) - model.Zerobond(endDate, expiry, yg[i]))
+                / (dcf * model.Zerobond(endDate, expiry, yg[i]));
+            p[i] = annuity * Math.Max(forward - strike, 0.0) / model.Numeraire(fixingTime, yg[i]);
+        }
+
+        var payoff = new CubicInterpolation(
+            z.AsSpan(),
+            p,
+            CubicInterpolationDerivativeApprox.Spline,
+            true,
+            CubicInterpolationBoundaryCondition.Lagrange,
+            0.0,
+            CubicInterpolationBoundaryCondition.Lagrange,
+            0.0);
+
+        double expectedPrice = 0.0;
+        for (int i = 0; i < z.Size - 1; ++i)
+        {
+            expectedPrice += Gaussian1dModel.GaussianShiftedPolynomialIntegral(
+                0.0, payoff.CCoefficients()[i], payoff.BCoefficients()[i], payoff.ACoefficients()[i], p[i], z[i], z[i], z[i + 1]);
+        }
+
+        int lastNode = z.Size - 1;
+        int lastInterval = lastNode - 1;
+        double correctTail = Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[^1], z[lastNode], z[lastNode], 100.0);
+        double oldTail = Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[lastInterval], z[lastInterval], z[lastNode], 100.0);
+        Assert.True(Math.Abs(correctTail - oldTail) > 1e-12);
+
+        expectedPrice += correctTail;
+        expectedPrice += Gaussian1dModel.GaussianShiftedPolynomialIntegral(0.0, 0.0, 0.0, 0.0, p[0], z[0], -100.0, z[0]);
+        expectedPrice *= model.Numeraire(0.0);
+
+        Assert.True(Math.Abs(outputs.ModelCallPremium[0][0] - expectedPrice) < 1e-12, $"{outputs.ModelCallPremium[0][0]} against {expectedPrice}");
+    }
 
     [Fact]
     public void TheSwaptionEnginesRightTailTakesTheLastNode()

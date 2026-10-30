@@ -68,8 +68,7 @@ public readonly struct Cubic : IInterpolator
     /// <returns>The interpolation.</returns>
     /// <exception cref="ArgumentException">The sizes differ, or there are too few points.</exception>
     /// <exception cref="NanoQLException">
-    /// The scheme or a condition isn't implemented, the spline's system has a zero pivot, or a not-a-knot end under the
-    /// spline has only 2 points (a divergence: QuantLib reads past its arrays there).
+    /// The scheme or a condition isn't implemented, or the spline's system has a zero pivot.
     /// </exception>
     public Interpolation Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y) =>
         new CubicInterpolation(

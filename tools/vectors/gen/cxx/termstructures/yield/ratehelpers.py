@@ -28,7 +28,11 @@ mixed quote and value forms, which the wheel doesn't wrap.
 Each case's inputs hold its settings, "helper" (a helper spec of termstructures/yield/ratehelpers.py, with a
 "couponPricer" spec of cashflows/couponspec.hpp for the six pricer cases, and "quotes" for the mixed futures forms)
 and "curves" (the flat forward spec and {"type":
-"DiscountCurve", "dates", "discounts", "dayCounter"}). Read back by tests/NanoQL.Tests/Vectors/Cxx/TermStructures/Yield/
+"DiscountCurve", "dates", "discounts", "dayCounter"}). A case's "skip" input, where it has one, lists the outputs
+QuantLib's master moves (#2899, taken ahead of the pin as the upstream sweep's SWD14 and SWI3 rule): a deposit's or an
+indexed FRA's implied quote and quote error where QuantLib 1.44 reads a fixing before the evaluation date that the
+store doesn't hold and refuses it, and master forecasts the quote from the curve; each is null, and the reader nulls
+the same outputs (tests/NanoQL.Tests/Divergences/RateHelperUpstreamFixesTests.cs checks the forecast). Read back by tests/NanoQL.Tests/Vectors/Cxx/TermStructures/Yield/
 RateHelpersCxxVectorTests.cs."""
 import importlib.util
 import math
@@ -152,20 +156,55 @@ def outputs(H, spec):
     return out
 
 
+def moved(H, spec, expected):
+    """The outputs #2899 moves: a built deposit's or indexed FRA's implied quotes and quote errors that QuantLib 1.44
+    refuses for its fixing before the evaluation date, not stored ("Missing ... fixing for ..."), where master's
+    forecast reads the curve from the helper's earliest date, on or after the evaluation date."""
+    indexed = spec["kind"] == "DepositRateHelper" or (spec["kind"] == "FraRateHelper"
+                                                      and spec.get("useIndexedCoupon", True))
+    if not indexed or expected.get("built") is not True:
+        return []
+    out = []
+    for name, curve in zip(("Flat", "Curve"), CURVES):
+        try:
+            H.call("RateHelper::impliedQuote", spec, curve)
+        except RuntimeError as e:
+            if str(e).startswith("Missing ") and " fixing for " in str(e):
+                out += ["impliedQuote" + name, "quoteError" + name]
+    # master forecasts from the curve, which reads no date before the evaluation date (the wheel's helper on it)
+    if out:
+        v.settings(TODAY)
+        if rh.make_helper(spec).earliestDate() < TODAY:
+            return []
+    return out
+
+
 def cases():
     out = []
     rows = [(n, s, a) for n, s, a in rh.all_helpers()] + [(f"swap {n}", s, None) for n, s in pricer_helpers()]
     rows += [(n, s, None) for n, s in rh.more_helpers()]
     rows += [(f"fra {n}", s, None) for n, s in fra_period_lengths()]
     rows += [(f"futures {n}", s, None) for n, s in mixed_futures()]
+    skips = []
     with cxx.connect() as H:
         for name, spec, at_par in rows:
             with H.case_settings(v.enc(TODAY), use_at_par_coupons=at_par) as st:
                 expected = outputs(H, spec)
+                skips.append(moved(H, spec, expected))
             out.append({"name": f"{TODAY.ISO()} {name}", "inputs": {"settings": st, "helper": spec,
                                                                     "curves": CURVES},
                         "expected": expected})
     check_rows(out)
+    skipped = []
+    for c, skip in zip(out, skips):
+        if skip:
+            for k in skip:
+                c["expected"][k] = None
+            c["inputs"]["skip"] = skip
+            skipped.append(c["name"][len(TODAY.ISO()) + 1:])
+    # the deposits whose fixing precedes the evaluation date, a US holiday (Martin Luther King Day) or a given Friday
+    assert skipped == ["deposit 1Y on the US SOFR calendar", "deposit on an index of the US SOFR calendar",
+                       "deposit fixing on Friday 12 January 2024"], skipped
     return out
 
 

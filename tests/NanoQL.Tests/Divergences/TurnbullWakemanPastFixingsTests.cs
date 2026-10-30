@@ -36,4 +36,40 @@ public class TurnbullWakemanPastFixingsTests
         Assert.Equal(known, tw.NPV!.Value, 1e-14);
         Assert.Equal(ChoiAsianEngine.Calculate(option, Context, Process).NPV, tw.NPV);
     }
+
+    [Fact]
+    public void TestTurnbullWakemanAllFixingsInThePast()
+    {
+        // Upstream: QuantLib's master's case for #2954 (asianoptions.cpp's testTurnbullWakemanAllFixingsInThePast), the
+        // master's fix of this crash: its known payoff discounted, nanoql's since BR5 (xxix)
+        DayCounter dc = new Actual365Fixed();
+        var rTS = new FlatForward(Today, 0.03, dc);
+        var process = new BlackScholesMertonProcess(
+            100.0, new FlatForward(Today, 0.01, dc), rTS, new BlackConstantVol(Today, new NullCalendar(), 0.25, dc));
+
+        var fixingDates = new List<Date>();
+        for (int i = 12; i > 0; --i)
+        {
+            fixingDates.Add(Today - (30 * i));
+        }
+
+        double[] pastFixings = [.. Enumerable.Repeat(100.0, 12)];
+        var exercise = new EuropeanExercise(Today + 14);
+
+        foreach (OptionType type in new[] { OptionType.Call, OptionType.Put })
+        {
+            foreach (double strike in new[] { 95.0, 100.0, 105.0 })
+            {
+                var payoff = new PlainVanillaPayoff(type, strike);
+                var option = new DiscreteAveragingAsianOption(AverageType.Arithmetic, fixingDates, payoff, exercise, pastFixings);
+                OneAssetOptionResults results = TurnbullWakemanAsianEngine.Calculate(option, Context, process);
+
+                // The fixed average is 100; only discounting to the payment date remains.
+                double expected = payoff.Evaluate(100.0) * rTS.Discount(exercise.LastDate());
+                Assert.True(Math.Abs(results.NPV!.Value - expected) < 1.0e-12, $"type: {type}, strike: {strike}");
+                Assert.Equal(0.0, results.Delta);
+                Assert.Equal(0.0, results.Gamma);
+            }
+        }
+    }
 }

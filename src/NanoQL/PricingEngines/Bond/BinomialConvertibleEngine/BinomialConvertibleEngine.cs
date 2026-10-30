@@ -38,6 +38,12 @@ namespace NanoQL.PricingEngines;
 /// Where every structure shares the risk-free curve's day counter and reference date, the tree is QuantLib's.
 /// </para>
 /// <para>
+/// The tree's stock starts at the settlement date's forward, the spot less the dividends' present values divided by
+/// the risk-free discount to the settlement date, as QuantLib's master starts it after 1.44 (#2752, issue #2701; the
+/// upstream sweep's SWR1 (a)), where QuantLib 1.44 starts it at the evaluation date's spot, so a bond with a settlement
+/// lag converts on a spot short of the carry over the lag (<c>Divergences/ConvertibleUpstreamFixesTests.cs</c>).
+/// </para>
+/// <para>
 /// The time grid and the lattice take their step count from the tree, its columns less one, where QuantLib's take the
 /// count given: the Leisen-Reimer and Joshi trees build an even count on the next odd one, as S-eq's binomial engine
 /// handles them (the S-eq plan's SEQR7 (x)). Every odd count and every other tree is QuantLib's.
@@ -125,7 +131,12 @@ public static class BinomialConvertibleEngine
             ? Math.Log(process.DividendYield.AccruedDiscount(referenceDate) / process.DividendYield.AccruedDiscount(maturityDate)) / tau
             : process.DividendYield.ZeroRate(maturityDate, divdc, Compounding.Continuous, Frequency.NoFrequency).Rate;
 
-        // subtract dividends
+        // Subtract every dividend that has not yet occurred as of the
+        // evaluation date. Note that a dividend falling strictly between the
+        // evaluation date and the settlement date is subtracted here but never
+        // added back: the tree prices the bond at the settlement date, where
+        // the underlying already reflects that dividend as already paid, so
+        // dropping it on the spot is the correct thing to do.
         for (int i = 0; i < dividends.Length; i++)
         {
             if (dividends[i].Date >= referenceDate)
@@ -138,6 +149,15 @@ public static class BinomialConvertibleEngine
         {
             throw new NanoQLException("negative value after subtracting dividends");
         }
+
+        // Roll the spot forward from the evaluation date to the settlement
+        // date by dividing out the discount factor between the two. This is
+        // correct even in the absence of any dividends: the tree and
+        // DiscretizedConvertible anchor all dividend/coupon/callability times
+        // at arguments_.settlementDate (see issue #2701), so the spot the
+        // tree prices from must be the settlement-date forward price, not the
+        // evaluation-date spot (QuantLib's fix after v1.44, #2752).
+        s0 /= process.RiskFreeRate.Discount(arguments.SettlementDate);
 
         if (dividendsFlattened)
         {

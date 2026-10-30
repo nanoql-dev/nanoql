@@ -65,13 +65,15 @@ public class CubicInterpolation : Interpolation
     /// <param name="leftConditionValue">The left condition's value, where it takes one.</param>
     /// <param name="rightCond">The right boundary condition, for the spline approximation.</param>
     /// <param name="rightConditionValue">The right condition's value, where it takes one.</param>
-    /// <exception cref="ArgumentException">The sizes differ, or there are too few points.</exception>
+    /// <exception cref="ArgumentException">The sizes differ, or there are too few points: 4 for Akima's approximation
+    /// or a Lagrange condition, and under the spline 3 for a <see cref="CubicInterpolationBoundaryCondition.NotAKnot"/>
+    /// end and 4 for two (QuantLib's master's count, #2888, where 1.44 reads past its arrays on 2 points and finds 3
+    /// singular).</exception>
     /// <exception cref="ArgumentOutOfRangeException">An enum argument isn't a member of its type.</exception>
     /// <exception cref="NanoQLException">
     /// The scheme or a condition isn't implemented (<see cref="CubicInterpolationDerivativeApprox.FourthOrder"/> with
     /// more than 2 points, <see cref="CubicInterpolationBoundaryCondition.Periodic"/> under the spline), or the spline's
-    /// system has a zero pivot, or a <see cref="CubicInterpolationBoundaryCondition.NotAKnot"/> end under the spline has
-    /// only 2 points, where QuantLib reads past its arrays (a divergence: nanoql refuses it).
+    /// system has a zero pivot.
     /// </exception>
     public CubicInterpolation(
         ReadOnlySpan<double> x,
@@ -137,9 +139,10 @@ public class CubicInterpolation : Interpolation
     public CubicInterpolation UpdateRightConditionValue(double value) =>
         Rebuild(new CubicInterpolation(X, Y, da, monotonic, leftType, leftValue, rightType, value));
 
-    // The constructor's own checks: QuantLib's CubicInterpolationImpl refuses too few points for a Lagrange condition or
-    // Akima's scheme before any computation. LogCubicInterpolation runs them on its inner cubic's behalf, in QuantLib's
-    // order, before its own check of the y values.
+    // The constructor's own checks: QuantLib's CubicInterpolationImpl refuses too few points for a Lagrange condition,
+    // a not-a-knot condition (QuantLib's master's, #2888) or Akima's scheme before any computation.
+    // LogCubicInterpolation runs them on its inner cubic's behalf, in QuantLib's order, before its own check of the y
+    // values.
     internal static void CheckPoints(
         int points,
         CubicInterpolationDerivativeApprox da,
@@ -156,6 +159,22 @@ public class CubicInterpolation : Interpolation
             }
         }
 
+        // QuantLib's fix after v1.44 (#2888): with three points, not-a-knot conditions at both ends constrain the same
+        // knot and the system is singular; under the spline alone, the one scheme that reads the conditions, where
+        // QuantLib's master counts them under every scheme (Divergences/CubicNotAKnotTwoPointsTests.cs)
+        if (da == CubicInterpolationDerivativeApprox.Spline
+            && (leftCondition == CubicInterpolationBoundaryCondition.NotAKnot
+                || rightCondition == CubicInterpolationBoundaryCondition.NotAKnot))
+        {
+            int required = leftCondition == CubicInterpolationBoundaryCondition.NotAKnot
+                && rightCondition == CubicInterpolationBoundaryCondition.NotAKnot ? 4 : 3;
+            if (!(points >= required))
+            {
+                throw new ArgumentException(
+                    $"not-a-knot boundary condition requires at least {required} points ({points} are given)", "x");
+            }
+        }
+
         if (da == CubicInterpolationDerivativeApprox.Akima)
         {
             if (!(points >= 4))
@@ -165,10 +184,9 @@ public class CubicInterpolation : Interpolation
         }
     }
 
-    // What the cubic refuses for a point count alone, in QuantLib's order: templateImpl's minimum, the constructor's
-    // checks, then nanoql's refusal of a not-a-knot spline end on two points, which reads the configuration and the
-    // count only. A left Periodic end, which QuantLib's update refuses before it reaches the right end, keeps that
-    // refusal, so the not-a-knot right end isn't refused here then. Cubic.CheckPoints and LogCubic.CheckPoints run it.
+    // What the cubic refuses for a point count alone, in QuantLib's order: templateImpl's minimum, then the
+    // constructor's checks, which read the configuration and the count only. Cubic.CheckPoints and LogCubic.CheckPoints
+    // run it.
     internal static void CheckConstruction(
         int points,
         CubicInterpolationDerivativeApprox da,
@@ -177,13 +195,6 @@ public class CubicInterpolation : Interpolation
     {
         CheckRequiredPoints(points, Cubic.RequiredPoints);
         CheckPoints(points, da, leftCondition, rightCondition);
-        if (da == CubicInterpolationDerivativeApprox.Spline
-            && (leftCondition == CubicInterpolationBoundaryCondition.NotAKnot
-                || (leftCondition != CubicInterpolationBoundaryCondition.Periodic
-                    && rightCondition == CubicInterpolationBoundaryCondition.NotAKnot)))
-        {
-            RequireNotAKnotPoints(points);
-        }
     }
 
     /// <inheritdoc/>
@@ -217,17 +228,6 @@ public class CubicInterpolation : Interpolation
         int j = Locate(x);
         double dx = x - X[j];
         return (2.0 * b[j]) + (6.0 * c[j] * dx);
-    }
-
-    // A divergence: on 2 points QuantLib's not-a-knot rows read dx_[1] and dx_[n_-3], past the end of dx_
-    // (cubicinterpolation.hpp:428-431,460-463), a result C++ leaves undefined. nanoql refuses it, in each end's own case,
-    // so a left end QuantLib refuses first (Periodic) keeps QuantLib's refusal.
-    private static void RequireNotAKnotPoints(int n)
-    {
-        if (n < 3)
-        {
-            throw new NanoQLException("the not-a-knot end condition needs at least 3 points");
-        }
     }
 
     // std::min and std::max: the first argument unless the second compares smaller (larger).
@@ -281,8 +281,6 @@ public class CubicInterpolation : Interpolation
             switch (leftType)
             {
                 case CubicInterpolationBoundaryCondition.NotAKnot:
-                    RequireNotAKnotPoints(n);
-
                     // ignoring end condition value
                     L.SetFirstRow(dx[1] * (dx[1] + dx[0]), (dx[0] + dx[1]) * (dx[0] + dx[1]));
                     tmp[0] = (S[0] * dx[1] * ((2.0 * dx[1]) + (3.0 * dx[0]))) + (S[1] * dx[0] * dx[0]);
@@ -310,8 +308,6 @@ public class CubicInterpolation : Interpolation
             switch (rightType)
             {
                 case CubicInterpolationBoundaryCondition.NotAKnot:
-                    RequireNotAKnotPoints(n);
-
                     // ignoring end condition value
                     L.SetLastRow(
                         -(dx[n - 2] + dx[n - 3]) * (dx[n - 2] + dx[n - 3]),
@@ -657,7 +653,8 @@ public class CubicInterpolation : Interpolation
                 // intermediate points
                 for (int i = 1; i < n - 1; ++i)
                 {
-                    if (S[i - 1] * S[i] < 0.0)
+                    // QuantLib's fix after v1.44 (#2952): a zero slope next to a flat segment, as Harmonic
+                    if (S[i - 1] * S[i] <= 0.0)
                     {
                         // slope changes sign at point
                         tmp[i] = 0.0;

@@ -45,9 +45,11 @@ public class InterpolationErrorTests
             "this end condition is not implemented yet",
             () => new CubicInterpolation(X, Y, spline, false, second, 0.0, CubicInterpolationBoundaryCondition.Periodic, 0.0));
 
-        // The spline's system with a zero pivot: two not-a-knot ends on 3 points (TridiagonalOperator's refusal).
-        AssertFailure(
-            "division by zero",
+        // Two not-a-knot ends on 3 points, whose system QuantLib 1.44 finds singular (TridiagonalOperator's "division
+        // by zero"): QuantLib's master's count refuses them at construction (#2888).
+        AssertArgument(
+            "x",
+            "not-a-knot boundary condition requires at least 4 points (3 are given)",
             () => new CubicInterpolation(
                 X,
                 Y,
