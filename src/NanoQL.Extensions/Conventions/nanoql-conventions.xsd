@@ -9,12 +9,12 @@
            targetNamespace="https://nanoql.net/schemas/conventions"
            elementFormDefault="qualified">
   <xs:annotation>
-    <xs:documentation>nanoql's market conventions: calendars, day counters, currencies, regions and indexes, named by nanoql's API, each a record whose business fields are child elements. Other tools' elements and attributes in their own namespaces are kept.</xs:documentation>
+    <xs:documentation>nanoql's market conventions: calendars, day counters, currencies, regions, indexes and instruments' conventions, named by nanoql's API, each a record whose business fields are child elements. Other tools' elements and attributes in their own namespaces are kept.</xs:documentation>
   </xs:annotation>
 
   <xs:element name="Conventions">
     <xs:annotation>
-      <xs:documentation>A set of convention records, in any order, as a document's root or inside another document. Each name is unique within its value kind: calendars, day counters, currencies, regions, indexes; an alias's name among all of them.</xs:documentation>
+      <xs:documentation>A set of convention records, in any order, as a document's root or inside another document. Each name is unique within its value kind: calendars, day counters, currencies, regions, indexes, and each instrument convention kind; an alias's name among the calendars, day counters, currencies, regions and indexes.</xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -33,6 +33,21 @@
         <xs:element ref="OvernightIndexedSwapIndex"/>
         <xs:element ref="ZeroInflationIndex"/>
         <xs:element ref="YoYInflationIndex"/>
+        <xs:element ref="ScheduleConvention"/>
+        <xs:element ref="SwapConvention"/>
+        <xs:element ref="OisConvention"/>
+        <xs:element ref="CdsConvention"/>
+        <xs:element ref="ZeroCouponInflationSwapConvention"/>
+        <xs:element ref="YearOnYearInflationSwapConvention"/>
+        <xs:element ref="CrossCurrencyBasisSwapConvention"/>
+        <xs:element ref="CrossCurrencySwapConvention"/>
+        <xs:element ref="FxSwapConvention"/>
+        <xs:element ref="CapFloorConvention"/>
+        <xs:element ref="SwaptionConvention"/>
+        <xs:element ref="CmsConvention"/>
+        <xs:element ref="MultipleResetsSwapConvention"/>
+        <xs:element ref="YoYInflationCapFloorConvention"/>
+        <xs:element ref="BondConvention"/>
         <xs:element ref="Alias"/>
         <xs:any namespace="##other" processContents="lax"/>
       </xs:choice>
@@ -56,6 +71,66 @@
     </xs:unique>
     <xs:unique name="IndexNames">
       <xs:selector xpath="c:IborIndex|c:IborFamily|c:OvernightIndex|c:SwapIndex|c:OvernightIndexedSwapIndex|c:ZeroInflationIndex|c:YoYInflationIndex|c:Alias"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="ScheduleConventionNames">
+      <xs:selector xpath="c:ScheduleConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="SwapConventionNames">
+      <xs:selector xpath="c:SwapConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="OisConventionNames">
+      <xs:selector xpath="c:OisConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="CdsConventionNames">
+      <xs:selector xpath="c:CdsConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="ZeroCouponInflationSwapConventionNames">
+      <xs:selector xpath="c:ZeroCouponInflationSwapConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="YearOnYearInflationSwapConventionNames">
+      <xs:selector xpath="c:YearOnYearInflationSwapConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="CrossCurrencyBasisSwapConventionNames">
+      <xs:selector xpath="c:CrossCurrencyBasisSwapConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="CrossCurrencySwapConventionNames">
+      <xs:selector xpath="c:CrossCurrencySwapConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="FxSwapConventionNames">
+      <xs:selector xpath="c:FxSwapConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="CapFloorConventionNames">
+      <xs:selector xpath="c:CapFloorConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="SwaptionConventionNames">
+      <xs:selector xpath="c:SwaptionConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="CmsConventionNames">
+      <xs:selector xpath="c:CmsConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="MultipleResetsSwapConventionNames">
+      <xs:selector xpath="c:MultipleResetsSwapConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="YoYInflationCapFloorConventionNames">
+      <xs:selector xpath="c:YoYInflationCapFloorConvention"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="BondConventionNames">
+      <xs:selector xpath="c:BondConvention"/>
       <xs:field xpath="@name"/>
     </xs:unique>
   </xs:element>
@@ -642,6 +717,1096 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="ScheduleConvention">
+    <xs:annotation>
+      <xs:documentation>A schedule's conventions (ScheduleConvention), which feed MakeSchedule; the dates are the trade's.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Tenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The schedule's tenor.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Frequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The schedule's frequency, in place of its tenor.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Convention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="TerminationDateConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The termination date's business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Rule" type="DateGenerationRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The date-generation rule.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="EndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the dates stay at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="SwapConvention">
+    <xs:annotation>
+      <xs:documentation>A fixed-against-Ibor swap's conventions (SwapConvention), which feed MakeVanillaSwap and SwapRateHelper; or, named MakeVanillaSwap. and a currency's code, the builder's defaults for that currency.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="SettlementDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The settlement days; the index's value date by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="SettlementCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The calendar the settlement days are counted on; the floating leg's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's tenor.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegTenorThreshold" type="SwapTenorThreshold" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's tenor at the swap tenors on one side of a threshold; a currency's default record only.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's calendar's name; the index's fixing calendar by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegTerminationDateConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's termination-date convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegRule" type="DateGenerationRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's date-generation rule.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegEndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the fixed leg's dates stay at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Index" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's Ibor index's name, or an Ibor family's; none in a currency's default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="IndexTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The tenor of the Ibor family Index names; none for an index.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's tenor; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's calendar's name; the index's fixing calendar by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's business-day convention; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegTerminationDateConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's termination-date convention; the index's convention by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegRule" type="DateGenerationRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's date-generation rule.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegEndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the floating leg's dates stay at month end; the maturity's default too.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating coupons' day counter's name; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment convention; the floating schedule's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="OisConvention">
+    <xs:annotation>
+      <xs:documentation>An overnight-indexed swap's conventions (OisConvention), which feed MakeOIS and OISRateHelper; or, named MakeOIS, or MakeOIS. and an index's class name, the builder's defaults.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Index" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The overnight index's name; none in a default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="SettlementDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The settlement days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="SettlementCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The calendar the settlement days are counted on; the overnight leg's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentLag" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment lag, in business days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment dates' business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentFrequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Both legs' payment frequency, the fixed leg's unless FixedLegFrequency is given.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment calendar's name; each leg's schedule calendar by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegFrequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's payment frequency.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's calendar's name; the index's fixing calendar by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegTerminationDateConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's termination-date convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegRule" type="DateGenerationRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's date-generation rule.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegEndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the fixed leg's dates stay at month end; by default, with neither leg's given, whether the start date is at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's day counter's name; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="OvernightLegCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The overnight leg's calendar's name; the index's fixing calendar by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="OvernightLegConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The overnight leg's business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="OvernightLegTerminationDateConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The overnight leg's termination-date convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="OvernightLegRule" type="DateGenerationRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The overnight leg's date-generation rule.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="OvernightLegEndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the overnight leg's dates and the maturity stay at month end; by default, with neither leg's given, whether the start date is at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="TelescopicValueDates" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the value dates are telescopic.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Averaging" type="RateAveragingType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the overnight rates are compounded or averaged.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="LookbackDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The lookback days; none by default, the coupons fixing by the index's fixing days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="LockoutDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The lockout days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ObservationShift" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the observation shift applies.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CdsConvention">
+    <xs:annotation>
+      <xs:documentation>A credit default swap's conventions (CdsConvention), which feed MakeCreditDefaultSwap, SpreadCdsHelper and UpfrontCdsHelper; or, named MakeCreditDefaultSwap, the builder's defaults.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="SettlementDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The helpers' settlement days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CouponFrequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The coupon frequency.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The business-day convention of the schedule and the payments.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Rule" type="DateGenerationRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The date-generation rule.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="DayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The accrual's day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="LastPeriodDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The last period's accrual day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="SettlesAccrual" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the accrued coupon is due on a default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaysAtDefaultTime" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the payments a default triggers are due at the default time.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="RebatesAccrual" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the seller pays the accrued current coupon at the cash settlement date.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CashSettlementDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The business days from the trade date to the cash settlement date.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PricingModel" type="CreditDefaultSwapPricingModel" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The model the helpers price with.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ZeroCouponInflationSwapConvention">
+    <xs:annotation>
+      <xs:documentation>A zero-coupon inflation swap's conventions (ZeroCouponInflationSwapConvention), which feed ZeroCouponInflationSwap and ZeroCouponInflationSwapHelper.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Index" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The zero inflation index's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ObservationLag" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The observation lag.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Interpolation" type="CPIInterpolationType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>How the index is observed.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Convention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="DayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="InflationCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The inflation leg's calendar's name; the fixed leg's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="InflationConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The inflation leg's business-day convention; the fixed leg's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AdjustObservationDates" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the observation dates are adjusted.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="YearOnYearInflationSwapConvention">
+    <xs:annotation>
+      <xs:documentation>A year-on-year inflation swap's conventions (YearOnYearInflationSwapConvention), which feed YearOnYearInflationSwapHelper.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Index" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The year-on-year inflation index's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ObservationLag" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The observation lag.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Interpolation" type="CPIInterpolationType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>How the index is observed.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="DayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CrossCurrencyBasisSwapConvention">
+    <xs:annotation>
+      <xs:documentation>A cross-currency basis swap's conventions (CrossCurrencyBasisSwapConvention), which feed the constant-notional or, marked to market, the mark-to-market basis swap helper.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="FixingDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Convention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="EndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the dates stay at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="BaseCurrencyIndex" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The FX base currency leg's Ibor index's name, or an Ibor family's.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="BaseCurrencyIndexTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The tenor of the Ibor family BaseCurrencyIndex names; none for an index.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="QuoteCurrencyIndex" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The FX quote currency leg's Ibor index's name, or an Ibor family's.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="QuoteCurrencyIndexTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The tenor of the Ibor family QuoteCurrencyIndex names; none for an index.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CollateralOnBaseCurrency" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the FX base currency is the collateral currency.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="BasisOnBaseCurrencyLeg" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the basis is on the FX base currency leg.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentFrequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The base currency leg's payment frequency, and the quote currency leg's unless QuoteCurrencyPaymentFrequency is given; the index's tenor by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="QuoteCurrencyPaymentFrequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The quote currency leg's payment frequency.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentLag" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment lag, in business days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="IndexedCoupons" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the floating coupons are indexed rather than par coupons; the context's switch by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentLagOnNotionalExchanges" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the payment lag applies to the notional exchanges; constant-notional swaps only.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="MarkToMarket" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the swap is marked to market.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="BaseCurrencyLegResettable" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the FX base currency leg's notional resets; marked to market only.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FxResetFixingDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The FX reset's fixing days; marked to market only.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FxResetFixingCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The FX reset's fixing calendar's name; marked to market only.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CrossCurrencySwapConvention">
+    <xs:annotation>
+      <xs:documentation>A cross-currency fixed-against-floating swap's conventions (CrossCurrencySwapConvention), which feed the constant-notional cross-currency swap helper.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="FixingDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixing days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Convention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="EndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the dates stay at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedFrequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's frequency.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingIndex" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's Ibor index's name, or an Ibor family's.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingIndexTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The tenor of the Ibor family FloatingIndex names; none for an index.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CollateralOnFixedLeg" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the fixed leg's currency is the collateral currency.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentLag" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment lag, in business days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingPaymentFrequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's payment frequency; the index's tenor by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="IndexedCoupons" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the floating coupons are indexed rather than par coupons; the context's switch by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="FxSwapConvention">
+    <xs:annotation>
+      <xs:documentation>An FX swap's and forward's conventions (FxSwapConvention), which feed FxSwapRateHelper and FxForward.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="BaseCurrency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The base currency's code.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="QuoteCurrency" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The quote currency's code.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixingDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The spot days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Convention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="EndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the dates stay at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CollateralOnBaseCurrency" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the base currency is the collateral currency.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="TradingCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The trading calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>A forward's payment calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CapFloorConvention">
+    <xs:annotation>
+      <xs:documentation>A cap's or floor's conventions (CapFloorConvention), which feed MakeCapFloor; or, named MakeCapFloor, the builder's defaults.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Index" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The Ibor index's name, or an Ibor family's; none in the default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="IndexTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The tenor of the Ibor family Index names; none for an index.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Tenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The coupons' tenor; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The leg's calendar's name; the index's fixing calendar by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Convention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The leg's business-day convention; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="TerminationDateConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The leg's termination-date convention; the index's convention by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Rule" type="DateGenerationRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The leg's date-generation rule; the swap builder's default by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="EndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the leg's dates stay at month end; the swap builder's default by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="DayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The leg's day counter's name; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FirstCapletExcluded" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the first caplet is excluded; the default record only.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="SwaptionConvention">
+    <xs:annotation>
+      <xs:documentation>A swaption's conventions (SwaptionConvention), which feed MakeSwaption; or, named MakeSwaption, the builder's defaults.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="SwapIndex" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The swap index family's name, or an overnight-indexed swap index's; none in the default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="SettlementType" type="SettlementType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The settlement type.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="SettlementMethod" type="SettlementMethod" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The settlement method.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="OptionConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The business-day convention the option tenor is advanced by.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ExerciseCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The exercise calendar's name; the swap index's fixing calendar by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CmsConvention">
+    <xs:annotation>
+      <xs:documentation>A CMS swap's conventions (CmsConvention), which feed MakeCms; or, named MakeCms, the builder's defaults.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="SwapIndex" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The CMS leg's swap index family's name; none in the default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="SwapIndexTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The swap index's tenor.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CmsLegTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The CMS leg's tenor.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CmsLegCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The CMS leg's calendar's name; the swap index's fixing calendar by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CmsLegConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The CMS leg's business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CmsLegTerminationDateConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The CMS leg's termination-date convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CmsLegRule" type="DateGenerationRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The CMS leg's date-generation rule.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CmsLegEndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the CMS leg's dates stay at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="CmsLegDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The CMS leg's day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegIndex" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's Ibor index's name, or an Ibor family's; the swap index's own by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegIndexTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The tenor of the Ibor family FloatingLegIndex names; none for an index.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's tenor; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's calendar's name; the index's fixing calendar by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's business-day convention; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegTerminationDateConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's termination-date convention; the index's convention by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegRule" type="DateGenerationRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's date-generation rule.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegEndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the floating leg's dates stay at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FloatingLegDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The floating leg's day counter's name; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="MultipleResetsSwapConvention">
+    <xs:annotation>
+      <xs:documentation>A multiple-resets swap's conventions (MultipleResetsSwapConvention), which feed MakeMultipleResetsSwap; or, named MakeMultipleResetsSwap, the builder's defaults.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Index" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The Ibor index's name, or an Ibor family's; none in the default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="IndexTenor" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The tenor of the Ibor family Index names; none for an index.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ResetsPerCoupon" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The resets per floating coupon; none in the default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="SettlementDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The settlement days; the index's fixing days by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegFrequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's frequency; the coupons' resets times the index's tenor by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's day counter's name; the index's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixedLegConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The fixed leg's business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Averaging" type="RateAveragingType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether a coupon's resets are compounded or averaged.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="YoYInflationCapFloorConvention">
+    <xs:annotation>
+      <xs:documentation>A year-on-year inflation cap's or floor's conventions (YoYInflationCapFloorConvention), which feed MakeYoYInflationCapFloor; or, named MakeYoYInflationCapFloor, the builder's defaults.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Index" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The year-on-year inflation index's name; none in the default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ObservationLag" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The observation lag; none in the default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Interpolation" type="CPIInterpolationType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>How the index is observed; none in the default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The calendar's name; none in the default record.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The coupons' payment day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentAdjustment" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment dates' business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="FixingDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The days from the evaluation date to the start.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="BondConvention">
+    <xs:annotation>
+      <xs:documentation>A government bond market's conventions (BondConvention), which feed FixedRateBond and FixedRateBondHelper; or, named FixedRateBond, the defaults a set's bonds take; or, named BTP, the preset's conventions.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="SettlementDays" type="xs:int" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The settlement days.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Frequency" type="Frequency" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The schedule's frequency.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Calendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The schedule's calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Convention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The schedule's business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="TerminationDateConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The schedule's termination-date convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Rule" type="DateGenerationRule" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The schedule's date-generation rule.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="EndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the schedule's dates stay at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="AccrualDayCounter" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The coupons' accrual day counter's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment dates' business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PaymentCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The payment calendar's name; the schedule's by default.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Redemption" type="xs:double" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The redemption, per 100 of face.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ExCouponPeriod" type="Period" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The ex-coupon period.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ExCouponCalendar" type="Name" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The ex-coupon period's calendar's name.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ExCouponConvention" type="BusinessDayConvention" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>The ex-coupon dates' business-day convention.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ExCouponEndOfMonth" type="xs:boolean" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the ex-coupon dates stay at month end.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PriceType" type="BondPriceType" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Whether the helper's price is clean or dirty.</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attributeGroup ref="OptionalBase"/>
+    </xs:complexType>
+  </xs:element>
+
   <xs:attributeGroup name="OptionalBase">
     <xs:attribute name="name" type="Name" use="required">
       <xs:annotation>
@@ -873,4 +2038,107 @@
       <xs:enumeration value="NONE"/>
     </xs:restriction>
   </xs:simpleType>
+
+  <xs:simpleType name="BondPriceType">
+    <xs:annotation>
+      <xs:documentation>Whether a bond's quoted price is clean or dirty.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Dirty"/>
+      <xs:enumeration value="Clean"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CPIInterpolationType">
+    <xs:annotation>
+      <xs:documentation>How an inflation index is observed between its fixings.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Flat"/>
+      <xs:enumeration value="Linear"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CreditDefaultSwapPricingModel">
+    <xs:annotation>
+      <xs:documentation>The model a credit default swap helper prices with.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Midpoint"/>
+      <xs:enumeration value="ISDA"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="DateGenerationRule">
+    <xs:annotation>
+      <xs:documentation>A schedule's date-generation rule, by nanoql's names.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Backward"/>
+      <xs:enumeration value="Forward"/>
+      <xs:enumeration value="Zero"/>
+      <xs:enumeration value="ThirdWednesday"/>
+      <xs:enumeration value="ThirdWednesdayInclusive"/>
+      <xs:enumeration value="Twentieth"/>
+      <xs:enumeration value="TwentiethIMM"/>
+      <xs:enumeration value="OldCDS"/>
+      <xs:enumeration value="CDS"/>
+      <xs:enumeration value="CDS2015"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="SettlementMethod">
+    <xs:annotation>
+      <xs:documentation>A swaption's settlement method.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="PhysicalOTC"/>
+      <xs:enumeration value="PhysicalCleared"/>
+      <xs:enumeration value="CollateralizedCashPrice"/>
+      <xs:enumeration value="ParYieldCurve"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="SettlementType">
+    <xs:annotation>
+      <xs:documentation>A swaption's settlement type.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="Physical"/>
+      <xs:enumeration value="Cash"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="SwapTenorComparison">
+    <xs:annotation>
+      <xs:documentation>How a swap's tenor compares with a threshold.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="AtMost"/>
+      <xs:enumeration value="AtLeast"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="SwapTenorThreshold">
+    <xs:annotation>
+      <xs:documentation>A currency's fixed leg tenor at the swap tenors on one side of a threshold.</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Comparison" type="SwapTenorComparison">
+        <xs:annotation>
+          <xs:documentation>How the swap's tenor compares with the threshold.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="SwapTenor" type="Period">
+        <xs:annotation>
+          <xs:documentation>The threshold.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="FixedLegTenor" type="Period">
+        <xs:annotation>
+          <xs:documentation>The fixed leg's tenor where the comparison holds.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
 </xs:schema>

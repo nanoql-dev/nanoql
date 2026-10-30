@@ -3,6 +3,7 @@
 // Own-tested: Extensions/ConventionRecordsTests.cs (nanoql's own description of built objects as records)
 
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using NanoQL.Indexes;
 using NanoQL.Time;
 
@@ -21,6 +22,8 @@ namespace NanoQL.Extensions.Conventions;
 /// A currency is one of QuantLib's by its code, its name and numeric code QuantLib's, since the three are its identity:
 /// one that differs from the set's in its other fields is described as an override of its code, the set holding one
 /// record per code, and one whose name or numeric code isn't QuantLib's is refused.
+/// An instrument convention is records already: it is described as its record with every field its base chain gives,
+/// under the name, its names those of the set it was resolved in.
 /// </remarks>
 public static class ConventionRecords
 {
@@ -84,6 +87,173 @@ public static class ConventionRecords
         var d = new Describer(ConventionNames.Checked(name, nameof(name)), set ?? ConventionSet.QuantLib);
         d.Currency(name, value);
         return d.Snapshot;
+    }
+
+    /// <summary>The record describing a schedule convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, ScheduleConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a swap convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, SwapConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing an overnight-indexed swap convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, OisConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a credit default swap convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, CdsConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a zero-coupon inflation swap convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, ZeroCouponInflationSwapConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a year-on-year inflation swap convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, YearOnYearInflationSwapConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a cross-currency basis swap convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    [Experimental("NQL0001")]
+    public static ConventionSnapshot Describe(string name, CrossCurrencyBasisSwapConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a cross-currency fixed-against-floating swap convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    [Experimental("NQL0001")]
+    public static ConventionSnapshot Describe(string name, CrossCurrencySwapConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing an FX swap and forward convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, FxSwapConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a cap and floor convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, CapFloorConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a swaption convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, SwaptionConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a CMS swap convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, CmsConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a multiple-resets swap convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, MultipleResetsSwapConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a year-on-year inflation cap and floor convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, YoYInflationCapFloorConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
+    }
+
+    /// <summary>The record describing a government bond market's convention under a name: its record with every field its base chain gives.</summary>
+    /// <param name="name">The name the convention takes.</param>
+    /// <param name="value">The convention.</param>
+    /// <returns>The record, whose names resolve in the convention's set.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="value"/> is null.</exception>
+    public static ConventionSnapshot Describe(string name, BondConvention value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return ConventionSnapshot.Empty.Add(value.Record.Named(ConventionNames.Checked(name, nameof(name))));
     }
 
     // Writes records for a value and its parts, each part a preset's name where it equals one.

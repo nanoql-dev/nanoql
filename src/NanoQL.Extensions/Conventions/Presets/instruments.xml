@@ -1,0 +1,159 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Conventions xmlns="https://nanoql.net/schemas/conventions">
+  <SwapConvention name="MakeVanillaSwap.AUD">
+    <FixedLegTenor>3M</FixedLegTenor>
+    <FixedLegTenorThreshold>
+      <Comparison>AtLeast</Comparison>
+      <SwapTenor>4Y</SwapTenor>
+      <FixedLegTenor>6M</FixedLegTenor>
+    </FixedLegTenorThreshold>
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <FixedLegTerminationDateConvention>ModifiedFollowing</FixedLegTerminationDateConvention>
+    <FixedLegRule>Backward</FixedLegRule>
+    <FixedLegEndOfMonth>false</FixedLegEndOfMonth>
+    <FixedLegDayCounter>Actual365Fixed</FixedLegDayCounter>
+    <FloatingLegRule>Backward</FloatingLegRule>
+    <FloatingLegEndOfMonth>false</FloatingLegEndOfMonth>
+  </SwapConvention>
+  <SwapConvention name="MakeVanillaSwap.CHF">
+    <FixedLegTenor>1Y</FixedLegTenor>
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <FixedLegTerminationDateConvention>ModifiedFollowing</FixedLegTerminationDateConvention>
+    <FixedLegRule>Backward</FixedLegRule>
+    <FixedLegEndOfMonth>false</FixedLegEndOfMonth>
+    <FixedLegDayCounter>Thirty360.BondBasis</FixedLegDayCounter>
+    <FloatingLegRule>Backward</FloatingLegRule>
+    <FloatingLegEndOfMonth>false</FloatingLegEndOfMonth>
+  </SwapConvention>
+  <SwapConvention name="MakeVanillaSwap.EUR">
+    <FixedLegTenor>1Y</FixedLegTenor>
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <FixedLegTerminationDateConvention>ModifiedFollowing</FixedLegTerminationDateConvention>
+    <FixedLegRule>Backward</FixedLegRule>
+    <FixedLegEndOfMonth>false</FixedLegEndOfMonth>
+    <FixedLegDayCounter>Thirty360.BondBasis</FixedLegDayCounter>
+    <FloatingLegRule>Backward</FloatingLegRule>
+    <FloatingLegEndOfMonth>false</FloatingLegEndOfMonth>
+  </SwapConvention>
+  <SwapConvention name="MakeVanillaSwap.GBP">
+    <FixedLegTenor>6M</FixedLegTenor>
+    <FixedLegTenorThreshold>
+      <Comparison>AtMost</Comparison>
+      <SwapTenor>1Y</SwapTenor>
+      <FixedLegTenor>1Y</FixedLegTenor>
+    </FixedLegTenorThreshold>
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <FixedLegTerminationDateConvention>ModifiedFollowing</FixedLegTerminationDateConvention>
+    <FixedLegRule>Backward</FixedLegRule>
+    <FixedLegEndOfMonth>false</FixedLegEndOfMonth>
+    <FixedLegDayCounter>Actual365Fixed</FixedLegDayCounter>
+    <FloatingLegRule>Backward</FloatingLegRule>
+    <FloatingLegEndOfMonth>false</FloatingLegEndOfMonth>
+  </SwapConvention>
+  <SwapConvention name="MakeVanillaSwap.HKD">
+    <FixedLegTenor>3M</FixedLegTenor>
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <FixedLegTerminationDateConvention>ModifiedFollowing</FixedLegTerminationDateConvention>
+    <FixedLegRule>Backward</FixedLegRule>
+    <FixedLegEndOfMonth>false</FixedLegEndOfMonth>
+    <FixedLegDayCounter>Actual365Fixed</FixedLegDayCounter>
+    <FloatingLegRule>Backward</FloatingLegRule>
+    <FloatingLegEndOfMonth>false</FloatingLegEndOfMonth>
+  </SwapConvention>
+  <SwapConvention name="MakeVanillaSwap.JPY">
+    <FixedLegTenor>6M</FixedLegTenor>
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <FixedLegTerminationDateConvention>ModifiedFollowing</FixedLegTerminationDateConvention>
+    <FixedLegRule>Backward</FixedLegRule>
+    <FixedLegEndOfMonth>false</FixedLegEndOfMonth>
+    <FixedLegDayCounter>Actual365Fixed</FixedLegDayCounter>
+    <FloatingLegRule>Backward</FloatingLegRule>
+    <FloatingLegEndOfMonth>false</FloatingLegEndOfMonth>
+  </SwapConvention>
+  <SwapConvention name="MakeVanillaSwap.SEK">
+    <FixedLegTenor>1Y</FixedLegTenor>
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <FixedLegTerminationDateConvention>ModifiedFollowing</FixedLegTerminationDateConvention>
+    <FixedLegRule>Backward</FixedLegRule>
+    <FixedLegEndOfMonth>false</FixedLegEndOfMonth>
+    <FixedLegDayCounter>Thirty360.BondBasis</FixedLegDayCounter>
+    <FloatingLegRule>Backward</FloatingLegRule>
+    <FloatingLegEndOfMonth>false</FloatingLegEndOfMonth>
+  </SwapConvention>
+  <SwapConvention name="MakeVanillaSwap.THB">
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <FixedLegTerminationDateConvention>ModifiedFollowing</FixedLegTerminationDateConvention>
+    <FixedLegRule>Backward</FixedLegRule>
+    <FixedLegEndOfMonth>false</FixedLegEndOfMonth>
+    <FixedLegDayCounter>Actual365Fixed</FixedLegDayCounter>
+    <FloatingLegRule>Backward</FloatingLegRule>
+    <FloatingLegEndOfMonth>false</FloatingLegEndOfMonth>
+  </SwapConvention>
+  <SwapConvention name="MakeVanillaSwap.USD">
+    <FixedLegTenor>1Y</FixedLegTenor>
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <FixedLegTerminationDateConvention>ModifiedFollowing</FixedLegTerminationDateConvention>
+    <FixedLegRule>Backward</FixedLegRule>
+    <FixedLegEndOfMonth>false</FixedLegEndOfMonth>
+    <FixedLegDayCounter>Actual360</FixedLegDayCounter>
+    <FloatingLegRule>Backward</FloatingLegRule>
+    <FloatingLegEndOfMonth>false</FloatingLegEndOfMonth>
+  </SwapConvention>
+  <OisConvention name="MakeOIS">
+    <SettlementDays>2</SettlementDays>
+    <PaymentLag>0</PaymentLag>
+    <PaymentConvention>Following</PaymentConvention>
+    <PaymentFrequency>Annual</PaymentFrequency>
+    <FixedLegFrequency>Annual</FixedLegFrequency>
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <FixedLegTerminationDateConvention>ModifiedFollowing</FixedLegTerminationDateConvention>
+    <FixedLegRule>Backward</FixedLegRule>
+    <OvernightLegConvention>ModifiedFollowing</OvernightLegConvention>
+    <OvernightLegTerminationDateConvention>ModifiedFollowing</OvernightLegTerminationDateConvention>
+    <OvernightLegRule>Backward</OvernightLegRule>
+    <TelescopicValueDates>false</TelescopicValueDates>
+    <Averaging>Compound</Averaging>
+    <LockoutDays>0</LockoutDays>
+    <ObservationShift>false</ObservationShift>
+  </OisConvention>
+  <OisConvention name="MakeOIS.Corra" base="MakeOIS">
+    <SettlementDays>1</SettlementDays>
+  </OisConvention>
+  <OisConvention name="MakeOIS.Sonia" base="MakeOIS">
+    <SettlementDays>0</SettlementDays>
+  </OisConvention>
+  <CdsConvention name="MakeCreditDefaultSwap">
+    <Calendar>WeekendsOnly</Calendar>
+    <CouponFrequency>Quarterly</CouponFrequency>
+    <PaymentConvention>Following</PaymentConvention>
+    <Rule>CDS</Rule>
+    <DayCounter>Actual360</DayCounter>
+    <LastPeriodDayCounter>Actual360.IncludeLastDay</LastPeriodDayCounter>
+    <SettlesAccrual>true</SettlesAccrual>
+    <PaysAtDefaultTime>true</PaysAtDefaultTime>
+    <RebatesAccrual>true</RebatesAccrual>
+    <CashSettlementDays>3</CashSettlementDays>
+  </CdsConvention>
+  <CapFloorConvention name="MakeCapFloor">
+    <FirstCapletExcluded>true</FirstCapletExcluded>
+  </CapFloorConvention>
+  <SwaptionConvention name="MakeSwaption">
+    <SettlementType>Physical</SettlementType>
+    <SettlementMethod>PhysicalOTC</SettlementMethod>
+    <OptionConvention>ModifiedFollowing</OptionConvention>
+  </SwaptionConvention>
+  <MultipleResetsSwapConvention name="MakeMultipleResetsSwap">
+    <FixedLegConvention>ModifiedFollowing</FixedLegConvention>
+    <Averaging>Compound</Averaging>
+  </MultipleResetsSwapConvention>
+  <BondConvention name="FixedRateBond">
+    <PaymentConvention>Following</PaymentConvention>
+    <Redemption>100</Redemption>
+    <ExCouponConvention>Unadjusted</ExCouponConvention>
+    <ExCouponEndOfMonth>false</ExCouponEndOfMonth>
+    <PriceType>Clean</PriceType>
+  </BondConvention>
+</Conventions>

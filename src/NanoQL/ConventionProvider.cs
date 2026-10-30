@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using NanoQL.Indexes;
+using NanoQL.Instruments;
 using NanoQL.Time;
 
 namespace NanoQL;
@@ -28,9 +29,11 @@ namespace NanoQL;
 /// <para>
 /// The provider is read only when an object is built, never while it prices, so a price doesn't depend on the scope
 /// it runs in. An index keeps the provider it was built with, and every clone of it keeps the same one. A market
-/// builder takes the provider of its index, and builds inside it. An object that builds a builder inside passes its
-/// own provider to it: a swap index's underlying swap takes the swap index's provider, even on an Ibor index built
-/// under another, so its defaults are the swap index's provider's and its floating leg's conventions the Ibor index's.
+/// builder takes the provider of its index, reads its defaults for the options it isn't given from it when it builds,
+/// and builds inside it; the CDS builder, with no index, takes the provider current when it is created. An object that
+/// builds a builder inside passes its own provider to it: a swap index's underlying swap takes the swap index's
+/// provider, even on an Ibor index built under another, so its defaults are the swap index's provider's and its
+/// floating leg's conventions the Ibor index's.
 /// Whatever is built on an index after its construction follows the index: a swap index's underlying swap, a rate
 /// helper's swap when a bootstrap re-dates it, an engine's auxiliary swaps. An object that builds after its
 /// construction with no index to follow keeps <see cref="Current"/> from its construction. QuantLib's registry
@@ -45,8 +48,8 @@ namespace NanoQL;
 /// </para>
 /// <para>
 /// A provider of a user's own (a database's, a service's) derives from this class and overrides the members whose
-/// values it configures. Each member takes the preset's name and its reference and returns the values to use, and the
-/// base class returns the reference. Every member is called inside the provider's own scope.
+/// values it configures. Each member takes the preset's or the builder's name and its reference and returns the values
+/// to use, and the base class returns the reference. Every member is called inside the provider's own scope.
 /// </para>
 /// </remarks>
 public abstract class ConventionProvider
@@ -207,6 +210,94 @@ public abstract class ConventionProvider
         return reference();
     }
 
+    /// <summary>The defaults a <see cref="MakeVanillaSwap"/> takes on an index of a currency.</summary>
+    /// <param name="currency">The index's currency, or <see langword="null"/> for none.</param>
+    /// <param name="reference">Builds QuantLib's defaults for the currency.</param>
+    /// <returns>The defaults; a fixed leg's tenor or day counter left <see langword="null"/> is unknown for the
+    /// currency, which the builder refuses when it needs one. A threshold is compared with the swap's tenor, or, with
+    /// a termination date given, with QuantLib's approximate months of the swap's length, (12 days + 182) / 365, when
+    /// the builder needs its fixed leg's tenor.</returns>
+    public virtual VanillaSwapDefaults ResolveVanillaSwapDefaults(Currency? currency, Func<VanillaSwapDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The defaults a <see cref="MakeOIS"/> takes on an overnight index.</summary>
+    /// <param name="index">The index's class name (<c>Sonia</c>, <c>OvernightIndex</c>), by which QuantLib chooses the
+    /// settlement days.</param>
+    /// <param name="reference">Builds QuantLib's defaults for the class.</param>
+    /// <returns>The defaults.</returns>
+    public virtual OisDefaults ResolveOisDefaults(string index, Func<OisDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The defaults a <see cref="MakeCreditDefaultSwap"/> takes.</summary>
+    /// <param name="reference">Builds QuantLib's defaults.</param>
+    /// <returns>The defaults.</returns>
+    public virtual CdsDefaults ResolveCdsDefaults(Func<CdsDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The defaults a <see cref="MakeCapFloor"/> takes.</summary>
+    /// <param name="reference">Builds QuantLib's defaults.</param>
+    /// <returns>The defaults.</returns>
+    public virtual CapFloorDefaults ResolveCapFloorDefaults(Func<CapFloorDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The defaults a <see cref="MakeSwaption"/> takes.</summary>
+    /// <param name="reference">Builds QuantLib's defaults.</param>
+    /// <returns>The defaults.</returns>
+    public virtual SwaptionDefaults ResolveSwaptionDefaults(Func<SwaptionDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The defaults a <see cref="MakeCms"/> takes.</summary>
+    /// <param name="reference">Builds QuantLib's defaults.</param>
+    /// <returns>The defaults.</returns>
+    public virtual CmsDefaults ResolveCmsDefaults(Func<CmsDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The defaults a <see cref="MakeMultipleResetsSwap"/> takes.</summary>
+    /// <param name="reference">Builds QuantLib's defaults.</param>
+    /// <returns>The defaults.</returns>
+    public virtual MultipleResetsSwapDefaults ResolveMultipleResetsSwapDefaults(Func<MultipleResetsSwapDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The defaults a <see cref="MakeYoYInflationCapFloor"/> takes.</summary>
+    /// <param name="reference">Builds QuantLib's defaults.</param>
+    /// <returns>The defaults.</returns>
+    public virtual YoYInflationCapFloorDefaults ResolveYoYInflationCapFloorDefaults(Func<YoYInflationCapFloorDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
+    /// <summary>The conventions of a fixed-rate bond preset.</summary>
+    /// <param name="preset">The preset's class name (<c>BTP</c>).</param>
+    /// <param name="reference">Builds QuantLib's conventions.</param>
+    /// <returns>The conventions the bond is built on; its terms are its constructor's arguments.</returns>
+    public virtual BondConventions ResolveBond(string preset, Func<BondConventions> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return reference();
+    }
+
     // The presets' reads, each of Current once, inside its scope.
     internal static CalendarEdits ReadCalendarEdits(string preset)
     {
@@ -303,6 +394,25 @@ public abstract class ConventionProvider
         using (Use(provider))
         {
             return (resolve(provider) ?? throw new NanoQLException($"no conventions for {what}"), provider);
+        }
+    }
+
+    // A market builder's defaults from its provider, read inside the provider's scope when the builder builds.
+    internal static T ReadDefaults<T>(ConventionProvider provider, Func<ConventionProvider, T?> resolve, string what)
+        where T : class
+    {
+        using (Use(provider))
+        {
+            return resolve(provider) ?? throw new NanoQLException($"no defaults for {what}");
+        }
+    }
+
+    internal static BondConventions ReadBond(string preset, Func<BondConventions> reference)
+    {
+        ConventionProvider provider = Current;
+        using (Use(provider))
+        {
+            return provider.ResolveBond(preset, reference) ?? throw new NanoQLException($"no conventions for the {preset} bond");
         }
     }
 

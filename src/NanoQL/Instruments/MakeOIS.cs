@@ -25,7 +25,9 @@ namespace NanoQL.Instruments;
 /// the context for the evaluation date the default start date counts from.
 /// </para>
 /// <para>
-/// The default settlement days test the index's type, as QuantLib's builder does: 0 for <see cref="Sonia"/>, 1 for
+/// An option the builder isn't given that QuantLib's builder fixes takes the builder's provider's default for the
+/// index's class (<see cref="Defaults"/>), read when the swap is built: QuantLib's values with nothing configured. Its
+/// settlement days test the index's type, as QuantLib's builder does: 0 for <see cref="Sonia"/>, 1 for
 /// <see cref="Corra"/> and 2 for any other index, so an index cloned from SONIA, a plain <see cref="OvernightIndex"/>,
 /// settles in 2 days.
 /// </para>
@@ -84,29 +86,27 @@ public sealed record MakeOIS
 
     private Calendar? SettlementCalendar { get; init; }
 
-    private Frequency FixedPaymentFrequency { get; init; } = Frequency.Annual;
+    private Frequency? FixedPaymentFrequency { get; init; }
 
-    private Frequency OvernightPaymentFrequency { get; init; } = Frequency.Annual;
+    private Frequency? OvernightPaymentFrequency { get; init; }
 
     private Calendar? PaymentCalendar { get; init; }
 
-    private BusinessDayConvention PaymentAdjustment { get; init; } = BusinessDayConvention.Following;
+    private BusinessDayConvention? PaymentAdjustment { get; init; }
 
-    private int PaymentLag { get; init; }
+    private int? PaymentLag { get; init; }
 
-    private BusinessDayConvention FixedConvention { get; init; } = BusinessDayConvention.ModifiedFollowing;
+    private BusinessDayConvention? FixedConvention { get; init; }
 
-    private BusinessDayConvention FixedTerminationDateConvention { get; init; } =
-        BusinessDayConvention.ModifiedFollowing;
+    private BusinessDayConvention? FixedTerminationDateConvention { get; init; }
 
-    private BusinessDayConvention OvernightConvention { get; init; } = BusinessDayConvention.ModifiedFollowing;
+    private BusinessDayConvention? OvernightConvention { get; init; }
 
-    private BusinessDayConvention OvernightTerminationDateConvention { get; init; } =
-        BusinessDayConvention.ModifiedFollowing;
+    private BusinessDayConvention? OvernightTerminationDateConvention { get; init; }
 
-    private DateGenerationRule FixedRule { get; init; } = DateGenerationRule.Backward;
+    private DateGenerationRule? FixedRule { get; init; }
 
-    private DateGenerationRule OvernightRule { get; init; } = DateGenerationRule.Backward;
+    private DateGenerationRule? OvernightRule { get; init; }
 
     private bool FixedEndOfMonth { get; init; }
 
@@ -126,15 +126,15 @@ public sealed record MakeOIS
 
     private Func<FixedVsFloatingSwap, EvaluationContext, FixedVsFloatingSwapResults>? Engine { get; init; }
 
-    private bool TelescopicValueDates { get; init; }
+    private bool? TelescopicValueDates { get; init; }
 
-    private RateAveragingType AveragingMethod { get; init; } = RateAveragingType.Compound;
+    private RateAveragingType? AveragingMethod { get; init; }
 
     private int? LookbackDays { get; init; }
 
-    private int LockoutDays { get; init; }
+    private int? LockoutDays { get; init; }
 
-    private bool ApplyObservationShift { get; init; }
+    private bool? ApplyObservationShift { get; init; }
 
     private int? RoundingPrecision { get; init; }
 
@@ -171,8 +171,8 @@ public sealed record MakeOIS
     public MakeOIS WithForwardStart(Period f) => this with { ForwardStart = f };
 
     /// <summary>
-    /// Sets the settlement days, counted from the evaluation date on the settlement calendar; by default 0 for SONIA,
-    /// 1 for CORRA and 2 for any other index.
+    /// Sets the settlement days, counted from the evaluation date on the settlement calendar; by default the
+    /// provider's for the index's class, QuantLib's 0 for SONIA, 1 for CORRA and 2 for any other index.
     /// </summary>
     /// <param name="settlementDays">
     /// The settlement days, or <see langword="null"/>, QuantLib's <c>Null&lt;Natural&gt;()</c> and its default, for the
@@ -519,6 +519,8 @@ public sealed record MakeOIS
     /// <param name="context">The evaluation context, whose evaluation date the default start date counts from.</param>
     /// <returns>The swap, which holds no engine.</returns>
     /// <exception cref="ArgumentNullException">The context is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The provider has no defaults for the index (a set without QuantLib's
+    /// presets).</exception>
     /// <exception cref="ArgumentOutOfRangeException">The rounding precision is outside [0, 16].</exception>
     /// <exception cref="NanoQLException">
     /// Both an effective date and settlement days are set; a date is needed that QuantLib's empty calendar can't give;
@@ -531,6 +533,10 @@ public sealed record MakeOIS
 
         // Built inside the builder's provider, so what the build constructs takes its conventions.
         using IDisposable scope = ConventionProvider.Use(Provider);
+
+        // the provider's defaults, read once an option needs one
+        OisDefaults? defaults = null;
+        OisDefaults Defaults() => defaults ??= MakeOIS.Defaults(OvernightIndex, Provider);
 
         // QuantLib's empty calendar, null here, is used unchecked, as QuantLib uses it
         Calendar overnightCalendar = OvernightCalendar ?? EmptyCalendar.Instance;
@@ -549,12 +555,7 @@ public sealed record MakeOIS
         else
         {
             // settlement days: override if set, else fallback to default by index name
-            int settlementDays = SettlementDays ?? OvernightIndex switch
-            {
-                Sonia => 0,
-                Corra => 1,
-                _ => 2,
-            };
+            int settlementDays = SettlementDays ?? Defaults().SettlementDays;
 
             Date refDate = context.EvaluationDate;
 
@@ -595,28 +596,20 @@ public sealed record MakeOIS
             }
         }
 
-        Frequency fixedPaymentFrequency, overnightPaymentFrequency;
-        DateGenerationRule fixedRule, overnightRule;
-        if (FixedPaymentFrequency == Frequency.Once || FixedRule == DateGenerationRule.Zero)
+        Frequency fixedPaymentFrequency = FixedPaymentFrequency ?? Defaults().FixedLegPaymentFrequency;
+        Frequency overnightPaymentFrequency = OvernightPaymentFrequency ?? Defaults().OvernightLegPaymentFrequency;
+        DateGenerationRule fixedRule = FixedRule ?? Defaults().FixedLegRule;
+        DateGenerationRule overnightRule = OvernightRule ?? Defaults().OvernightLegRule;
+        if (fixedPaymentFrequency == Frequency.Once || fixedRule == DateGenerationRule.Zero)
         {
             fixedPaymentFrequency = Frequency.Once;
             fixedRule = DateGenerationRule.Zero;
         }
-        else
-        {
-            fixedPaymentFrequency = FixedPaymentFrequency;
-            fixedRule = FixedRule;
-        }
 
-        if (OvernightPaymentFrequency == Frequency.Once || OvernightRule == DateGenerationRule.Zero)
+        if (overnightPaymentFrequency == Frequency.Once || overnightRule == DateGenerationRule.Zero)
         {
             overnightPaymentFrequency = Frequency.Once;
             overnightRule = DateGenerationRule.Zero;
-        }
-        else
-        {
-            overnightPaymentFrequency = OvernightPaymentFrequency;
-            overnightRule = OvernightRule;
         }
 
         var fixedSchedule = new Schedule(
@@ -624,8 +617,8 @@ public sealed record MakeOIS
             endDate,
             PeriodOf(fixedPaymentFrequency),
             FixedCalendar,
-            FixedConvention,
-            FixedTerminationDateConvention,
+            FixedConvention ?? Defaults().FixedLegConvention,
+            FixedTerminationDateConvention ?? Defaults().FixedLegTerminationDateConvention,
             fixedRule,
             fixedEndOfMonth,
             context);
@@ -635,11 +628,37 @@ public sealed record MakeOIS
             endDate,
             PeriodOf(overnightPaymentFrequency),
             OvernightCalendar,
-            OvernightConvention,
-            OvernightTerminationDateConvention,
+            OvernightConvention ?? Defaults().OvernightLegConvention,
+            OvernightTerminationDateConvention ?? Defaults().OvernightLegTerminationDateConvention,
             overnightRule,
             overnightEndOfMonth,
             context);
+
+        int paymentLag = PaymentLag ?? Defaults().PaymentLag;
+        BusinessDayConvention paymentAdjustment = PaymentAdjustment ?? Defaults().PaymentAdjustment;
+        bool telescopicValueDates = TelescopicValueDates ?? Defaults().TelescopicValueDates;
+        RateAveragingType averagingMethod = AveragingMethod ?? Defaults().AveragingMethod;
+        int lockoutDays = LockoutDays ?? Defaults().LockoutDays;
+        bool applyObservationShift = ApplyObservationShift ?? Defaults().ApplyObservationShift;
+        OvernightIndexedSwap BuildSwap(double fixedRate) =>
+            new(
+                Type,
+                Nominal,
+                fixedSchedule,
+                fixedRate,
+                FixedDayCount,
+                overnightSchedule,
+                OvernightIndex,
+                OvernightSpread,
+                paymentLag,
+                paymentAdjustment,
+                PaymentCalendar,
+                telescopicValueDates,
+                averagingMethod,
+                LookbackDays,
+                lockoutDays,
+                applyObservationShift,
+                RoundingPrecision);
 
         double usedFixedRate;
         if (FixedRate is double fixedRate)
@@ -648,7 +667,7 @@ public sealed record MakeOIS
         }
         else
         {
-            OvernightIndexedSwap temp = BuildSwap(fixedSchedule, 0.0 /* fixed rate */, overnightSchedule);
+            OvernightIndexedSwap temp = BuildSwap(0.0 /* fixed rate */);
             FixedVsFloatingSwapResults results;
             if (Engine is null)
             {
@@ -666,30 +685,53 @@ public sealed record MakeOIS
             usedFixedRate = results.FairRate ?? throw new NanoQLException("result not available");
         }
 
-        return BuildSwap(fixedSchedule, usedFixedRate, overnightSchedule);
+        return BuildSwap(usedFixedRate);
     }
+
+    /// <summary>The defaults a builder takes under a provider for the options it isn't given, on an overnight
+    /// index.</summary>
+    /// <param name="overnightIndex">The index, whose class QuantLib's settlement days test.</param>
+    /// <param name="provider">The provider, an index's, which a builder on the index takes.</param>
+    /// <returns>The provider's defaults for the index's class; QuantLib's under
+    /// <see cref="ConventionProvider.QuantLib"/>.</returns>
+    /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The provider has no defaults for the index (a set without QuantLib's
+    /// presets).</exception>
+    public static OisDefaults Defaults(OvernightIndex overnightIndex, ConventionProvider provider)
+    {
+        ArgumentNullException.ThrowIfNull(overnightIndex);
+        ArgumentNullException.ThrowIfNull(provider);
+        return ConventionProvider.ReadDefaults(
+            provider,
+            p => p.ResolveOisDefaults(overnightIndex.GetType().Name, () => QuantLibDefaults(overnightIndex)),
+            $"overnight-indexed swaps on {overnightIndex.Name}");
+    }
+
+    // QuantLib's settlement days by the index's class, and the builder's constants.
+    private static OisDefaults QuantLibDefaults(OvernightIndex overnightIndex) =>
+        new(
+            overnightIndex switch
+            {
+                Sonia => 0,
+                Corra => 1,
+                _ => 2,
+            },
+            Frequency.Annual,
+            Frequency.Annual,
+            BusinessDayConvention.Following,
+            0,
+            BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing,
+            DateGenerationRule.Backward,
+            DateGenerationRule.Backward,
+            false,
+            RateAveragingType.Compound,
+            0,
+            false);
 
     // Period(Frequency) on a stored frequency: OtherFrequency, which a zero-coupon rule accepts, has no period.
     private static Period PeriodOf(Frequency f) =>
         f == Frequency.OtherFrequency ? throw new NanoQLException("unknown frequency") : new Period(f);
-
-    private OvernightIndexedSwap BuildSwap(Schedule fixedSchedule, double fixedRate, Schedule overnightSchedule) =>
-        new(
-            Type,
-            Nominal,
-            fixedSchedule,
-            fixedRate,
-            FixedDayCount,
-            overnightSchedule,
-            OvernightIndex,
-            OvernightSpread,
-            PaymentLag,
-            PaymentAdjustment,
-            PaymentCalendar,
-            TelescopicValueDates,
-            AveragingMethod,
-            LookbackDays,
-            LockoutDays,
-            ApplyObservationShift,
-            RoundingPrecision);
 }

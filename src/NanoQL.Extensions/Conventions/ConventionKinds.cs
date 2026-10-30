@@ -4,7 +4,8 @@
 namespace NanoQL.Extensions.Conventions;
 
 // The value kinds whose names are unique among their records: the calendar kinds share one, the day counter kinds
-// another; an alias joins its base's, so its name is unique among all of them.
+// another; an alias joins its base's, so its name is unique among the value kinds an alias can name. Each instrument
+// convention kind has its own, which no alias joins.
 internal static class ConventionKinds
 {
     public static ConventionKind Of(ConventionRecord record) => record switch
@@ -15,12 +16,30 @@ internal static class ConventionKinds
         RegionRecord => ConventionKind.Region,
         IborIndexRecord or IborFamilyRecord or OvernightIndexRecord or SwapIndexRecord or OvernightIndexedSwapIndexRecord
             or ZeroInflationIndexRecord or YoYInflationIndexRecord => ConventionKind.Index,
+        ScheduleConventionRecord => ConventionKind.ScheduleConvention,
+        SwapConventionRecord => ConventionKind.SwapConvention,
+        OisConventionRecord => ConventionKind.OisConvention,
+        CdsConventionRecord => ConventionKind.CdsConvention,
+        ZeroCouponInflationSwapConventionRecord => ConventionKind.ZeroCouponInflationSwapConvention,
+        YearOnYearInflationSwapConventionRecord => ConventionKind.YearOnYearInflationSwapConvention,
+        CrossCurrencyBasisSwapConventionRecord => ConventionKind.CrossCurrencyBasisSwapConvention,
+        CrossCurrencySwapConventionRecord => ConventionKind.CrossCurrencySwapConvention,
+        FxSwapConventionRecord => ConventionKind.FxSwapConvention,
+        CapFloorConventionRecord => ConventionKind.CapFloorConvention,
+        SwaptionConventionRecord => ConventionKind.SwaptionConvention,
+        CmsConventionRecord => ConventionKind.CmsConvention,
+        MultipleResetsSwapConventionRecord => ConventionKind.MultipleResetsSwapConvention,
+        YoYInflationCapFloorConventionRecord => ConventionKind.YoYInflationCapFloorConvention,
+        BondConventionRecord => ConventionKind.BondConvention,
         AliasRecord => ConventionKind.Alias,
         _ => throw new ArgumentException($"unknown record kind {record.GetType().Name}", nameof(record)),
     };
 
     public static bool Clash(ConventionKind a, ConventionKind b) =>
-        a == b || a == ConventionKind.Alias || b == ConventionKind.Alias;
+        a == b || (a == ConventionKind.Alias && Aliased(b)) || (b == ConventionKind.Alias && Aliased(a));
+
+    // The kinds an alias's name shares a name space with: the values an alias can name.
+    public static bool Aliased(ConventionKind kind) => kind <= ConventionKind.Index || kind >= ConventionKind.Alias;
 
     // The element a record is written as.
     public static string Element(ConventionRecord record) => record.GetType().Name[..^"Record".Length];

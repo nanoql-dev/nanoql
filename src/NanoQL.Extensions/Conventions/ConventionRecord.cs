@@ -34,4 +34,10 @@ public abstract record ConventionRecord
 
     /// <summary>Gets the foreign namespaced attributes and elements the record was read with, written back as read.</summary>
     public ForeignContent Foreign { get; init; } = ForeignContent.None;
+
+    // The names the record's fields refer to, an instrument convention's; the other kinds' the set reads itself.
+    internal virtual IEnumerable<string?> References() => [];
+
+    // The fields the record gives, an instrument convention's, by name.
+    internal virtual IEnumerable<string> Given() => [];
 }

@@ -32,6 +32,10 @@ namespace NanoQL.Instruments;
 /// <see cref="WithPricingEngine"/> is kept and changes nothing: QuantLib's builder only attaches the engine to the
 /// swaption, computing nothing with it, and a nanoql swaption holds no engine. A builder has no value equality.
 /// </para>
+/// <para>
+/// An option the builder isn't given that QuantLib's builder fixes takes the builder's provider's default
+/// (<see cref="Defaults"/>), read when the swaption is built: QuantLib's values with nothing configured.
+/// </para>
 /// </remarks>
 public sealed record MakeSwaption
 {
@@ -74,14 +78,14 @@ public sealed record MakeSwaption
 
     private SwapIndex SwapIndex { get; init; }
 
-    private SettlementType Delivery { get; init; } = SettlementType.Physical;
+    private SettlementType? Delivery { get; init; }
 
-    private SettlementMethod SettlementMethod { get; init; } = SettlementMethod.PhysicalOTC;
+    private SettlementMethod? SettlementMethod { get; init; }
 
     // The date form's tenor is QuantLib's default Period(), never read.
     private Period OptionTenor { get; init; } = new(0, TimeUnit.Days);
 
-    private BusinessDayConvention OptionConvention { get; init; } = BusinessDayConvention.ModifiedFollowing;
+    private BusinessDayConvention? OptionConvention { get; init; }
 
     private Date? FixingDate { get; init; }
 
@@ -201,13 +205,17 @@ public sealed record MakeSwaption
         // Built inside the builder's provider, so what the build constructs takes its conventions.
         using IDisposable scope = ConventionProvider.Use(Provider);
 
+        // the provider's defaults, read once an option needs one
+        SwaptionDefaults? defaults = null;
+        SwaptionDefaults Defaults() => defaults ??= MakeSwaption.Defaults(Provider);
+
         Calendar calendar = ExerciseCalendar ?? SwapIndex.FixingCalendar;
         Date refDate = context.EvaluationDate;
 
         // if the evaluation date is not a business day
         // then move to the next business day
         refDate = calendar.Adjust(refDate);
-        Date fixingDate = FixingDate ?? calendar.Advance(refDate, OptionTenor, OptionConvention);
+        Date fixingDate = FixingDate ?? calendar.Advance(refDate, OptionTenor, OptionConvention ?? Defaults().OptionConvention);
         Exercise exercise;
         if (ExerciseDate is not Date exerciseDate)
         {
@@ -275,6 +283,21 @@ public sealed record MakeSwaption
                 .WithNominal(Nominal)
                 .WithIndexedCoupons(UseIndexedCoupons)
                 .ToVanillaSwap(context);
-        return new Swaption(underlyingSwap, exercise, Delivery, SettlementMethod);
+        return new Swaption(underlyingSwap, exercise, Delivery ?? Defaults().SettlementType, SettlementMethod ?? Defaults().SettlementMethod);
     }
+
+    /// <summary>The defaults a builder takes under a provider for the options it isn't given.</summary>
+    /// <param name="provider">The provider, the index's, which a builder on the index takes.</param>
+    /// <returns>The provider's defaults; QuantLib's under <see cref="ConventionProvider.QuantLib"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="provider"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The provider has no defaults (a set without QuantLib's presets).</exception>
+    public static SwaptionDefaults Defaults(ConventionProvider provider)
+    {
+        ArgumentNullException.ThrowIfNull(provider);
+        return ConventionProvider.ReadDefaults(provider, p => p.ResolveSwaptionDefaults(QuantLibDefaults), "swaptions");
+    }
+
+    // QuantLib's constants: physical settlement, OTC, the option tenor advanced Modified Following.
+    private static SwaptionDefaults QuantLibDefaults() =>
+        new(SettlementType.Physical, NanoQL.Instruments.SettlementMethod.PhysicalOTC, BusinessDayConvention.ModifiedFollowing);
 }

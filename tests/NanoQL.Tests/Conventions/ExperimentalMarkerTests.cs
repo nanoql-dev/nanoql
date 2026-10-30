@@ -111,4 +111,28 @@ public class ExperimentalMarkerTests
             Assert.Equal(DiagnosticId, t.GetCustomAttribute<ExperimentalAttribute>(inherit: false)?.DiagnosticId);
         }
     }
+
+    [Fact]
+    public void TheExtensionsMarkWhatConfiguresOrReturnsAnExperimentalType()
+    {
+        // CVD16: the cross-currency kinds configure the experimental helpers; a member returning or taking an
+        // experimental type carries the marker, on itself or its type
+        Type[] extensions = typeof(NanoQL.Extensions.Conventions.ConventionSet).Assembly.GetExportedTypes();
+        string[] marked = [.. extensions.Where(Marked).Select(t => t.Name).Order(StringComparer.Ordinal)];
+        Assert.Equal(
+            ["CrossCurrencyBasisSwapConvention", "CrossCurrencyBasisSwapConventionRecord", "CrossCurrencySwapConvention", "CrossCurrencySwapConventionRecord"],
+            marked);
+
+        string[] unmarked =
+        [
+            .. extensions.Where(t => !Marked(t))
+                .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+                .Where(m => !Marked(m) && new[] { m.ReturnType }.Concat(m.GetParameters().Select(p => p.ParameterType)).Any(Marked))
+                .Select(m => $"{m.DeclaringType!.Name}.{m.Name}")
+                .Order(StringComparer.Ordinal),
+        ];
+        Assert.Empty(unmarked);
+
+        static bool Marked(MemberInfo m) => m.GetCustomAttribute<ExperimentalAttribute>(inherit: false)?.DiagnosticId == DiagnosticId;
+    }
 }

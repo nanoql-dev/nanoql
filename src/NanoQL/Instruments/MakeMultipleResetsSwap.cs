@@ -18,7 +18,9 @@ namespace NanoQL.Instruments;
 /// the swap under a context, in place of QuantLib's conversion operators. By default the fixed leg's frequency is the
 /// coupons' period, the index's tenor times the resets per coupon. With no fixed rate given, the swap is built at its
 /// par rate, priced by the engine set, or by <see cref="DiscountingSwapEngine"/> on the index's forwarding curve; the
-/// engine is never stored on the swap, where QuantLib's builder attaches it. A builder has no value equality.
+/// engine is never stored on the swap, where QuantLib's builder attaches it. A builder has no value equality. An
+/// option the builder isn't given that QuantLib's builder fixes takes the builder's provider's default
+/// (<see cref="Defaults"/>), read when the swap is built: QuantLib's values with nothing configured.
 /// </remarks>
 public sealed record MakeMultipleResetsSwap
 {
@@ -72,11 +74,11 @@ public sealed record MakeMultipleResetsSwap
 
     private DayCounter FixedDayCount { get; init; }
 
-    private BusinessDayConvention FixedConvention { get; init; } = BusinessDayConvention.ModifiedFollowing;
+    private BusinessDayConvention? FixedConvention { get; init; }
 
     private double Spread { get; init; }
 
-    private RateAveragingType AveragingMethod { get; init; } = RateAveragingType.Compound;
+    private RateAveragingType? AveragingMethod { get; init; }
 
     private Func<FixedVsFloatingSwap, EvaluationContext, FixedVsFloatingSwapResults>? Engine { get; init; }
 
@@ -217,6 +219,10 @@ public sealed record MakeMultipleResetsSwap
         // Built inside the builder's provider, so what the build constructs takes its conventions.
         using IDisposable scope = ConventionProvider.Use(Provider);
 
+        MultipleResetsSwapDefaults? defaults = FixedConvention is null || AveragingMethod is null ? Defaults(Provider) : null;
+        BusinessDayConvention fixedConvention = FixedConvention ?? defaults!.FixedLegConvention;
+        RateAveragingType averagingMethod = AveragingMethod ?? defaults!.AveragingMethod;
+
         Calendar cal = IborIndex.FixingCalendar;
         BusinessDayConvention bdc = IborIndex.BusinessDayConvention;
         if (!(EffectiveDate is null || SettlementDays is null))
@@ -253,7 +259,7 @@ public sealed record MakeMultipleResetsSwap
         }
 
         var fixedSchedule = new Schedule(
-            startDate, endDate, new Period(fixedFreq), cal, FixedConvention, FixedConvention, DateGenerationRule.Backward, false, context);
+            startDate, endDate, new Period(fixedFreq), cal, fixedConvention, fixedConvention, DateGenerationRule.Backward, false, context);
         var fullResetSchedule = new Schedule(
             startDate, endDate, resetTenor, cal, bdc, bdc, DateGenerationRule.Backward, false, context);
 
@@ -265,7 +271,7 @@ public sealed record MakeMultipleResetsSwap
         else
         {
             var temp = new MultipleResetsSwap(
-                Type, Nominal, fixedSchedule, 0.0, FixedDayCount, fullResetSchedule, IborIndex, ResetsPerCoupon, Spread, AveragingMethod);
+                Type, Nominal, fixedSchedule, 0.0, FixedDayCount, fullResetSchedule, IborIndex, ResetsPerCoupon, Spread, averagingMethod);
             FixedVsFloatingSwapResults results;
             if (Engine is null)
             {
@@ -282,6 +288,21 @@ public sealed record MakeMultipleResetsSwap
         }
 
         return new MultipleResetsSwap(
-            Type, Nominal, fixedSchedule, usedFixedRate, FixedDayCount, fullResetSchedule, IborIndex, ResetsPerCoupon, Spread, AveragingMethod);
+            Type, Nominal, fixedSchedule, usedFixedRate, FixedDayCount, fullResetSchedule, IborIndex, ResetsPerCoupon, Spread, averagingMethod);
     }
+
+    /// <summary>The defaults a builder takes under a provider for the options it isn't given.</summary>
+    /// <param name="provider">The provider, the index's, which a builder on the index takes.</param>
+    /// <returns>The provider's defaults; QuantLib's under <see cref="ConventionProvider.QuantLib"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="provider"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The provider has no defaults (a set without QuantLib's presets).</exception>
+    public static MultipleResetsSwapDefaults Defaults(ConventionProvider provider)
+    {
+        ArgumentNullException.ThrowIfNull(provider);
+        return ConventionProvider.ReadDefaults(provider, p => p.ResolveMultipleResetsSwapDefaults(QuantLibDefaults), "multiple-resets swaps");
+    }
+
+    // QuantLib's constants: the fixed leg Modified Following, the resets compounded.
+    private static MultipleResetsSwapDefaults QuantLibDefaults() =>
+        new(BusinessDayConvention.ModifiedFollowing, RateAveragingType.Compound);
 }

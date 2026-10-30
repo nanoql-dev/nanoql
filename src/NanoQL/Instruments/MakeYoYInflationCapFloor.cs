@@ -32,6 +32,10 @@ namespace NanoQL.Instruments;
 /// <see cref="YoYInflationCapFloorType.Collar"/> is refused by the instrument's constructor after the strike, as
 /// QuantLib refuses it. A builder has no value equality.
 /// </para>
+/// <para>
+/// An option the builder isn't given that QuantLib's builder fixes takes the builder's provider's default
+/// (<see cref="Defaults"/>), read when the instrument is built: QuantLib's values with nothing configured.
+/// </para>
 /// </remarks>
 public sealed record MakeYoYInflationCapFloor
 {
@@ -89,11 +93,14 @@ public sealed record MakeYoYInflationCapFloor
 
     private Period ForwardStart { get; init; }
 
-    private DayCounter? DayCounter { get; init; } = new Thirty360(Thirty360Convention.BondBasis);
+    private DayCounter? DayCounter { get; init; }
 
-    private BusinessDayConvention Roll { get; init; } = BusinessDayConvention.ModifiedFollowing;
+    // Whether the payment day counter is given: null given is QuantLib's empty one.
+    private bool HasDayCounter { get; init; }
 
-    private int FixingDays { get; init; }
+    private BusinessDayConvention? Roll { get; init; }
+
+    private int? FixingDays { get; init; }
 
     private double Nominal { get; init; } = 1000000.0;
 
@@ -119,7 +126,7 @@ public sealed record MakeYoYInflationCapFloor
     /// <param name="dc">The day counter, or <see langword="null"/>, QuantLib's empty one, which the leg
     /// refuses.</param>
     /// <returns>The modified builder.</returns>
-    public MakeYoYInflationCapFloor WithPaymentDayCounter(DayCounter? dc) => this with { DayCounter = dc };
+    public MakeYoYInflationCapFloor WithPaymentDayCounter(DayCounter? dc) => this with { DayCounter = dc, HasDayCounter = true };
 
     /// <summary>Sets the convention adjusting the payment dates; ModifiedFollowing by default.</summary>
     /// <param name="bdc">The convention.</param>
@@ -210,6 +217,11 @@ public sealed record MakeYoYInflationCapFloor
         // Built inside the builder's provider, so what the build constructs takes its conventions.
         using IDisposable scope = ConventionProvider.Use(Provider);
 
+        YoYInflationCapFloorDefaults? defaults = HasDayCounter && Roll is not null && FixingDays is not null ? null : Defaults(Provider);
+        DayCounter? dayCounter = HasDayCounter ? DayCounter : defaults!.PaymentDayCounter;
+        BusinessDayConvention roll = Roll ?? defaults!.PaymentAdjustment;
+        int fixingDays = FixingDays ?? defaults!.FixingDays;
+
         // QuantLib's empty calendar, null here, is used unchecked, as QuantLib uses it
         Calendar calendar = Calendar ?? EmptyCalendar.Instance;
         Date startDate;
@@ -220,7 +232,7 @@ public sealed record MakeYoYInflationCapFloor
         else
         {
             Date referenceDate = context.EvaluationDate;
-            Date spotDate = calendar.Advance(referenceDate, FixingDays, TimeUnit.Days);
+            Date spotDate = calendar.Advance(referenceDate, fixingDays, TimeUnit.Days);
             startDate = spotDate + ForwardStart;
         }
 
@@ -238,8 +250,8 @@ public sealed record MakeYoYInflationCapFloor
             false,
             context);
         ImmutableArray<CashFlow> leg = new YoYInflationLeg(schedule, Calendar, Index, ObservationLag, Interpolation)
-            .WithPaymentAdjustment(Roll)
-            .WithPaymentDayCounter(DayCounter)
+            .WithPaymentAdjustment(roll)
+            .WithPaymentDayCounter(dayCounter)
             .WithNotionals(Nominal)
             .ToLeg();
 
@@ -264,4 +276,19 @@ public sealed record MakeYoYInflationCapFloor
 
         return new YoYInflationCapFloor(CapFloorType, leg, [strike]);
     }
+
+    /// <summary>The defaults a builder takes under a provider for the options it isn't given.</summary>
+    /// <param name="provider">The provider, the index's, which a builder on the index takes.</param>
+    /// <returns>The provider's defaults; QuantLib's under <see cref="ConventionProvider.QuantLib"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="provider"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The provider has no defaults (a set without QuantLib's presets).</exception>
+    public static YoYInflationCapFloorDefaults Defaults(ConventionProvider provider)
+    {
+        ArgumentNullException.ThrowIfNull(provider);
+        return ConventionProvider.ReadDefaults(provider, p => p.ResolveYoYInflationCapFloorDefaults(QuantLibDefaults), "year-on-year inflation caps and floors");
+    }
+
+    // QuantLib's constants: 30/360 (Bond Basis) payments, Modified Following, no fixing days.
+    private static YoYInflationCapFloorDefaults QuantLibDefaults() =>
+        new(new Thirty360(Thirty360Convention.BondBasis), BusinessDayConvention.ModifiedFollowing, 0);
 }

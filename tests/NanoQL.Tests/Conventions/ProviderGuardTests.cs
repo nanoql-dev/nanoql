@@ -4,6 +4,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using NanoQL.Indexes;
+using NanoQL.Instruments;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Conventions;
@@ -28,17 +29,17 @@ public class ProviderGuardTests
             ["NanoQL.TermStructures.SofrFutureRateHelper..ctor"] = ("1: its Sofr, at its construction", "Sofr"),
             ["NanoQL.TermStructures.DepositRateHelper..ctor"] = ("1: its index from explicit conventions", "IborIndex"),
             ["NanoQL.TermStructures.FraRateHelper..ctor"] = ("1: its index from explicit conventions", "IborIndex"),
-            ["NanoQL.Instruments.BTP..ctor"] = ("1: its TARGET, at its construction", "TARGET"),
             ["NanoQL.Instruments.CCTEU..ctor"] = ("1: its Euribor6M indexes, at its construction", "Euribor6M"),
             ["NanoQL.Experimental.CommoditySettings..ctor"] = ("1: its USD, at its construction", "USDCurrency"),
 
             // 3: a builder, or a builder built on an index, building in the index's provider
             ["NanoQL.Instruments.MakeCreditDefaultSwap..ctor"] = ("3: no index, so Current when it is created", "Current"),
-            ["NanoQL.Instruments.MakeVanillaSwap.ToVanillaSwap"] = (
-                "3: the currency chain, in its index's provider",
+            ["NanoQL.Instruments.MakeVanillaSwap.QuantLibDefaults"] = (
+                "3: the defaults' currency chain, in its index's provider",
                 "AUDCurrency, CHFCurrency, EURCurrency, GBPCurrency, HKDCurrency, JPYCurrency, SEKCurrency, THBCurrency, USDCurrency"),
-            ["NanoQL.Instruments.MakeCreditDefaultSwap.ToCreditDefaultSwap"] = (
-                "3: its weekends-only calendar and its swap, in its provider", "CreditDefaultSwap, WeekendsOnly"),
+            ["NanoQL.Instruments.MakeCreditDefaultSwap.ToCreditDefaultSwap"] = ("3: its swap, in its provider", "CreditDefaultSwap"),
+            ["NanoQL.Instruments.MakeCreditDefaultSwap.QuantLibDefaults"] = (
+                "3: the defaults' weekends-only calendar, in its provider", "WeekendsOnly"),
             ["NanoQL.Coupons.OvernightLeg.ToLeg"] = ("3: its fallback calendar, in its index's provider", "WeekendsOnly"),
             ["NanoQL.Instruments.RendistatoCalculator..ctor"] = ("3: its swaps' builders, on its Euribor index", "MakeVanillaSwap"),
             ["NanoQL.TermStructures.CmsMarket..ctor"] = ("3: its CMS builders, on its swap indexes", "MakeCms"),
@@ -389,7 +390,8 @@ public class ProviderGuardTests
             }
 
             bool preset = typeof(Calendar).IsAssignableFrom(type) || typeof(Currency).IsAssignableFrom(type)
-                || typeof(FinancialIndex).IsAssignableFrom(type) || typeof(Region).IsAssignableFrom(type) || type == typeof(Business252);
+                || typeof(FinancialIndex).IsAssignableFrom(type) || typeof(Region).IsAssignableFrom(type) || type == typeof(Business252)
+                || type == typeof(BTP);
             return preset && (owner.EndsWith("..ctor", StringComparison.Ordinal) || owner.EndsWith(".Reference", StringComparison.Ordinal));
         }
     }

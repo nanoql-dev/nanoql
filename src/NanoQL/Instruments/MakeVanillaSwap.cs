@@ -30,6 +30,11 @@ namespace NanoQL.Instruments;
 /// the engine given, or with <see cref="DiscountingSwapEngine"/> on the index's forwarding curve when none is. The
 /// engine computes that rate and is never stored: the swap returned holds no engine.
 /// </para>
+/// <para>
+/// An option the builder isn't given that QuantLib's builder fixes, its fixed leg's tenor, day counter, conventions,
+/// rule and end of month and the floating leg's rule and end of month, takes the builder's provider's default for the
+/// index's currency (<see cref="Defaults"/>), read when the swap is built: QuantLib's values with nothing configured.
+/// </para>
 /// </remarks>
 public sealed record MakeVanillaSwap
 {
@@ -91,22 +96,21 @@ public sealed record MakeVanillaSwap
 
     private Period FloatTenor { get; init; }
 
-    private BusinessDayConvention FixedConvention { get; init; } = BusinessDayConvention.ModifiedFollowing;
+    private BusinessDayConvention? FixedConvention { get; init; }
 
-    private BusinessDayConvention FixedTerminationDateConvention { get; init; } =
-        BusinessDayConvention.ModifiedFollowing;
+    private BusinessDayConvention? FixedTerminationDateConvention { get; init; }
 
     private BusinessDayConvention FloatConvention { get; init; }
 
     private BusinessDayConvention FloatTerminationDateConvention { get; init; }
 
-    private DateGenerationRule FixedRule { get; init; } = DateGenerationRule.Backward;
+    private DateGenerationRule? FixedRule { get; init; }
 
-    private DateGenerationRule FloatRule { get; init; } = DateGenerationRule.Backward;
+    private DateGenerationRule? FloatRule { get; init; }
 
-    private bool FixedEndOfMonth { get; init; }
+    private bool? FixedEndOfMonth { get; init; }
 
-    private bool FloatEndOfMonth { get; init; }
+    private bool? FloatEndOfMonth { get; init; }
 
     private bool? MaturityEndOfMonth { get; init; }
 
@@ -216,7 +220,7 @@ public sealed record MakeVanillaSwap
         };
     }
 
-    /// <summary>Sets both legs' date-generation rule.</summary>
+    /// <summary>Sets both legs' date-generation rule; the provider's defaults by default.</summary>
     /// <param name="r">The rule.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The rule isn't a member of the enum.</exception>
@@ -236,7 +240,7 @@ public sealed record MakeVanillaSwap
         return this with { PaymentConvention = bdc };
     }
 
-    /// <summary>Sets the fixed leg's tenor; by default it follows the index's currency.</summary>
+    /// <summary>Sets the fixed leg's tenor; by default the provider's for the index's currency.</summary>
     /// <param name="t">The tenor.</param>
     /// <returns>The modified builder.</returns>
     public MakeVanillaSwap WithFixedLegTenor(Period t) => this with { FixedTenor = t };
@@ -250,7 +254,7 @@ public sealed record MakeVanillaSwap
     /// <returns>The modified builder.</returns>
     public MakeVanillaSwap WithFixedLegCalendar(Calendar? cal) => this with { FixedCalendar = cal };
 
-    /// <summary>Sets the fixed leg's business-day convention.</summary>
+    /// <summary>Sets the fixed leg's business-day convention; the provider's default by default.</summary>
     /// <param name="bdc">The convention.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
@@ -260,7 +264,7 @@ public sealed record MakeVanillaSwap
         return this with { FixedConvention = bdc };
     }
 
-    /// <summary>Sets the fixed leg's termination-date convention.</summary>
+    /// <summary>Sets the fixed leg's termination-date convention; the provider's default by default.</summary>
     /// <param name="bdc">The convention.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The convention isn't a member of the enum.</exception>
@@ -270,7 +274,7 @@ public sealed record MakeVanillaSwap
         return this with { FixedTerminationDateConvention = bdc };
     }
 
-    /// <summary>Sets the fixed leg's date-generation rule.</summary>
+    /// <summary>Sets the fixed leg's date-generation rule; the provider's default by default.</summary>
     /// <param name="r">The rule.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The rule isn't a member of the enum.</exception>
@@ -280,7 +284,7 @@ public sealed record MakeVanillaSwap
         return this with { FixedRule = r };
     }
 
-    /// <summary>Sets whether the fixed leg's dates stay at month end.</summary>
+    /// <summary>Sets whether the fixed leg's dates stay at month end; the provider's default by default.</summary>
     /// <param name="flag">The flag.</param>
     /// <returns>The modified builder.</returns>
     public MakeVanillaSwap WithFixedLegEndOfMonth(bool flag = true) => this with { FixedEndOfMonth = flag };
@@ -308,8 +312,8 @@ public sealed record MakeVanillaSwap
     }
 
     /// <summary>
-    /// Sets the fixed leg's day counter, or <see langword="null"/>, QuantLib's empty day counter, for the default that
-    /// follows the index's currency.
+    /// Sets the fixed leg's day counter, or <see langword="null"/>, QuantLib's empty day counter, for the provider's
+    /// default for the index's currency.
     /// </summary>
     /// <param name="dc">The day counter.</param>
     /// <returns>The modified builder.</returns>
@@ -349,7 +353,7 @@ public sealed record MakeVanillaSwap
         return this with { FloatTerminationDateConvention = bdc };
     }
 
-    /// <summary>Sets the floating leg's date-generation rule.</summary>
+    /// <summary>Sets the floating leg's date-generation rule; the provider's default by default.</summary>
     /// <param name="r">The rule.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException">The rule isn't a member of the enum.</exception>
@@ -360,7 +364,8 @@ public sealed record MakeVanillaSwap
     }
 
     /// <summary>
-    /// Sets whether the floating leg's dates stay at month end; it is the maturity's default too.
+    /// Sets whether the floating leg's dates stay at month end, the provider's default by default; it is the
+    /// maturity's default too.
     /// </summary>
     /// <param name="flag">The flag.</param>
     /// <returns>The modified builder.</returns>
@@ -459,6 +464,8 @@ public sealed record MakeVanillaSwap
     /// floating leg reads its at-par switch when no coupon choice is given.</param>
     /// <returns>The swap, which holds no engine.</returns>
     /// <exception cref="ArgumentNullException">The context is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The provider has no defaults for the index's currency (a set without
+    /// QuantLib's presets).</exception>
     /// <exception cref="NanoQLException">
     /// Both an effective date and settlement days are set; the fixed leg's default tenor or day counter is unknown for
     /// the index's currency; a date is needed that QuantLib's empty calendar can't give; or, with no fixed rate, there
@@ -471,6 +478,10 @@ public sealed record MakeVanillaSwap
 
         // Built inside the builder's provider, so what the build constructs takes its conventions.
         using IDisposable scope = ConventionProvider.Use(Provider);
+
+        // the provider's defaults, read once an option needs one
+        VanillaSwapDefaults? defaults = null;
+        VanillaSwapDefaults Defaults() => defaults ??= MakeVanillaSwap.Defaults(Index.Currency, Provider);
 
         if (!(EffectiveDate is null || SettlementDays is null))
         {
@@ -531,7 +542,7 @@ public sealed record MakeVanillaSwap
         else
         {
             endDate = startDate + SwapTenor;
-            bool maturityEndOfMonth = MaturityEndOfMonth ?? FloatEndOfMonth;
+            bool maturityEndOfMonth = MaturityEndOfMonth ?? FloatEndOfMonth ?? Defaults().FloatingLegEndOfMonth;
             if (maturityEndOfMonth && ScheduleFunctions.AllowsEndOfMonth(SwapTenor)
                 && floatCalendar.IsEndOfMonth(startDate))
             {
@@ -557,28 +568,11 @@ public sealed record MakeVanillaSwap
                 tenor = new Period(months, TimeUnit.Months);
             }
 
-            if (curr == new EURCurrency()
-                || curr == new USDCurrency()
-                || curr == new CHFCurrency()
-                || curr == new SEKCurrency()
-                || (curr == new GBPCurrency() && tenor <= new Period(1, TimeUnit.Years)))
-            {
-                fixedTenor = new Period(1, TimeUnit.Years);
-            }
-            else if ((curr == new GBPCurrency() && tenor > new Period(1, TimeUnit.Years))
-                || curr == new JPYCurrency()
-                || (curr == new AUDCurrency() && tenor >= new Period(4, TimeUnit.Years)))
-            {
-                fixedTenor = new Period(6, TimeUnit.Months);
-            }
-            else if (curr == new HKDCurrency() || (curr == new AUDCurrency() && tenor < new Period(4, TimeUnit.Years)))
-            {
-                fixedTenor = new Period(3, TimeUnit.Months);
-            }
-            else
-            {
-                throw new NanoQLException($"unknown fixed leg default tenor for {Currency.Format(curr)}");
-            }
+            // the currency's tenor, or its tenor on a threshold's side, compared only here, as QuantLib compares
+            VanillaSwapDefaults d = Defaults();
+            fixedTenor = d.FixedLegTenorThreshold is { } threshold && threshold.Holds(tenor)
+                ? threshold.FixedLegTenor
+                : d.FixedLegTenor ?? throw new NanoQLException($"unknown fixed leg default tenor for {Currency.Format(curr)}");
         }
 
         var fixedSchedule = new Schedule(
@@ -586,10 +580,10 @@ public sealed record MakeVanillaSwap
             endDate,
             fixedTenor,
             FixedCalendar,
-            FixedConvention,
-            FixedTerminationDateConvention,
-            FixedRule,
-            FixedEndOfMonth,
+            FixedConvention ?? Defaults().FixedLegConvention,
+            FixedTerminationDateConvention ?? Defaults().FixedLegTerminationDateConvention,
+            FixedRule ?? Defaults().FixedLegRule,
+            FixedEndOfMonth ?? Defaults().FixedLegEndOfMonth,
             context,
             FixedFirstDate,
             FixedNextToLastDate);
@@ -601,34 +595,14 @@ public sealed record MakeVanillaSwap
             FloatCalendar,
             FloatConvention,
             FloatTerminationDateConvention,
-            FloatRule,
-            FloatEndOfMonth,
+            FloatRule ?? Defaults().FloatingLegRule,
+            FloatEndOfMonth ?? Defaults().FloatingLegEndOfMonth,
             context,
             FloatFirstDate,
             FloatNextToLastDate);
 
-        DayCounter fixedDayCount;
-        if (FixedDayCount is not null)
-        {
-            fixedDayCount = FixedDayCount;
-        }
-        else if (curr == new USDCurrency())
-        {
-            fixedDayCount = new Actual360();
-        }
-        else if (curr == new EURCurrency() || curr == new CHFCurrency() || curr == new SEKCurrency())
-        {
-            fixedDayCount = new Thirty360(Thirty360Convention.BondBasis);
-        }
-        else if (curr == new GBPCurrency() || curr == new JPYCurrency() || curr == new AUDCurrency()
-            || curr == new HKDCurrency() || curr == new THBCurrency())
-        {
-            fixedDayCount = new Actual365Fixed();
-        }
-        else
-        {
-            throw new NanoQLException($"unknown fixed leg day counter for {Currency.Format(curr)}");
-        }
+        DayCounter fixedDayCount = FixedDayCount ?? Defaults().FixedLegDayCounter
+            ?? throw new NanoQLException($"unknown fixed leg day counter for {Currency.Format(curr)}");
 
         double usedFixedRate;
         if (FixedRate is double fixedRate)
@@ -679,5 +653,79 @@ public sealed record MakeVanillaSwap
             context,
             PaymentConvention,
             UseIndexedCoupons);
+    }
+
+    /// <summary>
+    /// The defaults a builder takes under a provider for the options it isn't given, on an index of a currency.
+    /// </summary>
+    /// <param name="currency">The index's currency, or <see langword="null"/> for none.</param>
+    /// <param name="provider">The provider, an index's, which a builder on the index takes.</param>
+    /// <returns>The provider's defaults; QuantLib's, by the currency, under <see cref="ConventionProvider.QuantLib"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="provider"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The provider has no defaults for the currency (a set without QuantLib's
+    /// presets).</exception>
+    public static VanillaSwapDefaults Defaults(Currency? currency, ConventionProvider provider)
+    {
+        ArgumentNullException.ThrowIfNull(provider);
+        return ConventionProvider.ReadDefaults(
+            provider, p => p.ResolveVanillaSwapDefaults(currency, () => QuantLibDefaults(currency)), $"swaps in {Currency.Format(currency)}");
+    }
+
+    // QuantLib's fixed leg tenor and day counter by the index's currency, GBP's and AUD's tenors by the swap's tenor on
+    // one side of a threshold, and the builder's constants.
+    private static VanillaSwapDefaults QuantLibDefaults(Currency? curr)
+    {
+        Period? fixedTenor = null;
+        SwapTenorThreshold? threshold = null;
+        if (curr == new EURCurrency() || curr == new USDCurrency() || curr == new CHFCurrency() || curr == new SEKCurrency())
+        {
+            fixedTenor = new Period(1, TimeUnit.Years);
+        }
+        else if (curr == new GBPCurrency())
+        {
+            // 1Y up to and including a year, 6M above
+            threshold = new SwapTenorThreshold(SwapTenorComparison.AtMost, new Period(1, TimeUnit.Years), new Period(1, TimeUnit.Years));
+            fixedTenor = new Period(6, TimeUnit.Months);
+        }
+        else if (curr == new JPYCurrency())
+        {
+            fixedTenor = new Period(6, TimeUnit.Months);
+        }
+        else if (curr == new AUDCurrency())
+        {
+            // 6M from four years, 3M below
+            threshold = new SwapTenorThreshold(SwapTenorComparison.AtLeast, new Period(4, TimeUnit.Years), new Period(6, TimeUnit.Months));
+            fixedTenor = new Period(3, TimeUnit.Months);
+        }
+        else if (curr == new HKDCurrency())
+        {
+            fixedTenor = new Period(3, TimeUnit.Months);
+        }
+
+        DayCounter? fixedDayCount = null;
+        if (curr == new USDCurrency())
+        {
+            fixedDayCount = new Actual360();
+        }
+        else if (curr == new EURCurrency() || curr == new CHFCurrency() || curr == new SEKCurrency())
+        {
+            fixedDayCount = new Thirty360(Thirty360Convention.BondBasis);
+        }
+        else if (curr == new GBPCurrency() || curr == new JPYCurrency() || curr == new AUDCurrency()
+            || curr == new HKDCurrency() || curr == new THBCurrency())
+        {
+            fixedDayCount = new Actual365Fixed();
+        }
+
+        return new VanillaSwapDefaults(
+            fixedTenor,
+            threshold,
+            fixedDayCount,
+            BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing,
+            DateGenerationRule.Backward,
+            false,
+            DateGenerationRule.Backward,
+            false);
     }
 }

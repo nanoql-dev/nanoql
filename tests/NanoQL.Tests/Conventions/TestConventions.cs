@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using NanoQL.Indexes;
+using NanoQL.Instruments;
 using NanoQL.Time;
 
 namespace NanoQL.Tests.Conventions;
@@ -43,6 +44,17 @@ public sealed class TestConventions : ConventionProvider
     /// <summary>Gets the changes to a region preset's QuantLib data, by preset.</summary>
     public IReadOnlyDictionary<string, Func<RegionData, RegionData>> Regions { get; init; } =
         new Dictionary<string, Func<RegionData, RegionData>>();
+
+    /// <summary>Gets the changes to the swap builder's QuantLib defaults, by the index's currency code.</summary>
+    public IReadOnlyDictionary<string, Func<VanillaSwapDefaults, VanillaSwapDefaults>> SwapDefaults { get; init; } =
+        new Dictionary<string, Func<VanillaSwapDefaults, VanillaSwapDefaults>>();
+
+    /// <summary>Gets the change to the CDS builder's QuantLib defaults, or null for none.</summary>
+    public Func<CdsDefaults, CdsDefaults>? CdsDefaults { get; init; }
+
+    /// <summary>Gets the changes to a bond preset's QuantLib conventions, by preset.</summary>
+    public IReadOnlyDictionary<string, Func<BondConventions, BondConventions>> Bonds { get; init; } =
+        new Dictionary<string, Func<BondConventions, BondConventions>>();
 
     /// <summary>Gets each resolve answered, in order: <c>calendar:TARGET</c>, <c>currency:EUR</c>, <c>business252</c>,
     /// <c>family:Euribor@6M</c>, <c>overnight:Sofr</c>, <c>swap:EuriborSwapIsdaFixA@10Y</c>.</summary>
@@ -154,6 +166,69 @@ public sealed class TestConventions : ConventionProvider
     {
         resolved.Enqueue("region:" + preset);
         return Change(Regions, preset, reference());
+    }
+
+    /// <inheritdoc/>
+    public override VanillaSwapDefaults ResolveVanillaSwapDefaults(Currency? currency, Func<VanillaSwapDefaults> reference)
+    {
+        resolved.Enqueue("vanilla:" + currency?.Code);
+        return Change(SwapDefaults, currency?.Code ?? "", reference());
+    }
+
+    /// <inheritdoc/>
+    public override OisDefaults ResolveOisDefaults(string index, Func<OisDefaults> reference)
+    {
+        resolved.Enqueue("ois:" + index);
+        return reference();
+    }
+
+    /// <inheritdoc/>
+    public override CdsDefaults ResolveCdsDefaults(Func<CdsDefaults> reference)
+    {
+        resolved.Enqueue("cds");
+        return CdsDefaults is { } change ? change(reference()) : reference();
+    }
+
+    /// <inheritdoc/>
+    public override CapFloorDefaults ResolveCapFloorDefaults(Func<CapFloorDefaults> reference)
+    {
+        resolved.Enqueue("capfloor");
+        return reference();
+    }
+
+    /// <inheritdoc/>
+    public override SwaptionDefaults ResolveSwaptionDefaults(Func<SwaptionDefaults> reference)
+    {
+        resolved.Enqueue("swaption");
+        return reference();
+    }
+
+    /// <inheritdoc/>
+    public override CmsDefaults ResolveCmsDefaults(Func<CmsDefaults> reference)
+    {
+        resolved.Enqueue("cms");
+        return reference();
+    }
+
+    /// <inheritdoc/>
+    public override MultipleResetsSwapDefaults ResolveMultipleResetsSwapDefaults(Func<MultipleResetsSwapDefaults> reference)
+    {
+        resolved.Enqueue("multipleresets");
+        return reference();
+    }
+
+    /// <inheritdoc/>
+    public override YoYInflationCapFloorDefaults ResolveYoYInflationCapFloorDefaults(Func<YoYInflationCapFloorDefaults> reference)
+    {
+        resolved.Enqueue("yoycapfloor");
+        return reference();
+    }
+
+    /// <inheritdoc/>
+    public override BondConventions ResolveBond(string preset, Func<BondConventions> reference)
+    {
+        resolved.Enqueue("bond:" + preset);
+        return Change(Bonds, preset, reference());
     }
 
     /// <inheritdoc/>

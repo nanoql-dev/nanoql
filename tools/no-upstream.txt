@@ -11,6 +11,17 @@ src/NanoQL/Indexes/IborIndexConventions.cs
 src/NanoQL/Indexes/InflationIndex/InflationIndexConventions.cs
 src/NanoQL/Indexes/Region/RegionData.cs
 src/NanoQL/Indexes/SwapIndexConventions.cs
+src/NanoQL/Instruments/Bonds/BondConventions.cs
+src/NanoQL/Instruments/CapFloorDefaults.cs
+src/NanoQL/Instruments/CdsDefaults.cs
+src/NanoQL/Instruments/CmsDefaults.cs
+src/NanoQL/Instruments/MultipleResetsSwapDefaults.cs
+src/NanoQL/Instruments/OisDefaults.cs
+src/NanoQL/Instruments/SwapTenorComparison.cs
+src/NanoQL/Instruments/SwapTenorThreshold.cs
+src/NanoQL/Instruments/SwaptionDefaults.cs
+src/NanoQL/Instruments/VanillaSwapDefaults.cs
+src/NanoQL/Instruments/YoYInflationCapFloorDefaults.cs
 src/NanoQL/Models/MarketModels/Products/MultiStep/MultiStepProductChecks.cs
 src/NanoQL/MsvcConversions.cs
 src/NanoQL/MsvcNormalDistribution.cs

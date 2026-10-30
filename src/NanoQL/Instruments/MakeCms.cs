@@ -29,6 +29,10 @@ namespace NanoQL.Instruments;
 /// attaches it. QuantLib's two constructors taking the Ibor spread and the forward start, deprecated in 1.44, aren't
 /// ported: <see cref="WithIborSpread"/> and <see cref="WithForwardStart"/> set them.
 /// </para>
+/// <para>
+/// An option the builder isn't given that QuantLib's builder fixes takes the builder's provider's default
+/// (<see cref="Defaults"/>), read when the swap is built: QuantLib's values with nothing configured.
+/// </para>
 /// </remarks>
 public sealed record MakeCms
 {
@@ -90,25 +94,25 @@ public sealed record MakeCms
 
     private double Nominal { get; init; } = 1.0;
 
-    private Period CmsTenor { get; init; } = new(3, TimeUnit.Months);
+    private Period? CmsTenor { get; init; }
 
     private Period FloatTenor { get; init; }
 
-    private BusinessDayConvention CmsConvention { get; init; } = BusinessDayConvention.ModifiedFollowing;
+    private BusinessDayConvention? CmsConvention { get; init; }
 
-    private BusinessDayConvention CmsTerminationDateConvention { get; init; } = BusinessDayConvention.ModifiedFollowing;
+    private BusinessDayConvention? CmsTerminationDateConvention { get; init; }
 
     private BusinessDayConvention FloatConvention { get; init; }
 
     private BusinessDayConvention FloatTerminationDateConvention { get; init; }
 
-    private DateGenerationRule CmsRule { get; init; } = DateGenerationRule.Backward;
+    private DateGenerationRule? CmsRule { get; init; }
 
-    private DateGenerationRule FloatRule { get; init; } = DateGenerationRule.Backward;
+    private DateGenerationRule? FloatRule { get; init; }
 
-    private bool CmsEndOfMonth { get; init; }
+    private bool? CmsEndOfMonth { get; init; }
 
-    private bool FloatEndOfMonth { get; init; }
+    private bool? FloatEndOfMonth { get; init; }
 
     private Date? CmsFirstDate { get; init; }
 
@@ -118,7 +122,7 @@ public sealed record MakeCms
 
     private Date? FloatNextToLastDate { get; init; }
 
-    private DayCounter CmsDayCount { get; init; } = new Actual360();
+    private DayCounter? CmsDayCount { get; init; }
 
     private DayCounter FloatDayCount { get; init; }
 
@@ -330,6 +334,11 @@ public sealed record MakeCms
         // Built inside the builder's provider, so what the build constructs takes its conventions.
         using IDisposable scope = ConventionProvider.Use(Provider);
 
+        // the provider's defaults, read once an option needs one
+        CmsDefaults? defaults = null;
+        CmsDefaults Defaults() => defaults ??= MakeCms.Defaults(Provider);
+        BusinessDayConvention cmsConvention = CmsConvention ?? Defaults().CmsLegConvention;
+
         Date startDate;
         if (EffectiveDate is Date effective)
         {
@@ -352,12 +361,12 @@ public sealed record MakeCms
         var cmsSchedule = new Schedule(
             startDate,
             terminationDate,
-            CmsTenor,
+            CmsTenor ?? Defaults().CmsLegTenor,
             CmsCalendar,
-            CmsConvention,
-            CmsTerminationDateConvention,
-            CmsRule,
-            CmsEndOfMonth,
+            cmsConvention,
+            CmsTerminationDateConvention ?? Defaults().CmsLegTerminationDateConvention,
+            CmsRule ?? Defaults().CmsLegRule,
+            CmsEndOfMonth ?? Defaults().CmsLegEndOfMonth,
             context,
             CmsFirstDate,
             CmsNextToLastDate);
@@ -369,16 +378,16 @@ public sealed record MakeCms
             FloatCalendar,
             FloatConvention,
             FloatTerminationDateConvention,
-            FloatRule,
-            FloatEndOfMonth,
+            FloatRule ?? Defaults().FloatingLegRule,
+            FloatEndOfMonth ?? Defaults().FloatingLegEndOfMonth,
             context,
             FloatFirstDate,
             FloatNextToLastDate);
 
         ImmutableArray<CashFlow> cmsLeg = new CmsLeg(cmsSchedule, SwapIndex)
             .WithNotionals(Nominal)
-            .WithPaymentDayCounter(CmsDayCount)
-            .WithPaymentAdjustment(CmsConvention)
+            .WithPaymentDayCounter(CmsDayCount ?? Defaults().CmsLegDayCounter)
+            .WithPaymentAdjustment(cmsConvention)
             .WithFixingDays(SwapIndex.FixingDays)
             .WithGearings(CmsGearing)
             .WithSpreads(CmsSpread)
@@ -433,6 +442,29 @@ public sealed record MakeCms
 
         return PayCms ? new Swap(cmsLeg, floatLeg) : new Swap(floatLeg, cmsLeg);
     }
+
+    /// <summary>The defaults a builder takes under a provider for the options it isn't given.</summary>
+    /// <param name="provider">The provider, the index's, which a builder on the index takes.</param>
+    /// <returns>The provider's defaults; QuantLib's under <see cref="ConventionProvider.QuantLib"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="provider"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The provider has no defaults (a set without QuantLib's presets).</exception>
+    public static CmsDefaults Defaults(ConventionProvider provider)
+    {
+        ArgumentNullException.ThrowIfNull(provider);
+        return ConventionProvider.ReadDefaults(provider, p => p.ResolveCmsDefaults(QuantLibDefaults), "CMS swaps");
+    }
+
+    // QuantLib's constants: a 3M CMS leg, Modified Following, backward, Actual/360; the floating leg backward.
+    private static CmsDefaults QuantLibDefaults() =>
+        new(
+            new Period(3, TimeUnit.Months),
+            BusinessDayConvention.ModifiedFollowing,
+            BusinessDayConvention.ModifiedFollowing,
+            DateGenerationRule.Backward,
+            false,
+            new Actual360(),
+            DateGenerationRule.Backward,
+            false);
 
     // A leg's NPV or BPS from the results, refused where it isn't available, as QuantLib's legNPV(j) and legBPS(j).
     private static double Leg(ImmutableArray<double?> values, int j) =>

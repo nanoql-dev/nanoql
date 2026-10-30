@@ -3,7 +3,9 @@
 
 using System.Collections.Immutable;
 using NanoQL.Coupons;
+using System.Diagnostics.CodeAnalysis;
 using NanoQL.Indexes;
+using NanoQL.Instruments;
 using NanoQL.TermStructures;
 using NanoQL.Time;
 
@@ -318,6 +320,128 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         }
     }
 
+    /// <summary>A schedule convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No ScheduleConvention record has the name.</exception>
+    public ScheduleConvention Schedule(string name) =>
+        new(this, Merged<ScheduleConventionRecord>(ConventionKind.ScheduleConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A swap convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No SwapConvention record has the name.</exception>
+    public SwapConvention Swap(string name) =>
+        new(this, Merged<SwapConventionRecord>(ConventionKind.SwapConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>An overnight-indexed swap convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No OisConvention record has the name.</exception>
+    public OisConvention Ois(string name) =>
+        new(this, Merged<OisConventionRecord>(ConventionKind.OisConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A credit default swap convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No CdsConvention record has the name.</exception>
+    public CdsConvention Cds(string name) =>
+        new(this, Merged<CdsConventionRecord>(ConventionKind.CdsConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A zero-coupon inflation swap convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No ZeroCouponInflationSwapConvention record has the name.</exception>
+    public ZeroCouponInflationSwapConvention ZeroCouponInflationSwap(string name) =>
+        new(this, Merged<ZeroCouponInflationSwapConventionRecord>(ConventionKind.ZeroCouponInflationSwapConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A year-on-year inflation swap convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No YearOnYearInflationSwapConvention record has the name.</exception>
+    public YearOnYearInflationSwapConvention YearOnYearInflationSwap(string name) =>
+        new(this, Merged<YearOnYearInflationSwapConventionRecord>(ConventionKind.YearOnYearInflationSwapConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A cross-currency basis swap convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No CrossCurrencyBasisSwapConvention record has the name.</exception>
+    [Experimental("NQL0001")]
+    public CrossCurrencyBasisSwapConvention CrossCurrencyBasisSwap(string name) =>
+        new(this, Merged<CrossCurrencyBasisSwapConventionRecord>(ConventionKind.CrossCurrencyBasisSwapConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A cross-currency fixed-against-floating swap convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No CrossCurrencySwapConvention record has the name.</exception>
+    [Experimental("NQL0001")]
+    public CrossCurrencySwapConvention CrossCurrencySwap(string name) =>
+        new(this, Merged<CrossCurrencySwapConventionRecord>(ConventionKind.CrossCurrencySwapConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>An FX swap and forward convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No FxSwapConvention record has the name.</exception>
+    public FxSwapConvention FxSwap(string name) =>
+        new(this, Merged<FxSwapConventionRecord>(ConventionKind.FxSwapConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A cap and floor convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No CapFloorConvention record has the name.</exception>
+    public CapFloorConvention CapFloor(string name) =>
+        new(this, Merged<CapFloorConventionRecord>(ConventionKind.CapFloorConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A swaption convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No SwaptionConvention record has the name.</exception>
+    public SwaptionConvention Swaption(string name) =>
+        new(this, Merged<SwaptionConventionRecord>(ConventionKind.SwaptionConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A CMS swap convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No CmsConvention record has the name.</exception>
+    public CmsConvention Cms(string name) =>
+        new(this, Merged<CmsConventionRecord>(ConventionKind.CmsConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A multiple-resets swap convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No MultipleResetsSwapConvention record has the name.</exception>
+    public MultipleResetsSwapConvention MultipleResetsSwap(string name) =>
+        new(this, Merged<MultipleResetsSwapConventionRecord>(ConventionKind.MultipleResetsSwapConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A year-on-year inflation cap and floor convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No YoYInflationCapFloorConvention record has the name.</exception>
+    public YoYInflationCapFloorConvention YoYInflationCapFloor(string name) =>
+        new(this, Merged<YoYInflationCapFloorConventionRecord>(ConventionKind.YoYInflationCapFloorConvention, name, static (a, b) => a.Over(b)).Named(name));
+
+    /// <summary>A government bond market's convention by name, its record's base chain merged.</summary>
+    /// <param name="name">The record's name.</param>
+    /// <returns>The convention, on the set's names.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No BondConvention record has the name.</exception>
+    public BondConvention Bond(string name) =>
+        new(this, Merged<BondConventionRecord>(ConventionKind.BondConvention, name, static (a, b) => a.Over(b)).Named(name), FixedRateBondDefaults(), BondPresetOf(name));
+
     /// <summary>
     /// Where each name the set defines comes from, QuantLib's presets or a file's record, and a warning for each
     /// record that overrides no name and that no record references, as a likely misspelling.
@@ -514,6 +638,196 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
     }
 
     /// <inheritdoc/>
+    public override VanillaSwapDefaults ResolveVanillaSwapDefaults(Currency? currency, Func<VanillaSwapDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        string name = SwapDefaults + currency?.Code;
+        if (currency is null || DefaultRecord<SwapConventionRecord>(ConventionKind.SwapConvention, name, static (a, b) => a.Over(b)) is not { } r)
+        {
+            return Undefined(name, reference);
+        }
+
+        VanillaSwapDefaults? q = null;
+        VanillaSwapDefaults Q() => q ??= reference();
+
+        // the threshold comes with the tenor from the record that gives the tenor, or alone from one that gives none
+        return new VanillaSwapDefaults(
+            r.FixedLegTenor is null ? Q().FixedLegTenor : r.FixedLegTenor,
+            r.FixedLegTenor is null ? r.FixedLegTenorThreshold ?? Q().FixedLegTenorThreshold : r.FixedLegTenorThreshold,
+            r.FixedLegDayCounter is string dc ? DayCounterOf(dc, layers.Length, [], "currency") : Q().FixedLegDayCounter,
+            r.FixedLegConvention ?? Q().FixedLegConvention,
+            r.FixedLegTerminationDateConvention ?? Q().FixedLegTerminationDateConvention,
+            r.FixedLegRule ?? Q().FixedLegRule,
+            r.FixedLegEndOfMonth ?? Q().FixedLegEndOfMonth,
+            r.FloatingLegRule ?? Q().FloatingLegRule,
+            r.FloatingLegEndOfMonth ?? Q().FloatingLegEndOfMonth);
+    }
+
+    /// <inheritdoc/>
+    public override OisDefaults ResolveOisDefaults(string index, Func<OisDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        ArgumentNullException.ThrowIfNull(reference);
+
+        // the index's class's record, else the builder's
+        if ((DefaultRecord<OisConventionRecord>(ConventionKind.OisConvention, OisDefaultsName + "." + index, static (a, b) => a.Over(b))
+            ?? DefaultRecord<OisConventionRecord>(ConventionKind.OisConvention, OisDefaultsName, static (a, b) => a.Over(b))) is not { } r)
+        {
+            return Undefined(OisDefaultsName, reference);
+        }
+
+        OisDefaults? q = null;
+        OisDefaults Q() => q ??= reference();
+
+        // the payment frequency is both legs', the fixed leg's unless its own is given, as the builder's setters
+        return new OisDefaults(
+            r.SettlementDays ?? Q().SettlementDays,
+            r.FixedLegFrequency ?? r.PaymentFrequency ?? Q().FixedLegPaymentFrequency,
+            r.PaymentFrequency ?? Q().OvernightLegPaymentFrequency,
+            r.PaymentConvention ?? Q().PaymentAdjustment,
+            r.PaymentLag ?? Q().PaymentLag,
+            r.FixedLegConvention ?? Q().FixedLegConvention,
+            r.FixedLegTerminationDateConvention ?? Q().FixedLegTerminationDateConvention,
+            r.OvernightLegConvention ?? Q().OvernightLegConvention,
+            r.OvernightLegTerminationDateConvention ?? Q().OvernightLegTerminationDateConvention,
+            r.FixedLegRule ?? Q().FixedLegRule,
+            r.OvernightLegRule ?? Q().OvernightLegRule,
+            r.TelescopicValueDates ?? Q().TelescopicValueDates,
+            r.Averaging ?? Q().AveragingMethod,
+            r.LockoutDays ?? Q().LockoutDays,
+            r.ObservationShift ?? Q().ApplyObservationShift);
+    }
+
+    /// <inheritdoc/>
+    public override CdsDefaults ResolveCdsDefaults(Func<CdsDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        if (DefaultRecord<CdsConventionRecord>(ConventionKind.CdsConvention, nameof(MakeCreditDefaultSwap), static (a, b) => a.Over(b)) is not { } r)
+        {
+            return Undefined(nameof(MakeCreditDefaultSwap), reference);
+        }
+
+        CdsDefaults? q = null;
+        CdsDefaults Q() => q ??= reference();
+        return new CdsDefaults(
+            r.CouponFrequency is Frequency f ? new Period(f) : Q().CouponTenor,
+            r.Rule ?? Q().Rule,
+            r.PaymentConvention ?? Q().Convention,
+            r.DayCounter is string dc ? DayCounterOf(dc, layers.Length, [], "reference") : Q().DayCounter,
+            r.LastPeriodDayCounter is string last ? DayCounterOf(last, layers.Length, [], "reference") : Q().LastPeriodDayCounter,
+            r.SettlesAccrual ?? Q().SettlesAccrual,
+            r.PaysAtDefaultTime ?? Q().PaysAtDefaultTime,
+            r.RebatesAccrual ?? Q().RebatesAccrual,
+            r.CashSettlementDays ?? Q().CashSettlementDays,
+            r.Calendar is string calendar ? CalendarOf(calendar, layers.Length, [], "reference") : Q().Calendar);
+    }
+
+    /// <inheritdoc/>
+    public override CapFloorDefaults ResolveCapFloorDefaults(Func<CapFloorDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        return DefaultRecord<CapFloorConventionRecord>(ConventionKind.CapFloorConvention, nameof(MakeCapFloor), static (a, b) => a.Over(b)) is { } r
+            ? new CapFloorDefaults(r.FirstCapletExcluded ?? reference().FirstCapletExcluded)
+            : Undefined(nameof(MakeCapFloor), reference);
+    }
+
+    /// <inheritdoc/>
+    public override SwaptionDefaults ResolveSwaptionDefaults(Func<SwaptionDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        if (DefaultRecord<SwaptionConventionRecord>(ConventionKind.SwaptionConvention, nameof(MakeSwaption), static (a, b) => a.Over(b)) is not { } r)
+        {
+            return Undefined(nameof(MakeSwaption), reference);
+        }
+
+        SwaptionDefaults? q = null;
+        SwaptionDefaults Q() => q ??= reference();
+        return new SwaptionDefaults(r.SettlementType ?? Q().SettlementType, r.SettlementMethod ?? Q().SettlementMethod, r.OptionConvention ?? Q().OptionConvention);
+    }
+
+    /// <inheritdoc/>
+    public override CmsDefaults ResolveCmsDefaults(Func<CmsDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        if (DefaultRecord<CmsConventionRecord>(ConventionKind.CmsConvention, nameof(MakeCms), static (a, b) => a.Over(b)) is not { } r)
+        {
+            return Undefined(nameof(MakeCms), reference);
+        }
+
+        CmsDefaults? q = null;
+        CmsDefaults Q() => q ??= reference();
+        return new CmsDefaults(
+            r.CmsLegTenor ?? Q().CmsLegTenor,
+            r.CmsLegConvention ?? Q().CmsLegConvention,
+            r.CmsLegTerminationDateConvention ?? Q().CmsLegTerminationDateConvention,
+            r.CmsLegRule ?? Q().CmsLegRule,
+            r.CmsLegEndOfMonth ?? Q().CmsLegEndOfMonth,
+            r.CmsLegDayCounter is string dc ? DayCounterOf(dc, layers.Length, [], "reference") : Q().CmsLegDayCounter,
+            r.FloatingLegRule ?? Q().FloatingLegRule,
+            r.FloatingLegEndOfMonth ?? Q().FloatingLegEndOfMonth);
+    }
+
+    /// <inheritdoc/>
+    public override MultipleResetsSwapDefaults ResolveMultipleResetsSwapDefaults(Func<MultipleResetsSwapDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        if (DefaultRecord<MultipleResetsSwapConventionRecord>(ConventionKind.MultipleResetsSwapConvention, nameof(MakeMultipleResetsSwap), static (a, b) => a.Over(b)) is not { } r)
+        {
+            return Undefined(nameof(MakeMultipleResetsSwap), reference);
+        }
+
+        MultipleResetsSwapDefaults? q = null;
+        MultipleResetsSwapDefaults Q() => q ??= reference();
+        return new MultipleResetsSwapDefaults(r.FixedLegConvention ?? Q().FixedLegConvention, r.Averaging ?? Q().AveragingMethod);
+    }
+
+    /// <inheritdoc/>
+    public override YoYInflationCapFloorDefaults ResolveYoYInflationCapFloorDefaults(Func<YoYInflationCapFloorDefaults> reference)
+    {
+        ArgumentNullException.ThrowIfNull(reference);
+        if (DefaultRecord<YoYInflationCapFloorConventionRecord>(ConventionKind.YoYInflationCapFloorConvention, nameof(MakeYoYInflationCapFloor), static (a, b) => a.Over(b)) is not { } r)
+        {
+            return Undefined(nameof(MakeYoYInflationCapFloor), reference);
+        }
+
+        YoYInflationCapFloorDefaults? q = null;
+        YoYInflationCapFloorDefaults Q() => q ??= reference();
+        return new YoYInflationCapFloorDefaults(
+            r.PaymentDayCounter is string dc ? DayCounterOf(dc, layers.Length, [], "reference") : Q().PaymentDayCounter,
+            r.PaymentAdjustment ?? Q().PaymentAdjustment,
+            r.FixingDays ?? Q().FixingDays);
+    }
+
+    /// <inheritdoc/>
+    public override BondConventions ResolveBond(string preset, Func<BondConventions> reference)
+    {
+        ArgumentNullException.ThrowIfNull(preset);
+        ArgumentNullException.ThrowIfNull(reference);
+        if (DefaultRecord<BondConventionRecord>(ConventionKind.BondConvention, preset, static (a, b) => a.Over(b)) is not { } r)
+        {
+            return Undefined(preset, reference);
+        }
+
+        BondConventions? q = null;
+        BondConventions Q() => q ??= reference();
+        return new BondConventions(
+            r.SettlementDays ?? Q().SettlementDays,
+            r.Frequency is Frequency f ? new Period(f) : Q().Tenor,
+            r.Calendar is string calendar ? CalendarOf(calendar, layers.Length, [], "preset") : Q().Calendar,
+            r.Convention ?? Q().Convention,
+            r.TerminationDateConvention ?? Q().TerminationDateConvention,
+            r.Rule ?? Q().Rule,
+            r.EndOfMonth ?? Q().EndOfMonth,
+            r.AccrualDayCounter is string dc ? DayCounterOf(dc, layers.Length, [], "preset") : Q().AccrualDayCounter,
+            r.PaymentConvention ?? Q().PaymentConvention,
+            r.PaymentCalendar is string payment ? CalendarOf(payment, layers.Length, [], "preset") : Q().PaymentCalendar,
+            r.ExCouponPeriod ?? Q().ExCouponPeriod,
+            r.ExCouponCalendar is string exCoupon ? CalendarOf(exCoupon, layers.Length, [], "preset") : Q().ExCouponCalendar,
+            r.ExCouponConvention ?? Q().ExCouponConvention,
+            r.ExCouponEndOfMonth ?? Q().ExCouponEndOfMonth);
+    }
+
+    /// <inheritdoc/>
     public bool Equals(ConventionSet? other) =>
         other is not null && (ReferenceEquals(this, other)
             || (hash == other.hash && onQuantLib == other.onQuantLib && layers.SequenceEqual(other.layers)));
@@ -544,6 +858,12 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
     private static object Validate(ConventionSet set, string name)
     {
         set.ValidateIndex(name);
+        return name;
+    }
+
+    private static object ValidateConvention(ConventionSet set, ConventionKind kind, string name)
+    {
+        set.ValidateConvention(kind, name);
         return name;
     }
 
@@ -578,7 +898,8 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
                         ConventionKind.Currency => set.CurrencyOf(name, [], "snapshot"),
                         ConventionKind.Region => set.RegionOf(name, [], "snapshot"),
                         ConventionKind.Index => Validate(set, name),
-                        _ => set.AliasTarget(name, []),
+                        ConventionKind.Alias or ConventionKind.Enumeration => set.AliasTarget(name, []),
+                        _ => ValidateConvention(set, kind, name),
                     };
                 }
             }
@@ -624,6 +945,14 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
             case CurrencyPresetRecord { TriangulationCurrency: { Length: > 0 } t }:
                 yield return t;
                 break;
+        }
+
+        foreach (string? name in r.References())
+        {
+            if (name is not null)
+            {
+                yield return name;
+            }
         }
     }
 
@@ -761,6 +1090,9 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
             case IborIndexRecord or IborFamilyRecord or OvernightIndexRecord or SwapIndexRecord or OvernightIndexedSwapIndexRecord
                 or ZeroInflationIndexRecord or YoYInflationIndexRecord:
                 CheckIndex(r, shippedLayer, Refuse);
+                break;
+            case ConventionRecord when IsInstrumentConvention(ConventionKinds.Of(r)):
+                CheckConvention(r, ConventionKinds.Of(r), Refuse);
                 break;
             case AliasRecord a:
                 // the shipped aliases are the ones QuantLib's shared implementations allow
@@ -1173,6 +1505,265 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         };
     }
 
+    // The instrument conventions. A record's fields are merged down its base chain, a field left out the next record's;
+    // a builder's default record answers the provider's member for its builder, a field it leaves out QuantLib's
+    // reference. A default record holds only what its builder fixes, never what the builder derives from its index.
+
+    private const string SwapDefaults = "MakeVanillaSwap.";
+
+    private const string OisDefaultsName = "MakeOIS";
+
+    // The fields each builder's default record may give: what the builder fixes, by the record's name.
+    private static readonly Dictionary<string, (ConventionKind Kind, string[] Fields)> DefaultRecords = new(StringComparer.Ordinal)
+    {
+        [SwapDefaults] = (ConventionKind.SwapConvention, [
+            "FixedLegTenor", "FixedLegTenorThreshold", "FixedLegDayCounter", "FixedLegConvention", "FixedLegTerminationDateConvention",
+            "FixedLegRule", "FixedLegEndOfMonth", "FloatingLegRule", "FloatingLegEndOfMonth"]),
+        [OisDefaultsName] = (ConventionKind.OisConvention, [
+            "SettlementDays", "PaymentLag", "PaymentConvention", "PaymentFrequency", "FixedLegFrequency", "FixedLegConvention",
+            "FixedLegTerminationDateConvention", "OvernightLegConvention", "OvernightLegTerminationDateConvention", "FixedLegRule",
+            "OvernightLegRule", "TelescopicValueDates", "Averaging", "LockoutDays", "ObservationShift"]),
+        [nameof(MakeCreditDefaultSwap)] = (ConventionKind.CdsConvention, [
+            "Calendar", "CouponFrequency", "PaymentConvention", "Rule", "DayCounter", "LastPeriodDayCounter", "SettlesAccrual",
+            "PaysAtDefaultTime", "RebatesAccrual", "CashSettlementDays"]),
+        [nameof(MakeCapFloor)] = (ConventionKind.CapFloorConvention, ["FirstCapletExcluded"]),
+        [nameof(MakeSwaption)] = (ConventionKind.SwaptionConvention, ["SettlementType", "SettlementMethod", "OptionConvention"]),
+        [nameof(MakeCms)] = (ConventionKind.CmsConvention, [
+            "CmsLegTenor", "CmsLegConvention", "CmsLegTerminationDateConvention", "CmsLegRule", "CmsLegEndOfMonth", "CmsLegDayCounter",
+            "FloatingLegRule", "FloatingLegEndOfMonth"]),
+        [nameof(MakeMultipleResetsSwap)] = (ConventionKind.MultipleResetsSwapConvention, ["FixedLegConvention", "Averaging"]),
+        [nameof(MakeYoYInflationCapFloor)] = (ConventionKind.YoYInflationCapFloorConvention, ["PaymentDayCounter", "PaymentAdjustment", "FixingDays"]),
+        [nameof(FixedRateBond)] = (ConventionKind.BondConvention, ["PaymentConvention", "Redemption", "ExCouponConvention", "ExCouponEndOfMonth", "PriceType"]),
+        [nameof(BTP)] = (ConventionKind.BondConvention, [
+            "SettlementDays", "Frequency", "Calendar", "Convention", "TerminationDateConvention", "Rule", "EndOfMonth", "AccrualDayCounter",
+            "PaymentConvention", "PaymentCalendar", "ExCouponPeriod", "ExCouponCalendar", "ExCouponConvention", "ExCouponEndOfMonth"]),
+    };
+
+    // The default record a name is, MakeVanillaSwap.<currency> and MakeOIS.<class> by their prefixes, or null.
+    private static string? DefaultRecordOf(string name) =>
+        DefaultRecords.ContainsKey(name) ? name
+        : name.StartsWith(SwapDefaults, StringComparison.Ordinal) && name.Length > SwapDefaults.Length ? SwapDefaults
+        : name.StartsWith(OisDefaultsName + ".", StringComparison.Ordinal) && name.Length > OisDefaultsName.Length + 1 ? OisDefaultsName
+        : null;
+
+    private static bool IsInstrumentConvention(ConventionKind kind) => !ConventionKinds.Aliased(kind);
+
+    // Whether an index name is an overnight-indexed swap index's record, through its aliases.
+    internal bool IsOvernightIndexedSwapIndex(string name) =>
+        Top(ConventionKind.Index, name, layers.Length)?.Record switch
+        {
+            AliasRecord a => IsOvernightIndexedSwapIndex(a.Base!),
+            OvernightIndexedSwapIndexRecord => true,
+            _ => false,
+        };
+
+    private T Merged<T>(ConventionKind kind, string name, Func<T, T, T> over)
+        where T : ConventionRecord
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        return ConventionRecordOf(kind, name, layers.Length, [], over) ?? throw Unknown(kind.ToString(), name, nameof(name));
+    }
+
+    private T? DefaultRecord<T>(ConventionKind kind, string name, Func<T, T, T> over)
+        where T : ConventionRecord =>
+        ConventionRecordOf(kind, name, layers.Length, [], over);
+
+    // An instrument convention's record merged down its base chain below upTo, or null where the set has none of the
+    // name in the kind; no alias names one.
+    private T? ConventionRecordOf<T>(ConventionKind kind, string name, int upTo, HashSet<string> visiting, Func<T, T, T> over)
+        where T : ConventionRecord
+    {
+        string key = $"{kind}:{name}:{upTo}";
+        Enter(visiting, key, name);
+        try
+        {
+            Entry? e = null;
+            if (index.TryGetValue((kind, name), out List<Entry>? entries))
+            {
+                e = entries.FirstOrDefault(x => x.Layer < upTo) is { Record: not null } found ? found : null;
+            }
+
+            if (e is not Entry top)
+            {
+                return null;
+            }
+
+            var r = (T)top.Record;
+            T? lower = r.Base switch
+            {
+                null => null,
+                string b when b == name => ConventionRecordOf(kind, name, top.Layer, visiting, over),
+                string b => ConventionRecordOf(kind, b, layers.Length, visiting, over)
+                    ?? throw new ArgumentException($"unknown {kind} {b}", "snapshot"),
+            };
+            return lower is null ? r : over(r, lower);
+        }
+        finally
+        {
+            visiting.Remove(key);
+        }
+    }
+
+    private BondConventionRecord? FixedRateBondDefaults() =>
+        DefaultRecord<BondConventionRecord>(ConventionKind.BondConvention, nameof(FixedRateBond), static (a, b) => a.Over(b));
+
+    // The coded bond preset a bond record's chain reaches, or null.
+    private string? BondPresetOf(string name)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        for (string? n = name; n is not null && seen.Add(n);)
+        {
+            if (n == nameof(BTP))
+            {
+                return n;
+            }
+
+            n = index.TryGetValue((ConventionKind.BondConvention, n), out List<Entry>? entries) ? entries[0].Record.Base : null;
+        }
+
+        return null;
+    }
+
+    // An instrument convention record's own rules: a default record's name keeps its kind, holds only what its builder
+    // fixes and bases on its own name or its builder's record; a threshold is a currency's default record's.
+    private static void CheckConvention(ConventionRecord r, ConventionKind kind, Action<string> refuse)
+    {
+        if (DefaultRecordOf(r.Name) is string builder)
+        {
+            (ConventionKind defaultKind, string[] fields) = DefaultRecords[builder];
+            if (kind != defaultKind)
+            {
+                refuse($"the name is the {builder.TrimEnd('.')} builder's default record, a {defaultKind}");
+            }
+
+            if (r.Given().FirstOrDefault(f => !fields.Contains(f)) is string derived)
+            {
+                refuse($"a default record holds only what its builder fixes, not {derived}");
+            }
+
+            if (r.Base is string b && b != r.Name && DefaultRecordOf(b) != builder && !(builder == OisDefaultsName && b == OisDefaultsName))
+            {
+                refuse("a default record takes only its own name or its builder's record as its base");
+            }
+        }
+        else if (r is SwapConventionRecord { FixedLegTenorThreshold: not null })
+        {
+            refuse("FixedLegTenorThreshold is a currency's default record's, MakeVanillaSwap.<currency>");
+        }
+        else if (r.Base is string b && DefaultRecordOf(b) is string defaults && defaults != nameof(BTP))
+        {
+            refuse($"a convention takes its builder's defaults without basing on them: {b} is the {defaults.TrimEnd('.')} builder's default record");
+        }
+    }
+
+    // Every name an instrument convention's record gives resolves, and its chain carries no default record's field it
+    // can't take.
+    private void ValidateConvention(ConventionKind kind, string name)
+    {
+        if (DefaultRecordOf(name) is not null)
+        {
+            ValidateDefaults(name);
+            return;
+        }
+
+        switch (kind)
+        {
+            case ConventionKind.ScheduleConvention:
+                ScheduleConvention schedule = Schedule(name);
+                if (schedule.Record is { Tenor: not null, Frequency: not null })
+                {
+                    throw new ArgumentException("Tenor and Frequency are one option, the schedule's tenor: the record and its bases give both", "snapshot");
+                }
+
+                schedule.Validate();
+                break;
+            case ConventionKind.SwapConvention:
+                SwapConvention swap = Swap(name);
+                if (swap.Record.FixedLegTenorThreshold is not null)
+                {
+                    throw new ArgumentException("FixedLegTenorThreshold is a currency's default record's, MakeVanillaSwap.<currency>", "snapshot");
+                }
+
+                swap.Validate();
+                break;
+            case ConventionKind.OisConvention:
+                Ois(name).Validate();
+                break;
+            case ConventionKind.CdsConvention:
+                Cds(name).Validate();
+                break;
+            case ConventionKind.ZeroCouponInflationSwapConvention:
+                ZeroCouponInflationSwap(name).Validate();
+                break;
+            case ConventionKind.YearOnYearInflationSwapConvention:
+                YearOnYearInflationSwap(name).Validate();
+                break;
+            case ConventionKind.CrossCurrencyBasisSwapConvention:
+                CrossCurrencyBasisSwap(name).Validate();
+                break;
+            case ConventionKind.CrossCurrencySwapConvention:
+                CrossCurrencySwap(name).Validate();
+                break;
+            case ConventionKind.FxSwapConvention:
+                FxSwap(name).Validate();
+                break;
+            case ConventionKind.CapFloorConvention:
+                CapFloor(name).Validate();
+                break;
+            case ConventionKind.SwaptionConvention:
+                Swaption(name).Validate();
+                break;
+            case ConventionKind.CmsConvention:
+                Cms(name).Validate();
+                break;
+            case ConventionKind.MultipleResetsSwapConvention:
+                MultipleResetsSwap(name).Validate();
+                break;
+            case ConventionKind.YoYInflationCapFloorConvention:
+                YoYInflationCapFloor(name).Validate();
+                break;
+            case ConventionKind.BondConvention:
+                Bond(name).Validate();
+                break;
+        }
+    }
+
+    // A default record resolves as its builder reads it; an OIS builder's and the bonds' default records name nothing.
+    private void ValidateDefaults(string name)
+    {
+        switch (DefaultRecordOf(name))
+        {
+            case SwapDefaults:
+                _ = MakeVanillaSwap.Defaults(CurrencyOf(name[SwapDefaults.Length..], [], "snapshot"), this);
+                break;
+            case nameof(MakeCreditDefaultSwap):
+                _ = MakeCreditDefaultSwap.Defaults(this);
+                break;
+            case nameof(MakeCapFloor):
+                _ = MakeCapFloor.Defaults(this);
+                break;
+            case nameof(MakeSwaption):
+                _ = MakeSwaption.Defaults(this);
+                break;
+            case nameof(MakeCms):
+                _ = MakeCms.Defaults(this);
+                break;
+            case nameof(MakeMultipleResetsSwap):
+                _ = MakeMultipleResetsSwap.Defaults(this);
+                break;
+            case nameof(MakeYoYInflationCapFloor):
+                _ = MakeYoYInflationCapFloor.Defaults(this);
+                break;
+            case nameof(BTP):
+                using (Use(this))
+                {
+                    _ = new BTP(new Date(15, Month.October, 2036), 0.03, new EvaluationContext { EvaluationDate = new Date(15, Month.October, 2026) });
+                }
+
+                break;
+        }
+    }
+
     // The index and region kinds. A record's fields are merged down its base chain, a field left out the next record's,
     // then, for a coded preset, QuantLib's reference. A family's fields are taken at a tenor by the tenor's unit.
 
@@ -1406,9 +1997,9 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
                         FixedLegConvention = s.FixedLegConvention ?? lower.FixedLegConvention,
                         FixedLegDayCounter = s.FixedLegDayCounter ?? lower.FixedLegDayCounter,
                         IborIndex = s.IborIndex ?? lower.IborIndex,
-                        IborIndexTenor = s.IborIndex is null ? lower.IborIndexTenor : s.IborIndexTenor,
+                        IborIndexTenor = s.IborIndex is null ? s.IborIndexTenor ?? lower.IborIndexTenor : s.IborIndexTenor,
                         ShortIborIndex = s.ShortIborIndex ?? lower.ShortIborIndex,
-                        ShortIborIndexTenor = s.ShortIborIndex is null ? lower.ShortIborIndexTenor : s.ShortIborIndexTenor,
+                        ShortIborIndexTenor = s.ShortIborIndex is null ? s.ShortIborIndexTenor ?? lower.ShortIborIndexTenor : s.ShortIborIndexTenor,
                         ShortFixedLegTenor = s.ShortFixedLegTenor ?? lower.ShortFixedLegTenor,
                     };
                 }

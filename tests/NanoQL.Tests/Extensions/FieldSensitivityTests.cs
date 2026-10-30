@@ -291,7 +291,9 @@ public class FieldSensitivityTests
     public void TheTableHoldsEveryFieldOfEveryKind()
     {
         var expected = new List<(string, string)>();
-        foreach (Type kind in typeof(ConventionRecord).Assembly.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(ConventionRecord))))
+        // the instrument convention kinds are InstrumentFieldSensitivityTests'
+        foreach (Type kind in typeof(ConventionRecord).Assembly.GetExportedTypes()
+            .Where(t => t.IsSubclassOf(typeof(ConventionRecord)) && !t.Name.EndsWith("ConventionRecord", StringComparison.Ordinal)))
         {
             string element = kind.Name[..^"Record".Length];
             expected.AddRange(Properties(kind).Select(p => (element, p)));

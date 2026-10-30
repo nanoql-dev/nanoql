@@ -1,0 +1,33 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Conventions xmlns="https://nanoql.net/schemas/conventions">
+  <CmsConvention name="MakeCms">
+    <CmsLegTenor>3M</CmsLegTenor>
+    <CmsLegConvention>ModifiedFollowing</CmsLegConvention>
+    <CmsLegTerminationDateConvention>ModifiedFollowing</CmsLegTerminationDateConvention>
+    <CmsLegRule>Backward</CmsLegRule>
+    <CmsLegEndOfMonth>false</CmsLegEndOfMonth>
+    <CmsLegDayCounter>Actual360</CmsLegDayCounter>
+    <FloatingLegRule>Backward</FloatingLegRule>
+    <FloatingLegEndOfMonth>false</FloatingLegEndOfMonth>
+  </CmsConvention>
+  <YoYInflationCapFloorConvention name="MakeYoYInflationCapFloor">
+    <PaymentDayCounter>Thirty360.BondBasis</PaymentDayCounter>
+    <PaymentAdjustment>ModifiedFollowing</PaymentAdjustment>
+    <FixingDays>0</FixingDays>
+  </YoYInflationCapFloorConvention>
+  <BondConvention name="BTP">
+    <SettlementDays>2</SettlementDays>
+    <Frequency>Semiannual</Frequency>
+    <Calendar>NullCalendar</Calendar>
+    <Convention>Unadjusted</Convention>
+    <TerminationDateConvention>Unadjusted</TerminationDateConvention>
+    <Rule>Backward</Rule>
+    <EndOfMonth>true</EndOfMonth>
+    <AccrualDayCounter>ActualActual.ISMA</AccrualDayCounter>
+    <PaymentConvention>ModifiedFollowing</PaymentConvention>
+    <PaymentCalendar>TARGET</PaymentCalendar>
+  </BondConvention>
+</Conventions>

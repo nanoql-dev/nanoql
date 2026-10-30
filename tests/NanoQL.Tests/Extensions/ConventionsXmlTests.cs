@@ -160,7 +160,7 @@ public class ConventionsXmlTests
         {
             ConventionsXml.WriteDefaults(folder);
             string[] files = [.. Directory.GetFiles(folder).Select(Path.GetFileName).Order(StringComparer.Ordinal)!];
-            Assert.Equal(["aliases.xml", "calendars.xml", "currencies.xml", "daycounters.xml", "indexes.cxx.xml", "indexes.xml", "nanoql-conventions.xsd"], files);
+            Assert.Equal(["aliases.xml", "calendars.xml", "currencies.xml", "daycounters.xml", "indexes.cxx.xml", "indexes.xml", "instruments.cxx.xml", "instruments.xml", "nanoql-conventions.xsd"], files);
             foreach (string file in files.Where(f => f.EndsWith(".xml", StringComparison.Ordinal)))
             {
                 byte[] bytes = File.ReadAllBytes(Path.Combine(folder, file));
@@ -181,7 +181,8 @@ public class ConventionsXmlTests
             Directory.Delete(folder, true);
         }
 
-        static int PresetOrder(string path) => Array.IndexOf(["calendars.xml", "daycounters.xml", "currencies.xml", "indexes.xml", "indexes.cxx.xml", "aliases.xml"], Path.GetFileName(path));
+        static int PresetOrder(string path) =>
+            Array.IndexOf(["calendars.xml", "daycounters.xml", "currencies.xml", "indexes.xml", "indexes.cxx.xml", "instruments.xml", "instruments.cxx.xml", "aliases.xml"], Path.GetFileName(path));
     }
 
     [Fact]
@@ -189,7 +190,7 @@ public class ConventionsXmlTests
     {
         XmlSchemaSet schema = ConventionsXml.Schema();
         Type[] kinds = [.. typeof(ConventionRecord).Assembly.GetExportedTypes().Where(t => t.IsSubclassOf(typeof(ConventionRecord))).OrderBy(t => t.Name, StringComparer.Ordinal)];
-        Assert.Equal(16, kinds.Length);
+        Assert.Equal(31, kinds.Length);
         foreach (Type kind in kinds)
         {
             var element = (XmlSchemaElement)schema.GlobalElements[new(kind.Name[..^"Record".Length], ConventionsXml.Namespace)]!;
@@ -199,8 +200,8 @@ public class ConventionsXmlTests
             Assert.True(kind.IsSealed, kind.Name);
         }
 
-        // the nested types: a currency's rounding and an Ibor family's unit
-        foreach ((string name, Type type) in new[] { ("Rounding", typeof(CurrencyRounding)), ("IborFamilyUnit", typeof(IborFamilyUnit)) })
+        // the nested types: a currency's rounding, an Ibor family's unit and a currency's threshold
+        foreach ((string name, Type type) in new[] { ("Rounding", typeof(CurrencyRounding)), ("IborFamilyUnit", typeof(IborFamilyUnit)), ("SwapTenorThreshold", typeof(Instruments.SwapTenorThreshold)) })
         {
             var complex = (XmlSchemaComplexType)schema.GlobalTypes[new(name, ConventionsXml.Namespace)]!;
             Assert.Equal(type.GetProperties().Where(p => p.Name != "EqualityContract").Select(p => p.Name).Order(StringComparer.Ordinal), Items(complex).Order(StringComparer.Ordinal));
@@ -236,6 +237,13 @@ public class ConventionsXmlTests
         Assert.Equal(Enum.GetNames<Frequency>().Order(StringComparer.Ordinal), Values("Frequency").Order(StringComparer.Ordinal));
         Assert.Equal(Enum.GetNames<IborIndexStyle>().Order(StringComparer.Ordinal), Values("IborIndexStyle").Order(StringComparer.Ordinal));
         Assert.Equal(Enum.GetNames<Coupons.RateAveragingType>().Order(StringComparer.Ordinal), Values("RateAveragingType").Order(StringComparer.Ordinal));
+        Assert.Equal(Enum.GetNames<DateGenerationRule>().Order(StringComparer.Ordinal), Values("DateGenerationRule").Order(StringComparer.Ordinal));
+        Assert.Equal(Enum.GetNames<Instruments.SettlementType>().Order(StringComparer.Ordinal), Values("SettlementType").Order(StringComparer.Ordinal));
+        Assert.Equal(Enum.GetNames<Instruments.SettlementMethod>().Order(StringComparer.Ordinal), Values("SettlementMethod").Order(StringComparer.Ordinal));
+        Assert.Equal(Enum.GetNames<Indexes.CPIInterpolationType>().Order(StringComparer.Ordinal), Values("CPIInterpolationType").Order(StringComparer.Ordinal));
+        Assert.Equal(Enum.GetNames<Instruments.BondPriceType>().Order(StringComparer.Ordinal), Values("BondPriceType").Order(StringComparer.Ordinal));
+        Assert.Equal(Enum.GetNames<Instruments.CreditDefaultSwapPricingModel>().Order(StringComparer.Ordinal), Values("CreditDefaultSwapPricingModel").Order(StringComparer.Ordinal));
+        Assert.Equal(Enum.GetNames<Instruments.SwapTenorComparison>().Order(StringComparer.Ordinal), Values("SwapTenorComparison").Order(StringComparer.Ordinal));
 
         // a tenor's units, those a period's short form writes
         Assert.Equal(["Days", "Months", "Weeks", "Years"], Values("TimeUnit").Order(StringComparer.Ordinal));

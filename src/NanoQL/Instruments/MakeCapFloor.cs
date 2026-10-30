@@ -31,6 +31,10 @@ namespace NanoQL.Instruments;
 /// the instrument is built, so a <see cref="CapFloorType.Collar"/> is refused by the instrument's constructor after the
 /// at-the-money rate, as QuantLib refuses it. A builder has no value equality.
 /// </para>
+/// <para>
+/// An option the builder isn't given that QuantLib's builder fixes takes the builder's provider's default
+/// (<see cref="Defaults"/>), read when the instrument is built: QuantLib's values with nothing configured.
+/// </para>
 /// </remarks>
 public sealed record MakeCapFloor
 {
@@ -62,7 +66,7 @@ public sealed record MakeCapFloor
 
     private double? Strike { get; init; }
 
-    private bool FirstCapletExcluded { get; init; } = true;
+    private bool? FirstCapletExcluded { get; init; }
 
     private bool IsOptionlet { get; init; }
 
@@ -197,7 +201,7 @@ public sealed record MakeCapFloor
         VanillaSwap swap = SwapBuilder.ToVanillaSwap(context);
 
         ImmutableArray<CashFlow> leg = swap.FloatingLeg;
-        if (FirstCapletExcluded)
+        if (FirstCapletExcluded ?? Defaults(Provider).FirstCapletExcluded)
         {
             leg = leg.RemoveAt(0);
         }
@@ -222,4 +226,19 @@ public sealed record MakeCapFloor
 
         return new CapFloor(CapFloorType, leg, [strike]);
     }
+
+    /// <summary>The defaults a builder takes under a provider for the options it isn't given.</summary>
+    /// <param name="provider">The provider, the index's, which a builder on the index takes.</param>
+    /// <returns>The provider's defaults; QuantLib's under <see cref="ConventionProvider.QuantLib"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="provider"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The provider has no defaults (a set without QuantLib's presets).</exception>
+    public static CapFloorDefaults Defaults(ConventionProvider provider)
+    {
+        ArgumentNullException.ThrowIfNull(provider);
+        return ConventionProvider.ReadDefaults(provider, p => p.ResolveCapFloorDefaults(QuantLibDefaults), "caps and floors");
+    }
+
+    // QuantLib's constant: the first caplet excluded.
+    private static CapFloorDefaults QuantLibDefaults() =>
+        new(true);
 }

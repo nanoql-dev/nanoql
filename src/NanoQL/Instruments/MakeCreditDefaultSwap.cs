@@ -16,16 +16,22 @@ namespace NanoQL.Instruments;
 /// holder. <see cref="ToCreditDefaultSwap"/> builds the swap, in place of QuantLib's conversion operators. Its defaults
 /// are QuantLib's: protection bought on a notional of 1, no upfront, quarterly coupons under the
 /// <see cref="DateGenerationRule.CDS"/> rule, Following, Actual/360 with Actual/360 (including the last day) for the
-/// last period, accrual settled and paid at the default time, the accrual rebated, and three days of cash settlement.
+/// last period, accrual settled and paid at the default time, the accrual rebated, and three days of cash settlement
+/// on <see cref="WeekendsOnly"/>.
 /// </para>
 /// <para>
 /// The trade date is the evaluation date unless given, and the upfront date the trade date advanced by the cash
-/// settlement days on <see cref="WeekendsOnly"/>. Unless a schedule is given, the protection starts on the trade date
-/// under the 2009 rules and the day after it under the others, and the schedule runs from it on
-/// <see cref="WeekendsOnly"/> to the term date, or, from a tenor, to the trade date plus the tenor or, under a CDS
+/// settlement days on the defaults' calendar. Unless a schedule is given, the protection starts on the trade date
+/// under the 2009 rules and the day after it under the others, and the schedule runs from it on the defaults' calendar
+/// to the term date, or, from a tenor, to the trade date plus the tenor or, under a CDS
 /// rule, to <see cref="CreditDefaultSwapFunctions.CdsMaturity"/>'s maturity, which the schedule refuses when there is
 /// none ("null termination date"). <see cref="WithPricingEngine"/> is kept and changes nothing: the swap holds no
 /// engine. A builder has no value equality.
+/// </para>
+/// <para>
+/// An option the builder isn't given, its calendar among them, takes the default of the provider current when the
+/// builder was created (<see cref="Defaults"/>), read when the swap is built: QuantLib's values with nothing
+/// configured.
 /// </para>
 /// </remarks>
 public sealed record MakeCreditDefaultSwap
@@ -83,17 +89,17 @@ public sealed record MakeCreditDefaultSwap
 
     private double UpfrontRate { get; init; }
 
-    private Period CouponTenor { get; init; } = new(3, TimeUnit.Months);
+    private Period? CouponTenor { get; init; }
 
-    private DateGenerationRule Rule { get; init; } = DateGenerationRule.CDS;
+    private DateGenerationRule? Rule { get; init; }
 
-    private BusinessDayConvention Convention { get; init; } = BusinessDayConvention.Following;
+    private BusinessDayConvention? Convention { get; init; }
 
-    private DayCounter DayCounter { get; init; } = new Actual360();
+    private DayCounter? DayCounter { get; init; }
 
-    private bool SettlesAccrual { get; init; } = true;
+    private bool? SettlesAccrual { get; init; }
 
-    private bool PaysAtDefaultTime { get; init; } = true;
+    private bool? PaysAtDefaultTime { get; init; }
 
     private Date? ProtectionStart { get; init; }
 
@@ -101,19 +107,23 @@ public sealed record MakeCreditDefaultSwap
 
     private Claim? Claim { get; init; }
 
-    private DayCounter? LastPeriodDayCounter { get; init; } = new Actual360(true);
+    private DayCounter? LastPeriodDayCounter { get; init; }
 
-    private bool RebatesAccrual { get; init; } = true;
+    // Whether the last period's day counter is given: null given is the accrual's.
+    private bool HasLastPeriodDayCounter { get; init; }
+
+    private bool? RebatesAccrual { get; init; }
 
     private Date? TradeDate { get; init; }
 
-    private int CashSettlementDays { get; init; } = 3;
+    private int? CashSettlementDays { get; init; }
 
     /// <summary>Builds the swap.</summary>
     /// <param name="context">The evaluation context: its evaluation date is the trade date when none is given.</param>
     /// <returns>The swap.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="context"/> is null.</exception>
-    /// <exception cref="ArgumentException">The schedule can't be built, or the swap refuses its arguments.</exception>
+    /// <exception cref="ArgumentException">The schedule can't be built, the swap refuses its arguments, or the provider
+    /// has no defaults (a set without QuantLib's presets).</exception>
     /// <exception cref="ArgumentOutOfRangeException">A given schedule is empty and no protection start is given, as
     /// QuantLib's <c>schedule_-&gt;at(0)</c> refuses it.</exception>
     /// <exception cref="NanoQLException">The maturity isn't after the trade date, or the coupon leg can't be
@@ -125,8 +135,15 @@ public sealed record MakeCreditDefaultSwap
         // Built inside the builder's provider, so what the build constructs takes its conventions.
         using IDisposable scope = ConventionProvider.Use(Provider);
 
+        // the provider's defaults, read once an option needs one
+        CdsDefaults? defaults = null;
+        CdsDefaults Defaults() => defaults ??= MakeCreditDefaultSwap.Defaults(Provider);
+        DateGenerationRule rule = Rule ?? Defaults().Rule;
+        BusinessDayConvention convention = Convention ?? Defaults().Convention;
+        int cashSettlementDays = CashSettlementDays ?? Defaults().CashSettlementDays;
+
         Date tradeDate = TradeDate ?? context.EvaluationDate;
-        Date upfrontDate = UpfrontDate ?? new WeekendsOnly().Advance(tradeDate, CashSettlementDays, TimeUnit.Days);
+        Date upfrontDate = UpfrontDate ?? Defaults().Calendar.Advance(tradeDate, cashSettlementDays, TimeUnit.Days);
 
         Date protectionStart;
         if (ProtectionStart is Date given)
@@ -137,7 +154,7 @@ public sealed record MakeCreditDefaultSwap
         {
             protectionStart = Schedule.At(0);
         }
-        else if (Rule == DateGenerationRule.CDS2015 || Rule == DateGenerationRule.CDS)
+        else if (rule == DateGenerationRule.CDS2015 || rule == DateGenerationRule.CDS)
         {
             protectionStart = tradeDate;
         }
@@ -157,11 +174,11 @@ public sealed record MakeCreditDefaultSwap
             Date end;
             if (Tenor is Period tenor)
             {
-                if (Rule == DateGenerationRule.CDS2015 || Rule == DateGenerationRule.CDS
-                    || Rule == DateGenerationRule.OldCDS)
+                if (rule == DateGenerationRule.CDS2015 || rule == DateGenerationRule.CDS
+                    || rule == DateGenerationRule.OldCDS)
                 {
                     // QuantLib's Date() when there is no maturity, which the schedule refuses
-                    end = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, Rule) ?? default;
+                    end = CreditDefaultSwapFunctions.CdsMaturity(tradeDate, tenor, rule) ?? default;
                 }
                 else
                 {
@@ -176,11 +193,11 @@ public sealed record MakeCreditDefaultSwap
             schedule = new Schedule(
                 protectionStart,
                 end,
-                CouponTenor,
-                new WeekendsOnly(),
-                Convention,
+                CouponTenor ?? Defaults().CouponTenor,
+                Defaults().Calendar,
+                convention,
                 BusinessDayConvention.Unadjusted,
-                Rule,
+                rule,
                 false,
                 context);
         }
@@ -191,18 +208,43 @@ public sealed record MakeCreditDefaultSwap
             UpfrontRate,
             RunningSpread,
             schedule,
-            Convention,
-            DayCounter,
-            SettlesAccrual,
-            PaysAtDefaultTime,
+            convention,
+            DayCounter ?? Defaults().DayCounter,
+            SettlesAccrual ?? Defaults().SettlesAccrual,
+            PaysAtDefaultTime ?? Defaults().PaysAtDefaultTime,
             protectionStart,
             upfrontDate,
             Claim,
-            LastPeriodDayCounter,
-            RebatesAccrual,
+            HasLastPeriodDayCounter ? LastPeriodDayCounter : Defaults().LastPeriodDayCounter,
+            RebatesAccrual ?? Defaults().RebatesAccrual,
             tradeDate,
-            CashSettlementDays);
+            cashSettlementDays);
     }
+
+    /// <summary>The defaults a builder takes under a provider for the options it isn't given.</summary>
+    /// <param name="provider">The provider, current when the builder is created.</param>
+    /// <returns>The provider's defaults; QuantLib's under <see cref="ConventionProvider.QuantLib"/>.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="provider"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The provider has no defaults (a set without QuantLib's presets).</exception>
+    public static CdsDefaults Defaults(ConventionProvider provider)
+    {
+        ArgumentNullException.ThrowIfNull(provider);
+        return ConventionProvider.ReadDefaults(provider, p => p.ResolveCdsDefaults(QuantLibDefaults), "credit default swaps");
+    }
+
+    // QuantLib's constants, the calendar of the schedule and the cash settlement date among them.
+    private static CdsDefaults QuantLibDefaults() =>
+        new(
+            new Period(3, TimeUnit.Months),
+            DateGenerationRule.CDS,
+            BusinessDayConvention.Following,
+            new Actual360(),
+            new Actual360(true),
+            true,
+            true,
+            true,
+            3,
+            new WeekendsOnly());
 
     /// <summary>Sets whether the protection is bought or sold; bought by default.</summary>
     /// <param name="side">The side; the engines refuse a value outside the enum, as QuantLib's do.</param>
@@ -219,12 +261,14 @@ public sealed record MakeCreditDefaultSwap
     /// <returns>The modified builder.</returns>
     public MakeCreditDefaultSwap WithUpfrontRate(double upfrontRate) => this with { UpfrontRate = upfrontRate };
 
-    /// <summary>Sets the coupon tenor of a schedule the builder generates; three months by default.</summary>
+    /// <summary>Sets the coupon tenor of a schedule the builder generates; the provider's default, QuantLib's three
+    /// months, by default.</summary>
     /// <param name="couponTenor">The tenor.</param>
     /// <returns>The modified builder.</returns>
     public MakeCreditDefaultSwap WithCouponTenor(Period couponTenor) => this with { CouponTenor = couponTenor };
 
-    /// <summary>Sets the date-generation rule; <see cref="DateGenerationRule.CDS"/> by default.</summary>
+    /// <summary>Sets the date-generation rule; the provider's default, QuantLib's
+    /// <see cref="DateGenerationRule.CDS"/>, by default.</summary>
     /// <param name="rule">The rule.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="rule"/> isn't a member of its type.</exception>
@@ -234,7 +278,8 @@ public sealed record MakeCreditDefaultSwap
         return this with { Rule = rule };
     }
 
-    /// <summary>Sets the business-day convention of the schedule and the payments; Following by default.</summary>
+    /// <summary>Sets the business-day convention of the schedule and the payments; the provider's default,
+    /// QuantLib's Following, by default.</summary>
     /// <param name="convention">The convention.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="convention"/> isn't a member of its
@@ -245,7 +290,8 @@ public sealed record MakeCreditDefaultSwap
         return this with { Convention = convention };
     }
 
-    /// <summary>Sets the day counter of the accrual; Actual/360 by default.</summary>
+    /// <summary>Sets the day counter of the accrual; the provider's default, QuantLib's Actual/360, by
+    /// default.</summary>
     /// <param name="dayCounter">The day counter.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="dayCounter"/> is null.</exception>
@@ -291,13 +337,13 @@ public sealed record MakeCreditDefaultSwap
     /// <returns>The modified builder.</returns>
     public MakeCreditDefaultSwap WithClaim(Claim? claim) => this with { Claim = claim };
 
-    /// <summary>Sets the day counter of the last period's accrual; Actual/360 (including the last day) by
-    /// default.</summary>
+    /// <summary>Sets the day counter of the last period's accrual; the provider's default, QuantLib's Actual/360
+    /// including the last day, by default.</summary>
     /// <param name="lastPeriodDayCounter">The day counter, or <see langword="null"/>, QuantLib's empty one, for the
     /// accrual's.</param>
     /// <returns>The modified builder.</returns>
     public MakeCreditDefaultSwap WithLastPeriodDayCounter(DayCounter? lastPeriodDayCounter) =>
-        this with { LastPeriodDayCounter = lastPeriodDayCounter };
+        this with { LastPeriodDayCounter = lastPeriodDayCounter, HasLastPeriodDayCounter = true };
 
     /// <summary>Sets whether the seller pays the accrued current coupon at the cash settlement date; it does by
     /// default.</summary>
@@ -316,7 +362,8 @@ public sealed record MakeCreditDefaultSwap
         return this with { TradeDate = tradeDate };
     }
 
-    /// <summary>Sets the business days from the trade date to the cash settlement date; 3 by default.</summary>
+    /// <summary>Sets the business days from the trade date to the cash settlement date; the provider's default,
+    /// QuantLib's 3, by default.</summary>
     /// <param name="cashSettlementDays">The days.</param>
     /// <returns>The modified builder.</returns>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="cashSettlementDays"/> is negative.</exception>
