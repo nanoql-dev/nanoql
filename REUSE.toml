@@ -6,6 +6,7 @@ path = [
   "README.md", "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md", ".github/pull_request_template.md", "NOTICE",
   ".gitattributes", ".gitignore", "NanoQL.slnx", "Directory.Build.props",
   ".editorconfig", "global.json", "stylecop.json", "tools/porting-map.json", "tests/vectors/**",
+  "tools/vectors/qlnet/packages.lock.json",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 The nanoql Authors"

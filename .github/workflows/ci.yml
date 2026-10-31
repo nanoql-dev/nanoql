@@ -47,6 +47,8 @@ env:
   DOTNET_NOLOGO: "1"
   QUANTLIB_TAG: v1.44
   QUANTLIB_COMMIT: ab4cb476d35f7275834bc05b47d1324403d1823b
+  QLNET_TAG: QLNet-v1.13.2
+  QLNET_COMMIT: 571d01e9ae72feb32f3ee4c4eeff184fa432c5b4
 
 jobs:
   build-test:
@@ -183,10 +185,17 @@ jobs:
               keep = [n for n in z.namelist() if n.split("/")[1:2] == ["boost"] or n.count("/") == 1]
               z.extractall(sys.argv[2], keep)
           EOF
+      # The extensions' QLNet ports name QLNet's files at its release tag, checked by its commit and a clean status.
+      - name: QLNet at the pin
+        run: |
+          git clone --quiet --depth 1 --branch "$QLNET_TAG" https://github.com/amaggiulli/QLNet.git "$RUNNER_TEMP/QLNet"
+          test "$(git -C "$RUNNER_TEMP/QLNet" rev-parse HEAD)" = "$QLNET_COMMIT"
       - name: reuse lint
         run: reuse lint
       - name: Upstream lines, copyright lines and notices
-        run: python -I tools/check-upstream.py "$RUNNER_TEMP/QuantLib" --boost "$RUNNER_TEMP/boost/boost_1_90_0"
+        run: >
+          python -I tools/check-upstream.py "$RUNNER_TEMP/QuantLib" --boost "$RUNNER_TEMP/boost/boost_1_90_0"
+          --qlnet "$RUNNER_TEMP/QLNet"
 
   coverage:
     name: Coverage
@@ -223,16 +232,23 @@ jobs:
       - name: Build
         if: steps.changes.outputs.src == 'true'
         run: dotnet build NanoQL.slnx -c Release --no-incremental
-      # Every tagged class, a superset of the commit's own: the check passes or fails on the same types.
+      # Every tagged class, a superset of the commit's own: the check passes or fails on the same types. One run per
+      # oracle: QuantLib's, and QLNet's for the extensions' QLNet ports, each type passing on its own oracle's run.
       - name: The tagged tests under coverage
         if: steps.changes.outputs.src == 'true'
         run: >
           dotnet test --solution NanoQL.slnx -c Release --no-build --filter-trait "Oracle=QuantLib" --coverage
           --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
           --coverage-settings tests/NanoQL.Tests/CodeCoverage.xml --results-directory TestResults/G7
+      - name: The QLNet-tagged tests under coverage
+        if: steps.changes.outputs.src == 'true'
+        run: >
+          dotnet test --solution NanoQL.slnx -c Release --no-build --filter-trait "Oracle=QLNet" --coverage
+          --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
+          --coverage-settings tests/NanoQL.Tests/CodeCoverage.xml --results-directory TestResults/G7qlnet
       - name: The ported types' coverage
         if: steps.changes.outputs.src == 'true'
-        run: python -I tools/check-coverage.py TestResults/G7
+        run: python -I tools/check-coverage.py TestResults/G7 --qlnet TestResults/G7qlnet
 
   reproducibility:
     name: Vector reproducibility
@@ -257,7 +273,8 @@ jobs:
           persist-credentials: false
       # Which generators rerun (docs/porting-playbook.md §8): those the change adds or changes; all of them when a
       # shared helper or a requirements file changes; every harness generator when the harness, its client or any wheel
-      # generator changes, a superset of the harness generators that import it.
+      # generator changes, a superset of the harness generators that import it; every QLNet generator when QLNet's
+      # vector program changes. A QLNet shim needs the .NET SDK, not the harness.
       - name: The generators to rerun
         id: which
         env:
@@ -271,8 +288,9 @@ jobs:
               case "$f" in
                 tools/vectors/gen/*.py)
                   g="${f#tools/vectors/gen/}"; gens+=("${g%.py}")
-                  case "$g" in cxx/*) ;; *) harness=1 ;; esac ;;
+                  case "$g" in cxx/*|qlnet/*) ;; *) harness=1 ;; esac ;;
                 tools/vectors/gen/*) g="${f#tools/vectors/gen/}"; gens+=("${g%/*}/") ;;
+                tools/vectors/qlnet/*) gens+=("qlnet/") ;;
                 tools/vectors/cxx.py|tools/cxx/*) harness=1 ;;
                 tools/vectors/*.py|tools/vectors/*requirements.txt) all=1 ;;
               esac
@@ -283,8 +301,10 @@ jobs:
           args=""; [ "$all" = 0 ] && args="${gens[*]}"
           run=false; { [ "$all" = 1 ] || [ ${#gens[@]} -gt 0 ]; } && run=true
           cxx=false; { [ "$all" = 1 ] || [[ " ${gens[*]} " == *" cxx/"* ]]; } && cxx=true
+          qlnet=false; { [ "$all" = 1 ] || [[ " ${gens[*]} " == *" qlnet/"* ]]; } && qlnet=true
           echo "run=$run" >> "$GITHUB_OUTPUT"; echo "cxx=$cxx" >> "$GITHUB_OUTPUT"; echo "args=$args" >> "$GITHUB_OUTPUT"
-          echo "rerun: ${args:-every generator} (run $run, harness $cxx)"
+          echo "qlnet=$qlnet" >> "$GITHUB_OUTPUT"
+          echo "rerun: ${args:-every generator} (run $run, harness $cxx, QLNet $qlnet)"
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         if: steps.which.outputs.run == 'true'
         with:
@@ -317,6 +337,12 @@ jobs:
       - name: The harness's self-test
         if: steps.which.outputs.cxx == 'true'
         run: python -I tools/vectors/cxx.py --self-test
+      # QLNet's shims build tools/vectors/qlnet/ on the SDK global.json names, its QLNet package locked by its
+      # packages.lock.json.
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        if: steps.which.outputs.qlnet == 'true'
+        with:
+          global-json-file: global.json
       - name: Rerun the generators
         if: steps.which.outputs.run == 'true'
         env:

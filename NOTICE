@@ -8,3 +8,7 @@ reproduced in THIRD_PARTY_NOTICES.md.
 Its conventions extensions carry codes from FpML's coding schemes and
 enumerations, under the FpML Public License, Version 3.0; FpML's notice is
 reproduced in THIRD_PARTY_NOTICES.md.
+
+Its extensions port parts of QLNet (https://github.com/amaggiulli/QLNet),
+distributed under the BSD 3-Clause license; QLNet's copyright notice and
+license are reproduced in THIRD_PARTY_NOTICES.md.

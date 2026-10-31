@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "QLNet": {
+        "type": "Direct",
+        "requested": "[1.13.2, 1.13.2]",
+        "resolved": "1.13.2",
+        "contentHash": "0xHXDIWLPAwNE66bGAYE38I29Epa9WC7vlM0kD2xN6KV0BnJoa9knI2MsnHTlnjRJEgMr+pdrIINUeUiGbgrWg=="
+      }
+    }
+  }
+}

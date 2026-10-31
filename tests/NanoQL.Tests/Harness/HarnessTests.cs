@@ -263,6 +263,34 @@ public class HarnessTests
         Assert.Contains("› b:", check.Mismatches[0], StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void AQLNetFileCarriesTheQLNetPinAndNoQuantLibOne()
+    {
+        var file = VectorFile.Parse(
+            """
+            { "upstream": "src/QLNet/Instruments/Bonds/PSACurve.cs", "qlnet": "1.13.2", "generator": "test", "seed": 1,
+              "cases": [ { "name": "case", "inputs": { "settings": {} }, "expected": { "a": 1.0 } } ] }
+            """);
+
+        Assert.Equal("1.13.2", file.QLNet);
+        Assert.Null(file.QuantLib);
+        Assert.Equal(1, file.Outputs);
+    }
+
+    [Theory]
+    [InlineData("\"quantlib\": \"1.44\", \"qlnet\": \"1.13.2\",")]
+    [InlineData("")]
+    public void AFileWithBothPinsOrNeitherIsRefused(string pins)
+    {
+        string json = $$"""
+            { "upstream": null, {{pins}} "generator": "test", "seed": 1,
+              "cases": [ { "name": "case", "inputs": { "settings": {} }, "expected": { "a": 1.0 } } ] }
+            """;
+
+        var e = Assert.Throws<InvalidOperationException>(() => VectorFile.Parse(json));
+        Assert.Contains("one pin field, quantlib or qlnet", e.Message, StringComparison.Ordinal);
+    }
+
     private static VectorFile One(string expected) => VectorFile.Parse(
         $$"""
         { "upstream": null, "quantlib": "1.44", "generator": "test", "seed": 1,

@@ -3,12 +3,15 @@
 # The code below quotes licence tags as data; REUSE reads only the two lines above.
 # REUSE-IgnoreStart
 """Generates docs/divergences.md: every documented divergence from QuantLib (docs/porting-playbook.md §9.3), one entry
-per test class under tests/NanoQL.Tests/Divergences/, with its file, its <summary> as text and the names of its facts.
+per test class under tests/NanoQL.Tests/Divergences/, with its file, its <summary> as text and the names of its facts;
+then, in a section of their own, the divergences from QLNet, one entry per test class under
+tests/NanoQL.Tests/Divergences/QLNet/, each recording QLNet's value beside nanoql's.
 
 Usage: .venv\\Scripts\\python -I tools/divergences.py [--root <repository>] [--check]
 
 The test files come in the order of their paths, sorted as tools/porting-map.py and the other tools list files
-(sources.git_files), and each file's top-level classes in the order it declares them. A summary's <c> becomes a code
+(sources.git_files), QuantLib's first and QLNet's after, and each file's top-level classes in the order it declares
+them. A summary's <c> becomes a code
 span, and so does the name a <see> (cref or langword), <paramref> or <typeparamref> gives; any other element keeps its
 text, and whitespace is collapsed. A fact is a method marked [Fact] or [Theory]. A class without a <summary> is an
 error naming its file. With --check, it writes nothing and exits 1 if the committed page differs from a fresh one,
@@ -23,6 +26,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sources  # noqa: E402
 
 FOLDER = "tests/NanoQL.Tests/Divergences/"
+# The divergences from QLNet, the oracle of the extensions' QLNet ports, in a section of the page after QuantLib's.
+QLNET = FOLDER + "QLNet/"
+QLNET_SECTION = "QLNet 1.13.2"
 PAGE = "docs/divergences.md"
 HEADER = """<!--
   SPDX-FileCopyrightText: 2026 The nanoql Authors
@@ -131,18 +137,29 @@ def facts(lines, first, last):
     return names
 
 
+def oracle_of(path):
+    """The oracle a Divergences/ test file departs from: "QuantLib" for a file in the folder itself, "QLNet" for one in
+    its QLNet/ subfolder, or None for any other file."""
+    if not path.endswith(".cs"):
+        return None
+    if path.startswith(FOLDER) and "/" not in path[len(FOLDER):]:
+        return "QuantLib"
+    if path.startswith(QLNET) and "/" not in path[len(QLNET):]:
+        return "QLNet"
+    return None
+
+
 def build(root):
-    """The page's entries, one per test class: {"path", "name", "summary", "facts"}."""
+    """The page's entries, one per test class: {"path", "name", "summary", "facts", "oracle"}, QuantLib's first."""
     entries = []
-    for path in sources.git_files(root):
-        if not (path.startswith(FOLDER) and path.endswith(".cs") and "/" not in path[len(FOLDER):]):
-            continue
+    paths = sources.git_files(root)
+    for path in [p for p in paths if oracle_of(p) == "QuantLib"] + [p for p in paths if oracle_of(p) == "QLNet"]:
         text = sources.read_text(os.path.join(root, path))
         lines = text.split("\n")
         code_lines = NOISE.sub(blank, text).split("\n")
         for name, at, last in top_level_classes(text):
             entries.append({"path": path, "name": name, "summary": summary(path, lines, at, name),
-                            "facts": facts(code_lines, at, last)})
+                            "facts": facts(code_lines, at, last), "oracle": oracle_of(path)})
     return entries
 
 
@@ -152,8 +169,16 @@ def render(entries):
            "`tests/NanoQL.Tests/Divergences/` with its file, its summary and its facts, generated from those files by",
            "`tools/divergences.py`: regenerate it with `.venv\\Scripts\\python -I tools/divergences.py` rather than",
            "editing it by hand."]
+    section = False
     for entry in entries:
-        out += ["", f"## {entry['name']}", "",
+        if entry["oracle"] == "QLNet" and not section:
+            section = True
+            out += ["", f"## {QLNET_SECTION}", "",
+                    "Every documented divergence from QLNet 1.13.2, the oracle of the extensions' ports of QLNet, one",
+                    "entry per test class under `tests/NanoQL.Tests/Divergences/QLNet/`, each recording QLNet's value",
+                    "beside nanoql's."]
+        heading = "###" if section else "##"
+        out += ["", f"{heading} {entry['name']}", "",
                 f"[`Divergences/{entry['path'][len(FOLDER):]}`](../{entry['path']})", "",
                 entry["summary"]]
         if entry["facts"]:
@@ -162,10 +187,12 @@ def render(entries):
 
 
 def entries_of(text):
-    """A page's text as (its header, [(entry name, entry text)]), each entry running from its "## " line, without the
-    line breaks that end it, so that an entry added after the last one leaves the last one as it was."""
-    parts = re.split(r"^(?=## )", text, flags=re.M)
-    return parts[0].rstrip("\n"), [(part.split("\n", 1)[0][3:], part.rstrip("\n")) for part in parts[1:]]
+    """A page's text as (its header, [(entry name, entry text)]), each entry running from its "## " or "### " line,
+    without the line breaks that end it, so that an entry added after the last one leaves the last one as it was. The
+    QLNet section's own heading is an entry named for the section, holding its introduction."""
+    parts = re.split(r"^(?=#{2,3} )", text, flags=re.M)
+    return parts[0].rstrip("\n"), [(part.split("\n", 1)[0].lstrip("#").strip(), part.rstrip("\n"))
+                                   for part in parts[1:]]
 
 
 def difference(root, entries=None):

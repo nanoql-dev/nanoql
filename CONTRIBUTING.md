@@ -37,13 +37,15 @@ The gates are in docs/porting-playbook.md §8; each passes only with its denomin
 - **Tests and vectors:** `dotnet test --solution NanoQL.slnx -c Release`, then `python -I tools/vectors/agree.py`.
   Neither needs QuantLib: the vectors are committed under `tests/vectors/`.
 - **Licensing:** `reuse lint`, then `python -I tools/check-upstream.py <QuantLib v1.44 worktree> --boost <Boost 1.90.0
-  root>`, with the tools of `tools/vectors/requirements.txt`.
+  root> --qlnet <QLNet-v1.13.2 checkout>`, with the tools of `tools/vectors/requirements.txt`. The QLNet checkout is a
+  clone of QLNet at its tag `QLNet-v1.13.2`, with no changes.
 - **Reproducibility,** when the change adds or changes a vector generator under `tools/vectors/gen/`:
   `python -I tools/vectors/reproduce.py <generator>...` reruns them and compares their output byte for byte. They
   need QuantLib-Python 1.44, from the same requirements file; harness generators also need the C++ harness that
-  `tools/cxx/build.py` builds.
-- **Coverage,** when the change ports code: the coverage run and `tools/check-coverage.py`, as the playbook's §8 and
-  §9.5 give them.
+  `tools/cxx/build.py` builds. QLNet's generators, under `tools/vectors/gen/qlnet/`, need the .NET SDK instead, and
+  nuget.org's QLNet 1.13.2 package, which `tools/vectors/qlnet/packages.lock.json` pins.
+- **Coverage,** when the change ports code: the two coverage runs, one per oracle (QuantLib's and QLNet's), and
+  `tools/check-coverage.py`, as the playbook's §8 and §9.5 give them.
 
 ## Issues and questions
 

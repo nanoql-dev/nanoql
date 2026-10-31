@@ -1,0 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<!-- QLNet's vector generator stands apart from the solution: this file stops MSBuild reading the repository's own
+     Directory.Build.props, whose analyzer package would join the generator's lock file. -->
+<Project>
+</Project>

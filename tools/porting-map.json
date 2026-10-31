@@ -1,6 +1,7 @@
 {
   "pin": "v1.44",
   "boostPin": "boost-1.90.0",
+  "qlnetPin": "QLNet-v1.13.2",
   "directories": {
     "ql": {"folder": "", "namespace": "NanoQL"},
     "ql/cashflows": {"folder": "Coupons", "namespace": "NanoQL.Coupons"},
@@ -1650,5 +1651,9 @@
     "boost/math/tools": {"folder": "Math/Tools"},
     "boost/math/tools/detail": {"folder": "Math/Tools/Detail"},
     "boost/numeric/ublas": {"folder": "Numeric/Ublas"}
+  },
+  "qlnet": {
+    "src/QLNet/Instruments/Bonds": {"folder": "Instruments/Bonds", "namespace": "NanoQL.Extensions.Instruments"},
+    "tests/QLNet.Tests/T_PSACurve.cs": {"test": "PSACurveTests"}
   }
 }

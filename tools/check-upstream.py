@@ -5,6 +5,7 @@
 """The licensing gate's upstream checks, (2) to (7) (docs/porting-playbook.md §8).
 
 Usage: .venv\\Scripts\\python -I tools/check-upstream.py <QuantLib v1.44 worktree> [--boost <Boost 1.90.0 root>]
+           [--qlnet <QLNet-v1.13.2 checkout>]
 
 (2) Every .cs, .py, .cpp and .hpp file carries an Upstream line or is listed in tools/no-upstream.txt, not both.
     Every Upstream path exists at the pin, and the file sits in the folder, and declares the namespace, that the name
@@ -34,12 +35,22 @@ boostPin and the root's boost/version.hpp gives 109000; every path exists under 
 the table's boost section gives the path's directory, under src/NanoQL/Boost/, in namespace NanoQL.Numerics; Boost's
 copyright lines appear verbatim and in order; the SPDX expression is Apache-2.0 AND BSL-1.0; and one Upstream line
 names QuantLib paths or Boost paths, never both.
+
+A QLNet port's Upstream line (src/QLNet/<path> or tests/QLNet.Tests/<file> @ QLNet-v1.13.2) needs --qlnet, a checkout
+of QLNet at the pin: git gives its HEAD as the tag's commit, 571d01e9ae72feb32f3ee4c4eeff184fa432c5b4, and its status
+as clean, since a version can't pin it (QLNet's develop reads 1.13.2 too). Its pin is the name table's qlnetPin; every
+path exists under the checkout; a source file sits in the folder under src/NanoQL.Extensions/, with the grouping
+subfolder and namespace, that the table's qlnet section gives the path's directory and file, and a test file at the
+name the section gives its QLNet test file, under tests/NanoQL.Tests/QLNet/; QLNet's copyright lines appear verbatim
+and in order; the SPDX expression is Apache-2.0 AND BSD-3-Clause; one Upstream line names QLNet paths alone; and
+THIRD_PARTY_NOTICES.md's fenced block under its "## QLNet" heading is QLNet's LICENSE at the pin, verbatim.
 """
 import hashlib
 import importlib.util
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 
@@ -58,6 +69,13 @@ DIVERGENCES = "Divergences/"
 BOOST_SRC = SRC + "Boost/"
 BOOST_NAMESPACE = "NanoQL.Numerics"
 BOOST_VERSION = "109000"
+# QLNet's ports: the extensions' sources and QLNet's test cases, from a checkout of QLNet at the tag's commit.
+QLNET_SRC = "src/NanoQL.Extensions/"
+QLNET_TESTS = TESTS + "QLNet/"
+QLNET_PATHS = ("src/QLNet/", "tests/QLNet.Tests/")
+QLNET_COMMIT = "571d01e9ae72feb32f3ee4c4eeff184fa432c5b4"
+QLNET_LICENSE = "Apache-2.0 AND BSD-3-Clause"
+QLNET_NOTICES = "## QLNet"
 CHECKED = (".cs", ".py", ".cpp", ".hpp")
 # (6): the scripts that generate QuantLib's data tables (docs/porting-playbook.md §1), each with a write(ql_root,
 # out_root) that writes its tables under out_root at their paths in the repository and returns those paths.
@@ -135,6 +153,24 @@ def case_body(ql_root, unit, case):
     return lines
 
 
+def qlnet_state(qlnet_root):
+    """(HEAD's commit, whether the status is clean) of a QLNet checkout, or (None, the error) when git can't read it."""
+    head = subprocess.run(["git", "-C", qlnet_root, "rev-parse", "HEAD"], capture_output=True, text=True)
+    status = subprocess.run(["git", "-C", qlnet_root, "status", "--porcelain"], capture_output=True, text=True)
+    if head.returncode != 0 or status.returncode != 0:
+        return None, (head.stderr or status.stderr).strip()
+    return head.stdout.strip(), status.stdout.strip() == ""
+
+
+def upstream_kind(up):
+    """Which library an Upstream path names: "boost", "qlnet" or "quantlib"."""
+    if up.startswith("boost/"):
+        return "boost"
+    if up.startswith(QLNET_PATHS):
+        return "qlnet"
+    return "quantlib"
+
+
 def boost_version(boost_root):
     try:
         text = sources.read_text(os.path.join(boost_root, "boost", "version.hpp"))
@@ -145,8 +181,8 @@ def boost_version(boost_root):
 
 
 class Checker:
-    def __init__(self, root, ql_root, boost_root=None):
-        self.root, self.ql, self.boost = root, ql_root, boost_root
+    def __init__(self, root, ql_root, boost_root=None, qlnet_root=None):
+        self.root, self.ql, self.boost, self.qlnet = root, ql_root, boost_root, qlnet_root
         self.errors = []  # (code, message)
         self.table = sources.load_table(root)
         self.units = sources.ql_units(ql_root)
@@ -177,6 +213,16 @@ class Checker:
             if version != BOOST_VERSION:
                 self.error("boost-root", f"{self.boost}: boost/version.hpp gives BOOST_VERSION {version}, "
                                          f"not {BOOST_VERSION} (Boost 1.90.0)")
+        self.counts["qlnet"] = 0
+        if self.qlnet is not None:
+            head, clean = qlnet_state(self.qlnet)
+            if head is None:
+                self.error("qlnet-root", f"{self.qlnet}: not a git checkout of QLNet ({clean})")
+            elif head != QLNET_COMMIT:
+                self.error("qlnet-root", f"{self.qlnet}: HEAD is {head}, not {QLNET_COMMIT} "
+                                         f"({self.table['qlnetPin']})")
+            elif not clean:
+                self.error("qlnet-root", f"{self.qlnet}: its status isn't clean (git status --porcelain)")
         for path in files:
             if not path.endswith(CHECKED):
                 continue
@@ -199,12 +245,19 @@ class Checker:
             if allowed:
                 self.error("allowlist", f"{path}: carries an Upstream line but is listed in tools/no-upstream.txt")
             upstream_files += 1
-            boost = [up.startswith("boost/") for up in header.upstream]
-            if any(boost) and not all(boost):
+            kinds = {upstream_kind(up) for up in header.upstream}
+            if "qlnet" in kinds and len(kinds) > 1:
+                others = " and ".join(sorted(kinds - {"qlnet"}))
+                self.error("qlnet-mixed", f"{path}: its Upstream line names QLNet and {others} paths; a file ports "
+                                          "from one library")
+            elif len(kinds) > 1:
                 self.error("boost-mixed", f"{path}: its Upstream line names QuantLib and Boost paths; a file ports "
                                           "from one or the other")
-            elif all(boost):
+            elif kinds == {"boost"}:
                 copyright_ok += self.check_boost(path, header)
+            elif kinds == {"qlnet"}:
+                self.counts["qlnet"] += 1
+                copyright_ok += self.check_qlnet(path, header)
             elif self.check_upstream(path, header) and self.check_copyrights(path, header, notices):
                 copyright_ok += 1
         self.counts["upstream"] = upstream_files
@@ -409,6 +462,77 @@ class Checker:
             ok = False
         return ok
 
+    def check_qlnet(self, path, header):
+        """A QLNet port (QLNet's route, in D19's form for Boost). Returns whether its header holds."""
+        if self.qlnet is None:
+            self.error("qlnet-root", f"{path}: a QLNet Upstream line needs --qlnet <QLNet-v1.13.2 checkout>")
+            return False
+        ok = True
+        if header.pin != self.table["qlnetPin"]:
+            self.error("qlnet-pin", f"{path}: Upstream pin {header.pin}, expected {self.table['qlnetPin']}")
+            ok = False
+        for up in header.upstream:
+            if not os.path.isfile(os.path.join(self.qlnet, up)):
+                self.error("qlnet-path", f"{path}: Upstream path {up} doesn't exist under the QLNet checkout")
+                ok = False
+        if not ok:
+            return False
+        section = self.table["qlnet"]
+        if path.startswith(QLNET_TESTS):
+            entry = section.get(header.upstream[0]) if len(header.upstream) == 1 else None
+            if entry is None or "test" not in entry:
+                self.error("folder", f"{path}: a QLNet test file names one QLNet test file of the name table's qlnet "
+                                     f"section, not {header.upstream}")
+                return False
+            expected = f"{QLNET_TESTS}{entry['test']}.cs"
+            if path != expected:
+                self.error("folder", f"{path}: the name table's qlnet section gives {expected}")
+                return False
+        elif path.startswith(QLNET_SRC):
+            folders, namespaces = set(), set()
+            for up in header.upstream:
+                directory = up.rsplit("/", 1)[0]
+                entry = section.get(directory)
+                if entry is None or "folder" not in entry:
+                    self.error("folder", f"{path}: {directory} isn't a directory of the name table's qlnet section")
+                    return False
+                folder = (QLNET_SRC + entry["folder"]).rstrip("/")
+                subfolder = section.get(up, {}).get("subfolder")
+                if subfolder:
+                    folder += "/" + subfolder
+                folders.add(folder)
+                namespaces.add(entry["namespace"])
+            actual = path.rsplit("/", 1)[0]
+            if folders != {actual}:
+                self.error("folder", f"{path}: in {actual}, but the name table's qlnet section gives "
+                                     f"{', '.join(sorted(folders))}")
+                ok = False
+            if namespaces != {header.namespace}:
+                self.error("namespace", f"{path}: namespace {header.namespace}, but the name table's qlnet section "
+                                        f"gives {', '.join(sorted(namespaces))}")
+                ok = False
+        else:
+            self.error("folder", f"{path}: a QLNet Upstream line outside {QLNET_SRC} and {QLNET_TESTS}")
+            return False
+        expected = []
+        for up in header.upstream:
+            for line in sources.upstream_copyrights(self.qlnet, up):
+                if line not in expected:
+                    expected.append(line)
+        if header.copyrights != expected:
+            missing = [c for c in expected if c not in header.copyrights]
+            extra = [c for c in header.copyrights if c not in expected]
+            detail = f"missing {missing}" if missing else (f"extra {extra}" if extra else "out of order")
+            self.error("copyright", f"{path}: QLNet copyright lines differ from the upstream files' ({detail})")
+            ok = False
+        if header.nanoql is None:
+            self.error("copyright", f"{path}: no 'SPDX-FileCopyrightText: <year> The nanoql Authors' line")
+            ok = False
+        if header.license != QLNET_LICENSE:
+            self.error("copyright", f"{path}: SPDX-License-Identifier '{header.license}', expected {QLNET_LICENSE}")
+            ok = False
+        return ok
+
     def check_upstream(self, path, header):
         ok = True
         if header.pin != self.table["pin"]:
@@ -535,6 +659,20 @@ class Checker:
         licence = sources.ql_read(self.ql, "LICENSE.TXT").replace("\r\n", "\n")
         if block != licence:
             self.error("notices", "THIRD_PARTY_NOTICES.md's fenced block isn't QuantLib's LICENSE.TXT at the pin")
+        if self.qlnet is None:
+            return
+        try:
+            heading = lines.index(QLNET_NOTICES)
+            start = lines.index("```text", heading + 1)
+            end = lines.index("```", start + 1)
+        except ValueError:
+            self.error("notices", f"THIRD_PARTY_NOTICES.md has no ```text fenced block under '{QLNET_NOTICES}'")
+            return
+        block = "\n".join(lines[start + 1:end]) + "\n"
+        licence = sources.ql_read(self.qlnet, "LICENSE").replace("\r\n", "\n")
+        if block != licence:
+            self.error("notices", f"THIRD_PARTY_NOTICES.md's fenced block under '{QLNET_NOTICES}' isn't QLNet's "
+                                  "LICENSE at the pin")
 
     def check_table(self):
         entries = []
@@ -548,6 +686,12 @@ class Checker:
             for d in self.table["boost"]:
                 if not os.path.isdir(os.path.join(self.boost, d)):
                     self.error("table-absent", f"tools/porting-map.json: {d} doesn't exist under the Boost root")
+        if self.qlnet is not None:
+            for entry, value in self.table["qlnet"].items():
+                exists = os.path.isdir if "folder" in value else os.path.isfile
+                if not exists(os.path.join(self.qlnet, entry)):
+                    self.error("table-absent", f"tools/porting-map.json: {entry} doesn't exist under the QLNet "
+                                               "checkout")
         self.counts["table"] = (len(entries) + len(self.table["directories"]) - len(absent),
                                 len(entries) + len(self.table["directories"]))
         self.counts["table-lists"] = len(self.table["replaced"]) + len(self.table["notPorted"])
@@ -609,10 +753,14 @@ def report(checker):
     c = checker.counts
     if checker.boost is not None:
         print(f"Boost root: {checker.boost}")
+    if checker.qlnet is not None:
+        print(f"QLNet checkout: {checker.qlnet} ({checker.table['qlnetPin']}); QLNet ports {c['qlnet']}, name table "
+              f"qlnet entries {len(checker.table['qlnet'])}")
     print(f"(2) files with an Upstream line: {c['upstream']}; every other .cs, .py, .cpp and .hpp file is allowlisted")
     print(f"(3) copyright lines verbatim: {c['copyright']}/{c['upstream']} files; third-party blocks whole: "
           f"{c['blocks']} (file, block) pairs, each in the file's header and in THIRD_PARTY_NOTICES.md")
-    print("(3) THIRD_PARTY_NOTICES.md carries LICENSE.TXT verbatim")
+    print("(3) THIRD_PARTY_NOTICES.md carries LICENSE.TXT verbatim"
+          + (", and QLNet's LICENSE under its '## QLNet' heading" if checker.qlnet is not None else ""))
     print(f"(4) partial files: {c['partial']}, listed in docs/porting-plan.md: {c['partial']}")
     print(f"(5) table entries at the pin: {c['table'][0]}/{c['table'][1]} "
           f"(replaced and not-ported: {c['table-lists']}); porting map reproduces")
@@ -636,12 +784,20 @@ def main(argv):
             return 2
         boost_root = argv.pop(i + 1)
         argv.pop(i)
+    qlnet_root = None
+    if "--qlnet" in argv:
+        i = argv.index("--qlnet")
+        if i + 1 >= len(argv):
+            print(__doc__)
+            return 2
+        qlnet_root = argv.pop(i + 1)
+        argv.pop(i)
     args = [a for a in argv if not a.startswith("--")]
     if len(args) != 1:
         print(__doc__)
         return 2
     root = os.path.dirname(TOOLS)
-    checker = Checker(root, args[0], boost_root)
+    checker = Checker(root, args[0], boost_root, qlnet_root)
     checker.run()
     report(checker)
     return 1 if checker.errors else 0

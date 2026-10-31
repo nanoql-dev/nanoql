@@ -8226,3 +8226,43 @@ The zero-spreaded curve's compounding and frequency are checked when it is built
 Facts:
 
 - `AnUnknownCompoundingOrFrequencyIsRefusedWhenTheCurveIsBuilt`
+
+## QLNet 1.13.2
+
+Every documented divergence from QLNet 1.13.2, the oracle of the extensions' ports of QLNet, one
+entry per test class under `tests/NanoQL.Tests/Divergences/QLNet/`, each recording QLNet's value
+beside nanoql's.
+
+### PrepayRateRangeTests
+
+[`Divergences/QLNet/PrepayRateRangeTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/PrepayRateRangeTests.cs)
+
+A prepayment rate outside SIFMA's range is refused at construction (Chapter SF: an SMM is "the percentage of the mortgage loans outstanding at the beginning of a month assumed to terminate during the month", SF-5, and SF-6 caps the CPR at 100), where QLNet takes it: `ConstantCPR(1.01)` gives an SMM of NaN, `ConstantCPR(-0.01)` a negative SMM, and a negative PSA multiplier negative rates (`ConstantCPR.cs:25-36`, `PSACurve.cs:29-46`). `ConstantCPR` refuses a CPR outside [0, 1] and `PSACurve` a negative or non-finite multiplier, with `ArgumentOutOfRangeException`. QLNet's values are QLNet 1.13.2's.
+
+Facts:
+
+- `AConstantCprOutsideZeroToOneIsRefused`
+- `ANegativePsaMultiplierIsRefused`
+
+### PsaCapAndFloorTests
+
+[`Divergences/QLNet/PsaCapAndFloorTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/PsaCapAndFloorTests.cs)
+
+`PSACurve` follows SIFMA's PSA formula at its two ends (Chapter SF, SF-6), where QLNet's `PSACurve.getCPR` (`PSACurve.cs:35-41`) has neither bound. Above 1,666⅔% PSA, QLNet's CPR passes 1 and its SMM is NaN, so an MBS's flows are NaN; nanoql caps the CPR at 100%, its SMM 1. Before the curve's start, QLNet's month falls to 0 and below, its CPR 0 and then negative; nanoql counts every prior month as the first, as SIFMA's "MONTH equals 1 for all prior months". QLNet's values are QLNet 1.13.2's; elsewhere the two agree bit for bit (the vectors).
+
+Facts:
+
+- `ACprAboveOneIsCappedAtOne`
+- `BelowTheCapTheRatesAreQLNets`
+- `AMonthBeforeTheStartCountsAsTheFirst`
+
+### PsaMonthCountTests
+
+[`Divergences/QLNet/PsaMonthCountTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/PsaMonthCountTests.cs)
+
+`PSACurve`'s MONTH is SF-6's, "the accrual period during which the age of the mortgage loans increases from MONTH – 1 to MONTH": the whole calendar months from the curve's start, plus one. QLNet counts the 30/360 Bond Basis days from the start over 30, plus one (`PSACurve.cs:37-38`). From a start on the 29th to the 31st, February's anniversary is under 30 such days after January's, so QLNet repeats the month there and skips the next (from 31 January 2007, MONTH 1 on 28 February and 3 on 31 March; MONTH 13 on 29 February 2008); from a start on the 1st it counts a 31st a month ahead (MONTH 2 on 31 March 2007 from 1 March), and from a 31st the 30th of a 31-day month (MONTH 3 on 30 March 2007). The check is SIFMA's formula (`Reference/SifmaPrepaymentTests`); QLNet's bits hold wherever the two counts agree (the vectors, which leave out the dates where they don't). QLNet's values are QLNet 1.13.2's.
+
+Facts:
+
+- `TheMonthIsTheCalendarMonthsFromTheStart`
+- `WhereTheCountsAgreeTheRatesAreQLNets`

@@ -192,7 +192,7 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
     /// <remarks>
     /// Build an index on its curve here, as a preset's own constructor does, rather than clone one: QuantLib's clones
     /// are its base classes', so a clone of <see cref="Sonia"/> is an <see cref="Indexes.OvernightIndex"/>, which a
-    /// builder defaulting by class (<see cref="Instruments.MakeOIS"/>'s settlement days) reads as another index.
+    /// builder defaulting by class (<see cref="NanoQL.Instruments.MakeOIS"/>'s settlement days) reads as another index.
     /// </remarks>
     public IborIndex IborIndex(string name, YieldTermStructure? h = null)
     {

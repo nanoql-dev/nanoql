@@ -4,7 +4,8 @@
 # REUSE-IgnoreStart
 """The coverage gate's type check, and its member line (docs/porting-playbook.md §9.5).
 
-Usage: .venv\\Scripts\\python -I tools/check-coverage.py <results folder> [--all <results folder>] [--since <commit>]
+Usage: .venv\\Scripts\\python -I tools/check-coverage.py <results folder> [--qlnet <results folder>]
+           [--all <results folder>] [--since <commit>]
 
 Run it after the coverage runs, each of which writes one Cobertura report into its emptied results folder: the
 tagged run, and for --all the rest of the suite's, the tests the tagged run leaves out, both from the repository root:
@@ -16,8 +17,13 @@ tagged run, and for --all the rest of the suite's, the tests the tagged run leav
         --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
         --coverage-settings tests\\NanoQL.Tests\\CodeCoverage.xml --results-directory TestResults\\G7rest
 
-The members report reads the two reports merged, each line's hits the most either gives, so the two runs count as one
-run of the whole suite; a whole-suite report in --all's folder reads the same.
+With --qlnet, the second tagged run's folder, the QLNet oracle's (run A', the same command with
+--filter-trait "Oracle=QLNet" into TestResults\\G7qlnet): a type whose file's Upstream line names QLNet passes on that
+run's covered lines alone, and every other type on the first run's, so each extensions type passes against the library
+it comes from. A QLNet type the commit changes needs --qlnet.
+
+The members report reads the reports merged, each line's hits the most any gives, so the runs count as one run of the
+whole suite; a whole-suite report in --all's folder reads the same.
 
 The types it checks are the top-level public types of the .cs files under src/NanoQL/ that the commit adds or
 changes (the working tree against HEAD, untracked files included) and that carry an Upstream line, and of every such
@@ -25,8 +31,9 @@ file under src/NanoQL.Extensions/, the extensions layer, whose types the tagged 
 lists apart. Report entries
 match those files by path, so nested, file and compiler-generated classes count toward their file's type.
 
-Red when: the folder doesn't hold exactly one report; the commit ports a public type and the report doesn't list the
-NanoQL package; a listed type has no covered line; a ported file carries ExcludeFromCodeCoverage; a type whose only
+Red when: the folder (or --qlnet's) doesn't hold exactly one report; the commit ports a public type and the report
+doesn't list the NanoQL package (or its extensions type's, NanoQL.Extensions); a QLNet type of the commit and no
+--qlnet; a listed type has no covered line; a ported file carries ExcludeFromCodeCoverage; a type whose only
 executable lines are its equality members lacks a "// Equality-tested:" line naming an existing test file; or, with
 --all, its folder doesn't hold exactly one report, or a NanoQL class of that report resolves to no file, which would
 leave every member unmatched and the line at 0.
@@ -59,6 +66,8 @@ SRC = "src/NanoQL/"
 # The extensions layer, nanoql's own code with no Upstream line, whose types the gate checks as it checks ported ones.
 EXTENSIONS = "src/NanoQL.Extensions/"
 CHECKED = (SRC, EXTENSIONS)
+# QLNet's paths on an Upstream line: a QLNet port, whose types pass on the QLNet run's coverage (--qlnet).
+QLNET_PATHS = ("src/QLNet/", "tests/QLNet.Tests/")
 EQUALITY = {"Equals", "GetHashCode", "op_Equality", "op_Inequality"}
 # The member line's reading of C# declarations.
 MODIFIERS = {"public", "private", "protected", "internal", "file", "static", "sealed", "abstract", "readonly",
@@ -519,9 +528,15 @@ def unreached_members(root, paths, by_file):
     return sorted(listed)
 
 
-def check(root, results, commit_files, all_files, whole=None, member_files=None):
-    """Returns (errors, lines of the report); with whole, the rest of the suite's results folder (or the whole
-    suite's), the member line too, over member_files, the commit's files by default."""
+def is_qlnet(header):
+    """Whether a file's Upstream line names QLNet's paths: its types pass on the QLNet run's coverage."""
+    return any(up.startswith(QLNET_PATHS) for up in header.upstream)
+
+
+def check(root, results, commit_files, all_files, whole=None, member_files=None, qlnet=None):
+    """Returns (errors, lines of the report); with qlnet, the QLNet run's results folder, which QLNet's types read;
+    with whole, the rest of the suite's results folder (or the whole suite's), the member line too, over member_files,
+    the commit's files by default."""
     errors, out = [], []
     reports = sorted(glob.glob(os.path.join(results, "**", "*.cobertura*.xml"), recursive=True))
     if len(reports) != 1:
@@ -531,6 +546,14 @@ def check(root, results, commit_files, all_files, whole=None, member_files=None)
     # file; one that doesn't means the report's paths don't match the repository's, and no type could be matched.
     for cls in unresolved:
         errors.append(f"the report's class {cls} resolves to no file under its <source> roots")
+    qlnet_by_file, qlnet_packages = None, []
+    if qlnet is not None:
+        qlnet_reports = sorted(glob.glob(os.path.join(qlnet, "**", "*.cobertura*.xml"), recursive=True))
+        if len(qlnet_reports) != 1:
+            return [f"the --qlnet results folder holds {len(qlnet_reports)} Cobertura reports, not exactly one"], out
+        qlnet_by_file, qlnet_packages, qlnet_unresolved = read_report(qlnet_reports[0])
+        for cls in qlnet_unresolved:
+            errors.append(f"the --qlnet report's class {cls} resolves to no file under its <source> roots")
 
     def assess(paths, record):
         counted = covered_types = lines_valid = lines_covered = 0
@@ -546,7 +569,19 @@ def check(root, results, commit_files, all_files, whole=None, member_files=None)
             kind, name = types[0]
             if record and "ExcludeFromCodeCoverage" in header.text:
                 errors.append(f"{path}: carries ExcludeFromCodeCoverage")
-            entry = by_file.get(os.path.normcase(os.path.normpath(full)))
+            oracle = "QuantLib"
+            report = by_file
+            if is_qlnet(header):
+                oracle = "QLNet"
+                if qlnet_by_file is None:
+                    if record:
+                        errors.append(f"{path}: a QLNet type, and no --qlnet report of the Oracle=QLNet tests")
+                    continue
+                report = qlnet_by_file
+                used.add("QLNet")
+            elif record:
+                used.add("QuantLib")
+            entry = report.get(os.path.normcase(os.path.normpath(full)))
             implicit = implicit_lines(header.text, entry) if entry is not None else set()
             lines = {} if entry is None else {n: h for n, h in entry["lines"].items() if n not in implicit}
             if not lines:
@@ -573,14 +608,20 @@ def check(root, results, commit_files, all_files, whole=None, member_files=None)
             if covered:
                 covered_types += 1
             elif record:
-                errors.append(f"{path}: {name} has no line covered by the Oracle=QuantLib tests")
+                errors.append(f"{path}: {name} has no line covered by the Oracle={oracle} tests")
         return counted, covered_types, lines_covered, lines_valid, apart, equality_only
 
+    used = set()
     t, tc, lc, lv, apart, equality_only = assess(commit_files, True)
-    if t + len(equality_only) and "NanoQL" not in packages:
+    if t + len(equality_only) and "QuantLib" in used and "NanoQL" not in packages:
         errors.append("the commit ports a public type, and the report doesn't list the NanoQL package")
-    if any(p.startswith(EXTENSIONS) for p in commit_files) and t and "NanoQL.Extensions" not in packages:
+    extension_files = [p for p in commit_files if p.startswith(EXTENSIONS)]
+    if extension_files and t and "QuantLib" in used and "NanoQL.Extensions" not in packages \
+            and any(not is_qlnet(sources.Header(os.path.join(root, p))) for p in extension_files):
         errors.append("the commit changes an extensions type, and the report doesn't list the NanoQL.Extensions package")
+    if t and "QLNet" in used and "NanoQL.Extensions" not in qlnet_packages:
+        errors.append("the commit changes a QLNet type, and the --qlnet report doesn't list the NanoQL.Extensions "
+                      "package")
     out.append(f"commit: types {tc}/{t}; lines {lc}/{lv}")
     out.append(f"  listed apart, not in the report: {len(apart)}" + (f": {', '.join(apart)}" if apart else ""))
     out.append(f"  listed apart, equality only: {len(equality_only)}"
@@ -601,13 +642,21 @@ def check(root, results, commit_files, all_files, whole=None, member_files=None)
             rest_by_file, _, rest_unresolved = read_report(wholes[0])
             for cls in rest_unresolved:
                 errors.append(f"the --all report's class {cls} resolves to no file under its <source> roots")
+            tagged = by_file if qlnet_by_file is None else merged(by_file, qlnet_by_file)
             members = unreached_members(root, commit_files if member_files is None else member_files,
-                                        merged(by_file, rest_by_file))
+                                        merged(tagged, rest_by_file))
             out.append(f"members no test reaches: {len(members)}" + "".join(f"\n    {m}" for m in members))
     return errors, out
 
 
 def main(argv):
+    qlnet = None
+    if "--qlnet" in argv:
+        k = argv.index("--qlnet")
+        if k + 1 >= len(argv) or argv[k + 1].startswith("--"):
+            print(__doc__)
+            return 2
+        qlnet, argv = argv[k + 1], argv[:k] + argv[k + 2:]
     whole = None
     if "--all" in argv:
         k = argv.index("--all")
@@ -628,7 +677,7 @@ def main(argv):
         return 2
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     errors, out = check(root, args[0], changed_files(root), ported_files(root), whole,
-                        None if since is None else files_since(root, since))
+                        None if since is None else files_since(root, since), qlnet)
     print("\n".join(out))
     for e in errors:
         print("RED " + e)

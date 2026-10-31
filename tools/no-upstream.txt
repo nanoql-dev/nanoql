@@ -43,12 +43,15 @@ src/NanoQL/PricingEngines/Vanilla/ApproximationWindow.cs
 src/NanoQL/TermStructures/Volatility/EquityFX/LocalVolTermStructureOnClock.cs
 src/NanoQL/TermStructures/Yield/YieldTermStructureOnClock.cs
 src/NanoQL/Time/CalendarEdits.cs
-src/NanoQL.Extensions/**
+src/NanoQL.Extensions/Conventions/**
 tests/NanoQL.Tests/Conventions/**
 tests/NanoQL.Tests/Divergences/**
 tests/NanoQL.Tests/Extensions/**
 tests/NanoQL.Tests/Harness/**
 tests/NanoQL.Tests/NoOracle/**
+tests/NanoQL.Tests/QLNet/Vectors/**
+tests/NanoQL.Tests/Reference/**
 tests/NanoQL.Tests/Vectors/**
 tools/**/*.py
 tools/cxx/**
+tools/vectors/qlnet/**

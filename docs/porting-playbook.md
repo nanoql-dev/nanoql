@@ -64,6 +64,18 @@ work is in [porting-plan.md](porting-plan.md), and what is ported so far is in [
     Winkler`). It also checks the SPDX expression, exactly `Apache-2.0 AND BSL-1.0`, and the file's place: the folder
     under `src/NanoQL/Boost/` that the name table's `boost` section gives the path's directory, in namespace
     `NanoQL.Numerics`. An Upstream line names QuantLib paths or Boost paths, never both.
+  - **QLNet ports** (the extensions' ports of QLNet 1.13.2, a C# library based on QuantLib, for what QuantLib lacks):
+    QLNet's copyright lines, `Apache-2.0 AND BSD-3-Clause`, an Upstream line of the form
+    `Upstream: src/QLNet/<path> @ QLNet-v1.13.2` (or `tests/QLNet.Tests/<file>` for a ported test file), and
+    `// Ported from QLNet and modified by the nanoql Authors.` The licensing gate checks them against a checkout of
+    QLNet at the tag (§8): QLNet's `Copyright (C)` lines verbatim and in order, the SPDX expression exactly
+    `Apache-2.0 AND BSD-3-Clause`, and the file's place. A source file sits under `src/NanoQL.Extensions/` in the folder
+    and namespace the name table's `qlnet` section gives the path's directory, with the grouping subfolder it gives a
+    file whose types split (`"src/QLNet/Instruments/Bonds": {"folder": "Instruments/Bonds", "namespace":
+    "NanoQL.Extensions.Instruments"}`); a test file at `tests/NanoQL.Tests/QLNet/<name>.cs`, the name the section gives
+    its QLNet test file (`"tests/QLNet.Tests/T_PSACurve.cs": {"test": "PSACurveTests"}`). An Upstream line names QLNet
+    paths alone. QLNet's own pointer to QuantLib's licence adds nothing: these files hold no QuantLib code, and
+    QuantLib's licence is the same, already carried.
 - **Lines directly after the header,** with no blank line between, since the tools read only the header's comment
   block:
   - `// Partial: <members left>`: the type ports only part of its QuantLib file. A test class that ports only some of
@@ -597,11 +609,16 @@ NanoQL/
   src/NanoQL/NanoQL.csproj      IsAotCompatible; NoWarn NQL0001
   src/NanoQL/<Dir>/[<File>/]<Type>.cs   one type per file, QuantLib's directories mirrored in PascalCase
   src/NanoQL/Boost/<Path>/<Type>.cs     Boost-derived internal types
+  src/NanoQL.Extensions/        the extensions layer: the conventions (Conventions/), and QLNet's ports in QLNet's
+                                folders, mirrored as the core mirrors QuantLib's (Instruments/Bonds/)
   tests/NanoQL.Tests/           xUnit v3 on Microsoft.Testing.Platform, with Microsoft's code coverage extension
                                 (Microsoft.Testing.Extensions.CodeCoverage), its settings in CodeCoverage.xml
-  tests/vectors/<ql path>.json  committed vectors (§7.2); tests/vectors/cxx/<ql path>.json, the C++ harness's
+  tests/vectors/<ql path>.json  committed vectors (§7.2); tests/vectors/cxx/<ql path>.json, the C++ harness's;
+                                tests/vectors/qlnet/<QLNet path>.json, QLNet's
   tools/vectors/                the hash-pinned requirements, the generators gen/<ql path>.py and gen/cxx/<ql path>.py,
-                                the shared helpers, the harness's client cxx.py and the twins' check agree.py
+                                the shared helpers, the harness's client cxx.py and the twins' check agree.py; QLNet's
+                                generator qlnet/ (QLNetVectors.csproj, its packages.lock.json) and its shims
+                                gen/qlnet/<QLNet path>.py
   tools/cxx/                    the C++ harness (§7.1): CMakeLists.txt, src/<ql path>.cpp, build.py
   tools/tables/<file>.py        the generators of QuantLib's data tables (§1), which the licensing gate reruns
   tools/check-upstream.py       the licensing gate's upstream checks; tools/no-upstream.txt, its allowlist
@@ -614,8 +631,10 @@ NanoQL/
   file's word split and grouping subfolder, each ported test file's word split, the files nanoql replaces or doesn't
   port with the reason, and the renames. For Boost ports it holds the pin, `boostPin` (`boost-1.90.0`), and the `boost`
   section, which gives each Boost directory a port names its folder under `src/NanoQL/Boost/`
-  (`"boost/math/tools": {"folder": "Math/Tools"}`); the section stays empty until the first Boost port. It is the one
-  source of those lists.
+  (`"boost/math/tools": {"folder": "Math/Tools"}`); the section stays empty until the first Boost port. For QLNet ports
+  it holds `qlnetPin` (`QLNet-v1.13.2`) and the `qlnet` section: each QLNet directory a port names, with its folder
+  under `src/NanoQL.Extensions/` and its namespace; each QLNet file whose types split, with its grouping subfolder; and
+  each QLNet test file a class ports, with the class's name (§1). It is the one source of those lists.
 - **Test folders** (`tests/NanoQL.Tests/`), each its own namespace `NanoQL.Tests.<Folder>`:
   - `TestSuite/`: QuantLib's own test cases, one class per QuantLib test file
     (`test-suite/daycounters.cpp` → `DayCountersTests.cs`). Methods keep the case name, capitalised
@@ -623,13 +642,19 @@ NanoQL/
   - `Vectors/`: one test class per vector file; `Vectors/Cxx/` for the C++ harness's; `Vectors/Conventions/` for
     the conventions extensions' presets, checked against QuantLib's coded presets (namespace `NanoQL.Tests.Vectors`).
   - `Harness/`: the vector loader's and the tolerance's own tests.
-  - `Divergences/`: each documented divergence from QuantLib.
+  - `QLNet/`: QLNet's own test cases for the extensions' QLNet ports, one class per QLNet test file
+    (`tests/QLNet.Tests/T_PSACurve.cs` → `PSACurveTests.cs`), methods named as QLNet's, capitalised, with their Upstream
+    lines (§1); `QLNet/Vectors/`, one test class per QLNet vector file (namespace `NanoQL.Tests.QLNet`).
+  - `Reference/`: published reference values, each test citing its source (SIFMA's standard formulas, by page).
+  - `Divergences/`: each documented divergence from QuantLib; `Divergences/QLNet/`, each from QLNet, recording QLNet's
+    value beside nanoql's (namespace `NanoQL.Tests.Divergences`).
   - `Conventions/`: nanoql's own types and rules.
   - `Extensions/`: the extensions' own tests (`NanoQL.Extensions`), nanoql's own.
   - `NoOracle/`: members the C++ harness can't drive, ported with nanoql's own tests (§9.4); none today.
-- **The `Oracle` trait:** `[Trait("Oracle", "QuantLib")]` sits on the class, on every test class in `TestSuite/` and
-  `Vectors/`, and on nothing else. A ported case asserts only QuantLib's expectations; where nanoql diverges, the
-  assertion moves to `Divergences/`. A test checks the placement.
+- **The `Oracle` trait:** one per oracle, on the class, and on nothing else: `[Trait("Oracle", "QuantLib")]` on every
+  test class in `TestSuite/` and `Vectors/`, `[Trait("Oracle", "QLNet")]` on every one in `QLNet/`, and
+  `[Trait("Oracle", "Reference")]` on every one in `Reference/`. A ported case asserts only its oracle's expectations;
+  where nanoql diverges, the assertion moves to `Divergences/` (or `Divergences/QLNet/`). A test checks the placement.
 - **Line endings:** `*.json` and `docs/porting-map.md` keep LF on every checkout (`.gitattributes`), and generators
   write LF, so byte comparisons hold on a fresh clone.
 - **Python:** the generators and tools run in a virtual environment at `.venv`, installed from the two hash-pinned
@@ -661,7 +686,7 @@ file's status, with the reason for each file that isn't ported.
 
 ### 7.1 The oracle
 
-Every port is checked against QuantLib itself:
+Every port of QuantLib is checked against QuantLib itself, and every port of QLNet against QLNet (4):
 
 1. **QuantLib's test suite:** the cases for each ported class, from `test-suite/<name>.cpp` at `v1.44`, ported with
    QuantLib's expected values and tolerances.
@@ -708,6 +733,14 @@ Every port is checked against QuantLib itself:
      everything the harness itself reads, and builds every QuantLib value inside the call, so that a constructor's
      refusal is QuantLib's. A port adds its methods there, its generators under `tools/vectors/gen/cxx/` and its test
      classes under `Vectors/Cxx/`, then reruns `build.py`.
+4. **QLNet,** for the extensions' ports of QLNet 1.13.2 (§1), whose units QuantLib lacks: QLNet's own test cases for
+   them, ported into `QLNet/` with QLNet's expected values and tolerances, and vectors generated by QLNet 1.13.2 itself
+   on .NET (§7.2), read by `QLNet/Vectors/`. Both carry `Oracle=QLNet`. Where a published standard gives values, tests
+   in `Reference/` check them, citing the standard (`Oracle=Reference`).
+   - **The checkout:** any checkout of QLNet's tag with no changes, its `HEAD`
+     `571d01e9ae72feb32f3ee4c4eeff184fa432c5b4`: a detached worktree of a clone (`git -C <QLNet clone> worktree add
+     --detach <path> QLNet-v1.13.2`), or a clone of the tag alone, as CI makes. The licensing gate refuses any other
+     commit, and a checkout with changes, since QLNet's `develop` reads version 1.13.2 too.
 
 ### 7.2 Vectors
 
@@ -768,6 +801,15 @@ Every port is checked against QuantLib itself:
 - **Reproducing a harness vector:** rerun its generator with a harness built from the committed sources, which the
   client checks through the digest, and compare the bytes, as for the wheel's. QuantLib and Boost are pinned, so
   QuantLib's from-scratch build isn't part of it; it reruns only at a pin move or a toolchain change.
+- **QLNet's vectors:** one C# console program, `tools/vectors/qlnet/QLNetVectors.csproj`, outside the solution, on
+  nuget.org's QLNet 1.13.2 package. `packages.lock.json` pins the package by its content hash, and the restore runs in
+  locked mode, so a changed package fails the build. The program takes one subcommand per vector file and writes the
+  bytes `vectors.py` writes (Python's float `repr`, compact JSON), with `"qlnet": "1.13.2"` in place of `"quantlib"` and
+  `upstream` the QLNet path; each case sets QLNet's global settings and writes them into `inputs.settings`. One shim
+  per vector file, `tools/vectors/gen/qlnet/<QLNet path>.py`, builds the program into a temporary folder and runs its
+  subcommand, so one generator writes one file, `tests/vectors/qlnet/<QLNet path>.json`, read by a test class under
+  `QLNet/Vectors/` named `<Name>VectorTests`. The shims need the .NET SDK that `global.json` names, not the wheel.
+  `VectorFile.Load` reads a file under `qlnet/` only with QLNet's pin, and every other only with QuantLib's.
 
 ### 7.3 Tolerance
 
@@ -789,9 +831,9 @@ Every commit that ports code passes these gates, each with its denominator.
 | Build | `dotnet build NanoQL.slnx -c Release`, incremental while fold-ins land; with `--no-incremental` for the commit's gates | 0 errors, 0 warnings, all projects built. The AOT and trim analyzers run through `IsAotCompatible`; SA1402 and SA1649 run as errors. |
 | Tests | `dotnet test --solution NanoQL.slnx -c Release`, plain, with `NANOQL_BITID_DIR` naming an emptied folder for the vectors' bit-identical tallies; never under coverage, whose instrumentation moves the last bits of some results | passed = total, failed 0, skipped 0. |
 | Vectors | part of the tests, counted per vector file by `tools/vectors/count.py`; then `.venv\Scripts\python -I tools/vectors/agree.py` | every compared output within tolerance, counting outputs, not cases; with the number of overridden outputs. Every twin on `agree.py`'s list agrees with its wheel file: the same case names and inputs, every output within tolerance, and kinds and scales exactly; it prints the outputs agreeing M/M and how many are bit-identical. The bit-identical reading per vector file comes from the tests' run: `VectorAssert` writes each file's real outputs and those equal to the vector's bit for bit into `NANOQL_BITID_DIR`. |
-| Licensing | `.venv\Scripts\reuse lint`, then `.venv\Scripts\python -I tools/check-upstream.py <QuantLib v1.44 worktree> --boost <Boost 1.90.0 root>` | (1) `reuse lint` reports the project compliant. (2) Every `.cs` file under `src/NanoQL/` and `tests/NanoQL.Tests/TestSuite/` carries an Upstream line whose paths exist at the pin, in the folder and namespace the name table gives, or is listed in `tools/no-upstream.txt`; so is every other `.cs`, `.py`, `.cpp` and `.hpp` file; every test file's namespace names its folder; and every `// Replaced:`, `// Moved:` and `// Not ported:` line holds (§1). (3) Every `Copyright (C)` line of the named upstream files appears verbatim, read as §1 says; every third-party block `tools/third-party-notices.txt` lists for them appears whole, every line in order, in the file's header and in `THIRD_PARTY_NOTICES.md`, read from the row's source, with its licence in the SPDX expression; a Boost port's header holds as §1 says. (4) The files with a `// Partial:` line are exactly those `porting-plan.md` lists. (5) Regenerating `porting-map.md` reproduces the committed file; every file the name table marks replaced or not ported exists at the pin; and no Upstream line names a not-ported file. (6) Regenerating the tables (§1) with each script under `tools/tables/` into a temporary folder writes bytes identical to the committed files, and every `.bin` file under `src/NanoQL/` is one they write. (7) Regenerating `divergences.md` from the `Divergences/` tests with `tools/divergences.py` reproduces the committed page byte for byte: one entry per test class, with its file, its summary and its facts' names; a difference names the first entry that differs, or the missing page. **The Boost root** is Boost 1.90.0's release tree: `tools/cxx/build.py`'s `boost_1_90_0` (§7.1), or `boost_1_90_0.zip` from `https://archives.boost.io/release/1.90.0/source/`, checked against its SHA-256, `bdc79f179d1a4a60c10fe764172946d0eeafad65e576a8703c4d89d49949973c`, and extracted with Python's `zipfile` (Windows' `tar` skips one file). `--boost` is required whenever an Upstream line names a Boost path. `reuse lint` also lints the ignored build output under a folder none of whose files is in git's index yet, a false red: in a change that adds such a folder, run it on a tree without build output (`git clean -fdX -- <new folders>`) or after `git add -N <new folders>`. |
-| Reproducibility | `.venv\Scripts\python -I tools/vectors/reproduce.py [--jobs <n>] [<generators>]`, the generators run n at a time (the processor count by default), a folder named by its path ending in `/` (`cxx/`); for harness generators, after `tools/cxx/build.py`, with `NANOQL_HARNESS` set and `tools/vectors/cxx.py --self-test` passing | rerunning each generator the commit adds or changes, or all of them when the shared helpers or the requirements change, writes bytes identical to the committed files, compared outside git. Harness generators rerun when the commit adds or changes them; all of them when the harness's source, its client, the shared helpers or the requirements change; and one also when a wheel generator it imports changes. |
-| Coverage | `dotnet test --solution NanoQL.slnx -c Release --filter-trait "Oracle=QuantLib" --coverage --coverage-output-format cobertura --coverage-output coverage.cobertura.xml --coverage-settings tests\NanoQL.Tests\CodeCoverage.xml --results-directory TestResults\G7`, the commit's tagged classes (`--filter-class`); at a slot's last commit also the rest of the suite's run, the same with `--filter-not-trait "Oracle=QuantLib"` (or `--filter-not-class` for each of the commit's classes) into `TestResults\G7rest`, the two runs' counts adding up to the suite's; each from the repository root into an emptied folder; then `.venv\Scripts\python -I tools/check-coverage.py TestResults\G7`, at the last commit with `--all TestResults\G7rest --since <the slot's base commit>` | Every public type the commit ports that has executable lines has covered lines from the tests marked `Oracle=QuantLib` (§9.5). Types the report doesn't list (enums, interfaces, delegates, abstract types with no bodies, types holding only fields or constants) are listed apart by name and count, and so are types whose only code is equality nanoql adds. The line coverage of the commit's ported files is reported, with no threshold. At a slot's last commit it also prints, without failing, the public members of the files the slot ports that no test of any kind reaches, reading the two runs' reports merged (§9.5); a missing or second report is a red. A constructor the source doesn't declare (field and property initialisers, a primary constructor's parameters) counts as no code. |
+| Licensing | `.venv\Scripts\reuse lint`, then `.venv\Scripts\python -I tools/check-upstream.py <QuantLib v1.44 worktree> --boost <Boost 1.90.0 root> --qlnet <QLNet-v1.13.2 checkout>` | (1) `reuse lint` reports the project compliant. (2) Every `.cs` file under `src/NanoQL/` and `tests/NanoQL.Tests/TestSuite/` carries an Upstream line whose paths exist at the pin, in the folder and namespace the name table gives, or is listed in `tools/no-upstream.txt`; so is every other `.cs`, `.py`, `.cpp` and `.hpp` file; every test file's namespace names its folder; and every `// Replaced:`, `// Moved:` and `// Not ported:` line holds (§1). (3) Every `Copyright (C)` line of the named upstream files appears verbatim, read as §1 says; every third-party block `tools/third-party-notices.txt` lists for them appears whole, every line in order, in the file's header and in `THIRD_PARTY_NOTICES.md`, read from the row's source, with its licence in the SPDX expression; a Boost port's header holds as §1 says. (4) The files with a `// Partial:` line are exactly those `porting-plan.md` lists. (5) Regenerating `porting-map.md` reproduces the committed file; every file the name table marks replaced or not ported exists at the pin; and no Upstream line names a not-ported file. (6) Regenerating the tables (§1) with each script under `tools/tables/` into a temporary folder writes bytes identical to the committed files, and every `.bin` file under `src/NanoQL/` is one they write. (7) Regenerating `divergences.md` from the `Divergences/` tests with `tools/divergences.py` reproduces the committed page byte for byte: one entry per test class, with its file, its summary and its facts' names; a difference names the first entry that differs, or the missing page. **The Boost root** is Boost 1.90.0's release tree: `tools/cxx/build.py`'s `boost_1_90_0` (§7.1), or `boost_1_90_0.zip` from `https://archives.boost.io/release/1.90.0/source/`, checked against its SHA-256, `bdc79f179d1a4a60c10fe764172946d0eeafad65e576a8703c4d89d49949973c`, and extracted with Python's `zipfile` (Windows' `tar` skips one file). `--boost` is required whenever an Upstream line names a Boost path. **The QLNet checkout** is §7.1's, at the tag's commit with a clean status; `--qlnet` is required whenever an Upstream line names a QLNet path, and then (2) covers `tests/NanoQL.Tests/QLNet/` as it covers `TestSuite/`, a QLNet port's header holds as §1 says, every `qlnet` entry of the name table exists in the checkout, and `THIRD_PARTY_NOTICES.md`'s fenced block under its `## QLNet` heading is QLNet's `LICENSE` at the tag, verbatim. (7)'s page lists the `Divergences/QLNet/` tests in a section of their own. `reuse lint` also lints the ignored build output under a folder none of whose files is in git's index yet, a false red: in a change that adds such a folder, run it on a tree without build output (`git clean -fdX -- <new folders>`) or after `git add -N <new folders>`. |
+| Reproducibility | `.venv\Scripts\python -I tools/vectors/reproduce.py [--jobs <n>] [<generators>]`, the generators run n at a time (the processor count by default), a folder named by its path ending in `/` (`cxx/`); for harness generators, after `tools/cxx/build.py`, with `NANOQL_HARNESS` set and `tools/vectors/cxx.py --self-test` passing | rerunning each generator the commit adds or changes, or all of them when the shared helpers or the requirements change, writes bytes identical to the committed files, compared outside git. Harness generators rerun when the commit adds or changes them; all of them when the harness's source, its client, the shared helpers or the requirements change; and one also when a wheel generator it imports changes. QLNet's generators (§7.2) rerun as the harness's do: each the commit adds or changes, and all of them (`qlnet/`) when anything under `tools/vectors/qlnet/` changes. |
+| Coverage | `dotnet test --solution NanoQL.slnx -c Release --filter-trait "Oracle=QuantLib" --coverage --coverage-output-format cobertura --coverage-output coverage.cobertura.xml --coverage-settings tests\NanoQL.Tests\CodeCoverage.xml --results-directory TestResults\G7`, the commit's tagged classes (`--filter-class`); at a slot's last commit also the rest of the suite's run, the same with `--filter-not-trait "Oracle=QuantLib"` (or `--filter-not-class` for each of the commit's classes) into `TestResults\G7rest`, the two runs' counts adding up to the suite's; each from the repository root into an emptied folder; then `.venv\Scripts\python -I tools/check-coverage.py TestResults\G7`, at the last commit with `--all TestResults\G7rest --since <the slot's base commit>`. For QLNet ports, a second tagged run, the same command with `--filter-trait "Oracle=QLNet"` into `TestResults\G7qlnet`, read by `--qlnet TestResults\G7qlnet`; the rest of the suite's run then leaves out both traits (`--filter-not-trait` twice), so the three add up to the suite | Every public type the commit ports that has executable lines has covered lines from the tests marked `Oracle=QuantLib`, or for a QLNet port `Oracle=QLNet`, each type on its own oracle's run (§9.5). Types the report doesn't list (enums, interfaces, delegates, abstract types with no bodies, types holding only fields or constants) are listed apart by name and count, and so are types whose only code is equality nanoql adds. The line coverage of the commit's ported files is reported, with no threshold. At a slot's last commit it also prints, without failing, the public members of the files the slot ports that no test of any kind reaches, reading the two runs' reports merged (§9.5); a missing or second report is a red. A constructor the source doesn't declare (field and property initialisers, a primary constructor's parameters) counts as no code. |
 
 ## 9 Checking every member
 
@@ -832,9 +874,13 @@ through a checked caller):
 
 ### 9.5 The coverage gate's type check
 
-`tools/check-coverage.py` reads the one Cobertura report in the results folder.
+`tools/check-coverage.py` reads the one Cobertura report in the results folder, and with `--qlnet` the one in the QLNet
+run's: a type whose file's Upstream line names QLNet passes on that run's covered lines alone, and every other type on
+the first run's, so each type passes against the library it comes from. A QLNet type the commit changes without
+`--qlnet` is a red.
 - **The types:** the top-level public types of the `.cs` files under `src/NanoQL/` that the commit adds or changes
-  (the working tree against `HEAD`, untracked files included) and that carry an Upstream line. Files that declare no
+  (the working tree against `HEAD`, untracked files included) and that carry an Upstream line, and of every such file
+  under `src/NanoQL.Extensions/`. Files that declare no
   type are skipped. Report entries are matched to those files by path, so nested, `file` and compiler-generated
   classes count toward their file's type.
 - **Red when:** the folder doesn't hold exactly one report; the commit ports a public type and the report doesn't
