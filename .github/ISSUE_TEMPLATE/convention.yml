@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+name: Missing convention
+description: A calendar, day counter, index or other market convention nanoql doesn't have
+labels: [convention]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        nanoql carries QuantLib's conventions, which change only with QuantLib. A convention QuantLib lacks goes into
+        the extensions layer, with its own tests, so a request helps most with an authoritative source and values a
+        test can check.
+  - type: input
+    id: convention
+    attributes:
+      label: The convention
+      placeholder: Brazilian Business/252, or the National Stock Exchange of India's holidays for 2027
+    validations:
+      required: true
+  - type: textarea
+    id: definition
+    attributes:
+      label: Its definition and source
+      description: The rule, and where it's published (the exchange, the central bank, ISDA or the index provider).
+    validations:
+      required: true
+  - type: textarea
+    id: values
+    attributes:
+      label: Values to check it against
+      description: Dates, year fractions or fixings that the definition gives, with their source.
+  - type: textarea
+    id: quantlib
+    attributes:
+      label: QuantLib
+      description: Whether QuantLib has it, under what name, or how it differs.

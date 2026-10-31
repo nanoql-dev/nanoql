@@ -58,7 +58,7 @@ public class CTSMMCapletAlphaFormCalibrationTests
         Assert.Equal(4.6924312876899316e-05, r.CapletRmsError);
         Assert.True(SwaptionMisfit(r, variances, times) < 1e-14);
 
-        // at maximum homogeneity and an α-solving tolerance of 0.2: 7decee9's fit, the first pass's failed final part
+        // at maximum homogeneity and an α-solving tolerance of 0.2: 08298c3's fit, the first pass's failed final part
         // counted before the fallback runs on a later caplet with no α
         var (homogeneous, _, _) = Calibration(0.015, 0.95, true, alpha0: -0.5);
         CTSMMCapletCalibrationResults h = homogeneous.Calibrate(7, 10, 1e-4, 100, 0.2);

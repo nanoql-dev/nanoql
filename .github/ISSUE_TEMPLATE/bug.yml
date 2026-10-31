@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+name: Bug report
+description: A wrong result, a crash, or a result that differs from QuantLib's
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        nanoql's results are checked against QuantLib 1.44. A report helps most with the inputs that reproduce it,
+        and with QuantLib's result for the same inputs if you have it.
+  - type: input
+    id: version
+    attributes:
+      label: nanoql version
+      placeholder: 0.1.0, or the commit you built
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The result you got, and the one you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce it
+      description: The smallest code that shows it, or a case in the vector format of tests/vectors/.
+      render: csharp
+    validations:
+      required: true
+  - type: textarea
+    id: quantlib
+    attributes:
+      label: QuantLib's result
+      description: The same calculation in QuantLib 1.44, from C++ or Python, if you have it.
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Windows 11 x64, .NET 10

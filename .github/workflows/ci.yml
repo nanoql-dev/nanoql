@@ -1,0 +1,350 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# The gates of docs/porting-playbook.md §8 on GitHub's runners.
+#
+# While the repository is private, the jobs run on the weekly schedule and on demand only; on a public repository,
+# pushes to main and pull requests run them too. Windows is the reference: on Linux and macOS a build, test or vector
+# red is reported but doesn't fail the run, until results across systems are compared. The no-AI-trace check is
+# never part of CI; it runs where commits are made.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      reproduce:
+        description: "Also rerun the vector generators (builds QuantLib for the C++ harness when it isn't cached)"
+        type: boolean
+        default: false
+      generators:
+        description: "Generators to rerun, space-separated (for example time/date cxx/); empty reruns all of them"
+        type: string
+        default: ""
+      systems:
+        description: "Systems for the build, tests and vectors"
+        type: choice
+        options: [all, windows]
+        default: all
+      pin-dotnet:
+        description: "Use global.json's SDK exactly, alone in its own folder, with the runtime it ships, not the runner's newer one"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+  QUANTLIB_TAG: v1.44
+  QUANTLIB_COMMIT: ab4cb476d35f7275834bc05b47d1324403d1823b
+
+jobs:
+  build-test:
+    name: Build, tests and vectors (${{ matrix.os }})
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(inputs.systems == 'windows' && '["windows-2022"]' || '["windows-2022", "ubuntu-24.04", "macos-15"]') }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.os != 'windows-2022' }}
+    timeout-minutes: 90
+    steps:
+      - name: Check out with LF line endings, as the working clones are
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      # global.json lets the SDK roll forward to a newer feature band, which the runners carry; pinned, the SDK it names
+      # is installed alone, so the tests run on the runtime that SDK ships.
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        if: ${{ !inputs.pin-dotnet }}
+        with:
+          global-json-file: global.json
+      - name: global.json's SDK
+        if: ${{ inputs.pin-dotnet }}
+        id: sdk
+        shell: bash
+        run: echo "version=$(python -c "import json; print(json.load(open('global.json'))['sdk']['version'])")" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        if: ${{ inputs.pin-dotnet }}
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
+        with:
+          dotnet-version: ${{ steps.sdk.outputs.version }}
+      # setup-dotnet also installs the newest runtime beside the SDK, and an application runs on the newest patch it
+      # finds, so pinned, every Microsoft.NETCore.App but the SDK's own is removed.
+      - name: Only the runtime global.json's SDK ships
+        if: ${{ inputs.pin-dotnet }}
+        shell: bash
+        env:
+          SDK_VERSION: ${{ steps.sdk.outputs.version }}
+        run: |
+          base="$RUNNER_TEMP"; command -v cygpath > /dev/null && base="$(cygpath -u "$RUNNER_TEMP")"
+          root="$base/dotnet"
+          runtime=$(python -c "import json, sys; print(json.load(open(sys.argv[1]))['runtimeOptions']['framework']['version'])" "$root/sdk/$SDK_VERSION/dotnet.runtimeconfig.json")
+          echo "SDK $SDK_VERSION ships runtime $runtime"
+          for d in "$root"/shared/Microsoft.NETCore.App/*/; do
+            [ "$(basename "$d")" = "$runtime" ] || { echo "removing $d"; rm -rf "$d"; }
+          done
+      # The last bits of some results depend on the processor and on the C runtime that .NET's maths functions call
+      # (docs/porting-playbook.md §7.3), so each run names them.
+      - name: The machine
+        shell: bash
+        run: |
+          case "$RUNNER_OS" in
+            Windows)
+              powershell -NoProfile -Command '(Get-CimInstance Win32_Processor).Name; $os = Get-CimInstance Win32_OperatingSystem; "$($os.Caption) build $($os.BuildNumber)"; "ucrtbase.dll " + (Get-Item C:\Windows\System32\ucrtbase.dll).VersionInfo.FileVersion' ;;
+            Linux)
+              grep -m1 'model name' /proc/cpuinfo; grep PRETTY_NAME /etc/os-release; ldd --version | head -1 ;;
+            macOS)
+              sysctl -n machdep.cpu.brand_string; sw_vers ;;
+          esac
+      - name: The .NET in use
+        run: |
+          dotnet --version
+          dotnet --list-runtimes
+      - name: Build
+        run: dotnet build NanoQL.slnx -c Release --no-incremental
+      - name: Tests
+        env:
+          NANOQL_BITID_DIR: ${{ github.workspace }}/TestResults/bitid
+        run: dotnet test --solution NanoQL.slnx -c Release --no-build
+      - name: Vectors
+        run: |
+          python -I tools/vectors/count.py
+          python -I tools/vectors/agree.py
+      - name: Keep the bit-identical tallies, to compare systems
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bitid-${{ matrix.os }}
+          path: TestResults/bitid
+          if-no-files-found: ignore
+
+  licensing:
+    name: Licensing
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    runs-on: windows-2022
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out with LF line endings, as the working clones are
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: The licensing tools, hash-pinned
+        run: |
+          python -m pip install --require-hashes --only-binary :all: -r tools/vectors/build-requirements.txt
+          python -m pip install --require-hashes --no-build-isolation -r tools/vectors/requirements.txt
+      - name: QuantLib at the pin
+        run: |
+          git clone --quiet --depth 1 --branch "$QUANTLIB_TAG" https://github.com/lballabio/QuantLib.git "$RUNNER_TEMP/QuantLib"
+          test "$(git -C "$RUNNER_TEMP/QuantLib" rev-parse HEAD)" = "$QUANTLIB_COMMIT"
+      - name: Boost's release zip, cached
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/boost-zip
+          key: boost-zip-${{ hashFiles('tools/cxx/build.py') }}
+      - name: Boost's headers, checked against the published SHA-256
+        run: |
+          url=$(sed -n 's/^BOOST_URL = "\(.*\)"$/\1/p' tools/cxx/build.py)
+          sha=$(sed -n 's/^BOOST_SHA256 = "\(.*\)"$/\1/p' tools/cxx/build.py)
+          mkdir -p "$RUNNER_TEMP/boost-zip"
+          cd "$RUNNER_TEMP/boost-zip"
+          [ -f boost.zip ] || curl -sSfL -o boost.zip "$url"
+          echo "$sha  boost.zip" | sha256sum -c -
+          python -I - boost.zip "$RUNNER_TEMP/boost" <<'EOF'
+          import sys, zipfile
+          with zipfile.ZipFile(sys.argv[1]) as z:
+              keep = [n for n in z.namelist() if n.split("/")[1:2] == ["boost"] or n.count("/") == 1]
+              z.extractall(sys.argv[2], keep)
+          EOF
+      - name: reuse lint
+        run: reuse lint
+      - name: Upstream lines, copyright lines and notices
+        run: python -I tools/check-upstream.py "$RUNNER_TEMP/QuantLib" --boost "$RUNNER_TEMP/boost/boost_1_90_0"
+
+  coverage:
+    name: Coverage
+    if: github.event_name == 'pull_request' && !github.event.repository.private
+    runs-on: windows-2022
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out with LF line endings, as the working clones are
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      # The check reads the commit's changes as the working tree against HEAD, so HEAD moves to the base and the
+      # working tree keeps the pull request merged into it.
+      - name: The pull request's changes against its base
+        id: changes
+        run: |
+          git reset --soft HEAD^1
+          if git diff --quiet HEAD -- src/; then echo "src=false" >> "$GITHUB_OUTPUT"; else echo "src=true" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        if: steps.changes.outputs.src == 'true'
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        if: steps.changes.outputs.src == 'true'
+        with:
+          python-version: "3.12"
+      - name: Build
+        if: steps.changes.outputs.src == 'true'
+        run: dotnet build NanoQL.slnx -c Release --no-incremental
+      # Every tagged class, a superset of the commit's own: the check passes or fails on the same types.
+      - name: The tagged tests under coverage
+        if: steps.changes.outputs.src == 'true'
+        run: >
+          dotnet test --solution NanoQL.slnx -c Release --no-build --filter-trait "Oracle=QuantLib" --coverage
+          --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
+          --coverage-settings tests/NanoQL.Tests/CodeCoverage.xml --results-directory TestResults/G7
+      - name: The ported types' coverage
+        if: steps.changes.outputs.src == 'true'
+        run: python -I tools/check-coverage.py TestResults/G7
+
+  reproducibility:
+    name: Vector reproducibility
+    if: >
+      (github.event_name == 'workflow_dispatch' && inputs.reproduce) ||
+      (github.event_name == 'pull_request' && !github.event.repository.private)
+    runs-on: windows-2022
+    timeout-minutes: 240
+    defaults:
+      run:
+        shell: bash
+    env:
+      CXX_ROOT: ${{ github.workspace }}/../cxx
+    steps:
+      - name: Check out with LF line endings, as the working clones are
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      # Which generators rerun (docs/porting-playbook.md §8): those the change adds or changes; all of them when a
+      # shared helper or a requirements file changes; every harness generator when the harness, its client or any wheel
+      # generator changes, a superset of the harness generators that import it.
+      - name: The generators to rerun
+        id: which
+        env:
+          GENERATORS: ${{ inputs.generators }}
+        run: |
+          all=0; harness=0; gens=()
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            if [ -z "$GENERATORS" ]; then all=1; else read -ra gens <<< "$GENERATORS"; fi
+          else
+            while IFS= read -r f; do
+              case "$f" in
+                tools/vectors/gen/*.py)
+                  g="${f#tools/vectors/gen/}"; gens+=("${g%.py}")
+                  case "$g" in cxx/*) ;; *) harness=1 ;; esac ;;
+                tools/vectors/gen/*) g="${f#tools/vectors/gen/}"; gens+=("${g%/*}/") ;;
+                tools/vectors/cxx.py|tools/cxx/*) harness=1 ;;
+                tools/vectors/*.py|tools/vectors/*requirements.txt) all=1 ;;
+              esac
+            done < <(git diff --name-only HEAD^1 HEAD)
+          fi
+          [ "$harness" = 1 ] && gens+=("cxx/")
+          [ ${#gens[@]} -gt 0 ] && mapfile -t gens < <(printf '%s\n' "${gens[@]}" | sort -u)
+          args=""; [ "$all" = 0 ] && args="${gens[*]}"
+          run=false; { [ "$all" = 1 ] || [ ${#gens[@]} -gt 0 ]; } && run=true
+          cxx=false; { [ "$all" = 1 ] || [[ " ${gens[*]} " == *" cxx/"* ]]; } && cxx=true
+          echo "run=$run" >> "$GITHUB_OUTPUT"; echo "cxx=$cxx" >> "$GITHUB_OUTPUT"; echo "args=$args" >> "$GITHUB_OUTPUT"
+          echo "rerun: ${args:-every generator} (run $run, harness $cxx)"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        if: steps.which.outputs.run == 'true'
+        with:
+          python-version: "3.12"
+      - name: The generators' oracle, hash-pinned
+        if: steps.which.outputs.run == 'true'
+        run: |
+          python -m pip install --require-hashes --only-binary :all: -r tools/vectors/build-requirements.txt
+          python -m pip install --require-hashes --no-build-isolation -r tools/vectors/requirements.txt
+      - name: QuantLib at the pin
+        if: steps.which.outputs.cxx == 'true'
+        run: |
+          git clone --quiet --depth 1 --branch "$QUANTLIB_TAG" https://github.com/lballabio/QuantLib.git "$RUNNER_TEMP/QuantLib"
+          test "$(git -C "$RUNNER_TEMP/QuantLib" rev-parse HEAD)" = "$QUANTLIB_COMMIT"
+      # tools/cxx/build.py rebuilds QuantLib when its configure command or the toolchain differ from the stamp.
+      - name: QuantLib's build for the harness, cached
+        if: steps.which.outputs.cxx == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ env.CXX_ROOT }}/downloads
+            ${{ env.CXX_ROOT }}/quantlib-install
+            ${{ env.CXX_ROOT }}/quantlib-build/nanoql-stamp.json
+          key: cxx-${{ runner.os }}-${{ hashFiles('tools/cxx/build.py') }}
+      - name: The C++ harness
+        if: steps.which.outputs.cxx == 'true'
+        run: |
+          python -I tools/cxx/build.py "$CXX_ROOT" --quantlib "$RUNNER_TEMP/QuantLib"
+          echo "NANOQL_HARNESS=$(cygpath -w "$CXX_ROOT/harness-build/cxx-harness.exe")" >> "$GITHUB_ENV"
+      - name: The harness's self-test
+        if: steps.which.outputs.cxx == 'true'
+        run: python -I tools/vectors/cxx.py --self-test
+      - name: Rerun the generators
+        if: steps.which.outputs.run == 'true'
+        env:
+          GENERATORS: ${{ steps.which.outputs.args }}
+        run: python -I tools/vectors/reproduce.py $GENERATORS
+
+  dco:
+    name: Sign-off
+    if: github.event_name == 'pull_request' && !github.event.repository.private
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      # Every commit of the pull request carries a Signed-off-by line naming its author (CONTRIBUTING.md).
+      - name: Every commit signed off by its author
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          fail=0
+          for c in $(git rev-list --no-merges "$BASE..HEAD"); do
+            author="$(git log -1 --format='%an <%ae>' "$c")"
+            if ! git log -1 --format='%(trailers:key=Signed-off-by,valueonly)' "$c" | grep -qxF "$author"; then
+              echo "::error::$(git log -1 --format='%h %s' "$c"): no 'Signed-off-by: $author' line"
+              fail=1
+            fi
+          done
+          exit "$fail"

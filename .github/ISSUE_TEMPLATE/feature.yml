@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+name: Feature request
+description: Something nanoql doesn't do yet
+labels: [feature]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        nanoql's core is a faithful port of QuantLib: it changes with QuantLib, or with a fix checked against it.
+        A model, product or feature QuantLib lacks goes into the extensions layer, with its own tests.
+  - type: textarea
+    id: what
+    attributes:
+      label: What you'd like
+      description: What it does, and the problem it solves for you.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Where it comes from
+      description: The QuantLib class, paper or market practice it follows, if any.

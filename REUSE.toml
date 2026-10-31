@@ -3,7 +3,8 @@ version = 1
 # Files without a comment header.
 [[annotations]]
 path = [
-  "README.md", "CONTRIBUTING.md", "NOTICE", ".gitattributes", ".gitignore", "NanoQL.slnx", "Directory.Build.props",
+  "README.md", "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md", ".github/pull_request_template.md", "NOTICE",
+  ".gitattributes", ".gitignore", "NanoQL.slnx", "Directory.Build.props",
   ".editorconfig", "global.json", "stylecop.json", "tools/porting-map.json", "tests/vectors/**",
 ]
 precedence = "aggregate"
