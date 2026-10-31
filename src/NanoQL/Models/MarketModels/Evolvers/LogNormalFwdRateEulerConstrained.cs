@@ -178,7 +178,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
     /// <inheritdoc/>
     public override CurveState CurrentState => curveState;
 
-    /// <inheritdoc/>
+    /// <summary>Sets, once, the swap rates each step constrains.</summary>
     /// <param name="startIndexOfSwapRate">Each step's constrained forward rate.</param>
     /// <param name="endIndexOfSwapRate">Each step's constrained rate plus one: only forward rates are
     /// constrained.</param>
@@ -235,7 +235,7 @@ public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
         constraintTypeSet = true;
     }
 
-    /// <inheritdoc/>
+    /// <summary>Sets, before each path, the value each step constrains its swap rate to, and which steps are active.</summary>
     /// <param name="rateConstraints">Each step's constrained rate's target.</param>
     /// <param name="isConstraintActive">Whether each step's constraint is active.</param>
     /// <exception cref="ArgumentException">The sizes aren't the steps'.</exception>
