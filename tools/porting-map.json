@@ -1653,7 +1653,12 @@
     "boost/numeric/ublas": {"folder": "Numeric/Ublas"}
   },
   "qlnet": {
+    "src/QLNet/Cashflows": {"folder": "Coupons", "namespace": "NanoQL.Extensions.Coupons"},
+    "src/QLNet/Cashflows/SimpleCashFlow.cs": {"subfolder": "SimpleCashFlow"},
     "src/QLNet/Instruments/Bonds": {"folder": "Instruments/Bonds", "namespace": "NanoQL.Extensions.Instruments"},
+    "src/QLNet/Instruments/Bonds/AmortizingBond.cs": {"subfolder": "AmortizingBond"},
+    "src/QLNet/Instruments/Bonds/MBSFixedRateBond.cs": {"subfolder": "MBSFixedRateBond"},
+    "tests/QLNet.Tests/T_Bonds.cs": {"test": "BondsTests"},
     "tests/QLNet.Tests/T_PSACurve.cs": {"test": "PSACurveTests"}
   }
 }

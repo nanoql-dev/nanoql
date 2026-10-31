@@ -43,7 +43,9 @@ path exists under the checkout; a source file sits in the folder under src/NanoQ
 subfolder and namespace, that the table's qlnet section gives the path's directory and file, and a test file at the
 name the section gives its QLNet test file, under tests/NanoQL.Tests/QLNet/; QLNet's copyright lines appear verbatim
 and in order; the SPDX expression is Apache-2.0 AND BSD-3-Clause; one Upstream line names QLNet paths alone; and
-THIRD_PARTY_NOTICES.md's fenced block under its "## QLNet" heading is QLNet's LICENSE at the pin, verbatim.
+THIRD_PARTY_NOTICES.md's fenced block under its "## QLNet" heading is QLNet's LICENSE at the pin, verbatim. A QLNet test
+class's "// Not ported:" line names test methods ([Fact] or [Theory]) of its QLNet test file, each with its reason,
+which it doesn't port.
 """
 import hashlib
 import importlib.util
@@ -160,6 +162,24 @@ def qlnet_state(qlnet_root):
     if head.returncode != 0 or status.returncode != 0:
         return None, (head.stderr or status.stderr).strip()
     return head.stdout.strip(), status.stdout.strip() == ""
+
+
+def qlnet_cases(text):
+    """The test methods of a QLNet test file: each public void method whose attributes, on the lines just before it,
+    hold [Fact] or [Theory]. A commented-out attribute doesn't count."""
+    cases, attributes = [], []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("["):
+            attributes.append(stripped)
+            continue
+        if not stripped or stripped.startswith("//"):
+            continue
+        m = re.match(r"public\s+void\s+(\w+)\s*\(", stripped)
+        if m and any(re.match(r"\[\s*(?:Fact|Theory)\b", a) for a in attributes):
+            cases.append(m.group(1))
+        attributes = []
+    return cases
 
 
 def upstream_kind(up):
@@ -344,6 +364,9 @@ class Checker:
     def check_not_ported(self, path, header):
         """A "// Not ported:" line: cases of the class's QuantLib test file that can never port, each with its reason
         (a case that exercises only code nanoql doesn't port)."""
+        if path.startswith(QLNET_TESTS):
+            self.check_qlnet_not_ported(path, header)
+            return
         units = {sources.unit_of(up) for up in header.upstream}
         if not path.startswith(TEST_SUITE) or len(units) != 1:
             self.error("not-ported-case", f"{path}: a // Not ported: line belongs on a TestSuite class naming one test "
@@ -368,6 +391,30 @@ class Checker:
             elif case in replaced:
                 self.error("not-ported-case", f"{path}: Not ported names {case}, which is also on its // Replaced: "
                                               "line")
+
+    def check_qlnet_not_ported(self, path, header):
+        """A QLNet test class's "// Not ported:" line: test methods of its QLNet test file, each with its reason, that
+        the class doesn't port."""
+        if self.qlnet is None:
+            self.error("qlnet-root", f"{path}: a QLNet // Not ported: line needs --qlnet <QLNet-v1.13.2 checkout>")
+            return
+        if len(header.upstream) != 1 or not header.upstream[0].startswith("tests/QLNet.Tests/") or \
+                not os.path.isfile(os.path.join(self.qlnet, header.upstream[0])):
+            self.error("not-ported-case", f"{path}: a // Not ported: line belongs on a QLNet test class naming one "
+                                          "QLNet test file")
+            return
+        rel = header.upstream[0]
+        cases = qlnet_cases(sources.ql_read(self.qlnet, rel))
+        methods = set(porting_map.METHOD.findall(header.text))
+        for case, reason in header.not_ported:
+            if case is None:
+                self.error("not-ported-case", f"{path}: '{reason}' on its // Not ported: line isn't '<case> "
+                                              "(<reason>)'")
+                continue
+            if case not in cases:
+                self.error("not-ported-case", f"{path}: Not ported names {case}, which isn't a test of {rel}")
+            elif case[0].upper() + case[1:] in methods:
+                self.error("not-ported-case", f"{path}: Not ported names {case}, which is also ported")
 
     def check_moved(self, path, header):
         """A "// Moved:" line: checks of the class's QuantLib cases, each at a line of the case's body at the pin, moved

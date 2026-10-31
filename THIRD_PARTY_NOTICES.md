@@ -277,8 +277,9 @@ DEALINGS IN THE SOFTWARE.
 ## QLNet
 
 nanoql's extensions port parts of QLNet 1.13.2, a C# library based on QuantLib: its prepayment models
-(`IPrepayModel`, `PSACurve` and `ConstantCPR`), under `src/NanoQL.Extensions/`, and its test cases for them, under
-`tests/NanoQL.Tests/QLNet/`. Each ported file carries QLNet's copyright notices. QLNet's license file, `LICENSE` at
+(`IPrepayModel`, `PSACurve` and `ConstantCPR`), its mortgage pass-through with prepayment (`MBSFixedRateBond` and
+`VoluntaryPrepay`) and its bond held at amortised cost (`AmortizingBond`), under `src/NanoQL.Extensions/`, and its test
+cases for them, under `tests/NanoQL.Tests/QLNet/`. Each ported file carries QLNet's copyright notices. QLNet's license file, `LICENSE` at
 release tag QLNet-v1.13.2, is reproduced verbatim below.
 
 ```text

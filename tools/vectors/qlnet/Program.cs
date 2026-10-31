@@ -16,6 +16,8 @@ internal static class Program
     {
         ["psacurve"] = PSACurveVectors.Build,
         ["constantcpr"] = ConstantCPRVectors.Build,
+        ["mbsfixedratebond"] = MBSFixedRateBondVectors.Build,
+        ["amortizingbond"] = AmortizingBondVectors.Build,
     };
 
     private static int Main(string[] args)

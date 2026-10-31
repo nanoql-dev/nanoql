@@ -8233,6 +8233,144 @@ Every documented divergence from QLNet 1.13.2, the oracle of the extensions' por
 entry per test class under `tests/NanoQL.Tests/Divergences/QLNet/`, each recording QLNet's value
 beside nanoql's.
 
+### AmortizedCostBonds
+
+[`Divergences/QLNet/AmortizedCostBonds.cs`](../tests/NanoQL.Tests/Divergences/QLNet/AmortizedCostBonds.cs)
+
+The bonds the amortised-cost divergence facts build: QLNet's AB1 and AB2 (`testAmortizingBond1`, `testAmortizingBond2`) and their variants, on `NullCalendar`.
+
+### AmortizedCostEntriesTests
+
+[`Divergences/QLNet/AmortizedCostEntriesTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/AmortizedCostEntriesTests.cs)
+
+`AmortizingBond`'s amortisations. Each pays the leg's own coupon, day-counted, where QLNet's pays the face amount times the rate over the frequency (`AmortizingBond.cs:58`), so that on Actual/365 (Fixed) QLNet's carrying amount misses the face amount at maturity, 1,000,367.33 on a million; nanoql's is the remaining flows' value at the effective rate at each coupon date. Each is signed, the interest less the coupon, where QLNet's sign is the bond's being at a premium (`:118-124`): a premium given a rate above its coupon accretes, where QLNet's amortises it, 42,875.52 on AB1 at 8% after a period where nanoql's is 43,948.48. A given rate of 0 is taken, where QLNet solves instead (`:60`; −0.0238 on AB1). The last closes to the face amount, where QLNet's cents leave AB2 at 500,000.02. The bond's cash flows are its coupons and redemption, its calendar the one given, where QLNet's hold 41 accounting entries and coupons with overridden amounts among its 83, on TARGET (`:43`, `:127-128`).
+
+Facts:
+
+- `ACouponDatesCarryingAmountIsTheRemainingFlowsValueOnAnyDayCounter`
+- `AnAmortisationsSignIsItsInterestLessItsCoupon`
+- `AGivenRateOfZeroIsTaken`
+- `TheLastAmortisationClosesToTheFaceAmount`
+- `TheCashFlowsAreTheBondsLeg`
+
+### AmortizedCostPartialPeriodTests
+
+[`Divergences/QLNet/AmortizedCostPartialPeriodTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/AmortizedCostPartialPeriodTests.cs)
+
+Between coupon dates, `AmortizingBond.AmortizationValue` accrues on the carrying amount at the period's start, over the coupon's own period: QLNet accrues every period on the cost, with no reference period (`AmortizingBond.cs:163-172`), so its carrying amount jumps at each coupon date, by 28.28 on a quarterly discount bond (96,952.32 the day before 15 June 2016, 96,980.60 on it) and by 68.96 before 15 December 2019. The check is QLNet's own `AmortizationValue` at the period's start and its `FixedRateCoupon` amounts on that carrying amount since then (the vectors' between-dates cases).
+
+Facts:
+
+- `TheCarryingAmountIsContinuousAtACouponDate`
+
+### AmortizedCostTradeDateTests
+
+[`Divergences/QLNet/AmortizedCostTradeDateTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/AmortizedCostTradeDateTests.cs)
+
+`AmortizingBond` solves its effective rate on the trade date, at initial recognition, as IFRS 9's and ASC 310-20's interest method require: the price paid, the cost plus the accrued interest purchased, against the remaining flows. QLNet takes the cost as the carrying amount on the coupon date on or before the trade, and solves there (`AmortizingBond.cs:205-207`); its first period then runs from that coupon date while its `AmortizationValue` accrues from the trade, so on AB2 its carrying amount jumps 96.34 at the first coupon date (471,724.66 the day before, 471,821.00 on it), and with no coupon before the trade it solves at its global evaluation date, a trade on 1 May 2010 of a bond issued 15 March 2010 yielding 0.0546 evaluated at the issue date, 0.0620 evaluated on 1 January 2012, and throwing evaluated after maturity. On a purchase on a coupon date the two methods agree, which the vectors check. The checks here: the rate is QuantLib's own `CashFlows.Yield` on the price paid at the trade date; the carrying amount is the cost on the trade date, continuous at the coupon dates, and the face amount at maturity; and each coupon date's is the remaining flows' value at the effective rate.
+
+Facts:
+
+- `TheRateIsTheYieldOfThePricePaidAtTheTradeDate`
+- `TheCarryingAmountIsContinuousFromTheCost`
+- `EachCouponDatesCarryingAmountIsTheRemainingFlowsValue`
+- `ATradeInTheFirstPeriodDoesntReadTheEvaluationDate`
+
+### MbsFlowOrderTests
+
+[`Divergences/QLNet/MbsFlowOrderTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/MbsFlowOrderTests.cs)
+
+`MBSFixedRateBond`'s flows on a date are its coupon, then its scheduled principal, then its prepayment, as a bond's redemptions follow its coupons on a date (QuantLib's `bond.cpp:325-328`). QLNet's are the prepayment, the scheduled principal and the coupon (`MBSFixedRateBond.cs:70-72`). The amounts and dates are QLNet's bit for bit (the vectors); a sum over a date's flows, as `PVDifference` takes, adds them in this order.
+
+Facts:
+
+- `ADatesCouponComesFirst`
+
+### MbsFrequencyTests
+
+[`Divergences/QLNet/MbsFrequencyTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/MbsFrequencyTests.cs)
+
+A pool of a frequency other than monthly prepays at its model's rate: a period survives the product of its months' survival, each month's SMM at its own start, and a period counted in weeks or days its start's monthly survival to the power of the months it spans, each calendar month's share of it. QLNet applies one month's SMM a period (`MBSFixedRateBond.cs:61-62`), so a CPR of 8% prepays at 2.74% a year quarterly and 1.38% semi-annually, and its yields refuse such a pool ("root not bracketed", its bracket and formula being monthly). The checks: QLNet's own MBS fed the period's SMM (the vectors' quarterly and semi-annual cases); the constant-CPR closed form, a span's balance (1 − CPR)^(T/12) of the level-payment schedule's, T its months by an independent count; and the yields' closed form at par, the pass-through rate per period compounded to a month and to a half year.
+
+Facts:
+
+- `AConstantCprPrepaysAtItsRate`
+- `AShortPeriodsPoolFollowsTheClosedForm`
+- `TheYieldsAtParAreThePassThroughRatesEquivalents`
+
+### MbsPayOffTests
+
+[`Divergences/QLNet/MbsPayOffTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/MbsPayOffTests.cs)
+
+A pool's pay-off. Under SIFMA's cap (`PsaCapAndFloorTests`), a 2,000% PSA pool prepays its whole balance at the 25th period, where its CPR reaches 100%, and its flows after are 0 but for one period's residue of rounding, 7.45e-9; QLNet's CPR passes 1 there and its flows from the 26th prepayment and 27th coupon are NaN, 335 of them. After a pay-off `MBSFixedRateBond.MonthlyYield`, `MBSFixedRateBond.BondEquivalentYield`, `Yield` and `Price` refuse the pool, its balance 0, as `BondFunctions` refuses a bond not tradable at its settlement: QLNet's yields throw too, on its stale notional (376,325,238.28 on a pool at CPR 1 settled 1 June 2007), where a solve on the pool's balance would return 0, QLNet's `PVDifference` being exactly 0 at both ends of its bracket.
+
+Facts:
+
+- `A2000PercentPsaPoolsFlowsAfterThePayOffAreZero`
+- `ThePaidOffPoolsYieldsAreRefused`
+
+### MbsPaymentDatesTests
+
+[`Divergences/QLNet/MbsPaymentDatesTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/MbsPaymentDatesTests.cs)
+
+`MBSFixedRateBond`'s flows pay on each period's end adjusted by its payment convention on its calendar. QLNet's MBS takes the convention and ignores it (`MBSFixedRateBond.cs:67-69`): on TARGET with Following, its default, the Fabozzi pool's second payment is 1 April 2007, a Sunday, and 148 of its 358 payment dates aren't business days. The check is QLNet's level-payment base bond on the same calendar and convention, whose dates the vectors' TARGET case reads; the amounts don't move.
+
+Facts:
+
+- `FlowsPayOnTheAdjustedPeriodEnds`
+- `TheAmountsAndTheYieldDontMove`
+
+### MbsPoolBalanceTests
+
+[`Divergences/QLNet/MbsPoolBalanceTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/MbsPoolBalanceTests.cs)
+
+`MBSFixedRateBond`'s notional schedule and redemptions are the pool's expected ones, so its yields price the pool's balance at the settlement. QLNet's MBS keeps its level-payment base bond's notionals (`MBSFixedRateBond.cs:39`, `:96`), the balance with no prepayment: on the Fabozzi pool settled 1 February 2012, QLNet's notional is 371,882,785.38 against the pool's 291,474,567.29, and its monthly yield 0.0017466, where a pool priced at its own balance yields its pass-through rate, 0.055/12 a month. The check is QLNet's own `PVDifference` and `Brent` on the pool's balance (the vectors' seasoned cases); here, that yield. The yields also count the settlement date's flows as paid whatever the context's settings, as the balance does, where QLNet's include them under either setting that does: on that payment date its monthly yield moves to 0.0018220.
+
+Facts:
+
+- `TheNotionalIsThePoolsBalance`
+- `ASeasonedPoolAtItsBalanceYieldsItsPassThroughRate`
+- `TheYieldsPriceTheSettlementDatesFlowsAsPaid`
+
+### MbsPoolMonthsTests
+
+[`Divergences/QLNet/MbsPoolMonthsTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/MbsPoolMonthsTests.cs)
+
+`MBSFixedRateBond` reads its prepayment model at its start's anniversaries: period i's month at the start plus the pool's age plus i months, so a pool on the PSA curve takes SF-6's MONTH in every period (`PsaMonthCountTests`). QLNet reads a schedule date plus the age (`MBSFixedRateBond.cs:61`, `:84`), the same date from a start before the 29th, and on its Bond Basis month: from a start on 31 January 2007 its pool takes MONTH 1's CPR in its second period and MONTH 13's in its 14th (0.2% and 2.6% at 100% PSA), skipping MONTHs 2 and 14. The check is SIFMA's formula, each period's CPR SF-6's at its MONTH; QLNet's bits hold from a start before the 29th (the vectors).
+
+Facts:
+
+- `APoolFromAMonthEndTakesSf6sMonthInEveryPeriod`
+- `ThePublicSmmIsTheModelAtADatePlusTheAge`
+
+### MbsPools
+
+[`Divergences/QLNet/MbsPools.cs`](../tests/NanoQL.Tests/Divergences/QLNet/MbsPools.cs)
+
+The pools the MBS divergence facts build: QLNet's Fabozzi pool (`testMBSFixedBondCached`) and its variants, 400 million from 1 February 2007, 30/360 Bond Basis.
+
+### MbsYieldBracketTests
+
+[`Divergences/QLNet/MbsYieldBracketTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/MbsYieldBracketTests.cs)
+
+`MBSFixedRateBond.MonthlyYield` solves in QLNet's bracket of [0, 1]% a month where it holds the root, and otherwise by Brent's step search from QLNet's guess, above −100% a month. QLNet's solve refuses a yield outside its bracket (`MBSFixedRateBond.cs:97`): a 13% pass-through priced at par throws "root not bracketed: f[0,1]". The checks: the PV difference at the root, and the closed form at par, the pass-through rate over 12.
+
+Facts:
+
+- `AYieldAboveQLNetsBracketIsSolved`
+- `AYieldBelowQLNetsBracketIsSolved`
+
+### MbsYoungPoolTests
+
+[`Divergences/QLNet/MbsYoungPoolTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/MbsYoungPoolTests.cs)
+
+A pool whose original length is shorter than its remaining term, so that its age is negative, prepays at MONTH 1 until its loans' first month, as SIFMA's PSA model prices it (Chapter SF, SF-6, "MONTH equals 1 for all prior months"; its same-month pools are `Reference/SifmaPassThroughTests`'). QLNet's PSA falls to 0 and below there (`PSACurve.cs:38`), so an original length of 300 on a 358-month term gives 57 negative prepayments, the first −3,611,165.28. The check is SIFMA's formula, and QLNet's bits wherever the age is 0 or more (the vectors).
+
+Facts:
+
+- `NoPrepaymentIsNegative`
+- `TheMonthsBeforeTheLoansFirstPrepayAtMonthOne`
+
 ### PrepayRateRangeTests
 
 [`Divergences/QLNet/PrepayRateRangeTests.cs`](../tests/NanoQL.Tests/Divergences/QLNet/PrepayRateRangeTests.cs)
