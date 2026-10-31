@@ -6,7 +6,7 @@
   FpML's codes, under the FpML Public License (LICENSES/LicenseRef-FpML-Public-License-3.0.txt), each an alias
   of the nanoql name it maps to exactly; the mapping is nanoql's own work.
 -->
-<Conventions xmlns="https://nanoql.net/schemas/conventions">
+<Conventions xmlns="https://nanoql.org/schemas/conventions">
   <Alias name="1/1" base="OneDayCounter" />
   <Alias name="30/360" base="Thirty360.BondBasis" />
   <Alias name="30E/360" base="Thirty360.European" />

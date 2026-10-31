@@ -27,12 +27,12 @@ checked against it; [the catalogue](conventions-catalogue.md) lists them all.
 
 ## The format
 
-A conventions file is a `Conventions` element in the namespace `https://nanoql.net/schemas/conventions`, holding
+A conventions file is a `Conventions` element in the namespace `https://nanoql.org/schemas/conventions`, holding
 records in any order. Each record is an element named after its kind, with a `name` attribute, an optional `base`
 attribute, and its fields as child elements, each named after nanoql's API:
 
 ```xml
-<Conventions xmlns="https://nanoql.net/schemas/conventions">
+<Conventions xmlns="https://nanoql.org/schemas/conventions">
   <!-- TARGET with an extra holiday, the preset itself replaced -->
   <Calendar name="TARGET" base="TARGET">
     <AddedHoliday>2026-12-24</AddedHoliday>

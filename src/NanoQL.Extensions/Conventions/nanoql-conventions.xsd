@@ -4,9 +4,9 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns="https://nanoql.net/schemas/conventions"
-           xmlns:c="https://nanoql.net/schemas/conventions"
-           targetNamespace="https://nanoql.net/schemas/conventions"
+           xmlns="https://nanoql.org/schemas/conventions"
+           xmlns:c="https://nanoql.org/schemas/conventions"
+           targetNamespace="https://nanoql.org/schemas/conventions"
            elementFormDefault="qualified">
   <xs:annotation>
     <xs:documentation>nanoql's market conventions: calendars, day counters, currencies, regions, indexes, instruments' conventions and commodities' conventions, named by nanoql's API, each a record whose business fields are child elements. Other tools' elements and attributes in their own namespaces are kept.</xs:documentation>

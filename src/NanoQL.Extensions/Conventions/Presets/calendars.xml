@@ -2,7 +2,7 @@
   SPDX-FileCopyrightText: 2026 The nanoql Authors
   SPDX-License-Identifier: Apache-2.0
 -->
-<Conventions xmlns="https://nanoql.net/schemas/conventions">
+<Conventions xmlns="https://nanoql.org/schemas/conventions">
   <CalendarPreset name="Argentina.Merval">
     <QuantLibName>Buenos Aires stock exchange</QuantLibName>
   </CalendarPreset>

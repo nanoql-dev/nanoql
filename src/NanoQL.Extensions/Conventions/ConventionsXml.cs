@@ -36,7 +36,7 @@ namespace NanoQL.Extensions.Conventions;
 public static class ConventionsXml
 {
     /// <summary>The conventions' namespace.</summary>
-    public const string Namespace = "https://nanoql.net/schemas/conventions";
+    public const string Namespace = "https://nanoql.org/schemas/conventions";
 
     private const string SchemaResource = "NanoQL.Extensions.Conventions.nanoql-conventions.xsd";
 

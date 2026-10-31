@@ -2,7 +2,7 @@
   SPDX-FileCopyrightText: 2026 The nanoql Authors
   SPDX-License-Identifier: Apache-2.0
 -->
-<Conventions xmlns="https://nanoql.net/schemas/conventions">
+<Conventions xmlns="https://nanoql.org/schemas/conventions">
   <DayCounterPreset name="Actual360">
     <QuantLibName>Actual/360</QuantLibName>
   </DayCounterPreset>

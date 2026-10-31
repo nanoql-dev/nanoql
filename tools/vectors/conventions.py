@@ -13,7 +13,7 @@ and base first, two-space indents, LF line ends, UTF-8 without a byte-order mark
 import os
 import sys
 
-NAMESPACE = "https://nanoql.net/schemas/conventions"
+NAMESPACE = "https://nanoql.org/schemas/conventions"
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 NANOQL_HEADER = ["SPDX-FileCopyrightText: 2026 The nanoql Authors", "SPDX-License-Identifier: Apache-2.0"]
 

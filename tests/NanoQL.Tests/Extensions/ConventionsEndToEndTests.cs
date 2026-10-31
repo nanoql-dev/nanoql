@@ -22,7 +22,7 @@ namespace NanoQL.Tests.Extensions;
 public class ConventionsEndToEndTests
 {
     private const string File = """
-        <Conventions xmlns="https://nanoql.net/schemas/conventions" xmlns:desk="urn:desk">
+        <Conventions xmlns="https://nanoql.org/schemas/conventions" xmlns:desk="urn:desk">
           <Calendar name="TARGET" base="TARGET" desk:owner="rates">
             <AddedHoliday>2026-12-28</AddedHoliday>
           </Calendar>

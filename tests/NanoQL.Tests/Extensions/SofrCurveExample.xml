@@ -7,7 +7,7 @@
   paid annually two business days after each period ends on the US government bond calendar, the fixed leg on
   Actual/360. USGS and ACT/360 are FpML's codes, aliases of nanoql's UnitedStates.GovernmentBond and Actual360.
 -->
-<Conventions xmlns="https://nanoql.net/schemas/conventions">
+<Conventions xmlns="https://nanoql.org/schemas/conventions">
   <OisConvention name="USD-SOFR">
     <Index>Sofr</Index>
     <SettlementDays>2</SettlementDays>
