@@ -19,6 +19,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class ForwardOptionTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     [Fact]
     public void TestValues()
     {
@@ -78,7 +81,7 @@ public class ForwardOptionTests
     {
         // Testing forward option greeks initialization...
         DayCounter dc = new Actual360();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = today };
 
         GeneralizedBlackScholesProcess stochProcess = Process(100.0, 0.04, 0.01, 0.11, dc, context);
@@ -139,7 +142,7 @@ public class ForwardOptionTests
         Real s = 100;
 
         DayCounter dc = new Actual360();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = today };
 
         GeneralizedBlackScholesProcess stochProcess = Process(s, q, r, sigma, dc, context);
@@ -230,7 +233,7 @@ public class ForwardOptionTests
             Real rho = -0.93;
 
             DayCounter dc = new Actual360();
-            Date today = Date.TodaysDate();
+            Date today = RunnerDate;
             var context = new EvaluationContext { EvaluationDate = today };
 
             Date exDate = today + new Period(1, TimeUnit.Years);
@@ -372,7 +375,7 @@ public class ForwardOptionTests
             Real rho = -0.5;
 
             DayCounter dc = new Actual360();
-            Date today = Date.TodaysDate();
+            Date today = RunnerDate;
             var context = new EvaluationContext { EvaluationDate = today };
 
             Date exDate = today + new Period(1, TimeUnit.Years);
@@ -443,7 +446,7 @@ public class ForwardOptionTests
             OneAssetOptionResults> engine)
     {
         DayCounter dc = new Actual360();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = today };
 
         foreach (ForwardOptionData value in values)
@@ -499,7 +502,7 @@ public class ForwardOptionTests
         Volatility[] vols = [0.11, 0.50, 1.20];
 
         DayCounter dc = new Actual360();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = today };
 
         OneAssetOptionResults Engine(ForwardVanillaOption o, EvaluationContext c, GeneralizedBlackScholesProcess p) =>

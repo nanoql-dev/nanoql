@@ -15,6 +15,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class ForwardRateAgreementTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     // Adapted: the quotes are given their values before the curve is built, where QuantLib sets them after building
     // the helpers and the FRAs on relinkable handles; the FRAs are built on an index forecasting on the bootstrapped
     // curve, which QuantLib's handle links. QL_USE_INDEXED_COUPON is undefined in QuantLib's default build, so the
@@ -24,7 +27,7 @@ public class ForwardRateAgreementTests
     {
         // Testing forward rate agreement construction...
 
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = today };
 
         // set up the index

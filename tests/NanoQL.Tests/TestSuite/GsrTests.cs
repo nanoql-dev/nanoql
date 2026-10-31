@@ -25,12 +25,15 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class GsrTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, September, 2015);
+
     [Fact]
     public void TestGsrProcess()
     {
         // Testing GSR process...
 
-        Date refDate = Date.TodaysDate();
+        Date refDate = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = refDate };
 
         // constant reversion, constant volatility, test conditional expectation and variance against existing
@@ -134,7 +137,7 @@ public class GsrTests
     {
         // Testing GSR model...
 
-        Date refDate = Date.TodaysDate();
+        Date refDate = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = refDate };
 
         Real modelvol = 0.01;
@@ -291,7 +294,7 @@ public class GsrTests
     {
         // Testing GSR model when updating quotes...
 
-        Date refDate = Date.TodaysDate();
+        Date refDate = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = refDate };
 
         Real modelvol = 0.01;

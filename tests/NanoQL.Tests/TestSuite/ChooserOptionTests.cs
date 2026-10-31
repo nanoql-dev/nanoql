@@ -16,6 +16,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class ChooserOptionTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     [Fact]
     public void TestAnalyticSimpleChooserEngine()
     {
@@ -26,7 +29,7 @@ public class ChooserOptionTests
            pages 39-40
         */
         DayCounter dc = new Actual360();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = today };
 
         Real spot = 50.0;

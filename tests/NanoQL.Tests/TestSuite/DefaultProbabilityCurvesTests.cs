@@ -18,6 +18,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class DefaultProbabilityCurvesTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, September, 2015);
+
     [Fact]
     public void TestDefaultProbability()
     {
@@ -29,7 +32,7 @@ public class DefaultProbabilityCurvesTests
         int n = 20;
 
         double tolerance = 1.0e-10;
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         Date startDate = today;
         Date endDate = startDate;
 
@@ -83,7 +86,7 @@ public class DefaultProbabilityCurvesTests
         int n = 20;
 
         double tolerance = 1.0e-10;
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         Date startDate = today;
         Date endDate = startDate;
 
@@ -403,7 +406,7 @@ public class DefaultProbabilityCurvesTests
     }
 
     // QuantLib's evaluation date: the fixture's, today's date.
-    private static EvaluationContext Context() => new() { EvaluationDate = Date.TodaysDate() };
+    private static EvaluationContext Context() => new() { EvaluationDate = RunnerDate };
 
     // BOOST_CHECK_CLOSE: the relative difference, in percent, within the tolerance from each side.
     private static void AssertClose(double a, double b, double tolerancePercent)

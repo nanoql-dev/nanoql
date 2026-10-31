@@ -18,6 +18,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class FloatFloatSwapTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     [Fact]
     public void TestFairSpread1()
     {
@@ -162,7 +165,7 @@ public class FloatFloatSwapTests
         {
             SettlementDays = 2;
             Calendar = new TARGET();
-            Today = Calendar.Adjust(Date.TodaysDate());
+            Today = Calendar.Adjust(RunnerDate);
             Context = new EvaluationContext { EvaluationDate = Today };
             Settlement = Calendar.Advance(Today, SettlementDays, TimeUnit.Days);
             TermStructure = new FlatForward(Settlement, 0.05, new Actual365Fixed());

@@ -160,6 +160,21 @@ STRIKE_OUTPUTS = ["variance", "volatility", "callPrice", "putPrice", "digitalCal
                   "normalVolatility"]
 RELATIVE = 1e-12
 
+# The density's recorded tolerance: QuantLib's density is a second difference with gap 1e-4, whose "roundoff scales as
+# |strike|*eps/g^2" (smilesection.cpp:106-114): one ulp of the file's largest price, 1.11, moves it by 2.2e-8, and the
+# C runtime and the processor a run uses move it by up to 6.94e-10 on GitHub's runners (CI run 41146085965).
+DENSITY_TOLERANCE = 1e-7
+
+
+DENSITY_REASON = ("a second difference of prices with gap 1e-4, whose roundoff scales as |strike|*eps/g^2: one ulp of "
+                  "a price moves it by up to 2.2e-8, and the C runtime and processor by up to 6.94e-10 on GitHub's "
+                  "runners")
+
+
+def density_bound(x):
+    return ({"value": x, "tolerance": DENSITY_TOLERANCE, "reason": DENSITY_REASON} if isinstance(x, float)
+            else x)
+
 
 def strike_outputs(s, ks, discount):
     """The outputs at each strike, as lists over the strikes."""
@@ -245,6 +260,7 @@ def section_case(k, spec):
     skip = [j for j, x in enumerate(ks) if bf.smile_normal_moved(s, x)]
     for j in skip:
         expected["normalVolatility"][j] = None
+    expected["density"] = [density_bound(x) for x in expected["density"]]
     return {"name": f"{spec['kernel']} {spec['form']} {spec['parameters']} / {k}",
             "inputs": {"settings": st, "kind": "section", "section": v.enc(spec), "strikes": ks, "discount": discount,
                        "skip": skip},

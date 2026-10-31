@@ -19,12 +19,15 @@ namespace NanoQL.Tests.Divergences;
 /// </summary>
 public class HolderExtensibleCriticalPricesTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     [Fact]
     public void TestHolderExtensibleOptionCriticalPrices()
     {
         // Testing holder-extensible options whose extension region is empty or unbounded...
         DayCounter dc = new Actual360();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = today };
         Date exDate1 = today + 180;
         Date exDate2 = today + 270;

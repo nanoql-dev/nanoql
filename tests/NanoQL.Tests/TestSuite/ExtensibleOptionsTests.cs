@@ -15,6 +15,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class ExtensibleOptionsTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     [Fact]
     public void TestAnalyticHolderExtensibleOptionEngine()
     {
@@ -23,7 +26,7 @@ public class ExtensibleOptionsTests
         Real strike1 = 100.0;
         Real strike2 = 105.0;
         DayCounter dc = new Actual360();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = today };
         Date exDate1 = today + 180;
         Date exDate2 = today + 270;
@@ -67,7 +70,7 @@ public class ExtensibleOptionsTests
         Real strike1 = 90.0;
         Real strike2 = 82.0;
         DayCounter dc = new Actual360();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = today };
         Date exDate1 = today + 180;
         Date exDate2 = today + 270;

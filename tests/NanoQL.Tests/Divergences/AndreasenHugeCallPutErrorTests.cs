@@ -17,7 +17,9 @@ namespace NanoQL.Tests.Divergences;
 /// from the calibrated prices, gives (1.6414905070833644e-08, 1.1491274031493572e-06, 2.1310003360549513e-07)
 /// [executed: the wheel, <c>scratchpad\c5\probe_ah_callput.py</c>]. nanoql compares the forward with the strike, the
 /// out-of-the-money side; QuantLib's check, the per-option errors from the calibrated prices, gives nanoql's values.
-/// Where every strike is below the forward the two choices agree, and QuantLib's bits stand.
+/// Where every strike is below the forward the two choices agree, and QuantLib's values stand within 1e-6 relative:
+/// the calibration's errors are ill-conditioned, and the C runtime and processor it runs on move them, by 1.8e-8 relative
+/// on GitHub's windows-2022 runner, 5.6e-8 on macOS and 1.7e-8 on Linux (CI run 41146085965).
 /// </summary>
 public class AndreasenHugeCallPutErrorTests
 {
@@ -44,13 +46,13 @@ public class AndreasenHugeCallPutErrorTests
         (min, _, _) = ByStrike(ah, straddling);
         AssertClose(min, e.Min, 1e-9);
         Assert.True(Math.Abs(e.Min - 2.04584952970147e-08) > 1e-3 * e.Min);
-        AssertClose(1.7303849107531028e-06, e.Max, 1e-12);
+        AssertClose(1.7303849107531028e-06, e.Max, 1e-6);
 
         // every strike below the forward: the puts' errors, QuantLib's bits
         (_, e) = Calibrated([70.0, 80.0, 90.0, 95.0, 99.0]);
-        AssertClose(2.898637688237428e-09, e.Min, 1e-12);
-        AssertClose(3.920585301157897e-06, e.Max, 1e-12);
-        AssertClose(9.976617913126538e-07, e.Avg, 1e-12);
+        AssertClose(2.898637688237428e-09, e.Min, 1e-6);
+        AssertClose(3.920585301157897e-06, e.Max, 1e-6);
+        AssertClose(9.976617913126538e-07, e.Avg, 1e-6);
     }
 
     private static (AndreasenHugeVolatilityInterpl Interpolation, AndreasenHugeCalibrationError Error) Calibrated(double[] strikes)

@@ -20,8 +20,10 @@ namespace NanoQL.Tests.Divergences;
 /// volatility on another clock read through an adapter that extrapolates where the local volatility does. QuantLib's
 /// check: its models on the market restated on one clock (r 4% on Act/360, q 2%·360/365 on Act/360), which nanoql's
 /// on the original market (q 2% on Act/365) reproduce [executed on the wheel and the harness:
-/// <c>scratchpad\c4\oracle_c4.py</c>]; the finite-difference calibration within its own spread under one-ulp moves of
-/// its inputs (3.2e-9 measured, the S-hes run record's C4 entry).
+/// <c>scratchpad\c4\oracle_c4.py</c>]; the finite-difference calibration within 1e-6 relative, its spread across
+/// machines: 3.2e-9 under one-ulp moves of its inputs on one machine (the S-hes run record's C4 entry), and 1.5e-8 on
+/// GitHub's windows-2022 runner and 1.6e-8 on macOS, whose C runtimes and processors move its last bits (CI run
+/// 41146085965).
 /// </summary>
 public class HestonSlvMismatchedTimesTests
 {
@@ -48,9 +50,9 @@ public class HestonSlvMismatchedTimesTests
         LocalVolTermStructure leverage = new HestonSLVFDMModel(LocalVol, Model(), Today + 365, Parameters()).LeverageFunction;
 
         // as given, QuantLib: 1.3423194539973495, 1.2087257806827008, 1.547723333088376
-        AssertClose(1.3420152342629652, leverage.LocalVol(0.5, 100.0, true), 1e-8);
-        AssertClose(1.2083436634228566, leverage.LocalVol(1.0, 90.0, true), 1e-8);
-        AssertClose(1.547396112335777, leverage.LocalVol(0.75, 110.0, true), 1e-8);
+        AssertClose(1.3420152342629652, leverage.LocalVol(0.5, 100.0, true), 1e-6);
+        AssertClose(1.2083436634228566, leverage.LocalVol(1.0, 90.0, true), 1e-6);
+        AssertClose(1.547396112335777, leverage.LocalVol(0.75, 110.0, true), 1e-6);
     }
 
     [Fact]

@@ -19,12 +19,15 @@ namespace NanoQL.Tests.Divergences;
 /// </summary>
 public class ComplexChooserEqualTermsTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     [Fact]
     public void TestComplexChooserWithEqualTermsMatchesSimpleChooser()
     {
         // Testing complex chooser with equal strikes and maturities against simple chooser...
         DayCounter dc = new Actual360();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = today };
 
         Real strike = 100.0;

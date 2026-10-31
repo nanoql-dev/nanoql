@@ -22,6 +22,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class G2ProcessTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     [Fact]
     public void TestG2ProcessDriftIncludesTermStructure()
     {
@@ -279,5 +282,5 @@ public class G2ProcessTests
     }
 
     private static YieldTermStructure MakeFlatCurve(Rate rate) =>
-        FlatForward.Create(0, new TARGET(), rate, new Actual365Fixed(), new EvaluationContext { EvaluationDate = Date.TodaysDate() });
+        FlatForward.Create(0, new TARGET(), rate, new Actual365Fixed(), new EvaluationContext { EvaluationDate = RunnerDate });
 }

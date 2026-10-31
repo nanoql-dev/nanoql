@@ -1025,7 +1025,7 @@ public class EuropeanOptionTests
         Volatility v = 0.20;
 
         DayCounter dc = new Actual360();
-        Date today = Date.TodaysDate();
+        Date today = new Date(16, Month.September, 2015);
         var context = new EvaluationContext { EvaluationDate = today };
 
         BlackVolTermStructure volTS = FlatVol(today, v, dc);

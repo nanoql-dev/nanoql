@@ -1470,14 +1470,12 @@ public class PiecewiseYieldCurveTests
             $" third helper:\n\n estimated rate: {calculated:R}\n expected rate:  {expected:R}");
     }
 
-    // Adapted: QuantLib's helpers read its evaluation date, the system date in its runner; here the context's,
-    // Date.TodaysDate().
     [Fact]
     public void TestSwapHelpersWithOnceFrequency()
     {
         // Testing single-coupon swap rate helpers...
 
-        var context = new EvaluationContext { EvaluationDate = Date.TodaysDate() };
+        var context = new EvaluationContext { EvaluationDate = new Date(16, September, 2015) };
 
         var index = new IborIndex(
             "TestIndex", 4 * TimeUnit.Weeks, 1, new MXNCurrency(), new Mexico(), BusinessDayConvention.Following, false,

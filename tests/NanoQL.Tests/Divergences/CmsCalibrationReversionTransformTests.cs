@@ -15,7 +15,10 @@ namespace NanoQL.Tests.Divergences;
 /// with the reversion free on the Standard model, whose prices don't read it, return a NaN reversion on spreads from
 /// every guess of 0.05 to 1e-4 (a beta of 0.2425733030330998, an error of 0.011716914297575421), and finite ones on
 /// prices and forward prices. nanoql reads √|y|, QuantLib's map wherever y ≥ 0. QuantLib's check: its values on every
-/// fit, betas and errors bit for bit, and the reversion where QuantLib's is finite. On forward prices the two Simplex
+/// fit, betas within 1e-7 relative, errors within 1e-12 relative, and the reversion within 1e-5 where QuantLib's is
+/// finite, an ill-conditioned fit's bounds: the C runtime and processor a fit runs on move its last bits, its beta
+/// 9.7e-12 relative on GitHub's windows-2022 runner, 5.4e-11 on macOS and 1.6e-8 on Linux, and its error up to 4.8e-15
+/// (CI run 41146085965). On forward prices the two Simplex
 /// paths agree to the bit for 114 evaluations; at the 115th, at the same point, one SABR section fit of the
 /// recalibrated cube, the 10-year expiry on the 2-year tenor, lands on the other of two solutions QuantLib's own fit
 /// flips between when its beta moves one ulp (S7's ill-conditioned section fit, whose outputs the S7 plan's S7R6 filter
@@ -62,18 +65,11 @@ public class CmsCalibrationReversionTransformTests
             {
                 CmsMarketCalibrationResults<Vector> r = Fit(type, Guesses[i], new Simplex(0.1));
                 Assert.True(double.IsFinite(r.Result[1]) && r.Result[1] >= 0.0, $"{type} {Guesses[i]}: {r.Result[1]}");
-                if (type == CmsMarketCalibrationCalibrationType.OnForwardCmsPrice)
-                {
-                    Assert.True(Math.Abs(r.Result[0] - beta) <= 1e-7 * beta, $"{Guesses[i]}: {r.Result[0]}");
-                    Assert.True(Math.Abs(r.Error - error) <= 1e-12 * error, $"{Guesses[i]}: {r.Error}");
-                    Assert.True(Math.Abs(r.Result[1] - reversions[i]) <= 1e-5, $"{Guesses[i]}: {r.Result[1]}");
-                    continue;
-                }
-
-                Assert.Equal((beta, error), (r.Result[0], r.Error));
+                Assert.True(Math.Abs(r.Result[0] - beta) <= 1e-7 * beta, $"{type} {Guesses[i]}: {r.Result[0]}");
+                Assert.True(Math.Abs(r.Error - error) <= 1e-12 * error, $"{type} {Guesses[i]}: {r.Error}");
                 if (!double.IsNaN(reversions[i]))
                 {
-                    Assert.Equal(reversions[i], r.Result[1]);
+                    Assert.True(Math.Abs(r.Result[1] - reversions[i]) <= 1e-5, $"{type} {Guesses[i]}: {r.Result[1]}");
                 }
             }
         }

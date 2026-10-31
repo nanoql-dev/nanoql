@@ -41,6 +41,15 @@ MET = {"maxIterations": 1000, "maxStationaryStateIterations": 100, "rootEpsilon"
        "gradientNormEpsilon": 1e-8}
 LIMITED = {**MET, "maxIterations": 5, "maxStationaryStateIterations": 2}
 
+# The gradient norm's recorded tolerance on a cost function's central differences at the iteration limit: QuantLib's
+# gradient by differences with step 1e-8 (costfunction.hpp:49-56, :96), which the C runtime and the processor a run uses
+# move by 1.37e-10 at the limit on GitHub's windows-2022 runner (CI run 41146085965); converged, the norm is about 5e-24.
+NORM_TOLERANCE = 1e-8
+
+
+NORM_REASON = ("a gradient by central differences with step 1e-8 at the iteration limit, which the C runtime and "
+               "processor move by 1.37e-10 on GitHub's windows-2022 runner")
+
 
 def cases():
     with cxx.connect() as H:
@@ -58,6 +67,10 @@ def cases():
             for i, start in enumerate(starts):
                 for tag, criteria in (("met", MET), ("limited", LIMITED)):
                     out.append(case(f"{label} start {i} {tag}", function, NONE, start, criteria))
+                    norm = out[-1]["expected"]["gradientNormValue"]
+                    if function["type"] == "weightedQuadraticValueOnly" and tag == "limited":
+                        out[-1]["expected"]["gradientNormValue"] = {"value": norm, "tolerance": NORM_TOLERANCE,
+                                                                    "reason": NORM_REASON}
         box = {"type": "BoundaryConstraint", "low": -1.0, "high": 1.0}
         out.append(case("weighted quadratic in a box", {"type": "weightedQuadratic", **QUADRATIC}, box,
                         [0.0, 0.0, 0.0], MET))

@@ -26,6 +26,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class CalendarsTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, September, 2015);
+
     // Adapted: nanoql's calendars are immutable, and an edit returns a modified copy that no other instance sees. The
     // edited calendar's added and removed holidays and results, and New York's unchanged results, are kept. Dropped:
     // lines 147-152, where a new TARGET instance sees the edit, and lines 160-167, which restore the holidays through
@@ -4055,13 +4058,12 @@ public class CalendarsTests
         static void CheckHoliday(Calendar c, Date d, string what) => Assert.False(c.IsBusinessDay(d), $"{d} {what}");
     }
 
-    // Adapted: QuantLib's evaluation date (line 4111), the system date in its runner, is Date.TodaysDate().
     [Fact]
     public void TestDayLists()
     {
         // Testing holidayList and businessDaysList...
         Calendar germany = new Germany();
-        Date firstDate = Date.TodaysDate(), endDate = firstDate + (1 * TimeUnit.Years);
+        Date firstDate = RunnerDate, endDate = firstDate + (1 * TimeUnit.Years);
 
         // Test that a crossed range returns an empty vector
         Assert.Empty(germany.HolidayList(endDate, firstDate, true));

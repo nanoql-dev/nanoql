@@ -147,13 +147,11 @@ public class IndexesTests
         }
     }
 
-    // Adapted: QuantLib's evaluation date (line 208), the system date in its runner, is Date.TodaysDate(), the
-    // context's.
     [Fact]
     public void TestCdiIndex()
     {
         // Testing Brazil CDI forecastFixing...
-        Date today = Date.TodaysDate();
+        Date today = new Date(16, Month.September, 2015);
         var context = new EvaluationContext { EvaluationDate = today };
         double flatRate = 0.05;
         YieldTermStructure ts = new FlatForward(today, flatRate, new Business252());

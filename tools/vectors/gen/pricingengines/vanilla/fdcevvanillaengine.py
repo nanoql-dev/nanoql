@@ -54,6 +54,16 @@ def pricing_spec(f0, alpha, beta, rate, payoff, ex, t_grid=50, x_grid=400, dampi
             "scheme": fbs.scheme_spec(scheme if scheme is not None else ql.FdmSchemeDesc.Douglas())}
 
 
+# The cash-or-nothing put's gamma's recorded tolerance: a second difference of the finite-difference grid's values
+# about its payoff's jump, which the C runtime and the processor a run uses move in their last bits: 1.02e-10 apart,
+# by R7's measure, on GitHub's windows-2022 runner (CI run 41146085965).
+GAMMA_TOLERANCE = 1e-8
+
+
+GAMMA_REASON = ("a second difference of the grid's values about the payoff's jump, which the C runtime and processor "
+                "move by 1.02e-10 on GitHub's windows-2022 runner")
+
+
 def results(spec):
     """The engine's results for a spec, each null where QuantLib doesn't provide it, the refusal, or None to leave
     the case out."""
@@ -103,6 +113,9 @@ def cases():
         add(f"American put, {dname}", pricing_spec(2.1, alpha, 0.45, 0.15, put, american, 40, 120,
                                                    scheme=getattr(ql.FdmSchemeDesc, dname)()))
     add("cash-or-nothing put", pricing_spec(2.1, alpha, 0.45, 0.15, bc.payoff_spec("CashOrNothing", PUT, 2.3), european))
+    gamma = out[-1]["expected"]["gamma"]
+    if isinstance(gamma, float):
+        out[-1]["expected"]["gamma"] = {"value": gamma, "tolerance": GAMMA_TOLERANCE, "reason": GAMMA_REASON}
     add("expired", pricing_spec(2.1, alpha, 0.45, 0.15, put, fbv.exercise_spec("European", [-1])))
     return out
 

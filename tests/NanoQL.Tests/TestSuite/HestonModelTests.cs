@@ -32,7 +32,7 @@ public class HestonModelTests
            smile. expected result is a vanishing volatility of the volatility.
            In addition theta and v0 should be equal to the constant variance */
 
-        var context = new EvaluationContext { EvaluationDate = Date.TodaysDate() };
+        var context = new EvaluationContext { EvaluationDate = new Date(16, Month.September, 2015) };
 
         DayCounter dayCounter = new Actual360();
         Calendar calendar = new NullCalendar();
@@ -153,7 +153,7 @@ public class HestonModelTests
     public void TestAnalyticVsBlack()
     {
         // Testing analytic Heston engine against Black formula...
-        Date settlementDate = Date.TodaysDate();
+        Date settlementDate = new Date(16, Month.September, 2015);
         var context = new EvaluationContext { EvaluationDate = settlementDate };
 
         DayCounter dayCounter = new ActualActual(ActualActualConvention.ISDA);

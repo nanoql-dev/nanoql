@@ -18,6 +18,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class AndreasenHugeVolatilityInterplTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     private const double QL_EPSILON = 2.220446049250313E-16;
 
     [Fact]
@@ -316,11 +319,8 @@ public class AndreasenHugeVolatilityInterplTests
     {
         // Testing Barrier option pricing with Andreasen-Huge local volatility surface...
 
-        // QuantLib's case dates its curves 4 January 2018 and leaves the evaluation date at the system date, where its
-        // one-year barrier option expired in 2019 and both prices are 0; here the evaluation date is the curves' date,
-        // the case's intent
         var today = new Date(4, Month.January, 2018);
-        var context = new EvaluationContext { EvaluationDate = today };
+        var context = new EvaluationContext { EvaluationDate = RunnerDate };
         DayCounter dc = new Actual365Fixed();
 
         YieldTermStructure rTS = new FlatForward(today, 0.01, dc);

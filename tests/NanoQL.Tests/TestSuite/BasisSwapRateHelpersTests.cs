@@ -26,6 +26,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class BasisSwapRateHelpersTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     [Fact]
     public void TestIborIborBaseCurveBootstrap()
     {
@@ -943,7 +946,7 @@ public class BasisSwapRateHelpersTests
         }
     }
 
-    private static EvaluationContext Context() => new() { EvaluationDate = Date.TodaysDate() };
+    private static EvaluationContext Context() => new() { EvaluationDate = RunnerDate };
 
     // The test suite's flatRate(forward, dc): a flat forward from the evaluation date.
     private static YieldTermStructure FlatRate(double forward, DayCounter dc, EvaluationContext context) =>

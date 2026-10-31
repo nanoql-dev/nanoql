@@ -15,12 +15,15 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class FittedBondDiscountCurveTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     [Fact]
     public void TestEvaluation()
     {
         // Testing that fitted bond curves work as evaluators...
 
-        var context = new EvaluationContext { EvaluationDate = Date.TodaysDate() };
+        var context = new EvaluationContext { EvaluationDate = RunnerDate };
         Date today = context.EvaluationDate;
         Date maxDate = today + new Period(10, TimeUnit.Years);
 
@@ -215,7 +218,7 @@ public class FittedBondDiscountCurveTests
     {
         // Testing that fitted bond curves require a guess when given an L2 penalty...
 
-        var context = new EvaluationContext { EvaluationDate = Date.TodaysDate() };
+        var context = new EvaluationContext { EvaluationDate = RunnerDate };
         Date today = context.EvaluationDate;
         List<BondHelper> helpers = ZeroCouponHelpers(today, context, [99.0, 98.0, 95.0, 90.0]);
 
@@ -239,7 +242,7 @@ public class FittedBondDiscountCurveTests
     {
         // Testing that fitted bond curves check the guess size when given...
 
-        var context = new EvaluationContext { EvaluationDate = Date.TodaysDate() };
+        var context = new EvaluationContext { EvaluationDate = RunnerDate };
         Date today = context.EvaluationDate;
         List<BondHelper> helpers = ZeroCouponHelpers(today, context, [99.0, 98.0, 95.0, 90.0]);
 
@@ -262,7 +265,7 @@ public class FittedBondDiscountCurveTests
     {
         // Testing that fitted bond curves respect passed constraint...
 
-        var context = new EvaluationContext { EvaluationDate = Date.TodaysDate() };
+        var context = new EvaluationContext { EvaluationDate = RunnerDate };
         Date today = context.EvaluationDate;
         List<BondHelper> helpers = ZeroCouponHelpers(today, context, [101.0, 102.0]);
 

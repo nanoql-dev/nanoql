@@ -21,6 +21,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class RiskNeutralDensityCalculatorTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     // QL_EPSILON (qldefines.hpp): machine epsilon.
     private const double QL_EPSILON = 2.220446049250313e-16;
 
@@ -33,7 +36,7 @@ public class RiskNeutralDensityCalculatorTests
         // Testing density against option prices...
 
         DayCounter dayCounter = new Actual365Fixed();
-        Date todaysDate = Date.TodaysDate();
+        Date todaysDate = RunnerDate;
 
         const Real s0 = 100;
 
@@ -95,7 +98,7 @@ public class RiskNeutralDensityCalculatorTests
         // Testing Black-Scholes-Merton and Heston densities...
 
         DayCounter dayCounter = new Actual365Fixed();
-        Date todaysDate = Date.TodaysDate();
+        Date todaysDate = RunnerDate;
 
         const Real s0 = 10;
 
@@ -571,7 +574,7 @@ public class RiskNeutralDensityCalculatorTests
         // Testing SmileSectionRNDCalculator on a flat-vol smile against BSMRNDCalculator...
 
         DayCounter dc = new Actual365Fixed();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         Date maturity = today + new Period(1, TimeUnit.Years);
 
         const Real s0 = 100.0;
@@ -695,7 +698,7 @@ public class RiskNeutralDensityCalculatorTests
         // Testing SmileSectionRNDCalculator on a Heston-implied smile against HestonRNDCalculator...
 
         DayCounter dc = new Actual365Fixed();
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         Date maturity = today + new Period(1, TimeUnit.Years);
 
         const Real s0 = 100.0;
@@ -752,7 +755,7 @@ public class RiskNeutralDensityCalculatorTests
     {
         // Testing that SmileSectionRNDCalculator raises when the smile has no atmLevel...
 
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         Date maturity = today + new Period(1, TimeUnit.Years);
         var smile = new FlatSmileSection(maturity, 0.20, new Actual365Fixed(), today);
         var rnd = new SmileSectionRNDCalculator(smile);
@@ -770,7 +773,7 @@ public class RiskNeutralDensityCalculatorTests
         // Scaling SVI total variance by c^2 fattens the wings while holding their
         // shape. The tail then carries a share of E[S] far out of proportion to its
         // probability, which is what a coarse or truncated quantile grid loses.
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         Date maturity = today + new Period(1, TimeUnit.Years);
         Real T = new Actual365Fixed().YearFraction(today, maturity);
         const Real fwd = 50.0;
@@ -819,7 +822,7 @@ public class RiskNeutralDensityCalculatorTests
         // 1 - P(S > K) spends it against a value close to one: at four standard
         // deviations that left ~3 correct bits, and by six it returned zero. The
         // put digital carries the same probability directly.
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         Date maturity = today + new Period(1, TimeUnit.Years);
         Real T = new Actual365Fixed().YearFraction(today, maturity);
         const Real fwd = 50.0;

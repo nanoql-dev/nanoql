@@ -23,6 +23,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class ShortRateModelsTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, September, 2015);
+
     private static readonly (Integer Start, Integer Length, Volatility Volatility)[] CalibrationData =
     [
         (1, 5, 0.1148),
@@ -226,7 +229,7 @@ public class ShortRateModelsTests
     {
         // Testing Hull-White swap pricing against known values...
 
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
         Calendar calendar = new TARGET();
         today = calendar.Adjust(today);
         var context = new EvaluationContext { EvaluationDate = today };
@@ -349,7 +352,7 @@ public class ShortRateModelsTests
     {
         // Testing zero-bond pricing for extended CIR model...
 
-        Date today = Date.TodaysDate();
+        Date today = RunnerDate;
 
         const Rate rate = 0.1;
         YieldTermStructure rTS = new FlatForward(today, rate, new Actual365Fixed());

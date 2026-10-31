@@ -15,6 +15,9 @@ namespace NanoQL.Tests.TestSuite;
 [Trait("Oracle", "QuantLib")]
 public class CompoundOptionTests
 {
+    // QuantLib's test runner's evaluation date (quantlibglobalfixture.cpp:62-63)
+    private static readonly Date RunnerDate = new(16, Month.September, 2015);
+
     [Fact]
     public void TestPutCallParity()
     {
@@ -40,7 +43,7 @@ public class CompoundOptionTests
         ];
 
         DayCounter dc = new Actual360();
-        Date todaysDate = Date.TodaysDate();
+        Date todaysDate = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = todaysDate };
 
         foreach (CompoundOptionData value in values)
@@ -133,7 +136,7 @@ public class CompoundOptionTests
         ];
 
         DayCounter dc = new Actual360();
-        Date todaysDate = Date.TodaysDate();
+        Date todaysDate = RunnerDate;
         var context = new EvaluationContext { EvaluationDate = todaysDate };
 
         foreach (CompoundOptionData value in values)
