@@ -8,6 +8,7 @@ using NanoQL.Instruments;
 using NanoQL.Models;
 using NanoQL.Numerics;
 using NanoQL.PricingEngines;
+using NanoQL.TermStructures;
 using NanoQL.Time;
 
 namespace NanoQL.Bind.TestTypes;
@@ -18,6 +19,11 @@ namespace NanoQL.Bind.TestTypes;
 /// </summary>
 public static class References
 {
+    /// <summary>The deposits' piecewise flat-forward curve, its interpolator and bootstrap left at their defaults: its discount at 2 years.</summary>
+    /// <returns>The discount factor.</returns>
+    public static double PiecewiseDiscount() =>
+        PiecewiseFlatForward.Create(0, new TARGET(), Fixtures.DepositHelpers, new Actual365Fixed(), Fixtures.Context).Discount(2.0);
+
     /// <summary>The swap builder's fixed rate, solved through the discounting engine as C#'s lambda.</summary>
     /// <returns>The fixed rate.</returns>
     public static double SwapFixedRate() =>

@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2026 The nanoql Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# The Python package's metadata. build.py assembles the wheel from it with the platform's library and the notices
+# (docs/bindings.md, "Python"); the package has no build backend of its own, since the library comes from nanoql-bind.
+
+[project]
+name = "nanoql"
+version = "2.0"
+description = "nanoql for Python: QuantLib's methods ported to .NET, called through nanoql's C ABI"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26"]
+authors = [{ name = "The nanoql Authors" }]
+# nanoql's own licence, QuantLib's and its third-party code's (BSD-3-Clause, MINPACK's, FDLIBM's SunPro, Jaeckel's,
+# Joe and Kuo's), Boost's, QLNet's, xoshiro's, FpML's, and the .NET runtime's, which Native AOT compiles into the library.
+license = "Apache-2.0 AND BSD-3-Clause AND BSL-1.0 AND CC0-1.0 AND MIT AND Minpack AND SunPro AND LicenseRef-Jaeckel AND LicenseRef-JoeKuo AND LicenseRef-FpML-Public-License-3.0"
+# The repository's notices and the .NET runtime's, which build.py places beside this file in the wheel's build.
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md", "dotnet/LICENSE.TXT", "dotnet/THIRD-PARTY-NOTICES.TXT"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Topic :: Office/Business :: Financial",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://nanoql.org"
+Documentation = "https://nanoql.org"

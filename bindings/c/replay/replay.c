@@ -6,6 +6,7 @@
    that needs something the trace couldn't record; the run reports facts replayed whole, calls replayed of calls
    recorded, refusals matched and mismatches, and passes at no mismatch.
    Usage: replay <trace.jsonl> [<facts report.tsv>] */
+#include <ctype.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -489,6 +490,36 @@ void ck_opt(rp* r, const jv* res, bool has, int kind, const void* v)
     if (has) ck_element(r, res, kind, (void*)v, 0, NULL);
 }
 
+/* A type's name without each file-local class's compiler prefix (<File>F<hash>__, the hash of its source file's path),
+   so a trace replays against a library built from another checkout. */
+static void type_key(const char* s, char* out, size_t cap)
+{
+    size_t o = 0;
+    while (*s && o + 1 < cap) {
+        if (*s == '<') {
+            const char* q = strchr(s, '>');
+            if (q && q[1] == 'F') {
+                const char* e = q + 2;
+                while (isxdigit((unsigned char)*e)) e++;
+                if (e > q + 2 && e[0] == '_' && e[1] == '_') {
+                    s = e + 2;
+                    continue;
+                }
+            }
+        }
+        out[o++] = *s++;
+    }
+    out[o] = 0;
+}
+
+static int same_type(const char* want, const char* got)
+{
+    char a[1024], b[1024];
+    type_key(want, a, sizeof a);
+    type_key(got, b, sizeof b);
+    return strcmp(a, b) == 0;
+}
+
 void ck_obj(rp* r, const jv* res, nql_handle h)
 {
     const jv* n = member(res, "n");
@@ -518,7 +549,7 @@ void ck_obj(rp* r, const jv* res, nql_handle h)
         if (n && y && y->type == JV_STR) {
             char* tn = NULL;
             const char* want = unescape(r, y);
-            if (nql_type_name(h, &tn) != NQL_OK || !tn || strcmp(tn, want) != 0) mismatch(r, "object type", want, tn ? tn : "(none)");
+            if (nql_type_name(h, &tn) != NQL_OK || !tn || !same_type(want, tn)) mismatch(r, "object type", want, tn ? tn : "(none)");
             nql_free(tn);
         }
         if (r->objs[id]) nql_release(r->objs[id]);

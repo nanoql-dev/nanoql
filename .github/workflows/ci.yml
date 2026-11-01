@@ -34,6 +34,14 @@ on:
         description: "Use global.json's SDK exactly, alone in its own folder, with the runtime it ships, not the runner's newer one"
         type: boolean
         default: false
+      publish-pypi:
+        description: "Publish the bindings jobs' wheels to PyPI (the pypi environment's approval; docs/bindings.md)"
+        type: boolean
+        default: false
+      pypi-version:
+        description: "The wheels' version when publishing (2.0.dev1 claims the name, then is yanked)"
+        type: string
+        default: "2.0.dev1"
 
 permissions:
   contents: read
@@ -235,6 +243,72 @@ jobs:
             ${{ runner.temp }}/nanoql/include
             ${{ runner.temp }}/nanoql/lib
           retention-days: 1
+      # Python: CPython's oldest supported version with NumPy's floor, and the newest with the newest NumPy (BIR12). The
+      # manylinux container brings its own CPythons; NumPy 1.26 has no Windows Arm64 wheel, so that job tests the newest.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        id: python-floor
+        if: matrix.container == '' && matrix.rid != 'win-arm64'
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        id: python-newest
+        if: matrix.container == ''
+        with:
+          python-version: "3.x"
+      - name: The Python wheel, its conformance suite and the vector suite replayed through it
+        env:
+          FLOOR: ${{ steps.python-floor.outputs.python-path }}
+          NEWEST: ${{ steps.python-newest.outputs.python-path }}
+          VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.publish-pypi && inputs.pypi-version || '' }}
+        run: |
+          if [ -d /opt/python ]; then
+            FLOOR=/opt/python/cp311-cp311/bin/python
+            NEWEST=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1)
+          fi
+          "$NEWEST" bindings/python/build.py --library "$RUNNER_TEMP/nanoql" --rid "$RID" --out "$RUNNER_TEMP/wheels" ${VERSION:+--version "$VERSION"}
+          "$NEWEST" bindings/python/build.py --library "$RUNNER_TEMP/nanoql-test" --rid "$RID" --stage "$RUNNER_TEMP/python-test" --test-exports
+          for run in "floor|$FLOOR|numpy==1.26.*" "newest|$NEWEST|numpy"; do
+            IFS='|' read -r label interpreter numpy <<< "$run"
+            [ -n "$interpreter" ] || { echo "no $label Python here"; continue; }
+            "$interpreter" -m venv "$RUNNER_TEMP/venv-$label"
+            py="$RUNNER_TEMP/venv-$label/bin/python"; [ -x "$py" ] || py="$RUNNER_TEMP/venv-$label/Scripts/python.exe"
+            "$py" -m pip install -q --only-binary :all: "$numpy"
+            "$py" -m pip install -q --no-index --find-links "$RUNNER_TEMP/wheels" nanoql
+            echo "== $label: $("$py" --version), NumPy $("$py" -c 'import numpy; print(numpy.__version__)')"
+            (cd "$RUNNER_TEMP" && "$py" "$GITHUB_WORKSPACE/bindings/python/tests/wheel_check.py" "$GITHUB_WORKSPACE/bindings/python/pyproject.toml")
+            PYTHONPATH="$RUNNER_TEMP/python-test" "$py" -m unittest discover -s bindings/python/tests -v
+          done
+          (cd "$RUNNER_TEMP" && "$py" "$GITHUB_WORKSPACE/bindings/python/tests/replay.py" "$RUNNER_TEMP/recording/trace.jsonl")
+      - name: Keep the Python wheel
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nanoql-python-${{ matrix.rid }}
+          path: ${{ runner.temp }}/wheels/*.whl
+          retention-days: 1
+
+  # PyPI's nanoql (BIR20): dispatched by hand, the pypi environment's approval, trusted publishing (no stored token),
+  # the wheels the same run's six bindings jobs built.
+  publish-pypi:
+    name: Publish to PyPI
+    if: github.event_name == 'workflow_dispatch' && inputs.publish-pypi
+    needs: bindings
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: nanoql-python-*
+          path: dist
+          merge-multiple: true
+      - name: The six wheels, one version
+        run: |
+          ls -l dist
+          test "$(ls dist/*.whl | wc -l)" = 6
+          test "$(ls dist/*.whl | sed 's/.*nanoql-\([^-]*\)-.*/\1/' | sort -u | wc -l)" = 1
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
 
   licensing:
     name: Licensing

@@ -112,6 +112,12 @@ public static class Fixtures
     /// <summary>Gets the calibrations' end criteria.</summary>
     public static EndCriteria Criteria { get; } = new(10000, 100, 1e-6, 1e-8, 1e-8);
 
+    /// <summary>Gets three deposits, 1, 2 and 3 years, for a piecewise curve built with its defaults.</summary>
+    public static ImmutableArray<BootstrapHelper<YieldTermStructure>> DepositHelpers { get; } =
+    [
+        Deposit(1, 0.030), Deposit(2, 0.032), Deposit(3, 0.034),
+    ];
+
     /// <summary>Gets three swaption helpers, 1x3, 2x2 and 3x1, their engines unset.</summary>
     public static ImmutableArray<SwaptionHelper> Swaptions { get; } =
     [
@@ -125,6 +131,9 @@ public static class Fixtures
     ];
 
     private static IborIndex Euribor6M => new Euribor6M(CalibrationCurve);
+
+    private static DepositRateHelper Deposit(int years, double rate) =>
+        new(rate, new Period(years, TimeUnit.Years), 2, new TARGET(), BusinessDayConvention.ModifiedFollowing, true, new Actual360(), Context);
 
     private static SwaptionHelper Swaption(int option, double vol) => new(
         new Period(option, TimeUnit.Years), new Period(4 - option, TimeUnit.Years), vol, Euribor6M, new Period(1, TimeUnit.Years),

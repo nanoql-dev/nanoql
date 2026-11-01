@@ -695,6 +695,40 @@ static void test_conventions(void)
     release(ql);
 }
 
+/* An optional struct left out: NULL is its default, what C# passes (R16); its implicit constructor crosses too. */
+static void test_defaults(void)
+{
+    nql_handle ctx = get(nqlt_Fixtures_get_Context), curve = NULL, explicit_curve = NULL, i = NULL, bootstrap = NULL;
+    nql_handle cal = set_lookup(nql_ConventionSet_Calendar, "TARGET"), dc = set_lookup(nql_ConventionSet_DayCounter, "Actual365Fixed");
+    nql_handle* helpers = NULL;
+    int32_t n = 0;
+    OK(nqlt_Fixtures_get_DepositHelpers(&helpers, &n));
+    CHECK(n == 3, "three deposits");
+    OK(nql_PiecewiseFlatForward_Create(0, cal, helpers, n, dc, ctx, NULL, 0, NULL, 0, NULL, NULL, &curve));
+    double d = 0, reference = 0, e = 0;
+    OK(nql_YieldTermStructure_Discount__double(curve, 2.0, false, &d));
+    OK(nqlt_References_PiecewiseDiscount(&reference));
+    SAME(d, reference);
+    OK(nql_BackwardFlat_new(&i));
+    OK(nql_IterativeBootstrap_new__void(&bootstrap));
+    OK(nql_PiecewiseFlatForward_Create(0, cal, helpers, n, dc, ctx, NULL, 0, NULL, 0, i, bootstrap, &explicit_curve));
+    OK(nql_YieldTermStructure_Discount__double(explicit_curve, 2.0, false, &e));
+    SAME(e, reference);
+
+    /* A required struct stays refused when NULL. */
+    nql_handle none = NULL;
+    REFUSED(nqlt_Echo_Money(NULL, &none), NQL_ERROR_ARGUMENT_NULL);
+    for (int32_t k = 0; k < n; k++) release(helpers[k]);
+    nql_free(helpers);
+    release(ctx);
+    release(curve);
+    release(explicit_curve);
+    release(i);
+    release(bootstrap);
+    release(cal);
+    release(dc);
+}
+
 /* ---- bound engines ---- */
 static void test_engines(void)
 {
@@ -909,7 +943,7 @@ int main(int argc, char** argv)
         void (*run)(void);
     } sections[] = {
         {"kinds", test_kinds}, {"arrays", test_arrays}, {"codes", test_codes}, {"handles", test_handles},
-        {"generators", test_generators}, {"misc", test_misc}, {"conventions", test_conventions}, {"engines", test_engines},
+        {"generators", test_generators}, {"misc", test_misc}, {"conventions", test_conventions}, {"defaults", test_defaults}, {"engines", test_engines},
         {"calibrations", test_calibrations},
     };
     setvbuf(stdout, NULL, _IONBF, 0);

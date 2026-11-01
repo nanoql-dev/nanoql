@@ -32,6 +32,6 @@ else()
 endif()
 
 enable_testing()
-foreach(section kinds arrays codes handles generators misc conventions engines calibrations)
+foreach(section kinds arrays codes handles generators misc conventions defaults engines calibrations)
   add_test(NAME ${section} COMMAND conformance ${section} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endforeach()

@@ -66,6 +66,15 @@ internal sealed class TwinWriter(Surface surface)
         Reflection(cs, map, presets);
         Records(cs, map, ref index);
         Generators(cs, map, ref index);
+
+        // A struct made by default or new T(), which has no call site, is written as its implicit constructor's call (R16).
+        cs.AppendLine("    public static string DefaultNew(global::System.Type t) => t.FullName switch").AppendLine("    {");
+        foreach (CFunction f in surface.Functions.Where(f => f.Kind == "new" && f.Member == null).OrderBy(f => f.Type.FullName, StringComparer.Ordinal))
+        {
+            cs.AppendLine($"        \"{f.Type.FullName}\" => \"{f.CName}\",");
+        }
+
+        cs.AppendLine("        _ => null,").AppendLine("    };");
         cs.AppendLine("}");
         File.WriteAllText(Path.Combine(dir, "Twins.g.cs"), cs.ToString().ReplaceLineEndings("\n"));
         using var json = new Utf8JsonWriter(File.Create(Path.Combine(dir, "twins.json")), new JsonWriterOptions { Indented = true });

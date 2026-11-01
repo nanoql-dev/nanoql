@@ -15,6 +15,7 @@ using NanoQL.Bind.Selecting;
 //                             write the export shims the native host compiles (its build runs this)
 //   twins --out <folder>      write the recorder's twins and their map (tools/replay)
 //   replay-c --out <folder>   write the C replayer's dispatch (bindings/c/replay)
+//   python --out <folder>     write the Python package's generated modules (bindings/python)
 //   report                    print the surface's counts
 // Each takes --assembly <prefix>=<path>... (nanoql's two by default, from beside the tool), --roles <path>... (the
 // repository's bindings/roles.json by default) and --shipped <path> (bindings/surface.shipped.json when it exists).
@@ -32,7 +33,7 @@ static int Run(string[] args)
 {
     if (args.Length == 0)
     {
-        Console.Error.WriteLine("usage: nanoql-bind update | check | build --rid <rid> --out <folder> [--test-exports] | shims --out <folder> | report");
+        Console.Error.WriteLine("usage: nanoql-bind update | check | build --rid <rid> --out <folder> [--test-exports] | shims --out <folder> | python --out <folder> | report");
         return 2;
     }
 
@@ -117,6 +118,13 @@ static int Run(string[] args)
             File.WriteAllText(Path.Combine(outDir, "dispatch.c"), g.CDispatch);
             Console.WriteLine($"nanoql-bind: the C replayer's dispatch in {outDir} ({sw.Elapsed.TotalSeconds:F1} s)");
             return 0;
+        case "python":
+        {
+            (int functions, int classes, int enums) = g.WritePython(outDir ?? throw new ArgumentException("python takes --out <package folder>"));
+            Console.WriteLine($"nanoql-bind: the Python modules in {outDir}: {functions:N0} functions, {classes:N0} classes, {enums:N0} enums ({sw.Elapsed.TotalSeconds:F1} s)");
+            return 0;
+        }
+
         case "shims":
             g.WriteShims(outDir ?? throw new ArgumentException("shims takes --out <folder>"));
             Console.WriteLine($"nanoql-bind: {g.Surface.Functions.Count:N0} functions' shims in {outDir} ({sw.Elapsed.TotalSeconds:F1} s)");

@@ -1163,7 +1163,9 @@ NQL_API nql_status nql_AbcdCoefficients_get_C(nql_handle self, double* result);
 /* AbcdCoefficients.get_D() -> double */
 NQL_API nql_status nql_AbcdCoefficients_get_D(nql_handle self, double* result);
 /* new AbcdCoefficients(double A, double B, double C, double D) */
-NQL_API nql_status nql_AbcdCoefficients_new(double A, double B, double C, double D, nql_handle* result);
+NQL_API nql_status nql_AbcdCoefficients_new__double(double A, double B, double C, double D, nql_handle* result);
+/* new AbcdCoefficients() */
+NQL_API nql_status nql_AbcdCoefficients_new__void(nql_handle* result);
 /* AbcdCoefficients.op_Equality(AbcdCoefficients left, AbcdCoefficients right) -> bool */
 NQL_API nql_status nql_AbcdCoefficients_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* AbcdCoefficients.op_Inequality(AbcdCoefficients left, AbcdCoefficients right) -> bool */
@@ -1279,7 +1281,9 @@ NQL_API nql_status nql_Abcd_get_Global(bool* result);
 /* Abcd.get_RequiredPoints() -> int */
 NQL_API nql_status nql_Abcd_get_RequiredPoints(int32_t* result);
 /* new Abcd(double? a, double? b, double? c, double? d, bool aIsFixed, bool bIsFixed, bool cIsFixed, bool dIsFixed, bool vegaWeighted = false, EndCriteria endCriteria = null, OptimizationMethod optMethod = null) */
-NQL_API nql_status nql_Abcd_new(const double* a, const double* b, const double* c, const double* d, bool aIsFixed, bool bIsFixed, bool cIsFixed, bool dIsFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle optMethod, nql_handle* result);
+NQL_API nql_status nql_Abcd_new__Optdouble(const double* a, const double* b, const double* c, const double* d, bool aIsFixed, bool bIsFixed, bool cIsFixed, bool dIsFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle optMethod, nql_handle* result);
+/* new Abcd() */
+NQL_API nql_status nql_Abcd_new__void(nql_handle* result);
 /* Actual360.DayCount(Date d1, Date d2) -> int */
 NQL_API nql_status nql_Actual360_DayCount(nql_handle self, nql_date d1, nql_date d2, int32_t* result);
 /* Actual360.YearFraction(Date d1, Date d2, Date? refPeriodStart = null, Date? refPeriodEnd = null) -> double */
@@ -1359,6 +1363,8 @@ NQL_API nql_status nql_AffineHazardRate_SurvivalProbabilityImpl__doubleArray_dou
 NQL_API nql_status nql_AffineHazardRate_UpdateGuess(const double* data, int32_t data_count, double rate, int32_t i);
 /* AffineHazardRate.get_MaxIterations() -> int */
 NQL_API nql_status nql_AffineHazardRate_get_MaxIterations(int32_t* result);
+/* new AffineHazardRate() */
+NQL_API nql_status nql_AffineHazardRate_new(nql_handle* result);
 #endif /* NANOQL_EXPERIMENTAL */
 /* new AkimaCubicInterpolation(ReadOnlySpan<double> x, ReadOnlySpan<double> y) */
 NQL_API nql_status nql_AkimaCubicInterpolation_new(const double* x, int32_t x_count, const double* y, int32_t y_count, nql_handle* result);
@@ -1871,7 +1877,9 @@ NQL_API nql_status nql_AndreasenHugeCalibrationError_get_Max(nql_handle self, do
 /* AndreasenHugeCalibrationError.get_Min() -> double */
 NQL_API nql_status nql_AndreasenHugeCalibrationError_get_Min(nql_handle self, double* result);
 /* new AndreasenHugeCalibrationError(double Min, double Max, double Avg) */
-NQL_API nql_status nql_AndreasenHugeCalibrationError_new(double Min, double Max, double Avg, nql_handle* result);
+NQL_API nql_status nql_AndreasenHugeCalibrationError_new__double(double Min, double Max, double Avg, nql_handle* result);
+/* new AndreasenHugeCalibrationError() */
+NQL_API nql_status nql_AndreasenHugeCalibrationError_new__void(nql_handle* result);
 /* AndreasenHugeCalibrationError.op_Equality(AndreasenHugeCalibrationError left, AndreasenHugeCalibrationError right) -> bool */
 NQL_API nql_status nql_AndreasenHugeCalibrationError_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* AndreasenHugeCalibrationError.op_Inequality(AndreasenHugeCalibrationError left, AndreasenHugeCalibrationError right) -> bool */
@@ -2306,10 +2314,14 @@ NQL_API nql_status nql_BackwardFlat_Interpolate(nql_handle self, const double* x
 NQL_API nql_status nql_BackwardFlat_get_Global(bool* result);
 /* BackwardFlat.get_RequiredPoints() -> int */
 NQL_API nql_status nql_BackwardFlat_get_RequiredPoints(int32_t* result);
+/* new BackwardFlat() */
+NQL_API nql_status nql_BackwardFlat_new(nql_handle* result);
 /* new BackwardflatLinearInterpolation(ReadOnlySpan<double> x, ReadOnlySpan<double> y, Matrix zData) */
 NQL_API nql_status nql_BackwardflatLinearInterpolation_new(const double* x, int32_t x_count, const double* y, int32_t y_count, const double* zData, int32_t zData_rows, int32_t zData_columns, nql_handle* result);
 /* BackwardflatLinear.Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y, Matrix z) -> Interpolation2D */
 NQL_API nql_status nql_BackwardflatLinear_Interpolate(nql_handle self, const double* x, int32_t x_count, const double* y, int32_t y_count, const double* z, int32_t z_rows, int32_t z_columns, nql_handle* result);
+/* new BackwardflatLinear() */
+NQL_API nql_status nql_BackwardflatLinear_new(nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* BankruptcyEvent.MatchesEventType(DefaultType contractEventType, EvaluationContext context) -> bool */
 NQL_API nql_status nql_BankruptcyEvent_MatchesEventType(nql_handle self, nql_handle contractEventType, nql_handle context, bool* result);
@@ -2643,7 +2655,9 @@ NQL_API nql_status nql_BiCGStabResult_get_Iterations(nql_handle self, int32_t* r
 /* BiCGStabResult.get_X() -> Vector */
 NQL_API nql_status nql_BiCGStabResult_get_X(nql_handle self, double** result, int32_t* result_count);
 /* new BiCGStabResult(int Iterations, double Error, Vector X) */
-NQL_API nql_status nql_BiCGStabResult_new(int32_t Iterations, double Error, const double* X, int32_t X_count, nql_handle* result);
+NQL_API nql_status nql_BiCGStabResult_new__int(int32_t Iterations, double Error, const double* X, int32_t X_count, nql_handle* result);
+/* new BiCGStabResult() */
+NQL_API nql_status nql_BiCGStabResult_new__void(nql_handle* result);
 /* BiCGStabResult.op_Equality(BiCGStabResult left, BiCGStabResult right) -> bool */
 NQL_API nql_status nql_BiCGStabResult_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* BiCGStabResult.op_Inequality(BiCGStabResult left, BiCGStabResult right) -> bool */
@@ -2668,10 +2682,14 @@ NQL_API nql_status nql_BicubicSpline_SecondDerivativeY(nql_handle self, double x
 NQL_API nql_status nql_BicubicSpline_new(const double* x, int32_t x_count, const double* y, int32_t y_count, const double* zData, int32_t zData_rows, int32_t zData_columns, nql_handle* result);
 /* Bicubic.Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y, Matrix z) -> Interpolation2D */
 NQL_API nql_status nql_Bicubic_Interpolate(nql_handle self, const double* x, int32_t x_count, const double* y, int32_t y_count, const double* z, int32_t z_rows, int32_t z_columns, nql_handle* result);
+/* new Bicubic() */
+NQL_API nql_status nql_Bicubic_new(nql_handle* result);
 /* new BilinearInterpolation(ReadOnlySpan<double> x, ReadOnlySpan<double> y, Matrix zData) */
 NQL_API nql_status nql_BilinearInterpolation_new(const double* x, int32_t x_count, const double* y, int32_t y_count, const double* zData, int32_t zData_rows, int32_t zData_columns, nql_handle* result);
 /* Bilinear.Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y, Matrix z) -> Interpolation2D */
 NQL_API nql_status nql_Bilinear_Interpolate(nql_handle self, const double* x, int32_t x_count, const double* y, int32_t y_count, const double* z, int32_t z_rows, int32_t z_columns, nql_handle* result);
+/* new Bilinear() */
+NQL_API nql_status nql_Bilinear_new(nql_handle* result);
 /* BinomialCRRConvertibleEngine.Bind(GeneralizedBlackScholesProcess process = null, int timeSteps = null, double creditSpread = null, ImmutableArray<Dividend> dividends = null) -> InstrumentResults */
 NQL_API nql_status nql_BinomialCRRConvertibleEngine_Bind(nql_handle process, const int32_t* timeSteps, const double* creditSpread, const nql_handle* dividends, int32_t dividends_count, nql_handle* result);
 /* BinomialCRRConvertibleEngine.BindOn(ConvertibleBond instrument, GeneralizedBlackScholesProcess process = null, int timeSteps = null, double creditSpread = null, ImmutableArray<Dividend> dividends = null) -> InstrumentResults */
@@ -6293,7 +6311,9 @@ NQL_API nql_status nql_ConvexMonotone_get_Quadraticity(nql_handle self, double* 
 /* ConvexMonotone.get_RequiredPoints() -> int */
 NQL_API nql_status nql_ConvexMonotone_get_RequiredPoints(int32_t* result);
 /* new ConvexMonotone(double quadraticity = 0.3, double monotonicity = 0.7, bool forcePositive = true) */
-NQL_API nql_status nql_ConvexMonotone_new(double quadraticity, double monotonicity, bool forcePositive, nql_handle* result);
+NQL_API nql_status nql_ConvexMonotone_new__double(double quadraticity, double monotonicity, bool forcePositive, nql_handle* result);
+/* new ConvexMonotone() */
+NQL_API nql_status nql_ConvexMonotone_new__void(nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* CorrelationTermStructure.DateFromTenor(Period p) -> Date */
 NQL_API nql_status nql_CorrelationTermStructure_DateFromTenor(nql_handle self, nql_period p, nql_date* result);
@@ -6793,7 +6813,9 @@ NQL_API nql_status nql_Cubic_get_Global(bool* result);
 /* Cubic.get_RequiredPoints() -> int */
 NQL_API nql_status nql_Cubic_get_RequiredPoints(int32_t* result);
 /* new Cubic(CubicInterpolationDerivativeApprox da = Kruger, bool monotonic = false, CubicInterpolationBoundaryCondition leftCondition = SecondDerivative, double leftConditionValue = 0, CubicInterpolationBoundaryCondition rightCondition = SecondDerivative, double rightConditionValue = 0) */
-NQL_API nql_status nql_Cubic_new(int32_t da, bool monotonic, int32_t leftCondition, double leftConditionValue, int32_t rightCondition, double rightConditionValue, nql_handle* result);
+NQL_API nql_status nql_Cubic_new__CubicInterpolationDerivativeApprox(int32_t da, bool monotonic, int32_t leftCondition, double leftConditionValue, int32_t rightCondition, double rightConditionValue, nql_handle* result);
+/* new Cubic() */
+NQL_API nql_status nql_Cubic_new__void(nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* CumulativeBehrensFisher.Density(double x) -> double */
 NQL_API nql_status nql_CumulativeBehrensFisher_Density(nql_handle self, double x, double* result);
@@ -7154,6 +7176,8 @@ NQL_API nql_status nql_DefaultDensity_SurvivalProbabilityImpl(const double* time
 NQL_API nql_status nql_DefaultDensity_UpdateGuess(const double* data, int32_t data_count, double density, int32_t i);
 /* DefaultDensity.get_MaxIterations() -> int */
 NQL_API nql_status nql_DefaultDensity_get_MaxIterations(int32_t* result);
+/* new DefaultDensity() */
+NQL_API nql_status nql_DefaultDensity_new(nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* DefaultEvent.MatchesDefaultKey(DefaultProbKey contractKey, EvaluationContext context) -> bool */
 NQL_API nql_status nql_DefaultEvent_MatchesDefaultKey(nql_handle self, nql_handle contractKey, nql_handle context, bool* result);
@@ -7382,6 +7406,8 @@ NQL_API nql_status nql_DefaultType_op_Inequality(nql_handle left, nql_handle rig
 #endif /* NANOQL_EXPERIMENTAL */
 /* Default.NbEvalutions() -> int */
 NQL_API nql_status nql_Default_NbEvalutions(int32_t* result);
+/* new Default() */
+NQL_API nql_status nql_Default_new(nql_handle* result);
 /* DeltaVolQuote.get_AtmType() -> DeltaVolQuoteAtmType */
 NQL_API nql_status nql_DeltaVolQuote_get_AtmType(nql_handle self, int32_t* result);
 /* DeltaVolQuote.get_Delta() -> double? */
@@ -7712,6 +7738,8 @@ NQL_API nql_status nql_Discount_get_HasGlobalGuess(bool* result);
 NQL_API nql_status nql_Discount_get_HasTransform(bool* result);
 /* Discount.get_MaxIterations() -> int */
 NQL_API nql_status nql_Discount_get_MaxIterations(int32_t* result);
+/* new Discount() */
+NQL_API nql_status nql_Discount_new(nql_handle* result);
 /* DiscountingBondEngine.Bind(YieldTermStructure discountCurve = null, bool? includeSettlementDateFlows = null) -> InstrumentResults */
 NQL_API nql_status nql_DiscountingBondEngine_Bind(nql_handle discountCurve, const bool* includeSettlementDateFlows, nql_handle* result);
 /* DiscountingBondEngine.BindOn(Bond instrument, YieldTermStructure discountCurve = null, bool? includeSettlementDateFlows = null) -> InstrumentResults */
@@ -7844,6 +7872,8 @@ NQL_API nql_status nql_DoubleStickyRatchetPayoff_new(double type1, double type2,
 NQL_API nql_status nql_DoublingConvergenceSteps_NextSamples(nql_handle self, int32_t current, int32_t* result);
 /* DoublingConvergenceSteps.get_InitialSamples() -> int */
 NQL_API nql_status nql_DoublingConvergenceSteps_get_InitialSamples(nql_handle self, int32_t* result);
+/* new DoublingConvergenceSteps() */
+NQL_API nql_status nql_DoublingConvergenceSteps_new(nql_handle* result);
 /* new DownRounding(int precision, int digit = 5) */
 NQL_API nql_status nql_DownRounding_new(int32_t precision, int32_t digit, nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
@@ -7903,7 +7933,9 @@ NQL_API nql_status nql_EndCriteriaCheck_get_Stop(nql_handle self, bool* result);
 /* EndCriteriaCheck.get_Type() -> EndCriteriaType */
 NQL_API nql_status nql_EndCriteriaCheck_get_Type(nql_handle self, int32_t* result);
 /* new EndCriteriaCheck(bool Stop, EndCriteriaType Type, int StationaryStateIterations) */
-NQL_API nql_status nql_EndCriteriaCheck_new(bool Stop, int32_t Type, int32_t StationaryStateIterations, nql_handle* result);
+NQL_API nql_status nql_EndCriteriaCheck_new__bool(bool Stop, int32_t Type, int32_t StationaryStateIterations, nql_handle* result);
+/* new EndCriteriaCheck() */
+NQL_API nql_status nql_EndCriteriaCheck_new__void(nql_handle* result);
 /* EndCriteriaCheck.op_Equality(EndCriteriaCheck left, EndCriteriaCheck right) -> bool */
 NQL_API nql_status nql_EndCriteriaCheck_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* EndCriteriaCheck.op_Inequality(EndCriteriaCheck left, EndCriteriaCheck right) -> bool */
@@ -9143,7 +9175,9 @@ NQL_API nql_status nql_FdmSchemeDesc_get_Theta(nql_handle self, double* result);
 /* FdmSchemeDesc.get_Type() -> FdmSchemeDescFdmSchemeType */
 NQL_API nql_status nql_FdmSchemeDesc_get_Type(nql_handle self, int32_t* result);
 /* new FdmSchemeDesc(FdmSchemeDescFdmSchemeType Type, double Theta, double Mu) */
-NQL_API nql_status nql_FdmSchemeDesc_new(int32_t Type, double Theta, double Mu, nql_handle* result);
+NQL_API nql_status nql_FdmSchemeDesc_new__FdmSchemeDescFdmSchemeType(int32_t Type, double Theta, double Mu, nql_handle* result);
+/* new FdmSchemeDesc() */
+NQL_API nql_status nql_FdmSchemeDesc_new__void(nql_handle* result);
 /* FdmSchemeDesc.op_Equality(FdmSchemeDesc left, FdmSchemeDesc right) -> bool */
 NQL_API nql_status nql_FdmSchemeDesc_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* FdmSchemeDesc.op_Inequality(FdmSchemeDesc left, FdmSchemeDesc right) -> bool */
@@ -9220,7 +9254,9 @@ NQL_API nql_status nql_FdmVPPStepConditionParams_get_TMinDown(nql_handle self, i
 /* FdmVPPStepConditionParams.get_TMinUp() -> int */
 NQL_API nql_status nql_FdmVPPStepConditionParams_get_TMinUp(nql_handle self, int32_t* result);
 /* new FdmVPPStepConditionParams(double HeatRate, double PMin, double PMax, int TMinUp, int TMinDown, double StartUpFuel, double StartUpFixCost, double FuelCostAddon) */
-NQL_API nql_status nql_FdmVPPStepConditionParams_new(double HeatRate, double PMin, double PMax, int32_t TMinUp, int32_t TMinDown, double StartUpFuel, double StartUpFixCost, double FuelCostAddon, nql_handle* result);
+NQL_API nql_status nql_FdmVPPStepConditionParams_new__double(double HeatRate, double PMin, double PMax, int32_t TMinUp, int32_t TMinDown, double StartUpFuel, double StartUpFixCost, double FuelCostAddon, nql_handle* result);
+/* new FdmVPPStepConditionParams() */
+NQL_API nql_status nql_FdmVPPStepConditionParams_new__void(nql_handle* result);
 /* FdmVPPStepConditionParams.op_Equality(FdmVPPStepConditionParams left, FdmVPPStepConditionParams right) -> bool */
 NQL_API nql_status nql_FdmVPPStepConditionParams_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* FdmVPPStepConditionParams.op_Inequality(FdmVPPStepConditionParams left, FdmVPPStepConditionParams right) -> bool */
@@ -9784,6 +9820,8 @@ NQL_API nql_status nql_ForwardFlat_Interpolate(nql_handle self, const double* x,
 NQL_API nql_status nql_ForwardFlat_get_Global(bool* result);
 /* ForwardFlat.get_RequiredPoints() -> int */
 NQL_API nql_status nql_ForwardFlat_get_RequiredPoints(int32_t* result);
+/* new ForwardFlat() */
+NQL_API nql_status nql_ForwardFlat_new(nql_handle* result);
 /* ForwardMeasureProcess1D.WithForwardMeasureTime(double forwardMeasureTime) -> ForwardMeasureProcess1D */
 NQL_API nql_status nql_ForwardMeasureProcess1D_WithForwardMeasureTime(nql_handle self, double forwardMeasureTime, nql_handle* result);
 /* ForwardMeasureProcess1D.get_ForwardMeasureTime() -> double */
@@ -9858,6 +9896,8 @@ NQL_API nql_status nql_ForwardRate_ZeroYieldImpl(const double* times, int32_t ti
 NQL_API nql_status nql_ForwardRate_get_HasGlobalGuess(bool* result);
 /* ForwardRate.get_MaxIterations() -> int */
 NQL_API nql_status nql_ForwardRate_get_MaxIterations(int32_t* result);
+/* new ForwardRate() */
+NQL_API nql_status nql_ForwardRate_new(nql_handle* result);
 /* ForwardResults.get_ForwardValue() -> double? */
 NQL_API nql_status nql_ForwardResults_get_ForwardValue(nql_handle self, double* result, bool* result_has_value);
 /* ForwardResults.get_SpotIncome() -> double? */
@@ -10216,7 +10256,9 @@ NQL_API nql_status nql_FxReset_get_FixingDate(nql_handle self, nql_date* result)
 /* FxReset.get_ValueDate() -> Date */
 NQL_API nql_status nql_FxReset_get_ValueDate(nql_handle self, nql_date* result);
 /* new FxReset(Date fixingDate, Date valueDate) */
-NQL_API nql_status nql_FxReset_new(nql_date fixingDate, nql_date valueDate, nql_handle* result);
+NQL_API nql_status nql_FxReset_new__Date(nql_date fixingDate, nql_date valueDate, nql_handle* result);
+/* new FxReset() */
+NQL_API nql_status nql_FxReset_new__void(nql_handle* result);
 /* FxReset.op_Equality(FxReset left, FxReset right) -> bool */
 NQL_API nql_status nql_FxReset_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* FxReset.op_Inequality(FxReset left, FxReset right) -> bool */
@@ -10483,7 +10525,9 @@ NQL_API nql_status nql_GMRESResult_get_Errors(nql_handle self, double** result, 
 /* GMRESResult.get_X() -> Vector */
 NQL_API nql_status nql_GMRESResult_get_X(nql_handle self, double** result, int32_t* result_count);
 /* new GMRESResult(ImmutableArray<double> Errors, Vector X) */
-NQL_API nql_status nql_GMRESResult_new(const double* Errors, int32_t Errors_count, const double* X, int32_t X_count, nql_handle* result);
+NQL_API nql_status nql_GMRESResult_new__doubleArray(const double* Errors, int32_t Errors_count, const double* X, int32_t X_count, nql_handle* result);
+/* new GMRESResult() */
+NQL_API nql_status nql_GMRESResult_new__void(nql_handle* result);
 /* GMRESResult.op_Equality(GMRESResult left, GMRESResult right) -> bool */
 NQL_API nql_status nql_GMRESResult_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* GMRESResult.op_Inequality(GMRESResult left, GMRESResult right) -> bool */
@@ -10903,6 +10947,8 @@ NQL_API nql_status nql_GaussianConstantLossLM_get_Size(nql_handle self, int32_t*
 NQL_API nql_status nql_GaussianConstantLossLM_new__double(double correlation, const double* recoveries, int32_t recoveries_count, int32_t integralType, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* new GaussianConstantLossLM(IReadOnlyList<IReadOnlyList<double>> factorWeights, IReadOnlyList<double> recoveries, LatentModelIntegrationType integralType, GaussianCopulaPolicyInitTraits initTraits = null) */
 NQL_API nql_status nql_GaussianConstantLossLM_new__doubleArrayArray(const double* factorWeights, int32_t factorWeights_count, const int32_t* factorWeights_row_lengths, int32_t factorWeights_rows, const double* recoveries, int32_t recoveries_count, int32_t integralType, nql_handle initTraits, nql_handle* result);
+/* new GaussianCopulaPolicyInitTraits() */
+NQL_API nql_status nql_GaussianCopulaPolicyInitTraits_new(nql_handle* result);
 /* GaussianCopulaPolicyInitTraits.op_Equality(GaussianCopulaPolicyInitTraits left, GaussianCopulaPolicyInitTraits right) -> bool */
 NQL_API nql_status nql_GaussianCopulaPolicyInitTraits_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* GaussianCopulaPolicyInitTraits.op_Inequality(GaussianCopulaPolicyInitTraits left, GaussianCopulaPolicyInitTraits right) -> bool */
@@ -10927,6 +10973,8 @@ NQL_API nql_status nql_GaussianCopulaPolicy_InverseCumulativeY(nql_handle self, 
 NQL_API nql_status nql_GaussianCopulaPolicy_InverseCumulativeZ(nql_handle self, double p, double* result);
 /* GaussianCopulaPolicy.get_NumFactors() -> int */
 NQL_API nql_status nql_GaussianCopulaPolicy_get_NumFactors(nql_handle self, int32_t* result);
+/* new GaussianCopulaPolicy() */
+NQL_API nql_status nql_GaussianCopulaPolicy_new(nql_handle* result);
 #endif /* NANOQL_EXPERIMENTAL */
 /* GaussianCopulaSpreadEngine.Bind(GeneralizedBlackScholesProcess process1 = null, GeneralizedBlackScholesProcess process2 = null, double correlation = null, int nPoints = 64) -> InstrumentResults */
 NQL_API nql_status nql_GaussianCopulaSpreadEngine_Bind(nql_handle process1, nql_handle process2, const double* correlation, const int32_t* nPoints, nql_handle* result);
@@ -11376,6 +11424,8 @@ NQL_API nql_status nql_Germany_get_Name(nql_handle self, char** result);
 NQL_API nql_status nql_GetCovarianceFunctions_GetCovariance(const double* stdDev, int32_t stdDev_count, const double* corr, int32_t corr_rows, int32_t corr_columns, double tolerance, double** result, int32_t* result_rows, int32_t* result_columns);
 /* GlobalBootstrap.get_AdditionalVariables() -> AdditionalBootstrapVariables */
 NQL_API nql_status nql_GlobalBootstrap_get_AdditionalVariables(nql_handle self, nql_handle* result);
+/* new GlobalBootstrap() */
+NQL_API nql_status nql_GlobalBootstrap_new(nql_handle* result);
 /* GlobalLinearSimpleZeroCurve.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, Linear i = null, GlobalBootstrap bootstrap = null) -> GlobalLinearSimpleZeroCurve */
 NQL_API nql_status nql_GlobalLinearSimpleZeroCurve_Create(int32_t settlementDays, nql_handle calendar, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
 /* GlobalLinearSimpleZeroCurve.Data() -> ImmutableArray<double> */
@@ -11832,6 +11882,8 @@ NQL_API nql_status nql_HazardRate_SurvivalProbabilityImpl(const double* times, i
 NQL_API nql_status nql_HazardRate_UpdateGuess(const double* data, int32_t data_count, double rate, int32_t i);
 /* HazardRate.get_MaxIterations() -> int */
 NQL_API nql_status nql_HazardRate_get_MaxIterations(int32_t* result);
+/* new HazardRate() */
+NQL_API nql_status nql_HazardRate_new(nql_handle* result);
 /* HestonBlackVolSurface.AtmLevel(double t) -> double? */
 NQL_API nql_status nql_HestonBlackVolSurface_AtmLevel(nql_handle self, double t, double* result, bool* result_has_value);
 /* HestonBlackVolSurface.MaxStrike() -> double */
@@ -12999,7 +13051,9 @@ NQL_API nql_status nql_IntegrationResult_get_NumberOfEvaluations(nql_handle self
 /* IntegrationResult.get_Value() -> double */
 NQL_API nql_status nql_IntegrationResult_get_Value(nql_handle self, double* result);
 /* new IntegrationResult(double Value, int NumberOfEvaluations) */
-NQL_API nql_status nql_IntegrationResult_new(double Value, int32_t NumberOfEvaluations, nql_handle* result);
+NQL_API nql_status nql_IntegrationResult_new__double(double Value, int32_t NumberOfEvaluations, nql_handle* result);
+/* new IntegrationResult() */
+NQL_API nql_status nql_IntegrationResult_new__void(nql_handle* result);
 /* IntegrationResult.op_Equality(IntegrationResult left, IntegrationResult right) -> bool */
 NQL_API nql_status nql_IntegrationResult_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* IntegrationResult.op_Inequality(IntegrationResult left, IntegrationResult right) -> bool */
@@ -13269,11 +13323,15 @@ NQL_API nql_status nql_InverseCumulativeNormal_Evaluate(nql_handle self, double 
 /* InverseCumulativeNormal.StandardValue(double x) -> double */
 NQL_API nql_status nql_InverseCumulativeNormal_StandardValue(double x, double* result);
 /* new InverseCumulativeNormal(double average = 0, double sigma = 1) */
-NQL_API nql_status nql_InverseCumulativeNormal_new(double average, double sigma, nql_handle* result);
+NQL_API nql_status nql_InverseCumulativeNormal_new__double(double average, double sigma, nql_handle* result);
+/* new InverseCumulativeNormal() */
+NQL_API nql_status nql_InverseCumulativeNormal_new__void(nql_handle* result);
 /* InverseCumulativePoisson.Evaluate(double x) -> double */
 NQL_API nql_status nql_InverseCumulativePoisson_Evaluate(nql_handle self, double x, double* result);
 /* new InverseCumulativePoisson(double lambda = 1) */
-NQL_API nql_status nql_InverseCumulativePoisson_new(double lambda, nql_handle* result);
+NQL_API nql_status nql_InverseCumulativePoisson_new__double(double lambda, nql_handle* result);
+/* new InverseCumulativePoisson() */
+NQL_API nql_status nql_InverseCumulativePoisson_new__void(nql_handle* result);
 /* InverseCumulativeStudent.Evaluate(double y) -> double */
 NQL_API nql_status nql_InverseCumulativeStudent_Evaluate(nql_handle self, double y, double* result);
 /* new InverseCumulativeStudent(int n) */
@@ -13367,7 +13425,9 @@ NQL_API nql_status nql_Italy_IsWeekend(nql_handle self, int32_t w, bool* result)
 /* Italy.get_Name() -> string */
 NQL_API nql_status nql_Italy_get_Name(nql_handle self, char** result);
 /* new IterativeBootstrap(double? accuracy = null, double? minValue = null, double? maxValue = null, int maxAttempts = 1, double maxFactor = 2, double minFactor = 2, bool dontThrow = false, int dontThrowSteps = 10, int maxEvaluations = 100) */
-NQL_API nql_status nql_IterativeBootstrap_new(const double* accuracy, const double* minValue, const double* maxValue, int32_t maxAttempts, double maxFactor, double minFactor, bool dontThrow, int32_t dontThrowSteps, int32_t maxEvaluations, nql_handle* result);
+NQL_API nql_status nql_IterativeBootstrap_new__Optdouble(const double* accuracy, const double* minValue, const double* maxValue, int32_t maxAttempts, double maxFactor, double minFactor, bool dontThrow, int32_t dontThrowSteps, int32_t maxEvaluations, nql_handle* result);
+/* new IterativeBootstrap() */
+NQL_API nql_status nql_IterativeBootstrap_new__void(nql_handle* result);
 /* JamshidianSwaptionEngine.Bind(OneFactorAffineModel model = null, YieldTermStructure termStructure = null) -> InstrumentResults */
 NQL_API nql_status nql_JamshidianSwaptionEngine_Bind(nql_handle model, nql_handle termStructure, nql_handle* result);
 /* JamshidianSwaptionEngine.BindOn(Swaption instrument, OneFactorAffineModel model = null, YieldTermStructure termStructure = null) -> InstrumentResults */
@@ -13597,7 +13657,9 @@ NQL_API nql_status nql_KrugerLogMixedLinearCubic_get_Global(bool* result);
 /* KrugerLogMixedLinearCubic.get_RequiredPoints() -> int */
 NQL_API nql_status nql_KrugerLogMixedLinearCubic_get_RequiredPoints(int32_t* result);
 /* new KrugerLogMixedLinearCubic(int n, MixedInterpolationBehavior behavior = ShareRanges) */
-NQL_API nql_status nql_KrugerLogMixedLinearCubic_new(int32_t n, int32_t behavior, nql_handle* result);
+NQL_API nql_status nql_KrugerLogMixedLinearCubic_new__int(int32_t n, int32_t behavior, nql_handle* result);
+/* new KrugerLogMixedLinearCubic() */
+NQL_API nql_status nql_KrugerLogMixedLinearCubic_new__void(nql_handle* result);
 /* KrugerLogMixedLinearCubic.op_Implicit(KrugerLogMixedLinearCubic preset) -> LogMixedLinearCubic */
 NQL_API nql_status nql_KrugerLogMixedLinearCubic_op_Implicit(nql_handle preset, nql_handle* result);
 /* KrugerLog.CheckPoints(int points) */
@@ -13608,6 +13670,8 @@ NQL_API nql_status nql_KrugerLog_Interpolate(nql_handle self, const double* x, i
 NQL_API nql_status nql_KrugerLog_get_Global(bool* result);
 /* KrugerLog.get_RequiredPoints() -> int */
 NQL_API nql_status nql_KrugerLog_get_RequiredPoints(int32_t* result);
+/* new KrugerLog() */
+NQL_API nql_status nql_KrugerLog_new(nql_handle* result);
 /* KrugerLog.op_Implicit(KrugerLog preset) -> LogCubic */
 NQL_API nql_status nql_KrugerLog_op_Implicit(nql_handle preset, nql_handle* result);
 /* new LBFGSB(ReadOnlySpan<double> lowerBound, ReadOnlySpan<double> upperBound, int memory = 10, double pgTol = 1E-08, double fTol = 2.220446049250313E-09) */
@@ -13825,6 +13889,8 @@ NQL_API nql_status nql_LinearFlat_Interpolate(nql_handle self, const double* x, 
 NQL_API nql_status nql_LinearFlat_get_Global(bool* result);
 /* LinearFlat.get_RequiredPoints() -> int */
 NQL_API nql_status nql_LinearFlat_get_RequiredPoints(int32_t* result);
+/* new LinearFlat() */
+NQL_API nql_status nql_LinearFlat_new(nql_handle* result);
 #endif /* NANOQL_EXPERIMENTAL */
 /* LinearForwardCurve.Data() -> ImmutableArray<double> */
 NQL_API nql_status nql_LinearForwardCurve_Data(nql_handle self, double** result, int32_t* result_count);
@@ -13946,6 +14012,8 @@ NQL_API nql_status nql_Linear_Interpolate(nql_handle self, const double* x, int3
 NQL_API nql_status nql_Linear_get_Global(bool* result);
 /* Linear.get_RequiredPoints() -> int */
 NQL_API nql_status nql_Linear_get_RequiredPoints(int32_t* result);
+/* new Linear() */
+NQL_API nql_status nql_Linear_new(nql_handle* result);
 /* LocalBootstrap.get_Accuracy() -> double? */
 NQL_API nql_status nql_LocalBootstrap_get_Accuracy(nql_handle self, double* result, bool* result_has_value);
 /* LocalBootstrap.get_ForcePositive() -> bool */
@@ -13953,7 +14021,9 @@ NQL_API nql_status nql_LocalBootstrap_get_ForcePositive(nql_handle self, bool* r
 /* LocalBootstrap.get_Localisation() -> int */
 NQL_API nql_status nql_LocalBootstrap_get_Localisation(nql_handle self, int32_t* result);
 /* new LocalBootstrap(int localisation = 2, bool forcePositive = true, double? accuracy = null) */
-NQL_API nql_status nql_LocalBootstrap_new(int32_t localisation, bool forcePositive, const double* accuracy, nql_handle* result);
+NQL_API nql_status nql_LocalBootstrap_new__int(int32_t localisation, bool forcePositive, const double* accuracy, nql_handle* result);
+/* new LocalBootstrap() */
+NQL_API nql_status nql_LocalBootstrap_new__void(nql_handle* result);
 /* LocalConstantVol.Create(int settlementDays, Calendar calendar, double volatility, DayCounter dayCounter, EvaluationContext context) -> LocalConstantVol */
 NQL_API nql_status nql_LocalConstantVol_Create(int32_t settlementDays, nql_handle calendar, double volatility, nql_handle dayCounter, nql_handle context, nql_handle* result);
 /* LocalConstantVol.MaxStrike() -> double */
@@ -14027,7 +14097,9 @@ NQL_API nql_status nql_LogCubic_get_Global(bool* result);
 /* LogCubic.get_RequiredPoints() -> int */
 NQL_API nql_status nql_LogCubic_get_RequiredPoints(int32_t* result);
 /* new LogCubic(CubicInterpolationDerivativeApprox da, bool monotonic = true, CubicInterpolationBoundaryCondition leftCondition = SecondDerivative, double leftConditionValue = 0, CubicInterpolationBoundaryCondition rightCondition = SecondDerivative, double rightConditionValue = 0) */
-NQL_API nql_status nql_LogCubic_new(int32_t da, bool monotonic, int32_t leftCondition, double leftConditionValue, int32_t rightCondition, double rightConditionValue, nql_handle* result);
+NQL_API nql_status nql_LogCubic_new__CubicInterpolationDerivativeApprox(int32_t da, bool monotonic, int32_t leftCondition, double leftConditionValue, int32_t rightCondition, double rightConditionValue, nql_handle* result);
+/* new LogCubic() */
+NQL_API nql_status nql_LogCubic_new__void(nql_handle* result);
 /* new LogLinearInterpolation(ReadOnlySpan<double> x, ReadOnlySpan<double> y) */
 NQL_API nql_status nql_LogLinearInterpolation_new(const double* x, int32_t x_count, const double* y, int32_t y_count, nql_handle* result);
 /* LogLinear.CheckPoints(int points) */
@@ -14038,6 +14110,8 @@ NQL_API nql_status nql_LogLinear_Interpolate(nql_handle self, const double* x, i
 NQL_API nql_status nql_LogLinear_get_Global(bool* result);
 /* LogLinear.get_RequiredPoints() -> int */
 NQL_API nql_status nql_LogLinear_get_RequiredPoints(int32_t* result);
+/* new LogLinear() */
+NQL_API nql_status nql_LogLinear_new(nql_handle* result);
 /* LogMixedLinearCubicDiscountCurve.Data() -> ImmutableArray<double> */
 NQL_API nql_status nql_LogMixedLinearCubicDiscountCurve_Data(nql_handle self, double** result, int32_t* result_count);
 /* LogMixedLinearCubicDiscountCurve.Dates() -> ImmutableArray<Date> */
@@ -14065,7 +14139,9 @@ NQL_API nql_status nql_LogMixedLinearCubic_get_Global(bool* result);
 /* LogMixedLinearCubic.get_RequiredPoints() -> int */
 NQL_API nql_status nql_LogMixedLinearCubic_get_RequiredPoints(int32_t* result);
 /* new LogMixedLinearCubic(int n, MixedInterpolationBehavior behavior, CubicInterpolationDerivativeApprox da, bool monotonic = true, CubicInterpolationBoundaryCondition leftCondition = SecondDerivative, double? leftConditionValue = 0, CubicInterpolationBoundaryCondition rightCondition = SecondDerivative, double rightConditionValue = 0) */
-NQL_API nql_status nql_LogMixedLinearCubic_new(int32_t n, int32_t behavior, int32_t da, bool monotonic, int32_t leftCondition, const double* leftConditionValue, int32_t rightCondition, double rightConditionValue, nql_handle* result);
+NQL_API nql_status nql_LogMixedLinearCubic_new__int(int32_t n, int32_t behavior, int32_t da, bool monotonic, int32_t leftCondition, const double* leftConditionValue, int32_t rightCondition, double rightConditionValue, nql_handle* result);
+/* new LogMixedLinearCubic() */
+NQL_API nql_status nql_LogMixedLinearCubic_new__void(nql_handle* result);
 /* new LogParabolic(ReadOnlySpan<double> x, ReadOnlySpan<double> y) */
 NQL_API nql_status nql_LogParabolic_new(const double* x, int32_t x_count, const double* y, int32_t y_count, nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
@@ -14166,7 +14242,9 @@ NQL_API nql_status nql_Loss_get_Amount(nql_handle self, double* result);
 /* Loss.get_Time() -> double */
 NQL_API nql_status nql_Loss_get_Time(nql_handle self, double* result);
 /* new Loss(double Time, double Amount) */
-NQL_API nql_status nql_Loss_new(double Time, double Amount, nql_handle* result);
+NQL_API nql_status nql_Loss_new__double(double Time, double Amount, nql_handle* result);
+/* new Loss() */
+NQL_API nql_status nql_Loss_new__void(nql_handle* result);
 /* Loss.op_Equality(Loss left, Loss right) -> bool */
 NQL_API nql_status nql_Loss_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* Loss.op_GreaterThan(Loss left, Loss right) -> bool */
@@ -14182,6 +14260,8 @@ NQL_API nql_status nql_Loss_op_LessThanOrEqual(nql_handle left, nql_handle right
 #endif /* NANOQL_EXPERIMENTAL */
 /* LowDiscrepancy.get_AllowsErrorEstimate() -> bool */
 NQL_API nql_status nql_LowDiscrepancy_get_AllowsErrorEstimate(bool* result);
+/* new LowDiscrepancy() */
+NQL_API nql_status nql_LowDiscrepancy_new(nql_handle* result);
 /* MBSFixedRateBondFunctions.PVDifference(double faceAmount, ImmutableArray<CashFlow> cashflows, double yield, Date settlement, EvaluationContext context) -> double */
 NQL_API nql_status nql_MBSFixedRateBondFunctions_PVDifference(double faceAmount, const nql_handle* cashflows, int32_t cashflows_count, double yield, nql_date settlement, nql_handle context, double* result);
 /* MBSFixedRateBond.BondEquivalentYield(EvaluationContext context) -> double */
@@ -14213,7 +14293,9 @@ NQL_API nql_status nql_MaddockCumulativeNormal_new(double average, double sigma,
 /* MaddockInverseCumulativeNormal.Evaluate(double x) -> double */
 NQL_API nql_status nql_MaddockInverseCumulativeNormal_Evaluate(nql_handle self, double x, double* result);
 /* new MaddockInverseCumulativeNormal(double average = 0, double sigma = 1) */
-NQL_API nql_status nql_MaddockInverseCumulativeNormal_new(double average, double sigma, nql_handle* result);
+NQL_API nql_status nql_MaddockInverseCumulativeNormal_new__double(double average, double sigma, nql_handle* result);
+/* new MaddockInverseCumulativeNormal() */
+NQL_API nql_status nql_MaddockInverseCumulativeNormal_new__void(nql_handle* result);
 /* MakeCapFloor.AsOptionlet(bool b = true) -> MakeCapFloor */
 NQL_API nql_status nql_MakeCapFloor_AsOptionlet(nql_handle self, bool b, nql_handle* result);
 /* MakeCapFloor.Defaults(ConventionProvider provider) -> CapFloorDefaults */
@@ -14796,6 +14878,8 @@ NQL_API nql_status nql_MarketModelFactory_Create(nql_handle self, nql_handle evo
 NQL_API nql_status nql_MarketModelMultiProductCashFlow_get_Amount(nql_handle self, double* result);
 /* MarketModelMultiProductCashFlow.get_TimeIndex() -> int */
 NQL_API nql_status nql_MarketModelMultiProductCashFlow_get_TimeIndex(nql_handle self, int32_t* result);
+/* new MarketModelMultiProductCashFlow() */
+NQL_API nql_status nql_MarketModelMultiProductCashFlow_new(nql_handle* result);
 /* MarketModelPathwiseDiscounter.GetFactors(Matrix liborRates, Matrix discounts, int currentStep, Span<double> factors) */
 NQL_API nql_status nql_MarketModelPathwiseDiscounter_GetFactors(nql_handle self, const double* liborRates, int32_t liborRates_rows, int32_t liborRates_columns, const double* discounts, int32_t discounts_rows, int32_t discounts_columns, int32_t currentStep, double* factors, int32_t factors_count);
 /* new MarketModelPathwiseDiscounter(double paymentTime, ReadOnlySpan<double> rateTimes) */
@@ -15036,6 +15120,8 @@ NQL_API nql_status nql_MidPointCdsEngine_BindOn(nql_handle instrument, nql_handl
 NQL_API nql_status nql_MidPointCdsEngine_Calculate(nql_handle cds, nql_handle context, nql_handle probability, double recoveryRate, nql_handle discountCurve, const bool* includeSettlementDateFlows, nql_handle* result);
 /* MidPoint.NbEvalutions() -> int */
 NQL_API nql_status nql_MidPoint_NbEvalutions(int32_t* result);
+/* new MidPoint() */
+NQL_API nql_status nql_MidPoint_new(nql_handle* result);
 /* MinBasketPayoff.Accumulate(ReadOnlySpan<double> a) -> double */
 NQL_API nql_status nql_MinBasketPayoff_Accumulate(nql_handle self, const double* a, int32_t a_count, double* result);
 /* new MinBasketPayoff(Payoff basePayoff) */
@@ -15057,7 +15143,9 @@ NQL_API nql_status nql_MixedLinearCubic_get_Global(bool* result);
 /* MixedLinearCubic.get_RequiredPoints() -> int */
 NQL_API nql_status nql_MixedLinearCubic_get_RequiredPoints(int32_t* result);
 /* new MixedLinearCubic(int n, MixedInterpolationBehavior behavior, CubicInterpolationDerivativeApprox da, bool monotonic = true, CubicInterpolationBoundaryCondition leftCondition = SecondDerivative, double? leftConditionValue = 0, CubicInterpolationBoundaryCondition rightCondition = SecondDerivative, double rightConditionValue = 0) */
-NQL_API nql_status nql_MixedLinearCubic_new(int32_t n, int32_t behavior, int32_t da, bool monotonic, int32_t leftCondition, const double* leftConditionValue, int32_t rightCondition, double rightConditionValue, nql_handle* result);
+NQL_API nql_status nql_MixedLinearCubic_new__int(int32_t n, int32_t behavior, int32_t da, bool monotonic, int32_t leftCondition, const double* leftConditionValue, int32_t rightCondition, double rightConditionValue, nql_handle* result);
+/* new MixedLinearCubic() */
+NQL_API nql_status nql_MixedLinearCubic_new__void(nql_handle* result);
 /* new MixedLinearFritschButlandCubic(ReadOnlySpan<double> x, ReadOnlySpan<double> y, int n, MixedInterpolationBehavior behavior = ShareRanges) */
 NQL_API nql_status nql_MixedLinearFritschButlandCubic_new(const double* x, int32_t x_count, const double* y, int32_t y_count, int32_t n, int32_t behavior, nql_handle* result);
 /* new MixedLinearKrugerCubic(ReadOnlySpan<double> x, ReadOnlySpan<double> y, int n, MixedInterpolationBehavior behavior = ShareRanges) */
@@ -15134,6 +15222,8 @@ NQL_API nql_status nql_Money_get_Value(nql_handle self, double* result);
 NQL_API nql_status nql_Money_new__Currency(nql_handle currency, double value, nql_handle* result);
 /* new Money(double value, Currency currency) */
 NQL_API nql_status nql_Money_new__double(double value, nql_handle currency, nql_handle* result);
+/* new Money() */
+NQL_API nql_status nql_Money_new__void(nql_handle* result);
 /* Money.op_Addition(Money m1, Money m2) -> Money */
 NQL_API nql_status nql_Money_op_Addition(nql_handle m1, nql_handle m2, nql_handle* result);
 /* Money.op_Division(Money m1, Money m2) -> double */
@@ -15190,6 +15280,8 @@ NQL_API nql_status nql_MonotonicLogCubic_Interpolate(nql_handle self, const doub
 NQL_API nql_status nql_MonotonicLogCubic_get_Global(bool* result);
 /* MonotonicLogCubic.get_RequiredPoints() -> int */
 NQL_API nql_status nql_MonotonicLogCubic_get_RequiredPoints(int32_t* result);
+/* new MonotonicLogCubic() */
+NQL_API nql_status nql_MonotonicLogCubic_new(nql_handle* result);
 /* MonotonicLogCubic.op_Implicit(MonotonicLogCubic preset) -> LogCubic */
 NQL_API nql_status nql_MonotonicLogCubic_op_Implicit(nql_handle preset, nql_handle* result);
 /* MonotonicLogMixedLinearCubic.CheckPoints(int points) */
@@ -15201,7 +15293,9 @@ NQL_API nql_status nql_MonotonicLogMixedLinearCubic_get_Global(bool* result);
 /* MonotonicLogMixedLinearCubic.get_RequiredPoints() -> int */
 NQL_API nql_status nql_MonotonicLogMixedLinearCubic_get_RequiredPoints(int32_t* result);
 /* new MonotonicLogMixedLinearCubic(int n, MixedInterpolationBehavior behavior = ShareRanges) */
-NQL_API nql_status nql_MonotonicLogMixedLinearCubic_new(int32_t n, int32_t behavior, nql_handle* result);
+NQL_API nql_status nql_MonotonicLogMixedLinearCubic_new__int(int32_t n, int32_t behavior, nql_handle* result);
+/* new MonotonicLogMixedLinearCubic() */
+NQL_API nql_status nql_MonotonicLogMixedLinearCubic_new__void(nql_handle* result);
 /* MonotonicLogMixedLinearCubic.op_Implicit(MonotonicLogMixedLinearCubic preset) -> LogMixedLinearCubic */
 NQL_API nql_status nql_MonotonicLogMixedLinearCubic_op_Implicit(nql_handle preset, nql_handle* result);
 /* new MonotonicLogParabolic(ReadOnlySpan<double> x, ReadOnlySpan<double> y) */
@@ -15283,7 +15377,9 @@ NQL_API nql_status nql_MoroInvCumulativeXoshiro256StarStarGaussianRsg_Draws(nql_
 /* MoroInverseCumulativeNormal.Evaluate(double x) -> double */
 NQL_API nql_status nql_MoroInverseCumulativeNormal_Evaluate(nql_handle self, double x, double* result);
 /* new MoroInverseCumulativeNormal(double average = 0, double sigma = 1) */
-NQL_API nql_status nql_MoroInverseCumulativeNormal_new(double average, double sigma, nql_handle* result);
+NQL_API nql_status nql_MoroInverseCumulativeNormal_new__double(double average, double sigma, nql_handle* result);
+/* new MoroInverseCumulativeNormal() */
+NQL_API nql_status nql_MoroInverseCumulativeNormal_new__void(nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* MtMCrossCurrencyBasisSwapRateHelper.ImpliedQuote(EvaluationContext context) -> double */
 NQL_API nql_status nql_MtMCrossCurrencyBasisSwapRateHelper_ImpliedQuote(nql_handle self, nql_handle context, double* result);
@@ -15812,7 +15908,9 @@ NQL_API nql_status nql_NoArbSabr_get_Global(bool* result);
 /* NoArbSabr.get_RequiredPoints() -> int */
 NQL_API nql_status nql_NoArbSabr_get_RequiredPoints(int32_t* result);
 /* new NoArbSabr(double t, double forward, double? alpha, double? beta, double? nu, double? rho, bool alphaIsFixed, bool betaIsFixed, bool nuIsFixed, bool rhoIsFixed, bool vegaWeighted = false, EndCriteria endCriteria = null, OptimizationMethod optMethod = null, double errorAccept = 0.002, bool useMaxError = false, int maxGuesses = 50) */
-NQL_API nql_status nql_NoArbSabr_new(double t, double forward, const double* alpha, const double* beta, const double* nu, const double* rho, bool alphaIsFixed, bool betaIsFixed, bool nuIsFixed, bool rhoIsFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle optMethod, double errorAccept, bool useMaxError, int32_t maxGuesses, nql_handle* result);
+NQL_API nql_status nql_NoArbSabr_new__double(double t, double forward, const double* alpha, const double* beta, const double* nu, const double* rho, bool alphaIsFixed, bool betaIsFixed, bool nuIsFixed, bool rhoIsFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle optMethod, double errorAccept, bool useMaxError, int32_t maxGuesses, nql_handle* result);
+/* new NoArbSabr() */
+NQL_API nql_status nql_NoArbSabr_new__void(nql_handle* result);
 #endif /* NANOQL_EXPERIMENTAL */
 /* NoConstraint.Test(Vector p) -> bool */
 NQL_API nql_status nql_NoConstraint_Test(nql_handle self, const double* p, int32_t p_count, bool* result);
@@ -18066,6 +18164,8 @@ NQL_API nql_status nql_PoissonDistribution_Evaluate(nql_handle self, int64_t k, 
 NQL_API nql_status nql_PoissonDistribution_new(double mu, nql_handle* result);
 /* PoissonPseudoRandom.get_AllowsErrorEstimate() -> bool */
 NQL_API nql_status nql_PoissonPseudoRandom_get_AllowsErrorEstimate(bool* result);
+/* new PoissonPseudoRandom() */
+NQL_API nql_status nql_PoissonPseudoRandom_new(nql_handle* result);
 /* Poland.IsWeekend(Weekday w) -> bool */
 NQL_API nql_status nql_Poland_IsWeekend(nql_handle self, int32_t w, bool* result);
 /* Poland.get_Name() -> string */
@@ -18099,6 +18199,8 @@ NQL_API nql_status nql_PolynomialFunction_new(const double* coeff, int32_t coeff
 #ifdef NANOQL_EXPERIMENTAL
 /* Polynomial.Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y, Matrix z) -> Interpolation2D */
 NQL_API nql_status nql_Polynomial_Interpolate(nql_handle self, const double* x, int32_t x_count, const double* y, int32_t y_count, const double* z, int32_t z_rows, int32_t z_columns, nql_handle* result);
+/* new Polynomial() */
+NQL_API nql_status nql_Polynomial_new(nql_handle* result);
 /* Pool.Add(string name, Issuer issuer, DefaultProbKey contractTrigger = null) -> Pool */
 NQL_API nql_status nql_Pool_Add(nql_handle self, const char* name, nql_handle issuer, nql_handle contractTrigger, nql_handle* result);
 /* Pool.Clear() -> Pool */
@@ -18248,6 +18350,8 @@ NQL_API nql_status nql_ProxyIbor_new(const char* familyName, nql_period tenor, i
 #endif /* NANOQL_EXPERIMENTAL */
 /* PseudoRandom.get_AllowsErrorEstimate() -> bool */
 NQL_API nql_status nql_PseudoRandom_get_AllowsErrorEstimate(bool* result);
+/* new PseudoRandom() */
+NQL_API nql_status nql_PseudoRandom_new(nql_handle* result);
 /* PseudoRootFacade.PseudoRoot(int i) -> Matrix */
 NQL_API nql_status nql_PseudoRootFacade_PseudoRoot(nql_handle self, int32_t i, double** result, int32_t* result_rows, int32_t* result_columns);
 /* PseudoRootFacade.get_Displacements() -> ImmutableArray<double> */
@@ -18424,7 +18528,9 @@ NQL_API nql_status nql_Quantity_get_CommodityType(nql_handle self, nql_handle* r
 /* Quantity.get_UnitOfMeasure() -> UnitOfMeasure */
 NQL_API nql_status nql_Quantity_get_UnitOfMeasure(nql_handle self, nql_handle* result);
 /* new Quantity(CommodityType commodityType, UnitOfMeasure unitOfMeasure, double amount) */
-NQL_API nql_status nql_Quantity_new(nql_handle commodityType, nql_handle unitOfMeasure, double amount, nql_handle* result);
+NQL_API nql_status nql_Quantity_new__CommodityType(nql_handle commodityType, nql_handle unitOfMeasure, double amount, nql_handle* result);
+/* new Quantity() */
+NQL_API nql_status nql_Quantity_new__void(nql_handle* result);
 /* Quantity.op_Addition(Quantity q1, Quantity q2) -> Quantity */
 NQL_API nql_status nql_Quantity_op_Addition(nql_handle q1, nql_handle q2, nql_handle* result);
 /* Quantity.op_Division(Quantity q1, Quantity q2) -> double */
@@ -18923,7 +19029,9 @@ NQL_API nql_status nql_SABR_get_Global(bool* result);
 /* SABR.get_RequiredPoints() -> int */
 NQL_API nql_status nql_SABR_get_RequiredPoints(int32_t* result);
 /* new SABR(double t, double forward, double? alpha, double? beta, double? nu, double? rho, bool alphaIsFixed, bool betaIsFixed, bool nuIsFixed, bool rhoIsFixed, bool vegaWeighted = false, EndCriteria endCriteria = null, OptimizationMethod optMethod = null, double errorAccept = 0.002, bool useMaxError = false, int maxGuesses = 50, double shift = 0) */
-NQL_API nql_status nql_SABR_new(double t, double forward, const double* alpha, const double* beta, const double* nu, const double* rho, bool alphaIsFixed, bool betaIsFixed, bool nuIsFixed, bool rhoIsFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle optMethod, double errorAccept, bool useMaxError, int32_t maxGuesses, double shift, nql_handle* result);
+NQL_API nql_status nql_SABR_new__double(double t, double forward, const double* alpha, const double* beta, const double* nu, const double* rho, bool alphaIsFixed, bool betaIsFixed, bool nuIsFixed, bool rhoIsFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle optMethod, double errorAccept, bool useMaxError, int32_t maxGuesses, double shift, nql_handle* result);
+/* new SABR() */
+NQL_API nql_status nql_SABR_new__void(nql_handle* result);
 /* SVD.Cond() -> double */
 NQL_API nql_status nql_SVD_Cond(nql_handle self, double* result);
 /* SVD.Norm2() -> double */
@@ -19250,6 +19358,8 @@ NQL_API nql_status nql_SimpleZeroYield_get_HasGlobalGuess(bool* result);
 NQL_API nql_status nql_SimpleZeroYield_get_HasTransform(bool* result);
 /* SimpleZeroYield.get_MaxIterations() -> int */
 NQL_API nql_status nql_SimpleZeroYield_get_MaxIterations(int32_t* result);
+/* new SimpleZeroYield() */
+NQL_API nql_status nql_SimpleZeroYield_new(nql_handle* result);
 /* Simplex.get_Lambda() -> double */
 NQL_API nql_status nql_Simplex_get_Lambda(nql_handle self, double* result);
 /* new Simplex(double lambda) */
@@ -20016,6 +20126,8 @@ NQL_API nql_status nql_SurvivalProbability_SurvivalProbabilityImpl(const double*
 NQL_API nql_status nql_SurvivalProbability_UpdateGuess(const double* data, int32_t data_count, double p, int32_t i);
 /* SurvivalProbability.get_MaxIterations() -> int */
 NQL_API nql_status nql_SurvivalProbability_get_MaxIterations(int32_t* result);
+/* new SurvivalProbability() */
+NQL_API nql_status nql_SurvivalProbability_new(nql_handle* result);
 /* SvenssonFitting.get_Size() -> int */
 NQL_API nql_status nql_SvenssonFitting_get_Size(nql_handle self, int32_t* result);
 /* new SvenssonFitting(IEnumerable<double> weights = null, OptimizationMethod optimizationMethod = null, IEnumerable<double> l2 = null, double minCutoffTime = 0, double maxCutoffTime = 1.7976931348623157E+308, Constraint constraint = null) */
@@ -20094,7 +20206,9 @@ NQL_API nql_status nql_Svi_get_Global(bool* result);
 /* Svi.get_RequiredPoints() -> int */
 NQL_API nql_status nql_Svi_get_RequiredPoints(int32_t* result);
 /* new Svi(double t, double forward, double? a, double? b, double? sigma, double? rho, double? m, bool aIsFixed, bool bIsFixed, bool sigmaIsFixed, bool rhoIsFixed, bool mIsFixed, bool vegaWeighted = false, EndCriteria endCriteria = null, OptimizationMethod optMethod = null, double errorAccept = 0.002, bool useMaxError = false, int maxGuesses = 50) */
-NQL_API nql_status nql_Svi_new(double t, double forward, const double* a, const double* b, const double* sigma, const double* rho, const double* m, bool aIsFixed, bool bIsFixed, bool sigmaIsFixed, bool rhoIsFixed, bool mIsFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle optMethod, double errorAccept, bool useMaxError, int32_t maxGuesses, nql_handle* result);
+NQL_API nql_status nql_Svi_new__double(double t, double forward, const double* a, const double* b, const double* sigma, const double* rho, const double* m, bool aIsFixed, bool bIsFixed, bool sigmaIsFixed, bool rhoIsFixed, bool mIsFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle optMethod, double errorAccept, bool useMaxError, int32_t maxGuesses, nql_handle* result);
+/* new Svi() */
+NQL_API nql_status nql_Svi_new__void(nql_handle* result);
 /* SwapCashFlows.get_AnnuityWeights() -> ImmutableArray<double> */
 NQL_API nql_status nql_SwapCashFlows_get_AnnuityWeights(nql_handle self, double** result, int32_t* result_count);
 /* SwapCashFlows.get_FixedLeg() -> ImmutableArray<CashFlow> */
@@ -20519,11 +20633,15 @@ NQL_API nql_status nql_SwaptionPseudoDerivative_new(nql_handle inputModel, int32
 NQL_API nql_status nql_SwaptionVolCubeNoArbSabrModel_CreateInterpolation(const double* strikes, int32_t strikes_count, const double* volatilities, int32_t volatilities_count, double t, double forward, const double* parameters, int32_t parameters_count, const bool* paramIsFixed, int32_t paramIsFixed_count, bool vegaWeighted, nql_handle endCriteria, nql_handle optMethod, double errorAccept, bool useMaxError, int32_t maxGuesses, double shift, int32_t volatilityType, nql_handle* result);
 /* SwaptionVolCubeNoArbSabrModel.CreateSmileSection(double optionTime, double forward, ReadOnlySpan<double> parameters, double shift, VolatilityType volatilityType) -> SmileSection */
 NQL_API nql_status nql_SwaptionVolCubeNoArbSabrModel_CreateSmileSection(double optionTime, double forward, const double* parameters, int32_t parameters_count, double shift, int32_t volatilityType, nql_handle* result);
+/* new SwaptionVolCubeNoArbSabrModel() */
+NQL_API nql_status nql_SwaptionVolCubeNoArbSabrModel_new(nql_handle* result);
 #endif /* NANOQL_EXPERIMENTAL */
 /* SwaptionVolCubeSabrModel.CreateInterpolation(ReadOnlySpan<double> strikes, ReadOnlySpan<double> volatilities, double t, double forward, ReadOnlySpan<double> parameters, ReadOnlySpan<bool> paramIsFixed, bool vegaWeighted, EndCriteria endCriteria, OptimizationMethod optMethod, double errorAccept, bool useMaxError, int maxGuesses, double shift, VolatilityType volatilityType) -> IXabrInterpolation */
 NQL_API nql_status nql_SwaptionVolCubeSabrModel_CreateInterpolation(const double* strikes, int32_t strikes_count, const double* volatilities, int32_t volatilities_count, double t, double forward, const double* parameters, int32_t parameters_count, const bool* paramIsFixed, int32_t paramIsFixed_count, bool vegaWeighted, nql_handle endCriteria, nql_handle optMethod, double errorAccept, bool useMaxError, int32_t maxGuesses, double shift, int32_t volatilityType, nql_handle* result);
 /* SwaptionVolCubeSabrModel.CreateSmileSection(double optionTime, double forward, ReadOnlySpan<double> parameters, double shift, VolatilityType volatilityType) -> SmileSection */
 NQL_API nql_status nql_SwaptionVolCubeSabrModel_CreateSmileSection(double optionTime, double forward, const double* parameters, int32_t parameters_count, double shift, int32_t volatilityType, nql_handle* result);
+/* new SwaptionVolCubeSabrModel() */
+NQL_API nql_status nql_SwaptionVolCubeSabrModel_new(nql_handle* result);
 /* SwaptionVolatilityCube.AtmStrike(Date optionDate, Period swapTenor, EvaluationContext context) -> double */
 NQL_API nql_status nql_SwaptionVolatilityCube_AtmStrike__Date(nql_handle self, nql_date optionDate, nql_period swapTenor, nql_handle context, double* result);
 /* SwaptionVolatilityCube.AtmStrike(Period optionTenor, Period swapTenor, EvaluationContext context) -> double */
@@ -20852,7 +20970,9 @@ NQL_API nql_status nql_TConstantLossLM_new__doubleArrayArray(const double* facto
 /* TCopulaPolicyInitTraits.get_TOrders() -> ImmutableArray<int> */
 NQL_API nql_status nql_TCopulaPolicyInitTraits_get_TOrders(nql_handle self, int32_t** result, int32_t* result_count);
 /* new TCopulaPolicyInitTraits(ImmutableArray<int> TOrders) */
-NQL_API nql_status nql_TCopulaPolicyInitTraits_new(const int32_t* TOrders, int32_t TOrders_count, nql_handle* result);
+NQL_API nql_status nql_TCopulaPolicyInitTraits_new__intArray(const int32_t* TOrders, int32_t TOrders_count, nql_handle* result);
+/* new TCopulaPolicyInitTraits() */
+NQL_API nql_status nql_TCopulaPolicyInitTraits_new__void(nql_handle* result);
 /* TCopulaPolicyInitTraits.op_Equality(TCopulaPolicyInitTraits left, TCopulaPolicyInitTraits right) -> bool */
 NQL_API nql_status nql_TCopulaPolicyInitTraits_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* TCopulaPolicyInitTraits.op_Inequality(TCopulaPolicyInitTraits left, TCopulaPolicyInitTraits right) -> bool */
@@ -20879,6 +20999,8 @@ NQL_API nql_status nql_TCopulaPolicy_InverseCumulativeZ(nql_handle self, double 
 NQL_API nql_status nql_TCopulaPolicy_get_NumFactors(nql_handle self, int32_t* result);
 /* TCopulaPolicy.get_VarianceFactors() -> ImmutableArray<double> */
 NQL_API nql_status nql_TCopulaPolicy_get_VarianceFactors(nql_handle self, double** result, int32_t* result_count);
+/* new TCopulaPolicy() */
+NQL_API nql_status nql_TCopulaPolicy_new(nql_handle* result);
 /* TDefProbLM.AllFactorCumulInverter(ReadOnlySpan<double> probs) -> double[] */
 NQL_API nql_status nql_TDefProbLM_AllFactorCumulInverter(nql_handle self, const double* probs, int32_t probs_count, double** result, int32_t* result_count);
 /* TDefProbLM.ConditionalDefaultProbability(double prob, int iName, ReadOnlySpan<double> mktFactors) -> double */
@@ -21816,7 +21938,9 @@ NQL_API nql_status nql_VannaVolga_get_Global(bool* result);
 /* VannaVolga.get_RequiredPoints() -> int */
 NQL_API nql_status nql_VannaVolga_get_RequiredPoints(int32_t* result);
 /* new VannaVolga(double spot, double dDiscount, double fDiscount, double t) */
-NQL_API nql_status nql_VannaVolga_new(double spot, double dDiscount, double fDiscount, double t, nql_handle* result);
+NQL_API nql_status nql_VannaVolga_new__double(double spot, double dDiscount, double fDiscount, double t, nql_handle* result);
+/* new VannaVolga() */
+NQL_API nql_status nql_VannaVolga_new__void(nql_handle* result);
 /* VarianceGammaEngine.Bind(VarianceGammaProcess process = null, double absoluteError = 1E-05) -> InstrumentResults */
 NQL_API nql_status nql_VarianceGammaEngine_Bind(nql_handle process, const double* absoluteError, nql_handle* result);
 /* VarianceGammaEngine.BindOn(VanillaOption instrument, VarianceGammaProcess process = null, double absoluteError = 1E-05) -> InstrumentResults */
@@ -21991,7 +22115,9 @@ NQL_API nql_status nql_VolatilityBumpInstrumentJacobianCap_get_StartIndex(nql_ha
 /* VolatilityBumpInstrumentJacobianCap.get_Strike() -> double */
 NQL_API nql_status nql_VolatilityBumpInstrumentJacobianCap_get_Strike(nql_handle self, double* result);
 /* new VolatilityBumpInstrumentJacobianCap(int StartIndex, int EndIndex, double Strike) */
-NQL_API nql_status nql_VolatilityBumpInstrumentJacobianCap_new(int32_t StartIndex, int32_t EndIndex, double Strike, nql_handle* result);
+NQL_API nql_status nql_VolatilityBumpInstrumentJacobianCap_new__int(int32_t StartIndex, int32_t EndIndex, double Strike, nql_handle* result);
+/* new VolatilityBumpInstrumentJacobianCap() */
+NQL_API nql_status nql_VolatilityBumpInstrumentJacobianCap_new__void(nql_handle* result);
 /* VolatilityBumpInstrumentJacobianCap.op_Equality(VolatilityBumpInstrumentJacobianCap left, VolatilityBumpInstrumentJacobianCap right) -> bool */
 NQL_API nql_status nql_VolatilityBumpInstrumentJacobianCap_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* VolatilityBumpInstrumentJacobianCap.op_Inequality(VolatilityBumpInstrumentJacobianCap left, VolatilityBumpInstrumentJacobianCap right) -> bool */
@@ -22001,7 +22127,9 @@ NQL_API nql_status nql_VolatilityBumpInstrumentJacobianSwaption_get_EndIndex(nql
 /* VolatilityBumpInstrumentJacobianSwaption.get_StartIndex() -> int */
 NQL_API nql_status nql_VolatilityBumpInstrumentJacobianSwaption_get_StartIndex(nql_handle self, int32_t* result);
 /* new VolatilityBumpInstrumentJacobianSwaption(int StartIndex, int EndIndex) */
-NQL_API nql_status nql_VolatilityBumpInstrumentJacobianSwaption_new(int32_t StartIndex, int32_t EndIndex, nql_handle* result);
+NQL_API nql_status nql_VolatilityBumpInstrumentJacobianSwaption_new__int(int32_t StartIndex, int32_t EndIndex, nql_handle* result);
+/* new VolatilityBumpInstrumentJacobianSwaption() */
+NQL_API nql_status nql_VolatilityBumpInstrumentJacobianSwaption_new__void(nql_handle* result);
 /* VolatilityBumpInstrumentJacobianSwaption.op_Equality(VolatilityBumpInstrumentJacobianSwaption left, VolatilityBumpInstrumentJacobianSwaption right) -> bool */
 NQL_API nql_status nql_VolatilityBumpInstrumentJacobianSwaption_op_Equality(nql_handle left, nql_handle right, bool* result);
 /* VolatilityBumpInstrumentJacobianSwaption.op_Inequality(VolatilityBumpInstrumentJacobianSwaption left, VolatilityBumpInstrumentJacobianSwaption right) -> bool */
@@ -22616,6 +22744,8 @@ NQL_API nql_status nql_YoYInflationTraits_YoyRateImpl(nql_handle interpolation, 
 NQL_API nql_status nql_YoYInflationTraits_get_HasGlobalGuess(bool* result);
 /* YoYInflationTraits.get_MaxIterations() -> int */
 NQL_API nql_status nql_YoYInflationTraits_get_MaxIterations(int32_t* result);
+/* new YoYInflationTraits() */
+NQL_API nql_status nql_YoYInflationTraits_new(nql_handle* result);
 /* YoYInflationUnitDisplacedBlackCapFloorEngine.Bind(YoYInflationIndex index = null, YoYOptionletVolatilitySurface volatility = null, YieldTermStructure nominalTermStructure = null) -> InstrumentResults */
 NQL_API nql_status nql_YoYInflationUnitDisplacedBlackCapFloorEngine_Bind(nql_handle index, nql_handle volatility, nql_handle nominalTermStructure, nql_handle* result);
 /* YoYInflationUnitDisplacedBlackCapFloorEngine.BindOn(YoYInflationCapFloor instrument, YoYInflationIndex index = null, YoYOptionletVolatilitySurface volatility = null, YieldTermStructure nominalTermStructure = null) -> InstrumentResults */
@@ -22627,6 +22757,8 @@ NQL_API nql_status nql_YoYInflationUnitDisplacedBlackCapFloorEngine_Calculate(nq
 NQL_API nql_status nql_YoYInflationVolatilityTraits_UpdateGuess(const double* data, int32_t data_count, double value, int32_t i);
 /* YoYInflationVolatilityTraits.get_MaxIterations() -> int */
 NQL_API nql_status nql_YoYInflationVolatilityTraits_get_MaxIterations(int32_t* result);
+/* new YoYInflationVolatilityTraits() */
+NQL_API nql_status nql_YoYInflationVolatilityTraits_new(nql_handle* result);
 /* YoYOptionletHelper.ImpliedQuote(EvaluationContext context) -> double */
 NQL_API nql_status nql_YoYOptionletHelper_ImpliedQuote(nql_handle self, nql_handle context, double* result);
 /* YoYOptionletHelper.QuoteError(EvaluationContext context) -> double */
@@ -22718,6 +22850,8 @@ NQL_API nql_status nql_ZabrFullFdSmileSection_get_ExerciseTime(nql_handle self, 
 NQL_API nql_status nql_ZabrFullFdSmileSection_get_Model(nql_handle self, nql_handle* result);
 /* new ZabrFullFdSmileSection(double timeToExpiry, double forward, ReadOnlySpan<double> zabrParameters, ReadOnlySpan<double> moneyness = null, int fdRefinement = 5) */
 NQL_API nql_status nql_ZabrFullFdSmileSection_new(double timeToExpiry, double forward, const double* zabrParameters, int32_t zabrParameters_count, const double* moneyness, int32_t moneyness_count, int32_t fdRefinement, nql_handle* result);
+/* new ZabrFullFd() */
+NQL_API nql_status nql_ZabrFullFd_new(nql_handle* result);
 /* ZabrInterpolatedSmileSection.AtmLevel() -> double? */
 NQL_API nql_status nql_ZabrInterpolatedSmileSection_ZabrFullFd_AtmLevel(nql_handle self, double* result, bool* result_has_value);
 /* ZabrInterpolatedSmileSection.Create(Date optionDate, double forward, ReadOnlySpan<double> strikes, bool hasFloatingStrikes, double atmVolatility, ReadOnlySpan<double?> vols, double? alpha, double? beta, double? nu, double? rho, double? gamma, EvaluationContext context, bool isAlphaFixed = false, bool isBetaFixed = false, bool isNuFixed = false, bool isRhoFixed = false, bool isGammaFixed = false, bool vegaWeighted = true, EndCriteria endCriteria = null, OptimizationMethod method = null, DayCounter dc = null) -> ZabrInterpolatedSmileSection<ZabrFullFd> */
@@ -22864,6 +22998,8 @@ NQL_API nql_status nql_ZabrLocalVolatilitySmileSection_get_ExerciseTime(nql_hand
 NQL_API nql_status nql_ZabrLocalVolatilitySmileSection_get_Model(nql_handle self, nql_handle* result);
 /* new ZabrLocalVolatilitySmileSection(double timeToExpiry, double forward, ReadOnlySpan<double> zabrParameters, ReadOnlySpan<double> moneyness = null, int fdRefinement = 5) */
 NQL_API nql_status nql_ZabrLocalVolatilitySmileSection_new(double timeToExpiry, double forward, const double* zabrParameters, int32_t zabrParameters_count, const double* moneyness, int32_t moneyness_count, int32_t fdRefinement, nql_handle* result);
+/* new ZabrLocalVolatility() */
+NQL_API nql_status nql_ZabrLocalVolatility_new(nql_handle* result);
 /* ZabrModel.FdPrice(double strike) -> double */
 NQL_API nql_status nql_ZabrModel_FdPrice__double(nql_handle self, double strike, double* result);
 /* ZabrModel.FdPrice(ReadOnlySpan<double> strikes) -> ImmutableArray<double> */
@@ -22940,6 +23076,8 @@ NQL_API nql_status nql_ZabrShortMaturityLognormalSmileSection_get_ExerciseTime(n
 NQL_API nql_status nql_ZabrShortMaturityLognormalSmileSection_get_Model(nql_handle self, nql_handle* result);
 /* new ZabrShortMaturityLognormalSmileSection(double timeToExpiry, double forward, ReadOnlySpan<double> zabrParameters, ReadOnlySpan<double> moneyness = null, int fdRefinement = 5) */
 NQL_API nql_status nql_ZabrShortMaturityLognormalSmileSection_new(double timeToExpiry, double forward, const double* zabrParameters, int32_t zabrParameters_count, const double* moneyness, int32_t moneyness_count, int32_t fdRefinement, nql_handle* result);
+/* new ZabrShortMaturityLognormal() */
+NQL_API nql_status nql_ZabrShortMaturityLognormal_new(nql_handle* result);
 /* ZabrShortMaturityNormalInterpolatedSmileSection.AtmLevel() -> double? */
 NQL_API nql_status nql_ZabrShortMaturityNormalInterpolatedSmileSection_AtmLevel(nql_handle self, double* result, bool* result_has_value);
 /* ZabrShortMaturityNormalInterpolatedSmileSection.Create(Date optionDate, double forward, ReadOnlySpan<double> strikes, bool hasFloatingStrikes, double atmVolatility, ReadOnlySpan<double?> vols, double? alpha, double? beta, double? nu, double? rho, double? gamma, EvaluationContext context, bool isAlphaFixed = false, bool isBetaFixed = false, bool isNuFixed = false, bool isRhoFixed = false, bool isGammaFixed = false, bool vegaWeighted = true, EndCriteria endCriteria = null, OptimizationMethod method = null, DayCounter dc = null) -> ZabrInterpolatedSmileSection<ZabrShortMaturityNormal> */
@@ -22982,6 +23120,8 @@ NQL_API nql_status nql_ZabrShortMaturityNormalSmileSection_get_ExerciseTime(nql_
 NQL_API nql_status nql_ZabrShortMaturityNormalSmileSection_get_Model(nql_handle self, nql_handle* result);
 /* new ZabrShortMaturityNormalSmileSection(double timeToExpiry, double forward, ReadOnlySpan<double> zabrParameters, ReadOnlySpan<double> moneyness = null, int fdRefinement = 5) */
 NQL_API nql_status nql_ZabrShortMaturityNormalSmileSection_new(double timeToExpiry, double forward, const double* zabrParameters, int32_t zabrParameters_count, const double* moneyness, int32_t moneyness_count, int32_t fdRefinement, nql_handle* result);
+/* new ZabrShortMaturityNormal() */
+NQL_API nql_status nql_ZabrShortMaturityNormal_new(nql_handle* result);
 /* ZabrSmileSection.AtmLevel() -> double? */
 NQL_API nql_status nql_ZabrSmileSection_ZabrFullFd_AtmLevel(nql_handle self, double* result, bool* result_has_value);
 /* ZabrSmileSection.Create(Date d, double forward, ReadOnlySpan<double> zabrParameters, EvaluationContext context, DayCounter dc = null, ReadOnlySpan<double> moneyness = null, int fdRefinement = 5) -> ZabrSmileSection<ZabrFullFd> */
@@ -23324,6 +23464,8 @@ NQL_API nql_status nql_ZeroInflationTraits_ZeroRateImpl(nql_handle interpolation
 NQL_API nql_status nql_ZeroInflationTraits_get_HasGlobalGuess(bool* result);
 /* ZeroInflationTraits.get_MaxIterations() -> int */
 NQL_API nql_status nql_ZeroInflationTraits_get_MaxIterations(int32_t* result);
+/* new ZeroInflationTraits() */
+NQL_API nql_status nql_ZeroInflationTraits_new(nql_handle* result);
 /* ZeroSpreadedTermStructure.get_Calendar() -> Calendar */
 NQL_API nql_status nql_ZeroSpreadedTermStructure_get_Calendar(nql_handle self, nql_handle* result);
 /* ZeroSpreadedTermStructure.get_MaxDate() -> Date */
@@ -23344,6 +23486,8 @@ NQL_API nql_status nql_ZeroYield_ZeroYieldImpl(const double* times, int32_t time
 NQL_API nql_status nql_ZeroYield_get_HasGlobalGuess(bool* result);
 /* ZeroYield.get_MaxIterations() -> int */
 NQL_API nql_status nql_ZeroYield_get_MaxIterations(int32_t* result);
+/* new ZeroYield() */
+NQL_API nql_status nql_ZeroYield_new(nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* ZigguratRng snapshot: Draws(int count) -> ZigguratRng */
 NQL_API nql_status nql_ZigguratRng_Draws(nql_handle self, int32_t count, double** values, double** weights, nql_handle* next);
@@ -23361,6 +23505,8 @@ NQL_API nql_status nql_ZigguratXoshiro256StarStarGaussianRsg_new(int32_t dimensi
 #ifdef NANOQL_EXPERIMENTAL
 /* Ziggurat.get_AllowsErrorEstimate() -> bool */
 NQL_API nql_status nql_Ziggurat_get_AllowsErrorEstimate(bool* result);
+/* new Ziggurat() */
+NQL_API nql_status nql_Ziggurat_new(nql_handle* result);
 #endif /* NANOQL_EXPERIMENTAL */
 
 #ifdef __cplusplus

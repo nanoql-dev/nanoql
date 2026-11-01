@@ -141,6 +141,11 @@ internal sealed class Generation
         }
     }
 
+    /// <summary>Writes the Python package's generated modules into its folder.</summary>
+    /// <param name="package">The package's folder (<c>nanoql/</c>).</param>
+    /// <returns>The functions, classes and enums written.</returns>
+    public (int Functions, int Classes, int Enums) WritePython(string package) => new PythonWriter(Surface).Write(package);
+
     /// <summary>The coverage report's counts.</summary>
     /// <returns>The counts section.</returns>
     public string Report()

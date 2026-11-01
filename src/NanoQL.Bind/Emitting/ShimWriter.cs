@@ -114,10 +114,14 @@ internal sealed class ShimWriter(Surface surface)
         string self = f.Params.Count > 0 && f.Params[0].IsSelf ? Self(f.Params[0]) : string.Empty;
         string holder = CsNames.Of(f.Holder);
         string generic = f.TypeArguments.Count > 0 ? "<" + string.Join(", ", f.TypeArguments.Select(CsNames.Of)) + ">" : string.Empty;
-        string name = f.Member!.Name;
+        string name = f.Member?.Name ?? f.BaseName;
         string call;
         switch (f.Kind)
         {
+            case "new" when f.Member == null:
+                // A struct's implicit parameterless constructor (R16).
+                call = $"default({CsNames.Of(f.Type)})";
+                break;
             case "new":
                 var required = f.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.Has("System.Runtime.CompilerServices.RequiredMemberAttribute")).OrderBy(p => p.MetadataToken).ToList();
@@ -233,6 +237,8 @@ internal sealed class ShimWriter(Surface surface)
             case "enum?": return $"({n} == null ? ({cs})null : ({CsNames.Of(k.Type.NullableOf()!)})(*{n}))";
             case "complex?": return $"({n} == null ? ({cs})null : {n}->ToComplex())";
             case "handle": return $"{Rt}.Get<{cs}>({n}, {pn})";
+            // NULL for an optional struct is its default, what C# passes for the omitted argument (R16).
+            case "boxed" when p.Optional: return $"({n} == 0 ? default({cs}) : {Rt}.Unbox<{cs}>({n}, {pn}))";
             case "boxed": return $"{Rt}.Unbox<{cs}>({n}, {pn})";
             case "boxed?": return $"({n} == 0 ? ({cs})null : {Rt}.Unbox<{CsNames.Of(k.Type.NullableOf()!)}>({n}, {pn}))";
             case "snapshot": return $"{Rt}.Generator<{cs}>({n}, {pn})";

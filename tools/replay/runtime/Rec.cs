@@ -150,6 +150,17 @@ public static class Rec
 
         if (!Pendings.TryGetValue(o, out StrongBox<object?>? b))
         {
+            // A struct made by default or new T(): its implicit constructor's call, written before the call taking it (R16).
+            Type t = o.GetType();
+            if (t.IsValueType && Twins.DefaultNew(t) is { } function && new ValueKey().Equals(o, Activator.CreateInstance(t)))
+            {
+                Args w = Args();
+                w.Result();
+                w.New(o);
+                Call(function, w);
+                return Id(o);
+            }
+
             return null;
         }
 

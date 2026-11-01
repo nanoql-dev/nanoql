@@ -207,4 +207,51 @@ public static class Echo
     /// <param name="x">The span.</param>
     /// <param name="value">The value.</param>
     public static void Fill(Span<double> x, double value) => x.Fill(value);
+
+    /// <summary>A number's total, itself: one of an overload per collection kind, for the layers' dispatch.</summary>
+    /// <param name="x">The number.</param>
+    /// <returns>The number.</returns>
+    public static double Total(double x) => x;
+
+    /// <summary>A collection's total.</summary>
+    /// <param name="values">The values.</param>
+    /// <returns>Their sum.</returns>
+    public static double Total(IReadOnlyList<double> values) => values.Sum();
+
+    /// <summary>A jagged array's total.</summary>
+    /// <param name="rows">The rows.</param>
+    /// <returns>Their values' sum.</returns>
+    public static double Total(IReadOnlyList<IReadOnlyList<double>> rows) => rows.Sum(r => r.Sum());
+
+    /// <summary>A dictionary's total.</summary>
+    /// <param name="nodes">The values by date.</param>
+    /// <returns>Their values' sum.</returns>
+    public static double Total(IReadOnlyDictionary<Date, double> nodes) => nodes.Values.Sum();
+
+    /// <summary>Long integers' total.</summary>
+    /// <param name="values">The values.</param>
+    /// <returns>Their sum.</returns>
+    public static long Total(IReadOnlyList<long> values) => values.Sum();
+
+    /// <summary>Objects' values' total.</summary>
+    /// <param name="objects">The objects.</param>
+    /// <returns>Their values' sum.</returns>
+    public static double Total(IReadOnlyList<EchoObject> objects) => objects.Sum(o => o.Value);
+
+    /// <summary>A number scaled: one of two overloads, the other written into a span in place.</summary>
+    /// <param name="x">The number.</param>
+    /// <param name="factor">The factor.</param>
+    /// <returns>The number scaled.</returns>
+    public static double Scale(double x, double factor) => x * factor;
+
+    /// <summary>A span scaled in place.</summary>
+    /// <param name="x">The span.</param>
+    /// <param name="factor">The factor.</param>
+    public static void Scale(Span<double> x, double factor)
+    {
+        for (int i = 0; i < x.Length; i++)
+        {
+            x[i] *= factor;
+        }
+    }
 }

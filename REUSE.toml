@@ -7,7 +7,7 @@ path = [
   ".gitattributes", ".gitignore", "NanoQL.slnx", "Directory.Build.props",
   ".editorconfig", "global.json", "stylecop.json", "tools/porting-map.json", "tests/vectors/**",
   "tools/vectors/qlnet/packages.lock.json", "bindings/surface.json", "bindings/roles.json", "bindings/NanoQL.Bindings.slnx",
-  "bindings/NanoQL.Bind.Tests/Fixtures/shipped.json", "bindings/replay-floor.json",
+  "bindings/NanoQL.Bind.Tests/Fixtures/shipped.json", "bindings/python/nanoql/py.typed", "bindings/replay-floor.json",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 The nanoql Authors"

@@ -29,6 +29,7 @@ internal sealed class Selector
     private readonly Surface surface = new();
     private readonly HashSet<Type> presetTypes;
     private readonly IReadOnlyList<PresetFactory> presets;
+    private readonly Dictionary<Type, bool> inheritsExperimental = [];
 
     private Selector(MetadataSet set, RolesTable roles, ShippedSurface shipped, ExceptionDocs docs)
     {
@@ -244,6 +245,16 @@ internal sealed class Selector
                     yield return f;
                 }
             }
+        }
+
+        // A struct's implicit parameterless constructor, default(T), which metadata doesn't hold (R16).
+        if (t.IsValueType && !t.IsEnum && t != known.Date && t != known.Period && !presetTypes.Contains(t) && t.GetConstructor(Type.EmptyTypes) == null)
+        {
+            yield return new CFunction
+            {
+                Prefix = prefix, TypeName = tc, BaseName = "new", Kind = "new", Type = t, Holder = t, Static = true,
+                Key = t.KeyName() + "::.ctor()", Experimental = IsExperimental(t), Deprecated = Deprecation(t), Return = new CKind("boxed", t),
+            };
         }
     }
 
@@ -593,7 +604,27 @@ internal sealed class Selector
     }
 
     private bool IsExperimental(MemberInfo m) =>
-        m.Has(WellKnown.ExperimentalAttribute) || (m.DeclaringType != null && IsExperimental(m.DeclaringType));
+        m.Has(WellKnown.ExperimentalAttribute) || (m.DeclaringType != null && IsExperimental(m.DeclaringType)) || (m is Type t && InheritsExperimental(t));
+
+    // A type over an experimental base or interface is experimental too, as a member whose signature names one is: a
+    // user's class over one of nanoql's experimental types (round 3's F3-1).
+    private bool InheritsExperimental(Type t)
+    {
+        if (!inheritsExperimental.TryGetValue(t, out bool e))
+        {
+            static Type Definition(Type x) => x.IsConstructedGenericType ? x.GetGenericTypeDefinition() : x;
+            e = false;
+            for (Type? b = t.BaseType; b != null && set.Ours(b) && !e; b = b.BaseType)
+            {
+                e = Definition(b).Has(WellKnown.ExperimentalAttribute);
+            }
+
+            e = e || t.GetInterfaces().Any(i => set.Ours(i) && Definition(i).Has(WellKnown.ExperimentalAttribute));
+            inheritsExperimental[t] = e;
+        }
+
+        return e;
+    }
 
     private static string? Deprecation(MemberInfo m)
     {
@@ -616,7 +647,8 @@ internal sealed class Selector
             return true;
         }
 
-        return set.Ours(t) && (t.IsConstructedGenericType ? t.GetGenericTypeDefinition() : t).Has(WellKnown.ExperimentalAttribute);
+        // Experimental by its own attribute, its declaring type's, or an experimental base or interface's (F4-1).
+        return set.Ours(t) && IsExperimental(t.IsConstructedGenericType ? t.GetGenericTypeDefinition() : t);
     }
 
     private static string Display(Type t, MemberInfo? m) => TypeNamer.Simple(t) + "." + (m is ConstructorInfo ? "new" : m?.Name ?? string.Empty);
