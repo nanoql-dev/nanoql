@@ -55,9 +55,10 @@ The gates are in docs/porting-playbook.md §8; each passes only with its denomin
   and `ctest --test-dir <build folder> -C Release`; C++'s the same way from `bindings/cpp/tests`; Python's on the test
   build's package, with NumPy installed:
   `python bindings/python/build.py --library <folder> --stage <stage folder> --test-exports`, then
-  `python -m unittest discover -s bindings/python/tests` with the stage folder on `PYTHONPATH`. The native build needs
-  the platform's C toolchain (on Windows, Visual Studio's C++ tools, with the Visual Studio Installer's folder on
-  `PATH`) and CMake.
+  `python -m unittest discover -s bindings/python/tests` with the stage folder on `PYTHONPATH`; Java's with JDK 22 or
+  later and Maven: `python bindings/java/stage.py --library <folder> --jextract <jextract 22> --test-exports`, then
+  `mvn test -Dnanoql.library=<folder>/lib/<the library>` in `bindings/java`. The native build needs the platform's C
+  toolchain (on Windows, Visual Studio's C++ tools, with the Visual Studio Installer's folder on `PATH`) and CMake.
 
 ## Issues and questions
 

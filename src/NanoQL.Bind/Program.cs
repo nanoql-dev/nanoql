@@ -13,11 +13,17 @@ using NanoQL.Bind.Selecting;
 //                             generate, publish the native host with Native AOT, and write the library and headers
 //   shims --out <folder> [--test-exports]
 //                             write the export shims the native host compiles (its build runs this)
+//   headers --out <folder> [--test-exports]
+//                             write the C headers alone: nanoql.h, and a user prefix's (nqlt.h for the test exports)
 //   twins --out <folder>      write the recorder's twins and their map (tools/replay)
 //   replay-c --out <folder>   write the C replayer's dispatch (bindings/c/replay)
 //   python --out <folder>     write the Python package's generated modules (bindings/python)
 //   cpp --out <folder>        write the C++ headers, nanoql.hpp and a user prefix's own (bindings/cpp)
 //   replay-cpp --out <folder> write the C++ replayer's dispatch (bindings/cpp/replay)
+//   java --out <folder> [--prefix <prefix>]...
+//                             write the Java layer's sources over jextract's (bindings/java): every prefix's, or the
+//                             named ones alone (nql for nanoql's jar, a user's for a package beside it)
+//   replay-java --out <folder> write the Java replayer's dispatch (bindings/java/src/test)
 //   report                    print the surface's counts
 // Each takes --assembly <prefix>=<path>... (nanoql's two by default, from beside the tool), --roles <path>... (the
 // repository's bindings/roles.json by default) and --shipped <path> (bindings/surface.shipped.json when it exists).
@@ -44,6 +50,7 @@ static int Run(string[] args)
     var roles = new List<string>();
     string? shipped = null, rid = null, outDir = null, host = null;
     bool testExports = false;
+    var prefixes = new List<string>();
     for (int i = 1; i < args.Length; i++)
     {
         switch (args[i])
@@ -55,6 +62,7 @@ static int Run(string[] args)
             case "--out": outDir = Path.GetFullPath(args[++i]); break;
             case "--host": host = Path.GetFullPath(args[++i]); break;
             case "--test-exports": testExports = true; break;
+            case "--prefix": prefixes.Add(args[++i]); break;
             default: throw new ArgumentException($"unknown argument '{args[i]}'");
         }
     }
@@ -111,6 +119,15 @@ static int Run(string[] args)
         case "report":
             Console.Write(g.Report());
             return 0;
+        case "headers":
+            Directory.CreateDirectory(outDir ?? throw new ArgumentException("headers takes --out <folder>"));
+            foreach ((string path, string text) in g.Files.Where(f => f.Key.StartsWith("c/include/", StringComparison.Ordinal)))
+            {
+                File.WriteAllBytes(Path.Combine(outDir, Path.GetFileName(path)), System.Text.Encoding.UTF8.GetBytes(text));
+                Console.WriteLine($"nanoql-bind: {Path.GetFileName(path)} in {outDir}");
+            }
+
+            return 0;
         case "twins":
             g.WriteTwins(outDir ?? throw new ArgumentException("twins takes --out <folder>"));
             Console.WriteLine($"nanoql-bind: the twins in {outDir} ({sw.Elapsed.TotalSeconds:F1} s)");
@@ -132,6 +149,23 @@ static int Run(string[] args)
             return 0;
         }
 
+        case "java":
+        {
+            int files = g.WriteJava(outDir ?? throw new ArgumentException("java takes --out <folder>"), prefixes.Count > 0 ? prefixes : null);
+            Console.WriteLine($"nanoql-bind: the Java layer in {outDir}: {files:N0} files ({sw.Elapsed.TotalSeconds:F1} s)");
+            return 0;
+        }
+
+        case "replay-java":
+            foreach ((string name, string text) in g.JavaDispatch())
+            {
+                string path = Path.Combine(outDir ?? throw new ArgumentException("replay-java takes --out <folder>"), name);
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.WriteAllBytes(path, System.Text.Encoding.UTF8.GetBytes(text));
+            }
+
+            Console.WriteLine($"nanoql-bind: the Java replayer's dispatch in {outDir} ({sw.Elapsed.TotalSeconds:F1} s)");
+            return 0;
         case "replay-cpp":
             Directory.CreateDirectory(outDir ?? throw new ArgumentException("replay-cpp takes --out <folder>"));
             foreach ((string name, string text) in g.CppDispatch())

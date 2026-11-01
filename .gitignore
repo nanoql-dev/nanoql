@@ -483,3 +483,6 @@ $RECYCLE.BIN/
 
 # Python virtual environment for the vector generators and the licensing tools
 .venv/
+
+# Maven's output for the Java binding (bindings/java/stage.py fills it before mvn)
+bindings/java/target/

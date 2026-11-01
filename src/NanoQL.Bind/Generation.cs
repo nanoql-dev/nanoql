@@ -151,9 +151,19 @@ internal sealed class Generation
         return new CppWriter(Surface).Write(reader.ReadToEnd());
     }
 
+    /// <summary>Writes the Java layer's sources (Java, docs/bindings.md) into a folder, a directory per package.</summary>
+    /// <param name="dir">The sources' root.</param>
+    /// <param name="prefixes">The prefixes whose classes to write, every one when null.</param>
+    /// <returns>The files written.</returns>
+    public int WriteJava(string dir, IReadOnlyCollection<string>? prefixes = null) => new JavaWriter(Surface).Write(dir, prefixes);
+
     /// <summary>The C++ replayer's dispatch files.</summary>
     /// <returns>Each file's text by its name.</returns>
     public Dictionary<string, string> CppDispatch() => new CppReplayWriter(new CppWriter(Surface)).Write();
+
+    /// <summary>The Java replayer's dispatch classes.</summary>
+    /// <returns>Each file's text by its path under the test sources' root.</returns>
+    public Dictionary<string, string> JavaDispatch() => new JavaReplayWriter(new JavaWriter(Surface)).Write();
 
     /// <summary>Writes the Python package's generated modules into its folder.</summary>
     /// <param name="package">The package's folder (<c>nanoql/</c>).</param>

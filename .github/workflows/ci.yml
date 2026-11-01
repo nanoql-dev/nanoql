@@ -147,13 +147,55 @@ jobs:
           path: TestResults/bitid
           if-no-files-found: ignore
 
+  # Java's jextract layer (BIR16): jextract 22, checked against its published SHA-256, run once over nanoql.h and over the
+  # test build's nqlt.h, which nanoql-bind headers writes without a native build. The headers hold fixed-width types
+  # only, so every bindings job compiles this one layer.
+  java-ffi:
+    name: Java's jextract layer
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      JEXTRACT_URL: https://download.java.net/java/early_access/jextract/22/6/openjdk-22-jextract+6-47_linux-x64_bin.tar.gz
+      JEXTRACT_SHA256: a6a42d5b5f4bff119455daadd1ccec9389b2554aea3342f391577843769cc7ec
+    steps:
+      - name: Check out with LF line endings, as the working clones are
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: The headers
+        run: |
+          dotnet build src/NanoQL.Bind -c Release
+          dotnet run --project src/NanoQL.Bind -c Release --no-build -- headers --out "$RUNNER_TEMP/headers" --test-exports
+      - name: jextract 22, checked
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/jextract.tar.gz" "$JEXTRACT_URL"
+          echo "$JEXTRACT_SHA256  $RUNNER_TEMP/jextract.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/jextract.tar.gz" -C "$RUNNER_TEMP"
+      - name: The layers
+        run: python3 bindings/java/stage.py --jextract "$RUNNER_TEMP/jextract-22/bin/jextract" --headers "$RUNNER_TEMP/headers" --layers "$RUNNER_TEMP/java-ffi"
+      - name: Keep the layers
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nanoql-java-ffi
+          path: ${{ runner.temp }}/java-ffi
+          retention-days: 1
+
   # The bindings (docs/bindings.md): the C ABI built with Native AOT on each platform, its checked-in surface checked,
   # the C conformance suite on the test build, and the vector suite recorded and replayed through the C ABI. The weekly
   # run builds Windows x64 and Linux x64; a dispatch builds all six. Linux builds in a manylinux_2_28 container, so the
   # library runs on glibc 2.28 and later; the container has no libicu, which the library doesn't load.
   bindings:
     name: Bindings (${{ matrix.rid }})
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    needs: java-ffi
+    # Not skipped when the java-ffi job fails: C's, C++'s and Python's checks run, and Java's steps are skipped.
+    if: ${{ !cancelled() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private) }}
     strategy:
       fail-fast: false
       matrix:
@@ -304,6 +346,67 @@ jobs:
         with:
           name: nanoql-c-api-${{ matrix.rid }}
           path: ${{ runner.temp }}/archive/nanoql-*-c-api.*
+          retention-days: 1
+      # Java (BIR16): the java-ffi job's layers, the idiomatic layer over nanoql's compiled for Java 22 on the newest LTS
+      # JDK, under -Xcheck:jni on Linux and macOS, which fails the step where it reports a signal handler Native AOT's
+      # runtime replaced; the conformance suite on the test build, the test types a user's package beside nanoql's; the
+      # vector suite replayed at or above B4's floor (Java's enums hold no undefined value and a double[][] no 0-by-n
+      # matrix, so a few refusals' facts stop short of C's); and the jars with their notices.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: needs.java-ffi.result == 'success'
+        with:
+          name: nanoql-java-ffi
+          path: ${{ runner.temp }}/java-ffi
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        if: needs.java-ffi.result == 'success'
+        with:
+          distribution: temurin
+          java-version: "25"
+      - name: Maven 3.9.9, checked
+        if: needs.java-ffi.result == 'success'
+        env:
+          MAVEN_URL: https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.tar.gz
+          MAVEN_SHA512: a555254d6b53d267965a3404ecb14e53c3827c09c3b94b5678835887ab404556bfaf78dcfe03ba76fa2508649dca8531c74bca4d5846513522404d48e8c4ac8b
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/maven.tar.gz" "$MAVEN_URL"
+          sum=$( (sha512sum "$RUNNER_TEMP/maven.tar.gz" 2>/dev/null || shasum -a 512 "$RUNNER_TEMP/maven.tar.gz") | cut -d' ' -f1)
+          [ "$sum" = "$MAVEN_SHA512" ] || { echo "::error::Maven's archive doesn't match its SHA-512"; exit 1; }
+          tar -xzf "$RUNNER_TEMP/maven.tar.gz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/apache-maven-3.9.9/bin" >> "$GITHUB_PATH"
+      - name: The Java layer, its conformance suite and the vector suite replayed through it
+        if: needs.java-ffi.result == 'success'
+        run: |
+          py=$(command -v python3 || command -v python)
+          if [ -d /opt/python ]; then py=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1); fi
+          case "$RUNNER_OS" in Windows) lib=nanoql.dll; sep=';' ;; macOS) lib=libnanoql.dylib; sep=':' ;; *) lib=libnanoql.so; sep=':' ;; esac
+          jvm=""; [ "$RUNNER_OS" = Windows ] || jvm="-Xcheck:jni"
+          java -version
+          "$py" bindings/java/stage.py --library "$RUNNER_TEMP/nanoql-test" --ffi "$RUNNER_TEMP/java-ffi" --rid "$RID" --test-exports --dispatch
+          (cd bindings/java && mvn -B -ntp -Dnanoql.library="$RUNNER_TEMP/nanoql-test/lib/$lib" -Dnanoql.jvmArgs="$jvm" test) 2>&1 | tee "$RUNNER_TEMP/java.log"
+          java --enable-native-access=ALL-UNNAMED $jvm -Dnanoql.library="$RUNNER_TEMP/nanoql-test/lib/$lib" \
+            -cp "bindings/java/target/classes${sep}bindings/java/target/test-classes" org.nanoql.replay.Replay \
+            "$RUNNER_TEMP/recording/trace.jsonl" "$RUNNER_TEMP/recording/java-facts.tsv" bindings/replay-floor.json 2>&1 | tee -a "$RUNNER_TEMP/java.log"
+          # -Xcheck:jni warns, and goes on, where a signal handler the JVM installed was replaced; a forked suite's JVM
+          # writes it to surefire's dump stream. The files that exist alone, so a missing one can't hide a match.
+          shopt -s nullglob
+          logs=("$RUNNER_TEMP/java.log" bindings/java/target/surefire-reports/*.dumpstream)
+          if grep -i "handler modified" "${logs[@]}"; then
+            echo "::error::-Xcheck:jni reports a replaced signal handler (BIR16): libjsig is the user's ruling"; exit 1
+          fi
+      - name: The Java jars
+        if: needs.java-ffi.result == 'success'
+        run: |
+          py=$(command -v python3 || command -v python)
+          if [ -d /opt/python ]; then py=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1); fi
+          classifier=$("$py" bindings/java/stage.py --library "$RUNNER_TEMP/nanoql" --ffi "$RUNNER_TEMP/java-ffi" --rid "$RID" | tail -1)
+          (cd bindings/java && mvn -B -ntp -Dmaven.test.skip=true -Dnanoql.classifier="$classifier" package)
+          "$py" bindings/java/jar_check.py bindings/java/target "$classifier"
+      - name: Keep the Java jars
+        if: needs.java-ffi.result == 'success'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nanoql-java-${{ matrix.rid }}
+          path: bindings/java/target/nanoql-*.jar
           retention-days: 1
 
   # PyPI's nanoql (BIR20): dispatched by hand, the pypi environment's approval, trusted publishing (no stored token),

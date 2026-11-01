@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<!--
+  nanoql for Java (docs/bindings.md, "Java"): jextract's layer over nanoql.h (org.nanoql.ffi) and the idiomatic layer
+  nanoql-bind writes over it, compiled for Java 22, with the hand-written runtime; the platform's library in a natives
+  jar. bindings/java/stage.py fills target/ first: jextract's layer, the generated layer, the notices and the natives.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.nanoql</groupId>
+  <artifactId>nanoql</artifactId>
+  <version>2.0</version>
+  <packaging>jar</packaging>
+
+  <name>nanoql</name>
+  <description>nanoql, a .NET quantitative finance library ported from QuantLib, for Java through its C ABI.</description>
+  <url>https://nanoql.org</url>
+
+  <licenses>
+    <license><name>Apache-2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0</url><comments>nanoql</comments></license>
+    <license><name>BSD-3-Clause</name><url>https://opensource.org/license/bsd-3-clause</url><comments>QuantLib, QLNet, MT19937</comments></license>
+    <license><name>BSL-1.0</name><url>https://www.boost.org/LICENSE_1_0.txt</url><comments>Boost</comments></license>
+    <license><name>CC0-1.0</name><url>https://creativecommons.org/publicdomain/zero/1.0/</url><comments>xoshiro256**</comments></license>
+    <license><name>MIT</name><url>https://opensource.org/license/mit</url><comments>the .NET runtime Native AOT compiles into the library</comments></license>
+    <license><name>Minpack</name><url>https://spdx.org/licenses/Minpack.html</url><comments>MINPACK</comments></license>
+    <license><name>SunPro</name><url>https://spdx.org/licenses/SunPro.html</url><comments>FDLIBM</comments></license>
+    <license><name>LicenseRef-Jaeckel</name><url>https://nanoql.org</url><comments>Peter Jäckel's code, its terms in THIRD_PARTY_NOTICES.md</comments></license>
+    <license><name>LicenseRef-JoeKuo</name><url>https://nanoql.org</url><comments>the Joe–Kuo direction numbers, their terms in THIRD_PARTY_NOTICES.md</comments></license>
+    <license><name>LicenseRef-FpML-Public-License-3.0</name><url>https://nanoql.org</url><comments>FpML's codes, Exhibit A in THIRD_PARTY_NOTICES.md</comments></license>
+  </licenses>
+
+  <developers>
+    <developer><name>Gang Ning</name><email>gangning@nanoql.org</email><organization>The nanoql Authors</organization></developer>
+  </developers>
+
+  <scm>
+    <url>https://nanoql.org</url>
+  </scm>
+
+  <properties>
+    <maven.compiler.release>22</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Filled by stage.py: jextract's layer, the generated layer, the test types' two (a user's package beside
+         nanoql's, compiled with the tests), the replayer's dispatch, the notices, the natives. -->
+    <nanoql.ffi>${project.build.directory}/ffi</nanoql.ffi>
+    <nanoql.generated>${project.build.directory}/generated</nanoql.generated>
+    <nanoql.ffiTest>${project.build.directory}/ffi-test</nanoql.ffiTest>
+    <nanoql.generatedTest>${project.build.directory}/generated-test</nanoql.generatedTest>
+    <nanoql.dispatch>${project.build.directory}/dispatch</nanoql.dispatch>
+    <nanoql.notices>${project.build.directory}/notices</nanoql.notices>
+    <nanoql.natives>${project.build.directory}/natives</nanoql.natives>
+    <!-- The platform's natives jar's classifier (natives-windows-x64, ...); the tests' library (the test build's). -->
+    <nanoql.classifier>natives-windows-x64</nanoql.classifier>
+    <nanoql.library></nanoql.library>
+    <nanoql.jvmArgs></nanoql.jvmArgs>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.4</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>${nanoql.notices}</directory>
+        <targetPath>META-INF</targetPath>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <id>layers</id>
+            <phase>generate-sources</phase>
+            <goals><goal>add-source</goal></goals>
+            <configuration>
+              <sources>
+                <source>${nanoql.ffi}</source>
+                <source>${nanoql.generated}</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>dispatch</id>
+            <phase>generate-test-sources</phase>
+            <goals><goal>add-test-source</goal></goals>
+            <configuration>
+              <sources>
+                <source>${nanoql.ffiTest}</source>
+                <source>${nanoql.generatedTest}</source>
+                <source>${nanoql.dispatch}</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <compilerArgs><arg>-nowarn</arg></compilerArgs>
+          <showWarnings>false</showWarnings>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <argLine>--enable-native-access=ALL-UNNAMED ${nanoql.jvmArgs}</argLine>
+          <systemPropertyVariables>
+            <nanoql.library>${nanoql.library}</nanoql.library>
+          </systemPropertyVariables>
+          <excludes><exclude>org/nanoql/replay/**</exclude></excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.2</version>
+        <executions>
+          <execution>
+            <id>natives</id>
+            <phase>package</phase>
+            <goals><goal>jar</goal></goals>
+            <configuration>
+              <classifier>${nanoql.classifier}</classifier>
+              <classesDirectory>${nanoql.natives}</classesDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>sources</id>
+            <goals><goal>jar-no-fork</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.11.2</version>
+        <configuration>
+          <doclint>none</doclint>
+          <quiet>true</quiet>
+          <excludePackageNames>org.nanoql.ffi:org.nanoql.internal</excludePackageNames>
+          <additionalJOptions><additionalJOption>-J-Xmx3g</additionalJOption></additionalJOptions>
+        </configuration>
+        <executions>
+          <execution>
+            <id>javadoc</id>
+            <goals><goal>jar</goal></goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
