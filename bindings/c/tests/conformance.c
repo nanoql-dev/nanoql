@@ -411,6 +411,8 @@ static void test_codes(void)
 /* ---- handles: ownership, refusals, retirement, a second library's ---- */
 typedef nql_status (*echo_new_fn)(double, const char*, nql_handle*);
 
+static char second_error[512]; /* why the second copy didn't load */
+
 static void* load_second_library(const char* copy_name)
 {
 #if defined(_WIN32)
@@ -421,7 +423,9 @@ static void* load_second_library(const char* copy_name)
     char copy[MAX_PATH];
     snprintf(copy, sizeof copy, "%.*s\\%s", (int)(slash - self), self, copy_name);
     CopyFileA(self, copy, FALSE);
-    return (void*)LoadLibraryA(copy);
+    HMODULE lib = LoadLibraryA(copy);
+    if (!lib) snprintf(second_error, sizeof second_error, "LoadLibrary's error %lu", GetLastError());
+    return (void*)lib;
 #else
     Dl_info info;
     dladdr((void*)&nql_release, &info);
@@ -430,8 +434,13 @@ static void* load_second_library(const char* copy_name)
     snprintf(copy, sizeof copy, "%.*s/%s", (int)(slash - info.dli_fname), info.dli_fname, copy_name);
     char cmd[8300];
     snprintf(cmd, sizeof cmd, "cp '%s' '%s'", info.dli_fname, copy);
-    if (system(cmd) != 0) return NULL;
-    return dlopen(copy, RTLD_NOW | RTLD_LOCAL);
+    if (system(cmd) != 0) {
+        snprintf(second_error, sizeof second_error, "copying the library failed");
+        return NULL;
+    }
+    void* lib = dlopen(copy, RTLD_NOW | RTLD_LOCAL);
+    if (!lib) snprintf(second_error, sizeof second_error, "%s", dlerror());
+    return lib;
 #endif
 }
 
@@ -523,9 +532,15 @@ static void test_handles(void)
     release(h);
     for (int k = 0; k < HELD; k++) release(held[k]);
 
-    /* A second nanoql library in the process: its handle is refused by its tag, never resolved to this library's. */
+    /* A second nanoql library in the process: its handle is refused by its tag, never resolved to this library's. glibc
+       may refuse a second copy the static TLS a library loaded late draws on; one library per process is the rule
+       (BIR9), so that refusal is reported and the foreign checks skipped (R21). */
     void* second = load_second_library("nanoql-second.dll");
-    CHECK(second != NULL, "a second copy of the library loads");
+    if (!second && strstr(second_error, "static TLS")) {
+        printf("the second copy isn't loaded (%s): the foreign checks are skipped\n", second_error);
+    } else {
+        CHECK(second != NULL, "a second copy of the library loads%s%s", second_error[0] ? ": " : "", second_error);
+    }
     if (second) {
         echo_new_fn new2 = (echo_new_fn)symbol(second, "nqlt_EchoObject_new");
         int32_t (*tag2)(void) = (int32_t (*)(void))symbol(second, "nqlt_handle_tag");

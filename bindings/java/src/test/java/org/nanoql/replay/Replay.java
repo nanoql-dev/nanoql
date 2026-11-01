@@ -59,6 +59,9 @@ public final class Replay {
         if (System.getenv("NANOQL_REPLAY_STOPS") != null) {
             stops = Long.parseLong(System.getenv("NANOQL_REPLAY_STOPS"));
         }
+        if (System.getenv("NANOQL_REPLAY_TOLERANCE") != null) {
+            Rp.tolerance = Double.parseDouble(System.getenv("NANOQL_REPLAY_TOLERANCE"));
+        }
         Map<String, int[]> table = new HashMap<>();
         for (int part = 0; part < DispatchTable.NAMES.length; part++) {
             for (int k = 0; k < DispatchTable.NAMES[part].length; k++) {
@@ -161,6 +164,9 @@ public final class Replay {
         System.out.printf("Java replay: facts replayed whole %d of %d; calls replayed %d of %d; refusals matched %d; mismatches %d; live handles at the end %d%n",
                 wholeFacts, facts.size(), replayed, calls, r.refusals, r.mismatches, live);
         layerStops.forEach((why, n) -> System.out.printf("facts stopped at %s: %d%n", why, n));
+        if (Rp.tolerance > 0) {
+            System.out.printf("tolerance %g: %d doubles within it, not bit for bit, the widest %.3g relative%n", Rp.tolerance, Rp.nearDoubles, Rp.widest);
+        }
         boolean below = args.length > 2 && belowFloor(Path.of(args[2]), facts, replayed, r.refusals);
         System.exit(r.mismatches == 0 && live == 0 && !below ? 0 : 1);
     }

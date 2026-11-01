@@ -47,6 +47,10 @@ final class Rp {
     long mismatches;
     long refusals;
     long shown = 20;
+    // Off the reference platform, a double within this relative difference is a match, tallied with the widest (R19).
+    static double tolerance;
+    static long nearDoubles;
+    static double widest;
     Jv afterValues;
     String fn = "";
 
@@ -684,7 +688,19 @@ final class Rp {
     }
 
     private static boolean same(double a, double b) {
-        return (Double.isNaN(a) && Double.isNaN(b)) || Double.doubleToRawLongBits(a) == Double.doubleToRawLongBits(b);
+        if ((Double.isNaN(a) && Double.isNaN(b)) || Double.doubleToRawLongBits(a) == Double.doubleToRawLongBits(b)) {
+            return true;
+        }
+        double d = Math.abs(a - b);
+        double m = Math.max(Math.abs(a), Math.abs(b));
+        if (tolerance > 0 && Double.isFinite(a) && Double.isFinite(b) && d <= tolerance * m) {
+            nearDoubles++;
+            if (m > 0) {
+                widest = Math.max(widest, d / m);
+            }
+            return true;
+        }
+        return false;
     }
 
     private static String hex(double d) {

@@ -12,6 +12,7 @@ Usage: python replay.py <trace.jsonl> [<facts report.tsv>]   (the package on the
 
 import datetime
 import json
+import math
 import re
 import struct
 import sys
@@ -29,6 +30,9 @@ class Stop(Exception):
 
 
 STOPS = int(__import__("os").environ.get("NANOQL_REPLAY_STOPS", "0"))  # how many facts' stops to print
+# Off the reference platform, a double within this relative difference is a match, tallied with the widest (R19).
+TOLERANCE = float(__import__("os").environ.get("NANOQL_REPLAY_TOLERANCE", "0"))
+NEAR = [0, 0.0]  # doubles within the tolerance, not bit for bit, and the widest relative difference
 
 
 def type_key(name):
@@ -42,7 +46,14 @@ def hexdouble(s):
 
 
 def same_double(a, b):
-    return (a != a and b != b) or struct.pack("<d", a) == struct.pack("<d", b)
+    if (a != a and b != b) or struct.pack("<d", a) == struct.pack("<d", b):
+        return True
+    d, m = abs(a - b), max(abs(a), abs(b))
+    if TOLERANCE > 0 and math.isfinite(a) and math.isfinite(b) and d <= TOLERANCE * m:
+        NEAR[0] += 1
+        NEAR[1] = max(NEAR[1], d / m) if m else NEAR[1]
+        return True
+    return False
 
 
 class Replay:
@@ -407,6 +418,8 @@ def main():
     print(f"Python replay: facts replayed whole {whole_facts} of {len(facts)}; calls replayed {replayed} of {calls}; refusals matched "
           f"{r.refusals}; mismatches {r.mismatches}; live handles at the end {nanoql.live_handles()}; overload calls through the dispatch "
           f"{r.dispatched}, of them another form than C#'s {r.other_form}")
+    if TOLERANCE > 0:
+        print(f"tolerance {TOLERANCE:g}: {NEAR[0]} doubles within it, not bit for bit, the widest {NEAR[1]:.3g} relative")
     return 0 if r.mismatches == 0 else 1
 
 

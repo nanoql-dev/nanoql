@@ -210,6 +210,9 @@ jobs:
       RID: ${{ matrix.rid }}
       # The SDK runs without ICU in the Linux container, as the library does.
       DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: ${{ matrix.container != '' && '1' || '' }}
+      # Off Windows x64, the reference platform, a replayed double within this relative difference of C#'s is a match,
+      # tallied (R19): macOS on Arm64 differs in some results' last bits.
+      NANOQL_REPLAY_TOLERANCE: ${{ matrix.rid != 'win-x64' && '1e-12' || '0' }}
     steps:
       - name: Check out with LF line endings, as the working clones are
         run: |
@@ -281,9 +284,7 @@ jobs:
           # Windows x64 is the reference, as in build-test: elsewhere a vector red is reported and the trace kept, since
           # the replays compare each binding with C#'s own results on the same machine.
           keep=$([ "$RID" = win-x64 ] || echo --keep-reds)
-          # Every method optimised from its first call, as Native AOT compiles it (R18's probe): on ARM64 the JIT's quick
-          # first tier and the library's optimised code may round differently.
-          DOTNET_TieredCompilation=0 dotnet tools/replay/bin/Release/net10.0/NanoQL.Replay.dll record --tests tests/NanoQL.Tests/bin/Release/net10.0 \
+          dotnet tools/replay/bin/Release/net10.0/NanoQL.Replay.dll record --tests tests/NanoQL.Tests/bin/Release/net10.0 \
             --twins "$RUNNER_TEMP/twins" --out "$RUNNER_TEMP/recording" $keep
       - name: The vector suite, replayed in C
         run: |
@@ -372,10 +373,11 @@ jobs:
         with:
           name: nanoql-java-ffi
           path: ${{ runner.temp }}/java-ffi
+      # Temurin 25, but Microsoft's build on Windows Arm64, which Temurin 25 has none for (R20).
       - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         if: needs.java-ffi.result == 'success'
         with:
-          distribution: temurin
+          distribution: ${{ matrix.rid == 'win-arm64' && 'microsoft' || 'temurin' }}
           java-version: "25"
       - name: Maven 3.9.9, checked
         if: needs.java-ffi.result == 'success'
@@ -384,9 +386,11 @@ jobs:
           MAVEN_SHA512: a555254d6b53d267965a3404ecb14e53c3827c09c3b94b5678835887ab404556bfaf78dcfe03ba76fa2508649dca8531c74bca4d5846513522404d48e8c4ac8b
         run: |
           curl -sSfL -o "$RUNNER_TEMP/maven.tar.gz" "$MAVEN_URL"
-          sum=$( (sha512sum "$RUNNER_TEMP/maven.tar.gz" 2>/dev/null || shasum -a 512 "$RUNNER_TEMP/maven.tar.gz") | cut -d' ' -f1)
+          # The archive on stdin: given a name holding a backslash (Windows' RUNNER_TEMP), sha512sum escapes the line.
+          sum=$( (sha512sum < "$RUNNER_TEMP/maven.tar.gz" 2>/dev/null || shasum -a 512 < "$RUNNER_TEMP/maven.tar.gz") | cut -d' ' -f1)
           [ "$sum" = "$MAVEN_SHA512" ] || { echo "::error::Maven's archive doesn't match its SHA-512"; exit 1; }
-          tar -xzf "$RUNNER_TEMP/maven.tar.gz" -C "$RUNNER_TEMP"
+          # From the folder itself: GNU tar reads a Windows path's colon as a remote host and unquotes its backslashes.
+          (cd "$RUNNER_TEMP" && tar -xzf maven.tar.gz)
           echo "$RUNNER_TEMP/apache-maven-3.9.9/bin" >> "$GITHUB_PATH"
       - name: The Java layer, its conformance suite and the vector suite replayed through it
         if: needs.java-ffi.result == 'success'
