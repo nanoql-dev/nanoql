@@ -31,6 +31,7 @@ namespace NanoQL.Methods;
 /// QuantLib's. A documented divergence.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmDividendHandler : StepCondition
 {
     private readonly double[] x;

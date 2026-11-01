@@ -21,6 +21,7 @@ namespace NanoQL.Models;
 /// inside the value (the caplet's τ times the period's discount ratio), and a value of 0 pays nothing.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class MultiStepPeriodCapletSwaptions : MultiProductMultiStep
 {
     private readonly ImmutableArray<double> paymentTimes;

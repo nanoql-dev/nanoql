@@ -17,6 +17,7 @@ namespace NanoQL.Experimental;
 /// allocating after the first.
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class HimalayaMultiPathPricer : PathPricer<MultiPath>
 {
     private readonly Payoff payoff;

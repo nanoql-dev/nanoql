@@ -15,6 +15,7 @@ namespace NanoQL.Methods;
 /// place, the same at every step, as QuantLib's. The diffusion is ½σ²r, the CIR generator's, where QuantLib's is σ²r
 /// (<c>fdmcirop.cpp:55-60</c>), the generator of a process with twice the variance (the S-van plan's VR4 (xv)).
 /// </remarks>
+[WorkingType]
 internal sealed class FdmCIRRatesPart
 {
     private readonly TripleBandLinearOp dyMap;

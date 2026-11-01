@@ -30,6 +30,7 @@ namespace NanoQL.Numerics;
 /// </remarks>
 /// <typeparam name="TLds">The low-discrepancy sequence generator.</typeparam>
 /// <typeparam name="TPrng">The pseudo-random sequence generator.</typeparam>
+[WorkingType]
 public sealed class RandomizedLDS<TLds, TPrng> : IRsg
     where TLds : class, IRsg
     where TPrng : class, IRsg

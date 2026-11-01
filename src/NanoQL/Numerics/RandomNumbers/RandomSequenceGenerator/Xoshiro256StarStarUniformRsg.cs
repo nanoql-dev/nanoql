@@ -13,6 +13,7 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// A convenience name: nanoql's own code uses the generic type. A mutable working type, as its base is.
 /// </remarks>
+[WorkingType]
 public sealed class Xoshiro256StarStarUniformRsg : RandomSequenceGenerator<Xoshiro256StarStarUniformRng>
 {
     /// <summary>Initializes a new instance of the <see cref="Xoshiro256StarStarUniformRsg"/> class.</summary>

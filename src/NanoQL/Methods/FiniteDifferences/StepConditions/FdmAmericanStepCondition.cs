@@ -16,6 +16,7 @@ namespace NanoQL.Methods;
 /// A working type (the S-eq plan's SEQR1): it walks the layout with an iterator it holds and resets, so applying it
 /// allocates nothing.
 /// </remarks>
+[WorkingType]
 public sealed class FdmAmericanStepCondition : StepCondition
 {
     private readonly FdmMesher mesher;

@@ -12,6 +12,7 @@ namespace NanoQL.Numerics;
 /// </summary>
 /// <remarks>A working type (the S-mm plan's MR1 (ii)): each added vector changes it, and it isn't
 /// thread-safe.</remarks>
+[WorkingType]
 public sealed class BasisIncompleteOrdered
 {
     private readonly List<double[]> currentBasis = [];

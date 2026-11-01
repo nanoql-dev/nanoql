@@ -26,6 +26,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class FdmDupire1dOp : FdmLinearOpComposite
 {
     private readonly TripleBandLinearOp mapT;

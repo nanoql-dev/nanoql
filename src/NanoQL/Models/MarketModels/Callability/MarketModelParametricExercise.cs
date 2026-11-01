@@ -17,6 +17,7 @@ namespace NanoQL.Models;
 /// <c>MarketModelNodeDataProvider</c> and <c>ParametricExercise</c>; the second is the interface
 /// <see cref="IParametricExercise"/> here.
 /// </remarks>
+[WorkingType]
 public abstract class MarketModelParametricExercise : MarketModelNodeDataProvider, IParametricExercise
 {
     /// <summary>The number of data at each exercise: the rule's variables.</summary>

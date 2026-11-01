@@ -27,6 +27,7 @@ namespace NanoQL.Methods;
 /// <c>model->dynamics()</c> each step: the model is immutable, so they are the same each time.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmHullWhiteOp : FdmLinearOpComposite
 {
     private readonly int direction;

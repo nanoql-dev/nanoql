@@ -19,6 +19,7 @@ namespace NanoQL.PricingEngines;
 /// A working type: it holds the buffer it passes the final prices through, which QuantLib builds per path, so a path
 /// prices without allocating after the first.
 /// </remarks>
+[WorkingType]
 public sealed class EuropeanMultiPathPricer : PathPricer<MultiPath>
 {
     private readonly BasketPayoff payoff;

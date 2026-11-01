@@ -18,6 +18,7 @@ namespace NanoQL.Methods;
 /// into the caller's span, and <see cref="ToMatrix"/> returns a copy of the operator's matrix. The direction's
 /// locations are deduplicated and sorted, as QuantLib's set of them, so the weights' offsets are distinct.
 /// </remarks>
+[WorkingType]
 public sealed class NthOrderDerivativeOp : FdmLinearOp
 {
     private readonly SparseMatrix m;

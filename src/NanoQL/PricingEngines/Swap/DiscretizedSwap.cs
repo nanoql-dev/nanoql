@@ -52,6 +52,7 @@ namespace NanoQL.PricingEngines;
 /// back to the swap's time, so no coupon's bond allocates.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class DiscretizedSwap : DiscretizedAsset
 {
     private readonly FixedVsFloatingSwapArguments arguments;

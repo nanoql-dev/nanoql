@@ -26,6 +26,7 @@ namespace NanoQL.Numerics;
 /// </para>
 /// </remarks>
 /// <typeparam name="TRng">The generator of the sequence's elements.</typeparam>
+[WorkingType]
 public class RandomSequenceGenerator<TRng> : IRsg
     where TRng : class, IRng
 {

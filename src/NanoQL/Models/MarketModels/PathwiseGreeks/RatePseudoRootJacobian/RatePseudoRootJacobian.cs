@@ -26,6 +26,7 @@ namespace NanoQL.Models;
 /// periods of a power of two and no displacement, QuantLib's bits.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class RatePseudoRootJacobian
 {
     private readonly Matrix pseudoRoot;

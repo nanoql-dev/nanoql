@@ -19,6 +19,7 @@ namespace NanoQL.Methods;
 /// values, so an application allocates nothing (VD12). The exercise times are found by equality, as QuantLib's
 /// <c>std::find</c>.
 /// </remarks>
+[WorkingType]
 public sealed class FdmSimpleSwingCondition : StepCondition
 {
     private readonly double[] exerciseTimes;

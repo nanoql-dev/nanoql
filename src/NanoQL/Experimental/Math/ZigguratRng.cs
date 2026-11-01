@@ -27,6 +27,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class ZigguratRng : ISeedableRng<ZigguratRng>
 {
     // tail probability

@@ -25,6 +25,7 @@ namespace NanoQL.Numerics;
 /// keeps its own copy of the points (CR7 (ix)).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class DiscrepancyStatistics : SequenceStatistics
 {
     private readonly List<double[]> points = [];

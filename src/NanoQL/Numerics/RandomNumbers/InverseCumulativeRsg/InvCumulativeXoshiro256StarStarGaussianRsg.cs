@@ -16,6 +16,7 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// A convenience name: nanoql's own code uses the generic type. A mutable working type, as its base is.
 /// </remarks>
+[WorkingType]
 public sealed class InvCumulativeXoshiro256StarStarGaussianRsg
     : InverseCumulativeRsg<RandomSequenceGenerator<Xoshiro256StarStarUniformRng>, InverseCumulativeNormal>
 {

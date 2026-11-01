@@ -1,0 +1,17 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Fixtures that stop nanoql-bind (docs/bindings.md, "Bound engines"): bound only by the tool's tests of its stops,
+       apart from the fixtures every other test binds, since a stop ends the whole generation. -->
+  <PropertyGroup>
+    <RootNamespace>NanoQL.Bind.StopFixtures</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);NQL0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NanoQL\NanoQL.csproj" />
+  </ItemGroup>
+</Project>

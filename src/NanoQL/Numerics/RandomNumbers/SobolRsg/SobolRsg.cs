@@ -64,6 +64,7 @@ namespace NanoQL.Numerics;
 /// the draw that would take the counter there throws "period exceeded", where QuantLib's behaviour is undefined.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class SobolRsg : ISeedableRsg<SobolRsg>
 {
     // QuantLib's M_LN2.

@@ -21,6 +21,7 @@ namespace NanoQL.Methods;
 /// over its own times, read through <see cref="YieldTermStructure"/>'s internal <c>ContinuousForwardRate</c>, its
 /// bits <c>ForwardRate</c>'s. A splitting solve in another direction returns its input, as QuantLib's.
 /// </remarks>
+[WorkingType]
 public sealed class FdmOrnsteinUhlenbeckOp : FdmLinearOpComposite
 {
     private readonly FdmMesher mesher;

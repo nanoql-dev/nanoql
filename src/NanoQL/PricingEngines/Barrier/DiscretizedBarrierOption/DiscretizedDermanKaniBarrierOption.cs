@@ -19,6 +19,7 @@ namespace NanoQL.PricingEngines;
 /// beside it, kept and initialized again at each reset, and reads the lattice's grid into a buffer it reserves at its
 /// widest step, so a rollback allocates nothing.
 /// </remarks>
+[WorkingType]
 public sealed class DiscretizedDermanKaniBarrierOption
     : DiscretizedAsset, IDiscretizedBarrierAsset<DiscretizedDermanKaniBarrierOption>
 {

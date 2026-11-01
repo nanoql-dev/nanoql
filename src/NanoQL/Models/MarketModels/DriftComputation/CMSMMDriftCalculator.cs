@@ -26,6 +26,7 @@ namespace NanoQL.Models;
 /// uninitialized entry, an undefined read (<c>Divergences/MarketModelUndefinedReadsTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class CMSMMDriftCalculator
 {
     private readonly int numberOfRates;

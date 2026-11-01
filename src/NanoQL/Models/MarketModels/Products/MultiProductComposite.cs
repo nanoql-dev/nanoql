@@ -14,6 +14,7 @@ namespace NanoQL.Models;
 /// A working type (the S-mmp plan's MMPR1 (i)); a part's end is recorded and the composite's end is every part's or
 /// its last step (<see cref="MarketModelComposite"/>; MMPR4 (vii), a documented divergence).
 /// </remarks>
+[WorkingType]
 public sealed class MultiProductComposite : MarketModelComposite
 {
     /// <summary>Initializes a new instance of the <see cref="MultiProductComposite"/> class, with no part.</summary>

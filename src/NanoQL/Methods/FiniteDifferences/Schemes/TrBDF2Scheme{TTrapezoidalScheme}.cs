@@ -32,6 +32,7 @@ namespace NanoQL.Methods;
 /// scheme holds, so a one-directional step allocates nothing after the first.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class TrBDF2Scheme<TTrapezoidalScheme> : IFdmScheme
     where TTrapezoidalScheme : class, IFdmScheme
 {

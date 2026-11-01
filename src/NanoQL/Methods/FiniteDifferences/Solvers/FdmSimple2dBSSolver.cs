@@ -18,6 +18,7 @@ namespace NanoQL.Methods;
 /// at the first read, and immutable after. The second coordinate is read at its logarithm, as QuantLib reads it: a
 /// value at 1 is the value at the second direction's location 0.
 /// </remarks>
+[WorkingType]
 public sealed class FdmSimple2dBSSolver
 {
     private readonly Fdm2DimSolver solver;

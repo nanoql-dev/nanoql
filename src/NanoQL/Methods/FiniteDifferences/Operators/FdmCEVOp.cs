@@ -28,6 +28,7 @@ namespace NanoQL.Methods;
 /// direction 0 of the transposed mesher (the S-van plan's VR4 (xiv)). In direction 0, QuantLib's bits.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmCEVOp : FdmLinearOpComposite
 {
     private readonly YieldTermStructure rTS;

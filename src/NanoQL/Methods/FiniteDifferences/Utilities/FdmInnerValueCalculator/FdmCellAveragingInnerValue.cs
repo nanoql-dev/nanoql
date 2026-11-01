@@ -19,6 +19,7 @@ namespace NanoQL.Methods;
 /// at that call's time, as QuantLib's does, so each cell is integrated once. An extension point, as in QuantLib:
 /// <see cref="FdmLogInnerValue"/> derives from it.
 /// </remarks>
+[WorkingType]
 public class FdmCellAveragingInnerValue : FdmInnerValueCalculator
 {
     private readonly Payoff payoff;

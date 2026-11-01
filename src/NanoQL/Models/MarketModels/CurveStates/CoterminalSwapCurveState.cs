@@ -20,6 +20,7 @@ namespace NanoQL.Models;
 /// read into the state's own buffers, as QuantLib's are. A rate read at the number of rates, which QuantLib's index
 /// check admits and reads past its vectors, is refused with QuantLib's text (MR3 (xx)).
 /// </remarks>
+[WorkingType]
 public sealed class CoterminalSwapCurveState : CurveState
 {
     private readonly double[] discRatios;

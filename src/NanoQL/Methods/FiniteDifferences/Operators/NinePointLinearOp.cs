@@ -27,6 +27,7 @@ namespace NanoQL.Methods;
 /// QuantLib's <c>swap</c> and move members are C++ value semantics: <see cref="Clone"/> and references replace them.
 /// </para>
 /// </remarks>
+[WorkingType]
 public class NinePointLinearOp : FdmLinearOp
 {
     /// <summary>The first direction.</summary>

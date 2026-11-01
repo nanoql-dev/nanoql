@@ -401,6 +401,10 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   S-core's the Ornstein-Uhlenbeck and n-th order derivative operators, the storage condition and the old framework's
   TR-BDF2 scheme, each writing into the caller's span, beside an immutable jump mesher and numerical differentiation.
   Every other public type is immutable.
+- **The mark:** every working type carries `[WorkingType]` (`WorkingTypeAttribute`; a class deriving from a marked
+  class, or implementing a marked interface, is one too), and its own summary or remarks call it a working type, in
+  the singular; `WorkingTypeMarkTests` holds the two in step both ways. The bindings read the mark to keep working
+  types off their handles, which any thread may share (docs/bindings.md).
 - **A copy where C++ copies:** a C# class is a reference, so a port copies explicitly (`Clone()`) wherever C++ copies
   an `Array` or `Matrix` by value (an assignment, a copy construction, a by-value parameter) and then changes either
   copy. The review checks each such site.

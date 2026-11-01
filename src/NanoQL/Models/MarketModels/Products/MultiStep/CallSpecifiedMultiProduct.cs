@@ -35,6 +35,7 @@ namespace NanoQL.Models;
 /// nothing (the upper-bound engine's one-product rebate of a hedge of several, <c>upperboundengine.cpp:124-125</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public class CallSpecifiedMultiProduct : MarketModelMultiProduct
 {
     private readonly MarketModelMultiProduct underlying;

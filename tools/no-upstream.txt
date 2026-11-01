@@ -4,6 +4,7 @@
 # Source files with no QuantLib upstream. Each carries only the nanoql copyright line and the Apache-2.0 licence
 # identifier, and no Upstream line. tools/check-upstream.py reads this list.
 # One path or glob per line, relative to the repository root, with forward slashes; "**" matches any depth.
+bindings/**
 src/NanoQL/ConventionProvider.cs
 src/NanoQL/CurrencyData.cs
 src/NanoQL/EnumArguments.cs
@@ -43,7 +44,10 @@ src/NanoQL/PricingEngines/Vanilla/ApproximationWindow.cs
 src/NanoQL/TermStructures/Volatility/EquityFX/LocalVolTermStructureOnClock.cs
 src/NanoQL/TermStructures/Yield/YieldTermStructureOnClock.cs
 src/NanoQL/Time/CalendarEdits.cs
+src/NanoQL/WorkingTypeAttribute.cs
+src/NanoQL.Bind/**
 src/NanoQL.Extensions/Conventions/**
+src/NanoQL.Native/**
 tests/NanoQL.Tests/Conventions/**
 tests/NanoQL.Tests/Divergences/**
 tests/NanoQL.Tests/Extensions/**
@@ -54,4 +58,5 @@ tests/NanoQL.Tests/Reference/**
 tests/NanoQL.Tests/Vectors/**
 tools/**/*.py
 tools/cxx/**
+tools/replay/**
 tools/vectors/qlnet/**

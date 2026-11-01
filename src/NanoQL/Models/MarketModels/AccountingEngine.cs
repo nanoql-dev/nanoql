@@ -26,6 +26,7 @@ namespace NanoQL.Models;
 /// evolver's steps (MMPR4's refusals).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class AccountingEngine
 {
     private readonly MarketModelEvolver evolver;

@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "comment": "Where a member that takes an engine places an argument it supplies that names alone can place: a value, an object two of the engine's parameters can take, a calibration helper's trial model. 'argument' counts the member's supplied arguments after the instrument and the context, from 0; 'parameters' names the engine parameters it may go into (docs/bindings.md, 'Bound engines').",
+  "roles": [
+    { "member": "NanoQL.Experimental.CallableBond.CleanPriceOAS", "argument": 0, "parameters": ["spread"] },
+    { "member": "NanoQL.Experimental.CallableBond.EffectiveConvexity", "argument": 0, "parameters": ["spread"] },
+    { "member": "NanoQL.Experimental.CallableBond.EffectiveDuration", "argument": 0, "parameters": ["spread"] },
+    { "member": "NanoQL.Experimental.CallableBond.OAS", "argument": 0, "parameters": ["spread"] },
+    { "member": "NanoQL.Experimental.VannaVolgaDoubleBarrierEngine.Calculate", "argument": 1, "parameters": ["series"] },
+    { "member": "NanoQL.Models.CapHelper.SetPricingEngine", "argument": 0, "parameters": ["model"] },
+    { "member": "NanoQL.Models.HestonModelHelper.SetPricingEngine", "argument": 0, "parameters": ["model", "hestonModel", "vasicekProcess"] },
+    { "member": "NanoQL.Models.SwaptionHelper.SetPricingEngine", "argument": 0, "parameters": ["model"] }
+  ]
+}

@@ -15,6 +15,7 @@ namespace NanoQL.Models;
 /// A working type (the S-mm plan's MR2 (b)). A rate past the times, which QuantLib reads unchecked, is refused (MR3
 /// (xx)).
 /// </remarks>
+[WorkingType]
 public sealed class AlphaFormInverseLinear : AlphaForm
 {
     private readonly double[] times;

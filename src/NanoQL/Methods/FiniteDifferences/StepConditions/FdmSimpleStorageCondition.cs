@@ -23,6 +23,7 @@ namespace NanoQL.Methods;
 /// mesher of another number of dimensions is refused here; and QuantLib copies the values into its grid before
 /// checking their size, which is checked first here.
 /// </remarks>
+[WorkingType]
 public sealed class FdmSimpleStorageCondition : StepCondition
 {
     private readonly double[] exerciseTimes;

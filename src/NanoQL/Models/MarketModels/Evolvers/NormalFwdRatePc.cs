@@ -26,6 +26,7 @@ namespace NanoQL.Models;
 /// <c>Divergences/NormalFwdRatePcInitialStateTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class NormalFwdRatePc : MarketModelEvolver
 {
     private readonly int initialStep;

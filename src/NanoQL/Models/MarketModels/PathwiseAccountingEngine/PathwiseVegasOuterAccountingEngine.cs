@@ -33,6 +33,7 @@ namespace NanoQL.Models;
 /// <see cref="RatePseudoRootJacobianAllElements"/>'s derivative.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class PathwiseVegasOuterAccountingEngine
 {
     private readonly LogNormalFwdRateEuler evolver;

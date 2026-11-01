@@ -17,6 +17,7 @@ namespace NanoQL.Methods;
 /// A working type (the S-eq plan's SEQR1), outside the finite-difference core's allocation pin: each step runs S7's
 /// <see cref="AdaptiveRungeKutta{T}"/>, which allocates its state as QuantLib's does (the S-eq plan's SEQD5).
 /// </remarks>
+[WorkingType]
 public sealed class MethodOfLinesScheme : IFdmScheme
 {
     private const double NullReal = 3.4028234663852886e38;

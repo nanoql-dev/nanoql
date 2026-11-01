@@ -17,6 +17,7 @@ namespace NanoQL.Numerics;
 /// method itself stays immutable and each minimization starts afresh (the S-core plan's CR5 (a)). An extension point:
 /// a method of one's own derives its state from it.
 /// </remarks>
+[WorkingType]
 public abstract class LineSearchBasedMethodState
 {
 }

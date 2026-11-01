@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "version": "2.0",
+  "functions": [
+    { "name": "fx_Lone_Value", "key": "NanoQL.Bind.Tests.Fixtures.Lone::Value()" },
+    { "name": "fx_Twin_get_Value", "key": "NanoQL.Bind.Tests.Fixtures.A.Twin::get_Value()" }
+  ],
+  "types": [
+    { "name": "NanoQL.Bind.Tests.Fixtures.A.Twin", "cname": "Twin" }
+  ]
+}

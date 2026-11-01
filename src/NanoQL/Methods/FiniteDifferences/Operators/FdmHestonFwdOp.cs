@@ -34,6 +34,7 @@ namespace NanoQL.Methods;
 /// reads.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmHestonFwdOp : FdmLinearOpComposite
 {
     private readonly FdmSquareRootFwdOpTransformationType type;

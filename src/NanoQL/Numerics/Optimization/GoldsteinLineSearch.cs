@@ -14,6 +14,7 @@ namespace NanoQL.Numerics;
 /// gradient its previous call left; a <see cref="LineSearchBasedMethod"/> runs each minimization on a new one
 /// (<see cref="NewSearch"/>).
 /// </remarks>
+[WorkingType]
 public sealed class GoldsteinLineSearch : LineSearch
 {
     // QuantLib's Null<Real>(), the function value and gradient norm of a problem reset and not yet evaluated:

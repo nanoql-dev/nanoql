@@ -22,6 +22,7 @@ namespace NanoQL.Experimental;
 /// </remarks>
 /// <typeparam name="TRng">The uniform generator.</typeparam>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class FarlieGumbelMorgensternCopulaRng<TRng>
     where TRng : class, IRng
 {

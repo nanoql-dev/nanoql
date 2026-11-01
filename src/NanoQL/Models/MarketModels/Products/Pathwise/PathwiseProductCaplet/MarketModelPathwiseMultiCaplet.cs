@@ -13,6 +13,7 @@ namespace NanoQL.Models;
 /// with its derivative aᵢ with respect to fᵢ; mainly a test product.
 /// </summary>
 /// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+[WorkingType]
 public sealed class MarketModelPathwiseMultiCaplet : MarketModelPathwiseMultiProduct
 {
     private readonly ImmutableArray<double> accruals;

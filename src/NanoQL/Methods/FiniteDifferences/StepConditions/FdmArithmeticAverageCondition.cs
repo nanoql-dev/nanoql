@@ -26,6 +26,7 @@ namespace NanoQL.Methods;
 /// them, +4.4% against an exact Monte Carlo on two fixings on one date (<c>Divergences/AsianDuplicateFixingsTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmArithmeticAverageCondition : StepCondition
 {
     private readonly double[] x;

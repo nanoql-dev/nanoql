@@ -21,6 +21,7 @@ namespace NanoQL.Experimental;
 /// not thread-safe. Experimental, as in QuantLib.
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class FdmZabrOp : FdmLinearOpComposite
 {
     private readonly NinePointLinearOp dxyMap;

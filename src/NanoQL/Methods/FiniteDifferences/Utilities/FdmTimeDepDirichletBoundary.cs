@@ -18,6 +18,7 @@ namespace NanoQL.Methods;
 /// step; the schemes call it in QuantLib's order. Its values before the first <see cref="SetTime"/> are 0, where
 /// QuantLib's are uninitialized.
 /// </remarks>
+[WorkingType]
 public sealed class FdmTimeDepDirichletBoundary : BoundaryCondition<FdmLinearOp>
 {
     private readonly ImmutableArray<int> indices;

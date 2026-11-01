@@ -34,6 +34,7 @@ namespace NanoQL.Methods;
 /// one risk-free curve the two are the same.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class Fdm2dBlackScholesOp : FdmLinearOpComposite
 {
     private const double NullReal = 3.4028234663852886e38;

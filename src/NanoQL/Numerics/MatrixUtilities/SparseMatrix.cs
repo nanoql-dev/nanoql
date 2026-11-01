@@ -24,6 +24,7 @@ namespace NanoQL.Numerics;
 /// a product then reads past its vector.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class SparseMatrix
 {
     private readonly CompressedMatrix m;

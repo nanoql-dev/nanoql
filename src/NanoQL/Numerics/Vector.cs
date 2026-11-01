@@ -33,6 +33,7 @@ namespace NanoQL.Numerics;
 /// </para>
 /// </remarks>
 [CollectionBuilder(typeof(Vector), nameof(Create))]
+[WorkingType]
 public sealed class Vector : IEquatable<Vector>, IEnumerable<double>
 {
     private double[] data;

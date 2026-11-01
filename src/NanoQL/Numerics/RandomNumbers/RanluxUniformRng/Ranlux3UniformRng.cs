@@ -14,6 +14,7 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// A mutable working type, as its base is; its seed is explicit, in [1, 4294967295] (<see cref="Ranlux64UniformRng"/>).
 /// </remarks>
+[WorkingType]
 public sealed class Ranlux3UniformRng : Ranlux64UniformRng, ISeedableRng<Ranlux3UniformRng>
 {
     /// <summary>Initializes a new instance of the <see cref="Ranlux3UniformRng"/> class from a seed.</summary>

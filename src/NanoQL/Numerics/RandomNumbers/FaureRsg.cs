@@ -27,6 +27,7 @@ namespace NanoQL.Numerics;
 /// other numbers and refuses after about 10^18. These are the Python wheel's numbers.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FaureRsg : IRsg
 {
     private readonly int dimensionality;

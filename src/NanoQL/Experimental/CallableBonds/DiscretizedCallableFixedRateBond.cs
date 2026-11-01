@@ -35,6 +35,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class DiscretizedCallableFixedRateBond : DiscretizedAsset
 {
     private readonly CallableBondArguments arguments;

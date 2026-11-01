@@ -17,6 +17,7 @@ namespace NanoQL.Models;
 /// A working type (the S-mmp plan's MMPR1 (i)): it holds its two bumped curve states and a forwards buffer, QuantLib's
 /// members, so a step allocates nothing.
 /// </remarks>
+[WorkingType]
 public sealed class MarketModelPathwiseCoterminalSwaptionsNumericalDeflated : MarketModelPathwiseMultiProduct
 {
     private readonly ImmutableArray<double> rateTimes;

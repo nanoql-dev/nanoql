@@ -37,6 +37,7 @@ namespace NanoQL.Models;
 /// evolver's last step.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class PathwiseVegasAccountingEngine
 {
     private readonly LogNormalFwdRateEuler evolver;

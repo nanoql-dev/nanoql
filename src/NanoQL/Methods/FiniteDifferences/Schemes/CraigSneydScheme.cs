@@ -19,6 +19,7 @@ namespace NanoQL.Methods;
 /// scheme holds, so a step allocates nothing after the first. TR-BDF2 drives it as its trapezoidal sub-scheme, on an
 /// operator set over TR-BDF2's whole step (the S-eq plan's SEQR9).
 /// </remarks>
+[WorkingType]
 public sealed class CraigSneydScheme : IFdmScheme, IFdmSetOperatorScheme
 {
     private const double NullReal = 3.4028234663852886e38;

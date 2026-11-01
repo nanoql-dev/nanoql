@@ -38,6 +38,7 @@ namespace NanoQL.PricingEngines;
 /// (the S-sr plan's SSD9); the underlying's grid is read into a buffer reserved at its widest step.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class DiscretizedConvertible : DiscretizedAsset
 {
     private readonly ConvertibleBondArguments arguments;

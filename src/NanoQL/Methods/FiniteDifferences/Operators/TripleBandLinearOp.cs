@@ -31,6 +31,7 @@ namespace NanoQL.Methods;
 /// replace them.
 /// </para>
 /// </remarks>
+[WorkingType]
 public class TripleBandLinearOp : FdmLinearOp
 {
     /// <summary>The direction the operator acts in.</summary>

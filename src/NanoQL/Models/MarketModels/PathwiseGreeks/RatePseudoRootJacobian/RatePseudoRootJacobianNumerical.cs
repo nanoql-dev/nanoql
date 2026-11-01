@@ -16,6 +16,7 @@ namespace NanoQL.Models;
 /// A working type (the S-mmp plan's MMPR1 (i)): its scratch is QuantLib's members, so an instance serves one caller
 /// at a time.
 /// </remarks>
+[WorkingType]
 public sealed class RatePseudoRootJacobianNumerical
 {
     private readonly int aliveIndex;

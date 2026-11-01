@@ -15,6 +15,7 @@ namespace NanoQL.Models;
 /// and it isn't thread-safe; <see cref="Clone"/> is deep, and the alpha calibration copies its form for each
 /// calibration. An extension point, as in QuantLib.
 /// </remarks>
+[WorkingType]
 public abstract class AlphaForm
 {
     /// <summary>Initializes a new instance of the <see cref="AlphaForm"/> class.</summary>

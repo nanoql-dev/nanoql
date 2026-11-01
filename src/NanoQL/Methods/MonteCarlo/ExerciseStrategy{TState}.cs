@@ -18,6 +18,7 @@ namespace NanoQL.Methods;
 /// steps its own <see cref="Clone"/>.
 /// </remarks>
 /// <typeparam name="TState">The state the strategy reads.</typeparam>
+[WorkingType]
 public abstract class ExerciseStrategy<TState>
 {
     /// <summary>The times at which the strategy can exercise.</summary>

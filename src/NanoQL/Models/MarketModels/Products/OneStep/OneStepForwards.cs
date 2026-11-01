@@ -15,6 +15,7 @@ namespace NanoQL.Models;
 /// A working type (the S-mmp plan's MMPR1 (i)). It refuses inputs QuantLib reads past (MMPR4's refusals): no strike,
 /// more strikes than rates, and fewer accruals or payment times than strikes.
 /// </remarks>
+[WorkingType]
 public sealed class OneStepForwards : MultiProductOneStep
 {
     private readonly ImmutableArray<double> accruals;

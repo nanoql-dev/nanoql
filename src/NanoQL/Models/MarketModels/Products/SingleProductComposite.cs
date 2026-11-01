@@ -23,6 +23,7 @@ namespace NanoQL.Models;
 /// past its buffer (<c>Divergences/SingleProductCompositeBufferTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class SingleProductComposite : MarketModelComposite
 {
     /// <summary>Initializes a new instance of the <see cref="SingleProductComposite"/> class, with no part.</summary>

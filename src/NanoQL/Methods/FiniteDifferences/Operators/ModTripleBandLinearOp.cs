@@ -11,6 +11,7 @@ namespace NanoQL.Methods;
 /// A working type, as <see cref="TripleBandLinearOp"/> is (the S-hes plan's HD6, HD8): the forward operators set their
 /// boundary rows through it. QuantLib's const and mutable accessor pairs are each one accessor returning a reference.
 /// </remarks>
+[WorkingType]
 public sealed class ModTripleBandLinearOp : TripleBandLinearOp
 {
     /// <summary>Initializes a new instance of the <see cref="ModTripleBandLinearOp"/> class, its bands zero.</summary>

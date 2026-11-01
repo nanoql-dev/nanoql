@@ -91,7 +91,7 @@ public release.
 
 | Step | Content |
 |---|---|
-| S-bind | Bindings: a language-neutral C interface over Native AOT's exports, with a generated C header, opaque handles released by the caller, and error codes with a last-error message; then wrappers generated over that header, each with its package and running the vector suite. v0.1 ships four bindings: Python, the C header, C++, and Java through Java's Foreign Function & Memory API (JDK 22 or later, no JNI). It builds the bindings once, over v0.1's whole API, after S-conv. |
+| S-bind | Bindings, over 2.0's whole API ([bindings.md](bindings.md)): one C interface over Native AOT's exports, generated from the built assemblies by the tool `nanoql-bind`, with the header `nanoql.h`, opaque handles any thread may share, error codes with a last-error message, conventions by name, generators as snapshots drawn in batches, and engines bound with their inputs; a user's own assembly compiles into the same native library. Over it, Python (a wheel), the C header, C++ (a header with RAII) and Java through Java's Foreign Function & Memory API (JDK 22 or later, no JNI), each with its package and its conformance suite, the vector suite replayed through each bit for bit. |
 | S-xl | The Excel add-in, after S-bind: Excel-DNA on `net10.0-windows`; curve and swap functions from Excel; immutable objects behind handles keyed by their inputs; export of a cell's call in the vector format; debugging by stepping from Excel into nanoql's source. |
 | Release | The documentation, with a validation report per module, and the v0.1 release. |
 

@@ -19,6 +19,7 @@ namespace NanoQL.Models;
 /// computation and isn't thread-safe; one evolver builds one per step. The forwards' and the drifts' sizes are checked
 /// at every computation, QuantLib's extra-safety checks (SD8), the plain and reduced forms included.
 /// </remarks>
+[WorkingType]
 public sealed class LMMNormalDriftCalculator
 {
     private readonly int numberOfRates;

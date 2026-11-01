@@ -18,6 +18,7 @@ namespace NanoQL.Experimental;
 /// </summary>
 /// <remarks>A working type, owned by one path's valuation.</remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class AdaptedPathPayoffValuationData
 {
     private readonly Matrix path;

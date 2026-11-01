@@ -22,6 +22,7 @@ namespace NanoQL.Methods;
 /// <c>MatMult</c> requires. <see cref="Apply(Vector)"/> is QuantLib's value-returning form.
 /// </para>
 /// </remarks>
+[WorkingType]
 public abstract class FdmLinearOp
 {
     /// <summary>Applies the operator to <paramref name="r"/>, writing the result into the caller's span.</summary>

@@ -16,6 +16,7 @@ namespace NanoQL.Models;
 /// A working type (the S-mmp plan's MMPR1 (i)): it steps its own clone of the exercise value. A call-specified
 /// product's rebate in QuantLib's callable cases.
 /// </remarks>
+[WorkingType]
 public sealed class ExerciseAdapter : MultiProductMultiStep
 {
     private readonly MarketModelExerciseValue exercise;

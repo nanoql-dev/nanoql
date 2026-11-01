@@ -17,6 +17,7 @@ namespace NanoQL.Models;
 /// <see cref="NextStep"/> change it, and it isn't thread-safe. <see cref="Values"/> fills a span of the current
 /// exercise's count of data, which QuantLib's resizes its caller's vector to.
 /// </remarks>
+[WorkingType]
 public abstract class MarketModelNodeDataProvider
 {
     /// <summary>Gets the number of exercises.</summary>

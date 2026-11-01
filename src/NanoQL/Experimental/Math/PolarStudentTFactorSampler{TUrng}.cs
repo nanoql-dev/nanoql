@@ -34,6 +34,7 @@ namespace NanoQL.Experimental;
 /// </remarks>
 /// <typeparam name="TUrng">The uniform generator.</typeparam>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class PolarStudentTFactorSampler<TUrng> : IRsg
     where TUrng : class, IRng
 {

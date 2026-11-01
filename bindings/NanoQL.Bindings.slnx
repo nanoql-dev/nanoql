@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="../src/NanoQL/NanoQL.csproj" />
+    <Project Path="../src/NanoQL.Extensions/NanoQL.Extensions.csproj" />
+    <Project Path="../src/NanoQL.Bind/NanoQL.Bind.csproj" />
+    <Project Path="../src/NanoQL.Native/NanoQL.Native.csproj" />
+  </Folder>
+  <Folder Name="/bindings/">
+    <Project Path="NanoQL.Bind.StopFixtures/NanoQL.Bind.StopFixtures.csproj" />
+    <Project Path="NanoQL.Bind.Tests/NanoQL.Bind.Tests.csproj" />
+    <Project Path="NanoQL.Bind.TestTypes/NanoQL.Bind.TestTypes.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="../tools/replay/NanoQL.Replay.csproj" />
+  </Folder>
+</Solution>

@@ -16,6 +16,7 @@ namespace NanoQL.Models;
 /// A working type (the S-mmp plan's MMPR1 (i)). Fewer accruals or payment times than rates are refused, where QuantLib
 /// reads past them (MMPR4's refusals).
 /// </remarks>
+[WorkingType]
 public sealed class MultiStepCoinitialSwaps : MultiProductMultiStep
 {
     private readonly ImmutableArray<double> fixedAccruals;

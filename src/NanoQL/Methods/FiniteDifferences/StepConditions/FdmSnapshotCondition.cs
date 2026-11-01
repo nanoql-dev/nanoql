@@ -15,6 +15,7 @@ namespace NanoQL.Methods;
 /// A working type (the S-eq plan's SEQR1): it copies the values into a buffer of its own, allocated at its first
 /// snapshot, where QuantLib assigns a new array.
 /// </remarks>
+[WorkingType]
 public sealed class FdmSnapshotCondition : StepCondition
 {
     private double[] values = [];

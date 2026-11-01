@@ -28,6 +28,7 @@ namespace NanoQL.Methods;
 /// at construction, with the same text.
 /// </para>
 /// </remarks>
+[WorkingType]
 public class MultiPathGenerator<TGsg> : IPathGenerator<MultiPath>
     where TGsg : class, IRsg
 {

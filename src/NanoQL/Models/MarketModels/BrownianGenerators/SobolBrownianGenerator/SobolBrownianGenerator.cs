@@ -17,6 +17,7 @@ namespace NanoQL.Models;
 /// A working type (the S-hes plan's HR3 (iv), (v)). Its seed is explicit, in [1, 4294967295], as
 /// <see cref="SobolRsg"/> takes it: QuantLib's default 0 draws one from the clock.
 /// </remarks>
+[WorkingType]
 public sealed class SobolBrownianGenerator : SobolBrownianGeneratorBase
 {
     private readonly InverseCumulativeRsg<SobolRsg, InverseCumulativeNormal> generator;

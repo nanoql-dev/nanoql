@@ -19,6 +19,7 @@ namespace NanoQL.Numerics;
 /// of the generator's buffer, valid until its next draw, which changes it; a caller that keeps one copies it.
 /// Construction from a seed in generic code is <see cref="ISeedableRsg{TSelf}"/>'s.
 /// </remarks>
+[WorkingType]
 public interface IRsg
 {
     /// <summary>Gets the dimension of each sequence.</summary>

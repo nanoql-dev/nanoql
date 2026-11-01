@@ -23,6 +23,7 @@ namespace NanoQL.Models;
 /// amounts.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class MarketModelPathwiseMultiDeflatedCaplet : MarketModelPathwiseMultiProduct
 {
     private readonly ImmutableArray<double> rateTimes;

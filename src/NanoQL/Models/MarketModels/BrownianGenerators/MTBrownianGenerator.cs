@@ -18,6 +18,7 @@ namespace NanoQL.Models;
 /// a seed from the clock, is refused, as <see cref="MersenneTwisterUniformRng"/> refuses it. A step's output length
 /// and a path's exhaustion are checked always, QuantLib's extra-safety checks.
 /// </remarks>
+[WorkingType]
 public sealed class MTBrownianGenerator : BrownianGenerator
 {
     private readonly int factors;

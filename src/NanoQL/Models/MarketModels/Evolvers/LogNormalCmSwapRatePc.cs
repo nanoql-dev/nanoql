@@ -27,6 +27,7 @@ namespace NanoQL.Models;
 /// <c>Divergences/SwapRatePcInitialStateTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class LogNormalCmSwapRatePc : MarketModelEvolver
 {
     private readonly int spanningForwards;

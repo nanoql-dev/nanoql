@@ -23,6 +23,7 @@ namespace NanoQL.Methods;
 /// rate is the curve's over its own times, read through <see cref="YieldTermStructure"/>'s internal
 /// <c>ContinuousForwardRate</c>, its bits <c>ForwardRate</c>'s.
 /// </remarks>
+[WorkingType]
 public sealed class FdmSabrOp : FdmLinearOpComposite
 {
     private readonly YieldTermStructure rTS;

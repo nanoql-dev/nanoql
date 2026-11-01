@@ -33,6 +33,7 @@ namespace NanoQL.Numerics;
 /// that carry the weight, as <see cref="GeneralStatistics"/>' is.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class IncrementalStatistics : IStatistics
 {
     // acc_: count, min, max, the sum of weights, the weighted sum, the weighted variance and the weighted moments' sums

@@ -13,6 +13,7 @@ namespace NanoQL.Methods;
 /// at the lower edge and downwind at the upper one.
 /// </summary>
 /// <remarks>A working type, as its base is (the S-eq plan's SEQR1).</remarks>
+[WorkingType]
 public sealed class FirstDerivativeOp : TripleBandLinearOp
 {
     /// <summary>Initializes a new instance of the <see cref="FirstDerivativeOp"/> class.</summary>

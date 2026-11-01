@@ -31,6 +31,7 @@ namespace NanoQL.Numerics;
 /// column) are indexed loops run backwards. <c>m[i][j]</c> and <c>m(i, j)</c> are both <c>m[i, j]</c>.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class Matrix : IEquatable<Matrix>
 {
     private double[] data;

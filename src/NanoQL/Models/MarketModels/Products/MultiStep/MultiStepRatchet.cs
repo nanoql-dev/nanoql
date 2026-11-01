@@ -22,6 +22,7 @@ namespace NanoQL.Models;
 /// where QuantLib's swap and inverse floater pay theirs.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class MultiStepRatchet : MultiProductMultiStep
 {
     private readonly ImmutableArray<double> accruals;

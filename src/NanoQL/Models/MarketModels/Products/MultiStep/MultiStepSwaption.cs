@@ -14,6 +14,7 @@ namespace NanoQL.Models;
 /// at the start, the path finished. It steps through every rate time up to the swap's start; mainly a test product.
 /// </summary>
 /// <remarks>A working type (the S-mmp plan's MMPR1 (i)); the payoff is shared, immutable.</remarks>
+[WorkingType]
 public sealed class MultiStepSwaption : MultiProductMultiStep
 {
     private readonly int startIndex;

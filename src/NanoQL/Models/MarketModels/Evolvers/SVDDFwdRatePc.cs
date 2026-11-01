@@ -26,6 +26,7 @@ namespace NanoQL.Models;
 /// process of no variates per step, whose spread QuantLib divides by, is refused (the S-mm plan's MR3 (xx)).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class SVDDFwdRatePc : MarketModelEvolver
 {
     private readonly int initialStep;

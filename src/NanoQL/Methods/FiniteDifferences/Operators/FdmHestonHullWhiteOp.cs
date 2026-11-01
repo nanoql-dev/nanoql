@@ -31,6 +31,7 @@ namespace NanoQL.Methods;
 /// times (<c>fdmhestonhullwhiteop.cpp:62</c>; HR7 (xix)), and its reads stand where the curves share the clock.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmHestonHullWhiteOp : FdmLinearOpComposite
 {
     private readonly NinePointLinearOp hestonCorrMap;

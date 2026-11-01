@@ -31,6 +31,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class GemanRoncoroniProcess : StochasticProcess1D
 {
     private readonly double x0;

@@ -28,6 +28,7 @@ namespace NanoQL.Models;
 /// on the derived states only.
 /// </para>
 /// </remarks>
+[WorkingType]
 public abstract class CurveState
 {
     /// <summary>Initializes a new instance of the <see cref="CurveState"/> class.</summary>

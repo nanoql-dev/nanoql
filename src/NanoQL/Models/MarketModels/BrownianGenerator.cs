@@ -13,6 +13,7 @@ namespace NanoQL.Models;
 /// A working type (the S2R2 rule; the S-hes plan's HR3 (iv)): each draw changes it, it is owned by one computation and
 /// it is not thread-safe. An extension point, as in QuantLib: the Mersenne-twister and Sobol generators derive it.
 /// </remarks>
+[WorkingType]
 public abstract class BrownianGenerator
 {
     /// <summary>Initializes a new instance of the <see cref="BrownianGenerator"/> class.</summary>

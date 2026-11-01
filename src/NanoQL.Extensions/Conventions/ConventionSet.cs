@@ -732,8 +732,9 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         SwapIndexConventions? q = null;
         SwapIndexConventions Q() => q ??= reference();
 
-        // QuantLib's families take their short variant up to and including a year
-        bool isShort = !(tenor > new Period(1, TimeUnit.Years));
+        // QuantLib's families take their short variant up to and including a year; a family with none never asks, as
+        // QuantLib's don't (a 365-day tenor against a year is undecidable)
+        bool isShort = (s.ShortIborIndex is not null || s.ShortFixedLegTenor is not null) && !(tenor > new Period(1, TimeUnit.Years));
         (string? ibor, Period? iborTenor) = isShort && s.ShortIborIndex is not null
             ? (s.ShortIborIndex, s.ShortIborIndexTenor)
             : (s.IborIndex, s.IborIndexTenor);
@@ -2637,7 +2638,7 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         }
 
         SwapIndexRecord s = (e is null ? null : SwapFieldsOf(name, layers.Length, visiting)) ?? throw Unknown("swap index", name, paramName);
-        bool isShort = !(tenor > new Period(1, TimeUnit.Years));
+        bool isShort = (s.ShortIborIndex is not null || s.ShortFixedLegTenor is not null) && !(tenor > new Period(1, TimeUnit.Years));
         (string? ibor, Period? iborTenor) = isShort && s.ShortIborIndex is not null ? (s.ShortIborIndex, s.ShortIborIndexTenor) : (s.IborIndex, s.IborIndexTenor);
         string iborName = ibor ?? throw Missing("swap index", name, "IborIndex");
         string family = s.Family ?? name;

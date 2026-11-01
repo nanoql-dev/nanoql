@@ -22,6 +22,7 @@ namespace NanoQL.Numerics;
 /// the search's own vectors, valid until it next changes.
 /// </para>
 /// </remarks>
+[WorkingType]
 public abstract class LineSearch
 {
     /// <summary>The current value of the search direction.</summary>

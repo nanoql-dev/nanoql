@@ -33,6 +33,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class SamplerMirrorGaussian : IAnnealingSampler<SamplerMirrorGaussian>
 {
     // QuantLib's passes before the fold in one step (XRR13)

@@ -21,6 +21,7 @@ namespace NanoQL.Numerics;
 /// </remarks>
 /// <typeparam name="TRng">The uniform generator, of deviates in (0, 1).</typeparam>
 /// <typeparam name="TIc">The inverse cumulative distribution.</typeparam>
+[WorkingType]
 public class InverseCumulativeRng<TRng, TIc> : IRng
     where TRng : class, IRng
     where TIc : struct, IInverseCumulative

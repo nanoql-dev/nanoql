@@ -27,6 +27,7 @@ namespace NanoQL.Experimental;
 /// <typeparam name="TInitTraits">The policy's initialization parameters.</typeparam>
 /// <typeparam name="TUsng">The uniform sequence generator.</typeparam>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class LatentModelFactorSampler<TCopula, TInitTraits, TUsng> : IRsg
     where TCopula : struct, ICopulaPolicy<TCopula, TInitTraits>
     where TInitTraits : struct

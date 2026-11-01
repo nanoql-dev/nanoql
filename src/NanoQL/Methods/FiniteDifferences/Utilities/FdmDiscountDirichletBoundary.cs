@@ -16,6 +16,7 @@ namespace NanoQL.Methods;
 /// A working type, as the <see cref="FdmTimeDepDirichletBoundary"/> it applies through. The times are the curve's own,
 /// as QuantLib reads them.
 /// </remarks>
+[WorkingType]
 public sealed class FdmDiscountDirichletBoundary : BoundaryCondition<FdmLinearOp>
 {
     private readonly FdmTimeDepDirichletBoundary bc;

@@ -18,6 +18,7 @@ namespace NanoQL.Methods;
 /// A working type (the S-eq plan's SEQR1): the rollback steps the caller's values in place through the scheme, so the
 /// model's inner loop allocates nothing.
 /// </remarks>
+[WorkingType]
 public sealed class FiniteDifferenceModel<TScheme>
     where TScheme : IFdmScheme
 {

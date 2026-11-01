@@ -1,0 +1,33 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- nanoql-bind's own tests: the generator's rules (docs/bindings.md) over nanoql's assemblies and this assembly's
+       fixtures, which it binds under the prefix fx as it would a user's. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NanoQL.Bind.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);NQL0001;CS0618</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NanoQL.Bind\NanoQL.Bind.csproj" />
+    <!-- Bound only by the tests of the generator's stops. -->
+    <ProjectReference Include="..\NanoQL.Bind.StopFixtures\NanoQL.Bind.StopFixtures.csproj" />
+  </ItemGroup>
+
+  <!-- The last release's surface the frozen names' test reads. -->
+  <ItemGroup>
+    <None Include="Fixtures\shipped.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

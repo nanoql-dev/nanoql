@@ -19,6 +19,7 @@ namespace NanoQL.Methods;
 /// builds them at its first rollback and reuses them, a scheme's state being only its step, which each rollback sets,
 /// and the buffers it holds, so a later rollback of the same size allocates nothing.
 /// </remarks>
+[WorkingType]
 public sealed class FdmBackwardSolver
 {
     private readonly FdmLinearOpComposite map;

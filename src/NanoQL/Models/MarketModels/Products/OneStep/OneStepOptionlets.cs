@@ -17,6 +17,7 @@ namespace NanoQL.Models;
 /// A working type (the S-mmp plan's MMPR1 (i)); the payoffs are shared, immutable. It refuses inputs QuantLib reads
 /// past (MMPR4's refusals): no payoff, more payoffs than rates, and fewer accruals or payment times than payoffs.
 /// </remarks>
+[WorkingType]
 public sealed class OneStepOptionlets : MultiProductOneStep
 {
     private readonly ImmutableArray<double> accruals;

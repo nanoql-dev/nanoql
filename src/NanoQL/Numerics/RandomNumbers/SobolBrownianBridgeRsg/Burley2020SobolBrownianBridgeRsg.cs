@@ -20,6 +20,7 @@ namespace NanoQL.Numerics;
 /// the generator again from its arguments and draws the paths this one has drawn, the scrambled sequence being
 /// deterministic, so the copy's next draw is this one's.
 /// </remarks>
+[WorkingType]
 public sealed class Burley2020SobolBrownianBridgeRsg : IRsg
 {
     private readonly int factors;

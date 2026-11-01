@@ -32,6 +32,7 @@ namespace NanoQL.TermStructures;
 /// in place.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class BootstrapState<TTermStructure> : IBootstrapState
     where TTermStructure : TermStructure
 {

@@ -189,6 +189,23 @@ public class IndexSetTests
     }
 
     [Fact]
+    public void ASwapFamilyWithNoShortVariantTakesATenorOfAYearInDays()
+    {
+        // QuantLib builds UsdLiborSwapIsdaFixAm(365 * Days): only a family with a short variant compares its tenor with a
+        // year, which 365 days against a year can't answer.
+        var tenor = new Period(365, TimeUnit.Days);
+        Assert.Equal(IndexFields.Of(new UsdLiborSwapIsdaFixAm(tenor)), IndexFields.Of(ConventionSet.QuantLib.SwapIndex("UsdLiborSwapIsdaFixAm", tenor)));
+        using (ConventionProvider.Use(ConventionSet.QuantLib))
+        {
+            Assert.Equal(IndexFields.Of(new UsdLiborSwapIsdaFixAm(tenor)), IndexFields.Of(ConventionSet.QuantLib.SwapIndex("UsdLiborSwapIsdaFixAm", tenor)));
+        }
+
+        // A family with one still can't, as QuantLib's EuriborSwapIsdaFixA(365 * Days) can't.
+        Assert.Throws<NanoQLException>(() => new EuriborSwapIsdaFixA(tenor));
+        Assert.Throws<NanoQLException>(() => ConventionSet.QuantLib.SwapIndex("EuriborSwapIsdaFixA", tenor));
+    }
+
+    [Fact]
     public void AUsersSwapAndInflationIndexesAreBuiltFromTheirRecords()
     {
         ConventionSet set = ConventionsText.OnQuantLib("""

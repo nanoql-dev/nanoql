@@ -19,6 +19,7 @@ namespace NanoQL.Methods;
 /// </para>
 /// <para>An extension point: a later unit's scheme implements it.</para>
 /// </remarks>
+[WorkingType]
 public interface IFdmScheme
 {
     /// <summary>Steps the values back from time <paramref name="t"/> by the set step, in place.</summary>

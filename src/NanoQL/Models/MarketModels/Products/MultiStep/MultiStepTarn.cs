@@ -22,6 +22,7 @@ namespace NanoQL.Models;
 /// two schedules coincide, QuantLib's value.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class MultiStepTarn : MultiProductMultiStep
 {
     private readonly ImmutableArray<double> accruals;

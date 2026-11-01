@@ -25,6 +25,7 @@ namespace NanoQL.Numerics;
 /// its end, and a number of points below 1, a division by 0, are refused (CR7 (xxvii)).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class LatticeRsg : IRsg
 {
     private readonly int dimensionality;

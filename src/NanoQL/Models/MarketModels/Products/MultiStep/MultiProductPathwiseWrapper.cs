@@ -26,6 +26,7 @@ namespace NanoQL.Models;
 /// A product not deflated gives QuantLib's amounts.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class MultiProductPathwiseWrapper : MarketModelMultiProduct
 {
     private readonly MarketModelPathwiseMultiProduct innerProduct;

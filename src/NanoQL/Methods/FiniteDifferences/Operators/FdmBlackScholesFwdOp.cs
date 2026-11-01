@@ -25,6 +25,7 @@ namespace NanoQL.Methods;
 /// (the S-van plan's VR4 (xxiii), the mismatched-dates class); structures that share the risk-free curve's times keep
 /// QuantLib's bits. A documented divergence.
 /// </remarks>
+[WorkingType]
 public sealed class FdmBlackScholesFwdOp : FdmLinearOpComposite
 {
     private const double NullReal = 3.4028234663852886e38;

@@ -29,6 +29,7 @@ namespace NanoQL.Methods;
 /// operators, which here build operators without a time setter.
 /// </para>
 /// </remarks>
+[WorkingType]
 public class TridiagonalOperator
 {
     /// <summary>The size: the length of the main diagonal.</summary>

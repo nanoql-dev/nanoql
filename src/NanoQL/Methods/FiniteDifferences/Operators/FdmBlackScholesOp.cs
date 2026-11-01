@@ -44,6 +44,7 @@ namespace NanoQL.Methods;
 /// 2026-10-20 and 2026-10-21, under R8).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmBlackScholesOp : FdmLinearOpComposite
 {
     private const double NullReal = 3.4028234663852886e38;

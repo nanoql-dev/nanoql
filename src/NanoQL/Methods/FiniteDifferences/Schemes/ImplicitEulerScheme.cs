@@ -20,6 +20,7 @@ namespace NanoQL.Methods;
 /// through a buffer the scheme holds, so a one-directional step allocates nothing after the first; the iterative
 /// solvers allocate their vectors, as QuantLib's do.
 /// </remarks>
+[WorkingType]
 public sealed class ImplicitEulerScheme : IFdmScheme, IFdmSetOperatorScheme
 {
     private const double NullReal = 3.4028234663852886e38;

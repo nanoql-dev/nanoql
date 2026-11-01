@@ -24,6 +24,7 @@ namespace NanoQL.Models;
 /// coefficient vectors than exercises, or an exercise's coefficients more than its basis functions.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class LongstaffSchwartzExerciseStrategy : ExerciseStrategy<CurveState>
 {
     private readonly MarketModelBasisSystem basisSystem;

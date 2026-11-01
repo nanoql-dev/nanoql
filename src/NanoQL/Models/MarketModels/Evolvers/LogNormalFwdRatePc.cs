@@ -20,6 +20,7 @@ namespace NanoQL.Models;
 /// model serves many evolvers on many threads. One step allocates nothing after a path's warm-up (MR1 (v);
 /// <c>Conventions/MarketModelAllocationTests.cs</c>).
 /// </remarks>
+[WorkingType]
 public sealed class LogNormalFwdRatePc : MarketModelEvolver
 {
     private readonly int initialStep;

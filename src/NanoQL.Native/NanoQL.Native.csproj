@@ -1,0 +1,69 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The native host (docs/bindings.md): the C ABI's runtime (handles, errors, strings, arrays, the fixed functions),
+       published with Native AOT as one shared library, nanoql.dll, libnanoql.so or libnanoql.dylib. nanoql-bind writes
+       the export shims for the assemblies it binds into obj/nanoql-bind/ and passes their folder as NanoQLShimsDir;
+       NanoQLTestExports=true makes the test build (8-bit handle generations, the test types' functions). -->
+  <PropertyGroup>
+    <RootNamespace>NanoQL.Native</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PublishAot>true</PublishAot>
+    <NativeLib>Shared</NativeLib>
+    <IsAotCompatible>true</IsAotCompatible>
+    <!-- The library loads no ICU, so it runs where libicu is absent and its messages read the same in every locale. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- The bindings export the experimental API, each declaration behind its language's opt-in (R3's consent here). -->
+    <NoWarn>$(NoWarn);NQL0001</NoWarn>
+    <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
+    <DefineConstants Condition="'$(NanoQLTestExports)' == 'true'">$(DefineConstants);NANOQL_TEST_EXPORTS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NanoQL\NanoQL.csproj" />
+    <ProjectReference Include="..\NanoQL.Extensions\NanoQL.Extensions.csproj" />
+  </ItemGroup>
+
+  <!-- The tool, built first, writes the shims into obj/ before the compile, unless its build command already did. -->
+  <ItemGroup>
+    <ProjectReference Include="..\NanoQL.Bind\NanoQL.Bind.csproj" ReferenceOutputAssembly="false" GlobalPropertiesToRemove="RuntimeIdentifier;SelfContained;PublishAot;NativeLib" />
+    <ProjectReference Include="..\..\bindings\NanoQL.Bind.TestTypes\NanoQL.Bind.TestTypes.csproj" Condition="'$(NanoQLTestExports)' == 'true'" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <NanoQLTestSuffix Condition="'$(NanoQLTestExports)' == 'true'">-test</NanoQLTestSuffix>
+    <NanoQLTestArgument Condition="'$(NanoQLTestExports)' == 'true'"> --test-exports</NanoQLTestArgument>
+    <NanoQLShimsDir Condition="'$(NanoQLShimsDir)' == ''">$(MSBuildProjectDirectory)/obj/nanoql-bind/$(Configuration)$(NanoQLTestSuffix)/</NanoQLShimsDir>
+  </PropertyGroup>
+
+  <Target Name="NanoQLShims" BeforeTargets="CoreCompile">
+    <Exec Condition="'$(NanoQLGenerateShims)' != 'false'" WorkingDirectory="$(MSBuildProjectDirectory)"
+          Command="dotnet &quot;$(MSBuildProjectDirectory)/../NanoQL.Bind/bin/$(Configuration)/net10.0/NanoQL.Bind.dll&quot; shims --out &quot;$(NanoQLShimsDir)&quot;$(NanoQLTestArgument)" />
+    <ItemGroup>
+      <Compile Include="$([MSBuild]::EnsureTrailingSlash('$(NanoQLShimsDir)'))*.g.cs" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Assemblies built on nanoql, by path: a user's, or the test build's own. -->
+  <ItemGroup Condition="'$(NanoQLAssemblies)' != ''">
+    <Reference Include="$(NanoQLAssemblies)" />
+  </ItemGroup>
+
+  <!-- The native file's name: nanoql, set before ILC links it; the import library and the symbols follow it. -->
+  <Target Name="NanoQLNativeName" BeforeTargets="LinkNative">
+    <PropertyGroup>
+      <NativeBinary>$(NativeOutputPath)$(NativeBinaryPrefix)nanoql$(NativeBinaryExt)</NativeBinary>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="NanoQLNativeFiles" AfterTargets="Publish">
+    <ItemGroup>
+      <_NanoQLNative Include="$(NativeOutputPath)nanoql.lib;$(NativeOutputPath)nanoql.pdb;$(NativeOutputPath)$(NativeBinaryPrefix)nanoql$(NativeBinaryExt).dbg" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_NanoQLNative)" DestinationFolder="$(PublishDir)" Condition="Exists('%(Identity)')" />
+    <Exec Command="cp -R &quot;$(NativeOutputPath)$(NativeBinaryPrefix)nanoql$(NativeBinaryExt).dSYM&quot; &quot;$(PublishDir)&quot;"
+          Condition="Exists('$(NativeOutputPath)$(NativeBinaryPrefix)nanoql$(NativeBinaryExt).dSYM')" />
+  </Target>
+</Project>

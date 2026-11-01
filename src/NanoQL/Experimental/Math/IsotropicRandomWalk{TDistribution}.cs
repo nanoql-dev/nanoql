@@ -29,6 +29,7 @@ namespace NanoQL.Experimental;
 /// </remarks>
 /// <typeparam name="TDistribution">The radius's distribution.</typeparam>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class IsotropicRandomWalk<TDistribution>
     where TDistribution : class, IRandomWalkDistribution
 {

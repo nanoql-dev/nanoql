@@ -37,6 +37,7 @@ namespace NanoQL.Models;
 /// weights, and a product not finished at the evolver's last step (MMPR4's refusals).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class ProxyGreekEngine
 {
     private readonly MarketModelEvolver originalEvolver;

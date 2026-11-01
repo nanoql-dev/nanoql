@@ -33,6 +33,7 @@ namespace NanoQL.Models;
 /// Refused, QuantLib reading past them: fewer inner evolvers than the exercise dates before the last step.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class UpperBoundEngine
 {
     private const int UnderlyingOffset = 0;

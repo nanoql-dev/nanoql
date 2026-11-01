@@ -14,6 +14,7 @@ namespace NanoQL.Models;
 /// rate is above the exercise's trigger.
 /// </summary>
 /// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+[WorkingType]
 public sealed class SwapRateTrigger : ExerciseStrategy<CurveState>
 {
     private readonly ImmutableArray<double> rateTimes;

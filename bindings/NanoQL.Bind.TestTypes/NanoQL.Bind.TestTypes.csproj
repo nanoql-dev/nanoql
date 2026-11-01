@@ -1,0 +1,21 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The test build's own assembly (docs/bindings.md, "The test build"): nanoql-bind binds it beside nanoql's two under
+       the prefix nqlt, as it would a user's, for the conformance suites: an echo per kind, each refusal kind, a
+       deprecated member, a user's generator, and the bound-engine cases' fixtures with their C# lambda references. The
+       packages ship without it. -->
+  <PropertyGroup>
+    <RootNamespace>NanoQL.Bind.TestTypes</RootNamespace>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);NQL0001;CS0618</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NanoQL\NanoQL.csproj" />
+    <ProjectReference Include="..\..\src\NanoQL.Extensions\NanoQL.Extensions.csproj" />
+  </ItemGroup>
+</Project>

@@ -19,6 +19,7 @@ namespace NanoQL.Numerics;
 /// (S2R4: QuantLib's defaults are 42 and 43); the scrambling seed feeds the Mersenne twister, where 0 would draw from
 /// the clock. Unlike <see cref="SobolRsg"/>, it takes two seeds, so it offers no <c>Create(dimension, seed)</c>.
 /// </remarks>
+[WorkingType]
 public sealed class Burley2020SobolRsg : IRsg
 {
     private readonly int dimensionality;

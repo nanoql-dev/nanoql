@@ -28,6 +28,7 @@ namespace NanoQL.Numerics;
 /// </para>
 /// </remarks>
 /// <typeparam name="TRng">The generator of 64-bit integers and uniform reals.</typeparam>
+[WorkingType]
 public class ZigguratGaussianRng<TRng> : IRng
     where TRng : class, IInt64Rng
 {

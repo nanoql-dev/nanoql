@@ -21,6 +21,7 @@ namespace NanoQL.Models;
 /// buffers, reset at each set, so every read is QuantLib's arithmetic in QuantLib's order. A rate read at the number of
 /// rates, which QuantLib's index check admits and reads past its vectors, is refused with QuantLib's text (MR3 (xx)).
 /// </remarks>
+[WorkingType]
 public sealed class LMMCurveState : CurveState
 {
     private readonly double[] discRatios;

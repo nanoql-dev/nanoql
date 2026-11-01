@@ -36,6 +36,7 @@ namespace NanoQL.Models;
 /// [1, 2].
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class SquareRootAndersen : MarketModelVolProcess
 {
     // S-g1d's cut for cancellation-free forms (G1R4).

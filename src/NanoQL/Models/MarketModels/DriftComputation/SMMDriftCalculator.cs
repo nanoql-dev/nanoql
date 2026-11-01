@@ -25,6 +25,7 @@ namespace NanoQL.Models;
 /// QuantLib's drifts bit for bit on a state set from the first rate (MR3 (xvi); <c>Divergences/SmmDriftAliveTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class SMMDriftCalculator
 {
     private readonly int numberOfRates;

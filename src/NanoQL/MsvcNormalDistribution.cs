@@ -14,6 +14,7 @@ namespace NanoQL;
 /// below s 1e-4 both are scaled by a power of 2 before the logarithm, so that ln s / s stays finite. A working type: each
 /// draw changes it, and it is not thread-safe.
 /// </remarks>
+[WorkingType]
 internal sealed class MsvcNormalDistribution
 {
     private const double Ln2 = 0.6931471805599453;

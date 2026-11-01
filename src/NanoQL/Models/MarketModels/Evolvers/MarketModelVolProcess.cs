@@ -15,6 +15,7 @@ namespace NanoQL.Models;
 /// thread-safe. <see cref="Clone"/>, a nanoql addition, is deep: an evolver holding a process owns a copy of it
 /// (MR1 (iv)). An extension point, as in QuantLib.
 /// </remarks>
+[WorkingType]
 public abstract class MarketModelVolProcess
 {
     /// <summary>Initializes a new instance of the <see cref="MarketModelVolProcess"/> class.</summary>

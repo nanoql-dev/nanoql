@@ -17,6 +17,7 @@ namespace NanoQL.Numerics;
 /// be uniform says so in its documentation, as QuantLib's do. Construction from a seed in generic code is
 /// <see cref="ISeedableRng{TSelf}"/>'s.
 /// </remarks>
+[WorkingType]
 public interface IRng
 {
     /// <summary>Draws the next sample, changing the generator (QuantLib's <c>next()</c>).</summary>

@@ -11,6 +11,7 @@ namespace NanoQL.Models;
 /// proxy simulation approach to Greeks.
 /// </summary>
 /// <remarks>A working type (the S-mm plan's MR1 (ii)). An extension point, as in QuantLib.</remarks>
+[WorkingType]
 public abstract class ConstrainedEvolver : MarketModelEvolver
 {
     /// <summary>Sets, once, the swap rates each step constrains.</summary>

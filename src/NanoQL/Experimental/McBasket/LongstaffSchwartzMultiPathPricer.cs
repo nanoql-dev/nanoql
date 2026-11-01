@@ -24,6 +24,7 @@ namespace NanoQL.Experimental;
 /// none (XER5 (xxiii)).
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class LongstaffSchwartzMultiPathPricer : PathPricer<MultiPath>
 {
     private readonly PathPayoff payoff;

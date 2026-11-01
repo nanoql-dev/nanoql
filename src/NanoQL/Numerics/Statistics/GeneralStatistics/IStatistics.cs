@@ -17,6 +17,7 @@ namespace NanoQL.Numerics;
 /// isn't thread-safe. The Gaussian risk measures of <see cref="GaussianStatisticsExtensions"/> apply to it; the
 /// empirical ones of <see cref="RiskStatisticsExtensions"/> to a sample-keeping one, <see cref="IEmpiricalStatistics"/>.
 /// </remarks>
+[WorkingType]
 public interface IStatistics : ISummaryStatistics
 {
     /// <summary>Gets the number of samples collected.</summary>

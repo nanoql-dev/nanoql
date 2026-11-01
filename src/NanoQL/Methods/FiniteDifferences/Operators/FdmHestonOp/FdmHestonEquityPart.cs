@@ -23,6 +23,7 @@ namespace NanoQL.Methods;
 /// the engine's clock (<see cref="FdmHestonOp.Clock"/>), each on its own, QuantLib's reads where they share its times
 /// (HR7 (ii)).
 /// </remarks>
+[WorkingType]
 internal sealed class FdmHestonEquityPart
 {
     private readonly double[] varianceValues;

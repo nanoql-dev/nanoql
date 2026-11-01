@@ -20,6 +20,7 @@ namespace NanoQL.Models;
 /// rate reports 3 functions where <see cref="Values"/> gives 2 (<c>Divergences/BasisSystemFunctionCountTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class SwapBasisSystem : MarketModelBasisSystem
 {
     private readonly ImmutableArray<double> rateTimes;

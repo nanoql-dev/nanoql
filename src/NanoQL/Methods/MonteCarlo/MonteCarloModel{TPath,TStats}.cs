@@ -26,6 +26,7 @@ namespace NanoQL.Methods;
 /// (the S-sr plan's SSR1 (v)).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class MonteCarloModel<TPath, TStats>
     where TStats : IStatistics
 {

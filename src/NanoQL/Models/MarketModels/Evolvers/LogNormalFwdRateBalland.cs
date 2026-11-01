@@ -27,6 +27,7 @@ namespace NanoQL.Models;
 /// time 0 undisplaced, QuantLib's case, it is QuantLib's arithmetic bit for bit.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class LogNormalFwdRateBalland : MarketModelEvolver
 {
     private readonly int initialStep;

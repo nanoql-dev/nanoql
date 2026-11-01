@@ -28,6 +28,7 @@ namespace NanoQL.TermStructures;
 /// <see cref="ToSurface"/>, held at the nearest strike at a node too (the S-van plan's VR4 (xviii)).
 /// </para>
 /// </remarks>
+[WorkingType]
 internal sealed class FixedLocalVolWorkingSurface : LocalVolTermStructure
 {
     private readonly Date maxDate;

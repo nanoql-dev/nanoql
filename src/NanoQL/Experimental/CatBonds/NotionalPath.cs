@@ -13,6 +13,7 @@ namespace NanoQL.Experimental;
 /// date order.</summary>
 /// <remarks>A working type (XR5's form): a notional risk writes each simulated path into it in place.</remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class NotionalPath
 {
     // QuantLib's Date() for the full notional at the beginning: before every date

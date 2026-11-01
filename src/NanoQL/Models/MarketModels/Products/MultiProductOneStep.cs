@@ -13,6 +13,7 @@ namespace NanoQL.Models;
 /// rate's reset, every rate relevant.
 /// </summary>
 /// <remarks>An extension point (U13): a working type, as every product (the S-mmp plan's MMPR1 (i)).</remarks>
+[WorkingType]
 public abstract class MultiProductOneStep : MarketModelMultiProduct
 {
     private readonly EvolutionDescription evolution;

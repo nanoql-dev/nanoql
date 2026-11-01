@@ -18,6 +18,7 @@ namespace NanoQL.Models;
 /// A working type (the S-hes plan's HR3 (iv), (v)). Both seeds are explicit, in [1, 4294967295], as
 /// <see cref="Burley2020SobolRsg"/> takes them (the S-mm plan's SD6); QuantLib's defaults are 42 and 43.
 /// </remarks>
+[WorkingType]
 public sealed class Burley2020SobolBrownianGenerator : SobolBrownianGeneratorBase
 {
     private readonly InverseCumulativeRsg<Burley2020SobolRsg, InverseCumulativeNormal> generator;

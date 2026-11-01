@@ -1,0 +1,25 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The vector suite's recorder (docs/bindings.md, "The vector suite through each binding"): it compiles nanoql-bind's
+       twins with the runtime in runtime/, rewrites the test assembly's call sites into nanoql to call them, runs the
+       vector classes, and writes the trace each language's replayer reads. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NanoQL.Replay</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" Version="0.11.6" />
+  </ItemGroup>
+
+  <!-- The twins' runtime is compiled into the twins' assembly, not here. -->
+  <ItemGroup>
+    <Compile Remove="runtime/**" />
+    <None Include="runtime/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

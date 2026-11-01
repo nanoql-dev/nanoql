@@ -28,6 +28,7 @@ namespace NanoQL.Methods;
 /// QuantLib's scheme, bit for bit.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class TRBDF2 : IFdmScheme
 {
     private readonly double alpha;

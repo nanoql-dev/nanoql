@@ -13,6 +13,7 @@ namespace NanoQL.Models;
 /// exercise, and one parameter, the trigger, exercised when the rate reaches it; the strikes are the triggers' guesses.
 /// </summary>
 /// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+[WorkingType]
 public sealed class TriggeredSwapExercise : MarketModelParametricExercise
 {
     private readonly ImmutableArray<double> rateTimes;

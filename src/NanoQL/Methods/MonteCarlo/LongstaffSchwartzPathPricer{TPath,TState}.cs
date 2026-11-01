@@ -36,6 +36,7 @@ namespace NanoQL.Methods;
 /// time of the grid is an exercise time, the bits are QuantLib's.
 /// </para>
 /// </remarks>
+[WorkingType]
 public class LongstaffSchwartzPathPricer<TPath, TState> : PathPricer<TPath>
 {
     private readonly Vector[] coeff;

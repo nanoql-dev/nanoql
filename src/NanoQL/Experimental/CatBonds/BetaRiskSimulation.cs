@@ -36,6 +36,7 @@ namespace NanoQL.Experimental;
 /// <para>A working type (XR5's form): each simulation owns its generator, stepping it in place.</para>
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class BetaRiskSimulation : CatSimulation
 {
     // std::mt19937's default seed, QuantLib's constant

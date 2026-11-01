@@ -1180,6 +1180,7 @@ public class XabrSwaptionVolatilityCube<TModel> : SwaptionVolatilityCube
     /// interpolated bilinearly or, for the first five with backward-flat interpolation, backward flat in option time,
     /// both flat outside the grid. A working type the cube's constructor fills and then freezes.
     /// </summary>
+    [WorkingType]
     private protected sealed class Cube
     {
         private readonly int nLayers;

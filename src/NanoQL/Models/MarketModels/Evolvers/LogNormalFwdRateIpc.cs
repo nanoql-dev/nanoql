@@ -19,6 +19,7 @@ namespace NanoQL.Models;
 /// construction (MR1 (iv)), so a step reads nothing shared; one step allocates nothing after a path's warm-up (MR1
 /// (v)).
 /// </remarks>
+[WorkingType]
 public sealed class LogNormalFwdRateIpc : MarketModelEvolver
 {
     private readonly int initialStep;

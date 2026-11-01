@@ -14,6 +14,7 @@ namespace NanoQL.Methods;
 /// A working type (the S-eq plan's SEQR1): a calculator may fill a cache on its first call, as QuantLib's cell
 /// averages do. An extension point, as in QuantLib: later units derive their calculators from it.
 /// </remarks>
+[WorkingType]
 public abstract class FdmInnerValueCalculator
 {
     /// <summary>The inner value at a point and time.</summary>

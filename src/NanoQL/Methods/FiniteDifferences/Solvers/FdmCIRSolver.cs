@@ -18,6 +18,7 @@ namespace NanoQL.Methods;
 /// computes at the first read, and immutable after. With a quanto helper the operator applies its adjustment, where
 /// QuantLib's solver takes none (<see cref="FdmCIROp"/>'s remarks).
 /// </remarks>
+[WorkingType]
 public sealed class FdmCIRSolver
 {
     private readonly Fdm2DimSolver solver;

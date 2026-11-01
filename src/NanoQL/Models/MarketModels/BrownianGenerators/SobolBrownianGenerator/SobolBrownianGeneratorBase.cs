@@ -17,6 +17,7 @@ namespace NanoQL.Models;
 /// A working type (the S-hes plan's HR3 (iv)). An extension point, as in QuantLib: a derived class supplies the
 /// sequence. A step's output length and a path's exhaustion are checked always, QuantLib's extra-safety checks.
 /// </remarks>
+[WorkingType]
 public abstract class SobolBrownianGeneratorBase : BrownianGenerator
 {
     private readonly int factors;

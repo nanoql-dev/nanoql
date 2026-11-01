@@ -66,6 +66,7 @@ namespace NanoQL.Numerics;
 /// The correctness of the returned values is tested by checking them against known good results.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class MersenneTwisterUniformRng : ISeedableRng<MersenneTwisterUniformRng>, IInt32Rng
 {
     // state size

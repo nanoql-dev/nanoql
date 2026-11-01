@@ -28,6 +28,7 @@ namespace NanoQL.Numerics;
 /// that modulus draw one sequence, and a multiple of it draws the sequence of seed 1, in QuantLib as here.
 /// </para>
 /// </remarks>
+[WorkingType]
 public abstract class Ranlux64UniformRng : IRng
 {
     // The engine's long and short lags and its word size

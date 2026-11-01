@@ -22,6 +22,7 @@ namespace NanoQL.Models;
 /// (<c>Divergences/BasisSystemFunctionCountTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class SwapForwardBasisSystem : MarketModelBasisSystem
 {
     private readonly ImmutableArray<double> rateTimes;

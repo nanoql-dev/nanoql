@@ -34,6 +34,7 @@ namespace NanoQL.Numerics;
 /// </para>
 /// </remarks>
 /// <typeparam name="TStats">The one-dimensional statistics of each component.</typeparam>
+[WorkingType]
 public class GenericSequenceStatistics<TStats>
     where TStats : IStatistics, new()
 {

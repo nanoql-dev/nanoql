@@ -21,6 +21,7 @@ namespace NanoQL.Methods;
 /// the part's operator in place. The risk-free curve is read on the engine's clock (<see cref="FdmHestonOp.Clock"/>),
 /// QuantLib's read where it is the risk-free curve itself (HR7 (ii)).
 /// </remarks>
+[WorkingType]
 internal sealed class FdmHestonVariancePart
 {
     private readonly TripleBandLinearOp dyMap;

@@ -31,6 +31,7 @@ namespace NanoQL.Methods;
 /// QuantLib's operator takes no helper.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmCIROp : FdmLinearOpComposite
 {
     private readonly FdmCIREquityPart dxMap;

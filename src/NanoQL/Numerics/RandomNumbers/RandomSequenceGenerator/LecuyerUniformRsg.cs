@@ -13,6 +13,7 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// A convenience name: nanoql's own code uses the generic type. A mutable working type, as its base is.
 /// </remarks>
+[WorkingType]
 public sealed class LecuyerUniformRsg : RandomSequenceGenerator<LecuyerUniformRng>
 {
     /// <summary>Initializes a new instance of the <see cref="LecuyerUniformRsg"/> class.</summary>

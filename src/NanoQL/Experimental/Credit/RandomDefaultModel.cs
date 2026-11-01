@@ -17,6 +17,7 @@ namespace NanoQL.Experimental;
 /// the sequence's default times, where QuantLib's sets them on the pool it shares.
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public abstract class RandomDefaultModel
 {
     /// <summary>Initializes a new instance of the <see cref="RandomDefaultModel"/> class.</summary>

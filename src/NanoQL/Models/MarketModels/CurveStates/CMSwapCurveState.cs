@@ -20,6 +20,7 @@ namespace NanoQL.Models;
 /// QuantLib's are. A rate read at the number of rates, which QuantLib's index check admits and reads past its vectors,
 /// is refused with QuantLib's text (MR3 (xx)).
 /// </remarks>
+[WorkingType]
 public sealed class CMSwapCurveState : CurveState
 {
     private readonly int spanningFwds;

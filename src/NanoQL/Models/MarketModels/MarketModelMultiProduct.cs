@@ -26,6 +26,7 @@ namespace NanoQL.Models;
 /// </para>
 /// <para>An extension point (U13).</para>
 /// </remarks>
+[WorkingType]
 public abstract class MarketModelMultiProduct
 {
     /// <summary>Gets the product's evolution: its rate times and the times it steps at.</summary>

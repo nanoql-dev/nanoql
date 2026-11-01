@@ -17,6 +17,7 @@ namespace NanoQL.Models;
 /// (<see cref="MarketModelPathwiseMultiDeflatedCaplet"/>, MMPR4 (vi)) and copies each caplet's cash flow into each cap
 /// holding it, QuantLib's assignment (<see cref="MarketModelPathwiseMultiProductCashFlow.CopyFrom"/>).
 /// </remarks>
+[WorkingType]
 public sealed class MarketModelPathwiseMultiDeflatedCap : MarketModelPathwiseMultiProduct
 {
     private readonly MarketModelPathwiseMultiDeflatedCaplet underlyingCaplets;

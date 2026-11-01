@@ -18,6 +18,7 @@ namespace NanoQL.Methods;
 /// A working type (the S-eq plan's SEQR1): <see cref="Step"/> steps the caller's values in place through buffers the
 /// scheme holds, so a step allocates nothing after the first.
 /// </remarks>
+[WorkingType]
 public sealed class DouglasScheme : IFdmScheme, IFdmSetOperatorScheme
 {
     private const double NullReal = 3.4028234663852886e38;

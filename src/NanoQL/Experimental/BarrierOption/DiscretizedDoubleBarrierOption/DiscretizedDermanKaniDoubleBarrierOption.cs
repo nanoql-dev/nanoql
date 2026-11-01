@@ -27,6 +27,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class DiscretizedDermanKaniDoubleBarrierOption
     : DiscretizedAsset, IDiscretizedDoubleBarrierAsset<DiscretizedDermanKaniDoubleBarrierOption>
 {

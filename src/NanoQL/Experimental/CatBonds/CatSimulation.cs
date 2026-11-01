@@ -16,6 +16,7 @@ namespace NanoQL.Experimental;
 /// <remarks>A working type (XR5's form): a simulation steps through its paths in place, one caller at a time. An
 /// extension point, as in QuantLib.</remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public abstract class CatSimulation
 {
     /// <summary>Initializes a new instance of the <see cref="CatSimulation"/> class.</summary>

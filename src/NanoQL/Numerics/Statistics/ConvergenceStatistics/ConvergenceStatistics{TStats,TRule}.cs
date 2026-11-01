@@ -27,6 +27,7 @@ namespace NanoQL.Numerics;
 /// <typeparam name="TStats">The statistics held.</typeparam>
 /// <typeparam name="TRule">The sampling rule, <see cref="DoublingConvergenceSteps"/> for QuantLib's
 /// default.</typeparam>
+[WorkingType]
 public sealed class ConvergenceStatistics<TStats, TRule> : IStatistics
     where TStats : IStatistics, new()
     where TRule : struct, IConvergenceSteps

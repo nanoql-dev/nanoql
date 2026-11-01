@@ -31,6 +31,7 @@ namespace NanoQL.Methods;
 /// divergence.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmLocalVolFwdOp : FdmLinearOpComposite
 {
     private readonly FdmMesher mesher;

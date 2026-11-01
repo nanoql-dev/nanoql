@@ -13,6 +13,7 @@ namespace NanoQL.Methods;
 /// the product of the two directions' central first-derivative stencils, one-sided at the grid's edges and corners.
 /// </summary>
 /// <remarks>A working type (the S-eq plan's SEQR1), its coefficients filled at construction.</remarks>
+[WorkingType]
 public sealed class SecondOrderMixedDerivativeOp : NinePointLinearOp
 {
     /// <summary>Initializes a new instance of the <see cref="SecondOrderMixedDerivativeOp"/> class.</summary>

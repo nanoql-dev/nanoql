@@ -22,6 +22,7 @@ namespace NanoQL.Methods;
 /// QuantLib's operator takes no helper and its engine passes it to the mesher alone, so that a quanto prices without
 /// the quanto drift (a run find of the S-van plan's C4, under R8).
 /// </remarks>
+[WorkingType]
 internal sealed class FdmCIREquityPart
 {
     private readonly FirstDerivativeOp dxMap;

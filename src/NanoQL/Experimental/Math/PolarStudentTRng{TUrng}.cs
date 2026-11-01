@@ -23,6 +23,7 @@ namespace NanoQL.Experimental;
 /// </remarks>
 /// <typeparam name="TUrng">The uniform generator, of deviates in (0, 1).</typeparam>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class PolarStudentTRng<TUrng> : IRng
     where TUrng : class, IRng
 {

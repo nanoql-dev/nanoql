@@ -16,6 +16,7 @@ namespace NanoQL.Processes;
 /// QuantLib's maps live in the core and are flushed on every parameter or time change; here a parameter change builds
 /// a new core, and no map outlives the call that filled it.
 /// </remarks>
+[WorkingType]
 internal sealed class GsrProcessCoreMemo
 {
     /// <summary>Gets QuantLib's <c>cache1_</c>: the state's decay A(w, t), keyed by (w, t).</summary>

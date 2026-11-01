@@ -19,6 +19,7 @@ namespace NanoQL.Numerics;
 /// weight is 1. <see cref="Clone"/> builds the generator again from its arguments and draws the paths this one has
 /// drawn, the Sobol sequence being deterministic, so the copy's next draw is this one's.
 /// </remarks>
+[WorkingType]
 public sealed class SobolBrownianBridgeRsg : IRsg
 {
     private readonly int factors;

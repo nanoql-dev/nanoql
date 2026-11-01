@@ -46,6 +46,14 @@ The gates are in docs/porting-playbook.md §8; each passes only with its denomin
   nuget.org's QLNet 1.13.2 package, which `tools/vectors/qlnet/packages.lock.json` pins.
 - **Coverage,** when the change ports code: the two coverage runs, one per oracle (QuantLib's and QLNet's), and
   `tools/check-coverage.py`, as the playbook's §8 and §9.5 give them.
+- **Bindings,** when the change touches the public API or the bindings (docs/bindings.md):
+  `dotnet run --project src/NanoQL.Bind -c Release -- check` keeps `bindings/` in step with the API, and `-- update`
+  regenerates it; `dotnet build bindings/NanoQL.Bindings.slnx -c Release`, then
+  `dotnet test --project bindings/NanoQL.Bind.Tests -c Release`. The C conformance suite runs on the test build:
+  `dotnet run --project src/NanoQL.Bind -c Release -- build --rid <rid> --out <folder> --test-exports`, then
+  `cmake -S bindings/c/tests -B <build folder> -DNANOQL_DIR=<folder>`, `cmake --build <build folder> --config Release`
+  and `ctest --test-dir <build folder> -C Release`. The native build needs the platform's C toolchain (on Windows,
+  Visual Studio's C++ tools, with the Visual Studio Installer's folder on `PATH`) and CMake.
 
 ## Issues and questions
 

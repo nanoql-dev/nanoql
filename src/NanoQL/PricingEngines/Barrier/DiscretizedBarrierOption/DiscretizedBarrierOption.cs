@@ -26,6 +26,7 @@ namespace NanoQL.PricingEngines;
 /// (<c>Divergences/BarrierUpstreamFixesTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class DiscretizedBarrierOption : DiscretizedAsset, IDiscretizedBarrierAsset<DiscretizedBarrierOption>
 {
     private readonly BarrierType barrierType;

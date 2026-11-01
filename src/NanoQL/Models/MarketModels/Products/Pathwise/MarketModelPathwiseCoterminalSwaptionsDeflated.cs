@@ -17,6 +17,7 @@ namespace NanoQL.Models;
 /// A working type (the S-mmp plan's MMPR1 (i)). Its cash-flow times are the rate times, as QuantLib's, and its name is
 /// QuantLib's, though it reports itself not deflated.
 /// </remarks>
+[WorkingType]
 public sealed class MarketModelPathwiseCoterminalSwaptionsDeflated : MarketModelPathwiseMultiProduct
 {
     private readonly ImmutableArray<double> rateTimes;

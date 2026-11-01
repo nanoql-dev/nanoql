@@ -139,6 +139,103 @@ jobs:
           path: TestResults/bitid
           if-no-files-found: ignore
 
+  # The bindings (docs/bindings.md): the C ABI built with Native AOT on each platform, its checked-in surface checked,
+  # the C conformance suite on the test build, and the vector suite recorded and replayed through the C ABI. The weekly
+  # run builds Windows x64 and Linux x64; a dispatch builds all six. Linux builds in a manylinux_2_28 container, so the
+  # library runs on glibc 2.28 and later; the container has no libicu, which the library doesn't load.
+  bindings:
+    name: Bindings (${{ matrix.rid }})
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(github.event_name == 'schedule' && '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"}]' || '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"win-arm64","os":"windows-11-arm","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"},{"rid":"linux-arm64","os":"ubuntu-24.04-arm","container":"quay.io/pypa/manylinux_2_28_aarch64"},{"rid":"osx-arm64","os":"macos-15","container":""},{"rid":"osx-x64","os":"macos-15-intel","container":""}]') }}
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
+    env:
+      RID: ${{ matrix.rid }}
+      # The SDK runs without ICU in the Linux container, as the library does.
+      DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: ${{ matrix.container != '' && '1' || '' }}
+    steps:
+      - name: Check out with LF line endings, as the working clones are
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        if: matrix.container == ''
+        with:
+          global-json-file: global.json
+      # In the container: Native AOT's toolchain (clang, zlib), CMake, and the SDK global.json names.
+      - name: The toolchain and the SDK in the manylinux container
+        if: matrix.container != ''
+        run: |
+          dnf install -y -q clang zlib-devel cmake
+          sdk=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' global.json | head -1)
+          curl -sSfL -o "$RUNNER_TEMP/dotnet-install.sh" https://dot.net/v1/dotnet-install.sh
+          bash "$RUNNER_TEMP/dotnet-install.sh" --version "$sdk" --install-dir "$HOME/.dotnet"
+          echo "$HOME/.dotnet" >> "$GITHUB_PATH"
+          echo "DOTNET_ROOT=$HOME/.dotnet" >> "$GITHUB_ENV"
+      - name: The machine
+        run: |
+          case "$RUNNER_OS" in
+            Windows) powershell -NoProfile -Command '(Get-CimInstance Win32_Processor).Name; (Get-CimInstance Win32_OperatingSystem).Caption' ;;
+            Linux) grep -m1 'model name' /proc/cpuinfo || true; grep PRETTY_NAME /etc/os-release; ldd --version | head -1 ;;
+            macOS) sysctl -n machdep.cpu.brand_string; sw_vers ;;
+          esac
+          dotnet --version
+          cmake --version | head -1
+      - name: The tool
+        run: dotnet build src/NanoQL.Bind -c Release
+      - name: The checked-in surface (nanoql.h, surface.json, coverage.md)
+        run: dotnet run --project src/NanoQL.Bind -c Release --no-build -- check
+      - name: The native library
+        run: |
+          start=$(date +%s)
+          dotnet run --project src/NanoQL.Bind -c Release --no-build -- build --rid "$RID" --out "$RUNNER_TEMP/nanoql"
+          echo "the native build took $(( $(date +%s) - start )) s"
+          ls -l "$RUNNER_TEMP/nanoql/lib"
+      - name: The test build
+        run: dotnet run --project src/NanoQL.Bind -c Release --no-build -- build --rid "$RID" --out "$RUNNER_TEMP/nanoql-test" --test-exports
+      - name: No libicu in the container
+        if: matrix.container != ''
+        run: |
+          if ldconfig -p | grep -q libicu; then echo "::error::libicu is present, so the suite wouldn't show the library runs without it"; exit 1; fi
+      - name: The C conformance suite
+        run: |
+          cmake -S bindings/c/tests -B "$RUNNER_TEMP/c-tests" -DNANOQL_DIR="$RUNNER_TEMP/nanoql-test" -DCMAKE_BUILD_TYPE=Release
+          cmake --build "$RUNNER_TEMP/c-tests" --config Release
+          ctest --test-dir "$RUNNER_TEMP/c-tests" -C Release --output-on-failure
+      # The trace stays in the job's temporary folder, never uploaded.
+      - name: The vector suite, recorded
+        run: |
+          dotnet build tests/NanoQL.Tests -c Release
+          dotnet build tools/replay -c Release
+          dotnet run --project src/NanoQL.Bind -c Release --no-build -- twins --out "$RUNNER_TEMP/twins"
+          dotnet tools/replay/bin/Release/net10.0/NanoQL.Replay.dll record --tests tests/NanoQL.Tests/bin/Release/net10.0 \
+            --twins "$RUNNER_TEMP/twins" --out "$RUNNER_TEMP/recording"
+      - name: The vector suite, replayed in C
+        run: |
+          dotnet run --project src/NanoQL.Bind -c Release --no-build -- replay-c --out "$RUNNER_TEMP/c-dispatch"
+          cmake -S bindings/c/replay -B "$RUNNER_TEMP/c-replay" -DNANOQL_DIR="$RUNNER_TEMP/nanoql" -DNANOQL_DISPATCH="$RUNNER_TEMP/c-dispatch" -DCMAKE_BUILD_TYPE=Release
+          cmake --build "$RUNNER_TEMP/c-replay" --config Release
+          replay=$(find "$RUNNER_TEMP/c-replay" -name 'replay' -type f -o -name 'replay.exe' -type f | head -1)
+          "$replay" "$RUNNER_TEMP/recording/trace.jsonl" "$RUNNER_TEMP/recording/facts.tsv" bindings/replay-floor.json
+      - name: Keep the C library
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nanoql-c-${{ matrix.rid }}
+          path: |
+            ${{ runner.temp }}/nanoql/include
+            ${{ runner.temp }}/nanoql/lib
+          retention-days: 1
+
   licensing:
     name: Licensing
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || !github.event.repository.private

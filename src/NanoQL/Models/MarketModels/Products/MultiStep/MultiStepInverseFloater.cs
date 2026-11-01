@@ -13,6 +13,7 @@ namespace NanoQL.Models;
 /// coupon (fᵢ + sᵢ) τᶠˡᵒᵃᵗᵢ, received, or paid by a payer.
 /// </summary>
 /// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+[WorkingType]
 public sealed class MultiStepInverseFloater : MultiProductMultiStep
 {
     private readonly ImmutableArray<double> fixedAccruals;

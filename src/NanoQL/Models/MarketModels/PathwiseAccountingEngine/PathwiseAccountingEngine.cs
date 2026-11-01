@@ -39,6 +39,7 @@ namespace NanoQL.Models;
 /// product whose rates or evolution aren't the model's, and a product not finished at the evolver's last step.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class PathwiseAccountingEngine
 {
     private readonly LogNormalFwdRateEuler evolver;

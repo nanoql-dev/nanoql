@@ -13,6 +13,7 @@ namespace NanoQL.Models;
 /// functions' values.
 /// </summary>
 /// <remarks>A working type and an extension point (U13; the S-mmp plan's MMPR1 (i), (vi)).</remarks>
+[WorkingType]
 public abstract class MarketModelBasisSystem : MarketModelNodeDataProvider
 {
     /// <summary>The number of basis functions at each exercise, possibly different for each.</summary>

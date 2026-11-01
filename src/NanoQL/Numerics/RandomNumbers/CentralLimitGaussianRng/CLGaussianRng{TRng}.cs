@@ -19,6 +19,7 @@ namespace NanoQL.Numerics;
 /// caller's later draws change nothing in it.
 /// </remarks>
 /// <typeparam name="TRng">The uniform generator, of deviates in (0, 1).</typeparam>
+[WorkingType]
 public class CLGaussianRng<TRng> : IRng
     where TRng : class, IRng
 {

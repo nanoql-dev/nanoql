@@ -24,6 +24,7 @@ namespace NanoQL.Methods;
 /// (<c>Divergences/FdmWienerOpDirectionTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmWienerOp : FdmLinearOpComposite
 {
     private readonly YieldTermStructure? rTS;

@@ -13,6 +13,7 @@ namespace NanoQL.Models;
 /// derivative with respect to its rate's forward.
 /// </summary>
 /// <remarks>A working type (the S-mmp plan's MMPR1 (i)).</remarks>
+[WorkingType]
 public sealed class MarketModelPathwiseInverseFloater : MarketModelPathwiseMultiProduct
 {
     private readonly ImmutableArray<double> fixedAccruals;

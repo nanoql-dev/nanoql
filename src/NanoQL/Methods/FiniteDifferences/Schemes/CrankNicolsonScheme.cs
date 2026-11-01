@@ -14,6 +14,7 @@ namespace NanoQL.Methods;
 /// it.
 /// </summary>
 /// <remarks>A working type (the S-eq plan's SEQR1), stepping in place through its two schemes.</remarks>
+[WorkingType]
 public sealed class CrankNicolsonScheme : IFdmScheme, IFdmSetOperatorScheme
 {
     private const double NullReal = 3.4028234663852886e38;

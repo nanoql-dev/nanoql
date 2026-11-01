@@ -21,6 +21,7 @@ namespace NanoQL.Experimental;
 /// without allocating after the first (the S-xeq plan's §2.0).
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class EuropeanPathMultiPathPricer : PathPricer<MultiPath>
 {
     private static readonly Vector[] NoStates = [];

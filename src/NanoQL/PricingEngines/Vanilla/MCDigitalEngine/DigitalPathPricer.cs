@@ -36,6 +36,7 @@ namespace NanoQL.PricingEngines;
 /// a window open from the start is QuantLib's.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class DigitalPathPricer : PathPricer<MonteCarloPath>
 {
     private readonly CashOrNothingPayoff payoff;

@@ -47,6 +47,7 @@ namespace NanoQL.Numerics;
 /// is refused, and so is the all-zero state, from which the generator draws 0 forever.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class Xoshiro256StarStarUniformRng : ISeedableRng<Xoshiro256StarStarUniformRng>, IInt64Rng
 {
     private ulong s0;

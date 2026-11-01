@@ -10,6 +10,7 @@ namespace NanoQL.Models;
 
 /// <summary>An exercise value of nothing: at each exercise time a cash flow of 0, paid at the current rate time.</summary>
 /// <remarks>A working type (the S-mmp plan's MMPR1 (i)): the control of QuantLib's callable cases.</remarks>
+[WorkingType]
 public sealed class NothingExerciseValue : MarketModelExerciseValue
 {
     private readonly int numberOfExercises;

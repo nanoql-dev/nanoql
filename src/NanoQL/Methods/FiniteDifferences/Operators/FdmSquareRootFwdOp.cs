@@ -20,6 +20,7 @@ namespace NanoQL.Methods;
 /// into the caller's spans, so a step allocates nothing. The direction's grid needs at least two points, where
 /// QuantLib reads past a shorter one.
 /// </remarks>
+[WorkingType]
 public sealed class FdmSquareRootFwdOp : FdmLinearOpComposite
 {
     private readonly int direction;

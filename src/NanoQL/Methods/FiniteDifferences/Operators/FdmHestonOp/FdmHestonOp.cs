@@ -40,6 +40,7 @@ namespace NanoQL.Methods;
 /// <c>Divergences/FdHestonMismatchedTimesTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmHestonOp : FdmLinearOpComposite
 {
     private readonly NinePointLinearOp correlationMap;

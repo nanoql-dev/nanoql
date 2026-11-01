@@ -17,6 +17,7 @@ namespace NanoQL.Methods;
 /// </para>
 /// <para>An extension point, as in QuantLib: later units derive their step conditions from it.</para>
 /// </remarks>
+[WorkingType]
 public abstract class StepCondition
 {
     /// <summary>Applies the condition to the values at time <paramref name="t"/>, in place.</summary>

@@ -23,6 +23,7 @@ namespace NanoQL.Models;
 /// (<c>Divergences/MarketModelPathwiseSwapStrikeTests.cs</c>). With a strike a rate, QuantLib's swap.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class MarketModelPathwiseSwap : MarketModelPathwiseMultiProduct
 {
     private readonly ImmutableArray<double> rateTimes;

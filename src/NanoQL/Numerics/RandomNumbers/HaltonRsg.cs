@@ -33,6 +33,7 @@ namespace NanoQL.Numerics;
 /// <c>unsigned long</c>s do under MSVC, in 32 bits, so their sum wraps at 2^32.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class HaltonRsg : ISeedableRsg<HaltonRsg>
 {
     private readonly uint[] primes;

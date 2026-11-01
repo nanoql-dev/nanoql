@@ -30,6 +30,7 @@ namespace NanoQL.Numerics;
 /// percentiles do with a sort that NaN leaves undefined. Both are documented divergences.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class GeneralStatistics : IEmpiricalStatistics
 {
     private (double Value, double Weight)[] samples = [];

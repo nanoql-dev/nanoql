@@ -37,6 +37,7 @@ namespace NanoQL;
 /// derive from it, as later ports' cap, vanilla option, barrier and convertible assets will.
 /// </para>
 /// </remarks>
+[WorkingType]
 public abstract class DiscretizedAsset
 {
     private double[] current = [];

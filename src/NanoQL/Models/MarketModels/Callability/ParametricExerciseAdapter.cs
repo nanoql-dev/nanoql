@@ -17,6 +17,7 @@ namespace NanoQL.Models;
 /// A working type (the S-mmp plan's MMPR1 (i)): it steps its own clone of the rule, and its variables' buffer is sized
 /// at construction, so a decision allocates nothing.
 /// </remarks>
+[WorkingType]
 public sealed class ParametricExerciseAdapter : ExerciseStrategy<CurveState>
 {
     private readonly MarketModelParametricExercise exercise;

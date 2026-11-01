@@ -18,6 +18,7 @@ namespace NanoQL.Methods;
 /// to the first point, so that a walk repeated every time step allocates nothing. <see cref="FdmLinearOpLayout.Begin"/>
 /// returns a new one, as QuantLib's <c>begin()</c> does.
 /// </remarks>
+[WorkingType]
 public sealed class FdmLinearOpIterator
 {
     private readonly int[] dim;

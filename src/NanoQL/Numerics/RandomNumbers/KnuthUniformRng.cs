@@ -25,6 +25,7 @@ namespace NanoQL.Numerics;
 /// the state, as in QuantLib (Knuth's mask), so seeds differing above them draw one sequence.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class KnuthUniformRng : ISeedableRng<KnuthUniformRng>
 {
     private const int KK = 100;

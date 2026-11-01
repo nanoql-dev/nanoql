@@ -22,6 +22,7 @@ namespace NanoQL.Models;
 /// once, as QuantLib's first price does, and nothing outlives the call. QuantLib keeps both in the model for its life,
 /// flushing the integrals at every parameter change.
 /// </remarks>
+[WorkingType]
 internal sealed class Gaussian1dMemo
 {
     private readonly Dictionary<SwapKey, VanillaSwap> swaps = [];

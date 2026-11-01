@@ -24,6 +24,7 @@ namespace NanoQL.Numerics;
 /// the two builds agree on every seed below 2^31.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class LecuyerUniformRng : ISeedableRng<LecuyerUniformRng>
 {
     private const long m1 = 2147483563L;

@@ -35,6 +35,7 @@ namespace NanoQL.Models;
 /// 2026-10-27). Inputs shorter than the step index reads, which QuantLib reads past, are refused (MR3 (xx)).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class AlphaFinder
 {
     private readonly AlphaForm parametricForm;

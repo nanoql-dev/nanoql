@@ -17,6 +17,7 @@ namespace NanoQL.Methods;
 /// A working type: it holds the buffer of a point's prices, which QuantLib builds per call, so a call allocates
 /// nothing.
 /// </remarks>
+[WorkingType]
 public sealed class FdmLogBasketInnerValue : FdmInnerValueCalculator
 {
     private readonly BasketPayoff payoff;

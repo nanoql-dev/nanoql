@@ -38,6 +38,7 @@ namespace NanoQL.PricingEngines;
 /// the option.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class DiscretizedSwaption : DiscretizedOption
 {
     private readonly double lastPayment;

@@ -18,6 +18,7 @@ namespace NanoQL.Models;
 /// step, as QuantLib's <c>const CurveState&amp;</c> is; a caller that keeps it calls <see cref="CurveState.Clone"/>.
 /// An extension point, as in QuantLib.
 /// </remarks>
+[WorkingType]
 public abstract class MarketModelEvolver
 {
     /// <summary>Initializes a new instance of the <see cref="MarketModelEvolver"/> class.</summary>

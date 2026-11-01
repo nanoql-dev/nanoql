@@ -20,6 +20,7 @@ namespace NanoQL.Numerics;
 /// other with the pair's weight.
 /// </remarks>
 /// <typeparam name="TRng">The uniform generator, of deviates in (0, 1).</typeparam>
+[WorkingType]
 public class BoxMullerGaussianRng<TRng> : IRng
     where TRng : class, IRng
 {

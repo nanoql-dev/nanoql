@@ -31,6 +31,7 @@ namespace NanoQL.Models;
 /// </para>
 /// <para>An extension point (U13).</para>
 /// </remarks>
+[WorkingType]
 public abstract class MarketModelComposite : MarketModelMultiProduct
 {
     private readonly List<Part> parts;

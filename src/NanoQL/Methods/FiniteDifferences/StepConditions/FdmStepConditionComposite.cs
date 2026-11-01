@@ -17,6 +17,7 @@ namespace NanoQL.Methods;
 /// A working type (the S-eq plan's SEQR1), as the conditions it holds are; applying it allocates nothing beyond what
 /// they do.
 /// </remarks>
+[WorkingType]
 public sealed class FdmStepConditionComposite : StepCondition
 {
     private readonly ImmutableArray<double> stoppingTimes;

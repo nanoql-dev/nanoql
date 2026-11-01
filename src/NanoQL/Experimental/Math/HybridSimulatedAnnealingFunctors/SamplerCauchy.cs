@@ -18,6 +18,7 @@ namespace NanoQL.Experimental;
 /// S-xrt plan's XRD4), on the seed, which is required: QuantLib's default seeds from the clock (XRD3). A working type.
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class SamplerCauchy : IAnnealingSampler<SamplerCauchy>
 {
     private readonly MersenneTwisterUniformRng generator;

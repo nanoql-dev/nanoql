@@ -33,6 +33,7 @@ namespace NanoQL.Methods;
 /// operator on the market restated on one clock (<c>Divergences/FdHestonMismatchedTimesTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class FdmBatesOp : FdmLinearOpComposite
 {
     private readonly double lambda;

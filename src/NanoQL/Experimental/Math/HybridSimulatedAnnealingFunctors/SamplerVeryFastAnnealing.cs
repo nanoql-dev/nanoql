@@ -36,6 +36,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class SamplerVeryFastAnnealing : IAnnealingSampler<SamplerVeryFastAnnealing>
 {
     private readonly Vector lower, upper;

@@ -25,6 +25,7 @@ namespace NanoQL.Numerics;
 /// uninitialized until its methods reset them.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class ProblemState
 {
     private Vector currentValue;

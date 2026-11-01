@@ -1,0 +1,29 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- nanoql-bind: the bindings' generator and native build, a .NET tool (docs/bindings.md). It reads built
+       assemblies' metadata without running them; nanoql's own two are copied beside it and are its default input. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>NanoQL.Bind</RootNamespace>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>nanoql-bind</ToolCommandName>
+    <PackageId>NanoQL.Bind</PackageId>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NanoQL.Bind.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NanoQL\NanoQL.csproj" />
+    <ProjectReference Include="..\NanoQL.Extensions\NanoQL.Extensions.csproj" />
+  </ItemGroup>
+</Project>

@@ -60,6 +60,7 @@ namespace NanoQL.PricingEngines;
 /// <see cref="Reset"/> at the widest step of the grid, so no optionlet's bonds allocate.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class DiscretizedCapFloor : DiscretizedAsset
 {
     private readonly CapFloorArguments arguments;

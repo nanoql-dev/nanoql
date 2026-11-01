@@ -23,6 +23,7 @@ namespace NanoQL.Models;
 /// (<c>ratepseudorootjacobian.cpp:280</c>, <c>:294</c>, <c>:298</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class RatePseudoRootJacobianAllElements
 {
     private readonly Matrix pseudoRoot;

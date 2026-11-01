@@ -19,6 +19,7 @@ namespace NanoQL.Methods;
 /// (<c>fdmcirop.cpp:74-82</c>) (the S-van plan's VR4 (xv)). The volatility is read on the engine's clock
 /// (<see cref="FdmBlackScholesOp.Clock"/>), QuantLib's read where it shares its times.
 /// </remarks>
+[WorkingType]
 internal sealed class FdmCIRMixedPart
 {
     private readonly NinePointLinearOp dyMap;

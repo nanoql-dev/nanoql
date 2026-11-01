@@ -24,6 +24,7 @@ namespace NanoQL.Methods;
 /// operators from it.
 /// </para>
 /// </remarks>
+[WorkingType]
 public abstract class FdmLinearOpComposite : FdmLinearOp
 {
     /// <summary>Gets the number of directions.</summary>

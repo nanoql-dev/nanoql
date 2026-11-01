@@ -18,6 +18,7 @@ namespace NanoQL.Experimental;
 /// each draw changes it, and it is not thread-safe.
 /// </remarks>
 [Experimental("NQL0001")]
+[WorkingType]
 public sealed class NormalRandomWalkDistribution : IRandomWalkDistribution
 {
     private readonly MsvcNormalDistribution distribution;

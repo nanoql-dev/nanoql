@@ -38,6 +38,7 @@ namespace NanoQL.Models;
 /// bit.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class LogNormalFwdRateEulerConstrained : ConstrainedEvolver
 {
     private readonly int initialStep;

@@ -14,6 +14,7 @@ namespace NanoQL.Numerics;
 /// <remarks>
 /// A convenience name: nanoql's own code uses the generic type. A mutable working type, as its base is.
 /// </remarks>
+[WorkingType]
 public sealed class CentralLimitXoshiro256StarStarGaussianRng : CLGaussianRng<Xoshiro256StarStarUniformRng>
 {
     /// <summary>Initializes a new instance of the <see cref="CentralLimitXoshiro256StarStarGaussianRng"/>

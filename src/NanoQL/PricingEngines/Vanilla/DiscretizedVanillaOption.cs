@@ -25,6 +25,7 @@ namespace NanoQL.PricingEngines;
 /// European one on the same tree, or rejects a window ending there (<c>Divergences/AmericanBoundsOnTimeTests.cs</c>).
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class DiscretizedVanillaOption : DiscretizedAsset
 {
     private readonly Payoff payoff;

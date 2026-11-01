@@ -16,6 +16,7 @@ namespace NanoQL.Models;
 /// <see cref="Amount"/> the caller sizes to 1 + the number of rates. <see cref="CopyFrom"/> copies another cash flow's
 /// values where QuantLib assigns one cash flow to another.
 /// </remarks>
+[WorkingType]
 public sealed class MarketModelPathwiseMultiProductCashFlow
 {
     private readonly double[] amount;

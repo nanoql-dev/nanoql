@@ -27,6 +27,7 @@ namespace NanoQL.Models;
 /// the buffers QuantLib sizes by the underlying's, is refused.
 /// </para>
 /// </remarks>
+[WorkingType]
 public sealed class CallSpecifiedPathwiseMultiProduct : MarketModelPathwiseMultiProduct
 {
     private readonly MarketModelPathwiseMultiProduct underlying;
