@@ -8,9 +8,11 @@ using Mono.Cecil.Cil;
 
 // The vector suite's recorder (docs/bindings.md, "The vector suite through each binding").
 //   record --tests <NanoQL.Tests' build folder> --twins <nanoql-bind twins folder> --out <folder> [--class <name>...]
+//          [--keep-reds]
 // compiles the twins with runtime/, copies the test build into <out>/run with its assembly rewritten (each call site
 // into nanoql that has a twin calls it; each vector fact starts a fact in the trace), runs the vector classes one at a
-// time, and writes the trace to <out>/trace.jsonl with a summary.
+// time, and writes the trace to <out>/trace.jsonl with a summary. A vector red stops it, unless --keep-reds: off the
+// reference platform a vector red is reported, and the trace, C#'s own results, is kept.
 try
 {
     return Run(args);
@@ -24,6 +26,7 @@ catch (Exception e) when (e is ArgumentException or IOException or InvalidOperat
 static int Run(string[] args)
 {
     string? tests = null, twins = null, outDir = null;
+    bool keepReds = false;
     var classes = new List<string>();
     for (int i = 1; i < args.Length; i++)
     {
@@ -33,13 +36,14 @@ static int Run(string[] args)
             case "--twins": twins = Path.GetFullPath(args[++i]); break;
             case "--out": outDir = Path.GetFullPath(args[++i]); break;
             case "--class": classes.Add(args[++i]); break;
+            case "--keep-reds": keepReds = true; break;
             default: throw new ArgumentException($"unknown argument '{args[i]}'");
         }
     }
 
     if (args.Length == 0 || args[0] != "record" || tests == null || twins == null || outDir == null)
     {
-        Console.Error.WriteLine("usage: replay record --tests <folder> --twins <folder> --out <folder> [--class <name>...]");
+        Console.Error.WriteLine("usage: replay record --tests <folder> --twins <folder> --out <folder> [--class <name>...] [--keep-reds]");
         return 2;
     }
 
@@ -77,7 +81,8 @@ static int Run(string[] args)
     {
         p.WaitForExit();
         Console.WriteLine($"the vector classes ran, exit code {p.ExitCode} ({sw.Elapsed.TotalSeconds:F0} s)");
-        if (p.ExitCode != 0)
+        // Exit code 1 is failed tests; any other, a crashed host or a bad command line, leaves no trace to keep.
+        if (p.ExitCode != 0 && !(keepReds && p.ExitCode == 1))
         {
             return p.ExitCode;
         }

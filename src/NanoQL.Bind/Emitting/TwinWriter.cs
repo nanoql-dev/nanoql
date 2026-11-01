@@ -77,7 +77,17 @@ internal sealed class TwinWriter(Surface surface)
         cs.AppendLine("        _ => null,").AppendLine("    };");
         cs.AppendLine("}");
         File.WriteAllText(Path.Combine(dir, "Twins.g.cs"), cs.ToString().ReplaceLineEndings("\n"));
-        using var json = new Utf8JsonWriter(File.Create(Path.Combine(dir, "twins.json")), new JsonWriterOptions { Indented = true });
+        WriteMap(Path.Combine(dir, "twins.json"), map);
+    }
+
+    /// <summary>Writes <c>twins.json</c>: each member key's twin and call site.</summary>
+    /// <param name="path">The file.</param>
+    /// <param name="map">The member keys, their twins and their sites.</param>
+    internal static void WriteMap(string path, IEnumerable<(string Key, string Twin, string Site)> map)
+    {
+        // The writer doesn't close the stream it's given: the file is closed here, before the caller reads it back.
+        using FileStream file = File.Create(path);
+        using var json = new Utf8JsonWriter(file, new JsonWriterOptions { Indented = true });
         json.WriteStartObject();
         foreach ((string key, string twin, string site) in map)
         {

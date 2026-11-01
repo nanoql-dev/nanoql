@@ -51,19 +51,29 @@
     <Reference Include="$(NanoQLAssemblies)" />
   </ItemGroup>
 
-  <!-- The native file's name: nanoql, set before ILC links it; the import library and the symbols follow it. -->
+  <!-- The native file's name: nanoql, set before ILC links it; the import library and the symbols follow it. ILC gives
+       a shared library no lib prefix, so it's set here, with the name a program linked to it records: Linux's soname,
+       and macOS's install name, which ILC reads before this target runs. -->
+  <PropertyGroup>
+    <SharedLibraryInstallName>@rpath/libnanoql.dylib</SharedLibraryInstallName>
+  </PropertyGroup>
+
   <Target Name="NanoQLNativeName" BeforeTargets="LinkNative">
     <PropertyGroup>
-      <NativeBinary>$(NativeOutputPath)$(NativeBinaryPrefix)nanoql$(NativeBinaryExt)</NativeBinary>
+      <NanoQLNativePrefix Condition="'$(NativeBinaryExt)' != '.dll'">lib</NanoQLNativePrefix>
+      <NativeBinary>$(NativeOutputPath)$(NanoQLNativePrefix)nanoql$(NativeBinaryExt)</NativeBinary>
     </PropertyGroup>
+    <ItemGroup>
+      <LinkerArg Include="-Wl,-soname,libnanoql.so" Condition="'$(NativeBinaryExt)' == '.so'" />
+    </ItemGroup>
   </Target>
 
   <Target Name="NanoQLNativeFiles" AfterTargets="Publish">
     <ItemGroup>
-      <_NanoQLNative Include="$(NativeOutputPath)nanoql.lib;$(NativeOutputPath)nanoql.pdb;$(NativeOutputPath)$(NativeBinaryPrefix)nanoql$(NativeBinaryExt).dbg" />
+      <_NanoQLNative Include="$(NativeOutputPath)nanoql.lib;$(NativeOutputPath)nanoql.pdb;$(NativeOutputPath)$(NanoQLNativePrefix)nanoql$(NativeBinaryExt).dbg" />
     </ItemGroup>
     <Copy SourceFiles="@(_NanoQLNative)" DestinationFolder="$(PublishDir)" Condition="Exists('%(Identity)')" />
-    <Exec Command="cp -R &quot;$(NativeOutputPath)$(NativeBinaryPrefix)nanoql$(NativeBinaryExt).dSYM&quot; &quot;$(PublishDir)&quot;"
-          Condition="Exists('$(NativeOutputPath)$(NativeBinaryPrefix)nanoql$(NativeBinaryExt).dSYM')" />
+    <Exec Command="cp -R &quot;$(NativeOutputPath)$(NanoQLNativePrefix)nanoql$(NativeBinaryExt).dSYM&quot; &quot;$(PublishDir)&quot;"
+          Condition="Exists('$(NativeOutputPath)$(NanoQLNativePrefix)nanoql$(NativeBinaryExt).dSYM')" />
   </Target>
 </Project>

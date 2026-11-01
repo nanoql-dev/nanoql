@@ -242,7 +242,9 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
   with its tests, as a user's package beside nanoql's.
 - **The vector suite through each binding:** the recorder (`tools/replay/`) compiles `nanoql-bind twins` with its
   runtime, rewrites the test assembly's call sites into nanoql to call them, and runs the vector classes with their own
-  checks against QuantLib's vectors. Each twin writes its call as its C function's: arguments and result in the C forms
+  checks against QuantLib's vectors; a red stops it unless `--keep-reds` keeps the trace, which CI passes except on
+  Windows x64, the reference platform: elsewhere a vector red is reported, and the replays compare each layer with C#'s
+  results on the same machine. Each twin writes its call as its C function's: arguments and result in the C forms
   above, objects by ids (a struct by its value), doubles by their bits, a preset's constructor, called or reached by
   reflection, as its set's lookup, a record built by an object initializer as `new` and its `with_` calls, a struct made
   by `default` or `new T()` as its implicit constructor's call, a generator's draws as `Draws` calls along its

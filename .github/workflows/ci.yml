@@ -121,7 +121,7 @@ jobs:
             Windows)
               powershell -NoProfile -Command '(Get-CimInstance Win32_Processor).Name; $os = Get-CimInstance Win32_OperatingSystem; "$($os.Caption) build $($os.BuildNumber)"; "ucrtbase.dll " + (Get-Item C:\Windows\System32\ucrtbase.dll).VersionInfo.FileVersion' ;;
             Linux)
-              grep -m1 'model name' /proc/cpuinfo; grep PRETTY_NAME /etc/os-release; ldd --version | head -1 ;;
+              grep -m1 'model name' /proc/cpuinfo; grep PRETTY_NAME /etc/os-release; ldd --version | sed -n 1p ;;
             macOS)
               sysctl -n machdep.cpu.brand_string; sw_vers ;;
           esac
@@ -234,13 +234,14 @@ jobs:
           echo "DOTNET_ROOT=$HOME/.dotnet" >> "$GITHUB_ENV"
       - name: The machine
         run: |
+          # sed -n 1p, not head -1: head's early exit ends AlmaLinux 8's ldd with SIGPIPE, a red under pipefail.
           case "$RUNNER_OS" in
             Windows) powershell -NoProfile -Command '(Get-CimInstance Win32_Processor).Name; (Get-CimInstance Win32_OperatingSystem).Caption' ;;
-            Linux) grep -m1 'model name' /proc/cpuinfo || true; grep PRETTY_NAME /etc/os-release; ldd --version | head -1 ;;
+            Linux) grep -m1 'model name' /proc/cpuinfo || true; grep PRETTY_NAME /etc/os-release; ldd --version | sed -n 1p ;;
             macOS) sysctl -n machdep.cpu.brand_string; sw_vers ;;
           esac
           dotnet --version
-          cmake --version | head -1
+          cmake --version | sed -n 1p
       - name: The tool
         run: dotnet build src/NanoQL.Bind -c Release
       - name: The checked-in surface (nanoql.h, surface.json, coverage.md)
@@ -251,6 +252,15 @@ jobs:
           dotnet run --project src/NanoQL.Bind -c Release --no-build -- build --rid "$RID" --out "$RUNNER_TEMP/nanoql"
           echo "the native build took $(( $(date +%s) - start )) s"
           ls -l "$RUNNER_TEMP/nanoql/lib"
+          # The name a program linked to the library records: Linux's soname and macOS's install name.
+          case "$RUNNER_OS" in
+            Linux)
+              readelf -d "$RUNNER_TEMP/nanoql/lib/libnanoql.so" > "$RUNNER_TEMP/dynamic.txt"
+              grep -F '(SONAME)' "$RUNNER_TEMP/dynamic.txt" | grep -F '[libnanoql.so]' ;;
+            macOS)
+              otool -D "$RUNNER_TEMP/nanoql/lib/libnanoql.dylib" > "$RUNNER_TEMP/install-name.txt"
+              grep -Fx '@rpath/libnanoql.dylib' "$RUNNER_TEMP/install-name.txt" ;;
+          esac
       - name: The test build
         run: dotnet run --project src/NanoQL.Bind -c Release --no-build -- build --rid "$RID" --out "$RUNNER_TEMP/nanoql-test" --test-exports
       - name: No libicu in the container
@@ -268,8 +278,11 @@ jobs:
           dotnet build tests/NanoQL.Tests -c Release
           dotnet build tools/replay -c Release
           dotnet run --project src/NanoQL.Bind -c Release --no-build -- twins --out "$RUNNER_TEMP/twins"
+          # Windows x64 is the reference, as in build-test: elsewhere a vector red is reported and the trace kept, since
+          # the replays compare each binding with C#'s own results on the same machine.
+          keep=$([ "$RID" = win-x64 ] || echo --keep-reds)
           dotnet tools/replay/bin/Release/net10.0/NanoQL.Replay.dll record --tests tests/NanoQL.Tests/bin/Release/net10.0 \
-            --twins "$RUNNER_TEMP/twins" --out "$RUNNER_TEMP/recording"
+            --twins "$RUNNER_TEMP/twins" --out "$RUNNER_TEMP/recording" $keep
       - name: The vector suite, replayed in C
         run: |
           dotnet run --project src/NanoQL.Bind -c Release --no-build -- replay-c --out "$RUNNER_TEMP/c-dispatch"
