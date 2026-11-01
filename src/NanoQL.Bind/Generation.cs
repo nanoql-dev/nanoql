@@ -141,6 +141,20 @@ internal sealed class Generation
         }
     }
 
+    /// <summary>The C++ headers: <c>nanoql.hpp</c>, and a user prefix's own.</summary>
+    /// <returns>Each header's text by its file name.</returns>
+    public Dictionary<string, string> CppHeaders()
+    {
+        using Stream s = typeof(Generation).Assembly.GetManifestResourceStream("NanoQL.Bind.runtime.hpp")
+            ?? throw new InvalidOperationException("the C++ runtime isn't embedded in the tool");
+        using var reader = new StreamReader(s);
+        return new CppWriter(Surface).Write(reader.ReadToEnd());
+    }
+
+    /// <summary>The C++ replayer's dispatch files.</summary>
+    /// <returns>Each file's text by its name.</returns>
+    public Dictionary<string, string> CppDispatch() => new CppReplayWriter(new CppWriter(Surface)).Write();
+
     /// <summary>Writes the Python package's generated modules into its folder.</summary>
     /// <param name="package">The package's folder (<c>nanoql/</c>).</param>
     /// <returns>The functions, classes and enums written.</returns>

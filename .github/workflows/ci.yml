@@ -235,14 +235,21 @@ jobs:
           cmake --build "$RUNNER_TEMP/c-replay" --config Release
           replay=$(find "$RUNNER_TEMP/c-replay" -name 'replay' -type f -o -name 'replay.exe' -type f | head -1)
           "$replay" "$RUNNER_TEMP/recording/trace.jsonl" "$RUNNER_TEMP/recording/facts.tsv" bindings/replay-floor.json
-      - name: Keep the C library
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: nanoql-c-${{ matrix.rid }}
-          path: |
-            ${{ runner.temp }}/nanoql/include
-            ${{ runner.temp }}/nanoql/lib
-          retention-days: 1
+      # C++ (BIR14): nanoql.hpp, C++17, through its conformance suite on the test build and the vector suite's trace, which
+      # replays to C's facts line for line.
+      - name: The C++ conformance suite
+        run: |
+          cmake -S bindings/cpp/tests -B "$RUNNER_TEMP/cpp-tests" -DNANOQL_DIR="$RUNNER_TEMP/nanoql-test" -DCMAKE_BUILD_TYPE=Release
+          cmake --build "$RUNNER_TEMP/cpp-tests" --config Release
+          ctest --test-dir "$RUNNER_TEMP/cpp-tests" -C Release --output-on-failure
+      - name: The vector suite, replayed in C++
+        run: |
+          dotnet run --project src/NanoQL.Bind -c Release --no-build -- replay-cpp --out "$RUNNER_TEMP/cpp-dispatch"
+          cmake -S bindings/cpp/replay -B "$RUNNER_TEMP/cpp-replay" -DNANOQL_DIR="$RUNNER_TEMP/nanoql" -DNANOQL_DISPATCH="$RUNNER_TEMP/cpp-dispatch" -DCMAKE_BUILD_TYPE=Release
+          cmake --build "$RUNNER_TEMP/cpp-replay" --config Release --parallel
+          replay=$(find "$RUNNER_TEMP/cpp-replay" -name 'replay' -type f -o -name 'replay.exe' -type f | head -1)
+          "$replay" "$RUNNER_TEMP/recording/trace.jsonl" "$RUNNER_TEMP/recording/cpp-facts.tsv"
+          diff <(sort "$RUNNER_TEMP/recording/facts.tsv") <(sort "$RUNNER_TEMP/recording/cpp-facts.tsv")
       # Python: CPython's oldest supported version with NumPy's floor, and the newest with the newest NumPy (BIR12). The
       # manylinux container brings its own CPythons; NumPy 1.26 has no Windows Arm64 wheel, so that job tests the newest.
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -284,6 +291,19 @@ jobs:
         with:
           name: nanoql-python-${{ matrix.rid }}
           path: ${{ runner.temp }}/wheels/*.whl
+          retention-days: 1
+      # The C and C++ archive (BIR14, BIR17): the headers, the library and the notices, zipped on Windows, .tar.xz elsewhere.
+      - name: The C and C++ archive
+        run: |
+          py=$(command -v python3 || command -v python)
+          if [ -d /opt/python ]; then py=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1); fi
+          "$py" bindings/c/archive.py --library "$RUNNER_TEMP/nanoql" --rid "$RID" --out "$RUNNER_TEMP/archive"
+          "$py" bindings/c/tests/archive_check.py "$(ls "$RUNNER_TEMP"/archive/nanoql-*-c-api.*)"
+      - name: Keep the C and C++ archive
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nanoql-c-api-${{ matrix.rid }}
+          path: ${{ runner.temp }}/archive/nanoql-*-c-api.*
           retention-days: 1
 
   # PyPI's nanoql (BIR20): dispatched by hand, the pypi environment's approval, trusted publishing (no stored token),

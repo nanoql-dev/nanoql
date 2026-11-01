@@ -23,6 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The C++ layer's hand-written part, which nanoql.hpp carries after its enums. -->
+    <EmbeddedResource Include="..\..\bindings\cpp\runtime.hpp" LogicalName="NanoQL.Bind.runtime.hpp" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\NanoQL\NanoQL.csproj" />
     <ProjectReference Include="..\NanoQL.Extensions\NanoQL.Extensions.csproj" />
   </ItemGroup>

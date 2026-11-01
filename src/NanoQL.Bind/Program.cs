@@ -16,6 +16,8 @@ using NanoQL.Bind.Selecting;
 //   twins --out <folder>      write the recorder's twins and their map (tools/replay)
 //   replay-c --out <folder>   write the C replayer's dispatch (bindings/c/replay)
 //   python --out <folder>     write the Python package's generated modules (bindings/python)
+//   cpp --out <folder>        write the C++ headers, nanoql.hpp and a user prefix's own (bindings/cpp)
+//   replay-cpp --out <folder> write the C++ replayer's dispatch (bindings/cpp/replay)
 //   report                    print the surface's counts
 // Each takes --assembly <prefix>=<path>... (nanoql's two by default, from beside the tool), --roles <path>... (the
 // repository's bindings/roles.json by default) and --shipped <path> (bindings/surface.shipped.json when it exists).
@@ -118,6 +120,27 @@ static int Run(string[] args)
             File.WriteAllText(Path.Combine(outDir, "dispatch.c"), g.CDispatch);
             Console.WriteLine($"nanoql-bind: the C replayer's dispatch in {outDir} ({sw.Elapsed.TotalSeconds:F1} s)");
             return 0;
+        case "cpp":
+        {
+            Directory.CreateDirectory(outDir ?? throw new ArgumentException("cpp takes --out <folder>"));
+            foreach ((string name, string text) in g.CppHeaders())
+            {
+                File.WriteAllBytes(Path.Combine(outDir, name), System.Text.Encoding.UTF8.GetBytes(text));
+                Console.WriteLine($"nanoql-bind: {name} in {outDir} ({text.Count(c => c == '\n'):N0} lines)");
+            }
+
+            return 0;
+        }
+
+        case "replay-cpp":
+            Directory.CreateDirectory(outDir ?? throw new ArgumentException("replay-cpp takes --out <folder>"));
+            foreach ((string name, string text) in g.CppDispatch())
+            {
+                File.WriteAllBytes(Path.Combine(outDir, name), System.Text.Encoding.UTF8.GetBytes(text));
+            }
+
+            Console.WriteLine($"nanoql-bind: the C++ replayer's dispatch in {outDir} ({sw.Elapsed.TotalSeconds:F1} s)");
+            return 0;
         case "python":
         {
             (int functions, int classes, int enums) = g.WritePython(outDir ?? throw new ArgumentException("python takes --out <package folder>"));
@@ -177,6 +200,12 @@ static int Build(Generation g, string host, string rid, string outDir, bool test
         string full = Path.Combine(outDir, path.StartsWith("c/include/", StringComparison.Ordinal) ? "include/" + Path.GetFileName(path) : path);
         Directory.CreateDirectory(Path.GetDirectoryName(full)!);
         File.WriteAllBytes(full, System.Text.Encoding.UTF8.GetBytes(text));
+    }
+
+    // The C++ headers beside the C ones.
+    foreach ((string name, string text) in g.CppHeaders())
+    {
+        File.WriteAllBytes(Path.Combine(outDir, "include", name), System.Text.Encoding.UTF8.GetBytes(text));
     }
 
     // Assemblies beyond nanoql's two are referenced by path; nanoql's are the host's project references.
