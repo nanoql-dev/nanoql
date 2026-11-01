@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 
 // The vector suite's recorder (docs/bindings.md, "The vector suite through each binding").
 //   record --tests <NanoQL.Tests' build folder> --twins <nanoql-bind twins folder> --out <folder> [--class <name>...]
@@ -183,6 +184,9 @@ static (int Sites, int Groups, int Facts, List<string> Classes) Rewrite(string i
         bool marked = false;
         foreach (MethodDefinition method in type.Methods.Where(m => m.HasBody))
         {
+            // Long branches while instructions go in, short again after: an insert can't push a short branch's
+            // target out of its reach.
+            method.Body.SimplifyMacros();
             ILProcessor il = method.Body.GetILProcessor();
             foreach (Instruction ins in method.Body.Instructions.ToList())
             {
@@ -199,10 +203,14 @@ static (int Sites, int Groups, int Facts, List<string> Classes) Rewrite(string i
                 }
 
                 string site = twin[1];
+
+                // A struct built in place, a call to its constructor on the local's address, is its twin's call with
+                // the value stored there: so each fact writes its own construction.
+                bool inPlace = ins.OpCode.Code == Code.Call && site == "newobj" && mr.Name == ".ctor" && mr.DeclaringType.Resolve()?.IsValueType == true;
                 bool rewrite = ins.OpCode.Code switch
                 {
                     Code.Newobj => site == "newobj",
-                    Code.Call => site == "static" || site == "byref" || (site == "instance" && !Resolve(mr)?.IsVirtual == true),
+                    Code.Call => inPlace || site == "static" || site == "byref" || (site == "instance" && !Resolve(mr)?.IsVirtual == true),
                     Code.Callvirt => site == "instance" && ins.Previous?.OpCode.Code != Code.Constrained,
                     Code.Ldftn => site == "static",
                     Code.Ldvirtftn => site == "instance",
@@ -233,6 +241,10 @@ static (int Sites, int Groups, int Facts, List<string> Classes) Rewrite(string i
                 }
 
                 ins.Operand = target;
+                if (inPlace)
+                {
+                    il.InsertAfter(ins, il.Create(OpCodes.Stobj, module.ImportReference(mr.DeclaringType)));
+                }
             }
 
             if (vector && method.CustomAttributes.Any(a => a.AttributeType.Name is "FactAttribute" or "TheoryAttribute"))
@@ -243,6 +255,8 @@ static (int Sites, int Groups, int Facts, List<string> Classes) Rewrite(string i
                 facts++;
                 marked = true;
             }
+
+            method.Body.OptimizeMacros();
         }
 
         if (marked)

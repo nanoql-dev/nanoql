@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using NanoQL.Bind.Model;
+
 namespace NanoQL.Bind.Tests;
 
 /// <summary>
@@ -181,5 +183,16 @@ public class KindTests
             Surfaces.Declaration(Surfaces.Nanoql, "nql_Constraint_Update"));
         Assert.All(Surfaces.Nanoql.Surface.Written, w => Assert.EndsWith("&", w.Parameter.Kind.Name, StringComparison.Ordinal));
         Assert.Equal(Surfaces.Nanoql.Surface.Written.Count, Surfaces.Nanoql.Surface.Functions.Sum(f => f.Params.Count(p => p.Kind.Name is "vector&" or "matrix&")));
+    }
+
+    [Fact]
+    public void ATypesBaseIsTheNearestThatCrossesAClosedConstructionIncluded()
+    {
+        // CdsHelper's own base, RelativeDateBootstrapHelper<DefaultProbabilityTermStructure>, doesn't cross; its base
+        // crosses as a closed construction (R14), so a CdsHelper goes wherever that class is taken.
+        TypeRow cds = Surfaces.Nanoql.Surface.Types.Single(t => t.CName == "CdsHelper");
+        TypeRow helper = Surfaces.Nanoql.Surface.Types.Single(t => t.CName == "BootstrapHelper_DefaultProbabilityTermStructure");
+        Assert.Equal(helper.Type.FullName, cds.Base);
+        Assert.Equal("NanoQL.TermStructures.YieldTermStructure", Surfaces.Nanoql.Surface.Types.Single(t => t.CName == "FlatForward").Base);
     }
 }

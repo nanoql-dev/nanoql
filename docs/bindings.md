@@ -212,10 +212,10 @@ The surface's language-neutral description, which every language back end reads 
 too. Schema 1, its `"schema"` field raised on any change of meaning; one row a line.
 
 - **`assemblies`:** each input's `prefix` and `name`.
-- **`types`:** `name`, `prefix`, `cname`, `base` (the nearest public base of the inputs), `interfaces`, `shape`
-  (`class`, `sealed`, `abstract`, `static`, `struct`, `interface`), `form` (how it crosses: `handle`, `value` for
-  `Date` and `Period`, `boxed` for another struct, `static`, and for the working types `matrix`, `vector`, `snapshot`,
-  `distribution` or `withheld`), `experimental`.
+- **`types`:** `name`, `prefix`, `cname`, `base` (the nearest base that crosses: a public class of the inputs that isn't
+  generic, or a closed construction), `interfaces`, `shape` (`class`, `sealed`, `abstract`, `static`, `struct`,
+  `interface`), `form` (how it crosses: `handle`, `value` for `Date` and `Period`, `boxed` for another struct, `static`,
+  and for the working types `matrix`, `vector`, `snapshot`, `distribution` or `withheld`), `experimental`.
 - **`enums`:** `name`, `prefix`, `cname`, `experimental`, `flags`, `members` as `[name, value]`.
 - **`functions`:** `name` (the C name), `kind` (`new`, `method`, `static`, `get`, `set`, `with`, `field`, `indexer`,
   `operator`, `draws`, `bind`, `bindon`), `type`, `member`, `key` (the member's metadata key: declaring type, name and
@@ -386,7 +386,12 @@ x64 is the validated platform; on the others, a result's last bits may differ wh
 
 - **Install:** Maven's `org.nanoql:nanoql:2.0` and the platform's natives jar, the same artifact with its classifier:
   `natives-windows-x64`, `natives-windows-arm64`, `natives-linux-x64`, `natives-linux-arm64`, `natives-macos-x64` or
-  `natives-macos-arm64`. Java 22 or later (the FFM API), run with `--enable-native-access=ALL-UNNAMED`.
+  `natives-macos-arm64`. Java 22 or later (the FFM API), run with `--enable-native-access=ALL-UNNAMED`, and on Linux
+  and macOS with the JDK's libjsig preloaded (`LD_PRELOAD=$JAVA_HOME/lib/libjsig.so`,
+  `DYLD_INSERT_LIBRARIES=$JAVA_HOME/lib/libjsig.dylib`): the library's runtime installs SIGSEGV and SIGFPE handlers,
+  which libjsig chains behind the JVM's. The variable has to reach the `java` process itself: on macOS a launcher that
+  goes through `/bin/sh`, such as Surefire's fork or a shell-script launcher, drops `DYLD_INSERT_LIBRARIES`, so a
+  wrapper named `java` sets it and runs the JDK's (CI's Java step writes one).
 - **The layers:** jextract's, `org.nanoql.ffi.nanoql_h`, over `nanoql.h`, and the idiomatic layer `nanoql-bind java`
   writes over it; neither is checked in. The hand-written runtime is `bindings/java/src/main/java/org/nanoql/`.
 - **Names:** a package per namespace (`org.nanoql.termstructures.FlatForward`), the experimental API's in

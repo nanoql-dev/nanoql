@@ -162,22 +162,19 @@ public class JavaTests
         {
             foreach (JavaMember m in ms)
             {
-                MethodInfo? method = m.Function.Member switch
-                {
-                    MethodInfo mi => mi,
-                    PropertyInfo pi => pi.GetMethod,
-                    _ => null,
-                };
+                MethodInfo? method = Method(m.Function.Member);
                 if (method == null || (method.IsVirtual && !method.Attributes.HasFlag(MethodAttributes.NewSlot)) || method.DeclaringType!.IsInterface)
                 {
                     continue;
                 }
 
-                // The same result too: a C# covariant-return override is a new slot as well, and an override in both.
+                // The same result too: a C# covariant-return override is a new slot as well, and an override in both. A
+                // member a class surfaces from a closed generic base that crosses too is the base's own, not a hide.
                 string signature = string.Join(",", m.Types.Select(JavaWriter.Erased)) + "->" + JavaWriter.Erased(w.Result(m.Function));
                 for (string? b = byName[cls].Base; b != null && byName.TryGetValue(b, out TypeRow? row); b = row.Base)
                 {
-                    if (byClass.GetValueOrDefault(b, []).Any(a => a.Name == m.Name && string.Join(",", a.Types.Select(JavaWriter.Erased)) + "->" + JavaWriter.Erased(w.Result(a.Function)) == signature))
+                    if (byClass.GetValueOrDefault(b, []).Any(a => a.Name == m.Name && string.Join(",", a.Types.Select(JavaWriter.Erased)) + "->" + JavaWriter.Erased(w.Result(a.Function)) == signature
+                        && !(Method(a.Function.Member) is { } am && am.MetadataToken == method.MetadataToken && am.DeclaringType == method.DeclaringType)))
                     {
                         hides.Add(m.Type.CName + "." + m.Name);
                         break;
@@ -187,6 +184,13 @@ public class JavaTests
         }
 
         Assert.Equal(["InterestRateVolSurface.optionDateFromTenor"], hides.Order(StringComparer.Ordinal));
+
+        static MethodInfo? Method(MemberInfo? member) => member switch
+        {
+            MethodInfo mi => mi,
+            PropertyInfo pi => pi.GetMethod,
+            _ => null,
+        };
     }
 
     [Fact]

@@ -101,6 +101,15 @@ internal sealed class Selector
 
         functions.AddRange(binder.BindFunctions(classifier, typeNames.Of, set.PrefixOf, (s, why) => Skip(s.Id, s.Engine.FullName + ".Bind", why)));
         AddConstructions(functions);
+
+        // A generic base the first walk passed may cross as a closed construction (R14): each type's base is the nearest
+        // that crosses.
+        var crossing = new HashSet<Type>(surface.Types.Select(r => r.Type));
+        for (int i = 0; i < surface.Types.Count; i++)
+        {
+            surface.Types[i] = surface.Types[i] with { Base = BaseOf(surface.Types[i].Type, crossing) };
+        }
+
         Name(functions);
         foreach (CFunction f in surface.Functions)
         {
@@ -160,14 +169,21 @@ internal sealed class Selector
         }
     }
 
-    private TypeRow Row(Type t, string prefix)
+    // The nearest base a type crosses with: a public class of ours that isn't generic, or a closed construction that
+    // crosses (R14).
+    private string? BaseOf(Type t, HashSet<Type> crossing)
     {
         Type? b = t.BaseType;
-        while (b != null && set.Ours(b) && (b.IsGenericType || !b.IsPublic))
+        while (b != null && set.Ours(b) && !crossing.Contains(b) && (b.IsGenericType || !b.IsPublic))
         {
             b = b.BaseType;
         }
 
+        return b != null && set.Ours(b) ? b.FullName : null;
+    }
+
+    private TypeRow Row(Type t, string prefix)
+    {
         string shape = t.IsInterface ? "interface" : t.IsValueType ? "struct" : t.IsAbstract && t.IsSealed ? "static" : t.IsAbstract ? "abstract" : t.IsSealed ? "sealed" : "class";
         string form = t == known.Date || t == known.Period ? "value"
             : known.IsWorking(t) ? known.WorkingForm(t)
@@ -175,7 +191,7 @@ internal sealed class Selector
             : t.IsAbstract && t.IsSealed ? "static"
             : "handle";
         return new TypeRow(
-            t, prefix, typeNames.Of(t), b != null && set.Ours(b) ? b.FullName : null,
+            t, prefix, typeNames.Of(t), BaseOf(t, []),
             [.. t.GetInterfaces().Where(i => set.Ours(i) && !i.IsGenericType && !i.IsTrait()).Select(i => i.FullName!).Order(StringComparer.Ordinal)],
             shape, IsExperimental(t), form);
     }

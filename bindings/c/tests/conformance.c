@@ -5,6 +5,10 @@
    --test-exports output, which adds the test types' functions (nqlt.h) and narrows handles' generations to 8 bits.
    Each section is one ctest test: conformance <section>. A section prints its checks and fails on the first count of
    failures above zero; every section ends with no live handle. */
+/* glibc declares dladdr and Dl_info only under _GNU_SOURCE, set before the first system header. */
+#if !defined(_WIN32) && !defined(_GNU_SOURCE)
+#define _GNU_SOURCE
+#endif
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>

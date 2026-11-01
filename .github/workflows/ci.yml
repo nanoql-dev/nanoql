@@ -281,7 +281,9 @@ jobs:
           # Windows x64 is the reference, as in build-test: elsewhere a vector red is reported and the trace kept, since
           # the replays compare each binding with C#'s own results on the same machine.
           keep=$([ "$RID" = win-x64 ] || echo --keep-reds)
-          dotnet tools/replay/bin/Release/net10.0/NanoQL.Replay.dll record --tests tests/NanoQL.Tests/bin/Release/net10.0 \
+          # Every method optimised from its first call, as Native AOT compiles it (R18's probe): on ARM64 the JIT's quick
+          # first tier and the library's optimised code may round differently.
+          DOTNET_TieredCompilation=0 dotnet tools/replay/bin/Release/net10.0/NanoQL.Replay.dll record --tests tests/NanoQL.Tests/bin/Release/net10.0 \
             --twins "$RUNNER_TEMP/twins" --out "$RUNNER_TEMP/recording" $keep
       - name: The vector suite, replayed in C
         run: |
@@ -393,10 +395,22 @@ jobs:
           if [ -d /opt/python ]; then py=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1); fi
           case "$RUNNER_OS" in Windows) lib=nanoql.dll; sep=';' ;; macOS) lib=libnanoql.dylib; sep=':' ;; *) lib=libnanoql.so; sep=':' ;; esac
           jvm=""; [ "$RUNNER_OS" = Windows ] || jvm="-Xcheck:jni"
-          java -version
+          # The JDK's libjsig preloaded on Linux and macOS, so the library's SIGSEGV and SIGFPE handlers chain behind
+          # the JVM's (BIR16, R17). Each JVM runs through a java that sets the variable itself: Surefire starts its JVM
+          # through /bin/sh, which strips DYLD_* on macOS (SIP). Surefire takes a java in a bin folder, the JDK's
+          # release file in the folder above.
+          java=java; surefire=""
+          if [ "$RUNNER_OS" != Windows ]; then
+            jsig="$JAVA_HOME/lib/libjsig.so"; [ "$RUNNER_OS" = macOS ] && jsig="$JAVA_HOME/lib/libjsig.dylib"
+            [ -f "$jsig" ] || { echo "::error::no libjsig at $jsig"; exit 1; }
+            jdk="$RUNNER_TEMP/jsig-jdk"; mkdir -p "$jdk/bin"; cp "$JAVA_HOME/release" "$jdk/release"
+            printf '#!/bin/sh\nexport LD_PRELOAD="%s" DYLD_INSERT_LIBRARIES="%s"\nexec "%s/bin/java" "$@"\n' "$jsig" "$jsig" "$JAVA_HOME" > "$jdk/bin/java"
+            chmod +x "$jdk/bin/java"; java="$jdk/bin/java"; surefire="-Djvm=$java"
+          fi
+          "$java" -version
           "$py" bindings/java/stage.py --library "$RUNNER_TEMP/nanoql-test" --ffi "$RUNNER_TEMP/java-ffi" --rid "$RID" --test-exports --dispatch
-          (cd bindings/java && mvn -B -ntp -Dnanoql.library="$RUNNER_TEMP/nanoql-test/lib/$lib" -Dnanoql.jvmArgs="$jvm" test) 2>&1 | tee "$RUNNER_TEMP/java.log"
-          java --enable-native-access=ALL-UNNAMED $jvm -Dnanoql.library="$RUNNER_TEMP/nanoql-test/lib/$lib" \
+          (cd bindings/java && mvn -B -ntp -Dnanoql.library="$RUNNER_TEMP/nanoql-test/lib/$lib" -Dnanoql.jvmArgs="$jvm" $surefire test) 2>&1 | tee "$RUNNER_TEMP/java.log"
+          "$java" --enable-native-access=ALL-UNNAMED $jvm -Dnanoql.library="$RUNNER_TEMP/nanoql-test/lib/$lib" \
             -cp "bindings/java/target/classes${sep}bindings/java/target/test-classes" org.nanoql.replay.Replay \
             "$RUNNER_TEMP/recording/trace.jsonl" "$RUNNER_TEMP/recording/java-facts.tsv" bindings/replay-floor.json 2>&1 | tee -a "$RUNNER_TEMP/java.log"
           # -Xcheck:jni warns, and goes on, where a signal handler the JVM installed was replaced; a forked suite's JVM
@@ -404,7 +418,7 @@ jobs:
           shopt -s nullglob
           logs=("$RUNNER_TEMP/java.log" bindings/java/target/surefire-reports/*.dumpstream)
           if grep -i "handler modified" "${logs[@]}"; then
-            echo "::error::-Xcheck:jni reports a replaced signal handler (BIR16): libjsig is the user's ruling"; exit 1
+            echo "::error::-Xcheck:jni reports a replaced signal handler with libjsig preloaded (BIR16, R17)"; exit 1
           fi
       - name: The Java jars
         if: needs.java-ffi.result == 'success'

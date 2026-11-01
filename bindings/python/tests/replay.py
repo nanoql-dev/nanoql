@@ -317,7 +317,11 @@ class Replay:
             # An overload: the form its group's dispatch takes, by the arguments' own classes; another than C#'s static
             # choice is counted, and the recorded form called.
             self.dispatched += 1
-            _, _, chosen = _select(getattr(cls, group), tuple(args), {})
+            try:
+                _, _, chosen = _select(getattr(cls, group), tuple(args), {})
+            except TypeError as e:
+                # The arguments' classes, which the dispatch read, name the one no form takes.
+                raise TypeError(f"{e}: {', '.join(type(a).__name__ for a in args)}") from None
             if chosen != cname:
                 self.other_form += 1
                 return _F[cname](*args) if style != "new" else self.construct(cls_name, _F[cname](*args))

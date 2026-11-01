@@ -16,7 +16,7 @@ namespace NanoQL.Replay;
 /// The twins' recorder: one JSON line per call into nanoql the vector suite makes, written as its C function's call,
 /// with its arguments and its result in the C ABI's forms, objects by ids in order of appearance; a line per fact as it
 /// starts. A struct behind a handle has its id by value: each use boxes a new copy, and an equal value is the same handle
-/// to the replay. A call made from inside nanoql (a callback into the test code) is not written: nothing replays it. The trace
+/// to the replay; a default value's construction is written in each fact that takes it. A call made from inside nanoql (a callback into the test code) is not written: nothing replays it. The trace
 /// goes to the file <c>NANOQL_TRACE</c> names; without it nothing is written.
 /// </summary>
 public static class Rec
@@ -24,11 +24,13 @@ public static class Rec
     private static readonly object Gate = new();
     private static readonly ConditionalWeakTable<object, StrongBox<long>> Ids = new();
     private static readonly Dictionary<object, long> Values = new(new ValueKey());
+    private static readonly Dictionary<object, int> ValueFacts = new(new ValueKey());
     private static readonly ConditionalWeakTable<object, StrongBox<object?>> Pendings = new();
     private static readonly ConditionalWeakTable<object, object> Shadows = new();
     private static readonly ConditionalWeakTable<object, object> Substitutes = new();
     private static readonly StreamWriter? Out = Open();
     private static long next;
+    private static int fact;
 
     [ThreadStatic]
     private static int depth;
@@ -53,6 +55,7 @@ public static class Rec
 
         lock (Gate)
         {
+            fact++;
             Out.Write("{\"fact\":");
             Out.Write(System.Text.Json.JsonSerializer.Serialize(name));
             Out.Write("}\n");
@@ -107,6 +110,11 @@ public static class Rec
             if (o.GetType().IsValueType)
             {
                 fresh = !Values.TryGetValue(o, out long v);
+                if (fresh)
+                {
+                    ValueFacts[o] = fact;
+                }
+
                 return fresh ? Values[o] = ++next : v;
             }
 
@@ -143,24 +151,32 @@ public static class Rec
     /// <returns>Its id, or null.</returns>
     public static long? IdOrMaterialize(object o)
     {
-        if (Id(o) is { } id)
+        Type t = o.GetType();
+        long? known = Id(o);
+        if (known is { } id && (!t.IsValueType || FactOf(o) == fact))
         {
             return id;
         }
 
+        // A struct made by default or new T(): its implicit constructor's call, written before the call taking it (R16),
+        // in each fact that takes it, so no fact's replay rests on another's reaching the call.
+        if (t.IsValueType && Twins.DefaultNew(t) is { } function && new ValueKey().Equals(o, Activator.CreateInstance(t)))
+        {
+            Forget(o);
+            Args w = Args();
+            w.Result();
+            w.New(o);
+            Call(function, w);
+            return Id(o);
+        }
+
+        if (known is { } earlier)
+        {
+            return earlier;
+        }
+
         if (!Pendings.TryGetValue(o, out StrongBox<object?>? b))
         {
-            // A struct made by default or new T(): its implicit constructor's call, written before the call taking it (R16).
-            Type t = o.GetType();
-            if (t.IsValueType && Twins.DefaultNew(t) is { } function && new ValueKey().Equals(o, Activator.CreateInstance(t)))
-            {
-                Args w = Args();
-                w.Result();
-                w.New(o);
-                Call(function, w);
-                return Id(o);
-            }
-
             return null;
         }
 
@@ -187,6 +203,7 @@ public static class Rec
             lock (Gate)
             {
                 Values.Remove(o);
+                ValueFacts.Remove(o);
             }
         }
         else if (o != null)
@@ -310,6 +327,7 @@ public static class Rec
             lock (Gate)
             {
                 Values[o] = id;
+                ValueFacts[o] = fact;
             }
         }
         else
@@ -486,6 +504,15 @@ public static class Rec
             }
 
             return true;
+        }
+    }
+
+    // The fact whose call gave a struct value its id, or -1.
+    private static int FactOf(object o)
+    {
+        lock (Gate)
+        {
+            return ValueFacts.TryGetValue(o, out int f) ? f : -1;
         }
     }
 
