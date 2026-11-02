@@ -9,11 +9,11 @@ report applies.
 ## Counts
 
 - **Assemblies:** `NanoQL` (`nql_`), `NanoQL.Extensions` (`nql_`).
-- **Functions:** 11,080, 2,418 of them experimental and 1,470 with an overload suffix; by kind, method 3,827, get 3,476, new 1,402, static 889, with 626, operator 413, bind 193, bindon 193, draws 48, field 7, indexer 5, set 1.
+- **Functions:** 11,086, 2,418 of them experimental and 1,477 with an overload suffix; by kind, method 3,833, get 3,476, new 1,402, static 889, with 626, operator 413, bind 193, bindon 193, draws 48, field 7, indexer 5, set 1.
 - **Types:** 2,255; by form, handle 1,629, static 280, withheld 215, boxed 73, snapshot 53, value 2, distribution 1, matrix 1, vector 1.
 - **Enums:** 165.
-- **Names:** the longest 165 characters, 1,058 over 63.
-- **Presets withheld:** 310 constructors of 298 types, 346 of the 356 preset constructions with a lookup by name.
+- **Names:** the longest 165 characters, 1,064 over 63.
+- **Presets withheld:** 310 constructors of 298 types, 356 of the 356 preset constructions with a lookup by name.
 - **Engines:** 161 engines, 202 input sets; 37 engine parameters, 925 pairs formed, 8 refused at the call, 264 calculations forming no pair.
 - **Not crossing:** 2,467 members and types.
 
@@ -2868,12 +2868,12 @@ writes a constructor call whose arguments match a preset's as that lookup.
 - `IborIndexes["Euribor6M"]`: `Euribor6M`, `nql_ConventionSet_IborIndex__string_YieldTermStructure`
 - `IborIndexes["GBPLiborON"]`: `GBPLiborON`, `nql_ConventionSet_IborIndex__string_YieldTermStructure`
 - `IborIndexes["USDLiborON"]`: `USDLiborON`, `nql_ConventionSet_IborIndex__string_YieldTermStructure`
-- `IborIndexesWithSettlementDays["DailyTenorCHFLibor"]`: `DailyTenorCHFLibor`, no lookup takes the lambda's parameters it passes
-- `IborIndexesWithSettlementDays["DailyTenorEURLibor"]`: `DailyTenorEURLibor`, no lookup takes the lambda's parameters it passes
-- `IborIndexesWithSettlementDays["DailyTenorGBPLibor"]`: `DailyTenorGBPLibor`, no lookup takes the lambda's parameters it passes
-- `IborIndexesWithSettlementDays["DailyTenorJPYLibor"]`: `DailyTenorJPYLibor`, no lookup takes the lambda's parameters it passes
-- `IborIndexesWithSettlementDays["DailyTenorUSDLibor"]`: `DailyTenorUSDLibor`, no lookup takes the lambda's parameters it passes
-- `OtherIndexes["BMAIndex"]`: `BMAIndex`, no lookup takes the lambda's parameters it passes
+- `IborIndexesWithSettlementDays["DailyTenorCHFLibor"]`: `DailyTenorCHFLibor`, `nql_ConventionSet_IborIndex__string_int`
+- `IborIndexesWithSettlementDays["DailyTenorEURLibor"]`: `DailyTenorEURLibor`, `nql_ConventionSet_IborIndex__string_int`
+- `IborIndexesWithSettlementDays["DailyTenorGBPLibor"]`: `DailyTenorGBPLibor`, `nql_ConventionSet_IborIndex__string_int`
+- `IborIndexesWithSettlementDays["DailyTenorJPYLibor"]`: `DailyTenorJPYLibor`, `nql_ConventionSet_IborIndex__string_int`
+- `IborIndexesWithSettlementDays["DailyTenorUSDLibor"]`: `DailyTenorUSDLibor`, `nql_ConventionSet_IborIndex__string_int`
+- `OtherIndexes["BMAIndex"]`: `BMAIndex`, `nql_ConventionSet_InterestRateIndex`
 - `OvernightIndexes["Aonia"]`: `Aonia`, `nql_ConventionSet_IborIndex__string_YieldTermStructure`
 - `OvernightIndexes["Cdi"]`: `Cdi`, `nql_ConventionSet_IborIndex__string_YieldTermStructure`
 - `OvernightIndexes["Corra"]`: `Corra`, `nql_ConventionSet_IborIndex__string_YieldTermStructure`
@@ -2929,23 +2929,23 @@ writes a constructor call whose arguments match a preset's as that lookup.
 - `UnitsOfMeasure["MBUnitOfMeasure"]`: `MBUnitOfMeasure`, `nql_ConventionSet_UnitOfMeasure`
 - `UnitsOfMeasure["MTUnitOfMeasure"]`: `MTUnitOfMeasure`, `nql_ConventionSet_UnitOfMeasure`
 - `UnitsOfMeasure["TokyoKilolitreUnitOfMeasure"]`: `TokyoKilolitreUnitOfMeasure`, `nql_ConventionSet_UnitOfMeasure`
-- `YoYInflationIndexes["YYEUHICP"]`: `YYEUHICP`, `nql_ConventionSet_YoYInflationIndex`
-- `YoYInflationIndexes["YYEUHICPXT"]`: `YYEUHICPXT`, `nql_ConventionSet_YoYInflationIndex`
-- `YoYInflationIndexes["YYFRHICP"]`: `YYFRHICP`, `nql_ConventionSet_YoYInflationIndex`
-- `YoYInflationIndexes["YYUKRPI"]`: `YYUKRPI`, `nql_ConventionSet_YoYInflationIndex`
-- `YoYInflationIndexes["YYUSCPI"]`: `YYUSCPI`, `nql_ConventionSet_YoYInflationIndex`
-- `YoYInflationIndexes["YYZACPI"]`: `YYZACPI`, `nql_ConventionSet_YoYInflationIndex`
-- `YoYInflationIndexesWithArguments["YYAUCPI"]`: `YYAUCPI`, no lookup takes the lambda's parameters it passes
-- `YoYInflationIndexesWithLagAndCurrency["YYGenericCPI"]`: `YYGenericCPI`, no lookup takes the lambda's parameters it passes
-- `ZeroInflationIndexes["EUHICP"]`: `EUHICP`, `nql_ConventionSet_ZeroInflationIndex`
-- `ZeroInflationIndexes["EUHICPXT"]`: `EUHICPXT`, `nql_ConventionSet_ZeroInflationIndex`
-- `ZeroInflationIndexes["FRHICP"]`: `FRHICP`, `nql_ConventionSet_ZeroInflationIndex`
-- `ZeroInflationIndexes["UKHICP"]`: `UKHICP`, `nql_ConventionSet_ZeroInflationIndex`
-- `ZeroInflationIndexes["UKRPI"]`: `UKRPI`, `nql_ConventionSet_ZeroInflationIndex`
-- `ZeroInflationIndexes["USCPI"]`: `USCPI`, `nql_ConventionSet_ZeroInflationIndex`
-- `ZeroInflationIndexes["ZACPI"]`: `ZACPI`, `nql_ConventionSet_ZeroInflationIndex`
-- `ZeroInflationIndexesWithArguments["AUCPI"]`: `AUCPI`, no lookup takes the lambda's parameters it passes
-- `ZeroInflationIndexesWithLagAndCurrency["GenericCPI"]`: `GenericCPI`, no lookup takes the lambda's parameters it passes
+- `YoYInflationIndexes["YYEUHICP"]`: `YYEUHICP`, `nql_ConventionSet_YoYInflationIndex__string_YoYInflationTermStructure`
+- `YoYInflationIndexes["YYEUHICPXT"]`: `YYEUHICPXT`, `nql_ConventionSet_YoYInflationIndex__string_YoYInflationTermStructure`
+- `YoYInflationIndexes["YYFRHICP"]`: `YYFRHICP`, `nql_ConventionSet_YoYInflationIndex__string_YoYInflationTermStructure`
+- `YoYInflationIndexes["YYUKRPI"]`: `YYUKRPI`, `nql_ConventionSet_YoYInflationIndex__string_YoYInflationTermStructure`
+- `YoYInflationIndexes["YYUSCPI"]`: `YYUSCPI`, `nql_ConventionSet_YoYInflationIndex__string_YoYInflationTermStructure`
+- `YoYInflationIndexes["YYZACPI"]`: `YYZACPI`, `nql_ConventionSet_YoYInflationIndex__string_YoYInflationTermStructure`
+- `YoYInflationIndexesWithArguments["YYAUCPI"]`: `YYAUCPI`, `nql_ConventionSet_YoYInflationIndex__string_Frequency_bool_YoYInflationTermStructure`
+- `YoYInflationIndexesWithLagAndCurrency["YYGenericCPI"]`: `YYGenericCPI`, `nql_ConventionSet_YoYInflationIndex__string_Frequency_bool_Period`
+- `ZeroInflationIndexes["EUHICP"]`: `EUHICP`, `nql_ConventionSet_ZeroInflationIndex__string_ZeroInflationTermStructure`
+- `ZeroInflationIndexes["EUHICPXT"]`: `EUHICPXT`, `nql_ConventionSet_ZeroInflationIndex__string_ZeroInflationTermStructure`
+- `ZeroInflationIndexes["FRHICP"]`: `FRHICP`, `nql_ConventionSet_ZeroInflationIndex__string_ZeroInflationTermStructure`
+- `ZeroInflationIndexes["UKHICP"]`: `UKHICP`, `nql_ConventionSet_ZeroInflationIndex__string_ZeroInflationTermStructure`
+- `ZeroInflationIndexes["UKRPI"]`: `UKRPI`, `nql_ConventionSet_ZeroInflationIndex__string_ZeroInflationTermStructure`
+- `ZeroInflationIndexes["USCPI"]`: `USCPI`, `nql_ConventionSet_ZeroInflationIndex__string_ZeroInflationTermStructure`
+- `ZeroInflationIndexes["ZACPI"]`: `ZACPI`, `nql_ConventionSet_ZeroInflationIndex__string_ZeroInflationTermStructure`
+- `ZeroInflationIndexesWithArguments["AUCPI"]`: `AUCPI`, `nql_ConventionSet_ZeroInflationIndex__string_Frequency_bool_ZeroInflationTermStructure`
+- `ZeroInflationIndexesWithLagAndCurrency["GenericCPI"]`: `GenericCPI`, `nql_ConventionSet_ZeroInflationIndex__string_Frequency_bool_Period`
 
 ## Matrix and Vector arguments their members write
 

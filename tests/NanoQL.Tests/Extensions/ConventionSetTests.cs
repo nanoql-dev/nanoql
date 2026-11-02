@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using NanoQL.Currencies;
+using NanoQL.Experimental;
 using NanoQL.Extensions.Conventions;
 using NanoQL.Indexes;
 using NanoQL.Time;
@@ -13,7 +14,8 @@ namespace NanoQL.Tests.Extensions;
 /// <see cref="ConventionSet.With"/> leaves <see cref="ConventionProvider.Default"/> and its receiver alone, resolves
 /// every record of the new set across its layers and refuses a cycle, an unknown name, an edited identity or a value the
 /// core refuses when the file is loaded; sets side by side on two threads; equality and hash; the empty set's code kinds;
-/// QuantLib's set and QuantLib's provider giving equal presets; and the provenance report.
+/// QuantLib's set and QuantLib's provider giving equal presets; the lookups of the presets that take arguments, each
+/// built in the set and refusing a name of another kind; and the provenance report.
 /// </summary>
 public class ConventionSetTests
 {
@@ -301,6 +303,147 @@ public class ConventionSetTests
         Assert.Contains("Calendar TARGTE (mine.xml) overrides no name and nothing references it", report.Warnings);
         Assert.DoesNotContain(report.Warnings, w => w.Contains("Desk", StringComparison.Ordinal) || w.Contains("TARGET ", StringComparison.Ordinal));
         Assert.Empty(ConventionSet.QuantLib.Provenance().Warnings);
+    }
+
+    [Fact]
+    public void ThePresetsThatTakeArgumentsAreLookedUpWithThem()
+    {
+        ConventionSet set = ConventionSet.QuantLib;
+        var lag = new Period(3, TimeUnit.Months);
+
+        IborIndex daily = set.IborIndex("DailyTenorUSDLibor", 2);
+        Assert.IsType<DailyTenorUSDLibor>(daily);
+        Assert.Equal((new DailyTenorUSDLibor(2).Name, 2), (daily.Name, daily.FixingDays));
+        Assert.IsType<BMAIndex>(set.InterestRateIndex("BMAIndex"));
+        Assert.IsType<Euribor6M>(set.InterestRateIndex("Euribor6M"));
+
+        ZeroInflationIndex au = set.ZeroInflationIndex("AUCPI", Frequency.Quarterly, false);
+        Assert.IsType<AUCPI>(au);
+        Assert.Equal((Frequency.Quarterly, false), (au.Frequency, au.Revised));
+        ZeroInflationIndex generic = set.ZeroInflationIndex("GenericCPI", Frequency.Monthly, true, lag, new GBPCurrency());
+        Assert.IsType<GenericCPI>(generic);
+        Assert.Equal((Frequency.Monthly, true, lag, "GBP"), (generic.Frequency, generic.Revised, generic.AvailabilityLag, generic.Currency.Code));
+        YoYInflationIndex yyau = set.YoYInflationIndex("YYAUCPI", Frequency.Quarterly, true);
+        Assert.IsType<YYAUCPI>(yyau);
+        Assert.Equal((Frequency.Quarterly, true), (yyau.Frequency, yyau.Revised));
+        YoYInflationIndex yygeneric = set.YoYInflationIndex("YYGenericCPI", Frequency.Monthly, false, lag, new EURCurrency());
+        Assert.IsType<YYGenericCPI>(yygeneric);
+        Assert.Equal((Frequency.Monthly, false, lag, "EUR"), (yygeneric.Frequency, yygeneric.Revised, yygeneric.AvailabilityLag, yygeneric.Currency.Code));
+    }
+
+    [Theory]
+    [InlineData("ibor", "True", "False")]
+    [InlineData("interest rate", "US government bond market", "TARGET")]
+    [InlineData("zero", "2M", "4M")]
+    [InlineData("zero with lag", "Generic", "UK")]
+    [InlineData("yoy", "2M", "4M")]
+    [InlineData("yoy with lag", "Generic", "UK")]
+    public void APresetsLookupWithArgumentsBuildsItInTheSet(string lookup, string quantLibs, string sets)
+    {
+        // each lookup's preset reads a record the set overrides: the daily-tenor LIBOR its fixing calendar's, the BMA
+        // index its fixing calendar, AUCPI and YYAUCPI their availability lags, the generic CPIs their regions
+        ConventionSet set = ConventionsText.OnQuantLib("""
+            <Calendar name="UnitedKingdom.Exchange" base="UnitedKingdom.Exchange"><AddedHoliday>2026-10-16</AddedHoliday></Calendar>
+            <IborIndex name="BMAIndex" base="BMAIndex"><FixingCalendar>TARGET</FixingCalendar></IborIndex>
+            <ZeroInflationIndex name="AUCPI" base="AUCPI"><AvailabilityLag>4M</AvailabilityLag></ZeroInflationIndex>
+            <YoYInflationIndex name="YYAUCPI" base="YYAUCPI"><AvailabilityLag>4M</AvailabilityLag></YoYInflationIndex>
+            <ZeroInflationIndex name="GenericCPI" base="GenericCPI"><Region>UKRegion</Region></ZeroInflationIndex>
+            <YoYInflationIndex name="YYGenericCPI" base="YYGenericCPI"><Region>UKRegion</Region></YoYInflationIndex>
+            """);
+        var lag = new Period(3, TimeUnit.Months);
+        Func<ConventionSet, string> read = lookup switch
+        {
+            "ibor" => s => s.IborIndex("DailyTenorUSDLibor", 2).FixingCalendar.IsBusinessDay(Holiday).ToString(),
+            "interest rate" => s => s.InterestRateIndex("BMAIndex").FixingCalendar.Name,
+            "zero" => s => s.ZeroInflationIndex("AUCPI", Frequency.Quarterly, false).AvailabilityLag.ToString(),
+            "zero with lag" => s => s.ZeroInflationIndex("GenericCPI", Frequency.Monthly, false, lag, new EURCurrency()).Region.Name,
+            "yoy" => s => s.YoYInflationIndex("YYAUCPI", Frequency.Quarterly, false).AvailabilityLag.ToString(),
+            _ => s => s.YoYInflationIndex("YYGenericCPI", Frequency.Monthly, false, lag, new EURCurrency()).Region.Name,
+        };
+
+        Assert.Equal((quantLibs, sets), (read(ConventionSet.QuantLib), read(set)));
+    }
+
+    [Theory]
+    [InlineData("ibor")]
+    [InlineData("interest rate")]
+    [InlineData("zero")]
+    [InlineData("zero with lag")]
+    [InlineData("yoy")]
+    [InlineData("yoy with lag")]
+    public void APresetsLookupWithArgumentsFollowsTheSetsAlias(string lookup)
+    {
+        // a user's alias of each preset, as the set's other index lookups follow one
+        ConventionSet set = ConventionsText.OnQuantLib("""
+            <Alias name="USD-LIBOR-ON" base="DailyTenorUSDLibor" />
+            <Alias name="USD-SIFMA" base="BMAIndex" />
+            <Alias name="AU-CPI" base="AUCPI" />
+            <Alias name="GENERIC-CPI" base="GenericCPI" />
+            <Alias name="AU-YY-CPI" base="YYAUCPI" />
+            <Alias name="GENERIC-YY-CPI" base="YYGenericCPI" />
+            """);
+        var lag = new Period(3, TimeUnit.Months);
+        object index = lookup switch
+        {
+            "ibor" => set.IborIndex("USD-LIBOR-ON", 2),
+            "interest rate" => set.InterestRateIndex("USD-SIFMA"),
+            "zero" => set.ZeroInflationIndex("AU-CPI", Frequency.Quarterly, false),
+            "zero with lag" => set.ZeroInflationIndex("GENERIC-CPI", Frequency.Monthly, false, lag, new EURCurrency()),
+            "yoy" => set.YoYInflationIndex("AU-YY-CPI", Frequency.Quarterly, false),
+            _ => set.YoYInflationIndex("GENERIC-YY-CPI", Frequency.Monthly, false, lag, new EURCurrency()),
+        };
+
+        Type expected = lookup switch
+        {
+            "ibor" => typeof(DailyTenorUSDLibor),
+            "interest rate" => typeof(BMAIndex),
+            "zero" => typeof(AUCPI),
+            "zero with lag" => typeof(GenericCPI),
+            "yoy" => typeof(YYAUCPI),
+            _ => typeof(YYGenericCPI),
+        };
+        Assert.IsType(expected, index);
+    }
+
+    [Theory]
+    [InlineData("ibor")]
+    [InlineData("interest rate")]
+    [InlineData("zero")]
+    [InlineData("zero with lag")]
+    [InlineData("yoy")]
+    [InlineData("yoy with lag")]
+    public void APresetsLookupWithArgumentsRefusesANameOfAnotherKind(string lookup)
+    {
+        ConventionSet set = ConventionSet.QuantLib;
+        var lag = new Period(3, TimeUnit.Months);
+        ArgumentException e = lookup switch
+        {
+            "ibor" => Assert.Throws<ArgumentException>(() => set.IborIndex("Euribor6M", 2)),
+            "interest rate" => Assert.Throws<ArgumentException>(() => set.InterestRateIndex("UKRPI")),
+            "zero" => Assert.Throws<ArgumentException>(() => set.ZeroInflationIndex("UKRPI", Frequency.Monthly, false)),
+            "zero with lag" => Assert.Throws<ArgumentException>(() => set.ZeroInflationIndex("AUCPI", Frequency.Monthly, false, lag, new AUDCurrency())),
+            "yoy" => Assert.Throws<ArgumentException>(() => set.YoYInflationIndex("YYUKRPI", Frequency.Monthly, false)),
+            _ => Assert.Throws<ArgumentException>(() => set.YoYInflationIndex("YYAUCPI", Frequency.Monthly, false, lag, new AUDCurrency())),
+        };
+
+        Assert.Equal("name", e.ParamName);
+    }
+
+    [Fact]
+    public void ANameAloneLookupOfAPresetThatTakesArgumentsNamesTheLookupThatTakesThem()
+    {
+        ConventionSet set = ConventionSet.QuantLib;
+
+        Assert.Contains("IborIndex(name, settlementDays) takes them", Refusal(() => set.IborIndex("DailyTenorUSDLibor")), StringComparison.Ordinal);
+        Assert.Contains("InterestRateIndex(name) gives it", Refusal(() => set.IborIndex("BMAIndex")), StringComparison.Ordinal);
+        Assert.Contains("ZeroInflationIndex(name, frequency, revised) takes them", Refusal(() => set.ZeroInflationIndex("AUCPI")), StringComparison.Ordinal);
+        Assert.Contains(
+            "YoYInflationIndex(name, frequency, revised, availabilityLag, currency) takes them",
+            Refusal(() => set.YoYInflationIndex("YYGenericCPI")),
+            StringComparison.Ordinal);
+        Assert.StartsWith("unknown interest-rate index Nowhere", Refusal(() => set.InterestRateIndex("Nowhere")), StringComparison.Ordinal);
+
+        static string Refusal(Func<object> lookup) => Assert.Throws<ArgumentException>(lookup).Message;
     }
 
     private static T Under<T>(ConventionProvider provider, Func<T> build)

@@ -188,7 +188,8 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
     /// <returns>A new index, keeping the set as its provider.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
     /// <exception cref="ArgumentException">No Ibor index has the name, the name is a family's, which takes a tenor, or
-    /// the preset takes its settlement days as an argument (a record based on it gives them).</exception>
+    /// the preset takes its settlement days as an argument (<see cref="IborIndex(string, int, YieldTermStructure?)"/>
+    /// takes them, or a record based on it gives them).</exception>
     /// <remarks>
     /// Build an index on its curve here, as a preset's own constructor does, rather than clone one: QuantLib's clones
     /// are its base classes', so a clone of <see cref="Sonia"/> is an <see cref="Indexes.OvernightIndex"/>, which a
@@ -322,6 +323,146 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         using (Use(this))
         {
             return YoYIndexOf(name, [], nameof(name), ts);
+        }
+    }
+
+    /// <summary>
+    /// An Ibor preset that takes its settlement days (the daily-tenor LIBORs), built in the set on its forwarding
+    /// curve, as QuantLib-Python's constructor takes them.
+    /// </summary>
+    /// <param name="name">The preset's name (<c>DailyTenorUSDLibor</c>) or an alias of it.</param>
+    /// <param name="settlementDays">The settlement days.</param>
+    /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
+    /// <returns>A new index, of its preset's class.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No Ibor preset of the name takes its settlement days.</exception>
+    public IborIndex IborIndex(string name, int settlementDays, YieldTermStructure? h = null)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            return PresetFactories.IborIndexesWithSettlementDays.TryGetValue(Unaliased(name), out var f)
+                ? f(settlementDays, h)
+                : throw new ArgumentException($"no Ibor preset {name} takes its settlement days", nameof(name));
+        }
+    }
+
+    /// <summary>
+    /// An interest-rate index by name, built in the set on its forwarding curve: a preset that is no Ibor index (the
+    /// BMA index), or an Ibor or overnight index as <see cref="IborIndex(string, YieldTermStructure?)"/> gives it.
+    /// </summary>
+    /// <param name="name">The preset's name (<c>BMAIndex</c>) or an alias of it, or an Ibor or overnight index's
+    /// name or alias.</param>
+    /// <param name="h">The forwarding curve, or <see langword="null"/> for none.</param>
+    /// <returns>A new index, of its preset's class.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No such index has the name, or <see cref="IborIndex(string,
+    /// YieldTermStructure?)"/> refuses it.</exception>
+    public InterestRateIndex InterestRateIndex(string name, YieldTermStructure? h = null)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            return PresetFactories.OtherIndexes.TryGetValue(Unaliased(name), out var f)
+                ? f(h)
+                : IborIndexOf(name, [], nameof(name), h, "interest-rate index");
+        }
+    }
+
+    /// <summary>
+    /// A zero inflation preset that takes its frequency and revised flag (AUCPI), built in the set on its curve, as
+    /// QuantLib-Python's constructor takes them.
+    /// </summary>
+    /// <param name="name">The preset's name or an alias of it.</param>
+    /// <param name="frequency">The index's frequency.</param>
+    /// <param name="revised">Whether the index is revised.</param>
+    /// <param name="ts">The zero inflation curve, or <see langword="null"/> for none.</param>
+    /// <returns>A new index, of its preset's class.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No zero inflation preset of the name takes a frequency and a revised
+    /// flag.</exception>
+    public ZeroInflationIndex ZeroInflationIndex(string name, Frequency frequency, bool revised, ZeroInflationTermStructure? ts = null)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            return PresetFactories.ZeroInflationIndexesWithArguments.TryGetValue(Unaliased(name), out var f)
+                ? f(frequency, revised, ts)
+                : throw new ArgumentException($"no zero inflation preset {name} takes a frequency and a revised flag", nameof(name));
+        }
+    }
+
+    /// <summary>
+    /// A zero inflation preset that takes its frequency, revised flag, availability lag and currency (GenericCPI),
+    /// built in the set on its curve, as QuantLib-Python's constructor takes them.
+    /// </summary>
+    /// <param name="name">The preset's name or an alias of it.</param>
+    /// <param name="frequency">The index's frequency.</param>
+    /// <param name="revised">Whether the index is revised.</param>
+    /// <param name="availabilityLag">The availability lag.</param>
+    /// <param name="currency">The currency.</param>
+    /// <param name="ts">The zero inflation curve, or <see langword="null"/> for none.</param>
+    /// <returns>A new index, of its preset's class.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No zero inflation preset of the name takes a lag and a currency.</exception>
+    public ZeroInflationIndex ZeroInflationIndex(
+        string name, Frequency frequency, bool revised, Period availabilityLag, Currency currency, ZeroInflationTermStructure? ts = null)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            return PresetFactories.ZeroInflationIndexesWithLagAndCurrency.TryGetValue(Unaliased(name), out var f)
+                ? f(frequency, revised, availabilityLag, currency, ts)
+                : throw new ArgumentException($"no zero inflation preset {name} takes a lag and a currency", nameof(name));
+        }
+    }
+
+    /// <summary>
+    /// A year-on-year inflation preset that takes its frequency and revised flag (YYAUCPI), built in the set on its
+    /// curve, as QuantLib-Python's constructor takes them.
+    /// </summary>
+    /// <param name="name">The preset's name or an alias of it.</param>
+    /// <param name="frequency">The index's frequency.</param>
+    /// <param name="revised">Whether the index is revised.</param>
+    /// <param name="ts">The year-on-year inflation curve, or <see langword="null"/> for none.</param>
+    /// <returns>A new index, of its preset's class.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No year-on-year inflation preset of the name takes a frequency and a revised
+    /// flag.</exception>
+    public YoYInflationIndex YoYInflationIndex(string name, Frequency frequency, bool revised, YoYInflationTermStructure? ts = null)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            return PresetFactories.YoYInflationIndexesWithArguments.TryGetValue(Unaliased(name), out var f)
+                ? f(frequency, revised, ts)
+                : throw new ArgumentException($"no year-on-year inflation preset {name} takes a frequency and a revised flag", nameof(name));
+        }
+    }
+
+    /// <summary>
+    /// A year-on-year inflation preset that takes its frequency, revised flag, availability lag and currency
+    /// (YYGenericCPI), built in the set on its curve, as QuantLib-Python's constructor takes them.
+    /// </summary>
+    /// <param name="name">The preset's name or an alias of it.</param>
+    /// <param name="frequency">The index's frequency.</param>
+    /// <param name="revised">Whether the index is revised.</param>
+    /// <param name="availabilityLag">The availability lag.</param>
+    /// <param name="currency">The currency.</param>
+    /// <param name="ts">The year-on-year inflation curve, or <see langword="null"/> for none.</param>
+    /// <returns>A new index, of its preset's class.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
+    /// <exception cref="ArgumentException">No year-on-year inflation preset of the name takes a lag and a
+    /// currency.</exception>
+    public YoYInflationIndex YoYInflationIndex(
+        string name, Frequency frequency, bool revised, Period availabilityLag, Currency currency, YoYInflationTermStructure? ts = null)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+        using (Use(this))
+        {
+            return PresetFactories.YoYInflationIndexesWithLagAndCurrency.TryGetValue(Unaliased(name), out var f)
+                ? f(frequency, revised, availabilityLag, currency, ts)
+                : throw new ArgumentException($"no year-on-year inflation preset {name} takes a lag and a currency", nameof(name));
         }
     }
 
@@ -2509,12 +2650,24 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
         _ => set.QuantitySettings(name),
     };
 
-    private IborIndex IborIndexOf(string name, HashSet<string> visiting, string paramName, YieldTermStructure? h)
+    // A name down its chain of aliases: the record or preset the last one names, the name itself where it is no alias.
+    private string Unaliased(string name)
+    {
+        while (Top(ConventionKind.Index, name, layers.Length)?.Record is AliasRecord alias)
+        {
+            name = alias.Base!;
+        }
+
+        return name;
+    }
+
+    private IborIndex IborIndexOf(
+        string name, HashSet<string> visiting, string paramName, YieldTermStructure? h, string kind = "Ibor index")
     {
         Entry? e = Top(ConventionKind.Index, name, layers.Length);
         if (e?.Record is AliasRecord alias)
         {
-            return IborIndexOf(alias.Base!, visiting, paramName, h);
+            return IborIndexOf(alias.Base!, visiting, paramName, h, kind);
         }
 
         if (PresetFactories.IborIndexes.TryGetValue(name, out Func<YieldTermStructure?, IborIndex>? preset))
@@ -2529,7 +2682,14 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
 
         if (PresetFactories.IborIndexesWithSettlementDays.ContainsKey(name))
         {
-            throw new ArgumentException($"the {name} preset takes its settlement days: name a record based on it that gives them", paramName);
+            throw new ArgumentException(
+                $"the {name} preset takes its settlement days: IborIndex(name, settlementDays) takes them, or name a record based on it that gives them",
+                paramName);
+        }
+
+        if (PresetFactories.OtherIndexes.ContainsKey(name))
+        {
+            throw new ArgumentException($"{name} is no Ibor or overnight index: InterestRateIndex(name) gives it", paramName);
         }
 
         if (e?.Record is IborFamilyRecord || (e is null && PresetFactories.IborFamilies.ContainsKey(name)))
@@ -2537,9 +2697,14 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
             throw new ArgumentException($"{name} is an Ibor family, which takes a tenor", paramName);
         }
 
+        if (e?.Record is { } record and not (IborIndexRecord or OvernightIndexRecord))
+        {
+            throw new ArgumentException($"{name} is a {ConventionKinds.Element(record)}, no Ibor or overnight index", paramName);
+        }
+
         IborFields f = e is null
-            ? throw Unknown("Ibor index", name, paramName)
-            : IborFieldsOf(name, layers.Length, visiting) ?? throw Unknown("Ibor index", name, paramName);
+            ? throw Unknown(kind, name, paramName)
+            : IborFieldsOf(name, layers.Length, visiting) ?? throw Unknown(kind, name, paramName);
         if (ArgumentBaseOf(name, []) is string dailyTenor)
         {
             return PresetFactories.IborIndexesWithSettlementDays[dailyTenor](f.FixingDays ?? throw Missing("index", name, "FixingDays"), h);
@@ -2685,12 +2850,16 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
 
         if (PresetFactories.ZeroInflationIndexesWithArguments.ContainsKey(name))
         {
-            throw new ArgumentException($"the {name} preset takes its frequency and revised flag: name a record based on it that gives them", paramName);
+            throw new ArgumentException(
+                $"the {name} preset takes its frequency and revised flag: ZeroInflationIndex(name, frequency, revised) takes them, or name a record based on it that gives them",
+                paramName);
         }
 
         if (PresetFactories.ZeroInflationIndexesWithLagAndCurrency.ContainsKey(name))
         {
-            throw new ArgumentException($"the {name} preset takes its frequency, revised flag, lag and currency: name a record based on it that gives them", paramName);
+            throw new ArgumentException(
+                $"the {name} preset takes its frequency, revised flag, lag and currency: ZeroInflationIndex(name, frequency, revised, availabilityLag, currency) takes them, or name a record based on it that gives them",
+                paramName);
         }
 
         YoYInflationIndexRecord z = InflationFieldsOf(name, layers.Length, visiting) ?? throw Unknown("zero inflation index", name, paramName);
@@ -2739,12 +2908,16 @@ public sealed class ConventionSet : ConventionProvider, IEquatable<ConventionSet
 
         if (PresetFactories.YoYInflationIndexesWithArguments.ContainsKey(name))
         {
-            throw new ArgumentException($"the {name} preset takes its frequency and revised flag: name a record based on it that gives them", paramName);
+            throw new ArgumentException(
+                $"the {name} preset takes its frequency and revised flag: YoYInflationIndex(name, frequency, revised) takes them, or name a record based on it that gives them",
+                paramName);
         }
 
         if (PresetFactories.YoYInflationIndexesWithLagAndCurrency.ContainsKey(name))
         {
-            throw new ArgumentException($"the {name} preset takes its frequency, revised flag, lag and currency: name a record based on it that gives them", paramName);
+            throw new ArgumentException(
+                $"the {name} preset takes its frequency, revised flag, lag and currency: YoYInflationIndex(name, frequency, revised, availabilityLag, currency) takes them, or name a record based on it that gives them",
+                paramName);
         }
 
         YoYInflationIndexRecord y = InflationFieldsOf(name, layers.Length, visiting) ?? throw Unknown("year-on-year inflation index", name, paramName);

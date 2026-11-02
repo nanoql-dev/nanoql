@@ -179,7 +179,12 @@ generator's; a member taking a construction no generator class derives doesn't c
   for each other field, each returning a new context.
 - **Conventions by name:** the coded presets' constructors (`TARGET`, `Actual365Fixed`, `Euribor6M`, ...) don't cross;
   a convention set gives each by its name: `nql_ConventionSet_Calendar(set, "TARGET", &calendar)`,
-  `nql_ConventionSet_IborIndex__string_Period(set, "Euribor", tenor, curve, &index)`. A set comes from
+  `nql_ConventionSet_IborIndex__string_Period(set, "Euribor", tenor, curve, &index)`. A preset that takes arguments
+  has a lookup taking them after its name, as QuantLib-Python's constructor takes them: the daily-tenor LIBORs'
+  settlement days (`nql_ConventionSet_IborIndex__string_int(set, "DailyTenorUSDLibor", 2, curve, &index)`), AUCPI's
+  frequency and revised flag and GenericCPI's with its lag and currency, and their year-on-year twins; the BMA index, no
+  Ibor index, by `nql_ConventionSet_InterestRateIndex`, which gives the BMA index, or any Ibor or overnight index, by
+  name or alias; the index lookups follow the set's aliases. A set comes from
   `nql_ConventionSet_get_QuantLib`, or from XML: `nql_ConventionsXml_Read__string(path, &snapshot)` then
   `nql_ConventionSet_With`. A NULL set is the current provider read as a set: QuantLib's set where the default provider
   is the core's, refused where it is a user's provider. `nql_ConventionProvider_set_Default` sets the default; scopes

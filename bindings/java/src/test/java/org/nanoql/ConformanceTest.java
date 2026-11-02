@@ -348,6 +348,22 @@ class ConformanceTest {
         Calendar theirs = mine.nanoqls();
         assertTrue(theirs.isBusinessDay(LocalDate.of(2026, 10, 30)));
         assertEquals(theirs, ConventionSet.quantLib().calendar("TARGET"));
+
+        // The presets that take arguments, each by its lookup's overload with them; the lookups by name alone too.
+        ConventionSet qs = ConventionSet.quantLib();
+        Period lag = new Period(3, TimeUnit.Months);
+        org.nanoql.Currency usd = qs.currency("USD");
+        org.nanoql.indexes.IborIndex daily = qs.iborIndex("DailyTenorUSDLibor", 2);
+        assertInstanceOf(org.nanoql.indexes.DailyTenorUSDLibor.class, daily);
+        assertEquals(2, daily.fixingDays());
+        assertInstanceOf(org.nanoql.indexes.BMAIndex.class, qs.interestRateIndex("BMAIndex"));
+        assertInstanceOf(org.nanoql.indexes.AUCPI.class, qs.zeroInflationIndex("AUCPI", Frequency.Quarterly, false));
+        assertInstanceOf(org.nanoql.experimental.GenericCPI.class, qs.zeroInflationIndex("GenericCPI", Frequency.Monthly, true, lag, usd));
+        assertInstanceOf(org.nanoql.indexes.YYAUCPI.class, qs.yoyInflationIndex("YYAUCPI", Frequency.Quarterly, false));
+        assertInstanceOf(org.nanoql.experimental.YYGenericCPI.class, qs.yoyInflationIndex("YYGenericCPI", Frequency.Monthly, true, lag, usd));
+        assertInstanceOf(org.nanoql.indexes.UKRPI.class, qs.zeroInflationIndex("UKRPI"));
+        assertInstanceOf(org.nanoql.indexes.YYUKRPI.class, qs.yoyInflationIndex("YYUKRPI"));
+        assertThrows(NanoQLArgumentException.class, () -> qs.iborIndex("Euribor6M", 2));
     }
 
     @Test

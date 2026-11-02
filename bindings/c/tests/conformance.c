@@ -866,6 +866,36 @@ static void test_conventions(void)
     release(c);
     release(user);
     release(ql);
+
+    /* The presets that take arguments, each by its lookup with them; the two lookups by name alone, renamed. */
+    nql_handle idx[7] = {NULL};
+    nql_handle usd = set_lookup(nql_ConventionSet_Currency, "USD");
+    nql_period lag = {3, NQL_TimeUnit_Months};
+    OK(nql_ConventionSet_IborIndex__string_int(NULL, "DailyTenorUSDLibor", 2, NULL, &idx[0]));
+    OK(nql_ConventionSet_InterestRateIndex(NULL, "BMAIndex", NULL, &idx[1]));
+    OK(nql_ConventionSet_ZeroInflationIndex__string_Frequency_bool_ZeroInflationTermStructure(NULL, "AUCPI", NQL_Frequency_Quarterly, false, NULL, &idx[2]));
+    OK(nql_ConventionSet_ZeroInflationIndex__string_Frequency_bool_Period(NULL, "GenericCPI", NQL_Frequency_Monthly, true, lag, usd, NULL, &idx[3]));
+    OK(nql_ConventionSet_YoYInflationIndex__string_Frequency_bool_YoYInflationTermStructure(NULL, "YYAUCPI", NQL_Frequency_Quarterly, false, NULL, &idx[4]));
+    OK(nql_ConventionSet_YoYInflationIndex__string_Frequency_bool_Period(NULL, "YYGenericCPI", NQL_Frequency_Monthly, true, lag, usd, NULL, &idx[5]));
+    OK(nql_ConventionSet_ZeroInflationIndex__string_ZeroInflationTermStructure(NULL, "UKRPI", NULL, &idx[6]));
+    static const char* types[7] = {"NanoQL.Indexes.DailyTenorUSDLibor", "NanoQL.Indexes.BMAIndex", "NanoQL.Indexes.AUCPI", "NanoQL.Experimental.GenericCPI",
+                                   "NanoQL.Indexes.YYAUCPI", "NanoQL.Experimental.YYGenericCPI", "NanoQL.Indexes.UKRPI"};
+    for (int k = 0; k < 7; k++) {
+        char* tn = NULL;
+        OK(nql_type_name(idx[k], &tn));
+        CHECK(tn && strcmp(tn, types[k]) == 0, "a preset by its lookup: %s", tn ? tn : "(none)");
+        nql_free(tn);
+    }
+    int32_t days = 0, frequency = 0;
+    OK(nql_InterestRateIndex_get_FixingDays(idx[0], &days));
+    OK(nql_InflationIndex_get_Frequency(idx[2], &frequency));
+    CHECK(days == 2 && frequency == NQL_Frequency_Quarterly, "each built with its arguments");
+    nql_handle yy = NULL, wrong = NULL;
+    OK(nql_ConventionSet_YoYInflationIndex__string_YoYInflationTermStructure(NULL, "YYUKRPI", NULL, &yy));
+    REFUSED(nql_ConventionSet_IborIndex__string_int(NULL, "Euribor6M", 2, NULL, &wrong), NQL_ERROR_ARGUMENT);
+    for (int k = 0; k < 7; k++) release(idx[k]);
+    release(yy);
+    release(usd);
 }
 
 /* An optional struct left out: NULL is its default, what C# passes (R16); its implicit constructor crosses too. */

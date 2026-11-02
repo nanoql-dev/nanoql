@@ -6204,6 +6204,10 @@ NQL_API nql_status nql_ConventionSet_FxSwap(nql_handle self, const char* name, n
 NQL_API nql_status nql_ConventionSet_IborIndex__string_Period(nql_handle self, const char* name, nql_period tenor, nql_handle h, nql_handle* result);
 /* ConventionSet.IborIndex(string name, YieldTermStructure h = null) -> IborIndex */
 NQL_API nql_status nql_ConventionSet_IborIndex__string_YieldTermStructure(nql_handle self, const char* name, nql_handle h, nql_handle* result);
+/* ConventionSet.IborIndex(string name, int settlementDays, YieldTermStructure h = null) -> IborIndex */
+NQL_API nql_status nql_ConventionSet_IborIndex__string_int(nql_handle self, const char* name, int32_t settlementDays, nql_handle h, nql_handle* result);
+/* ConventionSet.InterestRateIndex(string name, YieldTermStructure h = null) -> InterestRateIndex */
+NQL_API nql_status nql_ConventionSet_InterestRateIndex(nql_handle self, const char* name, nql_handle h, nql_handle* result);
 /* ConventionSet.MultipleResetsSwap(string name) -> MultipleResetsSwapConvention */
 NQL_API nql_status nql_ConventionSet_MultipleResetsSwap(nql_handle self, const char* name, nql_handle* result);
 /* ConventionSet.Ois(string name) -> OisConvention */
@@ -6248,12 +6252,20 @@ NQL_API nql_status nql_ConventionSet_With(nql_handle self, nql_handle snapshot, 
 NQL_API nql_status nql_ConventionSet_YearOnYearInflationSwap(nql_handle self, const char* name, nql_handle* result);
 /* ConventionSet.YoYInflationCapFloor(string name) -> YoYInflationCapFloorConvention */
 NQL_API nql_status nql_ConventionSet_YoYInflationCapFloor(nql_handle self, const char* name, nql_handle* result);
+/* ConventionSet.YoYInflationIndex(string name, Frequency frequency, bool revised, Period availabilityLag, Currency currency, YoYInflationTermStructure ts = null) -> YoYInflationIndex */
+NQL_API nql_status nql_ConventionSet_YoYInflationIndex__string_Frequency_bool_Period(nql_handle self, const char* name, int32_t frequency, bool revised, nql_period availabilityLag, nql_handle currency, nql_handle ts, nql_handle* result);
+/* ConventionSet.YoYInflationIndex(string name, Frequency frequency, bool revised, YoYInflationTermStructure ts = null) -> YoYInflationIndex */
+NQL_API nql_status nql_ConventionSet_YoYInflationIndex__string_Frequency_bool_YoYInflationTermStructure(nql_handle self, const char* name, int32_t frequency, bool revised, nql_handle ts, nql_handle* result);
 /* ConventionSet.YoYInflationIndex(string name, YoYInflationTermStructure ts = null) -> YoYInflationIndex */
-NQL_API nql_status nql_ConventionSet_YoYInflationIndex(nql_handle self, const char* name, nql_handle ts, nql_handle* result);
+NQL_API nql_status nql_ConventionSet_YoYInflationIndex__string_YoYInflationTermStructure(nql_handle self, const char* name, nql_handle ts, nql_handle* result);
 /* ConventionSet.ZeroCouponInflationSwap(string name) -> ZeroCouponInflationSwapConvention */
 NQL_API nql_status nql_ConventionSet_ZeroCouponInflationSwap(nql_handle self, const char* name, nql_handle* result);
+/* ConventionSet.ZeroInflationIndex(string name, Frequency frequency, bool revised, Period availabilityLag, Currency currency, ZeroInflationTermStructure ts = null) -> ZeroInflationIndex */
+NQL_API nql_status nql_ConventionSet_ZeroInflationIndex__string_Frequency_bool_Period(nql_handle self, const char* name, int32_t frequency, bool revised, nql_period availabilityLag, nql_handle currency, nql_handle ts, nql_handle* result);
+/* ConventionSet.ZeroInflationIndex(string name, Frequency frequency, bool revised, ZeroInflationTermStructure ts = null) -> ZeroInflationIndex */
+NQL_API nql_status nql_ConventionSet_ZeroInflationIndex__string_Frequency_bool_ZeroInflationTermStructure(nql_handle self, const char* name, int32_t frequency, bool revised, nql_handle ts, nql_handle* result);
 /* ConventionSet.ZeroInflationIndex(string name, ZeroInflationTermStructure ts = null) -> ZeroInflationIndex */
-NQL_API nql_status nql_ConventionSet_ZeroInflationIndex(nql_handle self, const char* name, nql_handle ts, nql_handle* result);
+NQL_API nql_status nql_ConventionSet_ZeroInflationIndex__string_ZeroInflationTermStructure(nql_handle self, const char* name, nql_handle ts, nql_handle* result);
 /* ConventionSet.get_Empty() -> ConventionSet */
 NQL_API nql_status nql_ConventionSet_get_Empty(nql_handle* result);
 /* ConventionSet.get_IsOnQuantLib() -> bool */

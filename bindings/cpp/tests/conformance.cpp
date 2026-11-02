@@ -384,6 +384,21 @@ static void test_conventions()
     CHECK(mine.name() == "TARGET" && theirs.isBusinessDay(Date(30, Month::October, 2026)), "the user's Calendar beside nanoql's");
     CHECK((!std::is_base_of_v<nanoql::Calendar, nqlt::Calendar>), "the user's Calendar isn't nanoql's");
     CHECK(theirs == ConventionSet::quantLib().calendar("TARGET"), "the user's member returns nanoql's calendar");
+
+    // The presets that take arguments, each by its lookup's overload with them; the lookups by name alone renamed.
+    ConventionSet qs = ConventionSet::quantLib();
+    Period lag(3, TimeUnit::Months);
+    Currency usd = qs.currency("USD");
+    IborIndex daily = qs.iborIndex("DailyTenorUSDLibor", 2);
+    CHECK(daily.typeName() == "NanoQL.Indexes.DailyTenorUSDLibor" && daily.fixingDays() == 2, "a daily-tenor LIBOR with its settlement days");
+    CHECK(qs.interestRateIndex("BMAIndex").typeName() == "NanoQL.Indexes.BMAIndex", "the BMA index, no Ibor index");
+    CHECK(qs.zeroInflationIndex("AUCPI", Frequency::Quarterly, false).typeName() == "NanoQL.Indexes.AUCPI", "AUCPI with its frequency");
+    CHECK(qs.zeroInflationIndex("GenericCPI", Frequency::Monthly, true, lag, usd).typeName() == "NanoQL.Experimental.GenericCPI", "GenericCPI with its lag");
+    CHECK(qs.yoyInflationIndex("YYAUCPI", Frequency::Quarterly, false).typeName() == "NanoQL.Indexes.YYAUCPI", "YYAUCPI");
+    CHECK(qs.yoyInflationIndex("YYGenericCPI", Frequency::Monthly, true, lag, usd).typeName() == "NanoQL.Experimental.YYGenericCPI", "YYGenericCPI");
+    CHECK(qs.zeroInflationIndex("UKRPI").typeName() == "NanoQL.Indexes.UKRPI" && qs.yoyInflationIndex("YYUKRPI").typeName() == "NanoQL.Indexes.YYUKRPI",
+          "the lookups by name alone");
+    REFUSED(qs.iborIndex("Euribor6M", 2), argument_error, NQL_ERROR_ARGUMENT);
 }
 
 // ---- bound engines ----

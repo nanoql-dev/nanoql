@@ -438,6 +438,26 @@ class Conventions(unittest.TestCase):
         self.assertEqual(dc.name, "Actual/365 (Fixed)")
         self.assertIsInstance(dc, nanoql.DayCounter)
 
+    def test_presets_with_arguments(self):
+        # Each by its lookup, the group's dispatch picking the form by the arguments; the lookups by name alone too.
+        qs, lag = ConventionSet.quant_lib(), Period(3, TimeUnit.Months)
+        usd = qs.currency("USD")
+        daily = qs.ibor_index("DailyTenorUSDLibor", 2)
+        self.assertIsInstance(daily, nanoql.DailyTenorUSDLibor)
+        self.assertEqual(daily.fixing_days, 2)
+        self.assertEqual(qs.ibor_index("Euribor", Period(6, TimeUnit.Months)).tenor, Period(6, TimeUnit.Months))
+        self.assertIsInstance(qs.interest_rate_index("BMAIndex"), nanoql.BMAIndex)
+        self.assertIsInstance(qs.zero_inflation_index("AUCPI", Frequency.Quarterly, False), nanoql.AUCPI)
+        self.assertIsInstance(qs.yoy_inflation_index("YYAUCPI", Frequency.Quarterly, False), nanoql.YYAUCPI)
+        import nanoql.experimental as x
+
+        self.assertIsInstance(qs.zero_inflation_index("GenericCPI", Frequency.Monthly, True, lag, usd), x.GenericCPI)
+        self.assertIsInstance(qs.yoy_inflation_index("YYGenericCPI", Frequency.Monthly, True, lag, usd), x.YYGenericCPI)
+        self.assertIsInstance(qs.zero_inflation_index("UKRPI"), nanoql.UKRPI)
+        self.assertIsInstance(qs.yoy_inflation_index("YYUKRPI"), nanoql.YYUKRPI)
+        with self.assertRaises(ArgumentError):
+            qs.ibor_index("Euribor6M", 2)
+
 
 class Engines(unittest.TestCase):
     def test_swap(self):
