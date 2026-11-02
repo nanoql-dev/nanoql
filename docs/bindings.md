@@ -284,10 +284,11 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
 
 ## Platforms
 
-The library is built natively on each of six platforms: `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64`,
-`osx-arm64` and `osx-x64`; Linux in a `manylinux_2_28` container, so it runs on glibc 2.28 and later. It loads no ICU
-(invariant globalization), so its messages read the same in every locale and it runs where libicu is absent. Windows
-x64 is the validated platform; on the others, a result's last bits may differ where the C runtime's maths functions do.
+The library is built natively on each of five platforms: `win-x64`, `win-arm64`, `linux-x64`, `linux-arm64` and
+`osx-arm64`; Linux in a `manylinux_2_28` container, so it runs on glibc 2.28 and later; Intel Macs aren't among them
+(nanoql's C# library runs there; nanoql builds and tests no bindings for them). It loads no ICU (invariant
+globalization), so its messages read the same in every locale and it runs where libicu is absent. Windows x64 is the
+validated platform; on the others, a result's last bits may differ where the C runtime's maths functions do.
 
 ## C and C++
 
@@ -336,7 +337,7 @@ x64 is the validated platform; on the others, a result's last bits may differ wh
 ## Python
 
 - **Install:** `pip install nanoql`, a `py3-none-<platform>` wheel holding the library for Windows x64 and Arm64,
-  Linux x64 and Arm64 (`manylinux_2_28`) and macOS x64 and Arm64 (14 or later): one wheel for every Python from 3.11,
+  Linux x64 and Arm64 (`manylinux_2_28`) and macOS on Apple silicon (14 or later): one wheel for every Python from 3.11,
   with NumPy 1.26 or later, and nothing compiled on install.
 - **Names:** nanoql's type names; members in PEP 8's snake case (`curve.discount(5.0)`, `swap.fixed_rate`); enum
   members as nanoql's (`Compounding.Continuous`). A constructor is the class's call, a getter a property, a static
@@ -380,19 +381,19 @@ x64 is the validated platform; on the others, a result's last bits may differ wh
   and the .NET runtime's `LICENSE.TXT` and `THIRD-PARTY-NOTICES.TXT`, which Native AOT compiles into the library, each a
   PEP 639 `License-File` under the `License-Expression` `pyproject.toml` gives. `--stage <folder> --test-exports`
   stages the test build's package instead, for the conformance suite.
-- **Publishing:** CI's `publish-pypi` job, dispatched by hand with the `pypi` environment's approval, uploads the six
+- **Publishing:** CI's `publish-pypi` job, dispatched by hand with the `pypi` environment's approval, uploads the five
   bindings jobs' wheels through PyPI's trusted publishing, with no stored token.
 
 ## Java
 
 - **Install:** Maven's `org.nanoql:nanoql:2.0` and the platform's natives jar, the same artifact with its classifier:
-  `natives-windows-x64`, `natives-windows-arm64`, `natives-linux-x64`, `natives-linux-arm64`, `natives-macos-x64` or
-  `natives-macos-arm64`. Java 22 or later (the FFM API), run with `--enable-native-access=ALL-UNNAMED`, and on Linux
-  and macOS with the JDK's libjsig preloaded (`LD_PRELOAD=$JAVA_HOME/lib/libjsig.so`,
-  `DYLD_INSERT_LIBRARIES=$JAVA_HOME/lib/libjsig.dylib`): the library's runtime installs SIGSEGV and SIGFPE handlers,
-  which libjsig chains behind the JVM's. The variable has to reach the `java` process itself: on macOS a launcher that
-  goes through `/bin/sh`, such as Surefire's fork or a shell-script launcher, drops `DYLD_INSERT_LIBRARIES`, so a
-  wrapper named `java` sets it and runs the JDK's (CI's Java step writes one).
+  `natives-windows-x64`, `natives-windows-arm64`, `natives-linux-x64`, `natives-linux-arm64` or `natives-macos-arm64`.
+  Java 22 or later (the FFM API), run with `--enable-native-access=ALL-UNNAMED`, and on Linux and macOS with the JDK's
+  libjsig preloaded (`LD_PRELOAD=$JAVA_HOME/lib/libjsig.so`, `DYLD_INSERT_LIBRARIES=$JAVA_HOME/lib/libjsig.dylib`): the
+  library's runtime installs SIGSEGV and SIGFPE handlers, which libjsig chains behind the JVM's. The variable has to
+  reach the `java` process itself: on macOS a launcher that goes through `/bin/sh`, such as Surefire's fork or a
+  shell-script launcher, drops `DYLD_INSERT_LIBRARIES`, so a wrapper named `java` sets it and runs the JDK's (CI's Java
+  step writes one).
 - **The layers:** jextract's, `org.nanoql.ffi.nanoql_h`, over `nanoql.h`, and the idiomatic layer `nanoql-bind java`
   writes over it; neither is checked in. The hand-written runtime is `bindings/java/src/main/java/org/nanoql/`.
 - **Names:** a package per namespace (`org.nanoql.termstructures.FlatForward`), the experimental API's in

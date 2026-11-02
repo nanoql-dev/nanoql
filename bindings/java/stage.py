@@ -29,7 +29,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 TARGET = HERE / "target"
 PLATFORMS = {"win-x64": "windows-x64", "win-arm64": "windows-arm64", "linux-x64": "linux-x64", "linux-arm64": "linux-arm64",
-             "osx-x64": "macos-x64", "osx-arm64": "macos-arm64"}
+             "osx-arm64": "macos-arm64"}
 LIBRARY = {"win": "nanoql.dll", "linux": "libnanoql.so", "osx": "libnanoql.dylib"}
 
 
@@ -103,6 +103,8 @@ def main() -> int:
         a.error("give --jextract to run jextract, or --ffi for a layer it made")
     builder = wheel_builder()
     rid = args.rid or builder.host_rid()
+    if rid not in PLATFORMS:
+        raise SystemExit(f"no natives jar for {rid}: nanoql's bindings are built for {', '.join(PLATFORMS)}")
     library = args.library.resolve()
     for d in ("generated", "ffi", "generated-test", "ffi-test", "dispatch", "notices", "natives"):
         shutil.rmtree(TARGET / d, ignore_errors=True)

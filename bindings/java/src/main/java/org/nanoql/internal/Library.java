@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Loads nanoql's native library once, before any call: the path {@code nanoql.library} names (a system property, or
@@ -27,6 +28,8 @@ import java.util.Locale;
  * part of nanoql's API.
  */
 public final class Library {
+    // The platforms a natives jar is built for; Intel macOS isn't one.
+    private static final Set<String> BUILT = Set.of("windows-x64", "windows-arm64", "linux-x64", "linux-arm64", "macos-arm64");
     private static volatile String loaded;
     private static String requested = System.getProperty("nanoql.library");
 
@@ -98,12 +101,13 @@ public final class Library {
         String resource = "/org/nanoql/natives/" + platform + "/" + name;
         try {
             if (!windows()) {
-                // A folder of a random name only its owner can open (POSIX), the copy deleted once loaded.
-                Path file = Files.createTempDirectory("nanoql").resolve(name);
+                // A folder of a random name only its owner can open (POSIX), the copy deleted once loaded; made only
+                // once the jar holds the library, so a platform with none leaves no folder.
                 try (InputStream in = open(resource, platform)) {
+                    Path file = Files.createTempDirectory("nanoql").resolve(name);
                     Files.copy(in, file);
+                    return file.toAbsolutePath();
                 }
-                return file.toAbsolutePath();
             }
             byte[] hash = sha256(open(resource, platform));
             Path file = Path.of(System.getProperty("java.io.tmpdir"), "nanoql-" + HexFormat.of().formatHex(hash, 0, 8), name).toAbsolutePath();
@@ -155,8 +159,10 @@ public final class Library {
     private static InputStream open(String resource, String platform) {
         InputStream in = Library.class.getResourceAsStream(resource);
         if (in == null) {
-            throw new UnsatisfiedLinkError("no " + resource + " on the class path: add org.nanoql:nanoql's natives-" + platform
-                + " jar, or set nanoql.library to the library's path");
+            throw new UnsatisfiedLinkError(BUILT.contains(platform)
+                ? "no " + resource + " on the class path: add org.nanoql:nanoql's natives-" + platform
+                    + " jar, or set nanoql.library to the library's path"
+                : "nanoql's natives aren't built for " + platform + ": set nanoql.library to a library built for it");
         }
         return in;
     }

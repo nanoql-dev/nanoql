@@ -31,7 +31,6 @@ TAGS = {
     "win-arm64": "win_arm64",
     "linux-x64": "manylinux_2_28_x86_64",
     "linux-arm64": "manylinux_2_28_aarch64",
-    "osx-x64": "macosx_14_0_x86_64",
     "osx-arm64": "macosx_14_0_arm64",
 }
 
@@ -115,6 +114,8 @@ def metadata(project: dict, version: str) -> str:
 def wheel(package: pathlib.Path, out: pathlib.Path, rid: str, version: str, notices: dict[str, bytes]) -> pathlib.Path:
     project = tomllib.loads((HERE / "pyproject.toml").read_text(encoding="utf-8"))["project"]
     version = version or project["version"]
+    if rid not in TAGS:
+        raise SystemExit(f"no wheel for {rid}: nanoql's bindings are built for {', '.join(TAGS)}")
     tag = TAGS[rid]
     dist = f"nanoql-{version}"
     files: dict[str, bytes] = {}
