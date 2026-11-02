@@ -31,6 +31,9 @@ internal sealed class Generation
     /// <summary>Gets the C replayer's generated dispatch.</summary>
     public string CDispatch { get; private init; } = string.Empty;
 
+    /// <summary>Gets the Excel build's outputs, when the run made one.</summary>
+    public ExcelOutput? Excel { get; private init; }
+
     /// <summary>Gets the checked-in outputs by their path under <c>bindings/</c>.</summary>
     public IReadOnlyDictionary<string, string> Files { get; }
 
@@ -38,8 +41,9 @@ internal sealed class Generation
     /// <param name="inputs">The assemblies and their prefixes.</param>
     /// <param name="roles">The roles tables: <c>bindings/roles.json</c> and a user assembly's own.</param>
     /// <param name="shipped">The last release's <c>surface.shipped.json</c>, absent before the first.</param>
+    /// <param name="excel">An Excel build's options, or null for none.</param>
     /// <returns>The run.</returns>
-    public static Generation Run(IReadOnlyList<AssemblyInput> inputs, IEnumerable<string> roles, string? shipped)
+    public static Generation Run(IReadOnlyList<AssemblyInput> inputs, IEnumerable<string> roles, string? shipped, ExcelOptions? excel = null)
     {
         using MetadataSet set = MetadataSet.Open(inputs);
         ExceptionDocs docs = ExceptionDocs.Read(set);
@@ -56,7 +60,7 @@ internal sealed class Generation
             files[$"c/include/{prefix}.h"] = HeaderWriter.Write(surface, prefix);
         }
 
-        var g = new Generation(surface, files) { CDispatch = new CReplayWriter(surface).Write() };
+        var g = new Generation(surface, files) { CDispatch = new CReplayWriter(surface).Write(), Excel = excel == null ? null : BuildExcel(surface, excel) };
         string dir = Path.Combine(Path.GetTempPath(), "nanoql-bind-" + Guid.NewGuid().ToString("N"));
         try
         {
@@ -86,6 +90,25 @@ internal sealed class Generation
         }
 
         return g;
+    }
+
+    // An Excel build (docs/excel.md): its functions selected and written, its surface and counts rendered.
+    private static ExcelOutput BuildExcel(Surface surface, ExcelOptions options)
+    {
+        ExcelSelection selection = ExcelSelection.Select(surface, options, ExcelShipped.Read(options.Shipped));
+        var writer = new ExcelWriter(surface, selection, options);
+        Dictionary<string, string> files = writer.Write();
+        string templates = writer.Templates();
+        int own = ExcelManifest.Own(options.TestBuild).Count;
+        int experimental = selection.Units.Count(u => u.Experimental);
+        string skips = string.Join("; ", selection.Skips.OrderByDescending(kv => kv.Value).Select(kv => $"{kv.Value:N0} {kv.Key}"));
+        string summary = $"{selection.Units.Count:N0} functions ({experimental:N0} experimental), {selection.Units.Count + own:N0} with the add-in's own {own}; "
+            + $"{selection.Withheld.Count:N0} withheld by the completeness check{(selection.StableWithheld > 0 ? $" ({selection.StableWithheld:N0} by the stable build's)" : string.Empty)}; "
+            + $"{selection.Inherited:N0} inherited, {selection.Extensions:N0} extension methods; "
+            + $"{selection.Units.Count(u => u.Family != null):N0} families of {selection.Units.Where(u => u.Family != null).Sum(u => u.Family!.Count):N0} constructions; "
+            + $"help: {writer.Documented:N0} documented ({writer.Inherited:N0} through inheritdoc), {writer.Cut:N0} cut to {ExcelDocs.Limit}; "
+            + $"looping {writer.Looping:N0}; nullable left out {writer.NullableLeftOut:N0}; withheld by Excel's filter: {skips}";
+        return new ExcelOutput(selection, files, templates, ExcelManifest.Write(selection, options), summary) { Registered = selection.Units.Count + own };
     }
 
     /// <summary>Writes the shims into a folder, replacing its <c>.g.cs</c> files.</summary>

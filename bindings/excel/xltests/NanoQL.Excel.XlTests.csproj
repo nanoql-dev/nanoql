@@ -1,0 +1,40 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The Excel add-in's suite inside Excel (docs/excel.md, XLR11): ExcelDna.Testing 1.9.0, which needs xUnit 2 on
+       VSTest, so this folder carries a global.json of its own (the SDK, no runner line) and the suite stays outside both
+       solutions. Its tests drive Excel instances of their own through automation, the add-ins loaded with RegisterXLL,
+       never the in-process agent; run.py, its wrapper, builds the add-ins into obj/addins first and leaves the
+       machine's other Excel processes and Excel's settings as it found them (XLD18). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>NanoQL.Excel.XlTests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);CA1416;NU1701</NoWarn>
+    <!-- ExcelDna.Testing 1.9.0 brings MessagePack 2.3.85 through StreamJsonRpc, which only its in-process agent's pipe
+         reads; the suite runs out of process. Its advisories stay warnings, shown at each restore. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1902;NU1903</WarningsNotAsErrors>
+    <!-- ExcelDna.Testing 1.9.0's targets compare "v10.0".Substring(1,1) with '6' as text, so .NET 10 gets no agent path;
+         the restored package's own folder serves (XLD10). -->
+    <ExcelDnaTestingAgentPath>$(NuGetPackageRoot)exceldna.testing/1.9.0/Build/net6.0-windows7.0/</ExcelDnaTestingAgentPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ExcelDna.Testing" Version="1.9.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <!-- ExcelDna.Testing turns Windows Forms and WPF on: Forms' Application isn't Excel's, and WPF leaves System.IO out. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Include="System.IO" />
+    <!-- The user's assembly is a project of its own, built by run.py into the user's add-in. -->
+    <Compile Remove="Acme/**" />
+    <None Include="Fixtures/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

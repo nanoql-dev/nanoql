@@ -1,0 +1,1241 @@
+{
+ "version": 1,
+ "types": [
+  {
+   "type": "NanoQL.CashFlow",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.AnalyticHaganPricer",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.BlackIborCouponPricer",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.CashFlows",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.CmsCouponPricer",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.CmsLeg",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.Coupon",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.DigitalCmsLeg",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.DigitalIborLeg",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.DigitalReplication",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.FixedRateCoupon",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.FixedRateLeg",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.FloatingRateCoupon",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.IborCoupon",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.IborCouponPricer",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.IborLeg",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.LinearTsrPricer",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.NumericHaganPricer",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.OvernightIndexedCoupon",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.RangeAccrualFloatersCoupon",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.RangeAccrualLeg",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Coupons.RangeAccrualPricerByBgm",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.InterestRate",
+   "task": "cash flows"
+  },
+  {
+   "type": "NanoQL.Currency",
+   "task": "conventions and context"
+  },
+  {
+   "type": "NanoQL.EvaluationContext",
+   "task": "conventions and context"
+  },
+  {
+   "type": "NanoQL.Extensions.Conventions.ConventionSet",
+   "task": "conventions and context"
+  },
+  {
+   "type": "NanoQL.Extensions.Conventions.ConventionSnapshot",
+   "task": "conventions and context"
+  },
+  {
+   "type": "NanoQL.Extensions.Conventions.ConventionsXml",
+   "task": "conventions and context"
+  },
+  {
+   "type": "NanoQL.Indexes.IndexFixings",
+   "task": "conventions and context"
+  },
+  {
+   "type": "NanoQL.Experimental.ConstNotionalCrossCurrencyBasisSwapRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.Experimental.IborIborBasisSwapRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.Experimental.MtMCrossCurrencyBasisSwapRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.Experimental.OvernightIborBasisSwapRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.Numerics.Default",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructure",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.BondHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.DefaultProbabilityTermStructure",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.DepositRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.DiscountCurve",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.FixedRateBondHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.FlatForward",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.FlatHazardRate",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.ForwardCurve",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.ForwardSpreadedTermStructure",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.FraRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.FuturesRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.FxSwapRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.ImpliedTermStructure",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.OISRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.OvernightIndexFutureRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.PiecewiseDefaultCurve`3",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.PiecewiseYieldCurve`3",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.RateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.SwapRateHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.YearOnYearInflationSwapHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.YieldTermStructure",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.ZeroCouponInflationSwapHelper",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.ZeroCurve",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.TermStructures.ZeroSpreadedTermStructure",
+   "task": "curves"
+  },
+  {
+   "type": "NanoQL.IntervalPrice",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.ASX",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.Calendar",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.Date",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.DateFunctions",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.DayCounter",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.ECB",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.FrequencyFunctions",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.IMM",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.JointCalendar",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.MakeSchedule",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.Period",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.PeriodFunctions",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.Schedule",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Time.ScheduleFunctions",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.TimeSeries`1",
+   "task": "dates and calendars"
+  },
+  {
+   "type": "NanoQL.Experimental.ConstantLossLatentModel`2",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Experimental.GaussianCopulaPolicyInitTraits",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Experimental.GaussianDefProbLM",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Experimental.IHGaussPoolLossModel",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Experimental.IHStudentPoolLossModel",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Experimental.TCopulaPolicyInitTraits",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Experimental.TDefProbLM",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.AssetSwapResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.BondResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.CPISwapResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.CreditDefaultSwapResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.FixedVsFloatingSwapResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.OneAssetOptionResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.OvernightIndexedSwapResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.QuantoOptionResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.SwapResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.YearOnYearInflationSwapResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Instruments.ZeroCouponSwapResults",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Methods.FdmQuantoHelper",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Methods.FdmSchemeDesc",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.AnalyticBarrierEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.AnalyticCapFloorEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.AnalyticContinuousGeometricAveragePriceAsianEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.AnalyticDiscreteGeometricAveragePriceAsianEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.AnalyticDiscreteGeometricAverageStrikeAsianEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.AnalyticDividendEuropeanEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.AnalyticEuropeanEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.AnalyticHestonEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BachelierCapFloorEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BaroneAdesiWhaleyApproximationEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BinomialCRRVanillaEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BinomialJRVanillaEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BinomialLRVanillaEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BjerksundStenslandApproximationEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BlackCalculator",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BlackCapFloorEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BlackFormulaFunctions",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BlackScholesCalculator",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BlackSwaptionEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.BondFunctions",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.ContinuousArithmeticAsianLevyEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.DiscountingBondEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.DiscountingSwapEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.FdBlackScholesVanillaEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.ForwardPerformanceVanillaEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.ForwardVanillaEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.G2SwaptionEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.IsdaCdsEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.JamshidianSwaptionEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.QuantoEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.RiskyBondEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.TreeSwaptionEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.PricingEngines.TurnbullWakemanAsianEngine",
+   "task": "engines"
+  },
+  {
+   "type": "NanoQL.Experimental.ProxyIbor",
+   "task": "indexes"
+  },
+  {
+   "type": "NanoQL.Indexes.BMAIndex",
+   "task": "indexes"
+  },
+  {
+   "type": "NanoQL.Indexes.IborIndex",
+   "task": "indexes"
+  },
+  {
+   "type": "NanoQL.Indexes.InterestRateIndex",
+   "task": "indexes"
+  },
+  {
+   "type": "NanoQL.Indexes.Libor",
+   "task": "indexes"
+  },
+  {
+   "type": "NanoQL.Indexes.OvernightIndex",
+   "task": "indexes"
+  },
+  {
+   "type": "NanoQL.Indexes.SwapIndex",
+   "task": "indexes"
+  },
+  {
+   "type": "NanoQL.Indexes.YoYInflationIndex",
+   "task": "indexes"
+  },
+  {
+   "type": "NanoQL.Indexes.ZeroInflationIndex",
+   "task": "indexes"
+  },
+  {
+   "type": "NanoQL.AmericanExercise",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.BermudanExercise",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Coupons.Dividend",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Coupons.DividendFunctions",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Coupons.FixedDividend",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Coupons.FractionalDividend",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.EuropeanExercise",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Exercise",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.BaseCorrelationTermStructure`1",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.Basket",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.BlackCdsOptionEngine",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.CdsOption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.CdsOptionResults",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.DefaultEvent",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.DefaultType",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.IntegralNtdEngine",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.Issuer",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.MidPointCDOEngine",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.NthToDefault",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.NthToDefaultResults",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.Pool",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.SyntheticCDO",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Experimental.SyntheticCDOResults",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instrument",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.InstrumentResults",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.AssetOrNothingPayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.AssetSwap",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.BTP",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.BarrierOption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.Bond",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.BondPrice",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.CCTEU",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.CPISwap",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.CapFloor",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.CashOrNothingPayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.CmsRateBond",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.ContinuousAveragingAsianOption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.CreditDefaultSwap",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.CreditDefaultSwapFunctions",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.DiscreteAveragingAsianOption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.DoubleStickyRatchetPayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.EuropeanOption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.FixedRateBond",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.FloatingRateBond",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.ForwardRateAgreement",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.ForwardRateAgreementResults",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.ForwardVanillaOption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.FxForward",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.FxForwardResults",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.MakeCapFloor",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.MakeCms",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.MakeOIS",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.MakeSwaption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.MakeVanillaSwap",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.OneAssetOption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.OvernightIndexedSwap",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.PlainVanillaPayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.QuantoVanillaOption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.RatchetMaxPayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.RatchetMinPayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.RatchetPayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.RendistatoBasket",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.RendistatoCalculator",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.RendistatoEquivalentSwapLengthQuote",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.RendistatoEquivalentSwapSpreadQuote",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.StickyMaxPayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.StickyMinPayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.StickyPayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.StrikedTypePayoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.Swaption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.SwaptionFunctions",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.VanillaOption",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.VanillaSwap",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.YearOnYearInflationSwap",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.ZeroCouponBond",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.ZeroCouponInflationSwap",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Instruments.ZeroCouponSwap",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Payoff",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.PricingEngines.DiscountingFxForwardEngine",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.PricingEngines.MidPointCdsEngine",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.TermStructures.HazardRateCurve",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.TermStructures.PiecewiseFlatForward",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.TermStructures.SpreadCdsHelper",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.TermStructures.UpfrontCdsHelper",
+   "task": "instruments"
+  },
+  {
+   "type": "NanoQL.Numerics.AbcdInterpolation",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.BicubicSpline",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.BilinearInterpolation",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.CholeskyDecompositionFunctions",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.CovarianceDecomposition",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.CubicInterpolation",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.CumulativeNormalDistribution",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.Extrapolator",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.FaureRsg",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.GetCovarianceFunctions",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.HaltonRsg",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.Interpolation",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.Interpolation2D",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.InvCumulativeMersenneTwisterGaussianRsg",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.InvCumulativeSobolGaussianRsg",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.InverseCumulativeNormal",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.LinearInterpolation",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.MersenneTwisterUniformRng",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.MersenneTwisterUniformRsg",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.MixedLinearCubicInterpolation",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.NormalDistribution",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.PseudoSqrtFunctions",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.SABRInterpolation",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.SobolBrownianBridgeRsg",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.SobolRsg",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Numerics.SymmetricSchurDecomposition",
+   "task": "math"
+  },
+  {
+   "type": "NanoQL.Models.CalibrationHelper",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Models.G2",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Models.HestonModel",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Models.HullWhite",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Models.SwaptionHelper",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Models.Vasicek",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Numerics.ConjugateGradient",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Numerics.EndCriteria",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Numerics.LevenbergMarquardt",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Numerics.NoConstraint",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Numerics.Simplex",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Numerics.SphereCylinderOptimizer",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Numerics.SteepestDescent",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Processes.BlackScholesMertonProcess",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Processes.BlackScholesProcess",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Processes.GeneralizedBlackScholesProcess",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Processes.HestonProcess",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.TermStructures.CmsMarket",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.TermStructures.CmsMarketCalibration",
+   "task": "models and calibration"
+  },
+  {
+   "type": "NanoQL.Quotes.EurodollarFuturesImpliedStdDevQuote",
+   "task": "quotes"
+  },
+  {
+   "type": "NanoQL.Quotes.ForwardSwapQuote",
+   "task": "quotes"
+  },
+  {
+   "type": "NanoQL.Quotes.ForwardValueQuote",
+   "task": "quotes"
+  },
+  {
+   "type": "NanoQL.Quotes.FuturesConvAdjustmentQuote",
+   "task": "quotes"
+  },
+  {
+   "type": "NanoQL.Quotes.ImpliedStdDevQuote",
+   "task": "quotes"
+  },
+  {
+   "type": "NanoQL.Quotes.LastFixingQuote",
+   "task": "quotes"
+  },
+  {
+   "type": "NanoQL.Experimental.AbcdAtmVolCurve",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.Experimental.BlackAtmVolCurve",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.Experimental.SabrVolSurface",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.Models.PiecewiseConstantAbcdVariance",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.Models.PiecewiseConstantVariance",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.Numerics.Abcd",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.Option",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.AbcdCalibration",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.AbcdFunction",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.AbcdFunctions",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.BlackConstantVol",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.BlackVarianceSurface",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.BlackVolTermStructure",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.CapFloorTermVolCurve",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.CapFloorTermVolSurface",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.ConstantOptionletVolatility",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.ConstantSwaptionVolatility",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.FlatSmileSection",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.InterpolatedSmileSection`1",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.InterpolatedSwaptionVolatilityCube",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.OptionletStripper",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.OptionletStripper1",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.OptionletStripper2",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.OptionletVolatilityStructure",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.SabrFunctions",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.SabrInterpolatedSmileSection",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.SabrSmileSection",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.SabrSwaptionVolatilityCube",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.SmileSection",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.SpreadedOptionletVolatility",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.SpreadedSwaptionVolatility",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.StrippedOptionlet",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.StrippedOptionletAdapter",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.StrippedOptionletBase",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.SwaptionVolatilityMatrix",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.SwaptionVolatilityStructure",
+   "task": "volatility"
+  },
+  {
+   "type": "NanoQL.TermStructures.VolatilityTermStructure",
+   "task": "volatility"
+  }
+ ]
+}

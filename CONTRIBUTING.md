@@ -59,6 +59,18 @@ The gates are in docs/porting-playbook.md §8; each passes only with its denomin
   later and Maven: `python bindings/java/stage.py --library <folder> --jextract <jextract 22> --test-exports`, then
   `mvn test -Dnanoql.library=<folder>/lib/<the library>` in `bindings/java`. The native build needs the platform's C
   toolchain (on Windows, Visual Studio's C++ tools, with the Visual Studio Installer's folder on `PATH`) and CMake.
+- **Excel,** on Windows, when the change touches the public API or the Excel add-in (docs/excel.md):
+  `dotnet build bindings/excel/NanoQL.Excel.slnx -c Release`, after the native build above, whose `NanoQL.Native.dll`
+  the error table's test reads, then `dotnet test --project bindings/excel/NanoQL.Excel.Tests -c Release`.
+  `dotnet run --project src/NanoQL.Bind -c Release -- excel check` keeps `bindings/excel/functions.json` in step with
+  the API and `bindings/excel/list.json`, and `-- excel update` regenerates it. An add-in builds against the runtime
+  package packed into a folder: `dotnet pack src/NanoQL.Excel -c Release -o <feed>`, then
+  `dotnet run --project src/NanoQL.Bind -c Release -- excel build --runtime-source <feed> --out <folder>`, with
+  `--experimental` for the experimental build. The suite inside Excel needs 64-bit Excel for Microsoft 365 with its
+  multi-threaded calculation on, and Python: `python -I bindings/excel/xltests/run.py` builds the add-ins, runs the
+  suite from its folder in Excel instances of its own, which load the add-ins for their session alone, and checks that
+  it leaves your other Excel processes and Excel's settings as it found them. It puts back Excel's window position,
+  which Excel rewrites when a test closes a second workbook, and says so. It takes about seven minutes.
 
 ## Issues and questions
 

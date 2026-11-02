@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Conventions xmlns="https://nanoql.org/schemas/conventions">
+  <!-- A desk's TARGET: Christmas Eve 2026 a holiday (docs/conventions.md's example). -->
+  <Calendar name="TARGET" base="TARGET">
+    <AddedHoliday>2026-12-24</AddedHoliday>
+  </Calendar>
+</Conventions>

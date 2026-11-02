@@ -316,6 +316,25 @@ jobs:
           cmake --build "$RUNNER_TEMP/c-replay" --config Release
           replay=$(find "$RUNNER_TEMP/c-replay" -name 'replay' -type f -o -name 'replay.exe' -type f | head -1)
           "$replay" "$RUNNER_TEMP/recording/trace.jsonl" "$RUNNER_TEMP/recording/facts.tsv" bindings/replay-floor.json
+      # Excel (XLR11, XLD14), on the reference leg alone: the Windows-only solution built and tested after the native
+      # build, whose managed NanoQL.Native.dll the error table's test reads; the checked-in surface; the shipped builds,
+      # packed against the runtime package; the tests' builds, compiled with no .xll; and the vector suite's trace
+      # replayed through the experimental tests' build's worksheet functions. The suite inside Excel needs Excel, which
+      # the runners don't have: it runs on a contributor's machine (CONTRIBUTING.md).
+      - name: The Excel add-in
+        if: matrix.rid == 'win-x64'
+        run: |
+          dotnet build bindings/excel/NanoQL.Excel.slnx -c Release
+          dotnet test --project bindings/excel/NanoQL.Excel.Tests -c Release --no-build
+          dotnet run --project src/NanoQL.Bind -c Release --no-build -- excel check
+          dotnet pack src/NanoQL.Excel -c Release --no-build -o "$RUNNER_TEMP/excel-feed"
+          bind="dotnet run --project src/NanoQL.Bind -c Release --no-build -- excel build"
+          $bind --runtime-source "$RUNNER_TEMP/excel-feed" --out "$RUNNER_TEMP/excel-stable"
+          $bind --runtime-source "$RUNNER_TEMP/excel-feed" --out "$RUNNER_TEMP/excel-experimental" --experimental
+          $bind --list nql=none --no-pack --runtime-source "$RUNNER_TEMP/excel-feed" --out "$RUNNER_TEMP/excel-tests-stable"
+          $bind --list nql=none --no-pack --runtime-source "$RUNNER_TEMP/excel-feed" --out "$RUNNER_TEMP/excel-tests-experimental" --experimental
+          dotnet run --project bindings/excel/replay -c Release --no-build -- "$RUNNER_TEMP/recording/trace.jsonl" \
+            "$RUNNER_TEMP/excel-tests-experimental" --floor bindings/excel/replay-floor.json
       # C++ (BIR14): nanoql.hpp, C++17, through its conformance suite on the test build and the vector suite's trace, which
       # replays to C's facts line for line.
       - name: The C++ conformance suite

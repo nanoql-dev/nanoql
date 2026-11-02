@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="../../src/NanoQL.Excel/NanoQL.Excel.csproj" />
+  </Folder>
+  <Folder Name="/bindings/">
+    <Project Path="NanoQL.Excel.Tests/NanoQL.Excel.Tests.csproj" />
+    <Project Path="replay/NanoQL.Excel.Replay.csproj" />
+  </Folder>
+</Solution>

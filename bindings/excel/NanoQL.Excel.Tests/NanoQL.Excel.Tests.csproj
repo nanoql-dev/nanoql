@@ -1,0 +1,51 @@
+<!--
+  SPDX-FileCopyrightText: 2026 The nanoql Authors
+  SPDX-License-Identifier: Apache-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The Excel add-in's own tests, outside Excel (docs/excel.md, XLR11): the runtime's conversions, keys, errors and
+       settings through a test host standing in for Excel, and the generated worksheet functions of the two tests'
+       builds (the list off, XLD36), which nanoql-bind writes into obj/ before the compile: the experimental with S-bind's
+       test types (prefix nqlt), and the stable. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>NanoQL.Excel.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);NQL0001;CS0618</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\NanoQL.Excel\NanoQL.Excel.csproj" />
+    <ProjectReference Include="..\..\..\src\NanoQL\NanoQL.csproj" />
+    <ProjectReference Include="..\..\..\src\NanoQL.Extensions\NanoQL.Extensions.csproj" />
+    <ProjectReference Include="..\..\NanoQL.Bind.TestTypes\NanoQL.Bind.TestTypes.csproj" />
+    <!-- The tool, built first, generates the tests' builds below. -->
+    <ProjectReference Include="..\..\..\src\NanoQL.Bind\NanoQL.Bind.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <NanoQLExcelGen>$(MSBuildProjectDirectory)/obj/nanoql-bind/$(Configuration)/</NanoQLExcelGen>
+    <NanoQLBindDll>$(MSBuildProjectDirectory)/../../../src/NanoQL.Bind/bin/$(Configuration)/net10.0/NanoQL.Bind.dll</NanoQLBindDll>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="NanoQLExcelGen" Value="$(NanoQLExcelGen)" />
+  </ItemGroup>
+
+  <Target Name="NanoQLExcelBuilds" BeforeTargets="CoreCompile">
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)" Command="dotnet &quot;$(NanoQLBindDll)&quot; excel generate --experimental --list nql=none --test-exports --namespace NanoQL.Excel.Generated.Experimental --out &quot;$(NanoQLExcelGen)experimental&quot;" />
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)" Command="dotnet &quot;$(NanoQLBindDll)&quot; excel generate --list nql=none --namespace NanoQL.Excel.Generated.Stable --out &quot;$(NanoQLExcelGen)stable&quot;" />
+    <ItemGroup>
+      <Compile Include="$(NanoQLExcelGen)experimental/gen/*.g.cs;$(NanoQLExcelGen)stable/gen/*.g.cs" />
+    </ItemGroup>
+  </Target>
+</Project>

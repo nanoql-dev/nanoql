@@ -46,6 +46,7 @@ src/NanoQL/TermStructures/Yield/YieldTermStructureOnClock.cs
 src/NanoQL/Time/CalendarEdits.cs
 src/NanoQL/WorkingTypeAttribute.cs
 src/NanoQL.Bind/**
+src/NanoQL.Excel/**
 src/NanoQL.Extensions/Conventions/**
 src/NanoQL.Native/**
 tests/NanoQL.Tests/Conventions/**

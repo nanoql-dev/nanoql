@@ -25,6 +25,8 @@ using NanoQL.Bind.Selecting;
 //                             named ones alone (nql for nanoql's jar, a user's for a package beside it)
 //   replay-java --out <folder> write the Java replayer's dispatch (bindings/java/src/test)
 //   report                    print the surface's counts
+//   excel update | check | generate | build
+//                             the Excel add-in's surface, functions and builds (ExcelCommand, docs/excel.md)
 // Each takes --assembly <prefix>=<path>... (nanoql's two by default, from beside the tool), --roles <path>... (the
 // repository's bindings/roles.json by default) and --shipped <path> (bindings/surface.shipped.json when it exists).
 try
@@ -46,6 +48,11 @@ static int Run(string[] args)
     }
 
     string command = args[0];
+    if (command == "excel")
+    {
+        return ExcelCommand.Run(args[1..], Repository(), TestTypes);
+    }
+
     var assemblies = new List<AssemblyInput>();
     var roles = new List<string>();
     string? shipped = null, rid = null, outDir = null, host = null;

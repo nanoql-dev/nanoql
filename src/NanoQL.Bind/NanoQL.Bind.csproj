@@ -25,6 +25,11 @@
   <ItemGroup>
     <!-- The C++ layer's hand-written part, which nanoql.hpp carries after its enums. -->
     <EmbeddedResource Include="..\..\bindings\cpp\runtime.hpp" LogicalName="NanoQL.Bind.runtime.hpp" />
+    <!-- nanoql's Excel list (XLD33, XLD35), and the notices a user's Excel build carries beside its add-in (XLD21). -->
+    <EmbeddedResource Include="..\..\bindings\excel\list.json" LogicalName="NanoQL.Bind.excel-list.json" />
+    <EmbeddedResource Include="..\..\LICENSE" LogicalName="NanoQL.Bind.notices.LICENSE" />
+    <EmbeddedResource Include="..\..\NOTICE" LogicalName="NanoQL.Bind.notices.NOTICE" />
+    <EmbeddedResource Include="..\..\THIRD_PARTY_NOTICES.md" LogicalName="NanoQL.Bind.notices.THIRD_PARTY_NOTICES.md" />
   </ItemGroup>
 
   <ItemGroup>
