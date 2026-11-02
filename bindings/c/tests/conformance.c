@@ -5,10 +5,6 @@
    --test-exports output, which adds the test types' functions (nqlt.h) and narrows handles' generations to 8 bits.
    Each section is one ctest test: conformance <section>. A section prints its checks and fails on the first count of
    failures above zero; every section ends with no live handle. */
-/* glibc declares dladdr and Dl_info only under _GNU_SOURCE, set before the first system header. */
-#if !defined(_WIN32) && !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#endif
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -542,13 +538,14 @@ static void* load_second_library(const char* copy_name)
     if (!lib) snprintf(second_error, sizeof second_error, "LoadLibrary's error %lu", GetLastError());
     return (void*)lib;
 #else
-    Dl_info info;
-    dladdr((void*)&nql_release, &info);
+    /* The library by its path, from CMake: on Linux, dladdr on an imported function names the program, whose stub
+       the function's address is. */
+    const char* self = NANOQL_LIBRARY_PATH;
     char copy[4096];
-    const char* slash = strrchr(info.dli_fname, '/');
-    snprintf(copy, sizeof copy, "%.*s/%s", (int)(slash - info.dli_fname), info.dli_fname, copy_name);
+    const char* slash = strrchr(self, '/');
+    snprintf(copy, sizeof copy, "%.*s/%s", (int)(slash - self), self, copy_name);
     char cmd[8300];
-    snprintf(cmd, sizeof cmd, "cp '%s' '%s'", info.dli_fname, copy);
+    snprintf(cmd, sizeof cmd, "cp '%s' '%s'", self, copy);
     if (system(cmd) != 0) {
         snprintf(second_error, sizeof second_error, "copying the library failed");
         return NULL;
@@ -814,9 +811,7 @@ static void test_misc(void)
 #if defined(_WIN32)
     void* self = (void*)GetModuleHandleA("nanoql.dll");
 #else
-    Dl_info info;
-    dladdr((void*)&nql_release, &info);
-    void* self = dlopen(info.dli_fname, RTLD_NOW | RTLD_NOLOAD);
+    void* self = dlopen(NANOQL_LIBRARY_PATH, RTLD_NOW | RTLD_NOLOAD);
 #endif
     CHECK(self != NULL, "the library itself");
     CHECK(self && symbol(self, "nql_LatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_FromCorrelation") != NULL

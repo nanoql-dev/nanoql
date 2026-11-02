@@ -26,6 +26,8 @@ if(MSVC)
 else()
   target_compile_options(conformance PRIVATE -Wall -Wextra)
   find_library(NANOQL_LIBRARY nanoql PATHS "${NANOQL_DIR}/lib" NO_DEFAULT_PATH REQUIRED)
+  # The library's own path, for the checks that reopen or copy it.
+  target_compile_definitions(conformance PRIVATE "NANOQL_LIBRARY_PATH=\"${NANOQL_LIBRARY}\"")
   find_package(Threads REQUIRED)
   target_link_libraries(conformance PRIVATE "${NANOQL_LIBRARY}" Threads::Threads ${CMAKE_DL_LIBS} m)
   set_target_properties(conformance PROPERTIES BUILD_RPATH "${NANOQL_DIR}/lib")
