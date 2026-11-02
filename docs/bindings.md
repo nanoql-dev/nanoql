@@ -294,7 +294,8 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
   by `default` or `new T()` as its implicit constructor's call, a generator's draws as `Draws` calls along its
   snapshots. A call made from inside nanoql (a callback into the test code) isn't written. Each language's replayer then
   calls its own layer for every line and compares every result with C#'s, bit for bit (off Windows x64, a double within
-  `NANOQL_REPLAY_TOLERANCE`, relatively, is a match, tallied; CI sets 1e-12), NaN as NaN, a new object by its
+  `NANOQL_REPLAY_TOLERANCE` relatively, or else within `NANOQL_REPLAY_ABS_TOLERANCE`
+  absolutely, is a match, tallied; CI sets 1e-12 and 1e-13), NaN as NaN, a new object by its
   class's name (a file-local class's without its compiler prefix, `<File>F<hash>__`, whose hash is of its source file's
   path, so a trace replays against a library built from another checkout); hash and equality calls aren't recorded (the
   conformance suites check them); a fact replays up to its first call that needs something the trace couldn't write (a

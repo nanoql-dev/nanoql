@@ -198,7 +198,8 @@ jobs:
   # the C conformance suite on the test build, and the vector suite recorded and replayed through the C ABI. The weekly
   # run and a dispatch's core build Windows x64 and Linux x64; a dispatch's macos builds macOS Arm64 alone, and its all
   # the five, as a PyPI publish does. Linux builds in a manylinux_2_28 container, so the library runs on glibc 2.28 and
-  # later; the container has no libicu, which the library doesn't load.
+  # later; the container has no libicu, which the library doesn't load. A check's red doesn't stop the checks after
+  # it, so a run shows every language's results, and the job's last step reds the job (R27).
   bindings:
     name: Bindings (${{ matrix.rid }})
     needs: java-ffi
@@ -218,9 +219,11 @@ jobs:
       RID: ${{ matrix.rid }}
       # The SDK runs without ICU in the Linux container, as the library does.
       DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: ${{ matrix.container != '' && '1' || '' }}
-      # Off Windows x64, the reference platform, a replayed double within this relative difference of C#'s is a match,
-      # tallied (R19): macOS on Arm64 differs in some results' last bits.
+      # Off Windows x64, the reference platform, a replayed double within this relative difference of C#'s, or else
+      # within this absolute one, is a match, tallied (R19, R26): macOS on Arm64 and Linux x64 differ in some results'
+      # last bits, which near zero are a larger part of the value.
       NANOQL_REPLAY_TOLERANCE: ${{ matrix.rid != 'win-x64' && '1e-12' || '0' }}
+      NANOQL_REPLAY_ABS_TOLERANCE: ${{ matrix.rid != 'win-x64' && '1e-13' || '0' }}
     steps:
       - name: Check out with LF line endings, as the working clones are
         run: |
@@ -256,6 +259,8 @@ jobs:
       - name: The tool
         run: dotnet build src/NanoQL.Bind -c Release
       - name: The checked-in surface (nanoql.h, surface.json, coverage.md)
+        id: surface
+        continue-on-error: true
         run: dotnet run --project src/NanoQL.Bind -c Release --no-build -- check
       # On the reference leg: every class QuantLib-Python constructs crosses, has a route or a ruled exclusion, the wheel
       # installed as the vector jobs install it, so an API change that loses a route, or a pin that adds a class, reds.
@@ -264,7 +269,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Parity with QuantLib-Python
+        id: parity
         if: matrix.rid == 'win-x64'
+        continue-on-error: true
         run: |
           python -m venv "$RUNNER_TEMP/venv-parity"
           py="$RUNNER_TEMP/venv-parity/Scripts/python.exe"
@@ -290,10 +297,14 @@ jobs:
       - name: The test build
         run: dotnet run --project src/NanoQL.Bind -c Release --no-build -- build --rid "$RID" --out "$RUNNER_TEMP/nanoql-test" --test-exports
       - name: No libicu in the container
+        id: no-libicu
         if: matrix.container != ''
+        continue-on-error: true
         run: |
           if ldconfig -p | grep -q libicu; then echo "::error::libicu is present, so the suite wouldn't show the library runs without it"; exit 1; fi
       - name: The C conformance suite
+        id: c-conformance
+        continue-on-error: true
         run: |
           cmake -S bindings/c/tests -B "$RUNNER_TEMP/c-tests" -DNANOQL_DIR="$RUNNER_TEMP/nanoql-test" -DCMAKE_BUILD_TYPE=Release
           cmake --build "$RUNNER_TEMP/c-tests" --config Release
@@ -310,6 +321,8 @@ jobs:
           dotnet tools/replay/bin/Release/net10.0/NanoQL.Replay.dll record --tests tests/NanoQL.Tests/bin/Release/net10.0 \
             --twins "$RUNNER_TEMP/twins" --out "$RUNNER_TEMP/recording" $keep
       - name: The vector suite, replayed in C
+        id: c-replay
+        continue-on-error: true
         run: |
           dotnet run --project src/NanoQL.Bind -c Release --no-build -- replay-c --out "$RUNNER_TEMP/c-dispatch"
           cmake -S bindings/c/replay -B "$RUNNER_TEMP/c-replay" -DNANOQL_DIR="$RUNNER_TEMP/nanoql" -DNANOQL_DISPATCH="$RUNNER_TEMP/c-dispatch" -DCMAKE_BUILD_TYPE=Release
@@ -322,7 +335,9 @@ jobs:
       # replayed through the experimental tests' build's worksheet functions. The suite inside Excel needs Excel, which
       # the runners don't have: it runs on a contributor's machine (CONTRIBUTING.md).
       - name: The Excel add-in
+        id: excel
         if: matrix.rid == 'win-x64'
+        continue-on-error: true
         run: |
           dotnet build bindings/excel/NanoQL.Excel.slnx -c Release
           dotnet test --project bindings/excel/NanoQL.Excel.Tests -c Release --no-build
@@ -338,11 +353,15 @@ jobs:
       # C++ (BIR14): nanoql.hpp, C++17, through its conformance suite on the test build and the vector suite's trace, which
       # replays to C's facts line for line.
       - name: The C++ conformance suite
+        id: cpp-conformance
+        continue-on-error: true
         run: |
           cmake -S bindings/cpp/tests -B "$RUNNER_TEMP/cpp-tests" -DNANOQL_DIR="$RUNNER_TEMP/nanoql-test" -DCMAKE_BUILD_TYPE=Release
           cmake --build "$RUNNER_TEMP/cpp-tests" --config Release
           ctest --test-dir "$RUNNER_TEMP/cpp-tests" -C Release --output-on-failure
       - name: The vector suite, replayed in C++
+        id: cpp-replay
+        continue-on-error: true
         run: |
           dotnet run --project src/NanoQL.Bind -c Release --no-build -- replay-cpp --out "$RUNNER_TEMP/cpp-dispatch"
           cmake -S bindings/cpp/replay -B "$RUNNER_TEMP/cpp-replay" -DNANOQL_DIR="$RUNNER_TEMP/nanoql" -DNANOQL_DISPATCH="$RUNNER_TEMP/cpp-dispatch" -DCMAKE_BUILD_TYPE=Release
@@ -363,6 +382,8 @@ jobs:
         with:
           python-version: "3.x"
       - name: The Python wheel, its conformance suite and the vector suite replayed through it
+        id: python
+        continue-on-error: true
         env:
           FLOOR: ${{ steps.python-floor.outputs.python-path }}
           NEWEST: ${{ steps.python-newest.outputs.python-path }}
@@ -394,6 +415,8 @@ jobs:
           retention-days: 1
       # The C and C++ archive (BIR14, BIR17): the headers, the library and the notices, zipped on Windows, .tar.xz elsewhere.
       - name: The C and C++ archive
+        id: archive
+        continue-on-error: true
         run: |
           py=$(command -v python3 || command -v python)
           if [ -d /opt/python ]; then py=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1); fi
@@ -435,7 +458,9 @@ jobs:
           (cd "$RUNNER_TEMP" && tar -xzf maven.tar.gz)
           echo "$RUNNER_TEMP/apache-maven-3.9.9/bin" >> "$GITHUB_PATH"
       - name: The Java layer, its conformance suite and the vector suite replayed through it
+        id: java
         if: needs.java-ffi.result == 'success'
+        continue-on-error: true
         run: |
           py=$(command -v python3 || command -v python)
           if [ -d /opt/python ]; then py=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1); fi
@@ -467,7 +492,9 @@ jobs:
             echo "::error::-Xcheck:jni reports a replaced signal handler with libjsig preloaded (BIR16, R17)"; exit 1
           fi
       - name: The Java jars
+        id: java-jars
         if: needs.java-ffi.result == 'success'
+        continue-on-error: true
         run: |
           py=$(command -v python3 || command -v python)
           if [ -d /opt/python ]; then py=$(ls -d /opt/python/cp3*-cp3*/bin/python | grep -v 't-cp' | sort -V | tail -1); fi
@@ -481,6 +508,30 @@ jobs:
           name: nanoql-java-${{ matrix.rid }}
           path: bindings/java/target/nanoql-*.jar
           retention-days: 1
+      # The checks above go on past a red (R27); the job reds here, after them all.
+      - name: Every check green
+        if: ${{ !cancelled() }}
+        env:
+          OUTCOMES: >-
+            surface:${{ steps.surface.outcome }}
+            parity:${{ steps.parity.outcome }}
+            no-libicu:${{ steps.no-libicu.outcome }}
+            c-conformance:${{ steps.c-conformance.outcome }}
+            c-replay:${{ steps.c-replay.outcome }}
+            excel:${{ steps.excel.outcome }}
+            cpp-conformance:${{ steps.cpp-conformance.outcome }}
+            cpp-replay:${{ steps.cpp-replay.outcome }}
+            python:${{ steps.python.outcome }}
+            archive:${{ steps.archive.outcome }}
+            java:${{ steps.java.outcome }}
+            java-jars:${{ steps.java-jars.outcome }}
+        run: |
+          reds=""
+          for step in $OUTCOMES; do
+            echo "$step"
+            case "$step" in *:failure) reds="$reds ${step%:failure}" ;; esac
+          done
+          [ -z "$reds" ] || { echo "::error::red:$reds"; exit 1; }
 
   # PyPI's nanoql (BIR20): dispatched by hand, the pypi environment's approval, trusted publishing (no stored token),
   # the wheels the same run's five bindings jobs built.

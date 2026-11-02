@@ -47,10 +47,14 @@ final class Rp {
     long mismatches;
     long refusals;
     long shown = 20;
-    // Off the reference platform, a double within this relative difference is a match, tallied with the widest (R19).
+    // Off the reference platform, a double within this relative difference, or else within this absolute one, is a
+    // match, each kind tallied with its widest (R19, R26).
     static double tolerance;
+    static double absTolerance;
     static long nearDoubles;
+    static long smallDoubles;
     static double widest;
+    static double widestAbs;
     Jv afterValues;
     String fn = "";
 
@@ -718,11 +722,19 @@ final class Rp {
         }
         double d = Math.abs(a - b);
         double m = Math.max(Math.abs(a), Math.abs(b));
-        if (tolerance > 0 && Double.isFinite(a) && Double.isFinite(b) && d <= tolerance * m) {
+        if (!Double.isFinite(a) || !Double.isFinite(b)) {
+            return false;
+        }
+        if (tolerance > 0 && d <= tolerance * m) {
             nearDoubles++;
             if (m > 0) {
                 widest = Math.max(widest, d / m);
             }
+            return true;
+        }
+        if (absTolerance > 0 && d <= absTolerance) {
+            smallDoubles++;
+            widestAbs = Math.max(widestAbs, d);
             return true;
         }
         return false;

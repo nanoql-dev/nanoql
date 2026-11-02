@@ -26,11 +26,11 @@ std::vector<jv*> slots;
 std::size_t slots_used = 0;
 long long shown = 20;  // how many mismatches to print (NANOQL_REPLAY_SHOW)
 long long stops = 0;   // how many facts' stops to print (NANOQL_REPLAY_STOPS)
-// NANOQL_REPLAY_TOLERANCE: off the reference platform, a double within this relative difference is a match, tallied
-// with the widest (R19).
-double tolerance = 0;
-long long near_doubles = 0;
-double widest = 0;
+// NANOQL_REPLAY_TOLERANCE and NANOQL_REPLAY_ABS_TOLERANCE: off the reference platform, a double within this relative
+// difference, or else within this absolute one, is a match, each kind tallied with its widest (R19, R26).
+double tolerance = 0, abs_tolerance = 0;
+long long near_doubles = 0, small_doubles = 0;
+double widest = 0, widest_abs = 0;
 
 jv* node()
 {
@@ -200,9 +200,15 @@ bool same_double(double a, double b)
     std::memcpy(&y, &b, 8);
     if (x == y) return true;
     double d = std::fabs(a - b), m = std::fmax(std::fabs(a), std::fabs(b));
-    if (tolerance > 0 && std::isfinite(a) && std::isfinite(b) && d <= tolerance * m) {
+    if (!std::isfinite(a) || !std::isfinite(b)) return false;
+    if (tolerance > 0 && d <= tolerance * m) {
         near_doubles++;
         if (d / m > widest) widest = d / m;
+        return true;
+    }
+    if (abs_tolerance > 0 && d <= abs_tolerance) {
+        small_doubles++;
+        if (d > widest_abs) widest_abs = d;
         return true;
     }
     return false;
@@ -342,6 +348,7 @@ int main(int argc, char** argv)
     if (std::getenv("NANOQL_REPLAY_SHOW")) shown = std::atoll(std::getenv("NANOQL_REPLAY_SHOW"));
     if (std::getenv("NANOQL_REPLAY_STOPS")) stops = std::atoll(std::getenv("NANOQL_REPLAY_STOPS"));
     if (std::getenv("NANOQL_REPLAY_TOLERANCE")) tolerance = std::atof(std::getenv("NANOQL_REPLAY_TOLERANCE"));
+    if (std::getenv("NANOQL_REPLAY_ABS_TOLERANCE")) abs_tolerance = std::atof(std::getenv("NANOQL_REPLAY_ABS_TOLERANCE"));
     arena.resize(std::size_t{1} << 22);
     slots.resize(std::size_t{1} << 22);
     std::vector<entry> table;
@@ -431,6 +438,8 @@ int main(int argc, char** argv)
     int64_t live = nanoql::liveHandles();
     std::printf("C++ replay: facts replayed whole %lld of %zu; calls replayed %lld of %lld; refusals matched %lld; mismatches %lld; live handles at the end %" PRId64 "\n",
                 whole_facts, facts.size(), replayed, calls, r.refusals, r.mismatches, live);
-    if (tolerance > 0) std::printf("tolerance %g: %lld doubles within it, not bit for bit, the widest %.3g relative\n", tolerance, near_doubles, widest);
+    if (tolerance > 0 || abs_tolerance > 0)
+        std::printf("tolerance %g relative, %g absolute: %lld doubles within the relative, not bit for bit, the widest %.3g; %lld more within the absolute, the widest %.3g\n",
+                    tolerance, abs_tolerance, near_doubles, widest, small_doubles, widest_abs);
     return r.mismatches == 0 && live == 0 ? 0 : 1;
 }

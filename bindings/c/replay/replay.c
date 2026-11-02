@@ -207,11 +207,11 @@ static void* temp(rp* r, size_t bytes)
 
 static long long shown = 20;
 static long long stops = 0; /* how many facts' stops to print (NANOQL_REPLAY_STOPS) */
-/* NANOQL_REPLAY_TOLERANCE: off the reference platform, a double within this relative difference is a match, tallied
-   with the widest (R19). */
-static double tolerance = 0;
-static long long near_doubles = 0;
-static double widest = 0;
+/* NANOQL_REPLAY_TOLERANCE and NANOQL_REPLAY_ABS_TOLERANCE: off the reference platform, a double within this relative
+   difference, or else within this absolute one, is a match, each kind tallied with its widest (R19, R26). */
+static double tolerance = 0, abs_tolerance = 0;
+static long long near_doubles = 0, small_doubles = 0;
+static double widest = 0, widest_abs = 0;
 
 static void stopped(rp* r, const char* fact_name, const char* fn, const char* why)
 {
@@ -438,9 +438,15 @@ static int same_double(double a, double b)
     memcpy(&y, &b, 8);
     if (x == y) return 1;
     double d = fabs(a - b), m = fmax(fabs(a), fabs(b));
-    if (tolerance > 0 && isfinite(a) && isfinite(b) && d <= tolerance * m) {
+    if (!isfinite(a) || !isfinite(b)) return 0;
+    if (tolerance > 0 && d <= tolerance * m) {
         near_doubles++;
         if (d / m > widest) widest = d / m;
+        return 1;
+    }
+    if (abs_tolerance > 0 && d <= abs_tolerance) {
+        small_doubles++;
+        if (d > widest_abs) widest_abs = d;
         return 1;
     }
     return 0;
@@ -785,6 +791,7 @@ int main(int argc, char** argv)
     if (getenv("NANOQL_REPLAY_SHOW")) shown = atoll(getenv("NANOQL_REPLAY_SHOW")); /* how many mismatches to print */
     if (getenv("NANOQL_REPLAY_STOPS")) stops = atoll(getenv("NANOQL_REPLAY_STOPS"));
     if (getenv("NANOQL_REPLAY_TOLERANCE")) tolerance = atof(getenv("NANOQL_REPLAY_TOLERANCE"));
+    if (getenv("NANOQL_REPLAY_ABS_TOLERANCE")) abs_tolerance = atof(getenv("NANOQL_REPLAY_ABS_TOLERANCE"));
     fact* facts = NULL;
     int nfacts = 0, capfacts = 0, current = -1, current_whole = 0;
     while (fgets(line, (int)cap, f)) {
@@ -871,7 +878,9 @@ int main(int argc, char** argv)
     nql_live_handles(&live);
     printf("C replay: facts replayed whole %d of %d; calls replayed %lld of %lld; refusals matched %lld; mismatches %lld; live handles at the end %lld\n",
            whole, nfacts, r.replayed, r.calls, r.refusals, r.mismatches, (long long)live);
-    if (tolerance > 0) printf("tolerance %g: %lld doubles within it, not bit for bit, the widest %.3g relative\n", tolerance, near_doubles, widest);
+    if (tolerance > 0 || abs_tolerance > 0)
+        printf("tolerance %g relative, %g absolute: %lld doubles within the relative, not bit for bit, the widest %.3g; %lld more within the absolute, the widest %.3g\n",
+               tolerance, abs_tolerance, near_doubles, widest, small_doubles, widest_abs);
     int below = argc > 3 && below_floor(argv[3], facts, nfacts, r.replayed, r.refusals);
     return r.mismatches == 0 && live == 0 && !below ? 0 : 1;
 }
