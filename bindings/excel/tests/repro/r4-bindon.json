@@ -1,0 +1,18 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v12",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlCompositeInstrument","args":[]},
+        {"id":"v2","fn":"nqlConventionSetQuantLib","args":[]},
+        {"id":"v3","fn":"nqlConventionSetDayCounter","args":[{"ref":"v2"},"Actual365Fixed"]},
+        {"id":"v4","fn":"nqlFlatForward","args":[42262,0.03,{"ref":"v3"},null,null]},
+        {"id":"v5","fn":"nqlConventionSetIborIndex2","args":[{"ref":"v2"},"Euribor","6M",{"ref":"v4"}]},
+        {"id":"v6","fn":"nqlMakeVanillaSwap","args":["10Y",{"ref":"v5"}]},
+        {"id":"v7","fn":"nqlEvaluationContext","args":[42262]},
+        {"id":"v8","fn":"nqlMakeVanillaSwapToVanillaSwap","args":[{"ref":"v6"},{"ref":"v7"}]},
+        {"id":"v9","fn":"nqlDiscountingSwapEngineBindOn","args":[{"ref":"v8"},{"ref":"v4"},null,null,null]},
+        {"id":"v10","fn":"nqlCompositeInstrumentAdd","args":[{"ref":"v1"},{"ref":"v8"},{"ref":"v9"},2]},
+        {"id":"v11","fn":"nqlCompositeInstrumentCalculate","args":[{"ref":"v10"},{"ref":"v7"}]},
+        {"id":"v12","fn":"nqlInstrumentResultsNPV","args":[{"ref":"v11"}]}
+      ], "result": "v12" },
+    "expected": { "value": 1.1102230246251565E-16 } } ] }

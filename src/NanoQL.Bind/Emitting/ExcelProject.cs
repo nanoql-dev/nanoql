@@ -63,10 +63,13 @@ internal static class ExcelProject
         }
 
         // A local feed (the repository, CI) restores into the build's own folder, so a runtime packed again under the same
-        // version is the one restored, never a copy NuGet's global folder kept; that folder is read for the rest.
+        // version is the one restored, never a copy NuGet's global folder kept; that folder is read for the rest. The
+        // folder is no item of the project's: a package restored there whole (Excel-DNA's, where NuGet's global folder
+        // lacks it) brings its template .dna, which Excel-DNA would pack as a second add-in.
         string source = runtimeSource == null ? string.Empty
             : $"    <RestoreAdditionalProjectSources>{Xml(runtimeSource)}</RestoreAdditionalProjectSources>\n"
               + "    <RestorePackagesPath>$(MSBuildProjectDirectory)\\packages</RestorePackagesPath>\n"
+              + "    <DefaultItemExcludes>$(DefaultItemExcludes);packages\\**</DefaultItemExcludes>\n"
               + "    <RestoreFallbackFolders Condition=\"'$(NUGET_PACKAGES)' != ''\">$(NUGET_PACKAGES)</RestoreFallbackFolders>\n"
               + "    <RestoreFallbackFolders Condition=\"'$(NUGET_PACKAGES)' == ''\">$(UserProfile)\\.nuget\\packages</RestoreFallbackFolders>\n";
         string project = $"""
@@ -91,6 +94,9 @@ internal static class ExcelProject
                 <PackageReference Include="ExcelDna.AddIn" Version="{ExcelDna}" />
                 <PackageReference Include="NanoQL.Excel" Version="{Versions.Text}" />
             {refs}    <Compile Include="gen\*.g.cs" />
+                <!-- The repro templates and the adapters' source, which nqlxlRepro renders a cell's calls from (XLR14). -->
+                <EmbeddedResource Include="xl-templates.json" LogicalName="NanoQL.Excel.templates.json" />
+                <EmbeddedResource Include="gen\XlAdapters.g.cs" LogicalName="NanoQL.Excel.adapters.cs" />
               </ItemGroup>
             </Project>
 
@@ -117,11 +123,20 @@ internal static class ExcelProject
     {
         foreach (string name in new[] { "LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md" })
         {
-            using Stream s = typeof(ExcelProject).Assembly.GetManifestResourceStream("NanoQL.Bind.notices." + name)
-                ?? throw new InvalidOperationException($"the tool doesn't carry {name}");
-            using FileStream f = File.Create(Path.Combine(dir, name));
-            s.CopyTo(f);
+            File.WriteAllBytes(Path.Combine(dir, name), Notice(name));
         }
+    }
+
+    /// <summary>One of nanoql's notices, as the tool carries it.</summary>
+    /// <param name="name"><c>LICENSE</c>, <c>NOTICE</c> or <c>THIRD_PARTY_NOTICES.md</c>.</param>
+    /// <returns>Its bytes.</returns>
+    public static byte[] Notice(string name)
+    {
+        using Stream s = typeof(ExcelProject).Assembly.GetManifestResourceStream("NanoQL.Bind.notices." + name)
+            ?? throw new InvalidOperationException($"the tool doesn't carry {name}");
+        using var m = new MemoryStream();
+        s.CopyTo(m);
+        return m.ToArray();
     }
 
     private static string Xml(string s) => SecurityElement.Escape(s);

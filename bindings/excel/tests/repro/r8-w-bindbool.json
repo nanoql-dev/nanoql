@@ -1,0 +1,9 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v3",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlConventionSetDayCounter","args":[null,"Actual365Fixed"]},
+        {"id":"v2","fn":"nqlFlatForward","args":[42262,0.03,{"ref":"v1"},null,null]},
+        {"id":"v3","fn":"nqlDiscountingSwapEngineBind","args":[{"ref":"v2"},{"rows":2,"cols":1,"cells":[true,false]},null,null]}
+      ], "result": "v3" },
+    "expected": { "value": {"rows":2,"cols":1,"cells":[{"handle":"BoundEngine#2BC300D798AA0CC5"},{"handle":"BoundEngine#999E5C8D92C137D3"}]} } } ] }

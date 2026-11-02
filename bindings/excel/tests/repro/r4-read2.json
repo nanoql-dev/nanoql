@@ -1,0 +1,12 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v5",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "files": { "C:\\_work\\NanoQL\\bindings\\excel\\tests\\repro\\workbooks\\files\\r4-k-a.xml": "<Conventions xmlns=\"https://nanoql.org/schemas/conventions\">\n  <!-- TARGET with an extra holiday, the preset itself replaced (docs/conventions.md's example) -->\n  <Calendar name=\"TARGET\" base=\"TARGET\">\n    <AddedHoliday>2026-12-24</AddedHoliday>\n  </Calendar>\n</Conventions>\n", "C:\\_work\\NanoQL\\bindings\\excel\\tests\\repro\\workbooks\\files\\r4-k-b.xml": "<Conventions xmlns=\"https://nanoql.org/schemas/conventions\">\r\n  <Calendar name=\"DESK\" base=\"TARGET\">\r\n    <AddedHoliday>2026-12-23</AddedHoliday>\r\n  </Calendar>\r\n</Conventions>\r\n" },
+      "calls": [
+        {"id":"v1","fn":"nqlConventionSetQuantLib","args":[]},
+        {"id":"v2","fn":"nqlConventionsXmlRead2","args":[{"rows":2,"cols":1,"cells":["C:\\_work\\NanoQL\\bindings\\excel\\tests\\repro\\workbooks\\files\\r4-k-a.xml","C:\\_work\\NanoQL\\bindings\\excel\\tests\\repro\\workbooks\\files\\r4-k-b.xml"]}]},
+        {"id":"v3","fn":"nqlConventionSetWith","args":[{"ref":"v1"},{"ref":"v2"}]},
+        {"id":"v4","fn":"nqlConventionSetCalendar","args":[{"ref":"v3"},"TARGET"]},
+        {"id":"v5","fn":"nqlCalendarIsHoliday","args":[{"ref":"v4"},46380]}
+      ], "result": "v5" },
+    "expected": { "value": true } } ] }

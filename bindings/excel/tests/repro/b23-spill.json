@@ -1,0 +1,9 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v3",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlMersenneTwisterUniformRng","args":[42]},
+        {"id":"v2","fn":"nqlMersenneTwisterUniformRngDraws","args":[{"ref":"v1"},5]},
+        {"id":"v3","fn":"nqlxlDrawsValues","args":[{"ref":"v2"}]}
+      ], "result": "v3" },
+    "expected": { "value": {"rows":5,"cols":1,"cells":[0.37454011442605406,0.7965429843170568,0.9507143116788939,0.18343478778842837,0.7319939384469762]} } } ] }

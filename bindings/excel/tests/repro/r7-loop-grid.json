@@ -1,0 +1,18 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v12",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlConventionSetDayCounter","args":[null,"Actual365Fixed"]},
+        {"id":"v2","fn":"nqlFlatForward","args":[46328,0.03,{"ref":"v1"},null,null]},
+        {"id":"v3","fn":"nqlYieldTermStructureForwardRate2","args":[{"ref":"v2"},46358,"1M",{"ref":"v1"},"Compounded","Annual",null]},
+        {"id":"v4","fn":"nqlYieldTermStructureForwardRate2","args":[{"ref":"v2"},46358,"3M",{"ref":"v1"},"Compounded","Annual",null]},
+        {"id":"v5","fn":"nqlYieldTermStructureForwardRate2","args":[{"ref":"v2"},46358,"6M",{"ref":"v1"},"Compounded","Annual",null]},
+        {"id":"v6","fn":"nqlYieldTermStructureForwardRate2","args":[{"ref":"v2"},46388,"1M",{"ref":"v1"},"Compounded","Annual",null]},
+        {"id":"v7","fn":"nqlYieldTermStructureForwardRate2","args":[{"ref":"v2"},46388,"3M",{"ref":"v1"},"Compounded","Annual",null]},
+        {"id":"v8","fn":"nqlYieldTermStructureForwardRate2","args":[{"ref":"v2"},46388,"6M",{"ref":"v1"},"Compounded","Annual",null]},
+        {"id":"v9","fn":"nqlYieldTermStructureForwardRate2","args":[{"ref":"v2"},46418,"1M",{"ref":"v1"},"Compounded","Annual",null]},
+        {"id":"v10","fn":"nqlYieldTermStructureForwardRate2","args":[{"ref":"v2"},46418,"3M",{"ref":"v1"},"Compounded","Annual",null]},
+        {"id":"v11","fn":"nqlYieldTermStructureForwardRate2","args":[{"ref":"v2"},46418,"6M",{"ref":"v1"},"Compounded","Annual",null]},
+        {"id":"v12","fn":"nqlInterestRateRate","args":[{"rows":3,"cols":3,"cells":[{"ref":"v3"},{"ref":"v4"},{"ref":"v5"},{"ref":"v6"},{"ref":"v7"},{"ref":"v8"},{"ref":"v9"},{"ref":"v10"},{"ref":"v11"}]}]}
+      ], "result": "v12" },
+    "expected": { "value": {"rows":3,"cols":3,"cells":[0.030454533953517826,0.030454533953516938,0.030454533953516938,0.030454533953517826,0.03045453395351605,0.030454533953516716,0.030454533953517604,0.03045453395351605,0.030454533953516716]} } } ] }

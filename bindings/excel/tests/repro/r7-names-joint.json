@@ -1,0 +1,8 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v2",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlJointCalendar","args":["TARGET","UnitedStates.Settlement",null]},
+        {"id":"v2","fn":"nqlCalendarIsBusinessDay","args":[{"ref":"v1"},46352]}
+      ], "result": "v2" },
+    "expected": { "value": false } } ] }

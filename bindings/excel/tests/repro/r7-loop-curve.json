@@ -1,0 +1,15 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v9",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlConventionSetCalendar","args":[null,"TARGET"]},
+        {"id":"v2","fn":"nqlConventionSetDayCounter","args":[null,"Actual360"]},
+        {"id":"v3","fn":"nqlEvaluationContext","args":[46328]},
+        {"id":"v4","fn":"nqlDepositRateHelper","args":[0.03,"1M",2,{"ref":"v1"},"ModifiedFollowing",false,{"ref":"v2"},{"ref":"v3"}]},
+        {"id":"v5","fn":"nqlDepositRateHelper","args":[0.031,"3M",2,{"ref":"v1"},"ModifiedFollowing",false,{"ref":"v2"},{"ref":"v3"}]},
+        {"id":"v6","fn":"nqlDepositRateHelper","args":[0.032,"6M",2,{"ref":"v1"},"ModifiedFollowing",false,{"ref":"v2"},{"ref":"v3"}]},
+        {"id":"v7","fn":"nqlConventionSetDayCounter","args":[null,"Actual365Fixed"]},
+        {"id":"v8","fn":"nqlPiecewiseYieldCurve","args":["Discount","LogLinear","IterativeBootstrap",46328,{"rows":3,"cols":1,"cells":[{"ref":"v4"},{"ref":"v5"},{"ref":"v6"}]},{"ref":"v7"},{"ref":"v3"},null,null,null,null]},
+        {"id":"v9","fn":"nqlYieldTermStructureDiscount","args":[{"ref":"v8"},46447,null]}
+      ], "result": "v9" },
+    "expected": { "value": 0.9897288418053023 } } ] }

@@ -1,0 +1,8 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v2",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlSimpleQuoteVariables","args":[3,{"rows":3,"cols":1,"cells":[0.1,0.2,0.3]},{"rows":3,"cols":1,"cells":[0,{"empty":true},0.05]}]},
+        {"id":"v2","fn":"nqlSimpleQuoteVariablesValues","args":[{"ref":"v1"},{"rows":3,"cols":1,"cells":[0.5,0.6,0.7]}]}
+      ], "result": "v2" },
+    "expected": { "value": {"rows":3,"cols":1,"cells":[1.6487212707001282,0.6,2.0637527074704765]} } } ] }

@@ -19,6 +19,42 @@ public static class OwnFunctions
     public static object Error([ExcelArgument(Name = "cell", Description = "The cell showing the error (a reference)", AllowReference = true)] object cell)
         => cell is ExcelReference r && X.Host.ValueOf(r) is ExcelError ? X.ErrorOf(r) : string.Empty;
 
+    /// <summary>
+    /// The calls behind a cell (XLR14), a line a row: a vector the Excel replayer reads, or the C# or the Python that runs
+    /// them. An export refused (a cell whose value isn't its call's own outcome, an Excel error argument, a tree mixing date
+    /// systems or reporting a read file's path) is #VALUE!, nqlxlError giving why.
+    /// </summary>
+    /// <param name="cell">The cell.</param>
+    /// <param name="format">The format: "vector", the default, "csharp" or "python".</param>
+    /// <returns>The lines, or #VALUE!.</returns>
+    [ExcelFunction(Name = "nqlxlRepro", Category = "nanoql", Description = "The calls behind a cell: a vector the Excel replayer reads, or the C# or the Python that runs them")]
+    public static object Repro(
+        [ExcelArgument(Name = "cell", Description = "The cell (a reference)", AllowReference = true)] object cell,
+        [ExcelArgument(Name = "format", Description = "Optional. \"vector\" (the default), \"csharp\" or \"python\" (text)")] object format)
+    {
+        try
+        {
+            if (cell is not ExcelReference r)
+            {
+                throw new ArgumentException("cell: a reference to the cell", nameof(cell));
+            }
+
+            string f = X.IsMissing(format) ? "vector" : X.One(format) as string ?? throw new ArgumentException("format: text", nameof(format));
+            List<string> lines = X.Repro(r, X.Host.ValueOf(r), f);
+            var o = new object[lines.Count, 1];
+            for (int i = 0; i < lines.Count; i++)
+            {
+                o[i, 0] = lines[i];
+            }
+
+            return o;
+        }
+        catch (Exception e) when (e is ArgumentException or InvalidOperationException or KeyNotFoundException)
+        {
+            return X.Refused("nqlxlRepro: " + e.Message);
+        }
+    }
+
     /// <summary>The call that made a handle: its worksheet function and its arguments.</summary>
     /// <param name="handle">The handle.</param>
     /// <returns>The recipe's text, or #REF! for a handle this session doesn't hold.</returns>

@@ -1,0 +1,10 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v3",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "files": { "C:\\_work\\NanoQL\\bindings\\excel\\tests\\repro\\workbooks\\files\\desk-conventions.xml": "<Conventions xmlns=\"https://nanoql.org/schemas/conventions\">\n  <!-- TARGET with an extra holiday, the preset itself replaced (docs/conventions.md's example) -->\n  <Calendar name=\"TARGET\" base=\"TARGET\">\n    <AddedHoliday>2026-12-24</AddedHoliday>\n  </Calendar>\n</Conventions>\n" },
+      "calls": [
+        {"id":"v1","fn":"nqlConventionsXmlRead","args":["C:\\_work\\NanoQL\\bindings\\excel\\tests\\repro\\workbooks\\files\\desk-conventions.xml"]},
+        {"id":"v2","fn":"nqlConventionSnapshotAddRootElement","args":[{"ref":"v1"},"<x:note xmlns:x=\"urn:example\">desk</x:note>"]},
+        {"id":"v3","fn":"nqlConventionSnapshotRootElements","args":[{"ref":"v2"}]}
+      ], "result": "v3" },
+    "expected": { "value": {"rows":1,"cols":2,"cells":[1,"<x:note xmlns:x=\"urn:example\">desk</x:note>"]} } } ] }

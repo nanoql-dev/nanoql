@@ -11,7 +11,8 @@ namespace NanoQL.Excel.XlTests;
 /// <summary>
 /// Handles and their release (XLR2, XLR15, XLP78), read through the test build's <c>nqlxlStats</c> (XLD25): two cells
 /// making the same call share one handle; 300 handle cells cleared release their objects; a spilled leg's coupons go
-/// with the leg's cell; a looped cell's objects go when it is cleared, shrunk, or one element's input changes.
+/// with the leg's cell; a looped cell's objects go when it is cleared, shrunk, or one element's input changes. The tests
+/// counting live objects run in an Excel of their own.
 /// </summary>
 [ExcelTestSettings(OutOfProcess = true)]
 public partial class ReleaseTests : RunnerTest
@@ -30,10 +31,9 @@ public partial class ReleaseTests : RunnerTest
     }
 
     /// <summary>300 handle cells cleared: their 300 objects released.</summary>
-    [ExcelFact(AddIn = AddIns.Test)]
-    public void ClearedCellsReleaseTheirObjects()
+    [Fact]
+    public void ClearedCellsReleaseTheirObjects() => Alone(ws =>
     {
-        Worksheet ws = NewSheet();
         Xl.Put(ws, ("Z1", "=nqlxlStats()"), ("A1", "=DATE(2015,9,15)"), ("A4", "=nqlConventionSetDayCounter(,\"Actual365Fixed\")"));
         int h0 = Settle(ws, null);
         Xl.Put(ws, "B1:B300", "=nqlFlatForward($A$1,0.02+ROW()/100000,$A$4)");
@@ -41,13 +41,12 @@ public partial class ReleaseTests : RunnerTest
         Assert.Equal(300, Xl.Range(ws, "B1:B300").Select(r => r[0]).Distinct().Count());
         Xl.Retry(() => ws.Range["B1:B300"].ClearContents());
         Assert.Equal(h0, Settle(ws, h0));
-    }
+    });
 
     /// <summary>A spilled leg's coupons go with the leg's cell.</summary>
-    [ExcelFact(AddIn = AddIns.Test)]
-    public void ASpilledLegsCouponsAreReleased()
+    [Fact]
+    public void ASpilledLegsCouponsAreReleased() => Alone(ws =>
     {
-        Worksheet ws = NewSheet();
         Xl.Put(ws, Desk.Swap);
         Xl.Put(ws, "Z1", "=nqlxlStats()");
         int h0 = Settle(ws, null);
@@ -57,13 +56,12 @@ public partial class ReleaseTests : RunnerTest
         Assert.True(h1 >= h0 + 10, $"{h0} handles, then {h1} with the leg spilled");
         Xl.Retry(() => ws.Range["J1"].ClearContents());
         Assert.Equal(h0, Settle(ws, h0));
-    }
+    });
 
     /// <summary>A looped cell's objects (XLP78, F7-3): three deposits from one formula; the cell cleared, entered again, shrunk to two, one element's input changed.</summary>
-    [ExcelFact(AddIn = AddIns.Test)]
-    public void ALoopedCellsObjectsAreReleased()
+    [Fact]
+    public void ALoopedCellsObjectsAreReleased() => Alone(ws =>
     {
-        Worksheet ws = NewSheet();
         const string helpers = "=nqlDepositRateHelper(B1:B3,\"3M\",2,A2,\"ModifiedFollowing\",FALSE,A3,A1)";
         Xl.Put(
             ws,
@@ -87,7 +85,11 @@ public partial class ReleaseTests : RunnerTest
         Xl.Put(ws, "B2", "0.035");
         Assert.Equal(h0 + 2, Settle(ws, h0 + 2));
         Assert.Equal(b0 + 1, Stats(ws).Builds);
-    }
+    });
+
+    // A test counting live objects runs in an Excel of its own: in the runner's instance, other tests' objects are
+    // released on Excel's schedule, under its counts.
+    private static void Alone(Action<Worksheet> body) => OwnExcel.Run(AddIns.TestXll, app => body(Xl.Sheet(Xl.Retry(() => app.Workbooks.Add()))));
 
     // Recalculates until the live handles reach a count, or settle when none is given: a cleared cell's objects go when
     // Excel disconnects its topic, after the recalculation that cleared it.

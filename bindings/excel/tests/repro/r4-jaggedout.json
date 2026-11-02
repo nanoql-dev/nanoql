@@ -1,0 +1,8 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v2",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlGaussianDefProbLM","args":[{"rows":3,"cols":2,"cells":[0.3,0.2,0.4,0.1,0.1,0.5]},"GaussianQuadrature",null]},
+        {"id":"v2","fn":"nqlGaussianDefProbLMFactorWeights","args":[{"ref":"v1"}]}
+      ], "result": "v2" },
+    "expected": { "value": {"rows":3,"cols":2,"cells":[0.3,0.2,0.4,0.1,0.1,0.5]} } } ] }

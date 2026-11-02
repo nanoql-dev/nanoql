@@ -1,0 +1,7 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v1",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlCalendarAdjust","args":["TARGET",{"rows":10,"cols":1,"cells":[46376,46377,46378,46379,46380,46381,46382,46383,46384,46385]},"Following"]}
+      ], "result": "v1" },
+    "expected": { "value": {"rows":10,"cols":1,"cells":[46377,46377,46378,46379,46380,46384,46384,46384,46384,46385]} } } ] }

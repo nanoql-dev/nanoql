@@ -131,11 +131,26 @@ public class ExcelWriterTests
     [Fact]
     public void TheBudget()
     {
-        Assert.Equal(10232, WholeExperimental.Registered);
+        Assert.Equal(10233, WholeExperimental.Registered);
         var e = Assert.Throws<BindException>(() => ExcelCommand.CheckBudget(WholeExperimental, ExcelCommand.Budget));
-        Assert.Contains("registers 10,232 functions", e.Message, StringComparison.Ordinal);
+        Assert.Contains("registers 10,233 functions", e.Message, StringComparison.Ordinal);
         Assert.Contains("the largest namespaces: NanoQL.", e.Message, StringComparison.Ordinal);
         ExcelCommand.CheckBudget(ListedExperimental, ExcelCommand.Budget);
         Assert.Throws<BindException>(() => ExcelCommand.CheckBudget(ListedStable, 2000));
+    }
+
+    /// <summary>
+    /// A build from a local feed restores into its own folder, which is no item of the project's: a package restored
+    /// there whole (Excel-DNA's, on a machine whose NuGet folder lacks it) brings a template .dna Excel-DNA would pack.
+    /// </summary>
+    [Fact]
+    public void TheRestoreFolderIsNoItemOfTheProjects()
+    {
+        string dir = Path.Combine(Path.GetTempPath(), "nanoql-bind-project-" + Environment.ProcessId);
+        ExcelProject.Write(dir, new Dictionary<string, string>(), [new AssemblyInput("nql", "NanoQL.dll")], false, "feed");
+        string project = File.ReadAllText(Path.Combine(dir, ExcelProject.Name + ".csproj"));
+        Assert.Contains("<RestorePackagesPath>$(MSBuildProjectDirectory)\\packages</RestorePackagesPath>", project, StringComparison.Ordinal);
+        Assert.Contains("<DefaultItemExcludes>$(DefaultItemExcludes);packages\\**</DefaultItemExcludes>", project, StringComparison.Ordinal);
+        Directory.Delete(dir, true);
     }
 }

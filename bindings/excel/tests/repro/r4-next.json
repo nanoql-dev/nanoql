@@ -1,0 +1,11 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v5",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlSobolRsg","args":[3,42,null,null]},
+        {"id":"v2","fn":"nqlSobolRsgDraws","args":[{"ref":"v1"},4]},
+        {"id":"v3","fn":"nqlxlDrawsNext","args":[{"ref":"v2"}]},
+        {"id":"v4","fn":"nqlSobolRsgDraws","args":[{"ref":"v3"},2]},
+        {"id":"v5","fn":"nqlxlDrawsValues","args":[{"ref":"v4"}]}
+      ], "result": "v5" },
+    "expected": { "value": {"rows":2,"cols":3,"cells":[0.875,0.875,0.125,0.625,0.125,0.375]} } } ] }

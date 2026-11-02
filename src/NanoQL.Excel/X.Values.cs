@@ -58,15 +58,14 @@ public static partial class X
     /// <param name="a">The Excel value.</param>
     /// <param name="p">The argument's name.</param>
     /// <returns>The date.</returns>
-    public static Date Date(object a, string p)
-    {
-        if (One(a) is double d && d == Math.Floor(d) && d >= 0 && d <= int.MaxValue - 1462)
-        {
-            return new Date((int)d + DateShift());
-        }
+    public static Date Date(object a, string p) => new(Serial(a, p) + DateShift());
 
-        throw Bad(p, "a date (a whole-number serial)", a);
-    }
+    /// <summary>A date's serial number as the workbook holds it: a whole number, never a time of day.</summary>
+    /// <param name="a">The Excel value.</param>
+    /// <param name="p">The argument's name.</param>
+    /// <returns>The serial number, in the workbook's own date system.</returns>
+    internal static int Serial(object a, string p)
+        => One(a) is double d && d == Math.Floor(d) && d >= 0 && d <= int.MaxValue - 1462 ? (int)d : throw Bad(p, "a date (a whole-number serial)", a);
 
     /// <summary>A period as text, <c>"6M"</c> or <c>"1Y6M"</c>.</summary>
     /// <param name="a">The Excel value.</param>

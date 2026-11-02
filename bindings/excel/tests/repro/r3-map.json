@@ -1,0 +1,7 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v1",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlEventSet","args":[{"rows":3,"cols":2,"cells":[42262,100,42400,250,42600,75.5]},42005,42736]}
+      ], "result": "v1" },
+    "expected": { "handle": "EventSet#C6CE08D4F5879476" } } ] }

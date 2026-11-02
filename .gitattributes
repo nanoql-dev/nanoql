@@ -2,3 +2,6 @@
 *.json text eol=lf
 docs/porting-map.md text eol=lf
 docs/divergences.md text eol=lf
+# Kept as written: the read files the Excel repro vectors embed, and the desk's conventions, whose hash names a provider.
+bindings/excel/tests/repro/workbooks/files/** -text
+bindings/excel/xltests/Fixtures/desk-conventions.xml -text

@@ -331,9 +331,10 @@ jobs:
           "$replay" "$RUNNER_TEMP/recording/trace.jsonl" "$RUNNER_TEMP/recording/facts.tsv" bindings/replay-floor.json
       # Excel (XLR11, XLD14), on the reference leg alone: the Windows-only solution built and tested after the native
       # build, whose managed NanoQL.Native.dll the error table's test reads; the checked-in surface; the shipped builds,
-      # packed against the runtime package; the tests' builds, compiled with no .xll; and the vector suite's trace
-      # replayed through the experimental tests' build's worksheet functions. The suite inside Excel needs Excel, which
-      # the runners don't have: it runs on a contributor's machine (CONTRIBUTING.md).
+      # packed against the runtime package; the tests' builds, compiled with no .xll; the vector suite's trace replayed
+      # through the experimental tests' build's worksheet functions, and the repro vectors replayed through them in each
+      # order (XLR14); and the release's package (XLR12), kept a day, its symbols zip only at a release. The suite inside
+      # Excel needs Excel, which the runners don't have: it runs on a contributor's machine (CONTRIBUTING.md).
       - name: The Excel add-in
         id: excel
         if: matrix.rid == 'win-x64'
@@ -350,6 +351,19 @@ jobs:
           $bind --list nql=none --no-pack --runtime-source "$RUNNER_TEMP/excel-feed" --out "$RUNNER_TEMP/excel-tests-experimental" --experimental
           dotnet run --project bindings/excel/replay -c Release --no-build -- "$RUNNER_TEMP/recording/trace.jsonl" \
             "$RUNNER_TEMP/excel-tests-experimental" --floor bindings/excel/replay-floor.json
+          for order in "" --reverse; do
+            dotnet run --project bindings/excel/replay -c Release --no-build -- vectors bindings/excel/tests/repro \
+              "$RUNNER_TEMP/excel-tests-experimental" $order
+          done
+          dotnet run --project src/NanoQL.Bind -c Release --no-build -- excel package --runtime-source "$RUNNER_TEMP/excel-feed" \
+            --out "$RUNNER_TEMP/excel-package"
+      - name: Keep the Excel package
+        if: matrix.rid == 'win-x64'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: nanoql-excel-win-x64
+          path: ${{ runner.temp }}/excel-package/nanoql-excel-*-win-x64.zip
+          retention-days: 1
       # C++ (BIR14): nanoql.hpp, C++17, through its conformance suite on the test build and the vector suite's trace, which
       # replays to C's facts line for line.
       - name: The C++ conformance suite

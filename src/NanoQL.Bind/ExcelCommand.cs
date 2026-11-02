@@ -3,7 +3,9 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using System.IO.Compression;
 using System.Text;
+using System.Text.Json;
 using NanoQL.Bind.Emitting;
 using NanoQL.Bind.Reading;
 using NanoQL.Bind.Selecting;
@@ -18,8 +20,10 @@ namespace NanoQL.Bind;
 /// <item><c>generate --out &lt;folder&gt;</c>: write a build's generated C#, its surface and its templates alone (the
 /// Excel tests compile them).</item>
 /// <item><c>build --out &lt;folder&gt;</c>: generate a build into an Excel-DNA project, build it and pack its <c>.xll</c>.</item>
+/// <item><c>package --out &lt;folder&gt;</c>: build nanoql's two add-ins and write the release's zip and its symbols zip
+/// (XLR12); it takes <c>--runtime-source</c> alone.</item>
 /// </list>
-/// Each takes <c>--assembly &lt;prefix&gt;=&lt;path&gt;</c> (nanoql's two by default), <c>--experimental</c> (the
+/// The others take <c>--assembly &lt;prefix&gt;=&lt;path&gt;</c> (nanoql's two by default), <c>--experimental</c> (the
 /// experimental API beside the stable), <c>--list &lt;prefix&gt;=&lt;file&gt;|none</c> (nanoql's prefix takes nanoql's list
 /// unless told otherwise, any other none, XLD35), <c>--test-exports</c> (S-bind's test types, prefix nqlt, and
 /// <c>nqlxlStats</c>), <c>--roles</c> and <c>--shipped</c> as the tool's other commands do; <c>build</c> also takes
@@ -40,7 +44,7 @@ internal static class ExcelCommand
     {
         if (args.Length == 0)
         {
-            throw new ArgumentException("excel takes update | check | generate --out <folder> | build --out <folder>");
+            throw new ArgumentException("excel takes update | check | generate --out <folder> | build --out <folder> | package --out <folder>");
         }
 
         string command = args[0];
@@ -87,6 +91,16 @@ internal static class ExcelCommand
         }
 
         string bindings = Path.Combine(repo, "bindings");
+        if (command == "package")
+        {
+            if (assemblies.Count > 0 || roles.Count > 0 || lists.Count > 0 || shipped != null || ns != null || experimental || testExports || noPack || budget != null)
+            {
+                throw new ArgumentException("excel package takes --out <folder> and --runtime-source <feed> alone: it packs nanoql's release");
+            }
+
+            return Package(bindings, outDir ?? throw new ArgumentException("excel package takes --out <folder>"), runtimeSource);
+        }
+
         if (assemblies.Count == 0)
         {
             assemblies.Add(new AssemblyInput("nql", Path.Combine(AppContext.BaseDirectory, "NanoQL.dll")));
@@ -140,6 +154,78 @@ internal static class ExcelCommand
             default:
                 throw new ArgumentException($"unknown excel command '{command}'");
         }
+    }
+
+    // XLR12: nanoql's two add-ins built and packed; the release's zip (the two .xll, LICENSE, NOTICE, the notices with
+    // Excel-DNA's and .NET's added, README.md) and its symbols zip (nanoql's PDBs, their sources embedded), each in the C
+    // archive's form: one folder, its entries sorted and dated 2026-01-01.
+    private static int Package(string bindings, string dir, string? runtimeSource)
+    {
+        var sw = Stopwatch.StartNew();
+        var assemblies = new List<AssemblyInput>
+        {
+            new("nql", Path.Combine(AppContext.BaseDirectory, "NanoQL.dll")),
+            new("nql", Path.Combine(AppContext.BaseDirectory, "NanoQL.Extensions.dll")),
+        };
+        var content = new SortedDictionary<string, byte[]>(StringComparer.Ordinal);
+        foreach (bool experimental in new[] { false, true })
+        {
+            var options = new ExcelOptions
+            {
+                Experimental = experimental,
+                Lists = Lists(new Dictionary<string, string>(StringComparer.Ordinal), assemblies),
+                Namespace = "NanoQL.Excel.Functions",
+                Shipped = Path.Combine(bindings, "excel", "functions.shipped.json"),
+            };
+            ExcelOutput x = Generation.Run(assemblies, [Path.Combine(bindings, "roles.json")], Path.Combine(bindings, "surface.shipped.json"), options).Excel!;
+            string build = Path.Combine(dir, experimental ? "experimental" : "stable");
+            int rc = Build(x, build, assemblies, experimental, runtimeSource, false, Budget, sw);
+            if (rc != 0)
+            {
+                return rc;
+            }
+
+            string xll = ExcelProject.AddInName(assemblies, experimental) + "64.xll";
+            content[xll] = File.ReadAllBytes(Path.Combine(build, xll));
+        }
+
+        content["LICENSE"] = ExcelProject.Notice("LICENSE");
+        content["NOTICE"] = ExcelProject.Notice("NOTICE");
+
+        // nanoql's notices, then Excel-DNA's, whose runtime each .xll packs, and .NET's, whose host it links (XLP50).
+        string notices = Path.Combine(bindings, "excel", "notices");
+        content["THIRD_PARTY_NOTICES.md"] = [.. ExcelProject.Notice("THIRD_PARTY_NOTICES.md"),
+            .. File.ReadAllBytes(Path.Combine(notices, "Excel-DNA.txt")), .. File.ReadAllBytes(Path.Combine(notices, "dotnet.txt"))];
+        content["README.md"] = File.ReadAllBytes(Path.Combine(bindings, "excel", "README.md"));
+        var symbols = new SortedDictionary<string, byte[]>(StringComparer.Ordinal);
+        foreach (AssemblyInput a in assemblies)
+        {
+            string pdb = Path.ChangeExtension(a.Path, ".pdb");
+            symbols[Path.GetFileName(pdb)] = File.Exists(pdb) ? File.ReadAllBytes(pdb)
+                : throw new BindException($"the symbols zip lacks {pdb}: the tool's Release build carries nanoql's PDBs");
+        }
+
+        using JsonDocument surface = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(bindings, "surface.json")));
+        string folder = $"nanoql-excel-{surface.RootElement.GetProperty("version").GetString()}-win-x64";
+        foreach ((string name, SortedDictionary<string, byte[]> files) in new[] { (folder, content), (folder + "-symbols", symbols) })
+        {
+            string zip = Path.Combine(dir, name + ".zip");
+            using (var z = new ZipArchive(File.Create(zip), ZipArchiveMode.Create))
+            {
+                foreach ((string path, byte[] bytes) in files)
+                {
+                    ZipArchiveEntry e = z.CreateEntry($"{name}/{path}", CompressionLevel.SmallestSize);
+                    e.LastWriteTime = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                    using Stream s = e.Open();
+                    s.Write(bytes);
+                }
+            }
+
+            Console.WriteLine($"excel package: {zip}, {new FileInfo(zip).Length:N0} bytes, {files.Count} files");
+        }
+
+        Console.WriteLine($"excel package: done ({sw.Elapsed.TotalSeconds:F0} s)");
+        return 0;
     }
 
     // Each prefix's list: nanoql's takes nanoql's unless told otherwise; any other none unless given one (XLD35).

@@ -1,0 +1,7 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v1",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlRecoveryRateQuoteMakeIsdaConvMap","args":[]}
+      ], "result": "v1" },
+    "expected": { "value": {"rows":5,"cols":2,"cells":["SecDom",0.65,"SnrFor",0.4,"SubLT2",0.2,"JrSubT2",0.2,"PrefT1",0.15]} } } ] }

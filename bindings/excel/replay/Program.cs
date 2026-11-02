@@ -16,8 +16,14 @@ using NanoQL.Excel.Replay;
 // C#'s: doubles by their bits (a non-finite one as #NUM!, which a cell shows), objects by their type, none as #N/A,
 // refusals by XLR4's error for their code. A fact replays up to its first call the build doesn't have or whose input no
 // cell gives, as S-bind's replayers do; the objects stay across facts, as theirs do. Passes at no mismatch and, given a
-// floor, at or above its calls with refusals matched.
+// floor, at or above its calls with refusals matched. Its vectors mode replays the repro vectors cells export (XLR14).
 // Usage: NanoQL.Excel.Replay <trace.jsonl> <build folder> [--surface <surface.json>] [--report <facts.tsv>] [--floor <replay-floor.json>]
+//        NanoQL.Excel.Replay vectors <vector folder> <build folder> [--reverse] [--shared]
+if (args.Length >= 3 && args[0] == "vectors")
+{
+    return VectorReplay.Run(args[1], args[2], args.Contains("--reverse"), args.Contains("--shared"));
+}
+
 if (args.Length < 2)
 {
     Console.Error.WriteLine("usage: NanoQL.Excel.Replay <trace.jsonl> <build folder> [--surface <surface.json>] [--report <facts.tsv>] [--floor <replay-floor.json>]");

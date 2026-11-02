@@ -1,0 +1,10 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v4",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlConventionSetCalendar","args":[null,"TARGET"]},
+        {"id":"v2","fn":"nqlConventionSetDayCounter","args":[null,"Actual360"]},
+        {"id":"v3","fn":"nqlEvaluationContext","args":[46328]},
+        {"id":"v4","fn":"nqlDepositRateHelper","args":[{"rows":3,"cols":1,"cells":[0.03,0.031,0.032]},{"rows":3,"cols":1,"cells":["1M","3M","6M"]},2,{"ref":"v1"},"ModifiedFollowing",false,{"ref":"v2"},{"ref":"v3"}]}
+      ], "result": "v4" },
+    "expected": { "value": {"rows":3,"cols":1,"cells":[{"handle":"DepositRateHelper#21EC19FF277D795D"},{"handle":"DepositRateHelper#6AD34063CCD0B123"},{"handle":"DepositRateHelper#AD0977BBEF152903"}]} } } ] }

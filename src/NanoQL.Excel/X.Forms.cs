@@ -251,7 +251,7 @@ public static partial class X
     /// <returns>The engine, or none.</returns>
     public static BoundEngine? Engine(object a, string p) => IsMissing(One(a)) ? null : Obj<BoundEngine>(a, p);
 
-    private static bool TryComplex(string s, out Complex c)
+    internal static bool TryComplex(string s, out Complex c)
     {
         c = default;
         if (s.Length == 0)

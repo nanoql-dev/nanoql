@@ -1,0 +1,5 @@
+<Conventions xmlns="https://nanoql.org/schemas/conventions">
+  <Calendar name="DESK" base="TARGET">
+    <AddedHoliday>2026-12-23</AddedHoliday>
+  </Calendar>
+</Conventions>

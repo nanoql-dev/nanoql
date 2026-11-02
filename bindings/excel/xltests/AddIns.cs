@@ -8,7 +8,8 @@ namespace NanoQL.Excel.XlTests;
 /// <summary>
 /// The add-ins run.py builds into <c>obj/addins/</c> with <c>nanoql-bind excel build</c>: the two shipped builds (the list
 /// on), the test build (the experimental one with S-bind's test types and <c>nqlxlStats</c>, XLD25), whose functions
-/// the runner's instance loads, and a user's build (XLR8).
+/// the runner's instance loads, a user's build (XLR8), the experimental tests' build the replayer reads (<c>texp</c>,
+/// compiled, no <c>.xll</c>, XLD36), and the package's stable add-in (X6).
 /// </summary>
 internal static class AddIns
 {
@@ -27,11 +28,20 @@ internal static class AddIns
     /// <summary>Gets the user's build's <c>.xll</c>: nanoql's listed stable functions and the user's assembly's.</summary>
     public static string Acme => Xll("acme", "nanoql-acme");
 
+    /// <summary>Gets the stable <c>.xll</c> run.py extracted from <c>excel package</c>'s zip (X6).</summary>
+    public static string Package => Xll("package", "nanoql");
+
+    /// <summary>Gets the vectors' replayer (X7), which run.py builds.</summary>
+    public static string Replayer => Path.Combine(Repository, "bindings", "excel", "replay", "bin", "Release", "net10.0-windows", "NanoQL.Excel.Replay.dll");
+
+    /// <summary>Gets the file in which run.py names the Python interpreter its --python gave, with nanoql's Python package and NumPy.</summary>
+    public static string PythonFile => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "obj", "python.txt"));
+
     /// <summary>Gets the repository's root.</summary>
     public static string Repository { get; } = FindRepository();
 
     /// <summary>A build's folder.</summary>
-    /// <param name="build">The build: experimental, stable, test or acme.</param>
+    /// <param name="build">The build: experimental, stable, test, acme, texp or package.</param>
     /// <returns>Its absolute path.</returns>
     public static string Folder(string build) => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "obj", "addins", build));
 

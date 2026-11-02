@@ -1,0 +1,14 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v8",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlConventionSetQuantLib","args":[]},
+        {"id":"v2","fn":"nqlConventionSetDayCounter","args":[{"ref":"v1"},"Actual365Fixed"]},
+        {"id":"v3","fn":"nqlFlatForward","args":[42262,0.03,{"ref":"v2"},null,null]},
+        {"id":"v4","fn":"nqlConventionSetIborIndex2","args":[{"ref":"v1"},"Euribor","6M",{"ref":"v3"}]},
+        {"id":"v5","fn":"nqlMakeVanillaSwap","args":["10Y",{"ref":"v4"}]},
+        {"id":"v6","fn":"nqlEvaluationContext","args":[42262]},
+        {"id":"v7","fn":"nqlMakeVanillaSwapToVanillaSwap","args":[{"ref":"v5"},{"ref":"v6"}]},
+        {"id":"v8","fn":"nqlFixedVsFloatingSwapFixedLeg","args":[{"ref":"v7"}]}
+      ], "result": "v8" },
+    "expected": { "value": {"rows":10,"cols":1,"cells":[{"handle":"FixedRateCoupon#09BA4AAF101F0323"},{"handle":"FixedRateCoupon#DB691EA66105BD8F"},{"handle":"FixedRateCoupon#3D89603B4733FC05"},{"handle":"FixedRateCoupon#37045D4E46E2CC1D"},{"handle":"FixedRateCoupon#99170F3CF11A5E21"},{"handle":"FixedRateCoupon#63AC858493F57CF5"},{"handle":"FixedRateCoupon#24F31CE1694F7A44"},{"handle":"FixedRateCoupon#F1A20C128A7C540E"},{"handle":"FixedRateCoupon#89DBE61DD5CBFDC0"},{"handle":"FixedRateCoupon#A2757C2850F88360"}]} } } ] }

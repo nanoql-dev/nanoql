@@ -93,7 +93,7 @@ public class ExcelBuildTests
         string path = Path.Combine(Surfaces.Repository, "bindings", "excel", "functions.json");
         Assert.Equal(File.ReadAllText(path), ListedExperimental.Manifest);
         using JsonDocument doc = JsonDocument.Parse(ListedExperimental.Manifest);
-        Assert.Equal(["nqlxlError", "nqlxlRecipe", "nqlxlVersion", "nqlxlDrawsValues", "nqlxlDrawsWeights", "nqlxlDrawsNext"], doc.RootElement.GetProperty("own").EnumerateArray().Select(e => e.GetString()));
+        Assert.Equal(["nqlxlError", "nqlxlRepro", "nqlxlRecipe", "nqlxlVersion", "nqlxlDrawsValues", "nqlxlDrawsWeights", "nqlxlDrawsNext"], doc.RootElement.GetProperty("own").EnumerateArray().Select(e => e.GetString()));
         Assert.Equal(19, doc.RootElement.GetProperty("withheld").GetArrayLength());
     }
 

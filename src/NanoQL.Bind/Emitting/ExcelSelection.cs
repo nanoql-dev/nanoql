@@ -34,6 +34,13 @@ internal sealed class ExcelSelection
     /// <summary>Gets every function's name over the whole filtered surface, a family by its representative.</summary>
     public Dictionary<CFunction, string> Names { get; private set; } = [];
 
+    /// <summary>
+    /// Gets the Excel names of the members reporting a read file's path (XLR14, round 6's F6-1), over the whole surface
+    /// so every build carries the same list: the generated assembly hands them to the runtime, whose export refuses a tree
+    /// calling one, since a replay reads the embedded file from another path.
+    /// </summary>
+    public List<string> PathReporters { get; } = [];
+
     /// <summary>Gets each family's members by its representative, over the whole filtered surface.</summary>
     public Dictionary<CFunction, List<CFunction>> Families { get; } = [];
 
@@ -191,6 +198,16 @@ internal sealed class ExcelSelection
 
     private static IEnumerable<Type> Required(CFunction f) => f.Params.Where(p => p.IsSelf || !p.Optional).SelectMany(p => KindTypes(p.Kind));
 
+    // XLR14's path reporters, by member: a call through one gives the path of the file a snapshot was read from. Each is
+    // nanoql's extensions' own, so a surface binding that assembly has them.
+    private static readonly (string Type, string Member)[] Reporters =
+    [
+        ("NanoQL.Extensions.Conventions.ConventionSnapshot", "get_Sources"),
+        ("NanoQL.Extensions.Conventions.ConventionSet", "Provenance"),
+    ];
+
+    private static bool Reports(CFunction f, (string Type, string Member) r) => f.Member!.DeclaringType!.FullName == r.Type && f.Member.Name == r.Member;
+
     private void Run(ExcelOptions options, ExcelShipped shipped)
     {
         // XLD31: a struct's implicit default constructor (no member) is withheld where its type declares a constructor or
@@ -221,6 +238,18 @@ internal sealed class ExcelSelection
         }
 
         Names = ExcelNames.Number([.. filtered.Where(f => !folded.Contains(f))], Families, shipped);
+
+        // The reporters listed by member, as XLR3 lists the readers; a listed member the surface binding nanoql's extensions
+        // doesn't have refuses the build before a file is written, so the export's refusal can't silently lose one.
+        var named = Names.Keys.Where(f => f.Member != null).ToList();
+        bool extensions = named.Any(f => f.Member!.DeclaringType!.Assembly.GetName().Name == "NanoQL.Extensions");
+        var missing = extensions ? Reporters.Where(r => !named.Any(f => Reports(f, r))).ToList() : [];
+        if (missing.Count > 0)
+        {
+            throw new BindException($"the path reporters' list names {string.Join(", ", missing.Select(r => r.Type + "." + r.Member))}, which the surface doesn't have: the export's refusal (XLR14) needs each");
+        }
+
+        PathReporters.AddRange(named.Where(f => Reporters.Any(r => Reports(f, r))).Select(f => Names[f]).Order(StringComparer.Ordinal));
 
         // XLD33: each prefix's list, a listed type bringing the instance members it inherits and the extension methods on it.
         Inherit(options);

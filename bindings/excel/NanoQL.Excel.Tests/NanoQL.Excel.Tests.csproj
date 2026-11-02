@@ -41,6 +41,13 @@
     <AssemblyMetadata Include="NanoQLExcelGen" Value="$(NanoQLExcelGen)" />
   </ItemGroup>
 
+  <!-- The experimental tests' build's repro templates and adapters' source, as a generated add-in carries them, for
+       nqlxlRepro's C# and Python formats on the test host; written by the target below before the compile. -->
+  <ItemGroup>
+    <EmbeddedResource Include="$(NanoQLExcelGen)experimental/xl-templates.json" LogicalName="NanoQL.Excel.templates.json" />
+    <EmbeddedResource Include="$(NanoQLExcelGen)experimental/gen/XlAdapters.g.cs" LogicalName="NanoQL.Excel.adapters.cs" />
+  </ItemGroup>
+
   <Target Name="NanoQLExcelBuilds" BeforeTargets="CoreCompile">
     <Exec WorkingDirectory="$(MSBuildProjectDirectory)" Command="dotnet &quot;$(NanoQLBindDll)&quot; excel generate --experimental --list nql=none --test-exports --namespace NanoQL.Excel.Generated.Experimental --out &quot;$(NanoQLExcelGen)experimental&quot;" />
     <Exec WorkingDirectory="$(MSBuildProjectDirectory)" Command="dotnet &quot;$(NanoQLBindDll)&quot; excel generate --list nql=none --namespace NanoQL.Excel.Generated.Stable --out &quot;$(NanoQLExcelGen)stable&quot;" />

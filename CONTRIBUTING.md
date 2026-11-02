@@ -66,11 +66,17 @@ The gates are in docs/porting-playbook.md §8; each passes only with its denomin
   the API and `bindings/excel/list.json`, and `-- excel update` regenerates it. An add-in builds against the runtime
   package packed into a folder: `dotnet pack src/NanoQL.Excel -c Release -o <feed>`, then
   `dotnet run --project src/NanoQL.Bind -c Release -- excel build --runtime-source <feed> --out <folder>`, with
-  `--experimental` for the experimental build. The suite inside Excel needs 64-bit Excel for Microsoft 365 with its
+  `--experimental` for the experimental build; `-- excel package --runtime-source <feed> --out <folder>` writes the
+  release's zip and its symbols zip. The suite inside Excel needs 64-bit Excel for Microsoft 365 with its
   multi-threaded calculation on, and Python: `python -I bindings/excel/xltests/run.py` builds the add-ins, runs the
   suite from its folder in Excel instances of its own, which load the add-ins for their session alone, and checks that
   it leaves your other Excel processes and Excel's settings as it found them. It puts back Excel's window position,
-  which Excel rewrites when a test closes a second workbook, and says so. It takes about seven minutes.
+  which Excel rewrites when a test closes a second workbook, and says so; a test Excel rejects as busy before its first
+  line runs once more, and it says that too (`run.py --self-test` checks that rule). It takes about seven minutes. Its
+  `--python <interpreter>`, a Python with nanoql's package and NumPy, runs the swap's Python repro, which it otherwise
+  leaves out. `python -I bindings/excel/xltests/stepin.py` needs pywin32 and netcoredbg 3.2.0 (`--netcoredbg <path>`
+  unless it's on `PATH`). A repro export becomes a test as its vector and the workbook it came from, committed under
+  `bindings/excel/tests/repro/` (docs/excel.md, "Repro export").
 
 ## Issues and questions
 

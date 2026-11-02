@@ -9,7 +9,8 @@ path = [
   "tools/vectors/qlnet/packages.lock.json", "bindings/surface.json", "bindings/roles.json", "bindings/NanoQL.Bindings.slnx",
   "bindings/NanoQL.Bind.Tests/Fixtures/shipped.json", "bindings/python/nanoql/py.typed", "bindings/replay-floor.json",
   "bindings/wheel-routes.json", "bindings/excel/functions.json", "bindings/excel/list.json", "bindings/excel/replay-floor.json",
-  "bindings/excel/NanoQL.Excel.slnx", "bindings/excel/xltests/global.json",
+  "bindings/excel/NanoQL.Excel.slnx", "bindings/excel/xltests/global.json", "bindings/excel/README.md",
+  "bindings/excel/tests/repro/**",
 ]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 The nanoql Authors"
@@ -20,6 +21,18 @@ SPDX-License-Identifier = "Apache-2.0"
 path = "THIRD_PARTY_NOTICES.md"
 precedence = "aggregate"
 SPDX-License-Identifier = "BSD-3-Clause"
+
+# Excel-DNA's and .NET's license texts, which the Excel package appends to the notices; their copyright lines are
+# read from the files themselves.
+[[annotations]]
+path = "bindings/excel/notices/Excel-DNA.txt"
+precedence = "aggregate"
+SPDX-License-Identifier = "Zlib"
+
+[[annotations]]
+path = "bindings/excel/notices/dotnet.txt"
+precedence = "aggregate"
+SPDX-License-Identifier = "MIT"
 
 # QuantLib's table of primitive polynomials modulo two, generated from primitivepolynomials.cpp by
 # tools/tables/primitivepolynomials.py: data only, under Jäckel's notice as QuantLib distributes it.

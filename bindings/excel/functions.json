@@ -2653,7 +2653,7 @@
   {"excel": "nqlZeroSpreadedTermStructureSettlementDays", "c": "nql_ZeroSpreadedTermStructure_get_SettlementDays", "kind": "get", "category": "nanoql.TermStructures", "experimental": false, "args": [{"name": "self", "kind": "handle"}], "returns": "int32?", "loops": "1"},
   {"excel": "nqlZeroSpreadedTermStructure", "c": "nql_ZeroSpreadedTermStructure_new", "kind": "new", "category": "nanoql.TermStructures", "experimental": false, "args": [{"name": "originalCurve", "kind": "handle"}, {"name": "spread", "kind": "double"}, {"name": "comp", "kind": "enum", "optional": true}, {"name": "freq", "kind": "enum", "optional": true}], "returns": "handle", "loops": "1111"}
  ],
- "own": ["nqlxlError", "nqlxlRecipe", "nqlxlVersion", "nqlxlDrawsValues", "nqlxlDrawsWeights", "nqlxlDrawsNext"],
+ "own": ["nqlxlError", "nqlxlRepro", "nqlxlRecipe", "nqlxlVersion", "nqlxlDrawsValues", "nqlxlDrawsWeights", "nqlxlDrawsNext"],
  "withheld": [
   {"excel": "nqlAnalyticHestonEngineCalculate3", "c": "nql_AnalyticHestonEngine_Calculate__VanillaOption_EvaluationContext_HestonModel_AnalyticHestonEngineComplexLogFormula", "lacks": ["NanoQL.Numerics.FourierIntegration"]},
   {"excel": "nqlAnalyticHestonEngine3", "c": "nql_AnalyticHestonEngine_new__HestonModel_AnalyticHestonEngineComplexLogFormula", "lacks": ["NanoQL.Numerics.FourierIntegration"]},

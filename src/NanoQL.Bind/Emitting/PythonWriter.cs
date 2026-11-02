@@ -46,6 +46,7 @@ internal sealed class PythonWriter(Surface surface)
     private readonly Dictionary<Type, TypeRow> types = surface.Types.ToDictionary(t => t.Type);
     private readonly Dictionary<Type, EnumRow> enums = surface.Enums.ToDictionary(e => e.Type);
     private readonly Dictionary<CFunction, string> lookupNames = [];
+    private readonly Dictionary<string, (string Module, string Class, string Member, string Style, IReadOnlyList<string> Params)> rows = new(StringComparer.Ordinal);
     private int tables;
     private string prefix = "nql";
 
@@ -72,9 +73,34 @@ internal sealed class PythonWriter(Surface surface)
         return (functions, classes, enumCount);
     }
 
+    /// <summary>
+    /// Each C function's Python member as the generated modules write it, for the Excel back end's repro templates
+    /// (XLR14): its module, nanoql's or a user prefix's and its experimental module where its class is experimental, its
+    /// class, its name, its style and its parameters' Python names. Nothing is written.
+    /// </summary>
+    /// <returns>The members by C name.</returns>
+    public IReadOnlyDictionary<string, (string Module, string Class, string Member, string Style, IReadOnlyList<string> Params)> Table()
+    {
+        foreach (string p in surface.Assemblies.Select(a => a.Prefix).Distinct())
+        {
+            Generate(p);
+        }
+
+        return rows;
+    }
+
     // One prefix's modules: nanoql's own, or a user's over nanoql's (its classes' bases and its defaults' enums are
     // nanoql's, its functions registered in nanoql's runtime).
     private (int Functions, int Classes, int Enums) WritePackage(string package, string prefix)
+    {
+        (string stable, string experimental, int functions, int classes, int enumCount) = Generate(prefix);
+        Directory.CreateDirectory(Path.Combine(package, "experimental"));
+        File.WriteAllText(Path.Combine(package, "_generated.py"), stable);
+        File.WriteAllText(Path.Combine(package, "experimental", "__init__.py"), experimental);
+        return (functions, classes, enumCount);
+    }
+
+    private (string Stable, string Experimental, int Functions, int Classes, int Enums) Generate(string prefix)
     {
         this.prefix = prefix;
         bool own = prefix == "nql";
@@ -204,10 +230,8 @@ internal sealed class PythonWriter(Surface surface)
         stable.AppendLine("__all__ = [" + string.Join(", ", surface.Enums.Where(e => e.Prefix == prefix && !e.Experimental).Select(e => Str(e.CName)).Concat(stableAll.Select(Str)).Order(StringComparer.Ordinal)) + "]");
         experimental.AppendLine("__all__ = [" + string.Join(", ", surface.Enums.Where(e => e.Prefix == prefix && e.Experimental).Select(e => Str(e.CName)).Concat(experimentalAll.Select(Str)).Order(StringComparer.Ordinal)) + "]");
 
-        Directory.CreateDirectory(Path.Combine(package, "experimental"));
-        File.WriteAllText(Path.Combine(package, "_generated.py"), stable.ToString().ReplaceLineEndings("\n"));
-        File.WriteAllText(Path.Combine(package, "experimental", "__init__.py"), experimental.ToString().ReplaceLineEndings("\n"));
-        return (surface.Functions.Count(f => f.Prefix == prefix), stableAll.Count + experimentalAll.Count, surface.Enums.Count(e => e.Prefix == prefix));
+        return (stable.ToString().ReplaceLineEndings("\n"), experimental.ToString().ReplaceLineEndings("\n"), surface.Functions.Count(f => f.Prefix == prefix),
+            stableAll.Count + experimentalAll.Count, surface.Enums.Count(e => e.Prefix == prefix));
     }
 
     // A user's package's __init__.py: the superset library beside it loaded in place of nanoql's own, before any object
@@ -514,9 +538,11 @@ internal sealed class PythonWriter(Surface surface)
         string style = asStatic ? "static" : Style(forms[0]);
         string cls = valueHolder ?? t.CName;
         string? table = forms.Count == 1 ? null : "_D" + (tables++).ToString(CultureInfo.InvariantCulture);
+        string module = (prefix == "nql" ? "nanoql" : prefix) + (t.Experimental ? ".experimental" : string.Empty);
         for (int i = 0; i < forms.Count; i++)
         {
             py.Add($"    {Str(forms[i].CName)}: ({Str(cls)}, {Str(name)}, {Str(style)}, {(table == null ? "None" : i.ToString(CultureInfo.InvariantCulture))}, {(table == null ? "None" : Str(table))}),");
+            rows.TryAdd(forms[i].CName, (module, cls, name, style, [.. Names(forms[i]).Select(x => x.Name)]));
         }
 
         if (forms.Count == 1)

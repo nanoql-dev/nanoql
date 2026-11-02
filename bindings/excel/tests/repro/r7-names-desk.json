@@ -1,0 +1,8 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v1",
+    "inputs": { "provider": "file:B9A7BC7F6721DE00", "dateSystem": 1900,
+      "conventions": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!--\n  SPDX-FileCopyrightText: 2026 The nanoql Authors\n  SPDX-License-Identifier: Apache-2.0\n-->\n<Conventions xmlns=\"https://nanoql.org/schemas/conventions\">\n  <!-- A desk's TARGET: Christmas Eve 2026 a holiday (docs/conventions.md's example). -->\n  <Calendar name=\"TARGET\" base=\"TARGET\">\n    <AddedHoliday>2026-12-24</AddedHoliday>\n  </Calendar>\n</Conventions>\n",
+      "calls": [
+        {"id":"v1","fn":"nqlCalendarAdjust","args":["TARGET",46380,null]}
+      ], "result": "v1" },
+    "expected": { "value": 46384 } } ] }

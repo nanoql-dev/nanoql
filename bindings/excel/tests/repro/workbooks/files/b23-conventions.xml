@@ -1,0 +1,6 @@
+<Conventions xmlns="https://nanoql.org/schemas/conventions">
+  <!-- TARGET with an extra holiday, the preset itself replaced (docs/conventions.md's example) -->
+  <Calendar name="TARGET" base="TARGET">
+    <AddedHoliday>2026-12-24</AddedHoliday>
+  </Calendar>
+</Conventions>

@@ -1,0 +1,10 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v4",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlIntervalPrice","args":[1,2,3,0.5]},
+        {"id":"v2","fn":"nqlIntervalPrice","args":[2,1,2.5,0.75]},
+        {"id":"v3","fn":"nqlTimeSeries","args":["IntervalPrice",{"rows":2,"cols":1,"cells":[42262,42263]},{"rows":2,"cols":1,"cells":[{"ref":"v1"},{"ref":"v2"}]}]},
+        {"id":"v4","fn":"nqlTimeSeriesSize","args":["IntervalPrice",{"ref":"v3"}]}
+      ], "result": "v4" },
+    "expected": { "value": 2 } } ] }

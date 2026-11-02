@@ -816,6 +816,10 @@ Every port of QuantLib is checked against QuantLib itself, and every port of QLN
   subcommand, so one generator writes one file, `tests/vectors/qlnet/<QLNet path>.json`, read by a test class under
   `QLNet/Vectors/` named `<Name>VectorTests`. The shims need the .NET SDK that `global.json` names, not the wheel.
   `VectorFile.Load` reads a file under `qlnet/` only with QLNet's pin, and every other only with QuantLib's.
+- **Excel's repro vectors:** a cell's export, `nqlxlRepro` (docs/excel.md), is a vector in this envelope, its inputs
+  the cell's worksheet calls. A user's export becomes a test in the Excel solution: the vector and the workbook it came
+  from, under `bindings/excel/tests/repro/`, replayed through the experimental tests' build with each number under
+  §7.3, rendered as C# and run, and exported again from its workbook inside Excel.
 
 ### 7.3 Tolerance
 

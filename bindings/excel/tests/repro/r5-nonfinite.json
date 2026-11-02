@@ -1,0 +1,10 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v4",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlConventionSetQuantLib","args":[]},
+        {"id":"v2","fn":"nqlConventionSetDayCounter","args":[{"ref":"v1"},"Actual365Fixed"]},
+        {"id":"v3","fn":"nqlInterestRate","args":[1000,{"ref":"v2"},"Continuous","Annual"]},
+        {"id":"v4","fn":"nqlInterestRateCompoundFactor","args":[{"ref":"v3"},1000]}
+      ], "result": "v4" },
+    "expected": { "value": {"error":36} } } ] }

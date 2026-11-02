@@ -1,0 +1,7 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v1",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlGarch11ToR2","args":[{"rows":5,"cols":1,"cells":[0.01,-0.02,0.015,0.003,-0.01]}]}
+      ], "result": "v1" },
+    "expected": { "value": {"rows":5,"cols":2,"cells":[0.0001,0.0001668,0.0004,{"error":42},0.000225,{"error":42},9E-06,{"error":42},0.0001,{"error":42}]} } } ] }

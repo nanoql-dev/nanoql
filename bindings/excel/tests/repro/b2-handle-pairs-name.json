@@ -1,0 +1,12 @@
+{ "upstream": null, "generator": "nanoql-excel 2.0.0", "seed": null,
+  "cases": [ { "name": "v6",
+    "inputs": { "provider": "QuantLib", "dateSystem": 1900,
+      "calls": [
+        {"id":"v1","fn":"nqlConventionSetDayCounter","args":[null,"Actual365Fixed"]},
+        {"id":"v2","fn":"nqlFlatForward","args":[46328,0.03,{"ref":"v1"},null,null]},
+        {"id":"v3","fn":"nqlConventionSetIborIndex","args":[null,"Euribor3M",{"ref":"v2"}]},
+        {"id":"v4","fn":"nqlConventionSetIborIndex","args":[null,"Euribor6M",{"ref":"v2"}]},
+        {"id":"v5","fn":"nqlStubIborCouponWeightedIndex","args":[{"rows":2,"cols":2,"cells":[{"ref":"v3"},0.4,{"ref":"v4"},0.6]}]},
+        {"id":"v6","fn":"nqlStubIborCouponWeightedIndexName","args":[{"ref":"v5"}]}
+      ], "result": "v6" },
+    "expected": { "value": "Euribor3M Actual/360(0.4000) + Euribor6M Actual/360(0.6000)" } } ] }
