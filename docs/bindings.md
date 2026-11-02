@@ -48,12 +48,23 @@ Visual Studio's C++ tools with the Visual Studio Installer's folder on `PATH`.
 
 - **`nql_<Type>_<member>`:** the type's nanoql name and the member's: `new` for a constructor, `get_<P>` for a getter,
   `set_<P>` for a static setter, `with_<P>` for a record's init-only property, `op_<Name>` for an operator (.NET's
-  metadata name, `op_Addition`); static and extension members under their declaring type. A type whose simple name
-  another type of the same prefix shares takes its namespace's last segment in front.
+  metadata name, `op_Addition`). A type whose simple name another type of the same prefix shares takes its namespace's
+  last segment in front.
+- **Statics** cross under their declaring type alone: a type carries the static and extension members it declares, and
+  a named class (a sealed class naming a closed generic, QuantLib-Python's `%template` name for it) also those of the
+  closing it names. A base's factory stays with its base, which crosses for it: `nql_LatentModel_GaussianCopulaPolicy_
+  GaussianCopulaPolicyInitTraits_FromCorrelation` builds the latent model, and no named latent model carries a copy.
+  Each language reaches a base's static through its own inheritance.
+- **A type's own members:** a type surfaces the members it declares and, for a closing's name, those of its closed
+  generic bases. A member a type declares with `new` hides its base's of the same C signature, as C#'s lookup binds it
+  (a named class's own `Create` returns the named class); an override doesn't, since C# call sites name the virtual's
+  declaration.
 - **Overloads:** two underscores and the shortest run of the parameters' type names that tells the overload from the
   others: `nql_Calendar_Advance__Date_int` beside `__Date_Period`. Type names: `double`, `int`, `long`, `bool`,
-  `string`, `Date`, `OptDate` for `Date?`, `doubleArray` for a collection of doubles, a nanoql type's name. Overloads
-  whose C signatures are the same cross once: the one taking a `ReadOnlySpan`, else an `ImmutableArray`, else the first.
+  `string`, `Date`, `OptDate` for `Date?`, `doubleArray` for a collection of doubles, `ValueTuple` and its elements'
+  names for a tuple (`ValueTupleOptdoubleOptdouble`), a nanoql type's name. Overloads whose C signatures are the same
+  cross once: the one a type declares with `new`, else the one taking a `ReadOnlySpan`, else an `ImmutableArray`, else
+  the first.
 - **Generics:** a generic method crosses closed: per named factory where its type argument is a trait's, and at its
   constraint where each type parameter has one class or interface constraint, no constructor or value-type one
   (`nql_CalibratedModelExtensions_Calibrate` takes any calibrated model); any other generic method doesn't cross. A
@@ -63,7 +74,14 @@ Visual Studio's C++ tools with the Visual Studio Installer's folder on `PATH`.
   keeps every released function's and type's name. Only a new member is named against the names in use: a member that
   gains its first overload keeps its short name and the newcomer takes the suffix.
 - **Parameters** keep their C# names; one a C or C++ keyword takes, or `self`, `result` or `has_value`, gets a trailing
-  underscore.
+  underscore. A tuple's elements take the parameter's name and their own in snake case, C#'s tuple element names
+  (`calibrationSet_option`), or `item1`... where C# names none; a returned tuple's elements their own (`first`). In a
+  collection's tuple an element named `count` or `has_value` gets a trailing underscore, those being the collection's
+  own.
+- **An optional parameter of a type that doesn't cross,** null by default (a `TimeProvider`, a line search, the caller's
+  functions), is left out of the C function and takes its default: `nql_BFGS_new(&optimizer)` builds QuantLib's
+  default line search, and `nql_Date_TodaysDate(&today)` reads the computer's clock. Any other parameter that doesn't
+  cross withholds its member, listed in `coverage.md` with why.
 
 ### Handles
 
@@ -133,13 +151,16 @@ until the thread's next nanoql call.
 | a collection of nullables | values and `has_value` flags | the same |
 | a jagged array | its values flat by rows, their count, the rows' lengths and the rows' count | the same |
 | a dictionary, key–value pairs | keys, values, count | the same |
-| a tuple | | one out-parameter per element, by its name |
+| a tuple | one parameter per element, `<param>_<element>`, each in its element's form; C#'s default is each element's zero value, NULL for a nullable one | one out-parameter per element, by its name |
+| a collection of tuples | one array per element, `<param>_<element>`, a nullable element with its `_has_value` flags, and `<param>_count`; NULL first array for null, arrays of no rows for empty | one array per element, by its name, then `has_value` flags for a collection of nullable tuples, then `count`, each freed with `nql_free` (each handle released first) |
 | `Matrix`, `Vector` | values by rows with the rows and columns; values and their count; one the member writes into (`coverage.md`'s list) by `double*`, written back after the call | the same, freed with `nql_free` |
-| a generator | its snapshot's handle | `nql_<Generator>_Draws`: draws and weights, the next snapshot |
+| a generator | its snapshot's handle; for a closed generator construction (`RandomSequenceGenerator<MersenneTwisterUniformRng>`), the snapshot of a class deriving it, checked at the call | `nql_<Generator>_Draws`: draws and weights, the next snapshot |
 | a loss `Distribution` | | its normalized buckets' edges, widths, densities, cumulative and excess probabilities and averages |
 
-An optional parameter's default is in the header's comment and in `surface.json`; C passes every parameter, and each
-language layer applies the defaults.
+A tuple's or a collection's elements are scalars, dates, enums, strings, nullable doubles, integers and dates, and
+objects. A returned collection of tuples with a nullable element, a collection of nullable tuples in, and a tuple
+holding a collection or a tuple don't cross, each listed in `coverage.md`. An optional parameter's default is in the
+header's comment and in `surface.json`; C passes every parameter, and each language layer applies the defaults.
 
 ### Generators
 
@@ -147,7 +168,10 @@ A generator's constructor returns an immutable snapshot holding a private copy o
 `nql_<Generator>_Draws(snapshot, count, &values, &weights, &next)` copies it, draws `count` values (for a sequence
 generator, `count` points of its dimension, by rows, the dimension out too) with their weights, and returns the copy as
 the next snapshot. The same snapshot always gives the same draws, a stream continues from `next` with nothing
-recomputed, and threads may draw from one snapshot at once. A member that takes a generator copies the snapshot's.
+recomputed, and threads may draw from one snapshot at once. A member that takes a generator copies the snapshot's. A
+parameter of a closed generator construction takes the snapshot of a class deriving it (the Gaussian sequence
+generators over `MersenneTwisterUniformRsg`, `KnuthUniformRsg` and the rest), refused with `NQL_ERROR_TYPE` for another
+generator's; a member taking a construction no generator class derives doesn't cross.
 
 ### The context and the conventions
 
@@ -167,20 +191,23 @@ A member that takes one of nanoql's engines as a delegate (an instrument builder
 engine) takes a bound engine: an immutable handle naming an engine with its inputs filled in.
 
 - **`nql_<Engine>_Bind`** takes the inputs the engine's calculations take after the instrument and the context, one
-  function per set of them, each input optional: NULL leaves it open (a value goes by pointer). **`nql_<Engine>_BindOn`**
-  takes the instrument too, for a member that takes the context alone (a composite instrument).
+  function per set of them, each input optional: NULL leaves it open (a value goes by pointer, a collection of tuples
+  by its first element's array). **`nql_<Engine>_BindOn`** takes the instrument too, for a member that takes the
+  context alone (a composite instrument).
 - **The member supplies its own arguments,** always the instrument and the context, and for some members more (a
   calibration helper's trial model, the quanto engine's process, YoY optionlet stripping's trial surface, the callable
   bond's OAS spread). Each goes into the engine's parameter of its role: an object into the one parameter of its type; a
   value, or an object two parameters can take, into the parameter `bindings/roles.json` names; a calibration helper's
   trial model always by its entry's names, cast to that parameter's type at each call (a model the engine can't take
   fails with `NQL_ERROR_INVALID_CAST`). The bound inputs fill the rest, and a parameter open on both sides keeps its
-  default.
+  default; a nullable value with no default is null, C#'s value for it (a Monte Carlo engine's `timeStepsPerYear` beside
+  its bound `timeSteps`).
 - **The calculation:** the member takes its engine's calculation for the input set `Bind` named, for the most derived
   instrument type its own is.
 - **Refused with `NQL_ERROR_TYPE`** when the member takes the engine: an input both bound and supplied, a required one
-  neither, an engine with no calculation for the member, an engine with no parameter for a role (the Black callable
-  engines on the OAS members, where QuantLib's engine reads no spread).
+  neither bound nor supplied (a non-nullable one with no default), an engine with no calculation for the member, an
+  engine with no parameter for a role (the Black callable engines on the OAS members, where QuantLib's engine reads no
+  spread).
 - **The generator stops** on a value a member supplies with no entry in the roles table, an object two parameters take
   that the table names neither of, and two calculations tied for one member. `coverage.md` lists every pair, where its
   arguments go, and each calculation that forms none, with why.
@@ -224,8 +251,10 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
   `kind` and `type`), and `c`, the C parameters as `[type, name]`. A kind is a scalar (`double`, `int32`, `int64`,
   `bool`, `string`, `date`, `period`, `enum`, `complex`), a nullable value (`double?` and the like), an object
   (`handle`, `boxed`, `snapshot`, `engine`), a working type's form (`matrix`, `vector`, `distribution`), or a
-  collection: `array:<element>`, `span:<element>`, `jagged:double`, `map:<key>:<value>`, `tuple:<element>,...`;
-  `vector&` and `matrix&` for one the member writes into.
+  collection: `array:<element>`, `span:<element>`, `jagged:double`, `map:<key>:<value>`, `tuple:<element>,...`,
+  `array:tuple:<element>,...` for a collection of tuples, and as a result `array:tuple?:<element>,...` for one of
+  nullable tuples; `vector&` and `matrix&` for one the member writes into. A tuple's or a collection of tuples' C#
+  element names are its `items`. A reader meeting a kind it doesn't know refuses it.
 - **`presets`:** each withheld preset constructor: its `dictionary`, `name`, `member`, the convention set's `lookup`
   function, and its `args`, each a constant, the lookup's parameter or computed.
 - **`engines`:** each engine input set: its `id`, `engine`, `inputs` and `calculations`.
@@ -319,8 +348,10 @@ validated platform; on the others, a result's last bits may differ where the C r
   `std::optional<std::string>`, null as `std::nullopt`), `std::optional` for nullable values, `std::complex<double>`;
   `std::vector` out, and in `array_view<T>`, a read-only view of a vector or a braced list, or `nullptr` for null, which
   differs from empty; a key-value collection as pairs; `Matrix` by rows; a `std::vector<double>&` or `Matrix&` nanoql
-  writes into in place; a tuple as `std::tuple`; a loss distribution as `Distribution`; a generator's `draws(count)` its
-  values, weights and next snapshot.
+  writes into in place; a tuple as `std::tuple` both ways (`{}` for C#'s default), a collection of tuples in as an
+  `array_view<std::tuple<...>>` and out as a `std::vector` of them, of `std::optional` ones for nullable tuples; a loss
+  distribution as `Distribution`; a generator's `draws(count)` its values, weights and next snapshot. A parameter of a
+  closed generator construction is an `Object`, the snapshot of a class deriving it, checked at the call.
 - **Defaults and overloads:** C++ default arguments with nanoql's defaults, at each argument count the forms whose
   leading parameters agree offering it once, through the shortest (§2.2's rule). A form whose C++ parameters another
   form's are takes its C overload suffix (`outerProduct_doubleArray` beside `outerProduct`), a constructor a
@@ -344,12 +375,18 @@ validated platform; on the others, a result's last bits may differ where the C r
   member or an extension method a static method of its declaring class (`ConventionSet.quant_lib()`), a record's
   init-only property `with_<name>(value)`, an operator a static `op_<name>` and, for arithmetic and ordering, Python's
   operator. A member that would take another's name, or one of `Object`'s, takes a suffix: `close_`.
+- **Constructors:** every class has its own: its constructors' dispatch, or a `TypeError` where none crosses, never a
+  base's, which would build the base under the class's name. A preset's names its lookup by name: `USDCurrency()` raises
+  "USDCurrency is made by ConventionSet.currency". An experimental constructor added on the opt-in replaces the
+  refusal.
 - **Values:** `datetime.date` in and out, `None` for no date; `nanoql.Period(length, units)` or a plain tuple in, a
   `Period` out, its operators and equality nanoql's (`Period(1, Years) == Period(12, Months)`); enums as `IntEnum`;
   NumPy arrays out (`float64` for doubles), any sequence in; a matrix a 2-D array by rows; a span nanoql writes into a
-  writable, contiguous NumPy array; lists of objects; a dictionary for key–value results, a named tuple for a tuple,
-  `nanoql.Distribution` for a loss distribution; a generator's `draws(count)` returns its values, weights and next
-  snapshot.
+  writable, contiguous NumPy array; lists of objects; a dictionary for key–value results; a tuple in as a tuple (`None`
+  for C#'s default) and out as a named tuple (`Result(first, second)`), a collection of tuples in as any sequence of
+  them and out as a list of named tuples, `None` for a null tuple, its stubs typed (`Sequence[tuple[VanillaOption,
+  float]]`), a tuple of the wrong length refused with a `TypeError`; `nanoql.Distribution` for a loss distribution; a
+  generator's `draws(count)` returns its values, weights and next snapshot.
 - **Defaults and overloads:** keyword arguments with nanoql's defaults. An overload group is one method that picks its
   form by the arguments' types, exact matches first, then conversions (an `int` for a `float`, a tuple for a period, an
   `int` for an enum), an object nearer the form's class first; each form is declared with `typing.overload`, and at
@@ -410,7 +447,11 @@ validated platform; on the others, a result's last bits may differ where the C r
   as a record holding any combination of its constants (`KahaleSmile.or(SabrSmile)`, `has`); a nullable as its boxed
   type (`Double`, `null` for none); `Complex`; numbers in primitive arrays (`double[]`, `int[]`), the rest in lists; a
   matrix a `double[][]` by rows, so a matrix of no rows keeps no column count; a jagged array a `List<double[]>`; a
-  key–value collection a `Map` in nanoql's order; `Tuple2` and `Tuple3`; a loss distribution `Distribution`; a
+  key–value collection a `Map` in nanoql's order; a tuple a `Tuple2` or `Tuple3` both ways (`null` for C#'s default), a
+  collection of tuples a `List` of them, with a `null` entry for a null tuple out, a `null` in an element that takes
+  none refused with a `NullPointerException` naming the parameter and the element ("rows: an element's count is
+  null"); a parameter of a closed generator construction a `NanoObject`, the snapshot of a class deriving it, checked at
+  the call; a loss distribution `Distribution`; a
   generator's `draws(count)` a `Draws` (values, weights, the next snapshot) or `SequenceDraws`; an array nanoql writes
   into, written in place.
 - **Defaults and overloads:** Java has no default arguments, so a form with nanoql's defaults gets telescoping

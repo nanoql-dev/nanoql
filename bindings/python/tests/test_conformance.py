@@ -35,7 +35,7 @@ from nanoql import (
     Period,
     TimeUnit,
 )
-from nqlt import CountingRng, Deprecations, Echo, EchoObject, Fixtures, References, Refusals
+from nqlt import CountingRng, Deprecations, Echo, EchoObject, Fixtures, McShapedEngine, References, Refusals, Tuples
 
 
 def bits(x: float) -> int:
@@ -464,6 +464,117 @@ class Engines(unittest.TestCase):
         with self.assertRaises(NanoQLError) as e:
             priced[0].model_value(hw, ctx)
         self.assertEqual(e.exception.code, 6)
+
+
+class Contract(unittest.TestCase):
+    """S-bind2's contract: the tuple forms both ways, a bound engine's open nullable inputs, optional parameters of a type
+    that doesn't cross, generator bases, each class's own constructor, and statics under their declaring type."""
+
+    def test_tuples_in(self):
+        # A tuple as a tuple, None for C#'s default; its elements in their own forms.
+        self.assertEqual(tuple(Tuples.single()), (None, None))
+        self.assertEqual(tuple(Tuples.single((0.5, None))), (0.5, None))
+        self.assertEqual(tuple(Tuples.single(c_point=(None, 0.25))), (None, 0.25))
+        self.assertEqual(Tuples.scalars((-3, 2**63 - 1, True)), "-3|9223372036854775807|true")
+        self.assertEqual(Tuples.labels(("x\u00e9", datetime.date(2023, 3, 15), Period(1, TimeUnit.Years))), "x\u00e9|45000|1Y")
+        self.assertEqual(Tuples.labels((None, datetime.date(2023, 3, 15), (1, TimeUnit.Years))), "null|45000|1Y")
+        self.assertEqual(Tuples.kinds((nanoql.Weekday.Friday, complex(1.5, -2.0))), "6|1.5|-2")
+        with self.assertRaises(TypeError):
+            Tuples.single((0.5,))
+        with self.assertRaises(TypeError):
+            Tuples.scalars([1, 2, True, 4])
+
+    def test_collections_of_tuples(self):
+        live0 = collected()
+        a, b = EchoObject(1.0, "one"), EchoObject(2.0, "two")
+        rows = Tuples.rows([(a, 0.25), (b, 0.75)])
+        self.assertEqual([r.weight for r in rows], [0.25, 0.75])
+        self.assertEqual([r.item for r in rows], [a, b])
+        self.assertEqual(Tuples.rows([]), [])
+        # A nullable element None by its flag; None is a null collection, an empty sequence an empty one.
+        self.assertEqual(Tuples.describe([(2.5, 7, datetime.date(2023, 3, 15)), (None, 8, None), (-1.0, None, datetime.date(2023, 3, 16))]),
+                         "2.5:7:45000;-:8:-;-1:-:45001")
+        self.assertEqual(Tuples.describe(None), "null")
+        self.assertEqual(Tuples.describe([]), "")
+        with self.assertRaises(TypeError):
+            Tuples.describe([(1.0, 2, None), (1.0,)])
+        self.assertEqual([tuple(r) for r in Tuples.days([("a", nanoql.Weekday.Monday), (None, nanoql.Weekday.Sunday)])],
+                         [("a", nanoql.Weekday.Monday), (None, nanoql.Weekday.Sunday)])
+        terms = Tuples.terms([(Period(3, TimeUnit.Months), -(2**63), False), ((2, TimeUnit.Years), 5, True)])
+        self.assertEqual((terms[1].tenor, terms[0].count, terms[1].flag), (Period(2, TimeUnit.Years), -(2**63), True))
+        numbers = Tuples.numbers([(complex(1, 2), datetime.date(2023, 3, 15)), (complex(-0.0, math.nan), None)])
+        self.assertTrue(numbers[0].z == complex(1, 2) and math.isnan(numbers[1].z.imag) and numbers[1].when is None)
+        # A returned collection of nullable tuples: None for a null one.
+        gaps = Tuples.gaps([(1, 10), (2, 20), (3, 30), (4, 40)], 2)
+        self.assertEqual([None if g is None else tuple(g) for g in gaps], [None, (2, 20), None, (4, 40)])
+        del a, b, rows
+        self.assertEqual(collected(), live0)
+
+    def test_tuple_dispatch(self):
+        # The single tuple or the collection by the argument, keywords included.
+        single = nanoql.Concentrating1dMesher(0.0, 1.0, 11, (0.5, 0.1), False)
+        many = nanoql.Concentrating1dMesher(0.0, 1.0, 11, [(0.3, 0.1, True), (0.7, 0.2, False)], 1e-8)
+        keyword = nanoql.Concentrating1dMesher(start=0.0, end=1.0, size=11, c_points=[(0.3, 0.1, True), (0.7, 0.2, False)])
+        self.assertEqual(len(single.locations()), 11)
+        self.assertEqual(list(many.locations()), list(keyword.locations()))
+
+    def test_bound_nullable_inputs(self):
+        ctx, quanto, bsm = Fixtures.context(), Fixtures.quanto(), Fixtures.black_scholes()
+        foreign, fxvol = Fixtures.foreign(), Fixtures.exchange_volatility()
+        # The steps per year and the tolerance neither bound nor supplied: null, C#'s value for them.
+        mc = McShapedEngine.bind(None, 4, None, 2000, None, 42)
+        npv = nanoql.QuantoEngine.calculate(quanto, ctx, bsm, foreign, fxvol, 0.3, mc).npv
+        self.assertEqual(bits(npv), bits(References.mc_shaped_quanto_npv(False)))
+        shaped = McShapedEngine.bind(None, 4, None, 2000, None, 42, [(0.5, 1.5), (1.0, 0.5)])
+        npv = nanoql.QuantoEngine.calculate(quanto, ctx, bsm, foreign, fxvol, 0.3, shaped).npv
+        self.assertEqual(bits(npv), bits(References.mc_shaped_quanto_npv(True)))
+        # A required input left open is still refused.
+        with self.assertRaises(HandleError) as e:
+            nanoql.QuantoEngine.calculate(quanto, ctx, bsm, foreign, fxvol, 0.3, McShapedEngine.bind(None, 4, None, 2000))
+        self.assertEqual(e.exception.code, 10)
+        self.assertIn("'seed' is neither bound nor supplied", str(e.exception))
+
+    def test_defaults_left_out(self):
+        # BFGS's line search, which doesn't cross, at its default; the calibration set read back as tuples.
+        cs = Fixtures.calibration_set()
+        self.assertEqual(cs[0]._fields, ("option", "volatility"))
+        I, CT = nanoql.AndreasenHugeVolatilityInterplInterpolationType, nanoql.AndreasenHugeVolatilityInterplCalibrationType
+        rf, q = Fixtures.risk_free(), Fixtures.dividend()
+        ah = nanoql.AndreasenHugeVolatilityInterpl(cs, 100.0, rf, q, I.CubicSpline, CT.Call, 100)
+        self.assertEqual(bits(ah.local_vol(1.0, 110.0)), bits(References.andreasen_huge_local_vol(False)))
+        ahb = nanoql.AndreasenHugeVolatilityInterpl(cs, 100.0, rf, q, I.CubicSpline, CT.Call, 100, None, None, nanoql.BFGS())
+        self.assertEqual(bits(ahb.local_vol(1.0, 110.0)), bits(References.andreasen_huge_local_vol(True)))
+
+    def test_generator_base(self):
+        uniform = nanoql.MersenneTwisterUniformRsg(3, 42)
+        gaussian = nanoql.InvCumulativeMersenneTwisterGaussianRsg(uniform)
+        values, _, _ = gaussian.draws(4)
+        self.assertEqual(np.asarray(values).shape, (4, 3))
+        self.assertEqual([bits(x) for x in np.asarray(values).ravel()], [bits(x) for x in References.gaussian_draws()])
+        with self.assertRaises(HandleError) as e:
+            nanoql.InvCumulativeMersenneTwisterGaussianRsg(nanoql.KnuthUniformRsg(3, 42))
+        self.assertEqual(e.exception.code, 10)
+
+    def test_own_constructors(self):
+        # A preset's refusal names its lookup; a class with no crossing constructor refuses, never builds its base.
+        with self.assertRaises(TypeError) as e:
+            nanoql.USDCurrency()
+        self.assertEqual(str(e.exception), "USDCurrency is made by ConventionSet.currency")
+        with self.assertRaises(TypeError) as e:
+            nanoql.EuriborSwapIsdaFixA("Fake", Period(10, TimeUnit.Years), 2, nanoql.EURCurrency, None, Period(1, TimeUnit.Years), 0, None, None)
+        self.assertIn("EuriborSwapIsdaFixA is made by ConventionSet.", str(e.exception))
+        self.assertIsInstance(ConventionSet.quant_lib().currency("USD"), nanoql.USDCurrency)
+        with self.assertRaises(TypeError) as e:
+            nanoql.YieldTermStructure()
+        self.assertIn("has no constructor that crosses the C ABI", str(e.exception))
+
+    def test_statics_under_their_declaring_type(self):
+        import nanoql.experimental as x
+
+        # The named latent model reaches its base's factory through Python's inheritance, with no copy of its own.
+        self.assertNotIn("from_correlation", vars(x.GaussianDefProbLM))
+        model = x.GaussianDefProbLM.from_correlation(0.3, 2)
+        self.assertEqual(type(model).__name__, "LatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits")
 
 
 class Experimental(unittest.TestCase):

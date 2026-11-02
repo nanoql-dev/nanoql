@@ -8,7 +8,7 @@ namespace NanoQL.Bind.Emitting;
 /// <summary>
 /// The C parameters each kind expands to, in and out (docs/bindings.md, "Kinds"): a scalar is one, an array a pointer
 /// and a count, a matrix a pointer by rows and its row and column counts, a nullable result its value and a
-/// <c>has_value</c> flag.
+/// <c>has_value</c> flag, a tuple one per element, and a collection of tuples an array per element and a count.
 /// </summary>
 internal static class CForms
 {
@@ -59,6 +59,29 @@ internal static class CForms
             case "vector&": return [new("double*", n, "double*"), new("int32_t", n + "_count", "int")];
             case "span":
                 return [new(Element(k.Element!).CType + "*", n, Element(k.Element!).CsType + "*"), new("int32_t", n + "_count", "int")];
+            case "tuple":
+                // One parameter per element, in its own form (B2R3).
+                return [.. k.Items.SelectMany((item, i) => In(new CParam(ItemParam(p.Name, k, i), item, false, null)))];
+            case "array" when k.Element!.Name == "tuple":
+            {
+                // One array per element, a nullable one with its flags, and one count (B2R3).
+                var slots = new List<CSlot>();
+                CKind tk = k.Element;
+                for (int i = 0; i < tk.Items.Count; i++)
+                {
+                    string en = ItemParam(p.Name, tk, i, true);
+                    (string et, string es) = Element(tk.Items[i]);
+                    slots.Add(new(tk.Items[i].Name == "string" ? "const char* const*" : "const " + et + "*", en, es + "*"));
+                    if (tk.Items[i].Name is "double?" or "int32?")
+                    {
+                        slots.Add(new("const bool*", en + "_has_value", "byte*"));
+                    }
+                }
+
+                slots.Add(new("int32_t", n + "_count", "int"));
+                return slots;
+            }
+
             case "array":
             {
                 var slots = new List<CSlot>();
@@ -122,6 +145,27 @@ internal static class CForms
             case "handle" or "boxed" or "boxed?" or "snapshot": return [new("nql_handle*", r, "nint*")];
             case "matrix": return [new("double**", r, "double**"), new("int32_t*", r + "_rows", "int*"), new("int32_t*", r + "_columns", "int*")];
             case "vector": return [new("double**", r, "double**"), new("int32_t*", r + "_count", "int*")];
+            case "array" when k.Element!.Name is "tuple" or "tuple?":
+            {
+                // One array per element, named by the element; a nullable tuple's flags; the count (B2R10).
+                CKind te = k.Element;
+                var slots = new List<CSlot>();
+                for (int i = 0; i < te.Items.Count; i++)
+                {
+                    (string et, string es) = Element(te.Items[i]);
+                    et = te.Items[i].Name == "string" ? "char*" : et;
+                    slots.Add(new(et + "**", ItemResult(te, i, true), es + "**"));
+                }
+
+                if (te.Name == "tuple?")
+                {
+                    slots.Add(new("bool**", "has_value", "byte**"));
+                }
+
+                slots.Add(new("int32_t*", "count", "int*"));
+                return slots;
+            }
+
             case "array":
             {
                 (string ct, string cs) = Element(k.Element!);
@@ -156,7 +200,7 @@ internal static class CForms
             }
 
             case "tuple":
-                return [.. k.Items.SelectMany((item, i) => Out(item, Ident(Snake(k.ItemNames[i]))))];
+                return [.. k.Items.SelectMany((item, i) => Out(item, ItemResult(k, i)))];
             case "distribution":
                 return
                 [
@@ -194,6 +238,29 @@ internal static class CForms
         "handle" => ("nql_handle", "nint"),
         _ => throw new InvalidOperationException("no C form for the element kind " + e.Text),
     };
+
+    /// <summary>A tuple element's C parameter: the parameter's name, then the element's in snake case (<c>calibrationSet_option</c>).</summary>
+    /// <param name="param">The C# parameter's name.</param>
+    /// <param name="tuple">The tuple's kind.</param>
+    /// <param name="i">The element's index.</param>
+    /// <param name="collection">Whether the tuple is a collection's, whose count and flags take the names <c>count</c> and <c>has_value</c>.</param>
+    /// <returns>The C parameter's name.</returns>
+    public static string ItemParam(string param, CKind tuple, int i, bool collection = false) => Ident(param + "_" + ItemSnake(tuple, i, collection));
+
+    /// <summary>A returned tuple element's C out-parameter: the element's name in snake case.</summary>
+    /// <param name="tuple">The tuple's kind.</param>
+    /// <param name="i">The element's index.</param>
+    /// <param name="collection">Whether the tuple is a collection's, whose count and flags take the names <c>count</c> and <c>has_value</c>.</param>
+    /// <returns>The C out-parameter's name.</returns>
+    public static string ItemResult(CKind tuple, int i, bool collection = false) => Ident(ItemSnake(tuple, i, collection));
+
+    // An element's name in snake case; in a collection's tuple, count and has_value take an underscore, as the
+    // collection's own count and flags have those names.
+    private static string ItemSnake(CKind tuple, int i, bool collection)
+    {
+        string s = Snake(tuple.ItemNames[i]);
+        return collection && s is "count" or "has_value" ? s + "_" : s;
+    }
 
     /// <summary>A name in snake case, as C's out-parameters are named.</summary>
     /// <param name="name">The name.</param>

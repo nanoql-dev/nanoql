@@ -9,7 +9,8 @@ namespace NanoQL.Bind.Model;
 /// <c>period</c>, <c>enum</c>, <c>complex</c>; nullable values with a <c>?</c>; objects: <c>handle</c>, <c>boxed</c> (a
 /// nanoql struct behind a handle), <c>snapshot</c> (a generator), <c>engine</c> (a bound engine); the working types'
 /// forms: <c>matrix</c>, <c>vector</c>, <c>distribution</c>; collections: <c>array</c>, <c>span</c> (written in place),
-/// <c>jagged</c>, <c>map</c> (keys and values), <c>tuple</c> (a result per element).
+/// <c>jagged</c>, <c>map</c> (keys and values), <c>tuple</c> (a parameter or a result per element), an <c>array</c> of
+/// tuples (an array per element), <c>tuple?</c> for a returned collection's nullable tuple.
 /// </summary>
 /// <param name="Name">The kind's name.</param>
 /// <param name="Type">The C# type it crosses.</param>
@@ -36,6 +37,7 @@ internal sealed record CKind(string Name, Type Type)
         "array" or "span" or "jagged" => Name + ":" + Element!.Text,
         "map" => "map:" + Element!.Text + ":" + Value!.Text,
         "tuple" => "tuple:" + string.Join(",", Items.Select(i => i.Text)),
+        "tuple?" => "tuple?:" + string.Join(",", Items.Select(i => i.Text)),
         _ => Name,
     };
 

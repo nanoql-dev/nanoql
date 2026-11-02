@@ -30,6 +30,20 @@ public static class Fixtures
     /// <summary>Gets a flat 3% curve, continuous, Actual/365 (Fixed).</summary>
     public static YieldTermStructure RiskFree { get; } = new FlatForward(Today, 0.03, ConventionSet.QuantLib.DayCounter("Actual365Fixed"), Compounding.Continuous, Frequency.Annual);
 
+    /// <summary>
+    /// Gets Andreasen–Huge's calibration set on the cases' curves: nine options, three expiries by three strikes, each
+    /// with its implied volatility, a collection of tuples nanoql returns (docs/bindings.md, "Values").
+    /// </summary>
+    public static IReadOnlyList<(VanillaOption Option, double Volatility)> CalibrationSet { get; } =
+    [
+        .. from months in new[] { 6, 12, 24 }
+           from strike in new[] { 80.0, 100.0, 120.0 }
+           select (new VanillaOption(
+                   new PlainVanillaPayoff(strike >= 100 ? OptionType.Call : OptionType.Put, strike),
+                   new EuropeanExercise(new TARGET().Advance(Today, months, TimeUnit.Months))),
+               0.20 + (0.0005 * (100 - strike) * (100 - strike) / 10) + (0.01 * months / 12)),
+    ];
+
     /// <summary>Gets a flat 1% dividend curve.</summary>
     public static YieldTermStructure Dividend { get; } = new FlatForward(Today, 0.01, ConventionSet.QuantLib.DayCounter("Actual365Fixed"), Compounding.Continuous, Frequency.Annual);
 

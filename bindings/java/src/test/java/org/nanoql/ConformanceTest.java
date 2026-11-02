@@ -28,9 +28,14 @@ import org.junit.jupiter.api.Test;
 import org.nanoql.bind.testtypes.Echo;
 import org.nanoql.bind.testtypes.EchoObject;
 import org.nanoql.bind.testtypes.Fixtures;
+import org.nanoql.bind.testtypes.McShapedEngine;
 import org.nanoql.bind.testtypes.References;
 import org.nanoql.bind.testtypes.Refusals;
+import org.nanoql.bind.testtypes.Tuples;
+import org.nanoql.experimental.GaussianDefProbLM;
+import org.nanoql.experimental.LatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits;
 import org.nanoql.extensions.conventions.ConventionSet;
+import org.nanoql.instruments.VanillaOption;
 import org.nanoql.models.BlackCalibrationHelper;
 import org.nanoql.models.CalibratedModel;
 import org.nanoql.models.CalibratedModelExtensions;
@@ -44,14 +49,22 @@ import org.nanoql.models.MarkovFunctionalModelSettingsAdjustments;
 import org.nanoql.models.ICalibratedModel;
 import org.nanoql.models.SwaptionHelper;
 import org.nanoql.numerics.BackwardFlat;
+import org.nanoql.numerics.BFGS;
 import org.nanoql.numerics.BoundaryConstraint;
+import org.nanoql.numerics.InvCumulativeMersenneTwisterGaussianRsg;
+import org.nanoql.numerics.KnuthUniformRsg;
 import org.nanoql.numerics.MersenneTwisterUniformRng;
+import org.nanoql.numerics.MersenneTwisterUniformRsg;
 import org.nanoql.numerics.SobolRsg;
 import org.nanoql.numerics.SobolRsgDirectionIntegers;
 import org.nanoql.pricingengines.AnalyticCapFloorEngine;
 import org.nanoql.pricingengines.AnalyticHestonEngine;
 import org.nanoql.pricingengines.DiscountingSwapEngine;
 import org.nanoql.pricingengines.Gaussian1dSwaptionEngine;
+import org.nanoql.pricingengines.QuantoEngine;
+import org.nanoql.termstructures.AndreasenHugeVolatilityInterpl;
+import org.nanoql.termstructures.AndreasenHugeVolatilityInterplCalibrationType;
+import org.nanoql.termstructures.AndreasenHugeVolatilityInterplInterpolationType;
 import org.nanoql.termstructures.FlatForward;
 import org.nanoql.termstructures.IterativeBootstrap;
 import org.nanoql.termstructures.PiecewiseFlatForward;
@@ -60,6 +73,7 @@ import org.nanoql.time.DayCounter;
 import org.nanoql.time.Frequency;
 import org.nanoql.time.Period;
 import org.nanoql.time.TimeUnit;
+import org.nanoql.time.Weekday;
 
 /**
  * The Java layer's conformance suite (docs/bindings.md, "Checking the bindings"): every kind both ways, the status codes
@@ -343,6 +357,101 @@ class ConformanceTest {
         BoundEngine heston = AnalyticHestonEngine.bind((HestonModel) null, (Integer) null);
         assertEquals(10, assertThrows(NanoQLException.class, () -> Fixtures.swapBuilder().withPricingEngine(heston)).code());
         assertEquals(bits(References.hestonModelValue()), bits(Fixtures.hestonHelper().setPricingEngine(heston).modelValue(Fixtures.heston(), Fixtures.context())));
+    }
+
+    @Test
+    void tuples() {
+        // A tuple as a Tuple2 or Tuple3, null for C#'s default; its elements in their own forms.
+        assertEquals(new Tuple2<Double, Double>(null, null), Tuples.single());
+        assertEquals(new Tuple2<Double, Double>(0.5, null), Tuples.single(new Tuple2<>(0.5, null)));
+        assertEquals(new Tuple2<Double, Double>(null, null), Tuples.single(null));
+        assertEquals("-3|9223372036854775807|true", Tuples.scalars(new Tuple3<>(-3, Long.MAX_VALUE, true)));
+        assertEquals("x\u00e9|45000|1Y", Tuples.labels(new Tuple3<>("x\u00e9", LocalDate.of(2023, 3, 15), new Period(1, TimeUnit.Years))));
+        assertEquals("null|45000|1Y", Tuples.labels(new Tuple3<>(null, LocalDate.of(2023, 3, 15), new Period(1, TimeUnit.Years))));
+        assertEquals("6|1.5|-2", Tuples.kinds(new Tuple2<>(Weekday.Friday, new Complex(1.5, -2.0))));
+        // A null in an element that takes none is refused, naming the parameter and the element.
+        NullPointerException e = assertThrows(NullPointerException.class, () -> Tuples.scalars(new Tuple3<>(1, null, true)));
+        assertEquals("x: its total is null", e.getMessage());
+
+        // A collection of tuples: a List of them, in and out.
+        EchoObject a = new EchoObject(1.0, "one");
+        EchoObject b = new EchoObject(2.0, "two");
+        List<Tuple2<EchoObject, Double>> rows = Tuples.rows(List.of(new Tuple2<>(a, 0.25), new Tuple2<>(b, 0.75)));
+        assertEquals(2, rows.size());
+        assertEquals(a, rows.get(0).item1());
+        assertEquals(0.75, rows.get(1).item2());
+        assertTrue(Tuples.rows(List.of()).isEmpty());
+        List<Tuple3<Double, Integer, LocalDate>> described = new ArrayList<>();
+        described.add(new Tuple3<>(2.5, 7, LocalDate.of(2023, 3, 15)));
+        described.add(new Tuple3<>(null, 8, null));
+        described.add(new Tuple3<>(-1.0, null, LocalDate.of(2023, 3, 16)));
+        assertEquals("2.5:7:45000;-:8:-;-1:-:45001", Tuples.describe(described));
+        assertEquals("null", Tuples.describe(null));
+        assertEquals("", Tuples.describe(List.of()));
+        List<Tuple2<String, Weekday>> days = new ArrayList<>();
+        days.add(new Tuple2<>("a", Weekday.Monday));
+        days.add(new Tuple2<>(null, Weekday.Sunday));
+        assertEquals(days, Tuples.days(days));
+        List<Tuple3<Period, Long, Boolean>> terms = List.of(new Tuple3<>(new Period(3, TimeUnit.Months), Long.MIN_VALUE, false),
+            new Tuple3<>(new Period(2, TimeUnit.Years), 5L, true));
+        assertEquals(terms, Tuples.terms(terms));
+        e = assertThrows(NullPointerException.class, () -> Tuples.terms(List.of(new Tuple3<>(new Period(1, TimeUnit.Years), null, true))));
+        assertEquals("rows: an element's count is null", e.getMessage());
+        List<Tuple2<Complex, LocalDate>> numbers = Tuples.numbers(List.of(new Tuple2<>(new Complex(1.0, 2.0), LocalDate.of(2023, 3, 15))));
+        assertEquals(new Complex(1.0, 2.0), numbers.get(0).item1());
+        // A returned collection of nullable tuples: a null entry for a null one.
+        List<Tuple2<Integer, Integer>> pairs = List.of(new Tuple2<>(1, 10), new Tuple2<>(2, 20), new Tuple2<>(3, 30), new Tuple2<>(4, 40));
+        assertEquals(Arrays.asList(null, new Tuple2<>(2, 20), null, new Tuple2<>(4, 40)), Tuples.gaps(pairs, 2));
+    }
+
+    @Test
+    void boundNullableInputs() {
+        EvaluationContext ctx = Fixtures.context();
+        // The steps per year and the tolerance neither bound nor supplied: null, C#'s value for them.
+        BoundEngine mc = McShapedEngine.bind(null, 4, null, 2000, null, 42L);
+        double npv = QuantoEngine.calculate(Fixtures.quanto(), ctx, Fixtures.blackScholes(), Fixtures.foreign(), Fixtures.exchangeVolatility(), 0.3, mc).NPV();
+        assertEquals(bits(References.mcShapedQuantoNpv(false)), bits(npv));
+        BoundEngine shaped = McShapedEngine.bind(null, 4, null, 2000, null, 42L, List.of(new Tuple2<>(0.5, 1.5), new Tuple2<>(1.0, 0.5)));
+        npv = QuantoEngine.calculate(Fixtures.quanto(), ctx, Fixtures.blackScholes(), Fixtures.foreign(), Fixtures.exchangeVolatility(), 0.3, shaped).NPV();
+        assertEquals(bits(References.mcShapedQuantoNpv(true)), bits(npv));
+        // A required input left open is still refused.
+        BoundEngine open = McShapedEngine.bind(null, 4, null, 2000);
+        NanoQLException e = assertThrows(NanoQLException.class,
+            () -> QuantoEngine.calculate(Fixtures.quanto(), ctx, Fixtures.blackScholes(), Fixtures.foreign(), Fixtures.exchangeVolatility(), 0.3, open));
+        assertEquals(10, e.code());
+        assertTrue(e.getMessage().contains("'seed' is neither bound nor supplied"), e.getMessage());
+    }
+
+    @Test
+    void defaultsLeftOutAndGeneratorBases() {
+        // BFGS's line search, which doesn't cross, at its default; the calibration set read back as tuples.
+        List<Tuple2<VanillaOption, Double>> set = Fixtures.calibrationSet();
+        assertEquals(9, set.size());
+        AndreasenHugeVolatilityInterpl ah = new AndreasenHugeVolatilityInterpl(set, 100.0, Fixtures.riskFree(), Fixtures.dividend(),
+            AndreasenHugeVolatilityInterplInterpolationType.CubicSpline, AndreasenHugeVolatilityInterplCalibrationType.Call, 100);
+        assertEquals(bits(References.andreasenHugeLocalVol(false)), bits(ah.localVol(1.0, 110.0)));
+        AndreasenHugeVolatilityInterpl ahb = new AndreasenHugeVolatilityInterpl(set, 100.0, Fixtures.riskFree(), Fixtures.dividend(),
+            AndreasenHugeVolatilityInterplInterpolationType.CubicSpline, AndreasenHugeVolatilityInterplCalibrationType.Call, 100, null, null, new BFGS());
+        assertEquals(bits(References.andreasenHugeLocalVol(true)), bits(ahb.localVol(1.0, 110.0)));
+
+        // A closed generator construction as a parameter takes a deriving class's snapshot; another is refused.
+        InvCumulativeMersenneTwisterGaussianRsg gaussian = new InvCumulativeMersenneTwisterGaussianRsg(new MersenneTwisterUniformRsg(3, 42));
+        double[][] values = gaussian.draws(4).points();
+        double[] flat = new double[12];
+        for (int i = 0; i < 4; i++) {
+            System.arraycopy(values[i], 0, flat, 3 * i, 3);
+        }
+        assertArrayEquals(References.gaussianDraws(), flat);
+        assertEquals(10, assertThrows(NanoQLException.class, () -> new InvCumulativeMersenneTwisterGaussianRsg(new KnuthUniformRsg(3, 42))).code());
+    }
+
+    @Test
+    void staticsUnderTheirDeclaringType() throws Exception {
+        // The named latent model reaches its base's factory through Java's inheritance, with no method of its own.
+        assertThrows(NoSuchMethodException.class, () -> GaussianDefProbLM.class.getDeclaredMethod("fromCorrelation", double.class, int.class));
+        Object model = GaussianDefProbLM.fromCorrelation(0.3, 2);
+        assertInstanceOf(LatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits.class, model);
+        assertFalse(model instanceof GaussianDefProbLM);
     }
 
     @Test

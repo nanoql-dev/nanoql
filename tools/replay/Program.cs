@@ -9,11 +9,12 @@ using Mono.Cecil.Rocks;
 
 // The vector suite's recorder (docs/bindings.md, "The vector suite through each binding").
 //   record --tests <NanoQL.Tests' build folder> --twins <nanoql-bind twins folder> --out <folder> [--class <name>...]
-//          [--keep-reds]
+//          [--keep-reds] [--seed <n>]
 // compiles the twins with runtime/, copies the test build into <out>/run with its assembly rewritten (each call site
 // into nanoql that has a twin calls it; each vector fact starts a fact in the trace), runs the vector classes one at a
 // time, and writes the trace to <out>/trace.jsonl with a summary. A vector red stops it, unless --keep-reds: off the
-// reference platform a vector red is reported, and the trace, C#'s own results, is kept.
+// reference platform a vector red is reported, and the trace, C#'s own results, is kept. xUnit randomizes the tests'
+// order by a seed, a new one each run unless --seed names it, so a recording's order can be repeated.
 try
 {
     return Run(args);
@@ -28,6 +29,7 @@ static int Run(string[] args)
 {
     string? tests = null, twins = null, outDir = null;
     bool keepReds = false;
+    string? seed = null;
     var classes = new List<string>();
     for (int i = 1; i < args.Length; i++)
     {
@@ -38,6 +40,7 @@ static int Run(string[] args)
             case "--out": outDir = Path.GetFullPath(args[++i]); break;
             case "--class": classes.Add(args[++i]); break;
             case "--keep-reds": keepReds = true; break;
+            case "--seed": seed = args[++i]; break;
             default: throw new ArgumentException($"unknown argument '{args[i]}'");
         }
     }
@@ -68,6 +71,12 @@ static int Run(string[] args)
     string trace = Path.Combine(outDir, "trace.jsonl");
     var psi = new ProcessStartInfo(Path.Combine(run, OperatingSystem.IsWindows() ? "NanoQL.Tests.exe" : "NanoQL.Tests")) { UseShellExecute = false, WorkingDirectory = run };
     psi.Environment["NANOQL_TRACE"] = trace;
+    if (seed != null)
+    {
+        // xUnit v3's runner takes the order's seed as its leading argument, ":<seed>".
+        psi.ArgumentList.Add(":" + seed);
+    }
+
     psi.ArgumentList.Add("-parallelMode");
     psi.ArgumentList.Add("none");
     // The vector namespaces whole, by class wildcards, and a class at a time where a namespace holds other classes

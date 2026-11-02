@@ -100,7 +100,7 @@ internal static unsafe partial class Rt
         }
 
         object g = Get<GeneratorSnapshot>(h, param).Generator;
-        return Clone(g) as T ?? throw new HandleException(10, $"{param}: a {TypeName(g)} snapshot where a {typeof(T).Name} is expected", param);
+        return Clone(g) as T ?? throw new HandleException(10, $"{param}: a {TypeName(g)} snapshot where a {Display(typeof(T))} is expected", param);
     }
 
     /// <summary>The generator a snapshot holds, never drawn from itself.</summary>
@@ -123,6 +123,10 @@ internal static unsafe partial class Rt
     /// <param name="generator">The generator.</param>
     /// <returns>The snapshot's handle.</returns>
     public static nint NewSnapshot(object? generator) => generator is null ? 0 : New(new GeneratorSnapshot(Clone(generator)));
+
+    // A type's name as C# writes it, a closed generic's with its arguments: RandomSequenceGenerator<MersenneTwisterUniformRng>.
+    private static string Display(Type t) =>
+        t.IsConstructedGenericType ? t.Name[..t.Name.IndexOf('`')] + "<" + string.Join(", ", t.GetGenericArguments().Select(Display)) + ">" : t.Name;
 
     /// <summary>A handle's object's .NET type, a snapshot's its generator's.</summary>
     /// <param name="o">The object.</param>

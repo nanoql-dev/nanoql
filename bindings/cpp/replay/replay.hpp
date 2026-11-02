@@ -157,6 +157,12 @@ public:
     void check_object(const jv* res, const nanoql::Object& o);
 
 private:
+    template <class T, std::size_t... I>
+    T el_tuple(const jv* v, std::index_sequence<I...>)
+    {
+        return T(el<std::tuple_element_t<I, T>>(at(v, static_cast<int>(I)))...);
+    }
+
     template <class C>
     C object(const jv* v)
     {
@@ -195,6 +201,9 @@ T rp::el(const jv* v)
         return object<T>(v);
     } else if constexpr (is_pair<T>::value) {
         return T(el<typename T::first_type>(at(v, 0)), el<typename T::second_type>(at(v, 1)));
+    } else if constexpr (is_tuple<T>::value) {
+        // A tuple argument, or a collection's tuple: its JSON array, each element in its own form (B2R3).
+        return el_tuple<T>(v, std::make_index_sequence<std::tuple_size_v<T>>{});
     } else if constexpr (is_vector<T>::value) {
         T out;
         for (int k = 0; v && v->type == jt::array && k < v->count; k++) out.push_back(el<typename T::value_type>(v->items[k]));

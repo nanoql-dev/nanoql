@@ -195,7 +195,7 @@ internal sealed class JavaWriter
         },
         "jagged" => "java.util.List<double[]>",
         "map" => "java.util.Map<" + Boxed(k.Element!) + ", " + Boxed(k.Value!) + ">",
-        "tuple" => (k.Items.Count == 2 ? "org.nanoql.Tuple2<" : "org.nanoql.Tuple3<") + string.Join(", ", k.Items.Select(Boxed)) + ">",
+        "tuple" or "tuple?" => (k.Items.Count == 2 ? "org.nanoql.Tuple2<" : "org.nanoql.Tuple3<") + string.Join(", ", k.Items.Select(Boxed)) + ">",
         "distribution" => "org.nanoql.Distribution",
         _ => throw new InvalidOperationException("no Java type for the kind " + k.Text),
     };
@@ -907,7 +907,7 @@ internal sealed class JavaWriter
     }
 
     // What a member's call reads a handle from, kept reachable until the call returns: the object, each object argument,
-    // each list or map holding objects. Compiled code ends a local's liveness at its last use, so without a fence a
+    // each list, map or tuple holding objects, and each list of such tuples. Compiled code ends a local's liveness at its last use, so without a fence a
     // cleaner may release a temporary's handle between the read and the call.
     private static List<string> Fences(JavaMember m)
     {
@@ -935,6 +935,7 @@ internal sealed class JavaWriter
         "handle" or "boxed" or "boxed?" or "snapshot" or "engine" => true,
         "array" => HoldsHandles(k.Element!),
         "map" => HoldsHandles(k.Element!) || HoldsHandles(k.Value!),
+        "tuple" => k.Items.Any(HoldsHandles),
         _ => false,
     };
 
@@ -1092,6 +1093,45 @@ internal sealed class JavaWriter
                 return;
             }
 
+            case "tuple":
+                // One C argument per element (B2R3): null is C#'s default, each element's zero value, and a null in an
+                // element that takes none is refused by name (B2D7).
+                for (int i = 0; i < k.Items.Count; i++)
+                {
+                    CKind e = k.Items[i];
+                    string item = NonNull(e, $"{n}.item{i + 1}()", $"{n}: its {k.ItemNames[i]} is null");
+                    In(e, $"({n} == null ? {Zero(e)} : {item})", local + i, pre, args, after);
+                }
+
+                return;
+            case "array" when k.Element!.Name == "tuple":
+            {
+                // One C array per element, a nullable one with its flags, then the count (B2R3): each element's list
+                // taken from the tuples, a null in an element that takes none refused by name (B2D7).
+                CKind te = k.Element;
+                for (int i = 0; i < te.Items.Count; i++)
+                {
+                    CKind e = te.Items[i];
+                    string column = local + "e" + i;
+                    string item = NonNull(e, $"t_.item{i + 1}()", $"{n}: an element's {te.ItemNames[i]} is null");
+                    pre.Add($"java.util.List<{Boxed(e)}> {column} = {n} == null ? null : {n}.stream().map(t_ -> {item}).toList();");
+                    if (e.Name is "double?" or "int32?")
+                    {
+                        string layout = e.Name == "double?" ? "JAVA_DOUBLE" : "JAVA_INT";
+                        string zero = e.Name == "double?" ? "0.0" : "0";
+                        args.Add($"{N}.list(a_, {column}, {VL}.{layout}, (s_, i_, v_) -> s_.setAtIndex({VL}.{layout}, i_, v_ == null ? {zero} : v_))");
+                        args.Add($"{N}.list(a_, {column}, {VL}.JAVA_BOOLEAN, (s_, i_, v_) -> s_.set({VL}.JAVA_BOOLEAN, i_, v_ != null))");
+                    }
+                    else
+                    {
+                        args.Add(ListIn(e, column));
+                    }
+                }
+
+                args.Add($"{N}.count({n})");
+                return;
+            }
+
             case "array":
             {
                 CKind e = k.Element!;
@@ -1145,11 +1185,30 @@ internal sealed class JavaWriter
         throw new InvalidOperationException("no Java argument for the kind " + k.Text);
     }
 
-    // A list's elements in their C form: four or eight bytes each, a period two ints, a complex number two doubles.
+    // A tuple element's value: as it is where it takes a null, else refused when null.
+    private static string NonNull(CKind e, string item, string message) =>
+        e.IsNullableValue || e.Name is "handle" or "string" or "date" ? item : $"java.util.Objects.requireNonNull({item}, \"{message}\")";
+
+    // A tuple element's zero value, C#'s default for the element of a tuple parameter given as null.
+    private string Zero(CKind e) => e.Name switch
+    {
+        "double" => "0.0",
+        "int32" => "0",
+        "int64" => "0L",
+        "bool" => "false",
+        "enum" => $"{EnumName(e)}.of(0)",
+        "period" => $"new {PeriodName}(0, {UnitName}.Days)",
+        "complex" => "new org.nanoql.Complex(0.0, 0.0)",
+        _ => $"({Type(e, false)}) null",
+    };
+
+    // A list's elements in their C form: one, four or eight bytes each, a period two ints, a complex number two doubles.
     private string ListIn(CKind e, string n) => e.Name switch
     {
         "double" => $"{N}.list(a_, {n}, {VL}.JAVA_DOUBLE, (s_, i_, v_) -> s_.setAtIndex({VL}.JAVA_DOUBLE, i_, v_))",
         "int32" => $"{N}.list(a_, {n}, {VL}.JAVA_INT, (s_, i_, v_) -> s_.setAtIndex({VL}.JAVA_INT, i_, v_))",
+        "int64" => $"{N}.list(a_, {n}, {VL}.JAVA_LONG, (s_, i_, v_) -> s_.setAtIndex({VL}.JAVA_LONG, i_, v_))",
+        "bool" => $"{N}.list(a_, {n}, {VL}.JAVA_BOOLEAN, (s_, i_, v_) -> s_.set({VL}.JAVA_BOOLEAN, i_, v_))",
         "date" or "date?" => $"{N}.list(a_, {n}, {VL}.JAVA_INT, (s_, i_, v_) -> s_.setAtIndex({VL}.JAVA_INT, i_, {N}.date(v_)))",
         "enum" => $"{N}.list(a_, {n}, {VL}.JAVA_INT, (s_, i_, v_) -> s_.setAtIndex({VL}.JAVA_INT, i_, v_.value()))",
         "string" => $"{N}.list(a_, {n}, {VL}.ADDRESS, (s_, i_, v_) -> s_.setAtIndex({VL}.ADDRESS, i_, {N}.str(a_, v_)))",
@@ -1203,6 +1262,29 @@ internal sealed class JavaWriter
                 decls.Add($"{Seg} {o} = a_.allocate({VL}.ADDRESS), {o}count = a_.allocate({VL}.JAVA_INT);");
                 outs.AddRange([o, o + "count"]);
                 return $"{N}.takeDoubles({o}.get({VL}.ADDRESS, 0), {o}count.get({VL}.JAVA_INT, 0))";
+            case "array" when k.Element!.Name is "tuple" or "tuple?":
+            {
+                CKind te = k.Element;
+                bool nullable = te.Name == "tuple?";
+                for (int i = 0; i < te.Items.Count; i++)
+                {
+                    decls.Add($"{Seg} {o}{i} = a_.allocate({VL}.ADDRESS);");
+                    outs.Add(o + i);
+                }
+
+                decls.Add($"{Seg} {o}has = a_.allocate({VL}.ADDRESS), {o}count = a_.allocate({VL}.JAVA_INT);");
+                if (nullable)
+                {
+                    outs.Add(o + "has");
+                }
+
+                outs.Add(o + "count");
+                string n = $"{o}count.get({VL}.JAVA_INT, 0)";
+                var lists = Enumerable.Range(0, te.Items.Count).Select(i => ListOut(te.Items[i], $"{o}{i}.get({VL}.ADDRESS, 0)", n));
+                string has = nullable ? $"{N}.takeBools({o}has.get({VL}.ADDRESS, 0), {n})" : "(boolean[]) null";
+                return $"{N}.tuples({string.Join(", ", lists)}, {has})";
+            }
+
             case "array":
             {
                 CKind e = k.Element!;
@@ -1343,6 +1425,8 @@ internal sealed class JavaWriter
     {
         "double" => $"{N}.boxed({N}.takeDoubles({p}, {n}))",
         "int32" => $"{N}.takeList({p}, {n}, 4, (s_, i_) -> s_.getAtIndex({VL}.JAVA_INT, i_))",
+        "int64" => $"{N}.takeList({p}, {n}, 8, (s_, i_) -> s_.getAtIndex({VL}.JAVA_LONG, i_))",
+        "bool" => $"{N}.takeList({p}, {n}, 1, (s_, i_) -> s_.get({VL}.JAVA_BOOLEAN, i_))",
         "date" or "date?" => $"{N}.takeList({p}, {n}, 4, (s_, i_) -> {N}.toDate(s_.getAtIndex({VL}.JAVA_INT, i_)))",
         "enum" => $"{N}.takeList({p}, {n}, 4, (s_, i_) -> {EnumName(e)}.of(s_.getAtIndex({VL}.JAVA_INT, i_)))",
         "string" => $"{N}.takeList({p}, {n}, 8, (s_, i_) -> {N}.takeString(s_.getAtIndex({VL}.ADDRESS, i_)))",

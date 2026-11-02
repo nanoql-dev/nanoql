@@ -7,7 +7,8 @@ namespace NanoQL.Native;
 /// A bound engine: one of nanoql's engines with the inputs given to its <c>Bind</c> filled in, each by its parameter's
 /// name, and with <c>BindOn</c> its instrument too. A member that takes an engine turns it into the delegate it takes
 /// (the generated adapters): its own arguments go into their roles' parameters, the bound inputs fill the rest, and a
-/// parameter open on both sides keeps its default. Immutable, so any thread may use it.
+/// parameter open on both sides keeps its default, a nullable value with none is null (C#'s value for it), and a
+/// required one is refused. Immutable, so any thread may use it.
 /// </summary>
 /// <param name="set">The engine input set's id: the engine's full name and the set's index.</param>
 /// <param name="instrument">The instrument <c>BindOn</c> was given, or null.</param>
@@ -27,7 +28,7 @@ internal sealed class BoundEngine(string set, object? instrument, IReadOnlyDicti
     public T Take<T>(string name) =>
         inputs.TryGetValue(name, out object? v) ? (T)v : throw new HandleException(10, $"engine: '{name}' is neither bound nor supplied", "engine");
 
-    /// <summary>A bound input, or its default when open.</summary>
+    /// <summary>A bound input, or its default when open: null for a nullable value with no default.</summary>
     /// <typeparam name="T">The parameter's type.</typeparam>
     /// <param name="name">The parameter.</param>
     /// <param name="fallback">The parameter's default.</param>

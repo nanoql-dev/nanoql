@@ -358,6 +358,121 @@ static void test_arrays(void)
     CHECK(buckets == 10 && fabs(total - 1.0) < 1e-12 && exc[0] == 1.0, "a loss distribution's normalized values (%d buckets, mass %.17g)", buckets, total);
     nql_free(dx0); nql_free(dx1); nql_free(dens); nql_free(cum); nql_free(exc); nql_free(avg);
     release(loss);
+
+    /* A tuple: one parameter per element, in its own form; NULL for both nullables is C#'s default. */
+    double p_in = 0.5, d_in = 0.1, p_out = 0, d_out = 0;
+    bool p_has = false, d_has = true;
+    OK(nqlt_Tuples_Single(&p_in, &d_in, &p_out, &p_has, &d_out, &d_has));
+    CHECK(p_has && d_has && p_out == 0.5 && d_out == 0.1, "a tuple of nullable doubles both ways");
+    OK(nqlt_Tuples_Single(NULL, NULL, &p_out, &p_has, &d_out, &d_has));
+    CHECK(!p_has && !d_has, "NULL elements: C#'s default tuple, each null");
+    char* text = NULL;
+    OK(nqlt_Tuples_Scalars(-3, INT64_MAX, true, &text));
+    CHECK(strcmp(text, "-3|9223372036854775807|true") == 0, "an int, a long and a flag: %s", text);
+    nql_free(text);
+    nql_period year = {1, NQL_TimeUnit_Years};
+    OK(nqlt_Tuples_Labels("x\xc3\xa9", 45000, year, &text));
+    CHECK(strcmp(text, "x\xc3\xa9|45000|1Y") == 0, "a string, a date and a period: %s", text);
+    nql_free(text);
+    OK(nqlt_Tuples_Labels(NULL, 45000, year, &text));
+    CHECK(strncmp(text, "null|", 5) == 0, "a NULL string element is null: %s", text);
+    nql_free(text);
+    nql_complex z = {1.5, -2.0};
+    OK(nqlt_Tuples_Kinds(NQL_Weekday_Friday, z, &text));
+    CHECK(strcmp(text, "6|1.5|-2") == 0, "an enum and a complex number: %s", text);
+    nql_free(text);
+
+    /* A collection of tuples: one array per element and one count, in and out; objects by handle. */
+    nql_handle o1 = NULL, o2 = NULL;
+    OK(nqlt_EchoObject_new(1.0, "one", &o1));
+    OK(nqlt_EchoObject_new(2.0, "two", &o2));
+    nql_handle items[2] = {o1, o2};
+    double weights[2] = {0.25, 0.75};
+    nql_handle* items_out = NULL;
+    double* weights_out = NULL;
+    OK(nqlt_Tuples_Rows(items, weights, 2, &items_out, &weights_out, &n));
+    bool same1 = false, same2 = false;
+    CHECK(n == 2 && weights_out[0] == 0.25 && weights_out[1] == 0.75, "the weights back in order");
+    if (n == 2) {
+        OK(nql_equals(items_out[0], o1, &same1));
+        OK(nql_equals(items_out[1], o2, &same2));
+        release(items_out[0]);
+        release(items_out[1]);
+    }
+    CHECK(same1 && same2, "the objects back, each a new handle to the same object");
+    nql_free(items_out);
+    nql_free(weights_out);
+    OK(nqlt_Tuples_Rows(items, weights, 0, &items_out, &weights_out, &n));
+    CHECK(n == 0, "an empty collection of tuples");
+    nql_free(items_out);
+    nql_free(weights_out);
+    release(o1);
+    release(o2);
+
+    /* Nullable elements with their flags; NULL first array: a null collection; arrays of no rows: an empty one. */
+    double seconds[3] = {2.5, 0, -1.0};
+    bool seconds_has[3] = {true, false, true};
+    int32_t thirds[3] = {7, 8, 0};
+    bool thirds_has[3] = {true, true, false};
+    nql_date whens[3] = {45000, 0, 45001};
+    OK(nqlt_Tuples_Describe(seconds, seconds_has, thirds, thirds_has, whens, 3, &text));
+    CHECK(strcmp(text, "2.5:7:45000;-:8:-;-1:-:45001") == 0, "nullable elements by their flags: %s", text);
+    nql_free(text);
+    OK(nqlt_Tuples_Describe(NULL, NULL, NULL, NULL, NULL, 0, &text));
+    CHECK(strcmp(text, "null") == 0, "a NULL first array is a null collection: %s", text);
+    nql_free(text);
+    OK(nqlt_Tuples_Describe(seconds, seconds_has, thirds, thirds_has, whens, 0, &text));
+    CHECK(strcmp(text, "") == 0, "arrays of no rows are an empty collection: '%s'", text);
+    nql_free(text);
+    REFUSED(nqlt_Tuples_Describe(seconds, seconds_has, NULL, NULL, whens, 3, &text), NQL_ERROR_ARGUMENT_NULL);
+    CHECK(strcmp(nql_last_error_param(), "rows") == 0, "a later element's NULL array is refused, naming the parameter: %s", nql_last_error_param());
+
+    /* Strings and enums, periods with a long and a flag (an element named count takes an underscore), complex numbers
+       with dates: each collection back as given. */
+    const char* names[2] = {"a", NULL};
+    int32_t days[2] = {NQL_Weekday_Monday, NQL_Weekday_Sunday};
+    char** names_out = NULL;
+    int32_t* days_out = NULL;
+    OK(nqlt_Tuples_Days(names, days, 2, &names_out, &days_out, &n));
+    CHECK(n == 2 && strcmp(names_out[0], "a") == 0 && names_out[1] == NULL && days_out[0] == NQL_Weekday_Monday && days_out[1] == NQL_Weekday_Sunday,
+          "strings, a NULL among them, and enums");
+    if (n == 2) {
+        nql_free(names_out[0]);
+    }
+    nql_free(names_out);
+    nql_free(days_out);
+    nql_period tenors[2] = {{3, NQL_TimeUnit_Months}, {2, NQL_TimeUnit_Years}};
+    int64_t counts[2] = {INT64_MIN, 5};
+    bool flags[2] = {false, true};
+    nql_period* tenors_out = NULL;
+    int64_t* counts_out = NULL;
+    bool* flags_out = NULL;
+    OK(nqlt_Tuples_Terms(tenors, counts, flags, 2, &tenors_out, &counts_out, &flags_out, &n));
+    CHECK(n == 2 && tenors_out[1].length == 2 && tenors_out[1].units == NQL_TimeUnit_Years && counts_out[0] == INT64_MIN && !flags_out[0] && flags_out[1],
+          "periods, longs and flags");
+    nql_free(tenors_out);
+    nql_free(counts_out);
+    nql_free(flags_out);
+    nql_complex zs[2] = {{1.0, 2.0}, {-0.0, NAN}};
+    nql_date serials[2] = {45000, 0};
+    nql_complex* zs_out = NULL;
+    nql_date* dates_out = NULL;
+    OK(nqlt_Tuples_Numbers(zs, serials, 2, &zs_out, &dates_out, &n));
+    CHECK(n == 2 && zs_out[0].im == 2.0 && bits(zs_out[1].re) == bits(-0.0) && isnan(zs_out[1].im) && dates_out[0] == 45000 && dates_out[1] == 0,
+          "complex numbers and dates, a null date as 0");
+    nql_free(zs_out);
+    nql_free(dates_out);
+
+    /* A returned collection of nullable tuples: one array per element, then the has-value flags, then the count. */
+    int32_t lefts[4] = {1, 2, 3, 4}, rights[4] = {10, 20, 30, 40};
+    int32_t *lefts_out = NULL, *rights_out = NULL;
+    bool* has_out = NULL;
+    OK(nqlt_Tuples_Gaps(lefts, rights, 4, 2, &lefts_out, &rights_out, &has_out, &n));
+    CHECK(n == 4 && !has_out[0] && has_out[1] && !has_out[2] && has_out[3] && lefts_out[1] == 2 && rights_out[3] == 40,
+          "a null tuple by its flag, the others' elements");
+    nql_free(lefts_out);
+    nql_free(rights_out);
+    nql_free(has_out);
 }
 
 /* ---- every status code, and the last error's parts ---- */
@@ -652,7 +767,22 @@ static void test_generators(void)
     double val;
     REFUSED(nqlt_EchoObject_get_Value(counting, &val), NQL_ERROR_TYPE);
     nql_free(v1); nql_free(w1); nql_free(v2); nql_free(w2);
-    release(n1); release(n2); release(counting); release(sobol); release(mt);
+    release(n1); release(n2);
+
+    /* A closed generator construction as a parameter takes a deriving class's snapshot, copied; another is refused. */
+    nql_handle uniform = NULL, gaussian = NULL, knuth = NULL, wrong = NULL;
+    OK(nql_MersenneTwisterUniformRsg_new__int_long(3, 42, &uniform));
+    OK(nql_InvCumulativeMersenneTwisterGaussianRsg_new__RandomSequenceGeneratorMersenneTwisterUniformRng(uniform, &gaussian));
+    OK(nql_InvCumulativeMersenneTwisterGaussianRsg_Draws(gaussian, 4, &v1, &w1, &dim, &n1));
+    double* expected = NULL;
+    int32_t ne = 0;
+    OK(nqlt_References_GaussianDraws(&expected, &ne));
+    CHECK(dim == 3 && ne == 12 && memcmp(v1, expected, 12 * sizeof(double)) == 0, "the Gaussian draws over the uniform snapshot, as C#'s");
+    nql_free(expected); nql_free(v1); nql_free(w1); release(n1);
+    OK(nql_KnuthUniformRsg_new__int_long(3, 42, &knuth));
+    REFUSED(nql_InvCumulativeMersenneTwisterGaussianRsg_new__RandomSequenceGeneratorMersenneTwisterUniformRng(knuth, &wrong), NQL_ERROR_TYPE);
+    release(knuth); release(gaussian); release(uniform);
+    release(counting); release(sobol); release(mt);
     OK(nql_live_handles(&live));
     CHECK(live == live0, "every handle released");
 }
@@ -678,6 +808,30 @@ static void test_misc(void)
         CHECK(strstr(text, "NQL_DEPRECATED(\"use Echo.Double\") NQL_API nql_status nqlt_Deprecations_Old(") != NULL,
               "a deprecated member is declared NQL_DEPRECATED with its message");
     }
+
+    /* A static stays under its declaring type: no named latent model carries a copy of LatentModel's factory, whose
+       own function builds the latent model. */
+#if defined(_WIN32)
+    void* self = (void*)GetModuleHandleA("nanoql.dll");
+#else
+    Dl_info info;
+    dladdr((void*)&nql_release, &info);
+    void* self = dlopen(info.dli_fname, RTLD_NOW | RTLD_NOLOAD);
+#endif
+    CHECK(self != NULL, "the library itself");
+    CHECK(self && symbol(self, "nql_LatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_FromCorrelation") != NULL
+              && symbol(self, "nql_GaussianDefProbLM_FromCorrelation") == NULL && symbol(self, "nql_Brent_get_MaxFunctionEvaluations") == NULL,
+          "the declaring closing's factory, and no copy under a derived type");
+#if !defined(_WIN32)
+    if (self) dlclose(self);
+#endif
+    nql_handle lm = NULL;
+    OK(nql_LatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_FromCorrelation(0.3, 2, NULL, &lm));
+    char* tn = NULL;
+    OK(nql_type_name(lm, &tn));
+    CHECK(strncmp(tn, "NanoQL.Experimental.LatentModel`2", 33) == 0, "the factory builds its declaring type: %s", tn);
+    nql_free(tn);
+    release(lm);
 }
 
 /* ---- conventions by name: the set, NULL as the current provider ---- */
@@ -820,6 +974,29 @@ static void test_engines(void)
     SAME(npv(results), reference);
     release(results);
 
+    /* A Monte Carlo-shaped engine: its nullable inputs neither bound nor supplied are null, the shape left open by a
+       NULL first array takes its default, and a required input left open is refused. */
+    nql_handle mc = NULL, mc_shaped = NULL, mc_open = NULL;
+    int32_t mc_steps = 4, samples = 2000;
+    int64_t seed = 42;
+    double times[2] = {0.5, 1.0}, shape_weights[2] = {1.5, 0.5};
+    OK(nqlt_McShapedEngine_Bind(NULL, &mc_steps, NULL, &samples, NULL, &seed, NULL, NULL, 0, &mc));
+    OK(nql_QuantoEngine_Calculate__QuantoVanillaOption(quanto, ctx, bsm, foreign, fxvol, 0.3, mc, &results));
+    OK(nqlt_References_McShapedQuantoNpv(false, &reference));
+    SAME(npv(results), reference);
+    release(results);
+    OK(nqlt_McShapedEngine_Bind(NULL, &mc_steps, NULL, &samples, NULL, &seed, times, shape_weights, 2, &mc_shaped));
+    OK(nql_QuantoEngine_Calculate__QuantoVanillaOption(quanto, ctx, bsm, foreign, fxvol, 0.3, mc_shaped, &results));
+    OK(nqlt_References_McShapedQuantoNpv(true, &reference));
+    SAME(npv(results), reference);
+    release(results);
+    OK(nqlt_McShapedEngine_Bind(NULL, &mc_steps, NULL, &samples, NULL, NULL, NULL, NULL, 0, &mc_open));
+    REFUSED(nql_QuantoEngine_Calculate__QuantoVanillaOption(quanto, ctx, bsm, foreign, fxvol, 0.3, mc_open, &results), NQL_ERROR_TYPE);
+    CHECK(strstr(last_message(), "'seed' is neither bound nor supplied") != NULL, "the required seed open: %s", last_message());
+    release(mc);
+    release(mc_shaped);
+    release(mc_open);
+
     /* The YoY optionlet helper's stripper supplies its trial surface, placed after the bound index. */
     nql_handle market = get(nqlt_YoYMarket_get_Instance), yctx = NULL, index = NULL, nominal = NULL, surface = NULL, yoy = NULL;
     OK(nqlt_YoYMarket_get_Context(market, &yctx));
@@ -883,6 +1060,32 @@ static void test_calibrations(void)
 {
     int64_t live0, live;
     OK(nql_live_handles(&live0));
+
+    /* Andreasen–Huge from a calibration set read back as tuples, by its default optimizer and by BFGS(), whose line
+       search the C function leaves at its default. */
+    nql_handle* options = NULL;
+    double* vols = NULL;
+    int32_t nset = 0;
+    OK(nqlt_Fixtures_get_CalibrationSet(&options, &vols, &nset));
+    CHECK(nset == 9, "nine options with their volatilities: %d", nset);
+    nql_handle rf = get(nqlt_Fixtures_get_RiskFree), dividend = get(nqlt_Fixtures_get_Dividend), bfgs = NULL, ah = NULL, ahb = NULL;
+    OK(nql_BFGS_new(&bfgs));
+    OK(nql_AndreasenHugeVolatilityInterpl_new(options, vols, nset, 100.0, rf, dividend, NQL_AndreasenHugeVolatilityInterplInterpolationType_CubicSpline,
+                                             NQL_AndreasenHugeVolatilityInterplCalibrationType_Call, 100, NULL, NULL, NULL, NULL, &ah));
+    OK(nql_AndreasenHugeVolatilityInterpl_new(options, vols, nset, 100.0, rf, dividend, NQL_AndreasenHugeVolatilityInterplInterpolationType_CubicSpline,
+                                             NQL_AndreasenHugeVolatilityInterplCalibrationType_Call, 100, NULL, NULL, bfgs, NULL, &ahb));
+    double lv = 0, lv_ref = 0;
+    OK(nql_AndreasenHugeVolatilityInterpl_LocalVol(ah, 1.0, 110.0, &lv));
+    OK(nqlt_References_AndreasenHugeLocalVol(false, &lv_ref));
+    SAME(lv, lv_ref);
+    OK(nql_AndreasenHugeVolatilityInterpl_LocalVol(ahb, 1.0, 110.0, &lv));
+    OK(nqlt_References_AndreasenHugeLocalVol(true, &lv_ref));
+    SAME(lv, lv_ref);
+    for (int k = 0; k < nset; k++) release(options[k]);
+    nql_free(options);
+    nql_free(vols);
+    release(ah); release(ahb); release(bfgs); release(rf); release(dividend);
+
     nql_handle ctx = get(nqlt_Fixtures_get_CalibrationContext), gsr = get(nqlt_Fixtures_get_Gsr), cal_hw = get(nqlt_Fixtures_get_CalibrationHullWhite);
     nql_handle g1d = NULL, cap_engine = NULL;
     OK(nql_Gaussian1dSwaptionEngine_Bind(NULL, NULL, NULL, NULL, NULL, NULL, NULL, &g1d));

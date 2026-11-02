@@ -70,6 +70,9 @@ internal sealed class CFunction
     /// <summary>Gets or sets a <c>bind</c> or <c>bindon</c> function's engine input set.</summary>
     public EngineInputSet? InputSet { get; set; }
 
-    /// <summary>Gets or sets an optional parameter dropped from the C signature, its default passed (a <c>TimeProvider</c>).</summary>
-    public int DroppedParameter { get; set; } = -1;
+    /// <summary>
+    /// Gets the member's optional parameters the C signature leaves out, by position, ascending: each null by default and
+    /// of a type that doesn't cross (a <c>TimeProvider</c>, a line search, the caller's functions), its default passed.
+    /// </summary>
+    public List<int> Dropped { get; } = [];
 }

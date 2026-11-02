@@ -1918,6 +1918,8 @@ NQL_API nql_status nql_AndreasenHugeVolatilityInterpl_OptionPrice(nql_handle sel
 NQL_API nql_status nql_AndreasenHugeVolatilityInterpl_get_MaxDate(nql_handle self, nql_date* result);
 /* AndreasenHugeVolatilityInterpl.get_RiskFreeRate() -> YieldTermStructure */
 NQL_API nql_status nql_AndreasenHugeVolatilityInterpl_get_RiskFreeRate(nql_handle self, nql_handle* result);
+/* new AndreasenHugeVolatilityInterpl(IEnumerable<ValueTuple<VanillaOption, double>> calibrationSet, double spot, YieldTermStructure rTS, YieldTermStructure qTS, AndreasenHugeVolatilityInterplInterpolationType interpolationType = CubicSpline, AndreasenHugeVolatilityInterplCalibrationType calibrationType = Call, int nGridPoints = 500, double? minStrike = null, double? maxStrike = null, OptimizationMethod optimizationMethod = null, EndCriteria endCriteria = null) */
+NQL_API nql_status nql_AndreasenHugeVolatilityInterpl_new(const nql_handle* calibrationSet_option, const double* calibrationSet_volatility, int32_t calibrationSet_count, double spot, nql_handle rTS, nql_handle qTS, int32_t interpolationType, int32_t calibrationType, int32_t nGridPoints, const double* minStrike, const double* maxStrike, nql_handle optimizationMethod, nql_handle endCriteria, nql_handle* result);
 /* Argentina.IsWeekend(Weekday w) -> bool */
 NQL_API nql_status nql_Argentina_IsWeekend(nql_handle self, int32_t w, bool* result);
 /* Argentina.get_Name() -> string */
@@ -2156,6 +2158,8 @@ NQL_API nql_status nql_AverageBasketPayoff_new__Payoff_int(nql_handle basePayoff
 NQL_API nql_status nql_AveragingMultipleResetsPricer_SwapletRate(nql_handle self, nql_handle coupon, nql_handle context, double* result);
 /* new AveragingMultipleResetsPricer() */
 NQL_API nql_status nql_AveragingMultipleResetsPricer_new(nql_handle* result);
+/* new BFGS() */
+NQL_API nql_status nql_BFGS_new(nql_handle* result);
 /* BMAIndex.FixingSchedule(Date start, Date end) -> Schedule */
 NQL_API nql_status nql_BMAIndex_FixingSchedule(nql_handle self, nql_date start, nql_date end, nql_handle* result);
 /* BMAIndex.ForecastFixing(Date fixingDate, EvaluationContext context) -> double */
@@ -2796,8 +2800,6 @@ NQL_API nql_status nql_Bisection_SetLowerBound(nql_handle self, double lowerBoun
 NQL_API nql_status nql_Bisection_SetMaxEvaluations(nql_handle self, int32_t evaluations, nql_handle* result);
 /* Bisection.SetUpperBound(double upperBound) -> Bisection */
 NQL_API nql_status nql_Bisection_SetUpperBound(nql_handle self, double upperBound, nql_handle* result);
-/* Bisection.MaxFunctionEvaluations() -> int */
-NQL_API nql_status nql_Bisection_get_MaxFunctionEvaluations(int32_t* result);
 /* new Bisection() */
 NQL_API nql_status nql_Bisection_new(nql_handle* result);
 /* BivariateCumulativeNormalDistributionDr78.Evaluate(double a, double b) -> double */
@@ -3690,8 +3692,6 @@ NQL_API nql_status nql_Brent_SetLowerBound(nql_handle self, double lowerBound, n
 NQL_API nql_status nql_Brent_SetMaxEvaluations(nql_handle self, int32_t evaluations, nql_handle* result);
 /* Brent.SetUpperBound(double upperBound) -> Brent */
 NQL_API nql_status nql_Brent_SetUpperBound(nql_handle self, double upperBound, nql_handle* result);
-/* Brent.MaxFunctionEvaluations() -> int */
-NQL_API nql_status nql_Brent_get_MaxFunctionEvaluations(int32_t* result);
 /* new Brent() */
 NQL_API nql_status nql_Brent_new(nql_handle* result);
 /* BrownianBridge.Transform(ReadOnlySpan<double> input, Span<double> output) */
@@ -5429,6 +5429,8 @@ NQL_API nql_status nql_CommodityCurve_get_Empty(nql_handle self, bool* result);
 NQL_API nql_status nql_CommodityCurve_get_MaxDate(nql_handle self, nql_date* result);
 /* CommodityCurve.get_Name() -> string */
 NQL_API nql_status nql_CommodityCurve_get_Name(nql_handle self, char** result);
+/* CommodityCurve.get_Nodes() -> ImmutableArray<ValueTuple<Date, double>> */
+NQL_API nql_status nql_CommodityCurve_get_Nodes(nql_handle self, nql_date** date, double** price, int32_t* count);
 /* CommodityCurve.get_Prices() -> ImmutableArray<double> */
 NQL_API nql_status nql_CommodityCurve_get_Prices(nql_handle self, double** result, int32_t* result_count);
 /* CommodityCurve.get_Times() -> ImmutableArray<double> */
@@ -5664,6 +5666,12 @@ NQL_API nql_status nql_CompoundingOvernightIndexedCouponPricer_SwapletPrice(nql_
 NQL_API nql_status nql_CompoundingOvernightIndexedCouponPricer_SwapletRate(nql_handle self, nql_handle coupon, nql_handle context, double* result);
 /* new CompoundingOvernightIndexedCouponPricer(OptionletVolatilityStructure v = null, bool effectiveVolatilityInput = false) */
 NQL_API nql_status nql_CompoundingOvernightIndexedCouponPricer_new(nql_handle v, bool effectiveVolatilityInput, nql_handle* result);
+/* new Concentrating1dMesher(double start, double end, int size, ValueTuple<double?, double?> cPoints = null, bool requireCPoint = false) */
+NQL_API nql_status nql_Concentrating1dMesher_new__double_double_int_ValueTupleOptdoubleOptdouble(double start, double end, int32_t size, const double* cPoints_point, const double* cPoints_density, bool requireCPoint, nql_handle* result);
+/* new Concentrating1dMesher(double start, double end, int size, IEnumerable<ValueTuple<double, double, bool>> cPoints, double tol = 1E-08) */
+NQL_API nql_status nql_Concentrating1dMesher_new__double_double_int_ValueTupledoubledoubleboolArray(double start, double end, int32_t size, const double* cPoints_point, const double* cPoints_density, const bool* cPoints_required, int32_t cPoints_count, double tol, nql_handle* result);
+/* new ConjugateGradient() */
+NQL_API nql_status nql_ConjugateGradient_new(nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* ConstNotionalCrossCurrencyBasisSwapRateHelper.ImpliedQuote(EvaluationContext context) -> double */
 NQL_API nql_status nql_ConstNotionalCrossCurrencyBasisSwapRateHelper_ImpliedQuote(nql_handle self, nql_handle context, double* result);
@@ -5849,8 +5857,6 @@ NQL_API nql_status nql_ConstantLossLatentModel_GaussianCopulaPolicy_GaussianCopu
 NQL_API nql_status nql_ConstantLossLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_Density(nql_handle self, const double* m, int32_t m_count, double* result);
 /* ConstantLossLatentModel.ExpectedRecovery(Date d, int iName, DefaultProbKey defaultKey) -> double */
 NQL_API nql_status nql_ConstantLossLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_ExpectedRecovery(nql_handle self, nql_date d, int32_t iName, nql_handle defaultKey, double* result);
-/* ConstantLossLatentModel.FromCorrelation(double correlation, int nVariables, GaussianCopulaPolicyInitTraits initTraits = null) -> LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits> */
-NQL_API nql_status nql_ConstantLossLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* ConstantLossLatentModel.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_ConstantLossLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* ConstantLossLatentModel.InverseCumulativeY(double p, int iVariable) -> double */
@@ -5911,8 +5917,6 @@ NQL_API nql_status nql_ConstantLossLatentModel_TCopulaPolicy_TCopulaPolicyInitTr
 NQL_API nql_status nql_ConstantLossLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_Density(nql_handle self, const double* m, int32_t m_count, double* result);
 /* ConstantLossLatentModel.ExpectedRecovery(Date d, int iName, DefaultProbKey defaultKey) -> double */
 NQL_API nql_status nql_ConstantLossLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_ExpectedRecovery(nql_handle self, nql_date d, int32_t iName, nql_handle defaultKey, double* result);
-/* ConstantLossLatentModel.FromCorrelation(double correlation, int nVariables, TCopulaPolicyInitTraits initTraits = null) -> LatentModel<TCopulaPolicy, TCopulaPolicyInitTraits> */
-NQL_API nql_status nql_ConstantLossLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* ConstantLossLatentModel.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_ConstantLossLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* ConstantLossLatentModel.InverseCumulativeY(double p, int iVariable) -> double */
@@ -6270,6 +6274,8 @@ NQL_API nql_status nql_ConventionSnapshot_get_Empty(nql_handle* result);
 NQL_API nql_status nql_ConventionSnapshot_get_Records(nql_handle self, nql_handle** result, int32_t* result_count);
 /* ConventionSnapshot.get_RootAttributes() -> ImmutableArray<ForeignAttribute> */
 NQL_API nql_status nql_ConventionSnapshot_get_RootAttributes(nql_handle self, nql_handle** result, int32_t* result_count);
+/* ConventionSnapshot.get_RootElements() -> ImmutableArray<ValueTuple<int, string>> */
+NQL_API nql_status nql_ConventionSnapshot_get_RootElements(nql_handle self, int32_t** position, char*** element, int32_t* count);
 /* ConventionSnapshot.get_Sources() -> ImmutableArray<string> */
 NQL_API nql_status nql_ConventionSnapshot_get_Sources(nql_handle self, char*** result, int32_t* result_count);
 /* ConventionsXml.Read(string path) -> ConventionSnapshot */
@@ -7223,8 +7229,6 @@ NQL_API nql_status nql_DefaultLatentModel_GaussianCopulaPolicy_GaussianCopulaPol
 NQL_API nql_status nql_DefaultLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_DefaultCorrelation(nql_handle self, nql_date d, int32_t iNamei, int32_t iNamej, double* result);
 /* DefaultLatentModel.Density(ReadOnlySpan<double> m) -> double */
 NQL_API nql_status nql_DefaultLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_Density(nql_handle self, const double* m, int32_t m_count, double* result);
-/* DefaultLatentModel.FromCorrelation(double correlation, int nVariables, GaussianCopulaPolicyInitTraits initTraits = null) -> LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits> */
-NQL_API nql_status nql_DefaultLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* DefaultLatentModel.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_DefaultLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* DefaultLatentModel.InverseCumulativeY(double p, int iVariable) -> double */
@@ -7273,8 +7277,6 @@ NQL_API nql_status nql_DefaultLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_
 NQL_API nql_status nql_DefaultLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_DefaultCorrelation(nql_handle self, nql_date d, int32_t iNamei, int32_t iNamej, double* result);
 /* DefaultLatentModel.Density(ReadOnlySpan<double> m) -> double */
 NQL_API nql_status nql_DefaultLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_Density(nql_handle self, const double* m, int32_t m_count, double* result);
-/* DefaultLatentModel.FromCorrelation(double correlation, int nVariables, TCopulaPolicyInitTraits initTraits = null) -> LatentModel<TCopulaPolicy, TCopulaPolicyInitTraits> */
-NQL_API nql_status nql_DefaultLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* DefaultLatentModel.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_DefaultLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* DefaultLatentModel.InverseCumulativeY(double p, int iVariable) -> double */
@@ -8342,6 +8344,10 @@ NQL_API nql_status nql_EvolutionDescription_get_NumberOfSteps(nql_handle self, i
 NQL_API nql_status nql_EvolutionDescription_get_RateTaus(nql_handle self, double** result, int32_t* result_count);
 /* EvolutionDescription.get_RateTimes() -> ImmutableArray<double> */
 NQL_API nql_status nql_EvolutionDescription_get_RateTimes(nql_handle self, double** result, int32_t* result_count);
+/* EvolutionDescription.get_RelevanceRates() -> ImmutableArray<ValueTuple<int, int>> */
+NQL_API nql_status nql_EvolutionDescription_get_RelevanceRates(nql_handle self, int32_t** first, int32_t** second, int32_t* count);
+/* new EvolutionDescription(ReadOnlySpan<double> rateTimes, ReadOnlySpan<double> evolutionTimes = null, ReadOnlySpan<ValueTuple<int, int>> relevanceRates = null) */
+NQL_API nql_status nql_EvolutionDescription_new(const double* rateTimes, int32_t rateTimes_count, const double* evolutionTimes, int32_t evolutionTimes_count, const int32_t* relevanceRates_first, const int32_t* relevanceRates_second, int32_t relevanceRates_count, nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* ExchangeContract.get_Code() -> string */
 NQL_API nql_status nql_ExchangeContract_get_Code(nql_handle self, char** result);
@@ -8752,8 +8758,6 @@ NQL_API nql_status nql_FalsePosition_SetLowerBound(nql_handle self, double lower
 NQL_API nql_status nql_FalsePosition_SetMaxEvaluations(nql_handle self, int32_t evaluations, nql_handle* result);
 /* FalsePosition.SetUpperBound(double upperBound) -> FalsePosition */
 NQL_API nql_status nql_FalsePosition_SetUpperBound(nql_handle self, double upperBound, nql_handle* result);
-/* FalsePosition.MaxFunctionEvaluations() -> int */
-NQL_API nql_status nql_FalsePosition_get_MaxFunctionEvaluations(int32_t* result);
 /* new FalsePosition() */
 NQL_API nql_status nql_FalsePosition_new(nql_handle* result);
 /* FarlieGumbelMorgensternCopula.Evaluate(double x, double y) -> double */
@@ -8836,6 +8840,14 @@ NQL_API nql_status nql_FdCIRVanillaEngine_Bind__CoxIngersollRossProcess_Generali
 NQL_API nql_status nql_FdCIRVanillaEngine_Calculate__VanillaOption_EvaluationContext_CoxIngersollRossProcess_GeneralizedBlackScholesProcess_DividendArray(nql_handle option, nql_handle context, nql_handle cirProcess, nql_handle bsProcess, const nql_handle* dividends, int32_t dividends_count, int32_t tGrid, int32_t xGrid, int32_t rGrid, int32_t dampingSteps, double rho, nql_handle schemeDesc, nql_handle quantoHelper, nql_handle* result);
 /* FdCIRVanillaEngine.Calculate(VanillaOption option, EvaluationContext context, CoxIngersollRossProcess cirProcess, GeneralizedBlackScholesProcess bsProcess, int tGrid, int xGrid, int rGrid, int dampingSteps, double rho, FdmSchemeDesc? schemeDesc = null, FdmQuantoHelper quantoHelper = null) -> OneAssetOptionResults */
 NQL_API nql_status nql_FdCIRVanillaEngine_Calculate__VanillaOption_EvaluationContext_CoxIngersollRossProcess_GeneralizedBlackScholesProcess_int(nql_handle option, nql_handle context, nql_handle cirProcess, nql_handle bsProcess, int32_t tGrid, int32_t xGrid, int32_t rGrid, int32_t dampingSteps, double rho, nql_handle schemeDesc, nql_handle quantoHelper, nql_handle* result);
+#ifdef NANOQL_EXPERIMENTAL
+/* FdExtOUJumpVanillaEngine.Bind(ExtOUWithJumpsProcess process = null, YieldTermStructure rTS = null, int tGrid = 50, int xGrid = 200, int yGrid = 50, IReadOnlyList<ValueTuple<double, double>> shape = null, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
+NQL_API nql_status nql_FdExtOUJumpVanillaEngine_Bind(nql_handle process, nql_handle rTS, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const double* shape_time, const double* shape_value, int32_t shape_count, nql_handle schemeDesc, nql_handle* result);
+/* FdExtOUJumpVanillaEngine.BindOn(VanillaOption instrument, ExtOUWithJumpsProcess process = null, YieldTermStructure rTS = null, int tGrid = 50, int xGrid = 200, int yGrid = 50, IReadOnlyList<ValueTuple<double, double>> shape = null, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
+NQL_API nql_status nql_FdExtOUJumpVanillaEngine_BindOn(nql_handle instrument, nql_handle process, nql_handle rTS, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const double* shape_time, const double* shape_value, int32_t shape_count, nql_handle schemeDesc, nql_handle* result);
+/* FdExtOUJumpVanillaEngine.Calculate(VanillaOption option, EvaluationContext context, ExtOUWithJumpsProcess process, YieldTermStructure rTS, int tGrid = 50, int xGrid = 200, int yGrid = 50, IReadOnlyList<ValueTuple<double, double>> shape = null, FdmSchemeDesc? schemeDesc = null) -> OneAssetOptionResults */
+NQL_API nql_status nql_FdExtOUJumpVanillaEngine_Calculate(nql_handle option, nql_handle context, nql_handle process, nql_handle rTS, int32_t tGrid, int32_t xGrid, int32_t yGrid, const double* shape_time, const double* shape_value, int32_t shape_count, nql_handle schemeDesc, nql_handle* result);
+#endif /* NANOQL_EXPERIMENTAL */
 /* FdG2SwaptionEngine.Bind(G2 model = null, int tGrid = 100, int xGrid = 50, int yGrid = 50, int dampingSteps = 0, double invEps = 1E-05, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
 NQL_API nql_status nql_FdG2SwaptionEngine_Bind(nql_handle model, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const int32_t* dampingSteps, const double* invEps, nql_handle schemeDesc, nql_handle* result);
 /* FdG2SwaptionEngine.BindOn(Swaption instrument, G2 model = null, int tGrid = 100, int xGrid = 50, int yGrid = 50, int dampingSteps = 0, double invEps = 1E-05, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
@@ -8925,6 +8937,12 @@ NQL_API nql_status nql_FdHullWhiteSwaptionEngine_BindOn(nql_handle instrument, n
 /* FdHullWhiteSwaptionEngine.Calculate(Swaption swaption, EvaluationContext context, HullWhite model, int tGrid = 100, int xGrid = 100, int dampingSteps = 0, double invEps = 1E-05, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
 NQL_API nql_status nql_FdHullWhiteSwaptionEngine_Calculate(nql_handle swaption, nql_handle context, nql_handle model, int32_t tGrid, int32_t xGrid, int32_t dampingSteps, double invEps, nql_handle schemeDesc, nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
+/* FdKlugeExtOUSpreadEngine.Bind(KlugeExtOUProcess klugeOUProcess = null, YieldTermStructure rTS = null, int tGrid = 25, int xGrid = 50, int yGrid = 10, int uGrid = 25, IReadOnlyList<ValueTuple<double, double>> gasShape = null, IReadOnlyList<ValueTuple<double, double>> powerShape = null, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
+NQL_API nql_status nql_FdKlugeExtOUSpreadEngine_Bind(nql_handle klugeOUProcess, nql_handle rTS, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const int32_t* uGrid, const double* gasShape_time, const double* gasShape_value, int32_t gasShape_count, const double* powerShape_time, const double* powerShape_value, int32_t powerShape_count, nql_handle schemeDesc, nql_handle* result);
+/* FdKlugeExtOUSpreadEngine.BindOn(BasketOption instrument, KlugeExtOUProcess klugeOUProcess = null, YieldTermStructure rTS = null, int tGrid = 25, int xGrid = 50, int yGrid = 10, int uGrid = 25, IReadOnlyList<ValueTuple<double, double>> gasShape = null, IReadOnlyList<ValueTuple<double, double>> powerShape = null, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
+NQL_API nql_status nql_FdKlugeExtOUSpreadEngine_BindOn(nql_handle instrument, nql_handle klugeOUProcess, nql_handle rTS, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const int32_t* uGrid, const double* gasShape_time, const double* gasShape_value, int32_t gasShape_count, const double* powerShape_time, const double* powerShape_value, int32_t powerShape_count, nql_handle schemeDesc, nql_handle* result);
+/* FdKlugeExtOUSpreadEngine.Calculate(BasketOption option, EvaluationContext context, KlugeExtOUProcess klugeOUProcess, YieldTermStructure rTS, int tGrid = 25, int xGrid = 50, int yGrid = 10, int uGrid = 25, IReadOnlyList<ValueTuple<double, double>> gasShape = null, IReadOnlyList<ValueTuple<double, double>> powerShape = null, FdmSchemeDesc? schemeDesc = null) -> MultiAssetOptionResults */
+NQL_API nql_status nql_FdKlugeExtOUSpreadEngine_Calculate(nql_handle option, nql_handle context, nql_handle klugeOUProcess, nql_handle rTS, int32_t tGrid, int32_t xGrid, int32_t yGrid, int32_t uGrid, const double* gasShape_time, const double* gasShape_value, int32_t gasShape_count, const double* powerShape_time, const double* powerShape_value, int32_t powerShape_count, nql_handle schemeDesc, nql_handle* result);
 /* FdOrnsteinUhlenbeckVanillaEngine.Bind(OrnsteinUhlenbeckProcess process = null, YieldTermStructure rTS = null, ImmutableArray<Dividend> dividends = null, int tGrid = 100, int xGrid = 100, int dampingSteps = 0, double epsilon = 0.0001, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
 NQL_API nql_status nql_FdOrnsteinUhlenbeckVanillaEngine_Bind(nql_handle process, nql_handle rTS, const nql_handle* dividends, int32_t dividends_count, const int32_t* tGrid, const int32_t* xGrid, const int32_t* dampingSteps, const double* epsilon, nql_handle schemeDesc, nql_handle* result);
 /* FdOrnsteinUhlenbeckVanillaEngine.BindOn(VanillaOption instrument, OrnsteinUhlenbeckProcess process = null, YieldTermStructure rTS = null, ImmutableArray<Dividend> dividends = null, int tGrid = 100, int xGrid = 100, int dampingSteps = 0, double epsilon = 0.0001, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
@@ -8944,6 +8962,26 @@ NQL_API nql_status nql_FdSimpleBSSwingEngine_Bind(nql_handle process, const int3
 NQL_API nql_status nql_FdSimpleBSSwingEngine_BindOn(nql_handle instrument, nql_handle process, const int32_t* tGrid, const int32_t* xGrid, nql_handle schemeDesc, nql_handle* result);
 /* FdSimpleBSSwingEngine.Calculate(VanillaSwingOption option, EvaluationContext context, GeneralizedBlackScholesProcess process, int tGrid = 50, int xGrid = 100, FdmSchemeDesc? schemeDesc = null) -> OneAssetOptionResults */
 NQL_API nql_status nql_FdSimpleBSSwingEngine_Calculate(nql_handle option, nql_handle context, nql_handle process, int32_t tGrid, int32_t xGrid, nql_handle schemeDesc, nql_handle* result);
+#ifdef NANOQL_EXPERIMENTAL
+/* FdSimpleExtOUJumpSwingEngine.Bind(ExtOUWithJumpsProcess process = null, YieldTermStructure rTS = null, int tGrid = 50, int xGrid = 200, int yGrid = 50, IReadOnlyList<ValueTuple<double, double>> shape = null, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
+NQL_API nql_status nql_FdSimpleExtOUJumpSwingEngine_Bind(nql_handle process, nql_handle rTS, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const double* shape_time, const double* shape_value, int32_t shape_count, nql_handle schemeDesc, nql_handle* result);
+/* FdSimpleExtOUJumpSwingEngine.BindOn(VanillaSwingOption instrument, ExtOUWithJumpsProcess process = null, YieldTermStructure rTS = null, int tGrid = 50, int xGrid = 200, int yGrid = 50, IReadOnlyList<ValueTuple<double, double>> shape = null, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
+NQL_API nql_status nql_FdSimpleExtOUJumpSwingEngine_BindOn(nql_handle instrument, nql_handle process, nql_handle rTS, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const double* shape_time, const double* shape_value, int32_t shape_count, nql_handle schemeDesc, nql_handle* result);
+/* FdSimpleExtOUJumpSwingEngine.Calculate(VanillaSwingOption option, EvaluationContext context, ExtOUWithJumpsProcess process, YieldTermStructure rTS, int tGrid = 50, int xGrid = 200, int yGrid = 50, IReadOnlyList<ValueTuple<double, double>> shape = null, FdmSchemeDesc? schemeDesc = null) -> OneAssetOptionResults */
+NQL_API nql_status nql_FdSimpleExtOUJumpSwingEngine_Calculate(nql_handle option, nql_handle context, nql_handle process, nql_handle rTS, int32_t tGrid, int32_t xGrid, int32_t yGrid, const double* shape_time, const double* shape_value, int32_t shape_count, nql_handle schemeDesc, nql_handle* result);
+/* FdSimpleExtOUStorageEngine.Bind(ExtendedOrnsteinUhlenbeckProcess process = null, YieldTermStructure rTS = null, int tGrid = 50, int xGrid = 100, int? yGrid = null, IReadOnlyList<ValueTuple<double, double>> shape = null, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
+NQL_API nql_status nql_FdSimpleExtOUStorageEngine_Bind(nql_handle process, nql_handle rTS, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const double* shape_time, const double* shape_value, int32_t shape_count, nql_handle schemeDesc, nql_handle* result);
+/* FdSimpleExtOUStorageEngine.BindOn(VanillaStorageOption instrument, ExtendedOrnsteinUhlenbeckProcess process = null, YieldTermStructure rTS = null, int tGrid = 50, int xGrid = 100, int? yGrid = null, IReadOnlyList<ValueTuple<double, double>> shape = null, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
+NQL_API nql_status nql_FdSimpleExtOUStorageEngine_BindOn(nql_handle instrument, nql_handle process, nql_handle rTS, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const double* shape_time, const double* shape_value, int32_t shape_count, nql_handle schemeDesc, nql_handle* result);
+/* FdSimpleExtOUStorageEngine.Calculate(VanillaStorageOption option, EvaluationContext context, ExtendedOrnsteinUhlenbeckProcess process, YieldTermStructure rTS, int tGrid = 50, int xGrid = 100, int? yGrid = null, IReadOnlyList<ValueTuple<double, double>> shape = null, FdmSchemeDesc? schemeDesc = null) -> OneAssetOptionResults */
+NQL_API nql_status nql_FdSimpleExtOUStorageEngine_Calculate(nql_handle option, nql_handle context, nql_handle process, nql_handle rTS, int32_t tGrid, int32_t xGrid, const int32_t* yGrid, const double* shape_time, const double* shape_value, int32_t shape_count, nql_handle schemeDesc, nql_handle* result);
+/* FdSimpleKlugeExtOUVPPEngine.Bind(KlugeExtOUProcess process = null, YieldTermStructure rTS = null, IReadOnlyList<ValueTuple<double, double>> fuelShape = null, IReadOnlyList<ValueTuple<double, double>> powerShape = null, double fuelCostAddon = null, int tGrid = 1, int xGrid = 50, int yGrid = 10, int gGrid = 20, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
+NQL_API nql_status nql_FdSimpleKlugeExtOUVPPEngine_Bind(nql_handle process, nql_handle rTS, const double* fuelShape_time, const double* fuelShape_value, int32_t fuelShape_count, const double* powerShape_time, const double* powerShape_value, int32_t powerShape_count, const double* fuelCostAddon, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const int32_t* gGrid, nql_handle schemeDesc, nql_handle* result);
+/* FdSimpleKlugeExtOUVPPEngine.BindOn(VanillaVPPOption instrument, KlugeExtOUProcess process = null, YieldTermStructure rTS = null, IReadOnlyList<ValueTuple<double, double>> fuelShape = null, IReadOnlyList<ValueTuple<double, double>> powerShape = null, double fuelCostAddon = null, int tGrid = 1, int xGrid = 50, int yGrid = 10, int gGrid = 20, FdmSchemeDesc? schemeDesc = null) -> InstrumentResults */
+NQL_API nql_status nql_FdSimpleKlugeExtOUVPPEngine_BindOn(nql_handle instrument, nql_handle process, nql_handle rTS, const double* fuelShape_time, const double* fuelShape_value, int32_t fuelShape_count, const double* powerShape_time, const double* powerShape_value, int32_t powerShape_count, const double* fuelCostAddon, const int32_t* tGrid, const int32_t* xGrid, const int32_t* yGrid, const int32_t* gGrid, nql_handle schemeDesc, nql_handle* result);
+/* FdSimpleKlugeExtOUVPPEngine.Calculate(VanillaVPPOption option, EvaluationContext context, KlugeExtOUProcess process, YieldTermStructure rTS, IReadOnlyList<ValueTuple<double, double>> fuelShape, IReadOnlyList<ValueTuple<double, double>> powerShape, double fuelCostAddon, int tGrid = 1, int xGrid = 50, int yGrid = 10, int gGrid = 20, FdmSchemeDesc? schemeDesc = null) -> MultiAssetOptionResults */
+NQL_API nql_status nql_FdSimpleKlugeExtOUVPPEngine_Calculate(nql_handle option, nql_handle context, nql_handle process, nql_handle rTS, const double* fuelShape_time, const double* fuelShape_value, int32_t fuelShape_count, const double* powerShape_time, const double* powerShape_value, int32_t powerShape_count, double fuelCostAddon, int32_t tGrid, int32_t xGrid, int32_t yGrid, int32_t gGrid, nql_handle schemeDesc, nql_handle* result);
+#endif /* NANOQL_EXPERIMENTAL */
 /* Fdm1DimSolver.DerivativeX(double x) -> double */
 NQL_API nql_status nql_Fdm1DimSolver_DerivativeX(nql_handle self, double x, double* result);
 /* Fdm1DimSolver.DerivativeXX(double x) -> double */
@@ -9014,6 +9052,10 @@ NQL_API nql_status nql_FdmBatesSolver_ValueAt(nql_handle self, double s, double 
 NQL_API nql_status nql_FdmBatesSolver_new(nql_handle process, nql_handle solverDesc, nql_handle schemeDesc, int32_t integroIntegrationOrder, nql_handle quantoHelper, nql_handle* result);
 /* FdmBlackScholesMesher.ProcessHelper(double s0, YieldTermStructure rTS, YieldTermStructure qTS, double vol) -> GeneralizedBlackScholesProcess */
 NQL_API nql_status nql_FdmBlackScholesMesher_ProcessHelper(double s0, nql_handle rTS, nql_handle qTS, double vol, nql_handle* result);
+/* new FdmBlackScholesMesher(int size, GeneralizedBlackScholesProcess process, double maturity, double strike, double? xMinConstraint = null, double? xMaxConstraint = null, double eps = 0.0001, double scaleFactor = 1.5, ValueTuple<double?, double?> cPoint = null, ImmutableArray<Dividend> dividendSchedule = null, FdmQuantoHelper fdmQuantoHelper = null, double spotAdjustment = 0, EvaluationContext context = null) */
+NQL_API nql_status nql_FdmBlackScholesMesher_new(int32_t size, nql_handle process, double maturity, double strike, const double* xMinConstraint, const double* xMaxConstraint, double eps, double scaleFactor, const double* cPoint_point, const double* cPoint_density, const nql_handle* dividendSchedule, int32_t dividendSchedule_count, nql_handle fdmQuantoHelper, double spotAdjustment, nql_handle context, nql_handle* result);
+/* new FdmBlackScholesMultiStrikeMesher(int size, GeneralizedBlackScholesProcess process, double maturity, IEnumerable<double> strikes, double eps = 0.0001, double scaleFactor = 1.5, ValueTuple<double?, double?> cPoint = null) */
+NQL_API nql_status nql_FdmBlackScholesMultiStrikeMesher_new(int32_t size, nql_handle process, double maturity, const double* strikes, int32_t strikes_count, double eps, double scaleFactor, const double* cPoint_point, const double* cPoint_density, nql_handle* result);
 /* FdmBlackScholesSolver.DeltaAt(double s) -> double */
 NQL_API nql_status nql_FdmBlackScholesSolver_DeltaAt(nql_handle self, double s, double* result);
 /* FdmBlackScholesSolver.GammaAt(double s) -> double */
@@ -9024,6 +9066,8 @@ NQL_API nql_status nql_FdmBlackScholesSolver_ThetaAt(nql_handle self, double s, 
 NQL_API nql_status nql_FdmBlackScholesSolver_ValueAt(nql_handle self, double s, double* result);
 /* new FdmBlackScholesSolver(GeneralizedBlackScholesProcess process, double strike, FdmSolverDesc solverDesc, FdmSchemeDesc? schemeDesc = null, bool localVol = false, double? illegalLocalVolOverwrite = null, FdmQuantoHelper quantoHelper = null) */
 NQL_API nql_status nql_FdmBlackScholesSolver_new(nql_handle process, double strike, nql_handle solverDesc, nql_handle schemeDesc, bool localVol, const double* illegalLocalVolOverwrite, nql_handle quantoHelper, nql_handle* result);
+/* new FdmCEV1dMesher(int size, double f0, double alpha, double beta, double maturity, double eps = 0.0001, double scaleFactor = 1.5, ValueTuple<double?, double?> cPoint = null) */
+NQL_API nql_status nql_FdmCEV1dMesher_new(int32_t size, double f0, double alpha, double beta, double maturity, double eps, double scaleFactor, const double* cPoint_point, const double* cPoint_density, nql_handle* result);
 /* FdmDirichletBoundary.ApplyAfterApplying(double x, double value) -> double */
 NQL_API nql_status nql_FdmDirichletBoundary_ApplyAfterApplying__double(nql_handle self, double x, double value, double* result);
 /* FdmDirichletBoundary.ApplyAfterApplying(Span<double> a) */
@@ -9308,8 +9352,6 @@ NQL_API nql_status nql_FiniteDifferenceNewtonSafe_SetLowerBound(nql_handle self,
 NQL_API nql_status nql_FiniteDifferenceNewtonSafe_SetMaxEvaluations(nql_handle self, int32_t evaluations, nql_handle* result);
 /* FiniteDifferenceNewtonSafe.SetUpperBound(double upperBound) -> FiniteDifferenceNewtonSafe */
 NQL_API nql_status nql_FiniteDifferenceNewtonSafe_SetUpperBound(nql_handle self, double upperBound, nql_handle* result);
-/* FiniteDifferenceNewtonSafe.MaxFunctionEvaluations() -> int */
-NQL_API nql_status nql_FiniteDifferenceNewtonSafe_get_MaxFunctionEvaluations(int32_t* result);
 /* new FiniteDifferenceNewtonSafe() */
 NQL_API nql_status nql_FiniteDifferenceNewtonSafe_new(nql_handle* result);
 /* Finland.IsWeekend(Weekday w) -> bool */
@@ -10909,8 +10951,6 @@ NQL_API nql_status nql_GaussianConstantLossLM_DefaultCorrelation(nql_handle self
 NQL_API nql_status nql_GaussianConstantLossLM_Density(nql_handle self, const double* m, int32_t m_count, double* result);
 /* GaussianConstantLossLM.ExpectedRecovery(Date d, int iName, DefaultProbKey defaultKey) -> double */
 NQL_API nql_status nql_GaussianConstantLossLM_ExpectedRecovery(nql_handle self, nql_date d, int32_t iName, nql_handle defaultKey, double* result);
-/* GaussianConstantLossLM.FromCorrelation(double correlation, int nVariables, GaussianCopulaPolicyInitTraits initTraits = null) -> LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits> */
-NQL_API nql_status nql_GaussianConstantLossLM_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* GaussianConstantLossLM.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_GaussianConstantLossLM_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* GaussianConstantLossLM.InverseCumulativeY(double p, int iVariable) -> double */
@@ -11001,8 +11041,6 @@ NQL_API nql_status nql_GaussianDefProbLM_CumulativeZ(nql_handle self, double z, 
 NQL_API nql_status nql_GaussianDefProbLM_DefaultCorrelation(nql_handle self, nql_date d, int32_t iNamei, int32_t iNamej, double* result);
 /* GaussianDefProbLM.Density(ReadOnlySpan<double> m) -> double */
 NQL_API nql_status nql_GaussianDefProbLM_Density(nql_handle self, const double* m, int32_t m_count, double* result);
-/* GaussianDefProbLM.FromCorrelation(double correlation, int nVariables, GaussianCopulaPolicyInitTraits initTraits = null) -> LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits> */
-NQL_API nql_status nql_GaussianDefProbLM_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* GaussianDefProbLM.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_GaussianDefProbLM_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* GaussianDefProbLM.InverseCumulativeY(double p, int iVariable) -> double */
@@ -11071,8 +11109,6 @@ NQL_API nql_status nql_GaussianLHPLossModel_ExpectedShortfall(nql_handle self, n
 NQL_API nql_status nql_GaussianLHPLossModel_ExpectedTrancheLoss(nql_handle self, nql_date d, double* result);
 /* GaussianLHPLossModel.ForCorrelation(double correlation, ImmutableArray<double> recoveries, GaussianCopulaPolicyInitTraits traits) -> IDefaultLossModel */
 NQL_API nql_status nql_GaussianLHPLossModel_ForCorrelation(double correlation, const double* recoveries, int32_t recoveries_count, nql_handle traits, nql_handle* result);
-/* GaussianLHPLossModel.FromCorrelation(double correlation, int nVariables, GaussianCopulaPolicyInitTraits initTraits = null) -> LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits> */
-NQL_API nql_status nql_GaussianLHPLossModel_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* GaussianLHPLossModel.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_GaussianLHPLossModel_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* GaussianLHPLossModel.InverseCumulativeY(double p, int iVariable) -> double */
@@ -11227,8 +11263,6 @@ NQL_API nql_status nql_GaussianSpotLossLM_ExpCondRecovery(nql_handle self, nql_d
 NQL_API nql_status nql_GaussianSpotLossLM_ExpCondRecoveryInvPinvRR(nql_handle self, double invUncondDefP, double invUncondRR, int32_t iName, const double* mktFactors, int32_t mktFactors_count, double* result);
 /* GaussianSpotLossLM.ExpCondRecoveryP(double uncondDefP, int iName, ReadOnlySpan<double> mktFactors) -> double */
 NQL_API nql_status nql_GaussianSpotLossLM_ExpCondRecoveryP(nql_handle self, double uncondDefP, int32_t iName, const double* mktFactors, int32_t mktFactors_count, double* result);
-/* GaussianSpotLossLM.FromCorrelation(double correlation, int nVariables, GaussianCopulaPolicyInitTraits initTraits = null) -> LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits> */
-NQL_API nql_status nql_GaussianSpotLossLM_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* GaussianSpotLossLM.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_GaussianSpotLossLM_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* GaussianSpotLossLM.InverseCumulativeY(double p, int iVariable) -> double */
@@ -11349,8 +11383,10 @@ NQL_API nql_status nql_GeneralizedHullWhite_Tree(nql_handle self, nql_handle gri
 NQL_API nql_status nql_GeneralizedHullWhite_get_Sigma(nql_handle self, double* result);
 /* GeneralizedHullWhite.get_TermStructure() -> YieldTermStructure */
 NQL_API nql_status nql_GeneralizedHullWhite_get_TermStructure(nql_handle self, nql_handle* result);
+/* new GeneralizedHullWhite(YieldTermStructure termStructure, IEnumerable<Date> speedStructure, IEnumerable<Date> volStructure, IEnumerable<double> speed, IEnumerable<double> vol) */
+NQL_API nql_status nql_GeneralizedHullWhite_new__YieldTermStructure_DateArray(nql_handle termStructure, const nql_date* speedStructure, int32_t speedStructure_count, const nql_date* volStructure, int32_t volStructure_count, const double* speed, int32_t speed_count, const double* vol, int32_t vol_count, nql_handle* result);
 /* new GeneralizedHullWhite(YieldTermStructure termStructure, double a = 0.1, double sigma = 0.01) */
-NQL_API nql_status nql_GeneralizedHullWhite_new(nql_handle termStructure, double a, double sigma, nql_handle* result);
+NQL_API nql_status nql_GeneralizedHullWhite_new__YieldTermStructure_double(nql_handle termStructure, double a, double sigma, nql_handle* result);
 /* GeneralizedOrnsteinUhlenbeckProcess.Diffusion(double t, double x) -> double */
 NQL_API nql_status nql_GeneralizedOrnsteinUhlenbeckProcess_Diffusion(nql_handle self, double t, double x, double* result);
 /* GeneralizedOrnsteinUhlenbeckProcess.Drift(double t, double x) -> double */
@@ -11424,8 +11460,10 @@ NQL_API nql_status nql_Germany_get_Name(nql_handle self, char** result);
 NQL_API nql_status nql_GetCovarianceFunctions_GetCovariance(const double* stdDev, int32_t stdDev_count, const double* corr, int32_t corr_rows, int32_t corr_columns, double tolerance, double** result, int32_t* result_rows, int32_t* result_columns);
 /* GlobalBootstrap.get_AdditionalVariables() -> AdditionalBootstrapVariables */
 NQL_API nql_status nql_GlobalBootstrap_get_AdditionalVariables(nql_handle self, nql_handle* result);
+/* new GlobalBootstrap(double? accuracy = null, OptimizationMethod optimizer = null, EndCriteria endCriteria = null, IEnumerable<double> instrumentWeights = null, IEnumerable<IBootstrapHelper> additionalHelpers = null, IEnumerable<Date> additionalDates = null, AdditionalBootstrapVariables additionalVariables = null) */
+NQL_API nql_status nql_GlobalBootstrap_new__Optdouble(const double* accuracy, nql_handle optimizer, nql_handle endCriteria, const double* instrumentWeights, int32_t instrumentWeights_count, const nql_handle* additionalHelpers, int32_t additionalHelpers_count, const nql_date* additionalDates, int32_t additionalDates_count, nql_handle additionalVariables, nql_handle* result);
 /* new GlobalBootstrap() */
-NQL_API nql_status nql_GlobalBootstrap_new(nql_handle* result);
+NQL_API nql_status nql_GlobalBootstrap_new__void(nql_handle* result);
 /* GlobalLinearSimpleZeroCurve.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, Linear i = null, GlobalBootstrap bootstrap = null) -> GlobalLinearSimpleZeroCurve */
 NQL_API nql_status nql_GlobalLinearSimpleZeroCurve_Create(int32_t settlementDays, nql_handle calendar, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
 /* GlobalLinearSimpleZeroCurve.Data() -> ImmutableArray<double> */
@@ -11844,8 +11882,6 @@ NQL_API nql_status nql_Halley_SetLowerBound(nql_handle self, double lowerBound, 
 NQL_API nql_status nql_Halley_SetMaxEvaluations(nql_handle self, int32_t evaluations, nql_handle* result);
 /* Halley.SetUpperBound(double upperBound) -> Halley */
 NQL_API nql_status nql_Halley_SetUpperBound(nql_handle self, double upperBound, nql_handle* result);
-/* Halley.MaxFunctionEvaluations() -> int */
-NQL_API nql_status nql_Halley_get_MaxFunctionEvaluations(int32_t* result);
 /* new Halley() */
 NQL_API nql_status nql_Halley_new(nql_handle* result);
 /* HaltonRsg snapshot: Draws(int count) -> HaltonRsg */
@@ -13288,18 +13324,30 @@ NQL_API nql_status nql_InvCumulativeKnuthGaussianRng_Draws(nql_handle self, int3
 NQL_API nql_status nql_InvCumulativeKnuthGaussianRng_new(nql_handle uniformGenerator, nql_handle* result);
 /* InvCumulativeKnuthGaussianRsg snapshot: Draws(int count) -> InvCumulativeKnuthGaussianRsg */
 NQL_API nql_status nql_InvCumulativeKnuthGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
+/* new InvCumulativeKnuthGaussianRsg(RandomSequenceGenerator<KnuthUniformRng> uniformSequenceGenerator) */
+NQL_API nql_status nql_InvCumulativeKnuthGaussianRsg_new__RandomSequenceGeneratorKnuthUniformRng(nql_handle uniformSequenceGenerator, nql_handle* result);
+/* new InvCumulativeKnuthGaussianRsg(RandomSequenceGenerator<KnuthUniformRng> uniformSequenceGenerator, InverseCumulativeNormal inverseCumulative) */
+NQL_API nql_status nql_InvCumulativeKnuthGaussianRsg_new__RandomSequenceGeneratorKnuthUniformRng_InverseCumulativeNormal(nql_handle uniformSequenceGenerator, nql_handle inverseCumulative, nql_handle* result);
 /* InvCumulativeLecuyerGaussianRng snapshot: Draws(int count) -> InvCumulativeLecuyerGaussianRng */
 NQL_API nql_status nql_InvCumulativeLecuyerGaussianRng_Draws(nql_handle self, int32_t count, double** values, double** weights, nql_handle* next);
 /* new InvCumulativeLecuyerGaussianRng(LecuyerUniformRng uniformGenerator) */
 NQL_API nql_status nql_InvCumulativeLecuyerGaussianRng_new(nql_handle uniformGenerator, nql_handle* result);
 /* InvCumulativeLecuyerGaussianRsg snapshot: Draws(int count) -> InvCumulativeLecuyerGaussianRsg */
 NQL_API nql_status nql_InvCumulativeLecuyerGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
+/* new InvCumulativeLecuyerGaussianRsg(RandomSequenceGenerator<LecuyerUniformRng> uniformSequenceGenerator) */
+NQL_API nql_status nql_InvCumulativeLecuyerGaussianRsg_new__RandomSequenceGeneratorLecuyerUniformRng(nql_handle uniformSequenceGenerator, nql_handle* result);
+/* new InvCumulativeLecuyerGaussianRsg(RandomSequenceGenerator<LecuyerUniformRng> uniformSequenceGenerator, InverseCumulativeNormal inverseCumulative) */
+NQL_API nql_status nql_InvCumulativeLecuyerGaussianRsg_new__RandomSequenceGeneratorLecuyerUniformRng_InverseCumulativeNormal(nql_handle uniformSequenceGenerator, nql_handle inverseCumulative, nql_handle* result);
 /* InvCumulativeMersenneTwisterGaussianRng snapshot: Draws(int count) -> InvCumulativeMersenneTwisterGaussianRng */
 NQL_API nql_status nql_InvCumulativeMersenneTwisterGaussianRng_Draws(nql_handle self, int32_t count, double** values, double** weights, nql_handle* next);
 /* new InvCumulativeMersenneTwisterGaussianRng(MersenneTwisterUniformRng uniformGenerator) */
 NQL_API nql_status nql_InvCumulativeMersenneTwisterGaussianRng_new(nql_handle uniformGenerator, nql_handle* result);
 /* InvCumulativeMersenneTwisterGaussianRsg snapshot: Draws(int count) -> InvCumulativeMersenneTwisterGaussianRsg */
 NQL_API nql_status nql_InvCumulativeMersenneTwisterGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
+/* new InvCumulativeMersenneTwisterGaussianRsg(RandomSequenceGenerator<MersenneTwisterUniformRng> uniformSequenceGenerator) */
+NQL_API nql_status nql_InvCumulativeMersenneTwisterGaussianRsg_new__RandomSequenceGeneratorMersenneTwisterUniformRng(nql_handle uniformSequenceGenerator, nql_handle* result);
+/* new InvCumulativeMersenneTwisterGaussianRsg(RandomSequenceGenerator<MersenneTwisterUniformRng> uniformSequenceGenerator, InverseCumulativeNormal inverseCumulative) */
+NQL_API nql_status nql_InvCumulativeMersenneTwisterGaussianRsg_new__RandomSequenceGeneratorMersenneTwisterUniformRng_InverseCumulativeNormal(nql_handle uniformSequenceGenerator, nql_handle inverseCumulative, nql_handle* result);
 /* InvCumulativeSobolGaussianRsg snapshot: Draws(int count) -> InvCumulativeSobolGaussianRsg */
 NQL_API nql_status nql_InvCumulativeSobolGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
 /* new InvCumulativeSobolGaussianRsg(SobolRsg uniformSequenceGenerator) */
@@ -13312,6 +13360,10 @@ NQL_API nql_status nql_InvCumulativeXoshiro256StarStarGaussianRng_Draws(nql_hand
 NQL_API nql_status nql_InvCumulativeXoshiro256StarStarGaussianRng_new(nql_handle uniformGenerator, nql_handle* result);
 /* InvCumulativeXoshiro256StarStarGaussianRsg snapshot: Draws(int count) -> InvCumulativeXoshiro256StarStarGaussianRsg */
 NQL_API nql_status nql_InvCumulativeXoshiro256StarStarGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
+/* new InvCumulativeXoshiro256StarStarGaussianRsg(RandomSequenceGenerator<Xoshiro256StarStarUniformRng> uniformSequenceGenerator) */
+NQL_API nql_status nql_InvCumulativeXoshiro256StarStarGaussianRsg_new__RandomSequenceGeneratorXoshiro256StarStarUniformRng(nql_handle uniformSequenceGenerator, nql_handle* result);
+/* new InvCumulativeXoshiro256StarStarGaussianRsg(RandomSequenceGenerator<Xoshiro256StarStarUniformRng> uniformSequenceGenerator, InverseCumulativeNormal inverseCumulative) */
+NQL_API nql_status nql_InvCumulativeXoshiro256StarStarGaussianRsg_new__RandomSequenceGeneratorXoshiro256StarStarUniformRng_InverseCumulativeNormal(nql_handle uniformSequenceGenerator, nql_handle inverseCumulative, nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* InverseCumulativeBehrensFisher.Value(double q) -> double */
 NQL_API nql_status nql_InverseCumulativeBehrensFisher_Value(nql_handle self, double q, double* result);
@@ -13419,6 +13471,10 @@ NQL_API nql_status nql_Issuer_DefaultedBetween(nql_handle self, nql_date start, 
 NQL_API nql_status nql_Issuer_DefaultsBetween(nql_handle self, nql_date start, nql_date end, nql_handle contractKey, bool includeRefDate, nql_handle context, nql_handle** result, int32_t* result_count);
 /* Issuer.get_Events() -> ImmutableArray<DefaultEvent> */
 NQL_API nql_status nql_Issuer_get_Events(nql_handle self, nql_handle** result, int32_t* result_count);
+/* Issuer.get_Probabilities() -> ImmutableArray<ValueTuple<DefaultProbKey, DefaultProbabilityTermStructure>> */
+NQL_API nql_status nql_Issuer_get_Probabilities(nql_handle self, nql_handle** key, nql_handle** curve, int32_t* count);
+/* new Issuer(IEnumerable<ValueTuple<DefaultProbKey, DefaultProbabilityTermStructure>> probabilities = null, IEnumerable<DefaultEvent> events = null) */
+NQL_API nql_status nql_Issuer_new(const nql_handle* probabilities_key, const nql_handle* probabilities_curve, int32_t probabilities_count, const nql_handle* events, int32_t events_count, nql_handle* result);
 #endif /* NANOQL_EXPERIMENTAL */
 /* Italy.IsWeekend(Weekday w) -> bool */
 NQL_API nql_status nql_Italy_IsWeekend(nql_handle self, int32_t w, bool* result);
@@ -14998,8 +15054,12 @@ NQL_API nql_status nql_MarkovFunctionalModelSettings_get_YStdDevs(nql_handle sel
 NQL_API nql_status nql_MarkovFunctionalModelSettings_new__int(int32_t yGridPoints, double yStdDevs, int32_t gaussHermitePoints, double digitalGap, double marketRateAccuracy, double lowerRateBound, double upperRateBound, int32_t adjustments, const double* smileMoneyCheckpoints, int32_t smileMoneyCheckpoints_count, nql_handle customSmileFactory, nql_handle* result);
 /* new MarkovFunctionalModelSettings() */
 NQL_API nql_status nql_MarkovFunctionalModelSettings_new__void(nql_handle* result);
+/* MarkovFunctional.ArbitrageIndices() -> ImmutableArray<ValueTuple<int, int>?> */
+NQL_API nql_status nql_MarkovFunctional_ArbitrageIndices(nql_handle self, int32_t** left, int32_t** right, bool** has_value, int32_t* count);
 /* MarkovFunctional.FixedFirstVolatility() -> ImmutableArray<bool> */
 NQL_API nql_status nql_MarkovFunctional_FixedFirstVolatility(nql_handle self, bool** result, int32_t* result_count);
+/* MarkovFunctional.ForceArbitrageIndices(ReadOnlySpan<ValueTuple<int, int>> indices, EvaluationContext context) -> MarkovFunctional */
+NQL_API nql_status nql_MarkovFunctional_ForceArbitrageIndices(nql_handle self, const int32_t* indices_left, const int32_t* indices_right, int32_t indices_count, nql_handle context, nql_handle* result);
 /* MarkovFunctional.ModelOutputs(EvaluationContext context) -> MarkovFunctionalModelOutputs */
 NQL_API nql_status nql_MarkovFunctional_ModelOutputs(nql_handle self, nql_handle context, nql_handle* result);
 /* MarkovFunctional.Params() -> Vector */
@@ -15350,18 +15410,30 @@ NQL_API nql_status nql_MoroInvCumulativeKnuthGaussianRng_Draws(nql_handle self, 
 NQL_API nql_status nql_MoroInvCumulativeKnuthGaussianRng_new(nql_handle uniformGenerator, nql_handle* result);
 /* MoroInvCumulativeKnuthGaussianRsg snapshot: Draws(int count) -> MoroInvCumulativeKnuthGaussianRsg */
 NQL_API nql_status nql_MoroInvCumulativeKnuthGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
+/* new MoroInvCumulativeKnuthGaussianRsg(RandomSequenceGenerator<KnuthUniformRng> uniformSequenceGenerator) */
+NQL_API nql_status nql_MoroInvCumulativeKnuthGaussianRsg_new__RandomSequenceGeneratorKnuthUniformRng(nql_handle uniformSequenceGenerator, nql_handle* result);
+/* new MoroInvCumulativeKnuthGaussianRsg(RandomSequenceGenerator<KnuthUniformRng> uniformSequenceGenerator, MoroInverseCumulativeNormal inverseCumulative) */
+NQL_API nql_status nql_MoroInvCumulativeKnuthGaussianRsg_new__RandomSequenceGeneratorKnuthUniformRng_MoroInverseCumulativeNormal(nql_handle uniformSequenceGenerator, nql_handle inverseCumulative, nql_handle* result);
 /* MoroInvCumulativeLecuyerGaussianRng snapshot: Draws(int count) -> MoroInvCumulativeLecuyerGaussianRng */
 NQL_API nql_status nql_MoroInvCumulativeLecuyerGaussianRng_Draws(nql_handle self, int32_t count, double** values, double** weights, nql_handle* next);
 /* new MoroInvCumulativeLecuyerGaussianRng(LecuyerUniformRng uniformGenerator) */
 NQL_API nql_status nql_MoroInvCumulativeLecuyerGaussianRng_new(nql_handle uniformGenerator, nql_handle* result);
 /* MoroInvCumulativeLecuyerGaussianRsg snapshot: Draws(int count) -> MoroInvCumulativeLecuyerGaussianRsg */
 NQL_API nql_status nql_MoroInvCumulativeLecuyerGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
+/* new MoroInvCumulativeLecuyerGaussianRsg(RandomSequenceGenerator<LecuyerUniformRng> uniformSequenceGenerator) */
+NQL_API nql_status nql_MoroInvCumulativeLecuyerGaussianRsg_new__RandomSequenceGeneratorLecuyerUniformRng(nql_handle uniformSequenceGenerator, nql_handle* result);
+/* new MoroInvCumulativeLecuyerGaussianRsg(RandomSequenceGenerator<LecuyerUniformRng> uniformSequenceGenerator, MoroInverseCumulativeNormal inverseCumulative) */
+NQL_API nql_status nql_MoroInvCumulativeLecuyerGaussianRsg_new__RandomSequenceGeneratorLecuyerUniformRng_MoroInverseCumulativeNormal(nql_handle uniformSequenceGenerator, nql_handle inverseCumulative, nql_handle* result);
 /* MoroInvCumulativeMersenneTwisterGaussianRng snapshot: Draws(int count) -> MoroInvCumulativeMersenneTwisterGaussianRng */
 NQL_API nql_status nql_MoroInvCumulativeMersenneTwisterGaussianRng_Draws(nql_handle self, int32_t count, double** values, double** weights, nql_handle* next);
 /* new MoroInvCumulativeMersenneTwisterGaussianRng(MersenneTwisterUniformRng uniformGenerator) */
 NQL_API nql_status nql_MoroInvCumulativeMersenneTwisterGaussianRng_new(nql_handle uniformGenerator, nql_handle* result);
 /* MoroInvCumulativeMersenneTwisterGaussianRsg snapshot: Draws(int count) -> MoroInvCumulativeMersenneTwisterGaussianRsg */
 NQL_API nql_status nql_MoroInvCumulativeMersenneTwisterGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
+/* new MoroInvCumulativeMersenneTwisterGaussianRsg(RandomSequenceGenerator<MersenneTwisterUniformRng> uniformSequenceGenerator) */
+NQL_API nql_status nql_MoroInvCumulativeMersenneTwisterGaussianRsg_new__RandomSequenceGeneratorMersenneTwisterUniformRng(nql_handle uniformSequenceGenerator, nql_handle* result);
+/* new MoroInvCumulativeMersenneTwisterGaussianRsg(RandomSequenceGenerator<MersenneTwisterUniformRng> uniformSequenceGenerator, MoroInverseCumulativeNormal inverseCumulative) */
+NQL_API nql_status nql_MoroInvCumulativeMersenneTwisterGaussianRsg_new__RandomSequenceGeneratorMersenneTwisterUniformRng_MoroInverseCumulativeNormal(nql_handle uniformSequenceGenerator, nql_handle inverseCumulative, nql_handle* result);
 /* MoroInvCumulativeSobolGaussianRsg snapshot: Draws(int count) -> MoroInvCumulativeSobolGaussianRsg */
 NQL_API nql_status nql_MoroInvCumulativeSobolGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
 /* new MoroInvCumulativeSobolGaussianRsg(SobolRsg uniformSequenceGenerator) */
@@ -15374,6 +15446,10 @@ NQL_API nql_status nql_MoroInvCumulativeXoshiro256StarStarGaussianRng_Draws(nql_
 NQL_API nql_status nql_MoroInvCumulativeXoshiro256StarStarGaussianRng_new(nql_handle uniformGenerator, nql_handle* result);
 /* MoroInvCumulativeXoshiro256StarStarGaussianRsg snapshot: Draws(int count) -> MoroInvCumulativeXoshiro256StarStarGaussianRsg */
 NQL_API nql_status nql_MoroInvCumulativeXoshiro256StarStarGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
+/* new MoroInvCumulativeXoshiro256StarStarGaussianRsg(RandomSequenceGenerator<Xoshiro256StarStarUniformRng> uniformSequenceGenerator) */
+NQL_API nql_status nql_MoroInvCumulativeXoshiro256StarStarGaussianRsg_new__RandomSequenceGeneratorXoshiro256StarStarUniformRng(nql_handle uniformSequenceGenerator, nql_handle* result);
+/* new MoroInvCumulativeXoshiro256StarStarGaussianRsg(RandomSequenceGenerator<Xoshiro256StarStarUniformRng> uniformSequenceGenerator, MoroInverseCumulativeNormal inverseCumulative) */
+NQL_API nql_status nql_MoroInvCumulativeXoshiro256StarStarGaussianRsg_new__RandomSequenceGeneratorXoshiro256StarStarUniformRng_MoroInverseCumulativeNormal(nql_handle uniformSequenceGenerator, nql_handle inverseCumulative, nql_handle* result);
 /* MoroInverseCumulativeNormal.Evaluate(double x) -> double */
 NQL_API nql_status nql_MoroInverseCumulativeNormal_Evaluate(nql_handle self, double x, double* result);
 /* new MoroInverseCumulativeNormal(double average = 0, double sigma = 1) */
@@ -15776,8 +15852,6 @@ NQL_API nql_status nql_NewtonSafe_SetLowerBound(nql_handle self, double lowerBou
 NQL_API nql_status nql_NewtonSafe_SetMaxEvaluations(nql_handle self, int32_t evaluations, nql_handle* result);
 /* NewtonSafe.SetUpperBound(double upperBound) -> NewtonSafe */
 NQL_API nql_status nql_NewtonSafe_SetUpperBound(nql_handle self, double upperBound, nql_handle* result);
-/* NewtonSafe.MaxFunctionEvaluations() -> int */
-NQL_API nql_status nql_NewtonSafe_get_MaxFunctionEvaluations(int32_t* result);
 /* new NewtonSafe() */
 NQL_API nql_status nql_NewtonSafe_new(nql_handle* result);
 /* Newton.SetLowerBound(double lowerBound) -> Newton */
@@ -15786,8 +15860,6 @@ NQL_API nql_status nql_Newton_SetLowerBound(nql_handle self, double lowerBound, 
 NQL_API nql_status nql_Newton_SetMaxEvaluations(nql_handle self, int32_t evaluations, nql_handle* result);
 /* Newton.SetUpperBound(double upperBound) -> Newton */
 NQL_API nql_status nql_Newton_SetUpperBound(nql_handle self, double upperBound, nql_handle* result);
-/* Newton.MaxFunctionEvaluations() -> int */
-NQL_API nql_status nql_Newton_get_MaxFunctionEvaluations(int32_t* result);
 /* new Newton() */
 NQL_API nql_status nql_Newton_new(nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
@@ -17322,7 +17394,7 @@ NQL_API nql_status nql_PiecewiseFlatForward_get_MaxDate(nql_handle self, nql_dat
 NQL_API nql_status nql_PiecewiseFlatForward_get_MaxTime(nql_handle self, double* result);
 /* new PiecewiseFlatForward(Date referenceDate, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, BackwardFlat i = null, IterativeBootstrap bootstrap = null) */
 NQL_API nql_status nql_PiecewiseFlatForward_new(nql_date referenceDate, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
-/* PiecewiseFlatHazardRate.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<DefaultProbabilityTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, BackwardFlat i = null, IterativeBootstrap bootstrap = null) -> PiecewiseDefaultCurve<HazardRate, BackwardFlat, IterativeBootstrap> */
+/* PiecewiseFlatHazardRate.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<DefaultProbabilityTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, BackwardFlat i = null, IterativeBootstrap bootstrap = null) -> PiecewiseFlatHazardRate */
 NQL_API nql_status nql_PiecewiseFlatHazardRate_Create(int32_t settlementDays, nql_handle calendar, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
 /* PiecewiseFlatHazardRate.Data() -> ImmutableArray<double> */
 NQL_API nql_status nql_PiecewiseFlatHazardRate_Data(nql_handle self, double** result, int32_t* result_count);
@@ -18896,8 +18968,6 @@ NQL_API nql_status nql_Ridder_SetLowerBound(nql_handle self, double lowerBound, 
 NQL_API nql_status nql_Ridder_SetMaxEvaluations(nql_handle self, int32_t evaluations, nql_handle* result);
 /* Ridder.SetUpperBound(double upperBound) -> Ridder */
 NQL_API nql_status nql_Ridder_SetUpperBound(nql_handle self, double upperBound, nql_handle* result);
-/* Ridder.MaxFunctionEvaluations() -> int */
-NQL_API nql_status nql_Ridder_get_MaxFunctionEvaluations(int32_t* result);
 /* new Ridder() */
 NQL_API nql_status nql_Ridder_new(nql_handle* result);
 /* RiemannLiouvilleWeights.get_Alpha() -> double */
@@ -19270,8 +19340,6 @@ NQL_API nql_status nql_Secant_SetLowerBound(nql_handle self, double lowerBound, 
 NQL_API nql_status nql_Secant_SetMaxEvaluations(nql_handle self, int32_t evaluations, nql_handle* result);
 /* Secant.SetUpperBound(double upperBound) -> Secant */
 NQL_API nql_status nql_Secant_SetUpperBound(nql_handle self, double upperBound, nql_handle* result);
-/* Secant.MaxFunctionEvaluations() -> int */
-NQL_API nql_status nql_Secant_get_MaxFunctionEvaluations(int32_t* result);
 /* new Secant() */
 NQL_API nql_status nql_Secant_new(nql_handle* result);
 /* new SegmentIntegral(int intervals) */
@@ -19555,8 +19623,6 @@ NQL_API nql_status nql_SpotRecoveryLatentModel_GaussianCopulaPolicy_GaussianCopu
 NQL_API nql_status nql_SpotRecoveryLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_ExpCondRecoveryInvPinvRR(nql_handle self, double invUncondDefP, double invUncondRR, int32_t iName, const double* mktFactors, int32_t mktFactors_count, double* result);
 /* SpotRecoveryLatentModel.ExpCondRecoveryP(double uncondDefP, int iName, ReadOnlySpan<double> mktFactors) -> double */
 NQL_API nql_status nql_SpotRecoveryLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_ExpCondRecoveryP(nql_handle self, double uncondDefP, int32_t iName, const double* mktFactors, int32_t mktFactors_count, double* result);
-/* SpotRecoveryLatentModel.FromCorrelation(double correlation, int nVariables, GaussianCopulaPolicyInitTraits initTraits = null) -> LatentModel<GaussianCopulaPolicy, GaussianCopulaPolicyInitTraits> */
-NQL_API nql_status nql_SpotRecoveryLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* SpotRecoveryLatentModel.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_SpotRecoveryLatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* SpotRecoveryLatentModel.InverseCumulativeY(double p, int iVariable) -> double */
@@ -19611,8 +19677,6 @@ NQL_API nql_status nql_SpotRecoveryLatentModel_TCopulaPolicy_TCopulaPolicyInitTr
 NQL_API nql_status nql_SpotRecoveryLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_ExpCondRecoveryInvPinvRR(nql_handle self, double invUncondDefP, double invUncondRR, int32_t iName, const double* mktFactors, int32_t mktFactors_count, double* result);
 /* SpotRecoveryLatentModel.ExpCondRecoveryP(double uncondDefP, int iName, ReadOnlySpan<double> mktFactors) -> double */
 NQL_API nql_status nql_SpotRecoveryLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_ExpCondRecoveryP(nql_handle self, double uncondDefP, int32_t iName, const double* mktFactors, int32_t mktFactors_count, double* result);
-/* SpotRecoveryLatentModel.FromCorrelation(double correlation, int nVariables, TCopulaPolicyInitTraits initTraits = null) -> LatentModel<TCopulaPolicy, TCopulaPolicyInitTraits> */
-NQL_API nql_status nql_SpotRecoveryLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* SpotRecoveryLatentModel.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_SpotRecoveryLatentModel_TCopulaPolicy_TCopulaPolicyInitTraits_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* SpotRecoveryLatentModel.InverseCumulativeY(double p, int iVariable) -> double */
@@ -19794,6 +19858,8 @@ NQL_API nql_status nql_StatsHolder_Mean(nql_handle self, double* result);
 NQL_API nql_status nql_StatsHolder_StandardDeviation(nql_handle self, double* result);
 /* new StatsHolder(double mean, double standardDeviation) */
 NQL_API nql_status nql_StatsHolder_new(double mean, double standardDeviation, nql_handle* result);
+/* new SteepestDescent() */
+NQL_API nql_status nql_SteepestDescent_new(nql_handle* result);
 /* StickyMaxPayoff.get_Name() -> string */
 NQL_API nql_status nql_StickyMaxPayoff_get_Name(nql_handle self, char** result);
 /* new StickyMaxPayoff(double gearing1, double gearing2, double gearing3, double spread1, double spread2, double spread3, double initialValue1, double initialValue2, double accrualFactor) */
@@ -20044,8 +20110,12 @@ NQL_API nql_status nql_StubIborCouponWeightedIndex_MaturityDate(nql_handle self,
 NQL_API nql_status nql_StubIborCouponWeightedIndex_PastFixing(nql_handle self, nql_date fixingDate, nql_handle context, double* result, bool* result_has_value);
 /* StubIborCouponWeightedIndex.get_AllowsNativeFixings() -> bool */
 NQL_API nql_status nql_StubIborCouponWeightedIndex_get_AllowsNativeFixings(nql_handle self, bool* result);
+/* StubIborCouponWeightedIndex.get_Components() -> ImmutableArray<ValueTuple<IborIndex, double>> */
+NQL_API nql_status nql_StubIborCouponWeightedIndex_get_Components(nql_handle self, nql_handle** index, double** weight, int32_t* count);
 /* StubIborCouponWeightedIndex.get_Name() -> string */
 NQL_API nql_status nql_StubIborCouponWeightedIndex_get_Name(nql_handle self, char** result);
+/* new StubIborCouponWeightedIndex(IEnumerable<ValueTuple<IborIndex, double>> components) */
+NQL_API nql_status nql_StubIborCouponWeightedIndex_new(const nql_handle* components_index, const double* components_weight, int32_t components_count, nql_handle* result);
 /* StubIborCoupon.HasFixed(EvaluationContext context) -> bool */
 NQL_API nql_status nql_StubIborCoupon_HasFixed(nql_handle self, nql_handle context, bool* result);
 /* StubIborCoupon.get_StubIndexSelection() -> StubIndexSelection */
@@ -20929,8 +20999,6 @@ NQL_API nql_status nql_TConstantLossLM_DefaultCorrelation(nql_handle self, nql_d
 NQL_API nql_status nql_TConstantLossLM_Density(nql_handle self, const double* m, int32_t m_count, double* result);
 /* TConstantLossLM.ExpectedRecovery(Date d, int iName, DefaultProbKey defaultKey) -> double */
 NQL_API nql_status nql_TConstantLossLM_ExpectedRecovery(nql_handle self, nql_date d, int32_t iName, nql_handle defaultKey, double* result);
-/* TConstantLossLM.FromCorrelation(double correlation, int nVariables, TCopulaPolicyInitTraits initTraits = null) -> LatentModel<TCopulaPolicy, TCopulaPolicyInitTraits> */
-NQL_API nql_status nql_TConstantLossLM_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* TConstantLossLM.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_TConstantLossLM_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* TConstantLossLM.InverseCumulativeY(double p, int iVariable) -> double */
@@ -21015,8 +21083,6 @@ NQL_API nql_status nql_TDefProbLM_CumulativeZ(nql_handle self, double z, double*
 NQL_API nql_status nql_TDefProbLM_DefaultCorrelation(nql_handle self, nql_date d, int32_t iNamei, int32_t iNamej, double* result);
 /* TDefProbLM.Density(ReadOnlySpan<double> m) -> double */
 NQL_API nql_status nql_TDefProbLM_Density(nql_handle self, const double* m, int32_t m_count, double* result);
-/* TDefProbLM.FromCorrelation(double correlation, int nVariables, TCopulaPolicyInitTraits initTraits = null) -> LatentModel<TCopulaPolicy, TCopulaPolicyInitTraits> */
-NQL_API nql_status nql_TDefProbLM_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* TDefProbLM.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_TDefProbLM_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* TDefProbLM.InverseCumulativeY(double p, int iVariable) -> double */
@@ -21137,8 +21203,6 @@ NQL_API nql_status nql_TSpotLossLM_ExpCondRecovery(nql_handle self, nql_date d, 
 NQL_API nql_status nql_TSpotLossLM_ExpCondRecoveryInvPinvRR(nql_handle self, double invUncondDefP, double invUncondRR, int32_t iName, const double* mktFactors, int32_t mktFactors_count, double* result);
 /* TSpotLossLM.ExpCondRecoveryP(double uncondDefP, int iName, ReadOnlySpan<double> mktFactors) -> double */
 NQL_API nql_status nql_TSpotLossLM_ExpCondRecoveryP(nql_handle self, double uncondDefP, int32_t iName, const double* mktFactors, int32_t mktFactors_count, double* result);
-/* TSpotLossLM.FromCorrelation(double correlation, int nVariables, TCopulaPolicyInitTraits initTraits = null) -> LatentModel<TCopulaPolicy, TCopulaPolicyInitTraits> */
-NQL_API nql_status nql_TSpotLossLM_FromCorrelation(double correlation, int32_t nVariables, nql_handle initTraits, nql_handle* result);
 /* TSpotLossLM.InverseCumulativeDensity(double p, int iFactor) -> double */
 NQL_API nql_status nql_TSpotLossLM_InverseCumulativeDensity(nql_handle self, double p, int32_t iFactor, double* result);
 /* TSpotLossLM.InverseCumulativeY(double p, int iVariable) -> double */
@@ -21670,6 +21734,8 @@ NQL_API nql_status nql_UltimateForwardTermStructure_new(nql_handle originalCurve
 NQL_API nql_status nql_Uniform1dMesher_new(double start, double end, int32_t size, nql_handle* result);
 /* UniformGridMesher.Locations(int direction) -> Vector */
 NQL_API nql_status nql_UniformGridMesher_Locations(nql_handle self, int32_t direction, double** result, int32_t* result_count);
+/* new UniformGridMesher(FdmLinearOpLayout layout, IEnumerable<ValueTuple<double, double>> boundaries) */
+NQL_API nql_status nql_UniformGridMesher_new(nql_handle layout, const double* boundaries_min, const double* boundaries_max, int32_t boundaries_count, nql_handle* result);
 /* new UnitDisplacedBlackYoYInflationCouponPricer(YieldTermStructure nominalTermStructure = null) */
 NQL_API nql_status nql_UnitDisplacedBlackYoYInflationCouponPricer_new__YieldTermStructure(nql_handle nominalTermStructure, nql_handle* result);
 /* new UnitDisplacedBlackYoYInflationCouponPricer(YoYOptionletVolatilitySurface capletVol, YieldTermStructure nominalTermStructure) */
@@ -22958,7 +23024,7 @@ NQL_API nql_status nql_ZabrInterpolatedSmileSection_ZabrShortMaturityNormal_get_
 NQL_API nql_status nql_ZabrInterpolatedSmileSection_ZabrShortMaturityNormal_get_RmsError(nql_handle self, double* result);
 /* ZabrLocalVolatilityInterpolatedSmileSection.AtmLevel() -> double? */
 NQL_API nql_status nql_ZabrLocalVolatilityInterpolatedSmileSection_AtmLevel(nql_handle self, double* result, bool* result_has_value);
-/* ZabrLocalVolatilityInterpolatedSmileSection.Create(Date optionDate, double forward, ReadOnlySpan<double> strikes, bool hasFloatingStrikes, double atmVolatility, ReadOnlySpan<double?> vols, double? alpha, double? beta, double? nu, double? rho, double? gamma, EvaluationContext context, bool isAlphaFixed = false, bool isBetaFixed = false, bool isNuFixed = false, bool isRhoFixed = false, bool isGammaFixed = false, bool vegaWeighted = true, EndCriteria endCriteria = null, OptimizationMethod method = null, DayCounter dc = null) -> ZabrInterpolatedSmileSection<ZabrLocalVolatility> */
+/* ZabrLocalVolatilityInterpolatedSmileSection.Create(Date optionDate, double forward, ReadOnlySpan<double> strikes, bool hasFloatingStrikes, double atmVolatility, ReadOnlySpan<double?> vols, double? alpha, double? beta, double? nu, double? rho, double? gamma, EvaluationContext context, bool isAlphaFixed = false, bool isBetaFixed = false, bool isNuFixed = false, bool isRhoFixed = false, bool isGammaFixed = false, bool vegaWeighted = true, EndCriteria endCriteria = null, OptimizationMethod method = null, DayCounter dc = null) -> ZabrLocalVolatilityInterpolatedSmileSection */
 NQL_API nql_status nql_ZabrLocalVolatilityInterpolatedSmileSection_Create(nql_date optionDate, double forward, const double* strikes, int32_t strikes_count, bool hasFloatingStrikes, double atmVolatility, const double* vols, const bool* vols_has_value, int32_t vols_count, const double* alpha, const double* beta, const double* nu, const double* rho, const double* gamma, nql_handle context, bool isAlphaFixed, bool isBetaFixed, bool isNuFixed, bool isRhoFixed, bool isGammaFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle method, nql_handle dc, nql_handle* result);
 /* ZabrLocalVolatilityInterpolatedSmileSection.MaxStrike() -> double */
 NQL_API nql_status nql_ZabrLocalVolatilityInterpolatedSmileSection_MaxStrike(nql_handle self, double* result);
@@ -23036,7 +23102,7 @@ NQL_API nql_status nql_ZabrModel_get_Rho(nql_handle self, double* result);
 NQL_API nql_status nql_ZabrModel_new(double expiryTime, double forward, double alpha, double beta, double nu, double rho, double gamma, nql_handle* result);
 /* ZabrShortMaturityLognormalInterpolatedSmileSection.AtmLevel() -> double? */
 NQL_API nql_status nql_ZabrShortMaturityLognormalInterpolatedSmileSection_AtmLevel(nql_handle self, double* result, bool* result_has_value);
-/* ZabrShortMaturityLognormalInterpolatedSmileSection.Create(Date optionDate, double forward, ReadOnlySpan<double> strikes, bool hasFloatingStrikes, double atmVolatility, ReadOnlySpan<double?> vols, double? alpha, double? beta, double? nu, double? rho, double? gamma, EvaluationContext context, bool isAlphaFixed = false, bool isBetaFixed = false, bool isNuFixed = false, bool isRhoFixed = false, bool isGammaFixed = false, bool vegaWeighted = true, EndCriteria endCriteria = null, OptimizationMethod method = null, DayCounter dc = null) -> ZabrInterpolatedSmileSection<ZabrShortMaturityLognormal> */
+/* ZabrShortMaturityLognormalInterpolatedSmileSection.Create(Date optionDate, double forward, ReadOnlySpan<double> strikes, bool hasFloatingStrikes, double atmVolatility, ReadOnlySpan<double?> vols, double? alpha, double? beta, double? nu, double? rho, double? gamma, EvaluationContext context, bool isAlphaFixed = false, bool isBetaFixed = false, bool isNuFixed = false, bool isRhoFixed = false, bool isGammaFixed = false, bool vegaWeighted = true, EndCriteria endCriteria = null, OptimizationMethod method = null, DayCounter dc = null) -> ZabrShortMaturityLognormalInterpolatedSmileSection */
 NQL_API nql_status nql_ZabrShortMaturityLognormalInterpolatedSmileSection_Create(nql_date optionDate, double forward, const double* strikes, int32_t strikes_count, bool hasFloatingStrikes, double atmVolatility, const double* vols, const bool* vols_has_value, int32_t vols_count, const double* alpha, const double* beta, const double* nu, const double* rho, const double* gamma, nql_handle context, bool isAlphaFixed, bool isBetaFixed, bool isNuFixed, bool isRhoFixed, bool isGammaFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle method, nql_handle dc, nql_handle* result);
 /* ZabrShortMaturityLognormalInterpolatedSmileSection.MaxStrike() -> double */
 NQL_API nql_status nql_ZabrShortMaturityLognormalInterpolatedSmileSection_MaxStrike(nql_handle self, double* result);
@@ -23080,7 +23146,7 @@ NQL_API nql_status nql_ZabrShortMaturityLognormalSmileSection_new(double timeToE
 NQL_API nql_status nql_ZabrShortMaturityLognormal_new(nql_handle* result);
 /* ZabrShortMaturityNormalInterpolatedSmileSection.AtmLevel() -> double? */
 NQL_API nql_status nql_ZabrShortMaturityNormalInterpolatedSmileSection_AtmLevel(nql_handle self, double* result, bool* result_has_value);
-/* ZabrShortMaturityNormalInterpolatedSmileSection.Create(Date optionDate, double forward, ReadOnlySpan<double> strikes, bool hasFloatingStrikes, double atmVolatility, ReadOnlySpan<double?> vols, double? alpha, double? beta, double? nu, double? rho, double? gamma, EvaluationContext context, bool isAlphaFixed = false, bool isBetaFixed = false, bool isNuFixed = false, bool isRhoFixed = false, bool isGammaFixed = false, bool vegaWeighted = true, EndCriteria endCriteria = null, OptimizationMethod method = null, DayCounter dc = null) -> ZabrInterpolatedSmileSection<ZabrShortMaturityNormal> */
+/* ZabrShortMaturityNormalInterpolatedSmileSection.Create(Date optionDate, double forward, ReadOnlySpan<double> strikes, bool hasFloatingStrikes, double atmVolatility, ReadOnlySpan<double?> vols, double? alpha, double? beta, double? nu, double? rho, double? gamma, EvaluationContext context, bool isAlphaFixed = false, bool isBetaFixed = false, bool isNuFixed = false, bool isRhoFixed = false, bool isGammaFixed = false, bool vegaWeighted = true, EndCriteria endCriteria = null, OptimizationMethod method = null, DayCounter dc = null) -> ZabrShortMaturityNormalInterpolatedSmileSection */
 NQL_API nql_status nql_ZabrShortMaturityNormalInterpolatedSmileSection_Create(nql_date optionDate, double forward, const double* strikes, int32_t strikes_count, bool hasFloatingStrikes, double atmVolatility, const double* vols, const bool* vols_has_value, int32_t vols_count, const double* alpha, const double* beta, const double* nu, const double* rho, const double* gamma, nql_handle context, bool isAlphaFixed, bool isBetaFixed, bool isNuFixed, bool isRhoFixed, bool isGammaFixed, bool vegaWeighted, nql_handle endCriteria, nql_handle method, nql_handle dc, nql_handle* result);
 /* ZabrShortMaturityNormalInterpolatedSmileSection.MaxStrike() -> double */
 NQL_API nql_status nql_ZabrShortMaturityNormalInterpolatedSmileSection_MaxStrike(nql_handle self, double* result);

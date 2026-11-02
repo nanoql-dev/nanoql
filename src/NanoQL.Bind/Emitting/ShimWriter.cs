@@ -106,9 +106,9 @@ internal sealed class ShimWriter(Surface surface)
         }
 
         var args = f.Params.Where(p => !p.IsSelf).Select(p => Arg(p, f)).ToList();
-        if (f.DroppedParameter >= 0)
+        foreach (int dropped in f.Dropped)
         {
-            args.Insert(f.DroppedParameter, "null");
+            args.Insert(dropped, "null");
         }
 
         string self = f.Params.Count > 0 && f.Params[0].IsSelf ? Self(f.Params[0]) : string.Empty;
@@ -247,6 +247,21 @@ internal sealed class ShimWriter(Surface surface)
             case "vector": return $"{Rt}.Vector({n}, {n}_count)";
             case "vector&" or "matrix&": return "io_" + CForms.Ident(p.Name);
             case "span": return $"new global::System.Span<{CsNames.Of(k.Element!.Type)}>({n}, {n}_count)";
+            case "tuple":
+                return "(" + string.Join(", ", k.Items.Select((item, i) => Arg(new CParam(CForms.ItemParam(p.Name, k, i), item, false, null), f))) + ")";
+            case "array" when k.Element!.Name == "tuple":
+            {
+                // The tuples from their elements' arrays in step (B2R3).
+                CKind tk = k.Element;
+                var arrays = tk.Items.Select((item, i) =>
+                {
+                    string en = "@" + CForms.ItemParam(p.Name, tk, i, true);
+                    return Elements(item, en, en + "_has_value", n + "_count", p.Name);
+                });
+                string zipped = $"{Rt}.Zip({string.Join(", ", arrays)}, \"{p.Name}\")";
+                return Wrap(k.Type, CsNames.Of(tk.Type), zipped);
+            }
+
             case "array":
                 if (k.Type.IsConstructionOf("System.ReadOnlySpan`1") && k.Element!.Name is "double" or "int32" or "int64")
                 {
@@ -363,6 +378,48 @@ internal sealed class ShimWriter(Surface surface)
             case "distribution":
                 sb.AppendLine($"{ind}{Rt}.OutDistribution({v}, {o}_x, {o}_dx, {o}_density, {o}_cumulative, {o}_excess, {o}_average, {o}_count);");
                 return;
+            case "array" when k.Element!.Name is "tuple" or "tuple?":
+            {
+                // An array per element, a null tuple's flag cleared and its elements zero (B2R10).
+                CKind te = k.Element;
+                bool nullable = te.Name == "tuple?";
+                sb.Append($"{ind}{{ var a_ = {ToArray(k.Type, v)}; ");
+                for (int i = 0; i < te.Items.Count; i++)
+                {
+                    CKind e = te.Items[i];
+                    sb.Append($"var p{i}_ = {(e.Name == "string" ? $"(byte**){Rt}.Alloc<nint>(a_.Length)" : $"{Rt}.Alloc<{CForms.Element(e).CsType}>(a_.Length)")}; ");
+                }
+
+                if (nullable)
+                {
+                    sb.Append($"var h_ = {Rt}.Alloc<byte>(a_.Length); ");
+                }
+
+                sb.Append("for (int i_ = 0; i_ < a_.Length; i_++) { ");
+                if (nullable)
+                {
+                    sb.Append("if (!a_[i_].HasValue) { h_[i_] = 0; " + string.Concat(Enumerable.Range(0, te.Items.Count).Select(i => $"p{i}_[i_] = default; ")) + "continue; } h_[i_] = 1; var t_ = a_[i_].GetValueOrDefault(); ");
+                }
+                else
+                {
+                    sb.Append("var t_ = a_[i_]; ");
+                }
+
+                for (int i = 0; i < te.Items.Count; i++)
+                {
+                    sb.Append($"p{i}_[i_] = {Conv(te.Items[i], $"t_.Item{i + 1}")}; ");
+                }
+
+                sb.Append("} ");
+                for (int i = 0; i < te.Items.Count; i++)
+                {
+                    sb.Append($"*{CForms.ItemResult(te, i, true)} = p{i}_; ");
+                }
+
+                sb.AppendLine((nullable ? "*has_value = h_; " : string.Empty) + "*count = a_.Length; }");
+                return;
+            }
+
             case "array":
             {
                 CKind e = k.Element!;
@@ -418,7 +475,7 @@ internal sealed class ShimWriter(Surface surface)
     }
 
     // A tuple element's out name, as CForms.Out names it.
-    private static string OutName(CKind tuple, int i) => CForms.Ident(CForms.Snake(tuple.ItemNames[i]));
+    private static string OutName(CKind tuple, int i) => CForms.ItemResult(tuple, i);
 
     private static string ToArray(Type collection, string v) =>
         collection.IsArray ? v
@@ -482,6 +539,11 @@ internal sealed class ShimWriter(Surface surface)
             ParameterInfo input = set.Inputs.Single(i => i.Name == p.Name);
             string n = "@" + CForms.Ident(p.Name);
             string given = p.Kind.Name is "handle" or "boxed?" or "snapshot" ? $"{n} != 0" : p.Kind.Name is "date" or "date?" ? $"{n} != 0" : $"{n} != null";
+            if (p.Kind.Name == "array" && p.Kind.Element?.Name == "tuple")
+            {
+                // A collection of tuples is open when its first element's array is NULL (B2R3).
+                given = $"@{CForms.ItemParam(p.Name, p.Kind.Element, 0, true)} != null";
+            }
             string value = p.Kind.Name switch
             {
                 "double?" or "int32?" or "int64?" => $"*{n}",
@@ -554,8 +616,10 @@ internal sealed class ShimWriter(Surface surface)
 
             string t = Stored(rest[j].ParameterType);
             string fallback = !rest[j].HasDefaultValue ? string.Empty : t != CsNames.Of(rest[j].ParameterType) ? "null" : CsNames.Literal(rest[j].ParameterType, rest[j].RawDefaultValue);
-            sb.AppendLine(rest[j].HasDefaultValue
-                ? $"                var {local} = b.TakeOr<{t}>(\"{rest[j].Name}\", {fallback});"
+            // A nullable value neither bound nor supplied is null, C#'s value for it (B2R4); a required one is refused.
+            bool openNull = !rest[j].HasDefaultValue && rest[j].ParameterType.NullableOf() != null;
+            sb.AppendLine(rest[j].HasDefaultValue || openNull
+                ? $"                var {local} = b.TakeOr<{t}>(\"{rest[j].Name}\", {(openNull ? "null" : fallback)});"
                 : $"                var {local} = b.Take<{t}>(\"{rest[j].Name}\");");
         }
 

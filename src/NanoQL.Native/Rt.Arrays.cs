@@ -261,6 +261,60 @@ internal static unsafe partial class Rt
     public static System.Collections.Frozen.FrozenDictionary<TKey, TValue> FrozenDictionary<TKey, TValue>(Dictionary<TKey, TValue> d)
         where TKey : notnull => d is null ? null! : System.Collections.Frozen.FrozenDictionary.ToFrozenDictionary(d);
 
+    /// <summary>
+    /// Pairs from their elements' arrays in step (B2R3): a null first array gives null, the collection a <c>Bind</c>
+    /// leaves open; a later one null where the first isn't is refused.
+    /// </summary>
+    /// <typeparam name="T1">The first element's type.</typeparam>
+    /// <typeparam name="T2">The second element's type.</typeparam>
+    /// <param name="a">The first elements.</param>
+    /// <param name="b">The second elements.</param>
+    /// <param name="name">The parameter, for the refusal.</param>
+    /// <returns>The pairs.</returns>
+    public static (T1, T2)[] Zip<T1, T2>(T1[] a, T2[] b, string name)
+    {
+        if (a is null)
+        {
+            return null!;
+        }
+
+        Present(b, a.Length, name);
+        var r = new (T1, T2)[a.Length];
+        for (int i = 0; i < r.Length; i++)
+        {
+            r[i] = (a[i], b[i]);
+        }
+
+        return r;
+    }
+
+    /// <summary>Triples from their elements' arrays in step (B2R3), as <see cref="Zip{T1, T2}"/>.</summary>
+    /// <typeparam name="T1">The first element's type.</typeparam>
+    /// <typeparam name="T2">The second element's type.</typeparam>
+    /// <typeparam name="T3">The third element's type.</typeparam>
+    /// <param name="a">The first elements.</param>
+    /// <param name="b">The second elements.</param>
+    /// <param name="c">The third elements.</param>
+    /// <param name="name">The parameter, for the refusal.</param>
+    /// <returns>The triples.</returns>
+    public static (T1, T2, T3)[] Zip<T1, T2, T3>(T1[] a, T2[] b, T3[] c, string name)
+    {
+        if (a is null)
+        {
+            return null!;
+        }
+
+        Present(b, a.Length, name);
+        Present(c, a.Length, name);
+        var r = new (T1, T2, T3)[a.Length];
+        for (int i = 0; i < r.Length; i++)
+        {
+            r[i] = (a[i], b[i], c[i]);
+        }
+
+        return r;
+    }
+
     /// <summary>Key–value pairs from keys and values in step; null keys give null.</summary>
     /// <typeparam name="TKey">The key type.</typeparam>
     /// <typeparam name="TValue">The value type.</typeparam>
@@ -281,6 +335,15 @@ internal static unsafe partial class Rt
         }
 
         return a;
+    }
+
+    // A tuple element's array, beside a first one that is there: NULL is refused unless the collection is empty.
+    private static void Present<T>(T[] array, int count, string name)
+    {
+        if (array is null && count > 0)
+        {
+            throw new ArgumentNullException(name, "a tuple element's array is NULL");
+        }
     }
 
     /// <summary>A matrix from the caller's values by rows.</summary>

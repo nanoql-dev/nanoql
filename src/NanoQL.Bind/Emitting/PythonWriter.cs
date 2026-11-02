@@ -45,6 +45,7 @@ internal sealed class PythonWriter(Surface surface)
 
     private readonly Dictionary<Type, TypeRow> types = surface.Types.ToDictionary(t => t.Type);
     private readonly Dictionary<Type, EnumRow> enums = surface.Enums.ToDictionary(e => e.Type);
+    private readonly Dictionary<CFunction, string> lookupNames = [];
     private int tables;
     private string prefix = "nql";
 
@@ -133,6 +134,17 @@ internal sealed class PythonWriter(Surface surface)
             if (t.Shape == "sealed" || t.Type.IsValueType)
             {
                 sb.AppendLine("    _sealed = True");
+            }
+
+            if (!fs.Any(f => f.Kind == "new" && (t.Experimental || !f.Experimental)))
+            {
+                // No base's constructor builds this class (B2D10): the runtime's refusal, a preset's naming its lookup.
+                // An experimental constructor attached on import replaces it.
+                sb.AppendLine("    __init__ = Object.__init__");
+                if (MadeBy(t.Type) is { } lookup)
+                {
+                    sb.AppendLine($"    _made_by = {Str(lookup)}");
+                }
             }
 
             var attached = new StringBuilder();
@@ -259,7 +271,7 @@ internal sealed class PythonWriter(Surface surface)
         "enum" or "enum?" => enums.TryGetValue(k.Type.NullableOf() ?? k.Type, out EnumRow? e) ? k.Name + "@" + e.Prefix + "." + e.CName : k.Name,
         "array" or "span" or "jagged" => k.Name + ":" + Token(k.Element!),
         "map" => "map:" + Token(k.Element!) + ":" + Token(k.Value!),
-        "tuple" => "tuple:" + string.Join(",", k.ItemNames.Select(n => Snake(n).TrimEnd('_'))) + "|" + string.Join(",", k.Items.Select(Token)),
+        "tuple" or "tuple?" => k.Name + ":" + string.Join(",", k.ItemNames.Select(n => Snake(n).TrimEnd('_'))) + "|" + string.Join(",", k.Items.Select(Token)),
         _ => k.Text,
     };
 
@@ -368,6 +380,37 @@ internal sealed class PythonWriter(Surface surface)
     private static string Escape(string name) => Keywords.Contains(name) || Taken.Contains(name) ? name + "_" : name;
 
     private static string Str(string s) => "\"" + s.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
+
+    // A withheld preset's lookups by name, as Python calls them (ConventionSet.currency), or null for none.
+    private string? MadeBy(Type preset)
+    {
+        string[] lookups =
+        [
+            .. surface.Presets.Where(p => p.Lookup != null && p.Construction.Constructor.DeclaringType == preset)
+                .Select(p => LookupName(p.Lookup!)).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal),
+        ];
+        return lookups.Length == 0 ? null : string.Join(" or ", lookups);
+    }
+
+    // A lookup's Python member, its class's name and its group's.
+    private string LookupName(CFunction lookup)
+    {
+        if (!lookupNames.TryGetValue(lookup, out string? name))
+        {
+            TypeRow holder = types[lookup.Type];
+            foreach (IGrouping<string, CFunction> g in Groups(surface.Functions.Where(f => f.Type == lookup.Type)))
+            {
+                foreach (CFunction f in g)
+                {
+                    lookupNames[f] = holder.CName + "." + Escape(g.Key);
+                }
+            }
+
+            name = lookupNames[lookup];
+        }
+
+        return name;
+    }
 
     // A function's Python name, before its group's collisions.
     private static string PyName(CFunction f)
@@ -617,11 +660,19 @@ internal sealed class PythonWriter(Surface surface)
         "enum" or "enum?" => (enums.TryGetValue(k.Type.NullableOf() ?? k.Type, out EnumRow? e) ? Name(e.Prefix, e.CName, e.Experimental) : "int") + (k.Name == "enum?" ? " | None" : string.Empty),
         "handle" or "boxed" or "boxed?" or "snapshot" => (types.TryGetValue(k.Type.NullableOf() ?? k.Type, out TypeRow? t) && t.Form != "value" ? Name(t) : "Object") + " | None",
         "matrix" or "vector" or "jagged" or "span" or "distribution" or "draws" or "sequences" => "Any",
+        "array" when k.Element!.Name is "tuple" or "tuple?" => result
+            ? "list[" + TupleHint(k.Element, true) + (k.Element.Name == "tuple?" ? " | None]" : "]")
+            : "Sequence[" + TupleHint(k.Element, false) + "]",
         "array" => result ? (k.Element!.Name is "double" or "int32" or "int64" or "bool" ? "Any" : "list[Any]") : "Sequence[Any]",
         "map" => result ? "dict[Any, Any]" : "Any",
-        "tuple" => "tuple[Any, ...]",
+        "tuple" => result ? TupleHint(k, true) : TupleHint(k, false) + " | None",
         _ => "Any",
     };
+
+    // A tuple's annotation, its elements' own (an object or a string not None unless the element is nullable): the
+    // named tuples a getter returns are tuples too.
+    private string TupleHint(CKind k, bool result) =>
+        "tuple[" + string.Join(", ", k.Items.Select(i => i.Name is "handle" or "string" ? Hint(i, result)[..^" | None".Length] : Hint(i, result))) + "]";
 
     // A parameter's default in Python.
     private string Default(CParam p)

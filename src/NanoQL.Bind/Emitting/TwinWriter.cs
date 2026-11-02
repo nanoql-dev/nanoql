@@ -40,7 +40,7 @@ internal sealed class TwinWriter(Surface surface)
             // A constructor whose C function takes its type's required members too has no call site of its own shape:
             // C# callers set them in an object initializer.
             if (f.Kind is "new" or "method" or "static" or "get" or "indexer" or "operator" or "set" && f.Member is MethodBase m
-                && f.Params.Count(p => !p.IsSelf) + (f.DroppedParameter >= 0 ? 1 : 0) == m.GetParameters().Length)
+                && f.Params.Count(p => !p.IsSelf) + f.Dropped.Count == m.GetParameters().Length)
             {
                 string key = FunctionKey(f, m);
                 if (!done.Add(key))
@@ -156,6 +156,13 @@ internal sealed class TwinWriter(Surface surface)
         cs.AppendLine($"    public static {retCs} {twin}({string.Join(", ", sig)})").AppendLine("    {");
         bool returns = retCs != "void";
         cs.AppendLine(returns ? $"        if (!{Rec}.On) return {call};" : $"        if (!{Rec}.On) {{ {call}; return; }}");
+
+        // An argument the C function leaves at its default (B2R5) that isn't: the C call can't make this one.
+        foreach (int d in f.Dropped)
+        {
+            cs.AppendLine(returns ? $"        if (a{d} is not null) return {call};" : $"        if (a{d} is not null) {{ {call}; return; }}");
+        }
+
         string name = $"\"{f.CName}\"";
         if (shared.Count > 1 && !m.IsStatic)
         {
@@ -175,22 +182,9 @@ internal sealed class TwinWriter(Surface surface)
         cs.AppendLine($"        var w_ = {Rec}.Args();");
         cs.AppendLine("        try");
         cs.AppendLine("        {");
-        int at = 0;
         foreach (CParam p in f.Params)
         {
-            if (p.IsSelf)
-            {
-                cs.AppendLine($"            {Capture(p.Kind, "self")};");
-                continue;
-            }
-
-            if (at == f.DroppedParameter)
-            {
-                at++;
-            }
-
-            cs.AppendLine($"            {Capture(p.Kind, "a" + at)};");
-            at++;
+            cs.AppendLine($"            {Capture(p.Kind, p.IsSelf ? "self" : ParamName(f, p))};");
         }
 
         cs.AppendLine("        }");
@@ -259,12 +253,13 @@ internal sealed class TwinWriter(Surface surface)
         cs.AppendLine("    }");
     }
 
+    // A parameter's twin argument, a<i> by the member's own position, past the parameters the C function leaves out.
     private static string ParamName(CFunction f, CParam p)
     {
         int at = 0;
         foreach (CParam q in f.Params.Where(q => !q.IsSelf))
         {
-            if (at == f.DroppedParameter)
+            while (f.Dropped.Contains(at))
             {
                 at++;
             }
@@ -318,6 +313,8 @@ internal sealed class TwinWriter(Surface surface)
         "span" => k.Element!.Name == "double" ? $"w_.Doubles({x})" : $"w_.Ints({x})",
         "jagged" => $"w_.Jagged<{CsNames.Of(k.Type.IsArray ? k.Type.GetElementType()! : k.Type.GetGenericArguments()[0])}>({Sequence(k.Type, x)})",
         "map" => $"w_.Map({x}, (w, v) => {Element(k.Element!, "v", "w")}, (w, v) => {Element(k.Value!, "v", "w")})",
+        "tuple" => "w_.Open(); " + string.Join(" ", k.Items.Select((item, i) => Capture(item, $"{x}.Item{i + 1}") + ";")) + " w_.Close()",
+        "array" when k.Element!.Name == "tuple" => $"w_.List({Sequence(k.Type, x)}, (w, v) => {{ w.Open(); {string.Join(" ", k.Element.Items.Select((item, i) => Element(item, $"v.Item{i + 1}", "w") + ";"))} w.Close(); }})",
         "array" => k.Element!.Name switch
         {
             "double" => $"w_.Doubles({x})",
@@ -354,8 +351,17 @@ internal sealed class TwinWriter(Surface surface)
         "tuple" => "w_.Open(); " + string.Join(" ", k.Items.Select((item, i) => Result(item, $"{r}.Item{i + 1}", false) + ";")) + " w_.Close()",
         "distribution" => $"w_.Distribution({r})",
         "array" when k.Element!.Name == "handle" => $"w_.List({Sequence(k.Type, r)}, (w, v) => w.New(v))",
+        "array" when k.Element!.Name is "tuple" or "tuple?" => $"w_.List({Sequence(k.Type, r)}, (w, v) => {{ {TupleResult(k.Element, "v", "w")} }})",
         _ => Capture(k, r),
     };
+
+    // One tuple of a returned collection (B2R10): its elements as results write them, an object by its new id, and a
+    // null tuple as null.
+    private static string TupleResult(CKind t, string v, string w)
+    {
+        string Body(string x) => $"{w}.Open(); " + string.Join(" ", t.Items.Select((item, i) => (item.Name == "handle" ? $"{w}.New({x}.Item{i + 1})" : Element(item, $"{x}.Item{i + 1}", w)) + ";")) + $" {w}.Close();";
+        return t.Name == "tuple?" ? $"if ({v} is null) {w}.Obj(null); else {{ var t_ = {v}.Value; {Body("t_")} }}" : Body(v);
+    }
 
     private void Preset(StringBuilder cs, System.Reflection.ConstructorInfo ctor, List<PresetRow> rows, string twin)
     {

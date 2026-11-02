@@ -285,6 +285,8 @@ internal sealed class CppWriter
         "double?" => "std::optional<double>",
         "int32?" => "std::optional<int32_t>",
         "handle" => ClassName(e),
+        "tuple" => "std::tuple<" + string.Join(", ", e.Items.Select(Element)) + ">",
+        "tuple?" => "std::optional<std::tuple<" + string.Join(", ", e.Items.Select(Element)) + ">>",
         _ => throw new InvalidOperationException("no C++ element type for the kind " + e.Text),
     };
 
@@ -613,6 +615,7 @@ internal sealed class CppWriter
                 "date" or "date?" => "Date()",
                 "period" => "Period()",
                 "array" or "vector" or "jagged" or "map" => "nullptr",
+                "tuple" => "{}",
                 _ => "std::nullopt",
             };
         }
@@ -939,6 +942,44 @@ internal sealed class CppWriter
                 pre.Add($"auto {local} = detail::pack_numbers({n});");
                 args.AddRange([local + ".ptr()", local + ".count()"]);
                 return;
+            case "tuple":
+                // One C argument per element, in its own form (B2R3).
+                for (int i = 0; i < k.Items.Count; i++)
+                {
+                    CKind e = k.Items[i];
+                    string x = $"std::get<{i}>({n})";
+                    args.Add(e.Name switch
+                    {
+                        "double?" or "int32?" or "int64?" or "bool?" => $"detail::opt({x})",
+                        "handle" => x + ".handle()",
+                        _ => ToC(e, x),
+                    });
+                }
+
+                return;
+            case "array" when k.Element!.Name == "tuple":
+                // One C array per element, a nullable one with its flags, then the count (B2R3).
+                for (int i = 0; i < k.Element.Items.Count; i++)
+                {
+                    CKind e = k.Element.Items[i];
+                    if (e.Name == "bool")
+                    {
+                        pre.Add($"auto {local}{i} = detail::pack<unsigned char>({n}, [](const auto& e) {{ return static_cast<unsigned char>(std::get<{i}>(e)); }});");
+                        args.Add($"reinterpret_cast<const bool*>({local}{i}.ptr())");
+                        continue;
+                    }
+
+                    pre.Add($"auto {local}{i} = detail::pack<{CElement(e)}>({n}, [](const auto& e) {{ return {ToC(e, $"std::get<{i}>(e)")}; }});");
+                    args.Add($"{local}{i}.ptr()");
+                    if (e.Name is "double?" or "int32?")
+                    {
+                        pre.Add($"auto {local}{i}h = detail::pack<unsigned char>({n}, [](const auto& e) {{ return static_cast<unsigned char>(std::get<{i}>(e).has_value()); }});");
+                        args.Add($"reinterpret_cast<const bool*>({local}{i}h.ptr())");
+                    }
+                }
+
+                args.Add(local + "0.count()");
+                return;
             case "array":
                 pre.Add($"auto {local} = {Pack(k.Element!, n)};");
                 args.Add(local + ".ptr()");
@@ -1057,6 +1098,38 @@ internal sealed class CppWriter
                 decls.Add($"int32_t {o}count = 0;");
                 outs.AddRange(["&" + o, $"&{o}count"]);
                 return $"detail::take_numbers({o}, {o}count)";
+            case "array" when k.Element!.Name is "tuple" or "tuple?":
+            {
+                // One out array per element, a nullable tuple's flags, the count (B2R10): a std::vector of std::tuple,
+                // of std::optional ones for nullable tuples.
+                CKind te = k.Element;
+                bool nullable = te.Name == "tuple?";
+                var parts = new List<string>();
+                for (int i = 0; i < te.Items.Count; i++)
+                {
+                    CKind e = te.Items[i];
+                    string et = e.Name == "string" ? "char*" : CForms.Element(e).CType;
+                    decls.Add($"{et}* {o}{i} = nullptr;");
+                    outs.Add($"&{o}{i}");
+                    parts.Add(FromC(e, $"{o}{i}[i_]"));
+                }
+
+                if (nullable)
+                {
+                    decls.Add($"bool* {o}has = nullptr;");
+                    outs.Add($"&{o}has");
+                }
+
+                decls.Add($"int32_t {o}count = 0;");
+                outs.Add($"&{o}count");
+                string tt = "std::tuple<" + string.Join(", ", te.Items.Select(Element)) + ">";
+                string make = $"{tt}({string.Join(", ", parts)})";
+                string elem = nullable ? $"std::optional<{tt}>" : tt;
+                string push = nullable ? $"{o}has[i_] ? {elem}({make}) : {elem}()" : make;
+                string frees = string.Concat(Enumerable.Range(0, te.Items.Count).Select(i => $" nql_free({o}{i});")) + (nullable ? $" nql_free({o}has);" : string.Empty);
+                return $"[&] {{ std::vector<{elem}> v_; v_.reserve({o}count > 0 ? {o}count : 0); for (int32_t i_ = 0; i_ < {o}count; i_++) v_.push_back({push});{frees} return v_; }}()";
+            }
+
             case "array":
             {
                 CKind e = k.Element!;

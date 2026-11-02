@@ -68,6 +68,8 @@ double* rd_span(rp* r, const jv* a, int i, int kind, int32_t* count);
 const double* rd_matrix(rp* r, const jv* a, int i, int32_t* rows, int32_t* columns);
 const double* rd_jagged(rp* r, const jv* a, int i, int32_t* count, const int32_t** lengths, int32_t* rows);
 void rd_map(rp* r, const jv* a, int i, int kk, int vk, const void** keys, const void** values, const bool** has, int32_t* count);
+const jv* rd_tuple(rp* r, const jv* a, int i);
+void rd_tuples(rp* r, const jv* a, int i, int n, const int* kinds, const void** items, const bool** has, int32_t* count);
 
 /* The status: 1 when the call succeeded as recorded and its result is to be checked, 0 otherwise (a refusal matched,
    or a mismatch counted). */
@@ -87,6 +89,7 @@ void ck_matrix(rp* r, const jv* res, double* p, int32_t rows, int32_t columns);
 void ck_jagged(rp* r, const jv* res, double* p, int32_t* lengths, int32_t rows);
 void ck_map(rp* r, const jv* res, int kk, int vk, void* keys, void* values, bool* has, int32_t n);
 void ck_distribution(rp* r, const jv* res, double* x, double* dx, double* density, double* cumulative, double* excess, double* average, int32_t n);
+void ck_tuples(rp* r, const jv* res, int n, const int* kinds, void** items, bool* has, int32_t count);
 void ck_span(rp* r, int k, double* p, int32_t n);
 void ck_span_ints(rp* r, int k, int32_t* p, int32_t n);
 const jv* jv_at(const jv* v, int i);

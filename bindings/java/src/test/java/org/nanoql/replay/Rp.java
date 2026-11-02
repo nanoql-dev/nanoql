@@ -256,6 +256,31 @@ final class Rp {
         return x;
     }
 
+    /** A tuple argument, which the trace writes as its elements in order (B2R3): a Tuple2 or a Tuple3. */
+    Object tuple(Jv a, int i, String[] kinds, Class<?>[] classes) {
+        return tupleOf(arg(a, i), kinds, classes);
+    }
+
+    /** A collection of tuples, each written as its elements in order (B2R3). */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    List tuples(Jv a, int i, String[] kinds, Class<?>[] classes) {
+        Jv v = arg(a, i);
+        if (Jv.isNull(v) || v.type != Jv.ARRAY) {
+            return null;
+        }
+        List x = new ArrayList(v.count());
+        for (Jv e : v.items) {
+            x.add(tupleOf(e, kinds, classes));
+        }
+        return x;
+    }
+
+    private Object tupleOf(Jv v, String[] kinds, Class<?>[] classes) {
+        Object a = element(Jv.at(v, 0), kinds[0], classes[0]);
+        Object b = element(Jv.at(v, 1), kinds[1], classes[1]);
+        return kinds.length == 2 ? new Tuple2<>(a, b) : new Tuple3<>(a, b, element(Jv.at(v, 2), kinds[2], classes[2]));
+    }
+
     List<double[]> jagged(Jv a, int i) {
         Jv v = arg(a, i);
         if (Jv.isNull(v) || v.type != Jv.ARRAY) {

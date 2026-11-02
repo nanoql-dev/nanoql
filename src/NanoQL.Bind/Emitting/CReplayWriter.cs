@@ -128,6 +128,57 @@ internal sealed class CReplayWriter(Surface surface)
                     break;
                 }
 
+                case "tuple":
+                {
+                    // A tuple's elements from its JSON array, each in its own form (B2R3).
+                    c.AppendLine($"    const jv* {p}t = rd_tuple(r, a, {j});");
+                    for (int i = 0; i < k.Items.Count; i++)
+                    {
+                        string q = $"{p}_{i}";
+                        string line = k.Items[i].Name switch
+                        {
+                            "double" => $"double {q} = rd_double(r, {p}t, {i});",
+                            "int32" or "enum" => $"int32_t {q} = rd_int(r, {p}t, {i});",
+                            "int64" => $"int64_t {q} = rd_long(r, {p}t, {i});",
+                            "bool" => $"bool {q} = rd_bool(r, {p}t, {i});",
+                            "string" => $"const char* {q} = rd_str(r, {p}t, {i});",
+                            "date" or "date?" => $"nql_date {q} = rd_date(r, {p}t, {i});",
+                            "period" => $"nql_period {q} = rd_period(r, {p}t, {i});",
+                            "complex" => $"nql_complex {q} = rd_complex(r, {p}t, {i});",
+                            "handle" => $"nql_handle {q} = rd_obj(r, {p}t, {i});",
+                            "double?" => $"double s{q}; const double* {q} = rd_optdouble(r, {p}t, {i}, &s{q});",
+                            "int32?" => $"int32_t s{q}; const int32_t* {q} = rd_optint(r, {p}t, {i}, &s{q});",
+                            _ => throw new InvalidOperationException($"{f.CName}: no replay reader for the tuple element {k.Items[i].Text}"),
+                        };
+                        c.AppendLine("    " + line);
+                        args.Add(q);
+                    }
+
+                    break;
+                }
+
+                case "array" when k.Element!.Name == "tuple":
+                {
+                    // A collection of tuples, one array per element, a nullable one with its flags, then the count (B2R3).
+                    CKind te = k.Element;
+                    int n = te.Items.Count;
+                    c.AppendLine($"    static const int {p}k[] = {{{string.Join(", ", te.Items.Select(K))}}}; const void* {p}e[{n}]; const bool* {p}h[{n}]; int32_t {p}n;");
+                    c.AppendLine($"    rd_tuples(r, a, {j}, {n}, {p}k, {p}e, {p}h, &{p}n);");
+                    for (int i = 0; i < n; i++)
+                    {
+                        CKind e = te.Items[i];
+                        string ptr = e.Name == "string" ? "const char* const*" : "const " + CForms.Element(e).CType + "*";
+                        args.Add($"({ptr}){p}e[{i}]");
+                        if (e.Name is "double?" or "int32?")
+                        {
+                            args.Add($"{p}h[{i}]");
+                        }
+                    }
+
+                    args.Add(p + "n");
+                    break;
+                }
+
                 case "array":
                 {
                     string ct = CForms.Element(k.Element!).CType;
@@ -231,6 +282,31 @@ internal sealed class CReplayWriter(Surface surface)
                 outs.AddRange(["&" + o, $"&{o}n"]);
                 checks.Add($"ck_array(r, {res}, K_DOUBLE, {o}, NULL, {o}n);");
                 return;
+            case "array" when k.Element!.Name is "tuple" or "tuple?":
+            {
+                // A returned collection of tuples, one out array per element, a nullable tuple's flags, the count (B2R10).
+                CKind te = k.Element;
+                var ptrs = new List<string>();
+                for (int i = 0; i < te.Items.Count; i++)
+                {
+                    CKind e = te.Items[i];
+                    string et = e.Name == "string" ? "char*" : CForms.Element(e).CType;
+                    c.AppendLine($"    {et}* {o}{i} = NULL;");
+                    outs.Add($"&{o}{i}");
+                    ptrs.Add($"(void*){o}{i}");
+                }
+
+                c.AppendLine($"    bool* {o}h = NULL; int32_t {o}n = 0;");
+                if (te.Name == "tuple?")
+                {
+                    outs.Add($"&{o}h");
+                }
+
+                outs.Add($"&{o}n");
+                checks.Add($"{{ static const int k_[] = {{{string.Join(", ", te.Items.Select(K))}}}; void* e_[] = {{{string.Join(", ", ptrs)}}}; ck_tuples(r, {res}, {te.Items.Count}, k_, e_, {o}h, {o}n); }}");
+                return;
+            }
+
             case "array":
             {
                 CKind e = k.Element!;

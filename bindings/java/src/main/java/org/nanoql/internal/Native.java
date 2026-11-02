@@ -578,6 +578,45 @@ public final class Native {
     }
 
     /**
+     * A collection of pairs nanoql returned, from its elements' lists (B2R10), a null pair where its flag is clear.
+     *
+     * @param <A> the first elements' type
+     * @param <B> the second elements' type
+     * @param a the first elements
+     * @param b the second elements
+     * @param has which pairs are there, or null for all
+     * @return the pairs, null where none
+     */
+    public static <A, B> List<org.nanoql.Tuple2<A, B>> tuples(List<A> a, List<B> b, boolean[] has) {
+        List<org.nanoql.Tuple2<A, B>> r = new ArrayList<>(a.size());
+        for (int i = 0; i < a.size(); i++) {
+            r.add(has == null || has[i] ? new org.nanoql.Tuple2<>(a.get(i), b.get(i)) : null);
+        }
+        return r;
+    }
+
+    /**
+     * A collection of triples nanoql returned, from its elements' lists (B2R10), a null triple where its flag is
+     * clear.
+     *
+     * @param <A> the first elements' type
+     * @param <B> the second elements' type
+     * @param <C> the third elements' type
+     * @param a the first elements
+     * @param b the second elements
+     * @param c the third elements
+     * @param has which triples are there, or null for all
+     * @return the triples, null where none
+     */
+    public static <A, B, C> List<org.nanoql.Tuple3<A, B, C>> tuples(List<A> a, List<B> b, List<C> c, boolean[] has) {
+        List<org.nanoql.Tuple3<A, B, C>> r = new ArrayList<>(a.size());
+        for (int i = 0; i < a.size(); i++) {
+            r.add(has == null || has[i] ? new org.nanoql.Tuple3<>(a.get(i), b.get(i), c.get(i)) : null);
+        }
+        return r;
+    }
+
+    /**
      * An enum's constant by its value.
      *
      * @param <E> the enum

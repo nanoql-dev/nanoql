@@ -200,6 +200,11 @@ class Object:
     _sealed = False
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
+        # Every generated class without a crossing constructor of its own takes this one, never a base's (B2D10); a
+        # preset's names its lookup by name.
+        made_by = type(self).__dict__.get("_made_by")
+        if made_by:
+            raise TypeError(f"{type(self).__name__} is made by {made_by}")
         raise TypeError(f"{type(self).__name__} has no constructor that crosses the C ABI")
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -470,6 +475,8 @@ _SCALAR_IN = {"double": c_double, "int32": c_int32, "int64": c_int64, "bool": c_
 _OPTIONAL = {"double?": c_double, "int32?": c_int32, "int64?": c_int64, "bool?": c_bool, "enum?": c_int32,
              "period?": _CPeriod, "complex?": _CComplex}
 _OBJECTS = ("handle", "boxed", "boxed?", "snapshot", "engine")
+# A tuple element's zero value, C#'s default for a tuple parameter given None; every other element's is None.
+_ZERO = {"double": 0.0, "int32": 0, "int64": 0, "enum": 0, "bool": False, "complex": 0j}
 
 
 def _in_value(name: str, v: Any) -> Any:
@@ -556,7 +563,15 @@ class _Kind:
         self.item_names: tuple[str, ...] = ()
         n = self.name
         head, _, rest = n.partition(":")
-        if head in ("array", "span", "jagged"):
+        if head == "array" and rest.startswith(("tuple:", "tuple?:")):
+            # A sequence of tuples, one C array per element and a count (B2R3); a returned sequence of nullable tuples
+            # with has-value flags (B2R10).
+            self.name = "tuples"
+            self.e = "nullable" if rest.startswith("tuple?:") else None
+            names, _, kinds = rest.partition(":")[2].partition("|")
+            self.item_names = tuple(names.split(","))
+            self.items = [_Kind(k) for k in _top_split(kinds)]
+        elif head in ("array", "span", "jagged"):
             self.name, self.e = head, rest
         elif head == "map":
             self.name = "map"
@@ -588,6 +603,16 @@ class _Kind:
             return [POINTER(ct)] + ([POINTER(c_bool)] if e in ("double?", "int32?") else []) + [c_int32]
         if n == "jagged":
             return [POINTER(c_double), c_int32, POINTER(c_int32), c_int32]
+        if n == "tuple":
+            return [t for k in self.items for t in k.cin]
+        if n == "tuples":
+            out: list[Any] = []
+            for k in self.items:
+                e = _split(k.text)[0]
+                out.append(POINTER(_ELEMENTS[e][0]))
+                if e in ("double?", "int32?"):
+                    out.append(POINTER(c_bool))
+            return out + [c_int32]
         if n == "map":
             kt = _ELEMENTS[_split(self.e)[0]][0]  # type: ignore[arg-type]
             ve = _split(self.v)[0]  # type: ignore[arg-type]
@@ -624,6 +649,12 @@ class _Kind:
             return [POINTER(kt), POINTER(vt)] + ([POINTER(c_bool)] if ve in ("double?", "int32?") else []) + [c_int32]
         if n == "tuple":
             return [t for k in self.items for t in k.cout]
+        if n == "tuples":
+            out = []
+            for k in self.items:
+                e = _split(k.text)[0]
+                out.append(POINTER(_ELEMENTS[e][0] if e != "string" else c_void_p))
+            return out + ([POINTER(c_bool)] if self.e == "nullable" else []) + [c_int32]
         if n == "distribution":
             return [POINTER(c_double)] * 6 + [c_int32]
         if n == "draws":
@@ -693,6 +724,33 @@ class _Kind:
             lengths = np.array([len(r) for r in rows], dtype=np.int32)
             keep += [flat, lengths]
             args += [flat.ctypes.data_as(POINTER(c_double)), flat.shape[0], lengths.ctypes.data_as(POINTER(c_int32)), len(rows)]
+        elif n == "tuple":
+            # One C argument per element (B2R3); None is C#'s default, each element's zero value.
+            if v is None:
+                v = tuple(_ZERO.get(k.name) for k in self.items)
+            if isinstance(v, (str, bytes)) or not hasattr(v, "__len__") or len(v) != len(self.items):
+                raise TypeError(f"a tuple of {len(self.items)} elements, got {v!r}")
+            for k, x in zip(self.items, v):
+                k.put(x, args, keep)
+        elif n == "tuples":
+            # One C array per element and a count (B2R3); None is NULL arrays, an empty sequence an empty collection.
+            if v is None:
+                for k in self.items:
+                    args.append(None)
+                    if _split(k.text)[0] in ("double?", "int32?"):
+                        args.append(None)
+                args.append(0)
+                return
+            rows = [tuple(r) for r in v]
+            if any(len(r) != len(self.items) for r in rows):
+                raise TypeError(f"each element is a tuple of {len(self.items)} elements")
+            for i, k in enumerate(self.items):
+                e, c = _split(k.text)
+                p, has = _element_array(e, c, [r[i] for r in rows], keep)
+                args.append(p)
+                if e in ("double?", "int32?"):
+                    args.append(has)
+            args.append(len(rows))
         elif n == "map":
             ke, kc = _split(self.e)  # type: ignore[arg-type]
             ve, vc = _split(self.v)  # type: ignore[arg-type]
@@ -786,6 +844,22 @@ class _Kind:
             if has is not None:
                 free(has)
             return dict(zip(keys, values)), at + (4 if nullable else 3)
+        if n == "tuples":
+            m = len(self.items)
+            nullable = self.e == "nullable"
+            count = outs[at + m + (1 if nullable else 0)].value
+            cols = []
+            for i, k in enumerate(self.items):
+                e, c = _split(k.text)
+                cols.append(_elements(e, c, outs[at + i], None, count, False))
+                free(outs[at + i])
+            t = _tuple_type(self.item_names)
+            rows: list[Any] = [t(*r) for r in zip(*cols)] if count else []
+            if nullable:
+                hp = outs[at + m]
+                rows = [r if hp[i] else None for i, r in enumerate(rows)]
+                free(hp)
+            return rows, at + m + (2 if nullable else 1)
         if n == "tuple":
             vals = []
             for k in self.items:
@@ -1037,6 +1111,25 @@ def _score(text: str, v: Any) -> int | None:
         if v is None:
             return 1
         return 0 if isinstance(v, np.ndarray) and v.ndim == (1 if name == "vector&" else 2) else None
+    if text.startswith("array:tuple:"):
+        # A sequence of tuples (or lists), each of the tuple's arity.
+        if v is None:
+            return 1
+        if isinstance(v, (str, bytes)) or hasattr(v, "keys") or not hasattr(v, "__len__"):
+            return None
+        n = len(_top_split(text.partition("|")[2]))
+        return 0 if all(isinstance(x, (tuple, list)) and len(x) == n for x in v) else None
+    if text.startswith("tuple:"):
+        # A tuple of the arity, each element scored as its kind.
+        if v is None:
+            return 1
+        if not isinstance(v, tuple):
+            return None
+        kinds = _top_split(text.partition("|")[2])
+        if len(v) != len(kinds):
+            return None
+        scores = [_score(k, x) for k, x in zip(kinds, v)]
+        return None if any(s is None for s in scores) else sum(scores)
     if name == "map":
         if v is None:
             return 1

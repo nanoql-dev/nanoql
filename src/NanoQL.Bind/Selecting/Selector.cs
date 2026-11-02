@@ -126,8 +126,9 @@ internal sealed class Selector
         return surface;
     }
 
-    // The closed generic types crossing functions take or return (R14): each crosses as a type of its own, its members
-    // too, until no function names a new one.
+    // The closed generic types crossing functions take or return (R14), and the closed generic bases of crossing types
+    // that declare a static factory of their own (B2R11): each crosses as a type of its own, its members too, until no
+    // function or type names a new one.
     private void AddConstructions(List<CFunction> functions)
     {
         var seen = new HashSet<Type>(surface.Types.Select(r => r.Type));
@@ -139,15 +140,29 @@ internal sealed class Selector
             [
                 .. functions.Skip(from).Take(to - from).SelectMany(f => f.Params.Select(p => p.Kind).Concat(f.Return is { } r ? [r] : []))
                     .SelectMany(Objects)
+                    .Concat(from == 0 ? surface.Types.Select(r => r.Type).SelectMany(FactoryBases) : [])
                     .Where(t => t.IsConstructedGenericType && !t.ContainsGenericParameters && set.Ours(t) && !t.IsInterface && !t.IsDelegate() && !t.IsTrait() && seen.Add(t))
                     .OrderBy(t => t.FullName, StringComparer.Ordinal),
             ];
             from = to;
-            foreach (Type t in found)
+            foreach (Type t in found.Concat(found.SelectMany(FactoryBases).Where(b => set.Ours(b) && seen.Add(b))).ToList())
             {
                 string prefix = set.PrefixOf(t);
                 surface.Types.Add(Row(t, prefix));
                 functions.AddRange(TypeFunctions(t, prefix));
+            }
+        }
+    }
+
+    // A type's closed generic bases that declare a public static returning themselves: a factory, which crosses under
+    // its declaring type alone (B2R11), so that type crosses too.
+    private static IEnumerable<Type> FactoryBases(Type t)
+    {
+        for (Type? b = t.BaseType; b != null && b.IsConstructedGenericType && !b.ContainsGenericParameters; b = b.BaseType)
+        {
+            if (b.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).Any(m => m.ReturnType == b))
+            {
+                yield return b;
             }
         }
     }
@@ -256,6 +271,13 @@ internal sealed class Selector
         {
             foreach (MemberInfo m in src.GetMembers(Declared).OrderBy(m => m.MetadataToken))
             {
+                // A base's static stays under its declaring type, unless this is a named class and the base is the
+                // closing it names (B2R11): a copy would build another type than its holder's name says.
+                if (src != t && IsStatic(m) && !(src == t.BaseType && IsNamedClass(t)))
+                {
+                    continue;
+                }
+
                 foreach (CFunction f in MemberFunctions(t, prefix, tc, src, m))
                 {
                     yield return f;
@@ -273,6 +295,27 @@ internal sealed class Selector
             };
         }
     }
+
+    // A static member: a static method or operator, a property whose accessors are static, or a static or constant field.
+    private static bool IsStatic(MemberInfo m) => m switch
+    {
+        MethodInfo mi => mi.IsStatic,
+        PropertyInfo pi => (pi.GetMethod ?? pi.SetMethod)?.IsStatic == true,
+        FieldInfo fi => fi.IsStatic,
+        _ => false,
+    };
+
+    /// <summary>
+    /// Whether a type is a named class (D12): a sealed, non-generic class whose direct base is a closed generic
+    /// construction, declaring no public instance member but its constructors and those returning itself (a generator's
+    /// <c>Clone</c>), as a QuantLib typedef's or a QuantLib-SWIG <c>%template</c>'s name for its closing does.
+    /// </summary>
+    /// <param name="t">The type.</param>
+    /// <returns>Whether it is one.</returns>
+    internal static bool IsNamedClass(Type t) =>
+        t.IsClass && t.IsSealed && !t.IsGenericType && t.BaseType is { IsGenericType: true, ContainsGenericParameters: false }
+        && !t.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+            .Any(m => m is PropertyInfo or FieldInfo || (m is MethodInfo { IsSpecialName: false } mi && mi.ReturnType != t));
 
     private IEnumerable<CFunction> MemberFunctions(Type t, string prefix, string tc, Type src, MemberInfo m)
     {
@@ -507,15 +550,16 @@ internal sealed class Selector
         for (int i = 0; i < ps.Length; i++)
         {
             ParameterInfo p = ps[i];
-            if (p.ParameterType.FullName == "System.TimeProvider" && p.HasDefaultValue && p.RawDefaultValue == null)
+            Type? defType = i < defs.Length ? defs[i].ParameterType : null;
+            CKind? k = classifier.Classify(p.ParameterType, p, false, d => binder.Shape(d, defType), out string? why);
+            if (k == null && IsNullByDefault(p))
             {
-                // Date.TodaysDate reads the computer's clock: its optional TimeProvider is left at its default.
-                f.DroppedParameter = i;
+                // An optional parameter of a type that doesn't cross, null by default, is left at its default (B2R5):
+                // Date.TodaysDate's clock, an optimizer's line search, the caller's functions.
+                f.Dropped.Add(i);
                 continue;
             }
 
-            Type? defType = i < defs.Length ? defs[i].ParameterType : null;
-            CKind? k = classifier.Classify(p.ParameterType, p, false, d => binder.Shape(d, defType), out string? why);
             if (k == null)
             {
                 Skip(f.Key, Display(t, m), why!);
@@ -548,6 +592,10 @@ internal sealed class Selector
         f.DocumentedCodes = [.. docs.Of(definition ?? m).Distinct().Select(e => (e, Code(e))).Where(x => x.Item2 > 0)];
         return f;
     }
+
+    // An optional parameter whose default is null: of a class, an interface, a delegate or a nullable value type.
+    private static bool IsNullByDefault(ParameterInfo p) =>
+        p.HasDefaultValue && p.RawDefaultValue == null && (!p.ParameterType.IsValueType || p.ParameterType.NullableOf() != null);
 
     // A documented exception the C ABI's table doesn't name maps by the member's own documentation.
     private static int Code(string exception) => exception switch

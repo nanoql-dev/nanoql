@@ -391,6 +391,31 @@ void rd_map(rp* r, const jv* a, int i, int kk, int vk, const void** keys, const 
     *count = v->count;
 }
 
+/* A tuple argument's JSON array, its elements read by the readers above; and a collection of tuples, one array per
+   element (NULL for a null collection), with has-value flags for a nullable element (B2R3). */
+const jv* rd_tuple(rp* r, const jv* a, int i) { return arg(r, a, i); }
+
+void rd_tuples(rp* r, const jv* a, int i, int n, const int* kinds, const void** items, const bool** has, int32_t* count)
+{
+    const jv* v = arg(r, a, i);
+    for (int j = 0; j < n; j++) {
+        items[j] = NULL;
+        has[j] = NULL;
+    }
+    if (!v || v->type != JV_ARR) {
+        *count = 0;
+        return;
+    }
+    for (int j = 0; j < n; j++) {
+        void* p = temp(r, size_of(kinds[j]) * v->count);
+        bool* h = (kinds[j] == K_OPTDOUBLE || kinds[j] == K_OPTINT) ? temp(r, v->count) : NULL;
+        for (int k = 0; k < v->count; k++) element(r, jv_at(v->items[k], j), kinds[j], p, k, h);
+        items[j] = p;
+        has[j] = h;
+    }
+    *count = v->count;
+}
+
 /* ---- checks ---- */
 int st(rp* r, nql_status s, int recorded)
 {
@@ -626,6 +651,33 @@ void ck_map(rp* r, const jv* res, int kk, int vk, void* keys, void* values, bool
     }
     nql_free(keys);
     nql_free(values);
+    nql_free(has);
+}
+
+/* A returned collection of tuples against the recorded list, a null tuple against null by its has-value flag, each
+   element by its kind; frees the arrays (B2R10). */
+void ck_tuples(rp* r, const jv* res, int n, const int* kinds, void** items, bool* has, int32_t count)
+{
+    if (!res || res->type != JV_ARR) {
+        if (items[0]) mismatch(r, "tuples", "null", "a collection");
+    } else if (res->count != count) {
+        char a[32], b[32];
+        snprintf(a, sizeof a, "%d tuples", res->count);
+        snprintf(b, sizeof b, "%d tuples", count);
+        mismatch(r, "tuples", a, b);
+    } else {
+        for (int k = 0; k < count; k++) {
+            const jv* e = res->items[k];
+            int null = !e || e->type == JV_NULL;
+            if (has && null != !has[k]) {
+                mismatch(r, "has-value", null ? "none" : "a tuple", has[k] ? "a tuple" : "none");
+                continue;
+            }
+            if (null) continue;
+            for (int j = 0; j < n; j++) ck_element(r, jv_at(e, j), kinds[j], items[j], k, NULL);
+        }
+    }
+    for (int j = 0; j < n; j++) nql_free(items[j]);
     nql_free(has);
 }
 

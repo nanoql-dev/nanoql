@@ -140,6 +140,12 @@ class Replay:
         if head == "span":
             e = _split(rest)[0]
             return np.array([self.element(e, None, x) for x in (v or [])], dtype=np.float64 if e == "double" else np.int32)
+        if head == "tuple":
+            # A tuple from its JSON array, each element by its kind (B2R3).
+            kinds = _runtime._top_split(rest.partition("|")[2])
+            return tuple(self.arg(k, x) for k, x in zip(kinds, v))
+        if head == "array" and rest.startswith("tuple:"):
+            return None if v is None else [self.arg(rest, x) for x in v]
         if head == "array":
             if v is None:
                 return None
@@ -226,6 +232,12 @@ class Replay:
             for (rk, rv), (gk, gv) in zip(res, items):
                 self.check(ke, rk, gk)
                 self.check(ve, rv, gv)
+        elif head == "tuple?":
+            # A returned collection's nullable tuple: null against None (B2R10).
+            if (res is None) != (got is None):
+                self.mismatch("has-value", "none" if res is None else "a tuple", "none" if got is None else "a tuple")
+            elif res is not None:
+                self.check("tuple:" + rest, res, got)
         elif head == "tuple":
             kinds = _runtime._top_split(rest.partition("|")[2])
             for k, r, g in zip(kinds, res, got):

@@ -18,6 +18,7 @@ internal sealed class WellKnown
     public const string ObsoleteAttribute = "System.ObsoleteAttribute";
 
     private readonly Dictionary<Type, bool> working = [];
+    private readonly Dictionary<Type, Type?> deriving = [];
 
     /// <summary>Initializes a new instance of the <see cref="WellKnown"/> class.</summary>
     /// <param name="set">The inputs.</param>
@@ -103,6 +104,27 @@ internal sealed class WellKnown
     /// <param name="t">The type.</param>
     /// <returns>True for a random-number or sequence generator.</returns>
     public bool IsGenerator(Type t) => Rng.IsAssignableFrom(t) || Rsg.IsAssignableFrom(t);
+
+    /// <summary>
+    /// A generator class of the inputs that derives a closed generator construction and has a public constructor, so its
+    /// snapshot can stand for the construction (B2R6: <c>MersenneTwisterUniformRsg</c> for
+    /// <c>RandomSequenceGenerator&lt;MersenneTwisterUniformRng&gt;</c>); null where none does.
+    /// </summary>
+    /// <param name="t">The closed construction.</param>
+    /// <returns>The first such class by name, or null.</returns>
+    public Type? DerivingGenerator(Type t)
+    {
+        if (!deriving.TryGetValue(t, out Type? d))
+        {
+            d = Set.Assemblies.SelectMany(a => a.Assembly.GetExportedTypes())
+                .Where(c => c != t && c.IsClass && !c.IsAbstract && !c.IsNested && !c.ContainsGenericParameters && t.IsAssignableFrom(c)
+                    && IsGenerator(c) && c.GetConstructors().Length > 0)
+                .OrderBy(c => c.FullName, StringComparer.Ordinal).FirstOrDefault();
+            deriving[t] = d;
+        }
+
+        return d;
+    }
 
     /// <summary>A working type's form: <c>matrix</c>, <c>vector</c>, <c>snapshot</c>, <c>distribution</c> or <c>withheld</c>.</summary>
     /// <param name="t">A working type.</param>

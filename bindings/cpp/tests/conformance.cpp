@@ -161,6 +161,34 @@ static void test_arrays()
     for (std::size_t k = 0; k < dist.x.size(); k++) mass += dist.density[k] * dist.dx[k];
     CHECK(dist.x.size() == 10 && std::fabs(mass - 1.0) < 1e-12 && dist.excess[0] == 1.0, "a loss distribution");
 #endif
+
+    // A tuple: a std::tuple, {} for C#'s default; a collection of tuples: an array_view of them, in and out.
+    CHECK((nqlt::Tuples::single() == std::tuple<std::optional<double>, std::optional<double>>()), "C#'s default tuple, each element null");
+    CHECK((nqlt::Tuples::single({0.5, std::nullopt}) == std::tuple<std::optional<double>, std::optional<double>>(0.5, std::nullopt)), "a tuple of nullables");
+    CHECK(nqlt::Tuples::scalars({-3, std::numeric_limits<int64_t>::max(), true}) == "-3|9223372036854775807|true", "an int, a long and a flag");
+    CHECK(nqlt::Tuples::labels({"x\xc3\xa9", Date(15, Month::March, 2023), Period(1, TimeUnit::Years)}) == "x\xc3\xa9|45000|1Y", "a string, a date and a period");
+    CHECK(nqlt::Tuples::kinds({Weekday::Friday, {1.5, -2.0}}) == "6|1.5|-2", "an enum and a complex number");
+    EchoObject a(1.0, "one"), b(2.0, "two");
+    std::vector<std::tuple<EchoObject, double>> weighted = nqlt::Tuples::rows(std::vector<std::tuple<EchoObject, double>>{{a, 0.25}, {b, 0.75}});
+    CHECK(weighted.size() == 2 && std::get<0>(weighted[0]) == a && std::get<1>(weighted[1]) == 0.75, "objects and weights back");
+    CHECK(nqlt::Tuples::rows(std::vector<std::tuple<EchoObject, double>>{}).empty(), "an empty collection of tuples");
+    std::vector<std::tuple<std::optional<double>, std::optional<int32_t>, Date>> described{
+        {2.5, 7, Date(15, Month::March, 2023)}, {std::nullopt, 8, Date()}, {-1.0, std::nullopt, Date(16, Month::March, 2023)}};
+    CHECK(nqlt::Tuples::describe(described) == "2.5:7:45000;-:8:-;-1:-:45001", "nullable elements by their flags");
+    CHECK(nqlt::Tuples::describe(nullptr) == "null", "a null collection of tuples");
+    CHECK(nqlt::Tuples::describe(std::vector<std::tuple<std::optional<double>, std::optional<int32_t>, Date>>{}).empty(), "an empty one");
+    auto days = nqlt::Tuples::days(std::vector<std::tuple<std::string, Weekday>>{{"a", Weekday::Monday}, {"", Weekday::Sunday}});
+    CHECK(days.size() == 2 && std::get<0>(days[0]) == "a" && std::get<1>(days[1]) == Weekday::Sunday, "strings and enums");
+    auto terms = nqlt::Tuples::terms(std::vector<std::tuple<Period, int64_t, bool>>{{Period(3, TimeUnit::Months), std::numeric_limits<int64_t>::min(), false},
+                                                                                     {Period(2, TimeUnit::Years), 5, true}});
+    CHECK(terms.size() == 2 && std::get<0>(terms[1]) == Period(2, TimeUnit::Years) && std::get<1>(terms[0]) == std::numeric_limits<int64_t>::min() && std::get<2>(terms[1]),
+          "periods, longs and flags");
+    auto numbers = nqlt::Tuples::numbers(std::vector<std::tuple<std::complex<double>, Date>>{{{1.0, 2.0}, Date(15, Month::March, 2023)}, {{-0.0, NAN}, Date()}});
+    CHECK(numbers.size() == 2 && std::get<0>(numbers[0]).imag() == 2.0 && std::isnan(std::get<0>(numbers[1]).imag()) && std::get<1>(numbers[1]).serial() == 0,
+          "complex numbers and dates");
+    // A returned collection of nullable tuples: std::nullopt for a null one.
+    auto gaps = nqlt::Tuples::gaps(std::vector<std::tuple<int32_t, int32_t>>{{1, 10}, {2, 20}, {3, 30}, {4, 40}}, 2);
+    CHECK(gaps.size() == 4 && !gaps[0] && gaps[1] == std::make_tuple(2, 20) && !gaps[2] && gaps[3] == std::make_tuple(4, 40), "a null tuple as std::nullopt");
 }
 
 // ---- the status codes as exceptions ----
@@ -272,6 +300,12 @@ static void test_generators()
     nqlt::CountingRng counting(10.0, 0.5);
     auto [cv, cw, next] = counting.draws(3);
     CHECK((cv == std::vector<double>{10.0, 10.5, 11.0}) && std::get<0>(next.draws(1))[0] == 11.5, "a user's generator");
+
+    // A closed generator construction as a parameter takes a deriving class's snapshot; another is refused.
+    InvCumulativeMersenneTwisterGaussianRsg gaussian(MersenneTwisterUniformRsg(3, 42));
+    Matrix drawn = std::get<0>(gaussian.draws(4));
+    CHECK(drawn.rows() == 4 && drawn.columns() == 3 && drawn.values() == References::gaussianDraws(), "the Gaussian draws over the uniform snapshot, as C#'s");
+    REFUSED(InvCumulativeMersenneTwisterGaussianRsg(KnuthUniformRsg(3, 42)), handle_error, NQL_ERROR_TYPE);
 }
 
 // ---- overloads and defaults ----
@@ -364,11 +398,35 @@ static void test_engines()
     REFUSED(Fixtures::swapBuilder().withPricingEngine(heston_engine), handle_error, NQL_ERROR_TYPE);
     HestonModelHelper helper = Fixtures::hestonHelper().setPricingEngine(heston_engine);
     SAME(helper.modelValue(Fixtures::heston(), ctx), References::hestonModelValue());
+
+    // A Monte Carlo-shaped engine: its nullable inputs neither bound nor supplied are null; a required one is refused.
+    QuantoVanillaOption quanto = Fixtures::quanto();
+    GeneralizedBlackScholesProcess bsm = Fixtures::blackScholes();
+    YieldTermStructure foreign = Fixtures::foreign();
+    BlackVolTermStructure fxvol = Fixtures::exchangeVolatility();
+    BoundEngine mc = nqlt::McShapedEngine::bind(GeneralizedBlackScholesProcess(nullptr), 4, std::nullopt, 2000, std::nullopt, 42);
+    SAME(*QuantoEngine::calculate(quanto, ctx, bsm, foreign, fxvol, 0.3, mc).NPV(), References::mcShapedQuantoNpv(false));
+    BoundEngine shaped = nqlt::McShapedEngine::bind(GeneralizedBlackScholesProcess(nullptr), 4, std::nullopt, 2000, std::nullopt, 42,
+                                                    std::vector<std::tuple<double, double>>{{0.5, 1.5}, {1.0, 0.5}});
+    SAME(*QuantoEngine::calculate(quanto, ctx, bsm, foreign, fxvol, 0.3, shaped).NPV(), References::mcShapedQuantoNpv(true));
+    BoundEngine open = nqlt::McShapedEngine::bind(GeneralizedBlackScholesProcess(nullptr), 4, std::nullopt, 2000);
+    REFUSED(QuantoEngine::calculate(quanto, ctx, bsm, foreign, fxvol, 0.3, open), handle_error, NQL_ERROR_TYPE);
 }
 
 // ---- calibrations: a calibrated model through its interface, to C#'s parameters bit for bit ----
 static void test_calibrations()
 {
+    // Andreasen–Huge from a calibration set read back as tuples, by its default optimizer and by BFGS(), whose line
+    // search stays at its default.
+    std::vector<std::tuple<VanillaOption, double>> set = Fixtures::calibrationSet();
+    CHECK(set.size() == 9, "nine options with their volatilities");
+    AndreasenHugeVolatilityInterpl ah(set, 100.0, Fixtures::riskFree(), Fixtures::dividend(), AndreasenHugeVolatilityInterplInterpolationType::CubicSpline,
+                                      AndreasenHugeVolatilityInterplCalibrationType::Call, 100);
+    SAME(ah.localVol(1.0, 110.0), References::andreasenHugeLocalVol(false));
+    AndreasenHugeVolatilityInterpl ahb(set, 100.0, Fixtures::riskFree(), Fixtures::dividend(), AndreasenHugeVolatilityInterplInterpolationType::CubicSpline,
+                                       AndreasenHugeVolatilityInterplCalibrationType::Call, 100, std::nullopt, std::nullopt, BFGS());
+    SAME(ahb.localVol(1.0, 110.0), References::andreasenHugeLocalVol(true));
+
     EvaluationContext ctx = Fixtures::calibrationContext();
     Gsr gsr = Fixtures::gsr();
     HullWhite hw = Fixtures::calibrationHullWhite();
@@ -395,6 +453,12 @@ static void test_calibrations()
 static void test_experimental()
 {
 #ifdef NANOQL_EXPERIMENTAL
+    // A static stays under its declaring type: the named latent model reaches its base's factory through C++'s
+    // inheritance, the one function, which builds the base.
+    CHECK(&GaussianDefProbLM::fromCorrelation == &LatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits::fromCorrelation,
+          "the factory inherited, not copied");
+    CHECK(GaussianDefProbLM::fromCorrelation(0.3, 2).typeName().rfind("NanoQL.Experimental.LatentModel`2", 0) == 0, "it builds its declaring type");
+
     CallableFixedRateBond bond = Fixtures::callableBond();
     CHECK(bond && bond.typeName() == "NanoQL.Experimental.CallableFixedRateBond", "an experimental class under NANOQL_EXPERIMENTAL");
 

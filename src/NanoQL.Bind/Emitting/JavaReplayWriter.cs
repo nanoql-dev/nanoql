@@ -157,7 +157,7 @@ internal sealed class JavaReplayWriter(JavaWriter java)
     {
         "handle" or "boxed" or "boxed?" or "snapshot" or "draws" or "sequences" => true,
         "array" or "map" => Holds(k.Element!) || (k.Value != null && Holds(k.Value)),
-        "tuple" => k.Items.Any(Holds),
+        "tuple" or "tuple?" => k.Items.Any(Holds),
         _ => false,
     };
 
@@ -186,6 +186,8 @@ internal sealed class JavaReplayWriter(JavaWriter java)
             "matrix" or "matrix&" => $"r.matrix(a, {at})",
             "vector" or "vector&" => $"r.doubles(a, {at})",
             "span" => k.Element!.Name == "double" ? $"r.doubles(a, {at})" : $"r.ints(a, {at})",
+            "tuple" => $"({type}) r.tuple(a, {at}, {Kinds(k)}, {Classes(k)})",
+            "array" when k.Element!.Name == "tuple" => $"r.tuples(a, {at}, {Kinds(k.Element)}, {Classes(k.Element)})",
             "array" => k.Element!.Name switch
             {
                 "double" => $"r.doubles(a, {at})",
@@ -199,6 +201,11 @@ internal sealed class JavaReplayWriter(JavaWriter java)
             _ => throw new InvalidOperationException("no Java replay reader for the kind " + k.Text),
         };
     }
+
+    // A tuple's element kinds and classes, for the tuple readers.
+    private static string Kinds(CKind t) => "new String[] {" + string.Join(", ", t.Items.Select(i => $"\"{i.Name}\"")) + "}";
+
+    private string Classes(CKind t) => "new Class<?>[] {" + string.Join(", ", t.Items.Select(ElementClass)) + "}";
 
     // An element's class, for the readers that make enums and objects; null for the rest.
     private string ElementClass(CKind e) => e.Name is "enum" or "handle" or "boxed" or "boxed?" or "snapshot" ? JavaWriter.Erased(java.Type(e, true)) + ".class" : "null";

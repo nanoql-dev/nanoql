@@ -200,10 +200,11 @@ internal static class SurfaceWriter
             w.WriteString("value", k.Value.Type.KeyName());
         }
 
-        if (k.ItemNames.Count > 0)
+        IReadOnlyList<string> itemNames = k.ItemNames.Count > 0 ? k.ItemNames : k.Element?.ItemNames ?? [];
+        if (itemNames.Count > 0)
         {
             w.WriteStartArray("items");
-            foreach (string n in k.ItemNames)
+            foreach (string n in itemNames)
             {
                 w.WriteStringValue(n);
             }

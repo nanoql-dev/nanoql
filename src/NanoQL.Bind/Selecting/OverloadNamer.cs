@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 The nanoql Authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Reflection;
 using NanoQL.Bind.Model;
 using NanoQL.Bind.Reading;
 
@@ -25,8 +26,10 @@ internal static class OverloadNamer
         var kept = new List<CFunction>();
         foreach (IGrouping<string, CFunction> same in group.GroupBy(CSignature))
         {
-            // The overload taking a ReadOnlySpan, else an ImmutableArray, else the first in metadata order.
-            CFunction best = same.OrderBy(Preference).ThenBy(f => f.Member?.MetadataToken ?? 0).First();
+            // A member the type declares with `new` hides its base's of the same signature, as C#'s lookup binds it (B2R1:
+            // a named class's own Create over its closed generic's); then the overload taking a ReadOnlySpan, else an
+            // ImmutableArray, else the first in metadata order.
+            CFunction best = same.OrderBy(f => Hides(f) ? 0 : 1).ThenBy(Preference).ThenBy(f => f.Member?.MetadataToken ?? 0).First();
             kept.Add(best);
             foreach (CFunction other in same.Where(f => f != best))
             {
@@ -140,4 +143,9 @@ internal static class OverloadNamer
 
     private static int Preference(CFunction f) => f.Params.Sum(p =>
         p.Kind.Type.IsConstructionOf("System.ReadOnlySpan`1") ? 0 : p.Kind.Type.IsConstructionOf("System.Collections.Immutable.ImmutableArray`1") ? 1 : p.Kind.Name == "array" ? 2 : 0);
+
+    // A member the type itself declares that hides its base's (C#'s `new`: non-virtual, or virtual in a new slot), not
+    // one that overrides a virtual, whose call sites name the virtual's declaration.
+    private static bool Hides(CFunction f) =>
+        f.Holder == f.Type && (f.Member is not MethodInfo m || !m.IsVirtual || (m.Attributes & MethodAttributes.NewSlot) != 0);
 }

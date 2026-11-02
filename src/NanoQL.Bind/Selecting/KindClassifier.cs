@@ -125,8 +125,7 @@ internal sealed class KindClassifier(WellKnown known)
         {
             if (!isReturn)
             {
-                why = "tuple parameter";
-                return null;
+                return ElementTupleOf(t, p, out why);
             }
 
             return TupleOf(t, p, out why);
@@ -134,13 +133,26 @@ internal sealed class KindClassifier(WellKnown known)
 
         if (t.IsArray || (t.IsGenericType && Sequences.Contains(t.GetGenericTypeDefinition().FullName!)))
         {
-            return SequenceOf(t, isReturn, out why);
+            return SequenceOf(t, p, isReturn, out why);
         }
 
         if (known.IsWorking(t))
         {
             if (known.IsGenerator(t) && !t.IsConstructedGenericType)
             {
+                return new CKind("snapshot", t);
+            }
+
+            // A closed generator construction as a parameter takes the snapshot of a class deriving it (B2R6: the named
+            // uniform generators), its type checked at the call; one no class derives stays withheld.
+            if (known.IsGenerator(t) && t.IsConstructedGenericType && !isReturn)
+            {
+                if (known.DerivingGenerator(t) == null)
+                {
+                    why = $"takes a closed generator construction no generator class derives: {TypeNamer.Simple(t)}<{string.Join(", ", t.GetGenericArguments().Select(TypeNamer.Simple))}>";
+                    return null;
+                }
+
                 return new CKind("snapshot", t);
             }
 
@@ -215,7 +227,7 @@ internal sealed class KindClassifier(WellKnown known)
         return null;
     }
 
-    private CKind? SequenceOf(Type t, bool isReturn, out string? why)
+    private CKind? SequenceOf(Type t, ParameterInfo? p, bool isReturn, out string? why)
     {
         why = null;
         if (t.IsArray && t.GetArrayRank() != 1)
@@ -243,6 +255,25 @@ internal sealed class KindClassifier(WellKnown known)
         }
 
         CKind? ek = ElementOf(el);
+        Type tupleEl = el.NullableOf() ?? el;
+        if (ek == null && !span && tupleEl.IsGenericType && tupleEl.GetGenericTypeDefinition().FullName!.StartsWith("System.ValueTuple`", StringComparison.Ordinal) && (isReturn || tupleEl == el))
+        {
+            // A collection of tuples crosses as one array per element and one count, in and out (B2R3, B2R10); a
+            // returned collection of nullable tuples with has-value flags.
+            ek = ElementTupleOf(tupleEl, p, out why);
+            if (ek == null)
+            {
+                return null;
+            }
+
+            if (isReturn && ek.Items.Any(i => i.IsNullableValue))
+            {
+                return Fail("returned tuple element: nullable", out why);
+            }
+
+            return new CKind("array", t) { Element = tupleEl == el ? ek : ek with { Name = "tuple?", Type = el } };
+        }
+
         if (ek == null)
         {
             why = "collection of " + (el.IsGenericType ? TypeNamer.Simple(el) : el.IsArray ? "arrays" : TypeNamer.Simple(el));
@@ -299,7 +330,7 @@ internal sealed class KindClassifier(WellKnown known)
         foreach (Type a in args)
         {
             CKind? k = Classify(a, null, true, null, out string? inner);
-            if (k == null || k.Name is "tuple" or "distribution")
+            if (k == null || k.Name is "tuple" or "distribution" || (k.Name == "array" && k.Element!.Name is "tuple" or "tuple?"))
             {
                 why = "tuple element: " + (inner ?? k!.Name);
                 return null;
@@ -312,6 +343,40 @@ internal sealed class KindClassifier(WellKnown known)
         string?[] names = new string?[args.Length];
         if (p?.Member is MethodInfo m && m.ReturnParameter.GetCustomAttributesData()
                 .FirstOrDefault(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.TupleElementNamesAttribute") is { } attr
+            && attr.ConstructorArguments[0].Value is IReadOnlyCollection<CustomAttributeTypedArgument> declared)
+        {
+            names = [.. declared.Take(args.Length).Select(d => (string?)d.Value)];
+        }
+
+        return new CKind("tuple", t) { Items = items, ItemNames = [.. names.Select((n, i) => n ?? "item" + (i + 1))] };
+    }
+
+    // A tuple of collection elements: a tuple parameter, or a collection's tuple, in or out. Each element is a scalar, a
+    // nullable double, integer or date, or an object, named by the parameter's or result's TupleElementNames, else
+    // item1...: the first tuple its type holds, as each of these holds one.
+    private CKind? ElementTupleOf(Type t, ParameterInfo? p, out string? why)
+    {
+        why = null;
+        Type[] args = t.GetGenericArguments();
+        if (args.Length > 7)
+        {
+            return Fail("tuple of more than seven elements", out why);
+        }
+
+        var items = new List<CKind>();
+        foreach (Type a in args)
+        {
+            CKind? k = ElementOf(a);
+            if (k == null)
+            {
+                return Fail("tuple element: " + TypeNamer.Simple(a), out why);
+            }
+
+            items.Add(k);
+        }
+
+        string?[] names = new string?[args.Length];
+        if (p?.GetCustomAttributesData().FirstOrDefault(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.TupleElementNamesAttribute") is { } attr
             && attr.ConstructorArguments[0].Value is IReadOnlyCollection<CustomAttributeTypedArgument> declared)
         {
             names = [.. declared.Take(args.Length).Select(d => (string?)d.Value)];

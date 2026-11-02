@@ -50,6 +50,44 @@ public static class References
         QuantoEngine.Calculate(Fixtures.Quanto, Fixtures.Context, Fixtures.BlackScholes, Fixtures.Foreign, Fixtures.ExchangeVolatility, 0.3,
             (o, c, p) => AnalyticEuropeanEngine.Calculate(o, c, p)).NPV!.Value;
 
+    /// <summary>
+    /// Twelve draws of the Mersenne-Twister Gaussian sequence generator over its uniform generator of dimension 3 and
+    /// seed 42, four sequences by rows: a closed generator construction's parameter given a deriving class's snapshot.
+    /// </summary>
+    /// <returns>The draws.</returns>
+    public static ImmutableArray<double> GaussianDraws()
+    {
+        var g = new InvCumulativeMersenneTwisterGaussianRsg(new MersenneTwisterUniformRsg(3, 42));
+        var all = ImmutableArray.CreateBuilder<double>();
+        for (int i = 0; i < 4; i++)
+        {
+            all.AddRange(g.NextSequence().Value.ToArray());
+        }
+
+        return all.ToImmutable();
+    }
+
+    /// <summary>
+    /// The quanto call's NPV through the Monte Carlo-shaped engine: four steps, 2,000 samples and seed 42, the steps per
+    /// year and the tolerance null; with its shape, its weights summing to 2.
+    /// </summary>
+    /// <param name="shaped">Whether the shape is given.</param>
+    /// <returns>The NPV.</returns>
+    public static double McShapedQuantoNpv(bool shaped) =>
+        QuantoEngine.Calculate(Fixtures.Quanto, Fixtures.Context, Fixtures.BlackScholes, Fixtures.Foreign, Fixtures.ExchangeVolatility, 0.3,
+            (o, c, p) => McShapedEngine.Calculate(o, c, p, 4, null, 2000, null, 42, shaped ? [(0.5, 1.5), (1.0, 0.5)] : null)).NPV!.Value;
+
+    /// <summary>
+    /// Andreasen–Huge's local volatility at a year and a strike of 110, calibrated on the fixtures' set and spot 100 with
+    /// a hundred grid points, by its default optimizer or by <see cref="BFGS"/> with QuantLib's default line search.
+    /// </summary>
+    /// <param name="bfgs">Whether the optimizer is BFGS.</param>
+    /// <returns>The local volatility.</returns>
+    public static double AndreasenHugeLocalVol(bool bfgs) =>
+        new AndreasenHugeVolatilityInterpl(
+            Fixtures.CalibrationSet, 100.0, Fixtures.RiskFree, Fixtures.Dividend, AndreasenHugeVolatilityInterplInterpolationType.CubicSpline,
+            AndreasenHugeVolatilityInterplCalibrationType.Call, 100, null, null, bfgs ? new BFGS() : null).LocalVol(1.0, 110.0);
+
     /// <summary>The YoY optionlet helper's implied quote on the market's surface, through the unit-displaced Black engine.</summary>
     /// <returns>The implied quote.</returns>
     public static double YoYImpliedQuote()
