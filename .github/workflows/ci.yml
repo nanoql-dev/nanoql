@@ -240,7 +240,8 @@ jobs:
       - name: The toolchain and the SDK in the manylinux container
         if: matrix.container != ''
         run: |
-          dnf install -y -q clang zlib-devel cmake
+          # Not quiet, so the log shows each download and its speed: one mirror took 44 minutes.
+          dnf install -y clang zlib-devel cmake
           sdk=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' global.json | head -1)
           curl -sSfL -o "$RUNNER_TEMP/dotnet-install.sh" https://dot.net/v1/dotnet-install.sh
           bash "$RUNNER_TEMP/dotnet-install.sh" --version "$sdk" --install-dir "$HOME/.dotnet"
@@ -379,7 +380,9 @@ jobs:
         run: |
           dotnet run --project src/NanoQL.Bind -c Release --no-build -- replay-cpp --out "$RUNNER_TEMP/cpp-dispatch"
           cmake -S bindings/cpp/replay -B "$RUNNER_TEMP/cpp-replay" -DNANOQL_DIR="$RUNNER_TEMP/nanoql" -DNANOQL_DISPATCH="$RUNNER_TEMP/cpp-dispatch" -DCMAKE_BUILD_TYPE=Release
-          cmake --build "$RUNNER_TEMP/cpp-replay" --config Release --parallel
+          # Two jobs: a dispatch unit takes g++ over a gigabyte, and make given no count compiles all 18 at once, more
+          # than a private repository's Linux runner holds.
+          cmake --build "$RUNNER_TEMP/cpp-replay" --config Release --parallel 2
           replay=$(find "$RUNNER_TEMP/cpp-replay" -name 'replay' -type f -o -name 'replay.exe' -type f | head -1)
           "$replay" "$RUNNER_TEMP/recording/trace.jsonl" "$RUNNER_TEMP/recording/cpp-facts.tsv"
           diff <(sort "$RUNNER_TEMP/recording/facts.tsv") <(sort "$RUNNER_TEMP/recording/cpp-facts.tsv")
