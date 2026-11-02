@@ -17,8 +17,10 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The C++ harness's Monte Carlo lookback vectors,
 /// <c>tests/vectors/cxx/pricingengines/lookback/mclookbackengine.json</c>: the checks of
-/// <see cref="MakeMCLookbackEngine{TOption, TRng, TStats}"/> for each of the four lookback options; the process as
-/// <c>tools/cxx/src/pricingengines/lookback/mclookbackengine.cpp</c> builds it.
+/// <see cref="MakeMCLookbackEngine{TOption, TRng, TStats}"/> for each of the four lookback options; and the fixed and
+/// floating options' prices through <see cref="MCPRLookbackEngine"/> and <see cref="MCLDLookbackEngine"/>, within the
+/// tolerance their file sets for BR5 (xx)'s fold; the processes as
+/// <c>tools/cxx/src/pricingengines/lookback/mclookbackengine.cpp</c> builds them.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class MCLookbackEngineCxxVectorTests
@@ -30,6 +32,19 @@ public class MCLookbackEngineCxxVectorTests
         var check = new VectorAssert(file);
         foreach (VectorCase c in file.Cases)
         {
+            if (c.Inputs.TryGetProperty("priced", out JsonElement p))
+            {
+                EvaluationContext context = c.Context();
+                var priced = new Lazy<OneAssetOptionResults>(() => Priced(p, context));
+                check.Output(c, "NPV", Lazy(() => priced.Value.NPV));
+                if (c.Expected.TryGetProperty("errorEstimate", out _))
+                {
+                    check.Output(c, "errorEstimate", Lazy(() => priced.Value.ErrorEstimate));
+                }
+
+                continue;
+            }
+
             GeneralizedBlackScholesProcess process = ProcessAt(c.Context().EvaluationDate);
             check.Output(c, "built", Lazy(() => c.String("instrument") switch
             {
@@ -72,6 +87,35 @@ public class MCLookbackEngineCxxVectorTests
             tolerance is double x ? b.WithAbsoluteTolerance(x) : b;
         builder = c.String("order") == "samples" ? Tolerance(Samples(builder)) : Samples(Tolerance(builder));
         return builder.ToEngine() is not null;
+    }
+
+    // The harness's priced call: the fixed option struck at 90 or the floating one, the extremum so far 100, on
+    // testMonteCarloLookback's market, through MCPRLookbackEngine or MCLDLookbackEngine
+    private static OneAssetOptionResults Priced(JsonElement p, EvaluationContext context)
+    {
+        Date today = context.EvaluationDate;
+        DayCounter dc = new Actual360();
+        var process = new BlackScholesMertonProcess(
+            100.0, new FlatForward(today, 0.0, dc), new FlatForward(today, 0.06, dc), new BlackConstantVol(today, new NullCalendar(), 0.1, dc));
+        var type = (OptionType)p.GetProperty("optionType").GetInt32();
+        var exercise = new EuropeanExercise(today + 360);
+        int steps = p.GetProperty("steps").GetInt32();
+        int samples = p.GetProperty("samples").GetInt32();
+        bool antithetic = p.GetProperty("antithetic").GetBoolean();
+        long seed = p.GetProperty("seed").GetInt64();
+        bool pseudoRandom = p.GetProperty("traits").GetString() == "pseudorandom";
+        if (p.GetProperty("instrument").GetString() == "fixed")
+        {
+            var fixedOption = new ContinuousFixedLookbackOption(100.0, new PlainVanillaPayoff(type, 90.0), exercise);
+            return pseudoRandom
+                ? MCPRLookbackEngine.Calculate(fixedOption, context, process, steps, null, false, antithetic, samples, null, null, seed)
+                : MCLDLookbackEngine.Calculate(fixedOption, context, process, steps, null, false, antithetic, samples, null, null, seed);
+        }
+
+        var floating = new ContinuousFloatingLookbackOption(100.0, new FloatingTypePayoff(type), exercise);
+        return pseudoRandom
+            ? MCPRLookbackEngine.Calculate(floating, context, process, steps, null, false, antithetic, samples, null, null, seed)
+            : MCLDLookbackEngine.Calculate(floating, context, process, steps, null, false, antithetic, samples, null, null, seed);
     }
 
     private static GeneralizedBlackScholesProcess ProcessAt(Date today)

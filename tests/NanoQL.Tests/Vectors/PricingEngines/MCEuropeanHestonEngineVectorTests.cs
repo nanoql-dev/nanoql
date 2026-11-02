@@ -63,9 +63,9 @@ public class MCEuropeanHestonEngineVectorTests
         int? max = MCEuropeanEngineVectorTests.NullableInt(spec, "maxSamples");
         long seed = spec.GetProperty("seed").GetInt64();
         return spec.GetProperty("traits").GetString() == "PseudoRandom"
-            ? MCEuropeanHestonEngine.Calculate<PseudoRandom, GeneralStatistics>(
+            ? MCPREuropeanHestonEngine.Calculate(
                 option, context, process, steps, perYear, anti, samples, tolerance, max, seed)
-            : MCEuropeanHestonEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+            : MCLDEuropeanHestonEngine.Calculate(
                 option, context, process, steps, perYear, anti, samples, tolerance, max, seed);
     }
 }

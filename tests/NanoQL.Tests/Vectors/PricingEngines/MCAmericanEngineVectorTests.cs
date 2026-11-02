@@ -64,10 +64,10 @@ public class MCAmericanEngineVectorTests
             : null;
         long seedCalibration = spec.GetProperty("seedCalibration").GetInt64();
         return spec.GetProperty("traits").GetString() == "PseudoRandom"
-            ? MCAmericanEngine.Calculate<PseudoRandom, GeneralStatistics, PseudoRandom>(
+            ? MCPRAmericanEngine.Calculate(
                 option, context, process, steps, perYear, anti, cv, samples, tolerance, max, seed, order, type, nCalibration,
                 antiCalibration, seedCalibration)
-            : MCAmericanEngine.Calculate<LowDiscrepancy, GeneralStatistics, LowDiscrepancy>(
+            : MCLDAmericanEngine.Calculate(
                 option, context, process, steps, perYear, anti, cv, samples, tolerance, max, seed, order, type, nCalibration,
                 antiCalibration, seedCalibration);
     }

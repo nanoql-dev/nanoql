@@ -160,9 +160,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | Unit | Status | nanoql files | Notes |
 |---|---|---|---|
 | `all` | not ported: include-only header |  |  |
-| `binomialdoublebarrierengine` | ported | Experimental/BarrierOption/BinomialDoubleBarrierEngine.cs |  |
+| `binomialdoublebarrierengine` | ported | Experimental/BarrierOption/BinomialCRRDoubleBarrierEngine.cs, Experimental/BarrierOption/BinomialDoubleBarrierEngine.cs, Experimental/BarrierOption/BinomialEQPDoubleBarrierEngine.cs, Experimental/BarrierOption/BinomialJ4DoubleBarrierEngine.cs, Experimental/BarrierOption/BinomialJRDoubleBarrierEngine.cs, Experimental/BarrierOption/BinomialLRDoubleBarrierEngine.cs, Experimental/BarrierOption/BinomialTianDoubleBarrierEngine.cs, Experimental/BarrierOption/BinomialTrigeorgisDoubleBarrierEngine.cs |  |
 | `discretizeddoublebarrieroption` | ported | Experimental/BarrierOption/DiscretizedDoubleBarrierOption/DiscretizedDermanKaniDoubleBarrierOption.cs, Experimental/BarrierOption/DiscretizedDoubleBarrierOption/DiscretizedDoubleBarrierOption.cs, Experimental/BarrierOption/DiscretizedDoubleBarrierOption/IDiscretizedDoubleBarrierAsset{TSelf}.cs |  |
-| `mcdoublebarrierengine` | ported | Experimental/BarrierOption/MCDoubleBarrierEngine/DoubleBarrierPathPricer.cs, Experimental/BarrierOption/MCDoubleBarrierEngine/MCDoubleBarrierEngine.cs, Experimental/BarrierOption/MCDoubleBarrierEngine/MakeMCDoubleBarrierEngine{TRng,TStats}.cs |  |
+| `mcdoublebarrierengine` | ported | Experimental/BarrierOption/MCDoubleBarrierEngine/DoubleBarrierPathPricer.cs, Experimental/BarrierOption/MCDoubleBarrierEngine/MCDoubleBarrierEngine.cs, Experimental/BarrierOption/MCDoubleBarrierEngine/MCLDDoubleBarrierEngine.cs, Experimental/BarrierOption/MCDoubleBarrierEngine/MCPRDoubleBarrierEngine.cs, Experimental/BarrierOption/MCDoubleBarrierEngine/MakeMCDoubleBarrierEngine{TRng,TStats}.cs |  |
 | `perturbativebarrieroptionengine` | ported | Experimental/BarrierOption/PerturbativeBarrierOptionEngine.cs |  |
 | `quantodoublebarrieroption` | ported | Experimental/BarrierOption/QuantoDoubleBarrierOption.cs |  |
 | `suowangdoublebarrierengine` | ported | Experimental/BarrierOption/SuoWangDoubleBarrierEngine.cs |  |
@@ -301,9 +301,9 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `everestoption` | ported | Experimental/ExoticOptions/EverestOption/EverestOption.cs, Experimental/ExoticOptions/EverestOption/EverestOptionResults.cs |  |
 | `himalayaoption` | ported | Experimental/ExoticOptions/HimalayaOption.cs | replaced: HimalayaOptionResults by MultiAssetOptionResults |
 | `kirkspreadoptionengine` | not ported: deprecated |  |  |
-| `mceverestengine` | ported | Experimental/ExoticOptions/MCEverestEngine/EverestMultiPathPricer.cs, Experimental/ExoticOptions/MCEverestEngine/MCEverestEngine.cs, Experimental/ExoticOptions/MCEverestEngine/MakeMCEverestEngine{TRng,TStats}.cs |  |
-| `mchimalayaengine` | ported | Experimental/ExoticOptions/MCHimalayaEngine/HimalayaMultiPathPricer.cs, Experimental/ExoticOptions/MCHimalayaEngine/MCHimalayaEngine.cs, Experimental/ExoticOptions/MCHimalayaEngine/MakeMCHimalayaEngine{TRng,TStats}.cs |  |
-| `mcpagodaengine` | ported | Experimental/ExoticOptions/MCPagodaEngine/MCPagodaEngine.cs, Experimental/ExoticOptions/MCPagodaEngine/MakeMCPagodaEngine{TRng,TStats}.cs, Experimental/ExoticOptions/MCPagodaEngine/PagodaMultiPathPricer.cs |  |
+| `mceverestengine` | ported | Experimental/ExoticOptions/MCEverestEngine/EverestMultiPathPricer.cs, Experimental/ExoticOptions/MCEverestEngine/MCEverestEngine.cs, Experimental/ExoticOptions/MCEverestEngine/MCLDEverestEngine.cs, Experimental/ExoticOptions/MCEverestEngine/MCPREverestEngine.cs, Experimental/ExoticOptions/MCEverestEngine/MakeMCEverestEngine{TRng,TStats}.cs |  |
+| `mchimalayaengine` | ported | Experimental/ExoticOptions/MCHimalayaEngine/HimalayaMultiPathPricer.cs, Experimental/ExoticOptions/MCHimalayaEngine/MCHimalayaEngine.cs, Experimental/ExoticOptions/MCHimalayaEngine/MCLDHimalayaEngine.cs, Experimental/ExoticOptions/MCHimalayaEngine/MCPRHimalayaEngine.cs, Experimental/ExoticOptions/MCHimalayaEngine/MakeMCHimalayaEngine{TRng,TStats}.cs |  |
+| `mcpagodaengine` | ported | Experimental/ExoticOptions/MCPagodaEngine/MCLDPagodaEngine.cs, Experimental/ExoticOptions/MCPagodaEngine/MCPRPagodaEngine.cs, Experimental/ExoticOptions/MCPagodaEngine/MCPagodaEngine.cs, Experimental/ExoticOptions/MCPagodaEngine/MakeMCPagodaEngine{TRng,TStats}.cs, Experimental/ExoticOptions/MCPagodaEngine/PagodaMultiPathPricer.cs |  |
 | `pagodaoption` | ported | Experimental/ExoticOptions/PagodaOption.cs |  |
 | `spreadoption` | not ported: deprecated |  |  |
 
@@ -416,7 +416,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `longstaffschwartzmultipathpricer` | ported | Experimental/McBasket/LongstaffSchwartzMultiPathPricer.cs |  |
 | `mcamericanpathengine` | ported | Experimental/McBasket/MCAmericanPathEngine/MCAmericanPathEngine{TRng,TStats}.cs, Experimental/McBasket/MCAmericanPathEngine/MakeMCAmericanPathEngine{TRng,TStats}.cs |  |
 | `mclongstaffschwartzpathengine` | ported | Experimental/McBasket/MCLongstaffSchwartzPathEngine{TRng,TStats}.cs |  |
-| `mcpathbasketengine` | ported | Experimental/McBasket/MCPathBasketEngine/EuropeanPathMultiPathPricer.cs, Experimental/McBasket/MCPathBasketEngine/MCPathBasketEngine.cs, Experimental/McBasket/MCPathBasketEngine/MakeMCPathBasketEngine{TRng,TStats}.cs |  |
+| `mcpathbasketengine` | ported | Experimental/McBasket/MCPathBasketEngine/EuropeanPathMultiPathPricer.cs, Experimental/McBasket/MCPathBasketEngine/MCLDPathBasketEngine.cs, Experimental/McBasket/MCPathBasketEngine/MCPRPathBasketEngine.cs, Experimental/McBasket/MCPathBasketEngine/MCPathBasketEngine.cs, Experimental/McBasket/MCPathBasketEngine/MakeMCPathBasketEngine{TRng,TStats}.cs |  |
 | `pathmultiassetoption` | ported | Experimental/McBasket/PathMultiAssetOption.cs | replaced: PathMultiAssetOptionResults by InstrumentResults |
 | `pathpayoff` | ported | Experimental/McBasket/PathPayoff.cs |  |
 
@@ -1482,11 +1482,11 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `choiasianengine` | ported | PricingEngines/Asian/ChoiAsianEngine.cs |  |
 | `continuousarithmeticasianlevyengine` | ported | PricingEngines/Asian/ContinuousArithmeticAsianLevyEngine.cs |  |
 | `fdblackscholesasianengine` | ported | PricingEngines/Asian/FdBlackScholesAsianEngine.cs |  |
-| `mc_discr_arith_av_price` | ported | PricingEngines/Asian/MCDiscreteArithmeticAPEngine/ArithmeticAPOPathPricer.cs, PricingEngines/Asian/MCDiscreteArithmeticAPEngine/MCDiscreteArithmeticAPEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticAPEngine/MakeMCDiscreteArithmeticAPEngine{TRng,TStats}.cs |  |
-| `mc_discr_arith_av_price_heston` | ported | PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/ArithmeticAPOHestonPathPricer.cs, PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/MCDiscreteArithmeticAPHestonEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/MakeMCDiscreteArithmeticAPHestonEngine{TRng,TStats}.cs |  |
-| `mc_discr_arith_av_strike` | ported | PricingEngines/Asian/MCDiscreteArithmeticASEngine/ArithmeticASOPathPricer.cs, PricingEngines/Asian/MCDiscreteArithmeticASEngine/MCDiscreteArithmeticASEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticASEngine/MakeMCDiscreteArithmeticASEngine{TRng,TStats}.cs |  |
-| `mc_discr_geom_av_price` | ported | PricingEngines/Asian/MCDiscreteGeometricAPEngine/GeometricAPOPathPricer.cs, PricingEngines/Asian/MCDiscreteGeometricAPEngine/MCDiscreteGeometricAPEngine.cs, PricingEngines/Asian/MCDiscreteGeometricAPEngine/MakeMCDiscreteGeometricAPEngine{TRng,TStats}.cs |  |
-| `mc_discr_geom_av_price_heston` | ported | PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/GeometricAPOHestonPathPricer.cs, PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/MCDiscreteGeometricAPHestonEngine.cs, PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/MakeMCDiscreteGeometricAPHestonEngine{TRng,TStats}.cs |  |
+| `mc_discr_arith_av_price` | ported | PricingEngines/Asian/MCDiscreteArithmeticAPEngine/ArithmeticAPOPathPricer.cs, PricingEngines/Asian/MCDiscreteArithmeticAPEngine/MCDiscreteArithmeticAPEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticAPEngine/MCLDDiscreteArithmeticAPEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticAPEngine/MCPRDiscreteArithmeticAPEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticAPEngine/MakeMCDiscreteArithmeticAPEngine{TRng,TStats}.cs |  |
+| `mc_discr_arith_av_price_heston` | ported | PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/ArithmeticAPOHestonPathPricer.cs, PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/MCDiscreteArithmeticAPHestonEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/MCLDDiscreteArithmeticAPHestonEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/MCPRDiscreteArithmeticAPHestonEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngine/MakeMCDiscreteArithmeticAPHestonEngine{TRng,TStats}.cs |  |
+| `mc_discr_arith_av_strike` | ported | PricingEngines/Asian/MCDiscreteArithmeticASEngine/ArithmeticASOPathPricer.cs, PricingEngines/Asian/MCDiscreteArithmeticASEngine/MCDiscreteArithmeticASEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticASEngine/MCLDDiscreteArithmeticASEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticASEngine/MCPRDiscreteArithmeticASEngine.cs, PricingEngines/Asian/MCDiscreteArithmeticASEngine/MakeMCDiscreteArithmeticASEngine{TRng,TStats}.cs |  |
+| `mc_discr_geom_av_price` | ported | PricingEngines/Asian/MCDiscreteGeometricAPEngine/GeometricAPOPathPricer.cs, PricingEngines/Asian/MCDiscreteGeometricAPEngine/MCDiscreteGeometricAPEngine.cs, PricingEngines/Asian/MCDiscreteGeometricAPEngine/MCLDDiscreteGeometricAPEngine.cs, PricingEngines/Asian/MCDiscreteGeometricAPEngine/MCPRDiscreteGeometricAPEngine.cs, PricingEngines/Asian/MCDiscreteGeometricAPEngine/MakeMCDiscreteGeometricAPEngine{TRng,TStats}.cs |  |
+| `mc_discr_geom_av_price_heston` | ported | PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/GeometricAPOHestonPathPricer.cs, PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/MCDiscreteGeometricAPHestonEngine.cs, PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/MCLDDiscreteGeometricAPHestonEngine.cs, PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/MCPRDiscreteGeometricAPHestonEngine.cs, PricingEngines/Asian/MCDiscreteGeometricAPHestonEngine/MakeMCDiscreteGeometricAPHestonEngine{TRng,TStats}.cs |  |
 | `mcdiscreteasianenginebase` | ported | PricingEngines/Asian/MCDiscreteAveragingAsianEngineBase/MCDiscreteAveragingAsianEngineBase{TMc,TPath,TStats}.cs |  |
 | `turnbullwakemanasianengine` | ported | PricingEngines/Asian/TurnbullWakemanAsianEngine.cs |  |
 
@@ -1502,14 +1502,14 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `analyticpartialtimebarrieroptionengine` | ported | PricingEngines/Barrier/AnalyticPartialTimeBarrierOptionEngine.cs |  |
 | `analyticsoftbarrierengine` | ported | PricingEngines/Barrier/AnalyticSoftBarrierEngine.cs |  |
 | `analytictwoassetbarrierengine` | ported | PricingEngines/Barrier/AnalyticTwoAssetBarrierEngine.cs |  |
-| `binomialbarrierengine` | ported | PricingEngines/Barrier/BinomialBarrierEngine.cs |  |
+| `binomialbarrierengine` | ported | PricingEngines/Barrier/BinomialBarrierEngine.cs, PricingEngines/Barrier/BinomialCRRBarrierEngine.cs, PricingEngines/Barrier/BinomialEQPBarrierEngine.cs, PricingEngines/Barrier/BinomialJ4BarrierEngine.cs, PricingEngines/Barrier/BinomialJRBarrierEngine.cs, PricingEngines/Barrier/BinomialLRBarrierEngine.cs, PricingEngines/Barrier/BinomialTianBarrierEngine.cs, PricingEngines/Barrier/BinomialTrigeorgisBarrierEngine.cs |  |
 | `discretizedbarrieroption` | ported | PricingEngines/Barrier/DiscretizedBarrierOption/DiscretizedBarrierOption.cs, PricingEngines/Barrier/DiscretizedBarrierOption/DiscretizedDermanKaniBarrierOption.cs, PricingEngines/Barrier/DiscretizedBarrierOption/IDiscretizedBarrierAsset{TSelf}.cs |  |
 | `fdblackscholesbarrierengine` | ported | PricingEngines/Barrier/FdBlackScholesBarrierEngine.cs |  |
 | `fdblackscholesrebateengine` | ported | PricingEngines/Barrier/FdBlackScholesRebateEngine.cs |  |
 | `fdhestonbarrierengine` | ported | PricingEngines/Barrier/FdHestonBarrierEngine.cs |  |
 | `fdhestondoublebarrierengine` | ported | PricingEngines/Barrier/FdHestonDoubleBarrierEngine.cs |  |
 | `fdhestonrebateengine` | ported | PricingEngines/Barrier/FdHestonRebateEngine.cs |  |
-| `mcbarrierengine` | ported | PricingEngines/Barrier/MCBarrierEngine/BarrierPathPricer.cs, PricingEngines/Barrier/MCBarrierEngine/BiasedBarrierPathPricer.cs, PricingEngines/Barrier/MCBarrierEngine/MCBarrierEngine.cs, PricingEngines/Barrier/MCBarrierEngine/MakeMCBarrierEngine{TRng,TStats}.cs |  |
+| `mcbarrierengine` | ported | PricingEngines/Barrier/MCBarrierEngine/BarrierPathPricer.cs, PricingEngines/Barrier/MCBarrierEngine/BiasedBarrierPathPricer.cs, PricingEngines/Barrier/MCBarrierEngine/MCBarrierEngine.cs, PricingEngines/Barrier/MCBarrierEngine/MCLDBarrierEngine.cs, PricingEngines/Barrier/MCBarrierEngine/MCPRBarrierEngine.cs, PricingEngines/Barrier/MCBarrierEngine/MakeMCBarrierEngine{TRng,TStats}.cs |  |
 
 ### `ql/pricingengines/basket/`
 
@@ -1523,8 +1523,8 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `fdndimblackscholesvanillaengine` | ported | PricingEngines/Basket/FdndimBlackScholesVanillaEngine.cs |  |
 | `gaussiancopulaspreadengine` | ported | PricingEngines/Basket/GaussianCopulaSpreadEngine.cs |  |
 | `kirkengine` | ported | PricingEngines/Basket/KirkEngine.cs |  |
-| `mcamericanbasketengine` | ported | PricingEngines/Basket/MCAmericanBasketEngine/AmericanBasketPathPricer.cs, PricingEngines/Basket/MCAmericanBasketEngine/MCAmericanBasketEngine.cs, PricingEngines/Basket/MCAmericanBasketEngine/MakeMCAmericanBasketEngine{TRng,TStats}.cs |  |
-| `mceuropeanbasketengine` | ported | PricingEngines/Basket/MCEuropeanBasketEngine/EuropeanMultiPathPricer.cs, PricingEngines/Basket/MCEuropeanBasketEngine/MCEuropeanBasketEngine.cs, PricingEngines/Basket/MCEuropeanBasketEngine/MakeMCEuropeanBasketEngine{TRng,TStats}.cs |  |
+| `mcamericanbasketengine` | ported | PricingEngines/Basket/MCAmericanBasketEngine/AmericanBasketPathPricer.cs, PricingEngines/Basket/MCAmericanBasketEngine/MCAmericanBasketEngine.cs, PricingEngines/Basket/MCAmericanBasketEngine/MCLDAmericanBasketEngine.cs, PricingEngines/Basket/MCAmericanBasketEngine/MCPRAmericanBasketEngine.cs, PricingEngines/Basket/MCAmericanBasketEngine/MakeMCAmericanBasketEngine{TRng,TStats}.cs |  |
+| `mceuropeanbasketengine` | ported | PricingEngines/Basket/MCEuropeanBasketEngine/EuropeanMultiPathPricer.cs, PricingEngines/Basket/MCEuropeanBasketEngine/MCEuropeanBasketEngine.cs, PricingEngines/Basket/MCEuropeanBasketEngine/MCLDEuropeanBasketEngine.cs, PricingEngines/Basket/MCEuropeanBasketEngine/MCPREuropeanBasketEngine.cs, PricingEngines/Basket/MCEuropeanBasketEngine/MakeMCEuropeanBasketEngine{TRng,TStats}.cs |  |
 | `operatorsplittingspreadengine` | ported | PricingEngines/Basket/OperatorSplittingSpreadEngine/OperatorSplittingSpreadEngine.cs, PricingEngines/Basket/OperatorSplittingSpreadEngine/OperatorSplittingSpreadEngineOrder.cs |  |
 | `pearsonspreadengine` | ported | PricingEngines/Basket/PearsonSpreadEngine.cs |  |
 | `singlefactorbsmbasketengine` | ported | PricingEngines/Basket/SingleFactorBsmBasketEngine/SingleFactorBsmBasketEngine.cs, PricingEngines/Basket/SingleFactorBsmBasketEngine/SumExponentialsRootSolver.cs |  |
@@ -1553,7 +1553,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `blackcapfloorengine` | ported | PricingEngines/CapFloor/BlackCapFloorEngine.cs |  |
 | `discretizedcapfloor` | ported | PricingEngines/CapFloor/DiscretizedCapFloor.cs |  |
 | `gaussian1dcapfloorengine` | ported | PricingEngines/CapFloor/Gaussian1dCapFloorEngine.cs |  |
-| `mchullwhiteengine` | ported | PricingEngines/CapFloor/MCHullWhiteEngine/HullWhiteCapFloorPricer.cs, PricingEngines/CapFloor/MCHullWhiteEngine/MCHullWhiteCapFloorEngine.cs, PricingEngines/CapFloor/MCHullWhiteEngine/MakeMCHullWhiteCapFloorEngine{TRng,TStats}.cs |  |
+| `mchullwhiteengine` | ported | PricingEngines/CapFloor/MCHullWhiteEngine/HullWhiteCapFloorPricer.cs, PricingEngines/CapFloor/MCHullWhiteEngine/MCHullWhiteCapFloorEngine.cs, PricingEngines/CapFloor/MCHullWhiteEngine/MCLDHullWhiteCapFloorEngine.cs, PricingEngines/CapFloor/MCHullWhiteEngine/MCPRHullWhiteCapFloorEngine.cs, PricingEngines/CapFloor/MCHullWhiteEngine/MakeMCHullWhiteCapFloorEngine{TRng,TStats}.cs |  |
 | `treecapfloorengine` | ported | PricingEngines/CapFloor/TreeCapFloorEngine.cs |  |
 
 ### `ql/pricingengines/cliquet/`
@@ -1563,7 +1563,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `all` | not ported: include-only header |  |  |
 | `analyticcliquetengine` | ported | PricingEngines/Cliquet/AnalyticCliquetEngine.cs |  |
 | `analyticperformanceengine` | ported | PricingEngines/Cliquet/AnalyticPerformanceEngine.cs |  |
-| `mcperformanceengine` | ported | PricingEngines/Cliquet/MCPerformanceEngine/MCPerformanceEngine.cs, PricingEngines/Cliquet/MCPerformanceEngine/MakeMCPerformanceEngine{TRng,TStats}.cs, PricingEngines/Cliquet/MCPerformanceEngine/PerformanceOptionPathPricer.cs |  |
+| `mcperformanceengine` | ported | PricingEngines/Cliquet/MCPerformanceEngine/MCLDPerformanceEngine.cs, PricingEngines/Cliquet/MCPerformanceEngine/MCPRPerformanceEngine.cs, PricingEngines/Cliquet/MCPerformanceEngine/MCPerformanceEngine.cs, PricingEngines/Cliquet/MCPerformanceEngine/MakeMCPerformanceEngine{TRng,TStats}.cs, PricingEngines/Cliquet/MCPerformanceEngine/PerformanceOptionPathPricer.cs |  |
 
 ### `ql/pricingengines/credit/`
 
@@ -1596,10 +1596,10 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `discountingfxforwardengine` | ported | PricingEngines/Forward/DiscountingFxForwardEngine.cs |  |
 | `forwardengine` | ported | PricingEngines/Forward/ForwardVanillaEngine.cs |  |
 | `forwardperformanceengine` | ported | PricingEngines/Forward/ForwardPerformanceVanillaEngine.cs |  |
-| `mcforwardeuropeanbsengine` | ported | PricingEngines/Forward/MCForwardEuropeanBSEngine/ForwardEuropeanBSPathPricer.cs, PricingEngines/Forward/MCForwardEuropeanBSEngine/MCForwardEuropeanBSEngine.cs, PricingEngines/Forward/MCForwardEuropeanBSEngine/MakeMCForwardEuropeanBSEngine{TRng,TStats}.cs |  |
-| `mcforwardeuropeanhestonengine` | ported | PricingEngines/Forward/MCForwardEuropeanHestonEngine/ForwardEuropeanHestonPathPricer.cs, PricingEngines/Forward/MCForwardEuropeanHestonEngine/MCForwardEuropeanHestonEngine.cs, PricingEngines/Forward/MCForwardEuropeanHestonEngine/MakeMCForwardEuropeanHestonEngine{TRng,TStats}.cs |  |
+| `mcforwardeuropeanbsengine` | ported | PricingEngines/Forward/MCForwardEuropeanBSEngine/ForwardEuropeanBSPathPricer.cs, PricingEngines/Forward/MCForwardEuropeanBSEngine/MCForwardEuropeanBSEngine.cs, PricingEngines/Forward/MCForwardEuropeanBSEngine/MCLDForwardEuropeanBSEngine.cs, PricingEngines/Forward/MCForwardEuropeanBSEngine/MCPRForwardEuropeanBSEngine.cs, PricingEngines/Forward/MCForwardEuropeanBSEngine/MakeMCForwardEuropeanBSEngine{TRng,TStats}.cs |  |
+| `mcforwardeuropeanhestonengine` | ported | PricingEngines/Forward/MCForwardEuropeanHestonEngine/ForwardEuropeanHestonPathPricer.cs, PricingEngines/Forward/MCForwardEuropeanHestonEngine/MCForwardEuropeanHestonEngine.cs, PricingEngines/Forward/MCForwardEuropeanHestonEngine/MCLDForwardEuropeanHestonEngine.cs, PricingEngines/Forward/MCForwardEuropeanHestonEngine/MCPRForwardEuropeanHestonEngine.cs, PricingEngines/Forward/MCForwardEuropeanHestonEngine/MakeMCForwardEuropeanHestonEngine{TRng,TStats}.cs |  |
 | `mcforwardvanillaengine` | ported | PricingEngines/Forward/MCForwardVanillaEngine{TMc,TPath,TStats}.cs |  |
-| `mcvarianceswapengine` | ported | PricingEngines/Forward/MCVarianceSwapEngine/MCVarianceSwapEngine.cs, PricingEngines/Forward/MCVarianceSwapEngine/MakeMCVarianceSwapEngine{TRng,TStats}.cs, PricingEngines/Forward/MCVarianceSwapEngine/VariancePathPricer.cs |  |
+| `mcvarianceswapengine` | ported | PricingEngines/Forward/MCVarianceSwapEngine/MCLDVarianceSwapEngine.cs, PricingEngines/Forward/MCVarianceSwapEngine/MCPRVarianceSwapEngine.cs, PricingEngines/Forward/MCVarianceSwapEngine/MCVarianceSwapEngine.cs, PricingEngines/Forward/MCVarianceSwapEngine/MakeMCVarianceSwapEngine{TRng,TStats}.cs, PricingEngines/Forward/MCVarianceSwapEngine/VariancePathPricer.cs |  |
 | `replicatingvarianceswapengine` | ported | PricingEngines/Forward/ReplicatingVarianceSwapEngine.cs |  |
 
 ### `ql/pricingengines/futures/`
@@ -1625,7 +1625,7 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `analyticcontinuousfloatinglookback` | ported | PricingEngines/Lookback/AnalyticContinuousFloatingLookbackEngine.cs |  |
 | `analyticcontinuouspartialfixedlookback` | ported | PricingEngines/Lookback/AnalyticContinuousPartialFixedLookbackEngine.cs |  |
 | `analyticcontinuouspartialfloatinglookback` | ported | PricingEngines/Lookback/AnalyticContinuousPartialFloatingLookbackEngine.cs |  |
-| `mclookbackengine` | ported | PricingEngines/Lookback/MCLookbackEngine/MCLookbackEngine.cs, PricingEngines/Lookback/MCLookbackEngine/MakeMCLookbackEngine{TOption,TRng,TStats}.cs |  |
+| `mclookbackengine` | ported | PricingEngines/Lookback/MCLookbackEngine/MCLDLookbackEngine.cs, PricingEngines/Lookback/MCLookbackEngine/MCLookbackEngine.cs, PricingEngines/Lookback/MCLookbackEngine/MCPRLookbackEngine.cs, PricingEngines/Lookback/MCLookbackEngine/MakeMCLookbackEngine{TOption,TRng,TStats}.cs |  |
 
 ### `ql/pricingengines/quanto/`
 
@@ -1702,12 +1702,12 @@ because the instrument and its static engine take their place (playbook §2.1).
 | `integralengine` | ported | PricingEngines/Vanilla/IntegralEngine.cs |  |
 | `jumpdiffusionengine` | ported | PricingEngines/Vanilla/JumpDiffusionEngine.cs |  |
 | `juquadraticengine` | ported | PricingEngines/Vanilla/JuQuadraticApproximationEngine.cs |  |
-| `mcamericanengine` | ported | PricingEngines/Vanilla/MCAmericanEngine/AmericanPathPricer.cs, PricingEngines/Vanilla/MCAmericanEngine/MCAmericanEngine.cs, PricingEngines/Vanilla/MCAmericanEngine/MakeMCAmericanEngine{TRng,TStats,TRngCalibration}.cs |  |
-| `mcdigitalengine` | ported | PricingEngines/Vanilla/MCDigitalEngine/DigitalPathPricer.cs, PricingEngines/Vanilla/MCDigitalEngine/MCDigitalEngine.cs, PricingEngines/Vanilla/MCDigitalEngine/MakeMCDigitalEngine{TRng,TStats}.cs |  |
-| `mceuropeanengine` | ported | PricingEngines/Vanilla/MCEuropeanEngine/EuropeanPathPricer.cs, PricingEngines/Vanilla/MCEuropeanEngine/MCEuropeanEngine.cs, PricingEngines/Vanilla/MCEuropeanEngine/MakeMCEuropeanEngine{TRng,TStats}.cs |  |
-| `mceuropeangjrgarchengine` | ported | PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/EuropeanGJRGARCHPathPricer.cs, PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/MCEuropeanGJRGARCHEngine.cs, PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/MakeMCEuropeanGJRGARCHEngine{TRng,TStats}.cs |  |
-| `mceuropeanhestonengine` | ported | PricingEngines/Vanilla/MCEuropeanHestonEngine/EuropeanHestonPathPricer.cs, PricingEngines/Vanilla/MCEuropeanHestonEngine/MCEuropeanHestonEngine.cs, PricingEngines/Vanilla/MCEuropeanHestonEngine/MakeMCEuropeanHestonEngine{TRng,TStats}.cs |  |
-| `mchestonhullwhiteengine` | ported | PricingEngines/Vanilla/MCHestonHullWhiteEngine/HestonHullWhitePathPricer.cs, PricingEngines/Vanilla/MCHestonHullWhiteEngine/MCHestonHullWhiteEngine.cs, PricingEngines/Vanilla/MCHestonHullWhiteEngine/MakeMCHestonHullWhiteEngine{TRng,TStats}.cs |  |
+| `mcamericanengine` | ported | PricingEngines/Vanilla/MCAmericanEngine/AmericanPathPricer.cs, PricingEngines/Vanilla/MCAmericanEngine/MCAmericanEngine.cs, PricingEngines/Vanilla/MCAmericanEngine/MCLDAmericanEngine.cs, PricingEngines/Vanilla/MCAmericanEngine/MCPRAmericanEngine.cs, PricingEngines/Vanilla/MCAmericanEngine/MakeMCAmericanEngine{TRng,TStats,TRngCalibration}.cs |  |
+| `mcdigitalengine` | ported | PricingEngines/Vanilla/MCDigitalEngine/DigitalPathPricer.cs, PricingEngines/Vanilla/MCDigitalEngine/MCDigitalEngine.cs, PricingEngines/Vanilla/MCDigitalEngine/MCLDDigitalEngine.cs, PricingEngines/Vanilla/MCDigitalEngine/MCPRDigitalEngine.cs, PricingEngines/Vanilla/MCDigitalEngine/MakeMCDigitalEngine{TRng,TStats}.cs |  |
+| `mceuropeanengine` | ported | PricingEngines/Vanilla/MCEuropeanEngine/EuropeanPathPricer.cs, PricingEngines/Vanilla/MCEuropeanEngine/MCEuropeanEngine.cs, PricingEngines/Vanilla/MCEuropeanEngine/MCLDEuropeanEngine.cs, PricingEngines/Vanilla/MCEuropeanEngine/MCPREuropeanEngine.cs, PricingEngines/Vanilla/MCEuropeanEngine/MakeMCEuropeanEngine{TRng,TStats}.cs |  |
+| `mceuropeangjrgarchengine` | ported | PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/EuropeanGJRGARCHPathPricer.cs, PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/MCEuropeanGJRGARCHEngine.cs, PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/MCLDEuropeanGJRGARCHEngine.cs, PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/MCPREuropeanGJRGARCHEngine.cs, PricingEngines/Vanilla/MCEuropeanGJRGARCHEngine/MakeMCEuropeanGJRGARCHEngine{TRng,TStats}.cs |  |
+| `mceuropeanhestonengine` | ported | PricingEngines/Vanilla/MCEuropeanHestonEngine/EuropeanHestonPathPricer.cs, PricingEngines/Vanilla/MCEuropeanHestonEngine/MCEuropeanHestonEngine.cs, PricingEngines/Vanilla/MCEuropeanHestonEngine/MCLDEuropeanHestonEngine.cs, PricingEngines/Vanilla/MCEuropeanHestonEngine/MCPREuropeanHestonEngine.cs, PricingEngines/Vanilla/MCEuropeanHestonEngine/MakeMCEuropeanHestonEngine{TRng,TStats}.cs |  |
+| `mchestonhullwhiteengine` | ported | PricingEngines/Vanilla/MCHestonHullWhiteEngine/HestonHullWhitePathPricer.cs, PricingEngines/Vanilla/MCHestonHullWhiteEngine/MCHestonHullWhiteEngine.cs, PricingEngines/Vanilla/MCHestonHullWhiteEngine/MCLDHestonHullWhiteEngine.cs, PricingEngines/Vanilla/MCHestonHullWhiteEngine/MCPRHestonHullWhiteEngine.cs, PricingEngines/Vanilla/MCHestonHullWhiteEngine/MakeMCHestonHullWhiteEngine{TRng,TStats}.cs |  |
 | `mcvanillaengine` | ported | PricingEngines/Vanilla/MCVanillaEngine{TMc,TPath,TStats}.cs |  |
 | `qdfpamericanengine` | ported | PricingEngines/Vanilla/QdFpAmericanEngine/DqFpEquation.cs, PricingEngines/Vanilla/QdFpAmericanEngine/DqFpEquationA.cs, PricingEngines/Vanilla/QdFpAmericanEngine/DqFpEquationB.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpAmericanEngine.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpAmericanEngineFixedPointEquation.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpIterationScheme.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpLegendreScheme.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpLegendreTanhSinhScheme.cs, PricingEngines/Vanilla/QdFpAmericanEngine/QdFpTanhSinhIterationScheme.cs |  |
 | `qdplusamericanengine` | ported | PricingEngines/Vanilla/QdPlusAmericanEngine/QdPlusAddOnValue.cs, PricingEngines/Vanilla/QdPlusAmericanEngine/QdPlusAmericanEngine.cs, PricingEngines/Vanilla/QdPlusAmericanEngine/QdPlusAmericanEngineSolverType.cs, PricingEngines/Vanilla/QdPlusAmericanEngine/QdPutCallParityEngine.cs |  |

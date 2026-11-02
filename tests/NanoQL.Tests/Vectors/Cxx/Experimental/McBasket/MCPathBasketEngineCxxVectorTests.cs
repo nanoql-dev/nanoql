@@ -17,8 +17,10 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's path engine vectors, <c>tests/vectors/cxx/experimental/mcbasket/mcpathbasketengine.json</c>:
 /// <see cref="MCPathBasketEngine"/>'s fixed-seed NPV, and its error estimate under the pseudo-random traits, for an
 /// average call and an Asian basket call, and <see cref="MCAmericanPathEngine{TRng, TStats}"/>'s for a Bermudan put on
-/// the largest asset, each through its builder and also on payoffs deriving from <see cref="AdaptedPathPayoff"/>; the payoffs, processes and options as <c>tools/cxx/src/experimental/mcbasket/mcpathbasketengine.cpp</c>
-/// builds them.
+/// the largest asset, each through its builder and also on payoffs deriving from <see cref="AdaptedPathPayoff"/>, the
+/// path basket's pseudo-random cases also through <see cref="MCPRPathBasketEngine"/> and its low-discrepancy ones
+/// through <see cref="MCLDPathBasketEngine"/>; the payoffs, processes and options as
+/// <c>tools/cxx/src/experimental/mcbasket/mcpathbasketengine.cpp</c> builds them.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class MCPathBasketEngineCxxVectorTests
@@ -78,12 +80,59 @@ public class MCPathBasketEngineCxxVectorTests
             }
             else
             {
-                check.Output(c, "NPV", () => MCPathBasketEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+                check.Output(c, "NPV", () => MCLDPathBasketEngine.Calculate(
                     option, context, processes, steps, perYear, false, antithetic, false, samples, null, null, seed).NPV);
             }
         }
 
         check.Complete();
+    }
+
+    [Fact]
+    public void MCPRPathBasketEngineCxxVector()
+    {
+        // MCPRPathBasketEngine on the path basket's pseudo-random cases, which the fact above prices through the
+        // builder: QuantLib's same closing, so its same outputs
+        var file = VectorFile.Load("cxx/experimental/mcbasket/mcpathbasketengine");
+        var check = new VectorAssert(file);
+        VectorCase[] cases =
+        [
+            .. file.Cases.Where(c => c.Input("engine").GetProperty("engine").GetString() != "american"
+                && c.Input("engine").GetProperty("traits").GetString() == "pr"),
+        ];
+        foreach (VectorCase c in cases)
+        {
+            EvaluationContext context = c.Context();
+            JsonElement e = c.Input("engine");
+            Date today = context.EvaluationDate;
+            StochasticProcessArray processes = MCPagodaEngineCxxVectorTests.ProcessesOf(
+                e.GetProperty("processes"), e.GetProperty("correlation").GetDouble(), today);
+            JsonElement payoff = e.GetProperty("payoff");
+            string kind = payoff[0].GetString()!;
+            PathPayoff pathPayoff = kind.StartsWith("Adapted", StringComparison.Ordinal)
+                ? new HarnessAdaptedPayoff(kind, payoff[1].GetDouble(), processes.Size)
+                : new HarnessPayoff(kind, payoff[1].GetDouble(), processes.Size);
+            var option = new PathOption(
+                pathPayoff, [.. e.GetProperty("fixingDays").EnumerateArray().Select(d => today + d.GetInt32())]);
+            var priced = new Lazy<InstrumentResults>(() => MCPRPathBasketEngine.Calculate(
+                option,
+                context,
+                processes,
+                NullableInt(e.GetProperty("timeSteps")),
+                NullableInt(e.GetProperty("timeStepsPerYear")),
+                false,
+                e.GetProperty("antithetic").GetBoolean(),
+                false,
+                e.GetProperty("samples").GetInt32(),
+                null,
+                null,
+                e.GetProperty("seed").GetInt64()));
+            check.Output(c, "NPV", () => priced.Value.NPV);
+            check.Output(c, "errorEstimate", () => priced.Value.ErrorEstimate);
+        }
+
+        Assert.Empty(check.Mismatches);
+        Assert.Equal(cases.Sum(c => c.Expected.EnumerateObject().Count()), check.Compared);
     }
 
     private static int? NullableInt(JsonElement e) => e.ValueKind == JsonValueKind.Null ? null : e.GetInt32();

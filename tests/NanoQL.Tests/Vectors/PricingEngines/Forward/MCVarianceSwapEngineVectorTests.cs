@@ -33,9 +33,9 @@ public class MCVarianceSwapEngineVectorTests
             (int? steps, int? perYear, bool bb, bool anti, int? samples, double? tolerance, int? max, long seed) =
                 MCEuropeanEngineVectorTests.Settings(spec);
             var r = new Lazy<VarianceSwapResults>(() => spec.GetProperty("traits").GetString() == "PseudoRandom"
-                ? MCVarianceSwapEngine.Calculate<PseudoRandom, GeneralStatistics>(
+                ? MCPRVarianceSwapEngine.Calculate(
                     swap, context, process, steps, perYear, bb, anti, samples, tolerance, max, seed)
-                : MCVarianceSwapEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+                : MCLDVarianceSwapEngine.Calculate(
                     swap, context, process, steps, perYear, bb, anti, samples, tolerance, max, seed));
             check.Output(c, "variance", () => r.Value.Variance);
             check.Output(c, "NPV", () => r.Value.NPV);

@@ -35,9 +35,9 @@ public class MCForwardEuropeanHestonEngineVectorTests
                 MCEuropeanEngineVectorTests.Settings(spec);
             bool control = spec.GetProperty("controlVariate").GetBoolean();
             var r = new Lazy<OneAssetOptionResults>(() => spec.GetProperty("traits").GetString() == "PseudoRandom"
-                ? MCForwardEuropeanHestonEngine.Calculate<PseudoRandom, GeneralStatistics>(
+                ? MCPRForwardEuropeanHestonEngine.Calculate(
                     option, context, process, steps, perYear, anti, samples, tolerance, max, seed, control)
-                : MCForwardEuropeanHestonEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+                : MCLDForwardEuropeanHestonEngine.Calculate(
                     option, context, process, steps, perYear, anti, samples, tolerance, max, seed, control));
             check.Output(c, "NPV", () => r.Value.NPV);
             if (c.Expected.TryGetProperty("errorEstimate", out _))

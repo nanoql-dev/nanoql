@@ -16,7 +16,9 @@ namespace NanoQL.Tests.Vectors;
 /// The MCEverestEngine vectors, <c>tests/vectors/experimental/exoticoptions/mceverestengine.json</c>:
 /// <see cref="MCEverestEngine"/>'s NPV, and its error estimate under the pseudo-random traits, on two and three
 /// correlated processes, pseudo-random and low-discrepancy on fixed seeds, by steps and by steps per year, with antithetic
-/// paths and a Brownian bridge; an expired option and a zero notional, refused.
+/// paths and a Brownian bridge; an expired option and a zero notional, refused; the pseudo-random cases through the
+/// builder and through <see cref="MCPREverestEngine"/>, the low-discrepancy ones through
+/// <see cref="MCLDEverestEngine"/>.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class MCEverestEngineVectorTests
@@ -60,12 +62,50 @@ public class MCEverestEngineVectorTests
             }
             else
             {
-                check.Output(c, "NPV", () => MCEverestEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+                check.Output(c, "NPV", () => MCLDEverestEngine.Calculate(
                     option(), context, array, steps, perYear, bridge, antithetic, samples, null, null, seed).NPV);
             }
         }
 
         check.Complete();
+    }
+
+    [Fact]
+    public void MCPREverestEngineVector()
+    {
+        // QuantLib-Python's MCPREverestEngine on the pseudo-random cases, which the fact above prices through the
+        // builder: QuantLib's same closing, so its same outputs
+        var file = VectorFile.Load("experimental/exoticoptions/mceverestengine");
+        var check = new VectorAssert(file);
+        VectorCase[] cases = [.. file.Cases.Where(c => c.Input("engine").GetProperty("traits").GetString() == "pr")];
+        foreach (VectorCase c in cases)
+        {
+            EvaluationContext context = c.Context();
+            JsonElement o = c.Input("option");
+            JsonElement e = c.Input("engine");
+            StochasticProcessArray array = ArrayOf(e, context);
+            var priced = new Lazy<EverestOptionResults>(() => MCPREverestEngine.Calculate(
+                new EverestOption(
+                    o.GetProperty("notional").GetDouble(), o.GetProperty("guarantee").GetDouble(), ExerciseOf(o.GetProperty("exercise"), context)),
+                context,
+                array,
+                NullableInt(e.GetProperty("timeSteps")),
+                NullableInt(e.GetProperty("timeStepsPerYear")),
+                e.GetProperty("brownianBridge").GetBoolean(),
+                e.GetProperty("antitheticVariate").GetBoolean(),
+                e.GetProperty("requiredSamples").GetInt32(),
+                null,
+                null,
+                e.GetProperty("seed").GetInt64()));
+            check.Output(c, "NPV", () => priced.Value.NPV);
+            if (c.Expected.TryGetProperty("errorEstimate", out _))
+            {
+                check.Output(c, "errorEstimate", () => priced.Value.ErrorEstimate);
+            }
+        }
+
+        Assert.Empty(check.Mismatches);
+        Assert.Equal(cases.Sum(c => c.Expected.EnumerateObject().Count()), check.Compared);
     }
 
     // The engine spec's processes and correlation

@@ -16,8 +16,9 @@ namespace NanoQL.Tests.Vectors;
 /// The C++ harness's Monte Carlo Heston-Hull-White vectors,
 /// <c>tests/vectors/cxx/pricingengines/vanilla/mchestonhullwhiteengine.json</c>: <see cref="HestonHullWhitePathPricer"/>
 /// on fixed three-asset paths; and the engine <see cref="MakeMCHestonHullWhiteEngine{TRng, TStats}"/> makes after
-/// QuantLib's builder's setters, its NPV and error estimate on fixed seeds, and the builder's refusals with QuantLib's
-/// messages.
+/// QuantLib's builder's setters, its NPV and error estimate on fixed seeds, also through
+/// <see cref="MCPRHestonHullWhiteEngine"/> and <see cref="MCLDHestonHullWhiteEngine"/>, and the builder's refusals with
+/// QuantLib's messages.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
 public class MCHestonHullWhiteEngineCxxVectorTests
@@ -67,6 +68,62 @@ public class MCHestonHullWhiteEngineCxxVectorTests
         check.Complete();
     }
 
+    [Fact]
+    public void MCPRAndMCLDHestonHullWhiteEngineCxxVector()
+    {
+        // MCPRHestonHullWhiteEngine and MCLDHestonHullWhiteEngine on the priced cases, which the fact above prices
+        // through the builder: QuantLib's same closings, so their same outputs; the builder's own refusals are its
+        var file = VectorFile.Load("cxx/pricingengines/vanilla/mchestonhullwhiteengine");
+        var check = new VectorAssert(file);
+        VectorCase[] cases =
+        [
+            .. file.Cases.Where(c => c.Input("kind").GetString() != "path" && !c.Expected.TryGetProperty("error", out _)),
+        ];
+        foreach (VectorCase c in cases)
+        {
+            EvaluationContext context = c.Context();
+            var type = (OptionType)c.Int("optionType");
+            HybridHestonHullWhiteProcess process = HybridHestonHullWhiteCxxInputs.ProcessOf(c.Input("process"));
+            var option = new VanillaOption(new PlainVanillaPayoff(type, c.Double("strike")), new EuropeanExercise(c.DateInput("exerciseDate")));
+            EngineSettings s = SettingsOf(c.Input("setters"));
+            var priced = new Lazy<OneAssetOptionResults>(() => c.Input("traits").GetString() == "PseudoRandom"
+                ? MCPRHestonHullWhiteEngine.Calculate(
+                    option, context, process, s.Steps, s.StepsPerYear, s.Antithetic, s.ControlVariate, s.Samples, s.Tolerance, s.MaxSamples, s.Seed)
+                : MCLDHestonHullWhiteEngine.Calculate(
+                    option, context, process, s.Steps, s.StepsPerYear, s.Antithetic, s.ControlVariate, s.Samples, s.Tolerance, s.MaxSamples, s.Seed));
+            check.Output(c, "NPV", () => priced.Value.NPV);
+            check.Output(c, "errorEstimate", () => priced.Value.ErrorEstimate);
+        }
+
+        Assert.Empty(check.Mismatches);
+        Assert.Equal(cases.Sum(c => c.Expected.EnumerateObject().Count()), check.Compared);
+    }
+
+    // The calculation's settings a case's setters give the builder, in order: the last of each wins, as in the builder
+    private static EngineSettings SettingsOf(JsonElement setters)
+    {
+        var s = default(EngineSettings);
+        foreach (JsonElement setter in setters.EnumerateArray())
+        {
+            JsonElement value = setter[1];
+            s = setter[0].GetString() switch
+            {
+                "withSeed" => s with { Seed = value.GetInt64() },
+                "withSteps" => s with { Steps = value.GetInt32() },
+                "withStepsPerYear" => s with { StepsPerYear = value.GetInt32() },
+                "withSamples" => s with { Samples = value.GetInt32() },
+                "withAbsoluteTolerance" => s with { Tolerance = value.GetDouble() },
+                "withMaxSamples" => s with { MaxSamples = value.GetInt32() },
+                "withAntitheticVariate" => s with { Antithetic = value.GetBoolean() },
+                "withControlVariate" => s with { ControlVariate = value.GetBoolean() },
+                string name => throw new InvalidOperationException($"unknown setter {name}"),
+                null => throw new InvalidOperationException("no setter"),
+            };
+        }
+
+        return s;
+    }
+
     // The engine the builder makes after a case's setters, in order, on the seed the first of them sets.
     private static Func<VanillaOption, EvaluationContext, OneAssetOptionResults> Built<TRng>(
         HybridHestonHullWhiteProcess process, JsonElement setters)
@@ -114,4 +171,7 @@ public class MCHestonHullWhiteEngineCxxVectorTests
 
         return "no refusal";
     }
+
+    private readonly record struct EngineSettings(
+        int? Steps, int? StepsPerYear, bool Antithetic, bool ControlVariate, int? Samples, double? Tolerance, int? MaxSamples, long Seed);
 }

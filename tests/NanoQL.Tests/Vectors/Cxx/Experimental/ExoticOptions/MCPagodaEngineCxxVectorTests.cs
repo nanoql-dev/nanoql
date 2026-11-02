@@ -15,7 +15,8 @@ namespace NanoQL.Tests.Vectors;
 /// <summary>
 /// The C++ harness's pagoda vectors, <c>tests/vectors/cxx/experimental/exoticoptions/mcpagodaengine.json</c>:
 /// <see cref="MCPagodaEngine"/>'s fixed-seed NPV, and its error estimate under the pseudo-random traits, through
-/// <see cref="MakeMCPagodaEngine{TRng, TStats}"/> and on low-discrepancy paths; an expired option; the processes and
+/// <see cref="MakeMCPagodaEngine{TRng, TStats}"/> and <see cref="MCPRPagodaEngine"/>, and on low-discrepancy paths
+/// through <see cref="MCLDPagodaEngine"/>; an expired option; the processes and
 /// option as <c>tools/cxx/src/experimental/exoticoptions/mcpagodaengine.cpp</c> builds them.
 /// </summary>
 [Trait("Oracle", "QuantLib")]
@@ -51,12 +52,49 @@ public class MCPagodaEngineCxxVectorTests
             }
             else
             {
-                check.Output(c, "NPV", () => MCPagodaEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+                check.Output(c, "NPV", () => MCLDPagodaEngine.Calculate(
                     option, context, processes, false, antithetic, samples, null, null, seed).NPV);
             }
         }
 
         check.Complete();
+    }
+
+    [Fact]
+    public void MCPRPagodaEngineCxxVector()
+    {
+        // MCPRPagodaEngine on the pseudo-random cases, which the fact above prices through the builder: QuantLib's same
+        // closing, so its same outputs
+        var file = VectorFile.Load("cxx/experimental/exoticoptions/mcpagodaengine");
+        var check = new VectorAssert(file);
+        VectorCase[] cases = [.. file.Cases.Where(c => c.Input("engine").GetProperty("traits").GetString() == "pr")];
+        foreach (VectorCase c in cases)
+        {
+            EvaluationContext context = c.Context();
+            JsonElement e = c.Input("engine");
+            Date today = context.EvaluationDate;
+            StochasticProcessArray processes = ProcessesOf(
+                e.GetProperty("processes"), e.GetProperty("correlation").GetDouble(), today);
+            var option = new PagodaOption(
+                e.GetProperty("fixingDays").EnumerateArray().Select(d => today + d.GetInt32()),
+                e.GetProperty("roof").GetDouble(),
+                e.GetProperty("fraction").GetDouble());
+            var priced = new Lazy<MultiAssetOptionResults>(() => MCPRPagodaEngine.Calculate(
+                option,
+                context,
+                processes,
+                false,
+                e.GetProperty("antithetic").GetBoolean(),
+                e.GetProperty("samples").GetInt32(),
+                null,
+                null,
+                e.GetProperty("seed").GetInt64()));
+            check.Output(c, "NPV", () => priced.Value.NPV);
+            check.Output(c, "errorEstimate", () => priced.Value.ErrorEstimate);
+        }
+
+        Assert.Empty(check.Mismatches);
+        Assert.Equal(cases.Sum(c => c.Expected.EnumerateObject().Count()), check.Compared);
     }
 
     // The harness's processes: each [spot, r, q, volatility] on flat Act/365 (Fixed) forwards and a constant volatility

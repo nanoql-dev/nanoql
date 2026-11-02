@@ -60,13 +60,13 @@ public class BinomialBarrierEngineVectorTests
         string tree) =>
         tree switch
         {
-            "crr" => BinomialBarrierEngine.Calculate<CoxRossRubinstein, DiscretizedDermanKaniBarrierOption>,
-            "jr" => BinomialBarrierEngine.Calculate<JarrowRudd, DiscretizedDermanKaniBarrierOption>,
-            "eqp" => BinomialBarrierEngine.Calculate<AdditiveEQPBinomialTree, DiscretizedDermanKaniBarrierOption>,
-            "trigeorgis" => BinomialBarrierEngine.Calculate<Trigeorgis, DiscretizedDermanKaniBarrierOption>,
-            "tian" => BinomialBarrierEngine.Calculate<Tian, DiscretizedDermanKaniBarrierOption>,
-            "lr" => BinomialBarrierEngine.Calculate<LeisenReimer, DiscretizedDermanKaniBarrierOption>,
-            "j4" => BinomialBarrierEngine.Calculate<Joshi4, DiscretizedDermanKaniBarrierOption>,
+            "crr" => BinomialCRRBarrierEngine.Calculate,
+            "jr" => BinomialJRBarrierEngine.Calculate,
+            "eqp" => BinomialEQPBarrierEngine.Calculate,
+            "trigeorgis" => BinomialTrigeorgisBarrierEngine.Calculate,
+            "tian" => BinomialTianBarrierEngine.Calculate,
+            "lr" => BinomialLRBarrierEngine.Calculate,
+            "j4" => BinomialJ4BarrierEngine.Calculate,
             _ => throw new ArgumentException($"unknown tree {tree}", nameof(tree)),
         };
 }

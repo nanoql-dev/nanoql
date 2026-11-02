@@ -92,7 +92,7 @@ public class MCVarianceSwapEngineCxxVectorTests
             default:
                 int? steps = setting switch { "zeroTimeSteps" => 0, "bothTimeSteps" => 4, _ => null };
                 int? perYear = setting switch { "zeroTimeStepsPerYear" => 0, "bothTimeSteps" => 12, _ => null };
-                MCVarianceSwapEngine.Calculate<PseudoRandom, GeneralStatistics>(
+                MCPRVarianceSwapEngine.Calculate(
                     swap, context, p, steps, perYear, false, false, 10, null, null, 42);
                 break;
         }

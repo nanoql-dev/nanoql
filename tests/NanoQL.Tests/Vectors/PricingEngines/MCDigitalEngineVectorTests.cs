@@ -54,9 +54,9 @@ public class MCDigitalEngineVectorTests
         (int? steps, int? perYear, bool bb, bool anti, int? samples, double? tolerance, int? max, long seed) =
             MCEuropeanEngineVectorTests.Settings(spec);
         return spec.GetProperty("traits").GetString() == "PseudoRandom"
-            ? MCDigitalEngine.Calculate<PseudoRandom, GeneralStatistics>(
+            ? MCPRDigitalEngine.Calculate(
                 option, context, process, steps, perYear, bb, anti, samples, tolerance, max, seed)
-            : MCDigitalEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+            : MCLDDigitalEngine.Calculate(
                 option, context, process, steps, perYear, bb, anti, samples, tolerance, max, seed);
     }
 }

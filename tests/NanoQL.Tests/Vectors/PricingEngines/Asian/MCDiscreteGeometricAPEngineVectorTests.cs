@@ -30,9 +30,11 @@ public class MCDiscreteGeometricAPEngineVectorTests
             CheckResults(check, c, () =>
             {
                 var option = DiscreteOptionOf(c.Input("option"), context);
-                return MCDiscreteGeometricAPEngine.Calculate<PseudoRandom, GeneralStatistics>(
-                    option, context, process, e.GetProperty("brownianBridge").GetBoolean(), e.GetProperty("antitheticVariate").GetBoolean(),
-                    Samples, null, null, e.GetProperty("seed").GetInt64());
+                bool bridge = e.GetProperty("brownianBridge").GetBoolean(), antithetic = e.GetProperty("antitheticVariate").GetBoolean();
+                long seed = e.GetProperty("seed").GetInt64();
+                return LowDiscrepancy(e)
+                    ? MCLDDiscreteGeometricAPEngine.Calculate(option, context, process, bridge, antithetic, Samples, null, null, seed)
+                    : MCPRDiscreteGeometricAPEngine.Calculate(option, context, process, bridge, antithetic, Samples, null, null, seed);
             });
         }
 

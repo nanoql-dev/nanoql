@@ -14,7 +14,9 @@ engine's ((xxxiv), (xlix), (l)), and fixing dates given twice (BR5 (xxviii)).
 
 The engine's settings go in as "engine". The wheel's calls, by QuantLib-SWIG 1.44's options.i:
 MCPRDiscreteArithmeticAPHestonEngine(process, antitheticVariate, requiredSamples, requiredTolerance, maxSamples, seed,
-timeSteps, timeStepsPerYear, controlVariate) and the option's NPV and errorEstimate. Read back by
+timeSteps, timeStepsPerYear, controlVariate) and the option's NPV and errorEstimate; then
+MCLDDiscreteArithmeticAPHestonEngine, the same arguments, on low-discrepancy draws ("traits": "ld"), its NPV
+alone. Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/Asian/MCDiscreteArithmeticAPHestonEngineVectorTests.cs."""
 import importlib.util
 import os
@@ -52,6 +54,17 @@ def mc_outputs(opt, engine):
 def make(p, antitheticVariate, seed, timeSteps, timeStepsPerYear):
     return ql.MCPRDiscreteArithmeticAPHestonEngine(p, antitheticVariate, SAMPLES, None, None, seed, timeSteps,
                                                    timeStepsPerYear, False)
+
+
+def make_ld(p, antitheticVariate, seed, timeSteps, timeStepsPerYear):
+    return ql.MCLDDiscreteArithmeticAPHestonEngine(p, antitheticVariate, SAMPLES, None, None, seed, timeSteps,
+                                                   timeStepsPerYear, False)
+
+
+def ld_outputs(opt, engine):
+    """The NPV alone: the low-discrepancy traits give no error estimate."""
+    opt.setPricingEngine(engine)
+    return {"NPV": v.attempt(opt.NPV)}
 
 hp = _load("hestonprocess", "processes/hestonprocess.py")
 QE = int(ql.HestonProcess.QuadraticExponentialMartingale)
@@ -97,6 +110,17 @@ def cases():
                        ("expired", ao.option_spec(ARITHMETIC, ao.dates(-1, 1), pay, abe.exercise_spec("European", -1)))):
         out.append({"name": name, "inputs": {"settings": st, "process": pspec, "option": spec, "engine": settings},
                     "expected": mc_outputs(ao.option(spec), make(p, **settings))})
+    # MCLDDiscreteArithmeticAPHestonEngine: low-discrepancy draws on the first parameter set, the NPV alone
+    for sname, running, past in (("unseasoned", None, 0), ("two past fixings", 200.0 * (s0 / 100.0), 2)):
+        for tname, t in (("call", CALL), ("put", PUT)):
+            settings = {"traits": "ld", "antitheticVariate": False, "seed": 42, "timeSteps": None,
+                        "timeStepsPerYear": None}
+            spec = ao.option_spec(ARITHMETIC, ao.dates(365, 12), bc.payoff_spec("PlainVanilla", t, s0), ex,
+                                  running=running, past=past)
+            engine = make_ld(p, **{k: s for k, s in settings.items() if k != "traits"})
+            out.append({"name": f"low-discrepancy, {pname}, 365 days, 12 fixings, {sname}, a {tname} at the spot",
+                        "inputs": {"settings": st, "process": pspec, "option": spec, "engine": settings},
+                        "expected": ld_outputs(ao.option(spec), engine)})
     return out
 
 

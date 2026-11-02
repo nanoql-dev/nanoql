@@ -9,12 +9,12 @@ report applies.
 ## Counts
 
 - **Assemblies:** `NanoQL` (`nql_`), `NanoQL.Extensions` (`nql_`).
-- **Functions:** 11,086, 2,418 of them experimental and 1,477 with an overload suffix; by kind, method 3,833, get 3,476, new 1,402, static 889, with 626, operator 413, bind 193, bindon 193, draws 48, field 7, indexer 5, set 1.
-- **Types:** 2,255; by form, handle 1,629, static 280, withheld 215, boxed 73, snapshot 53, value 2, distribution 1, matrix 1, vector 1.
+- **Functions:** 11,290, 2,469 of them experimental and 1,497 with an overload suffix; by kind, method 3,833, get 3,476, new 1,402, static 961, with 626, operator 413, bind 259, bindon 259, draws 48, field 7, indexer 5, set 1.
+- **Types:** 2,319; by form, handle 1,629, static 344, withheld 215, boxed 73, snapshot 53, value 2, distribution 1, matrix 1, vector 1.
 - **Enums:** 165.
-- **Names:** the longest 165 characters, 1,064 over 63.
+- **Names:** the longest 165 characters, 1,076 over 63.
 - **Presets withheld:** 310 constructors of 298 types, 356 of the 356 preset constructions with a lookup by name.
-- **Engines:** 161 engines, 202 input sets; 37 engine parameters, 925 pairs formed, 8 refused at the call, 264 calculations forming no pair.
+- **Engines:** 225 engines, 268 input sets; 37 engine parameters, 1,179 pairs formed, 17 refused at the call, 320 calculations forming no pair.
 - **Not crossing:** 2,467 members and types.
 
 ## What doesn't cross, by reason
@@ -3060,6 +3060,8 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `BlackCapFloorEngine.Calculate(CapFloor, EvaluationContext, YieldTermStructure, double, DayCounter, double)`: no pair: no parameter takes the member's ICalibratedModel
 - `BlackCapFloorEngine.Calculate(CapFloor, EvaluationContext, YieldTermStructure, OptionletVolatilityStructure, double?)`: no pair: no parameter takes the member's ICalibratedModel
 - `Gaussian1dCapFloorEngine.Calculate(CapFloor, EvaluationContext, Gaussian1dModel, int, double, bool, bool, YieldTermStructure)`: ICalibratedModel by name into model, cast
+- `MCLDHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: ICalibratedModel by name into model, cast
+- `MCPRHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: ICalibratedModel by name into model, cast
 - `TreeCapFloorEngine.Calculate(CapFloor, EvaluationContext, ShortRateModel, int, YieldTermStructure)`: ICalibratedModel by name into model, cast
 - `TreeCapFloorEngine.Calculate(CapFloor, EvaluationContext, ShortRateModel, TimeGrid, YieldTermStructure)`: ICalibratedModel by name into model, cast
 - `TreeCapFloorEngine.Calculate(CapFloor, EvaluationContext, ShortRateModel, Lattice, YieldTermStructure)`: ICalibratedModel by name into model, cast
@@ -3081,6 +3083,13 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `AnalyticContinuousGeometricAveragePriceAsianHestonEngine.Calculate(ContinuousAveragingAsianOption, EvaluationContext, HestonProcess, int, double)`: the instrument bound by BindOn
 - `AnalyticDiscreteGeometricAveragePriceAsianHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, double)`: the instrument bound by BindOn
 - `AnalyticHestonForwardEuropeanEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int)`: the instrument bound by BindOn
+- `BinomialCRRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialEQPDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJ4DoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialLRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTianDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTrigeorgisDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
 - `BlackCallableFixedRateBondEngine.Calculate(CallableBond, EvaluationContext, double, YieldTermStructure)`: the instrument bound by BindOn
 - `BlackCallableFixedRateBondEngine.Calculate(CallableBond, EvaluationContext, CallableBondVolatilityStructure, YieldTermStructure)`: the instrument bound by BindOn
 - `BlackCallableZeroCouponBondEngine.Calculate(CallableBond, EvaluationContext, double, YieldTermStructure)`: the instrument bound by BindOn
@@ -3102,6 +3111,16 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `IntegralHestonVarianceOptionEngine.Calculate(VarianceOption, EvaluationContext, HestonProcess)`: the instrument bound by BindOn
 - `IntegralNtdEngine.Calculate(NthToDefault, EvaluationContext, Period, YieldTermStructure)`: the instrument bound by BindOn
 - `InterpolatingCPICapFloorEngine.Calculate(CPICapFloor, EvaluationContext, CPICapFloorTermPriceSurface)`: the instrument bound by BindOn
+- `MCLDDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEverestEngine.Calculate(EverestOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDHimalayaEngine.Calculate(HimalayaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDPagodaEngine.Calculate(PagodaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDPathBasketEngine.Calculate(PathMultiAssetOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREverestEngine.Calculate(EverestOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRHimalayaEngine.Calculate(HimalayaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRPagodaEngine.Calculate(PagodaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRPathBasketEngine.Calculate(PathMultiAssetOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
 - `MidPointCDOEngine.Calculate(SyntheticCDO, EvaluationContext, YieldTermStructure)`: the instrument bound by BindOn
 - `MonteCarloCatBondEngine.Calculate(CatBond, EvaluationContext, CatRisk, YieldTermStructure, bool?, int)`: the instrument bound by BindOn
 - `PerturbativeBarrierOptionEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, bool, int, int)`: the instrument bound by BindOn
@@ -3175,18 +3194,25 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `BatesDoubleExpEngine.Calculate(VanillaOption, EvaluationContext, BatesDoubleExpModel, double, int)`: the instrument bound by BindOn
 - `BatesEngine.Calculate(VanillaOption, EvaluationContext, BatesModel, int)`: the instrument bound by BindOn
 - `BatesEngine.Calculate(VanillaOption, EvaluationContext, BatesModel, double, int)`: the instrument bound by BindOn
+- `BinomialCRRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialCRRConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialCRRVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialEQPBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialEQPConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialEQPVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJ4BarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialJ4ConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialJ4VanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialJRConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialJRVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialLRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialLRConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialLRVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTianBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialTianConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialTianVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTrigeorgisBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialTrigeorgisConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialTrigeorgisVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
 - `BjerksundStenslandApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: the instrument bound by BindOn
@@ -3254,6 +3280,48 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `JuQuadraticApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: the instrument bound by BindOn
 - `JumpDiffusionEngine.Calculate(VanillaOption, EvaluationContext, Merton76Process, double, int)`: the instrument bound by BindOn
 - `KirkEngine.Calculate(BasketOption, EvaluationContext, GeneralizedBlackScholesProcess, GeneralizedBlackScholesProcess, double)`: the instrument bound by BindOn
+- `MCLDAmericanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long, int?, int, LsmBasisSystemPolynomialType, long?)`: the instrument bound by BindOn
+- `MCLDAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: the instrument bound by BindOn
+- `MCLDBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, bool, long)`: the instrument bound by BindOn
+- `MCLDDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteArithmeticAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteArithmeticAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?, bool)`: the instrument bound by BindOn
+- `MCLDDiscreteArithmeticASEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteGeometricAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteGeometricAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?)`: the instrument bound by BindOn
+- `MCLDEuropeanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDForwardEuropeanBSEngine.Calculate(ForwardVanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDForwardEuropeanHestonEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long, bool)`: the instrument bound by BindOn
+- `MCLDHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDLookbackEngine.Calculate(ContinuousFixedLookbackOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDPerformanceEngine.Calculate(CliquetOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDVarianceSwapEngine.Calculate(VarianceSwap, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRAmericanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long, int?, int, LsmBasisSystemPolynomialType, long?)`: the instrument bound by BindOn
+- `MCPRAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: the instrument bound by BindOn
+- `MCPRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, bool, long)`: the instrument bound by BindOn
+- `MCPRDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteArithmeticAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteArithmeticAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?, bool)`: the instrument bound by BindOn
+- `MCPRDiscreteArithmeticASEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteGeometricAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteGeometricAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?)`: the instrument bound by BindOn
+- `MCPREuropeanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRForwardEuropeanBSEngine.Calculate(ForwardVanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRForwardEuropeanHestonEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long, bool)`: the instrument bound by BindOn
+- `MCPRHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRLookbackEngine.Calculate(ContinuousFixedLookbackOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRPerformanceEngine.Calculate(CliquetOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRVarianceSwapEngine.Calculate(VarianceSwap, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
 - `MidPointCdsEngine.Calculate(CreditDefaultSwap, EvaluationContext, DefaultProbabilityTermStructure, double, YieldTermStructure, bool?)`: the instrument bound by BindOn
 - `OperatorSplittingSpreadEngine.Calculate(BasketOption, EvaluationContext, GeneralizedBlackScholesProcess, GeneralizedBlackScholesProcess, double, OperatorSplittingSpreadEngineOrder)`: the instrument bound by BindOn
 - `PearsonSpreadEngine.Calculate(BasketOption, EvaluationContext, GeneralizedBlackScholesProcess, GeneralizedBlackScholesProcess, double, double, int, double)`: the instrument bound by BindOn
@@ -3286,6 +3354,13 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `AnalyticContinuousGeometricAveragePriceAsianHestonEngine.Calculate(ContinuousAveragingAsianOption, EvaluationContext, HestonProcess, int, double)`: the instrument bound by BindOn
 - `AnalyticDiscreteGeometricAveragePriceAsianHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, double)`: the instrument bound by BindOn
 - `AnalyticHestonForwardEuropeanEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int)`: the instrument bound by BindOn
+- `BinomialCRRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialEQPDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJ4DoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialLRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTianDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTrigeorgisDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
 - `BlackCallableFixedRateBondEngine.Calculate(CallableBond, EvaluationContext, double, YieldTermStructure)`: the instrument bound by BindOn
 - `BlackCallableFixedRateBondEngine.Calculate(CallableBond, EvaluationContext, CallableBondVolatilityStructure, YieldTermStructure)`: the instrument bound by BindOn
 - `BlackCallableZeroCouponBondEngine.Calculate(CallableBond, EvaluationContext, double, YieldTermStructure)`: the instrument bound by BindOn
@@ -3307,6 +3382,16 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `IntegralHestonVarianceOptionEngine.Calculate(VarianceOption, EvaluationContext, HestonProcess)`: the instrument bound by BindOn
 - `IntegralNtdEngine.Calculate(NthToDefault, EvaluationContext, Period, YieldTermStructure)`: the instrument bound by BindOn
 - `InterpolatingCPICapFloorEngine.Calculate(CPICapFloor, EvaluationContext, CPICapFloorTermPriceSurface)`: the instrument bound by BindOn
+- `MCLDDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEverestEngine.Calculate(EverestOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDHimalayaEngine.Calculate(HimalayaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDPagodaEngine.Calculate(PagodaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDPathBasketEngine.Calculate(PathMultiAssetOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREverestEngine.Calculate(EverestOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRHimalayaEngine.Calculate(HimalayaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRPagodaEngine.Calculate(PagodaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRPathBasketEngine.Calculate(PathMultiAssetOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
 - `MidPointCDOEngine.Calculate(SyntheticCDO, EvaluationContext, YieldTermStructure)`: the instrument bound by BindOn
 - `MonteCarloCatBondEngine.Calculate(CatBond, EvaluationContext, CatRisk, YieldTermStructure, bool?, int)`: the instrument bound by BindOn
 - `PerturbativeBarrierOptionEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, bool, int, int)`: the instrument bound by BindOn
@@ -3380,18 +3465,25 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `BatesDoubleExpEngine.Calculate(VanillaOption, EvaluationContext, BatesDoubleExpModel, double, int)`: the instrument bound by BindOn
 - `BatesEngine.Calculate(VanillaOption, EvaluationContext, BatesModel, int)`: the instrument bound by BindOn
 - `BatesEngine.Calculate(VanillaOption, EvaluationContext, BatesModel, double, int)`: the instrument bound by BindOn
+- `BinomialCRRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialCRRConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialCRRVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialEQPBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialEQPConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialEQPVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJ4BarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialJ4ConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialJ4VanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialJRConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialJRVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialLRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialLRConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialLRVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTianBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialTianConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialTianVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTrigeorgisBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialTrigeorgisConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialTrigeorgisVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
 - `BjerksundStenslandApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: the instrument bound by BindOn
@@ -3459,6 +3551,48 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `JuQuadraticApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: the instrument bound by BindOn
 - `JumpDiffusionEngine.Calculate(VanillaOption, EvaluationContext, Merton76Process, double, int)`: the instrument bound by BindOn
 - `KirkEngine.Calculate(BasketOption, EvaluationContext, GeneralizedBlackScholesProcess, GeneralizedBlackScholesProcess, double)`: the instrument bound by BindOn
+- `MCLDAmericanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long, int?, int, LsmBasisSystemPolynomialType, long?)`: the instrument bound by BindOn
+- `MCLDAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: the instrument bound by BindOn
+- `MCLDBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, bool, long)`: the instrument bound by BindOn
+- `MCLDDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteArithmeticAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteArithmeticAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?, bool)`: the instrument bound by BindOn
+- `MCLDDiscreteArithmeticASEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteGeometricAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteGeometricAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?)`: the instrument bound by BindOn
+- `MCLDEuropeanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDForwardEuropeanBSEngine.Calculate(ForwardVanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDForwardEuropeanHestonEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long, bool)`: the instrument bound by BindOn
+- `MCLDHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDLookbackEngine.Calculate(ContinuousFixedLookbackOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDPerformanceEngine.Calculate(CliquetOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDVarianceSwapEngine.Calculate(VarianceSwap, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRAmericanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long, int?, int, LsmBasisSystemPolynomialType, long?)`: the instrument bound by BindOn
+- `MCPRAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: the instrument bound by BindOn
+- `MCPRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, bool, long)`: the instrument bound by BindOn
+- `MCPRDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteArithmeticAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteArithmeticAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?, bool)`: the instrument bound by BindOn
+- `MCPRDiscreteArithmeticASEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteGeometricAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteGeometricAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?)`: the instrument bound by BindOn
+- `MCPREuropeanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRForwardEuropeanBSEngine.Calculate(ForwardVanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRForwardEuropeanHestonEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long, bool)`: the instrument bound by BindOn
+- `MCPRHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRLookbackEngine.Calculate(ContinuousFixedLookbackOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRPerformanceEngine.Calculate(CliquetOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRVarianceSwapEngine.Calculate(VarianceSwap, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
 - `MidPointCdsEngine.Calculate(CreditDefaultSwap, EvaluationContext, DefaultProbabilityTermStructure, double, YieldTermStructure, bool?)`: the instrument bound by BindOn
 - `OperatorSplittingSpreadEngine.Calculate(BasketOption, EvaluationContext, GeneralizedBlackScholesProcess, GeneralizedBlackScholesProcess, double, OperatorSplittingSpreadEngineOrder)`: the instrument bound by BindOn
 - `PearsonSpreadEngine.Calculate(BasketOption, EvaluationContext, GeneralizedBlackScholesProcess, GeneralizedBlackScholesProcess, double, double, int, double)`: the instrument bound by BindOn
@@ -3491,6 +3625,13 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `AnalyticContinuousGeometricAveragePriceAsianHestonEngine.Calculate(ContinuousAveragingAsianOption, EvaluationContext, HestonProcess, int, double)`: the instrument bound by BindOn
 - `AnalyticDiscreteGeometricAveragePriceAsianHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, double)`: the instrument bound by BindOn
 - `AnalyticHestonForwardEuropeanEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int)`: the instrument bound by BindOn
+- `BinomialCRRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialEQPDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJ4DoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialLRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTianDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTrigeorgisDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
 - `BlackCallableFixedRateBondEngine.Calculate(CallableBond, EvaluationContext, double, YieldTermStructure)`: the instrument bound by BindOn
 - `BlackCallableFixedRateBondEngine.Calculate(CallableBond, EvaluationContext, CallableBondVolatilityStructure, YieldTermStructure)`: the instrument bound by BindOn
 - `BlackCallableZeroCouponBondEngine.Calculate(CallableBond, EvaluationContext, double, YieldTermStructure)`: the instrument bound by BindOn
@@ -3512,6 +3653,16 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `IntegralHestonVarianceOptionEngine.Calculate(VarianceOption, EvaluationContext, HestonProcess)`: the instrument bound by BindOn
 - `IntegralNtdEngine.Calculate(NthToDefault, EvaluationContext, Period, YieldTermStructure)`: the instrument bound by BindOn
 - `InterpolatingCPICapFloorEngine.Calculate(CPICapFloor, EvaluationContext, CPICapFloorTermPriceSurface)`: the instrument bound by BindOn
+- `MCLDDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEverestEngine.Calculate(EverestOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDHimalayaEngine.Calculate(HimalayaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDPagodaEngine.Calculate(PagodaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDPathBasketEngine.Calculate(PathMultiAssetOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREverestEngine.Calculate(EverestOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRHimalayaEngine.Calculate(HimalayaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRPagodaEngine.Calculate(PagodaOption, EvaluationContext, StochasticProcessArray, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRPathBasketEngine.Calculate(PathMultiAssetOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
 - `MidPointCDOEngine.Calculate(SyntheticCDO, EvaluationContext, YieldTermStructure)`: the instrument bound by BindOn
 - `MonteCarloCatBondEngine.Calculate(CatBond, EvaluationContext, CatRisk, YieldTermStructure, bool?, int)`: the instrument bound by BindOn
 - `PerturbativeBarrierOptionEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, bool, int, int)`: the instrument bound by BindOn
@@ -3585,18 +3736,25 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `BatesDoubleExpEngine.Calculate(VanillaOption, EvaluationContext, BatesDoubleExpModel, double, int)`: the instrument bound by BindOn
 - `BatesEngine.Calculate(VanillaOption, EvaluationContext, BatesModel, int)`: the instrument bound by BindOn
 - `BatesEngine.Calculate(VanillaOption, EvaluationContext, BatesModel, double, int)`: the instrument bound by BindOn
+- `BinomialCRRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialCRRConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialCRRVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialEQPBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialEQPConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialEQPVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJ4BarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialJ4ConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialJ4VanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialJRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialJRConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialJRVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialLRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialLRConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialLRVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTianBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialTianConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialTianVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
+- `BinomialTrigeorgisBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: the instrument bound by BindOn
 - `BinomialTrigeorgisConvertibleEngine.Calculate(ConvertibleBond, EvaluationContext, GeneralizedBlackScholesProcess, int, double, ImmutableArray<Dividend>)`: the instrument bound by BindOn
 - `BinomialTrigeorgisVanillaEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: the instrument bound by BindOn
 - `BjerksundStenslandApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: the instrument bound by BindOn
@@ -3664,6 +3822,48 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `JuQuadraticApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: the instrument bound by BindOn
 - `JumpDiffusionEngine.Calculate(VanillaOption, EvaluationContext, Merton76Process, double, int)`: the instrument bound by BindOn
 - `KirkEngine.Calculate(BasketOption, EvaluationContext, GeneralizedBlackScholesProcess, GeneralizedBlackScholesProcess, double)`: the instrument bound by BindOn
+- `MCLDAmericanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long, int?, int, LsmBasisSystemPolynomialType, long?)`: the instrument bound by BindOn
+- `MCLDAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: the instrument bound by BindOn
+- `MCLDBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, bool, long)`: the instrument bound by BindOn
+- `MCLDDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteArithmeticAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteArithmeticAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?, bool)`: the instrument bound by BindOn
+- `MCLDDiscreteArithmeticASEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteGeometricAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDDiscreteGeometricAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?)`: the instrument bound by BindOn
+- `MCLDEuropeanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDForwardEuropeanBSEngine.Calculate(ForwardVanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDForwardEuropeanHestonEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long, bool)`: the instrument bound by BindOn
+- `MCLDHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDLookbackEngine.Calculate(ContinuousFixedLookbackOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDPerformanceEngine.Calculate(CliquetOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCLDVarianceSwapEngine.Calculate(VarianceSwap, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRAmericanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long, int?, int, LsmBasisSystemPolynomialType, long?)`: the instrument bound by BindOn
+- `MCPRAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: the instrument bound by BindOn
+- `MCPRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, bool, long)`: the instrument bound by BindOn
+- `MCPRDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteArithmeticAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteArithmeticAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?, bool)`: the instrument bound by BindOn
+- `MCPRDiscreteArithmeticASEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteGeometricAPEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRDiscreteGeometricAPHestonEngine.Calculate(DiscreteAveragingAsianOption, EvaluationContext, HestonProcess, bool, int?, double?, int?, long, int?, int?)`: the instrument bound by BindOn
+- `MCPREuropeanBasketEngine.Calculate(BasketOption, EvaluationContext, StochasticProcessArray, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRForwardEuropeanBSEngine.Calculate(ForwardVanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRForwardEuropeanHestonEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long, bool)`: the instrument bound by BindOn
+- `MCPRHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRLookbackEngine.Calculate(ContinuousFixedLookbackOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRPerformanceEngine.Calculate(CliquetOption, EvaluationContext, GeneralizedBlackScholesProcess, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
+- `MCPRVarianceSwapEngine.Calculate(VarianceSwap, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: the instrument bound by BindOn
 - `MidPointCdsEngine.Calculate(CreditDefaultSwap, EvaluationContext, DefaultProbabilityTermStructure, double, YieldTermStructure, bool?)`: the instrument bound by BindOn
 - `OperatorSplittingSpreadEngine.Calculate(BasketOption, EvaluationContext, GeneralizedBlackScholesProcess, GeneralizedBlackScholesProcess, double, OperatorSplittingSpreadEngineOrder)`: the instrument bound by BindOn
 - `PearsonSpreadEngine.Calculate(BasketOption, EvaluationContext, GeneralizedBlackScholesProcess, GeneralizedBlackScholesProcess, double, double, int, double)`: the instrument bound by BindOn
@@ -3774,6 +3974,20 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `IntegralEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `JuQuadraticApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `JumpDiffusionEngine.Calculate(VanillaOption, EvaluationContext, Merton76Process, double, int)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDEuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDEuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: GeneralizedBlackScholesProcess by type into process
+- `MCPRDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPREuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPREuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `QdFpAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, QdFpIterationScheme, QdFpAmericanEngineFixedPointEquation)`: GeneralizedBlackScholesProcess by type into bsProcess
 - `QdPlusAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int, QdPlusAmericanEngineSolverType, double, int?)`: GeneralizedBlackScholesProcess by type into process
 
@@ -3844,6 +4058,20 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `IntegralEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `JuQuadraticApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `JumpDiffusionEngine.Calculate(VanillaOption, EvaluationContext, Merton76Process, double, int)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDEuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDEuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: GeneralizedBlackScholesProcess by type into process
+- `MCPRDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPREuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPREuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `QdFpAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, QdFpIterationScheme, QdFpAmericanEngineFixedPointEquation)`: GeneralizedBlackScholesProcess by type into bsProcess
 - `QdPlusAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int, QdPlusAmericanEngineSolverType, double, int?)`: GeneralizedBlackScholesProcess by type into process
 
@@ -3914,6 +4142,20 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `IntegralEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `JuQuadraticApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `JumpDiffusionEngine.Calculate(VanillaOption, EvaluationContext, Merton76Process, double, int)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDEuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDEuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: GeneralizedBlackScholesProcess by type into process
+- `MCPRDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPREuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPREuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `QdFpAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, QdFpIterationScheme, QdFpAmericanEngineFixedPointEquation)`: GeneralizedBlackScholesProcess by type into bsProcess
 - `QdPlusAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int, QdPlusAmericanEngineSolverType, double, int?)`: GeneralizedBlackScholesProcess by type into process
 
@@ -3984,6 +4226,20 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `IntegralEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `JuQuadraticApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `JumpDiffusionEngine.Calculate(VanillaOption, EvaluationContext, Merton76Process, double, int)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDEuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDEuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: GeneralizedBlackScholesProcess by type into process
+- `MCPRDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPREuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPREuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `QdFpAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, QdFpIterationScheme, QdFpAmericanEngineFixedPointEquation)`: GeneralizedBlackScholesProcess by type into bsProcess
 - `QdPlusAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int, QdPlusAmericanEngineSolverType, double, int?)`: GeneralizedBlackScholesProcess by type into process
 
@@ -3995,6 +4251,8 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `BlackCapFloorEngine.Calculate(CapFloor, EvaluationContext, YieldTermStructure, double, DayCounter, double)`: no supplied argument
 - `BlackCapFloorEngine.Calculate(CapFloor, EvaluationContext, YieldTermStructure, OptionletVolatilityStructure, double?)`: no supplied argument
 - `Gaussian1dCapFloorEngine.Calculate(CapFloor, EvaluationContext, Gaussian1dModel, int, double, bool, bool, YieldTermStructure)`: no supplied argument
+- `MCLDHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: no supplied argument
+- `MCPRHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: no supplied argument
 - `TreeCapFloorEngine.Calculate(CapFloor, EvaluationContext, ShortRateModel, int, YieldTermStructure)`: no supplied argument
 - `TreeCapFloorEngine.Calculate(CapFloor, EvaluationContext, ShortRateModel, TimeGrid, YieldTermStructure)`: no supplied argument
 - `TreeCapFloorEngine.Calculate(CapFloor, EvaluationContext, ShortRateModel, Lattice, YieldTermStructure)`: no supplied argument
@@ -4098,6 +4356,20 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `IntegralEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: no pair: no parameter takes the member's ICalibratedModel
 - `JuQuadraticApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: no pair: no parameter takes the member's ICalibratedModel
 - `JumpDiffusionEngine.Calculate(VanillaOption, EvaluationContext, Merton76Process, double, int)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCLDAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCLDDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCLDEuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCLDEuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCLDHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCPRAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCPRDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCPREuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCPREuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
+- `MCPRHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
 - `QdFpAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, QdFpIterationScheme, QdFpAmericanEngineFixedPointEquation)`: no pair: no parameter takes the member's ICalibratedModel
 - `QdPlusAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int, QdPlusAmericanEngineSolverType, double, int?)`: no pair: no parameter takes the member's ICalibratedModel
 
@@ -4109,6 +4381,8 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `BlackCapFloorEngine.Calculate(CapFloor, EvaluationContext, YieldTermStructure, double, DayCounter, double)`: no supplied argument
 - `BlackCapFloorEngine.Calculate(CapFloor, EvaluationContext, YieldTermStructure, OptionletVolatilityStructure, double?)`: no supplied argument
 - `Gaussian1dCapFloorEngine.Calculate(CapFloor, EvaluationContext, Gaussian1dModel, int, double, bool, bool, YieldTermStructure)`: no supplied argument
+- `MCLDHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: no supplied argument
+- `MCPRHullWhiteCapFloorEngine.Calculate(CapFloor, EvaluationContext, HullWhite, bool, bool, int?, double?, int?, long)`: no supplied argument
 - `TreeCapFloorEngine.Calculate(CapFloor, EvaluationContext, ShortRateModel, int, YieldTermStructure)`: no supplied argument
 - `TreeCapFloorEngine.Calculate(CapFloor, EvaluationContext, ShortRateModel, TimeGrid, YieldTermStructure)`: no supplied argument
 - `TreeCapFloorEngine.Calculate(CapFloor, EvaluationContext, ShortRateModel, Lattice, YieldTermStructure)`: no supplied argument
@@ -4165,15 +4439,33 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `VannaVolgaBarrierEngine.Calculate(BarrierOption, EvaluationContext, DeltaVolQuote, DeltaVolQuote, DeltaVolQuote, double, YieldTermStructure, YieldTermStructure, bool, double)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `AnalyticBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `AnalyticBinaryBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialCRRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialEQPBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialJ4BarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialJRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialLRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialTianBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialTrigeorgisBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, int)`: GeneralizedBlackScholesProcess by type into process
 - `FdBlackScholesBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, ImmutableArray<Dividend>, int, int, int, FdmSchemeDesc?, bool, double?)`: GeneralizedBlackScholesProcess by type into process
 - `FdBlackScholesRebateEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, ImmutableArray<Dividend>, int, int, int, FdmSchemeDesc?, bool, double?)`: GeneralizedBlackScholesProcess by type into process
 - `FdHestonBarrierEngine.Calculate(BarrierOption, EvaluationContext, HestonModel, int, int, int, int, FdmSchemeDesc?, LocalVolTermStructure, double)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `FdHestonBarrierEngine.Calculate(BarrierOption, EvaluationContext, HestonModel, ImmutableArray<Dividend>, int, int, int, int, FdmSchemeDesc?, LocalVolTermStructure, double)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `FdHestonRebateEngine.Calculate(BarrierOption, EvaluationContext, HestonModel, int, int, int, int, FdmSchemeDesc?, LocalVolTermStructure, double)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `FdHestonRebateEngine.Calculate(BarrierOption, EvaluationContext, HestonModel, ImmutableArray<Dividend>, int, int, int, int, FdmSchemeDesc?, LocalVolTermStructure, double)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, bool, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPRBarrierEngine.Calculate(BarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, bool, long)`: GeneralizedBlackScholesProcess by type into process
 
 ### `nql_QuantoEngine_Calculate__QuantoDoubleBarrierOption`
 
+- `BinomialCRRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialEQPDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialJ4DoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialJRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialLRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialTianDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: GeneralizedBlackScholesProcess by type into process
+- `BinomialTrigeorgisDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
 - `SuoWangDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: GeneralizedBlackScholesProcess by type into process
 - `VannaVolgaDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, Func<DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, OneAssetOptionResults>, DeltaVolQuote, DeltaVolQuote, DeltaVolQuote, double, YieldTermStructure, YieldTermStructure, bool, double, int)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `AnalyticDoubleBarrierBinaryEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
@@ -4185,6 +4477,10 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `AnalyticHestonForwardEuropeanEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `ForwardPerformanceVanillaEngine.Calculate(ForwardVanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, Func<VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, OneAssetOptionResults>)`: GeneralizedBlackScholesProcess by type into process
 - `ForwardVanillaEngine.Calculate(ForwardVanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, Func<VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, OneAssetOptionResults>)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDForwardEuropeanBSEngine.Calculate(ForwardVanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDForwardEuropeanHestonEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long, bool)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRForwardEuropeanBSEngine.Calculate(ForwardVanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPRForwardEuropeanHestonEngine.Calculate(ForwardVanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long, bool)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 
 ### `nql_QuantoEngine_Calculate__QuantoVanillaOption`
 
@@ -4253,6 +4549,20 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `IntegralEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `JuQuadraticApproximationEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess)`: GeneralizedBlackScholesProcess by type into process
 - `JumpDiffusionEngine.Calculate(VanillaOption, EvaluationContext, Merton76Process, double, int)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDEuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCLDEuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDEuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCLDHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long, int, LsmBasisSystemPolynomialType, int?, bool?, long?)`: GeneralizedBlackScholesProcess by type into process
+- `MCPRDigitalEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPREuropeanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: GeneralizedBlackScholesProcess by type into process
+- `MCPREuropeanGJRGARCHEngine.Calculate(VanillaOption, EvaluationContext, GJRGARCHProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPREuropeanHestonEngine.Calculate(VanillaOption, EvaluationContext, HestonSLVProcess, int?, int?, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
+- `MCPRHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `QdFpAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, QdFpIterationScheme, QdFpAmericanEngineFixedPointEquation)`: GeneralizedBlackScholesProcess by type into bsProcess
 - `QdPlusAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int, QdPlusAmericanEngineSolverType, double, int?)`: GeneralizedBlackScholesProcess by type into process
 
@@ -4274,6 +4584,15 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 
 ### `nql_VannaVolgaDoubleBarrierEngine_Calculate`
 
+- `BinomialCRRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: refused at the call: no parameter 'series' for the member's Int32
+- `BinomialEQPDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: refused at the call: no parameter 'series' for the member's Int32
+- `BinomialJ4DoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: refused at the call: no parameter 'series' for the member's Int32
+- `BinomialJRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: refused at the call: no parameter 'series' for the member's Int32
+- `BinomialLRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: refused at the call: no parameter 'series' for the member's Int32
+- `BinomialTianDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: refused at the call: no parameter 'series' for the member's Int32
+- `BinomialTrigeorgisDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: refused at the call: no parameter 'series' for the member's Int32
+- `MCLDDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: refused at the call: no parameter 'series' for the member's Int32
+- `MCPRDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int?, int?, bool, bool, int?, double?, int?, long)`: refused at the call: no parameter 'series' for the member's Int32
 - `SuoWangDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int)`: GeneralizedBlackScholesProcess by type into process; Int32 by name into series
 - `VannaVolgaDoubleBarrierEngine.Calculate(DoubleBarrierOption, EvaluationContext, Func<DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess, int, OneAssetOptionResults>, DeltaVolQuote, DeltaVolQuote, DeltaVolQuote, double, YieldTermStructure, YieldTermStructure, bool, double, int)`: no pair: no parameter takes the member's GeneralizedBlackScholesProcess
 - `AnalyticDoubleBarrierBinaryEngine.Calculate(DoubleBarrierOption, EvaluationContext, GeneralizedBlackScholesProcess)`: no pair: no parameter takes the member's Int32

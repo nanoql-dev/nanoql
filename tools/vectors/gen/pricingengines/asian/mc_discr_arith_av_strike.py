@@ -13,7 +13,9 @@ Fixing dates given twice are left out (the S-bar plan's §2.10: BR5 (xxviii)).
 
 The engine's settings go in as "engine". The wheel's calls, by QuantLib-SWIG 1.44's options.i:
 MCPRDiscreteArithmeticASEngine(process, brownianBridge, antitheticVariate, requiredSamples, requiredTolerance,
-maxSamples, seed) and the option's NPV and errorEstimate. Read back by
+maxSamples, seed) and the option's NPV and errorEstimate; then
+MCLDDiscreteArithmeticASEngine, the same arguments, on low-discrepancy draws ("traits": "ld"), its NPV
+alone. Read back by
 tests/NanoQL.Tests/Vectors/PricingEngines/Asian/MCDiscreteArithmeticASEngineVectorTests.cs."""
 import importlib.util
 import os
@@ -57,6 +59,16 @@ def make(p, brownianBridge, antitheticVariate, seed):
     return ql.MCPRDiscreteArithmeticASEngine(p, brownianBridge, antitheticVariate, SAMPLES, None, None, seed)
 
 
+def make_ld(p, brownianBridge, antitheticVariate, seed):
+    return ql.MCLDDiscreteArithmeticASEngine(p, brownianBridge, antitheticVariate, SAMPLES, None, None, seed)
+
+
+def ld_outputs(opt, engine):
+    """The NPV alone: the low-discrepancy traits give no error estimate."""
+    opt.setPricingEngine(engine)
+    return {"NPV": v.attempt(opt.NPV)}
+
+
 def cases():
     st = v.settings(R)
     out = []
@@ -93,6 +105,20 @@ def cases():
                        ("expired", ao.option_spec(ARITHMETIC, ao.dates(-1, 1), pay, abe.exercise_spec("European", -1)))):
         out.append({"name": name, "inputs": {"settings": st, "process": pspec, "option": spec, "engine": settings},
                     "expected": mc_outputs(ao.option(spec), make(p, **settings))})
+    # MCLDDiscreteArithmeticASEngine: low-discrepancy draws on the first two processes, the NPV alone
+    for pname, pspec in bsp.PROCESSES[:2]:
+        p = bsp.process(pspec)
+        x0 = pspec["x0"]
+        ex = abe.exercise_spec("European", 365)
+        for sname, running, past in (("unseasoned", None, 0), ("two past fixings at 95 and 105", 2.0 * x0, 2)):
+            for tname, t in (("call", CALL), ("put", PUT)):
+                settings = {"traits": "ld", "brownianBridge": True, "antitheticVariate": False, "seed": 42}
+                spec = ao.option_spec(ARITHMETIC, ao.dates(365, 12), bc.payoff_spec("PlainVanilla", t, x0), ex,
+                                      running=running, past=past)
+                engine = make_ld(p, **{k: s for k, s in settings.items() if k != "traits"})
+                out.append({"name": f"low-discrepancy, {pname}, 365 days, 12 fixings, {sname}, a {tname} at the spot",
+                            "inputs": {"settings": st, "process": pspec, "option": spec, "engine": settings},
+                            "expected": ld_outputs(ao.option(spec), engine)})
     return out
 
 

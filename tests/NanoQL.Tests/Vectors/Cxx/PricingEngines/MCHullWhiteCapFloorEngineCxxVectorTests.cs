@@ -75,8 +75,8 @@ public class MCHullWhiteCapFloorEngineCxxVectorTests
         int? maxSamples = CouponInputs.NullableInt(e.GetProperty("maxSamples"));
         long seed = e.GetProperty("seed").GetInt64();
         return e.GetProperty("traits").GetString() == "PseudoRandom"
-            ? MCHullWhiteCapFloorEngine.Calculate<PseudoRandom, GeneralStatistics>(capFloor, context, model, bb, anti, samples, tolerance, maxSamples, seed)
-            : MCHullWhiteCapFloorEngine.Calculate<LowDiscrepancy, GeneralStatistics>(capFloor, context, model, bb, anti, samples, tolerance, maxSamples, seed);
+            ? MCPRHullWhiteCapFloorEngine.Calculate(capFloor, context, model, bb, anti, samples, tolerance, maxSamples, seed)
+            : MCLDHullWhiteCapFloorEngine.Calculate(capFloor, context, model, bb, anti, samples, tolerance, maxSamples, seed);
     }
 
     // The builder on the first setter's seed, which every case gives first (QuantLib's default, 0, is refused), then

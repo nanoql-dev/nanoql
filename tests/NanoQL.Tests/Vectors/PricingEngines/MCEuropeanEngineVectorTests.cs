@@ -54,9 +54,9 @@ public class MCEuropeanEngineVectorTests
     {
         (int? steps, int? perYear, bool bb, bool anti, int? samples, double? tolerance, int? max, long seed) = Settings(spec);
         return spec.GetProperty("traits").GetString() == "PseudoRandom"
-            ? MCEuropeanEngine.Calculate<PseudoRandom, GeneralStatistics>(
+            ? MCPREuropeanEngine.Calculate(
                 option, context, process, steps, perYear, bb, anti, samples, tolerance, max, seed)
-            : MCEuropeanEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+            : MCLDEuropeanEngine.Calculate(
                 option, context, process, steps, perYear, bb, anti, samples, tolerance, max, seed);
     }
 

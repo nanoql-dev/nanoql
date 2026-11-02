@@ -30,9 +30,12 @@ public class MCDiscreteArithmeticAPHestonEngineVectorTests
             CheckResults(check, c, () =>
             {
                 var option = DiscreteOptionOf(c.Input("option"), context);
-                return MCDiscreteArithmeticAPHestonEngine.Calculate<PseudoRandom, GeneralStatistics>(
-                    option, context, process, e.GetProperty("antitheticVariate").GetBoolean(), Samples, null, null,
-                    e.GetProperty("seed").GetInt64(), NullableInt(e, "timeSteps"), NullableInt(e, "timeStepsPerYear"));
+                bool antithetic = e.GetProperty("antitheticVariate").GetBoolean();
+                long seed = e.GetProperty("seed").GetInt64();
+                int? steps = NullableInt(e, "timeSteps"), perYear = NullableInt(e, "timeStepsPerYear");
+                return LowDiscrepancy(e)
+                    ? MCLDDiscreteArithmeticAPHestonEngine.Calculate(option, context, process, antithetic, Samples, null, null, seed, steps, perYear)
+                    : MCPRDiscreteArithmeticAPHestonEngine.Calculate(option, context, process, antithetic, Samples, null, null, seed, steps, perYear);
             });
         }
 

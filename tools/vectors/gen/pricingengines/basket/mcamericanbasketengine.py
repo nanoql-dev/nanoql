@@ -3,7 +3,9 @@
 """Vectors for QuantLib's MCAmericanBasketEngine (ql/pricingengines/basket/mcamericanbasketengine.hpp, .cpp), on the
 evaluation date 15 October 2026: the Longstaff-Schwartz engine's NPV and error estimate for American maximum calls,
 minimum puts and average puts on two and three Black-Scholes processes, pseudo-random, with and without antithetic
-variates, on monomial, Laguerre and Hermite bases of orders 2 and 3, on fixed seeds.
+variates, on monomial, Laguerre and Hermite bases of orders 2 and 3, on fixed seeds; then a maximum call and a minimum
+put on low-discrepancy paths ("traits": "ld", MCLDAmericanBasketEngine's closing), the NPV alone, as the traits give no
+error estimate.
 QuantLib's engine takes no calibration seed; its base's default is the narrowed null, 2147483647 through the wheel
 (the S-van plan's VR4 (v)), which the reader passes, nanoql's default being the documented one. A zero or negative
 strike is left out, where nanoql scales the regression by 1/|K| (tests/NanoQL.Tests/Divergences/
@@ -11,8 +13,9 @@ AmericanBasketStrikeScalingTests.cs). The specs are tools/vectors/gen/instrument
 engine {"processes", "rho", "timeSteps", "antitheticVariate", "requiredSamples", "seed", "nCalibrationSamples",
 "polynomialOrder", "polynomialType"}. The wheel's calls, by QuantLib-SWIG 1.44's basketoptions.i:
 StochasticProcessArray(processes, rho); MCAmericanBasketEngine(process, "pseudorandom", timeSteps=...,
-antitheticVariate=..., requiredSamples=..., seed=..., nCalibrationSamples=..., polynomOrder=..., polynomType=...);
-BasketOption's NPV and errorEstimate. Read back by
+antitheticVariate=..., requiredSamples=..., seed=..., nCalibrationSamples=..., polynomOrder=..., polynomType=...),
+"lowdiscrepancy" in place of "pseudorandom" for the low-discrepancy cases; BasketOption's NPV and errorEstimate. Read
+back by
 tests/NanoQL.Tests/Vectors/PricingEngines/Basket/MCAmericanBasketEngineVectorTests.cs."""
 import importlib.util
 import os
@@ -43,21 +46,25 @@ TYPES = {"Monomial": ql.LsmBasisSystem.Monomial, "Laguerre": ql.LsmBasisSystem.L
          "Hermite": ql.LsmBasisSystem.Hermite}
 
 
-def engine_spec(processes, rho, steps, antithetic, samples, seed, calibration, order=2, kind="Monomial"):
-    return {"processes": processes, "rho": rho, "timeSteps": steps, "antitheticVariate": antithetic,
+def engine_spec(processes, rho, steps, antithetic, samples, seed, calibration, order=2, kind="Monomial", ld=False):
+    spec = {"processes": processes, "rho": rho, "timeSteps": steps, "antitheticVariate": antithetic,
             "requiredSamples": samples, "seed": seed, "nCalibrationSamples": calibration, "polynomialOrder": order,
             "polynomialType": kind}
+    return {"traits": "ld", **spec} if ld else spec
 
 
 def results(option_s, engine_s):
     option, keep = bo.option(option_s)
     ps = [bsp.process(p) for p in engine_s["processes"]]
     array = ql.StochasticProcessArray(ps, ql.Matrix(engine_s["rho"]))
+    ld = engine_s.get("traits") == "ld"
     option.setPricingEngine(ql.MCAmericanBasketEngine(
-        array, "pseudorandom", timeSteps=engine_s["timeSteps"], antitheticVariate=engine_s["antitheticVariate"],
-        requiredSamples=engine_s["requiredSamples"], seed=engine_s["seed"],
-        nCalibrationSamples=engine_s["nCalibrationSamples"], polynomOrder=engine_s["polynomialOrder"],
-        polynomType=TYPES[engine_s["polynomialType"]]))
+        array, "lowdiscrepancy" if ld else "pseudorandom", timeSteps=engine_s["timeSteps"],
+        antitheticVariate=engine_s["antitheticVariate"], requiredSamples=engine_s["requiredSamples"],
+        seed=engine_s["seed"], nCalibrationSamples=engine_s["nCalibrationSamples"],
+        polynomOrder=engine_s["polynomialOrder"], polynomType=TYPES[engine_s["polynomialType"]]))
+    if ld:
+        return {"NPV": option.NPV()}
     return {"NPV": option.NPV(), "errorEstimate": option.errorEstimate()}
 
 
@@ -75,6 +82,9 @@ def cases():
          engine_spec(fd2.FLAT_PAIR, [[1.0, -0.3], [-0.3, 1.0]], 16, True, 1500, 1234, 400, 3, "Laguerre")),
         ("minimum put, Hermite", min_put, engine_spec(fd2.ZERO_PAIR, rho2, 12, True, 1000, 99, 300, 2, "Hermite")),
         ("average put, three assets", avg_put, engine_spec(nd.THREE, nd.RHO3, 10, True, 1000, 42, 300)),
+        ("low-discrepancy, maximum call", max_call, engine_spec(fd2.FLAT_PAIR, rho2, 20, False, 2000, 42, 500, ld=True)),
+        ("low-discrepancy, minimum put, Laguerre order 3", min_put,
+         engine_spec(fd2.FLAT_PAIR, [[1.0, -0.3], [-0.3, 1.0]], 16, False, 1500, 42, 400, 3, "Laguerre", ld=True)),
     ]
     out = []
     for name, payoff, engine in setups:

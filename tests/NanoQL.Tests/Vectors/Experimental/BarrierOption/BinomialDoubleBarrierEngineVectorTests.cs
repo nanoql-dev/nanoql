@@ -56,19 +56,19 @@ public class BinomialDoubleBarrierEngineVectorTests
         string tree, DoubleBarrierOption option, EvaluationContext context, GeneralizedBlackScholesProcess process, int steps) =>
         tree switch
         {
-            "crr" => BinomialDoubleBarrierEngine.Calculate<CoxRossRubinstein, DiscretizedDermanKaniDoubleBarrierOption>(
+            "crr" => BinomialCRRDoubleBarrierEngine.Calculate(
                 option, context, process, steps),
-            "jr" => BinomialDoubleBarrierEngine.Calculate<JarrowRudd, DiscretizedDermanKaniDoubleBarrierOption>(
+            "jr" => BinomialJRDoubleBarrierEngine.Calculate(
                 option, context, process, steps),
-            "eqp" => BinomialDoubleBarrierEngine.Calculate<AdditiveEQPBinomialTree, DiscretizedDermanKaniDoubleBarrierOption>(
+            "eqp" => BinomialEQPDoubleBarrierEngine.Calculate(
                 option, context, process, steps),
-            "trigeorgis" => BinomialDoubleBarrierEngine.Calculate<Trigeorgis, DiscretizedDermanKaniDoubleBarrierOption>(
+            "trigeorgis" => BinomialTrigeorgisDoubleBarrierEngine.Calculate(
                 option, context, process, steps),
-            "tian" => BinomialDoubleBarrierEngine.Calculate<Tian, DiscretizedDermanKaniDoubleBarrierOption>(
+            "tian" => BinomialTianDoubleBarrierEngine.Calculate(
                 option, context, process, steps),
-            "lr" => BinomialDoubleBarrierEngine.Calculate<LeisenReimer, DiscretizedDermanKaniDoubleBarrierOption>(
+            "lr" => BinomialLRDoubleBarrierEngine.Calculate(
                 option, context, process, steps),
-            "j4" => BinomialDoubleBarrierEngine.Calculate<Joshi4, DiscretizedDermanKaniDoubleBarrierOption>(
+            "j4" => BinomialJ4DoubleBarrierEngine.Calculate(
                 option, context, process, steps),
             _ => throw new ArgumentException($"unknown tree {tree}", nameof(tree)),
         };

@@ -32,6 +32,14 @@ internal static class AsianInputs
     }
 
     /// <summary>
+    /// Whether an engine spec asks for low-discrepancy draws (<c>"traits": "ld"</c>; pseudo-random without it).
+    /// </summary>
+    /// <param name="engine">The engine spec.</param>
+    /// <returns><see langword="true"/> for the low-discrepancy traits.</returns>
+    public static bool LowDiscrepancy(JsonElement engine) =>
+        engine.TryGetProperty("traits", out JsonElement traits) && traits.GetString() == "ld";
+
+    /// <summary>
     /// Checks the outputs a case records among the NPV, the error estimate and the Greeks, from one pricing, made
     /// once, its throw each output's.
     /// </summary>

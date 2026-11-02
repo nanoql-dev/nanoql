@@ -69,7 +69,12 @@ Visual Studio's C++ tools with the Visual Studio Installer's folder on `PATH`.
   constraint where each type parameter has one class or interface constraint, no constructor or value-type one
   (`nql_CalibratedModelExtensions_Calibrate` takes any calibrated model); any other generic method doesn't cross. A
   closed generic type a crossing function takes or returns crosses as a type of its own, its members too, named by its
-  definition and its arguments: `nql_CalibrationResults_Gsr_get_Model`.
+  definition and its arguments: `nql_CalibrationResults_Gsr_get_Model`. An engine's calculations generic in their
+  traits and statistics cross through its named classes, each a static class of them closed (D12): `MCPR<X>Engine`
+  and `MCLD<X>Engine` at `PseudoRandom` or `LowDiscrepancy` and `GeneralStatistics`, QuantLib's default statistics,
+  for the 19 engines QuantLib-Python names and the six it doesn't, named as their siblings are; and
+  `Binomial<Tree>BarrierEngine` and `Binomial<Tree>DoubleBarrierEngine` for the seven trees on Derman and Kani's
+  assets, the wheel's closings (`nql_MCPREuropeanEngine_Calculate`, `nql_BinomialCRRBarrierEngine_Bind`).
 - **Released names never move:** each release writes its surface to `bindings/surface.shipped.json`, and the generator
   keeps every released function's and type's name. Only a new member is named against the names in use: a member that
   gains its first overload keeps its short name and the newcomer takes the suffix.

@@ -34,9 +34,9 @@ public class MCPerformanceEngineVectorTests
             (_, _, bool bb, bool anti, int? samples, double? tolerance, int? max, long seed) =
                 MCEuropeanEngineVectorTests.Settings(spec);
             var r = new Lazy<OneAssetOptionResults>(() => spec.GetProperty("traits").GetString() == "PseudoRandom"
-                ? MCPerformanceEngine.Calculate<PseudoRandom, GeneralStatistics>(
+                ? MCPRPerformanceEngine.Calculate(
                     option, context, process, bb, anti, samples, tolerance, max, seed)
-                : MCPerformanceEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+                : MCLDPerformanceEngine.Calculate(
                     option, context, process, bb, anti, samples, tolerance, max, seed));
             check.Output(c, "NPV", () => r.Value.NPV);
             if (c.Expected.TryGetProperty("errorEstimate", out _))

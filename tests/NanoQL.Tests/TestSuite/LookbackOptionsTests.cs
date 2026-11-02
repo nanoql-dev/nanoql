@@ -229,7 +229,49 @@ public class LookbackOptionsTests
     public void TestMonteCarloLookback()
     {
         // Testing Monte Carlo engines for lookback options...
+        MonteCarloLookback(new MonteCarloPricers(
+            (option, process, tolerance) => new MakeMCLookbackEngine<ContinuousPartialFixedLookbackOption, PseudoRandom, GeneralStatistics>(process, 1)
+                .WithSteps(2000)
+                .WithAntitheticVariate()
+                .WithAbsoluteTolerance(tolerance)
+                .ToEngine()(option, RunnerContext).NPV!.Value,
+            (option, process, tolerance) => new MakeMCLookbackEngine<ContinuousFixedLookbackOption, PseudoRandom, GeneralStatistics>(process, 1)
+                .WithSteps(2000)
+                .WithAntitheticVariate()
+                .WithAbsoluteTolerance(tolerance)
+                .ToEngine()(option, RunnerContext).NPV!.Value,
+            (option, process, tolerance) => new MakeMCLookbackEngine<ContinuousPartialFloatingLookbackOption, PseudoRandom, GeneralStatistics>(process, 1)
+                .WithSteps(2000)
+                .WithAntitheticVariate()
+                .WithAbsoluteTolerance(tolerance)
+                .ToEngine()(option, RunnerContext).NPV!.Value,
+            (option, process, tolerance) => new MakeMCLookbackEngine<ContinuousFloatingLookbackOption, PseudoRandom, GeneralStatistics>(process, 1)
+                .WithSteps(2000)
+                .WithAntitheticVariate()
+                .WithAbsoluteTolerance(tolerance)
+                .ToEngine()(option, RunnerContext).NPV!.Value));
+    }
 
+    [Fact]
+    public void TestMonteCarloLookbackThroughMCPRLookbackEngine()
+    {
+        // testMonteCarloLookback's cases through QuantLib-Python's name for the pseudo-random closing, at the builder's
+        // settings: 2,000 steps, antithetic variates, seed 1 and the absolute tolerance
+        MonteCarloLookback(new MonteCarloPricers(
+            (option, process, tolerance) =>
+                MCPRLookbackEngine.Calculate(option, RunnerContext, process, 2000, null, false, true, null, tolerance, null, 1).NPV!.Value,
+            (option, process, tolerance) =>
+                MCPRLookbackEngine.Calculate(option, RunnerContext, process, 2000, null, false, true, null, tolerance, null, 1).NPV!.Value,
+            (option, process, tolerance) =>
+                MCPRLookbackEngine.Calculate(option, RunnerContext, process, 2000, null, false, true, null, tolerance, null, 1).NPV!.Value,
+            (option, process, tolerance) =>
+                MCPRLookbackEngine.Calculate(option, RunnerContext, process, 2000, null, false, true, null, tolerance, null, 1).NPV!.Value));
+    }
+
+    // testMonteCarloLookback's body: each option's Monte Carlo price, through the pricers given, against its analytic
+    // one
+    private static void MonteCarloLookback(MonteCarloPricers pricers)
+    {
         double tolerance = 0.1;
 
         DayCounter dc = new Actual360();
@@ -254,22 +296,14 @@ public class LookbackOptionsTests
             var partialFixedLookback = new ContinuousPartialFixedLookbackOption(lookbackStart, payoff, exercise);
             double analytical =
                 AnalyticContinuousPartialFixedLookbackEngine.Calculate(partialFixedLookback, RunnerContext, stochProcess).NPV!.Value;
-            double monteCarlo = new MakeMCLookbackEngine<ContinuousPartialFixedLookbackOption, PseudoRandom, GeneralStatistics>(stochProcess, 1)
-                .WithSteps(2000)
-                .WithAntitheticVariate()
-                .WithAbsoluteTolerance(tolerance)
-                .ToEngine()(partialFixedLookback, RunnerContext).NPV!.Value;
+            double monteCarlo = pricers.PartialFixed(partialFixedLookback, stochProcess, tolerance);
             CheckMc("Partial Fixed", type, analytical, monteCarlo, tolerance);
 
             // Fixed
             double minMax = 100;
             var fixedLookback = new ContinuousFixedLookbackOption(minMax, payoff, exercise);
             analytical = AnalyticContinuousFixedLookbackEngine.Calculate(fixedLookback, RunnerContext, stochProcess).NPV!.Value;
-            monteCarlo = new MakeMCLookbackEngine<ContinuousFixedLookbackOption, PseudoRandom, GeneralStatistics>(stochProcess, 1)
-                .WithSteps(2000)
-                .WithAntitheticVariate()
-                .WithAbsoluteTolerance(tolerance)
-                .ToEngine()(fixedLookback, RunnerContext).NPV!.Value;
+            monteCarlo = pricers.Fixed(fixedLookback, stochProcess, tolerance);
             CheckMc("Fixed", type, analytical, monteCarlo, tolerance);
 
             // Partial Floating
@@ -279,21 +313,13 @@ public class LookbackOptionsTests
             var partialFloating = new ContinuousPartialFloatingLookbackOption(minMax, lambda, lookbackEnd, floatingPayoff, exercise);
             analytical =
                 AnalyticContinuousPartialFloatingLookbackEngine.Calculate(partialFloating, RunnerContext, stochProcess).NPV!.Value;
-            monteCarlo = new MakeMCLookbackEngine<ContinuousPartialFloatingLookbackOption, PseudoRandom, GeneralStatistics>(stochProcess, 1)
-                .WithSteps(2000)
-                .WithAntitheticVariate()
-                .WithAbsoluteTolerance(tolerance)
-                .ToEngine()(partialFloating, RunnerContext).NPV!.Value;
+            monteCarlo = pricers.PartialFloating(partialFloating, stochProcess, tolerance);
             CheckMc("Partial Floating", type, analytical, monteCarlo, tolerance);
 
             // Floating
             var floating = new ContinuousFloatingLookbackOption(minMax, floatingPayoff, exercise);
             analytical = AnalyticContinuousFloatingLookbackEngine.Calculate(floating, RunnerContext, stochProcess).NPV!.Value;
-            monteCarlo = new MakeMCLookbackEngine<ContinuousFloatingLookbackOption, PseudoRandom, GeneralStatistics>(stochProcess, 1)
-                .WithSteps(2000)
-                .WithAntitheticVariate()
-                .WithAbsoluteTolerance(tolerance)
-                .ToEngine()(floating, RunnerContext).NPV!.Value;
+            monteCarlo = pricers.Floating(floating, stochProcess, tolerance);
             CheckMc("Floating", type, analytical, monteCarlo, tolerance);
         }
     }
@@ -337,6 +363,13 @@ public class LookbackOptionsTests
     // The test suite's flatVol: a constant volatility from the reference date, on the null calendar.
     private static BlackVolTermStructure FlatVol(Date today, double vol, DayCounter dc) =>
         new BlackConstantVol(today, new NullCalendar(), vol, dc);
+
+    // A Monte Carlo price of each lookback option on a process, at an absolute tolerance
+    private sealed record MonteCarloPricers(
+        Func<ContinuousPartialFixedLookbackOption, GeneralizedBlackScholesProcess, double, double> PartialFixed,
+        Func<ContinuousFixedLookbackOption, GeneralizedBlackScholesProcess, double, double> Fixed,
+        Func<ContinuousPartialFloatingLookbackOption, GeneralizedBlackScholesProcess, double, double> PartialFloating,
+        Func<ContinuousFloatingLookbackOption, GeneralizedBlackScholesProcess, double, double> Floating);
 
     private sealed record LookbackOptionData(
         OptionType Type,

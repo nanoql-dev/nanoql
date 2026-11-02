@@ -60,9 +60,9 @@ public class MCEuropeanGJRGARCHEngineVectorTests
         int? max = MCEuropeanEngineVectorTests.NullableInt(spec, "maxSamples");
         long seed = spec.GetProperty("seed").GetInt64();
         return spec.GetProperty("traits").GetString() == "PseudoRandom"
-            ? MCEuropeanGJRGARCHEngine.Calculate<PseudoRandom, GeneralStatistics>(
+            ? MCPREuropeanGJRGARCHEngine.Calculate(
                 option, context, process, steps, perYear, anti, samples, tolerance, max, seed)
-            : MCEuropeanGJRGARCHEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+            : MCLDEuropeanGJRGARCHEngine.Calculate(
                 option, context, process, steps, perYear, anti, samples, tolerance, max, seed);
     }
 }

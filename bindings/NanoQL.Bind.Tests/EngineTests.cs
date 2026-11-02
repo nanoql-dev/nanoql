@@ -33,16 +33,29 @@ public class EngineTests
         Generation g = Surfaces.Nanoql;
         Assert.Equal(35, Formed(g, "NanoQL.Models.HestonModelHelper.SetPricingEngine"));
         Assert.Equal(9, Formed(g, "NanoQL.Models.SwaptionHelper.SetPricingEngine"));
-        Assert.Equal(5, Formed(g, "NanoQL.Models.CapHelper.SetPricingEngine"));
+
+        // the Hull-White cap engine's named classes among them
+        Assert.Equal(7, Formed(g, "NanoQL.Models.CapHelper.SetPricingEngine"));
     }
 
     [Fact]
     public void TheBlackCallableEnginesAreRefusedOnTheOasMembers()
     {
-        EnginePair[] refused = [.. Surfaces.Nanoql.Surface.EnginePairs.Where(p => p.Refused)];
+        EnginePair[] refused = [.. Surfaces.Nanoql.Surface.EnginePairs.Where(p => p.Refused && p.Set.Engine.Name.Contains("BlackCallable", StringComparison.Ordinal))];
         Assert.Equal(8, refused.Length);
-        Assert.All(refused, p => Assert.Contains("BlackCallable", p.Set.Engine.Name, StringComparison.Ordinal));
         Assert.All(refused, p => Assert.Contains("'spread'", p.Reason, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void TheDoubleBarrierEnginesTakingAStepCountAreRefusedOnTheVannaVolgaEngine()
+    {
+        // the binomial and Monte Carlo double-barrier engines' integer is a step count, not the series the Vanna-Volga
+        // engine passes its bound engine: the only other refusals at the call
+        EnginePair[] refused = [.. Surfaces.Nanoql.Surface.EnginePairs.Where(p => p.Refused && !p.Set.Engine.Name.Contains("BlackCallable", StringComparison.Ordinal))];
+        Assert.Equal(9, refused.Length);
+        Assert.All(refused, p => Assert.Equal("NanoQL.Experimental.VannaVolgaDoubleBarrierEngine.Calculate", EngineBinder.MemberName(p.Member)));
+        Assert.All(refused, p => Assert.Contains("'series'", p.Reason, StringComparison.Ordinal));
+        Assert.All(refused, p => Assert.EndsWith("DoubleBarrierEngine", p.Set.Engine.Name, StringComparison.Ordinal));
     }
 
     [Fact]

@@ -58,9 +58,9 @@ public class MCBarrierEngineVectorTests
         long seed = mc.GetProperty("seed").GetInt64();
         return mc.GetProperty("traits").GetString() switch
         {
-            "pseudorandom" => MCBarrierEngine.Calculate<PseudoRandom, GeneralStatistics>(
+            "pseudorandom" => MCPRBarrierEngine.Calculate(
                 option, context, process, steps, null, bridge, antithetic, samples, null, null, biased, seed),
-            "lowdiscrepancy" => MCBarrierEngine.Calculate<LowDiscrepancy, GeneralStatistics>(
+            "lowdiscrepancy" => MCLDBarrierEngine.Calculate(
                 option, context, process, steps, null, bridge, antithetic, samples, null, null, biased, seed),
             string s => throw new InvalidOperationException($"unknown traits '{s}'"),
             null => throw new InvalidOperationException("no traits"),
