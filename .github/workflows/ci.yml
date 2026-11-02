@@ -5,8 +5,10 @@
 #
 # While the repository is private, the jobs run on the weekly schedule and on demand only; on a public repository,
 # pushes to main and pull requests run them too. Windows is the reference: on Linux and macOS a build, test or vector
-# red is reported but doesn't fail the run, until results across systems are compared. The no-AI-trace check is
-# never part of CI; it runs where commits are made.
+# red is reported but doesn't fail the run, until results across systems are compared. A private repository's minutes
+# count macOS's tenfold and Windows's twofold, so the weekly run builds and tests on Windows alone, as a dispatch does
+# unless it asks for all three systems, and the bindings jobs build Windows x64 and Linux x64 unless a dispatch asks
+# for macOS or all five. The no-AI-trace check is never part of CI; it runs where commits are made.
 name: CI
 
 on:
@@ -26,10 +28,10 @@ on:
         type: string
         default: ""
       systems:
-        description: "Systems for the build, tests and vectors"
+        description: "Systems for the build, tests and vectors: Windows alone, or all three (macOS's minutes count tenfold)"
         type: choice
-        options: [all, windows]
-        default: all
+        options: [windows, all]
+        default: windows
       pin-dotnet:
         description: "Use global.json's SDK exactly, alone in its own folder, with the runtime it ships, not the runner's newer one"
         type: boolean
@@ -43,9 +45,9 @@ on:
         type: string
         default: "2.0.dev1"
       bindings:
-        description: "Bindings platforms: core (Windows x64, Linux x64, macOS Arm64) or all five; publishing builds all five"
+        description: "Bindings platforms: core (Windows x64, Linux x64), macos (macOS Arm64 alone) or all five; publishing builds all five"
         type: choice
-        options: [core, all]
+        options: [core, macos, all]
         default: core
 
 permissions:
@@ -70,7 +72,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(inputs.systems == 'windows' && '["windows-2022"]' || '["windows-2022", "ubuntu-24.04", "macos-15"]') }}
+        os: ${{ fromJSON((inputs.systems == 'all' || github.event_name == 'push' || github.event_name == 'pull_request') && '["windows-2022", "ubuntu-24.04", "macos-15"]' || '["windows-2022"]') }}
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.os != 'windows-2022' }}
     timeout-minutes: 90
@@ -194,8 +196,8 @@ jobs:
 
   # The bindings (docs/bindings.md): the C ABI built with Native AOT on each platform, its checked-in surface checked,
   # the C conformance suite on the test build, and the vector suite recorded and replayed through the C ABI. The weekly
-  # run builds Windows x64 and Linux x64; any other run the core three, macOS Arm64 beside them, unless a dispatch asks
-  # for all five or publishes to PyPI. Linux builds in a manylinux_2_28 container, so the library runs on glibc 2.28 and
+  # run and a dispatch's core build Windows x64 and Linux x64; a dispatch's macos builds macOS Arm64 alone, and its all
+  # the five, as a PyPI publish does. Linux builds in a manylinux_2_28 container, so the library runs on glibc 2.28 and
   # later; the container has no libicu, which the library doesn't load.
   bindings:
     name: Bindings (${{ matrix.rid }})
@@ -205,7 +207,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(github.event_name == 'schedule' && '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"}]' || (inputs.bindings == 'all' || inputs.publish-pypi) && '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"win-arm64","os":"windows-11-arm","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"},{"rid":"linux-arm64","os":"ubuntu-24.04-arm","container":"quay.io/pypa/manylinux_2_28_aarch64"},{"rid":"osx-arm64","os":"macos-15","container":""}]' || '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"},{"rid":"osx-arm64","os":"macos-15","container":""}]') }}
+        include: ${{ fromJSON(github.event_name == 'schedule' && '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"}]' || (inputs.bindings == 'all' || inputs.publish-pypi) && '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"win-arm64","os":"windows-11-arm","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"},{"rid":"linux-arm64","os":"ubuntu-24.04-arm","container":"quay.io/pypa/manylinux_2_28_aarch64"},{"rid":"osx-arm64","os":"macos-15","container":""}]' || inputs.bindings == 'macos' && '[{"rid":"osx-arm64","os":"macos-15","container":""}]' || '[{"rid":"win-x64","os":"windows-2022","container":""},{"rid":"linux-x64","os":"ubuntu-24.04","container":"quay.io/pypa/manylinux_2_28_x86_64"}]') }}
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     timeout-minutes: 120
