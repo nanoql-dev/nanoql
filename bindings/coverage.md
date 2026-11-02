@@ -9,13 +9,13 @@ report applies.
 ## Counts
 
 - **Assemblies:** `NanoQL` (`nql_`), `NanoQL.Extensions` (`nql_`).
-- **Functions:** 11,290, 2,469 of them experimental and 1,497 with an overload suffix; by kind, method 3,833, get 3,476, new 1,402, static 961, with 626, operator 413, bind 259, bindon 259, draws 48, field 7, indexer 5, set 1.
-- **Types:** 2,319; by form, handle 1,629, static 344, withheld 215, boxed 73, snapshot 53, value 2, distribution 1, matrix 1, vector 1.
+- **Functions:** 11,477, 2,523 of them experimental and 1,503 with an overload suffix; by kind, method 3,918, get 3,547, new 1,422, static 970, with 626, operator 413, bind 259, bindon 259, draws 50, field 7, indexer 5, set 1.
+- **Types:** 2,343; by form, handle 1,651, static 344, withheld 215, boxed 73, snapshot 55, value 2, distribution 1, matrix 1, vector 1.
 - **Enums:** 165.
-- **Names:** the longest 165 characters, 1,076 over 63.
+- **Names:** the longest 165 characters, 1,114 over 63.
 - **Presets withheld:** 310 constructors of 298 types, 356 of the 356 preset constructions with a lookup by name.
-- **Engines:** 225 engines, 268 input sets; 37 engine parameters, 1,179 pairs formed, 17 refused at the call, 320 calculations forming no pair.
-- **Not crossing:** 2,467 members and types.
+- **Engines:** 225 engines, 268 input sets; 41 engine parameters, 1,188 pairs formed, 17 refused at the call, 320 calculations forming no pair.
+- **Not crossing:** 2,472 members and types.
 
 ## What doesn't cross, by reason
 
@@ -2038,7 +2038,7 @@ report applies.
 - `TabulatedGaussLegendre.Evaluate` <sub>`NanoQL.Numerics.TabulatedGaussLegendre::Evaluate(System.Func`2<System.Double,System.Double>)`</sub>
 - `TwoDimensionalIntegral.Integrate` <sub>`NanoQL.Numerics.TwoDimensionalIntegral::Integrate(System.Func`3<System.Double,System.Double,System.Double>,System.ValueTuple`2<System.Double,System.Double>,System.ValueTuple`2<System.Double,System.Double>)`</sub>
 
-### a generator crosses as a snapshot drawn in batches (Draws); its other members don't cross (105)
+### a generator crosses as a snapshot drawn in batches (Draws); its other members don't cross (107)
 
 - `BoxMullerKnuthGaussianRng.Clone` <sub>`NanoQL.Numerics.BoxMullerKnuthGaussianRng::Clone()`</sub>
 - `BoxMullerLecuyerGaussianRng.Clone` <sub>`NanoQL.Numerics.BoxMullerLecuyerGaussianRng::Clone()`</sub>
@@ -2078,6 +2078,7 @@ report applies.
 - `IRsg.Dimension` <sub>`NanoQL.Numerics.IRsg::Dimension`</sub>
 - `IRsg.LastSequence` <sub>`NanoQL.Numerics.IRsg::LastSequence()`</sub>
 - `IRsg.NextSequence` <sub>`NanoQL.Numerics.IRsg::NextSequence()`</sub>
+- `InvCumulativeBurley2020SobolGaussianRsg.Clone` <sub>`NanoQL.Numerics.InvCumulativeBurley2020SobolGaussianRsg::Clone()`</sub>
 - `InvCumulativeHaltonGaussianRsg.Clone` <sub>`NanoQL.Numerics.InvCumulativeHaltonGaussianRsg::Clone()`</sub>
 - `InvCumulativeKnuthGaussianRng.Clone` <sub>`NanoQL.Numerics.InvCumulativeKnuthGaussianRng::Clone()`</sub>
 - `InvCumulativeKnuthGaussianRsg.Clone` <sub>`NanoQL.Numerics.InvCumulativeKnuthGaussianRsg::Clone()`</sub>
@@ -2107,6 +2108,7 @@ report applies.
 - `MersenneTwisterUniformRng.NextInt32` <sub>`NanoQL.Numerics.MersenneTwisterUniformRng::NextInt32()`</sub>
 - `MersenneTwisterUniformRng.NextReal` <sub>`NanoQL.Numerics.MersenneTwisterUniformRng::NextReal()`</sub>
 - `MersenneTwisterUniformRsg.Clone` <sub>`NanoQL.Numerics.MersenneTwisterUniformRsg::Clone()`</sub>
+- `MoroInvCumulativeBurley2020SobolGaussianRsg.Clone` <sub>`NanoQL.Numerics.MoroInvCumulativeBurley2020SobolGaussianRsg::Clone()`</sub>
 - `MoroInvCumulativeHaltonGaussianRsg.Clone` <sub>`NanoQL.Numerics.MoroInvCumulativeHaltonGaussianRsg::Clone()`</sub>
 - `MoroInvCumulativeKnuthGaussianRng.Clone` <sub>`NanoQL.Numerics.MoroInvCumulativeKnuthGaussianRng::Clone()`</sub>
 - `MoroInvCumulativeKnuthGaussianRsg.Clone` <sub>`NanoQL.Numerics.MoroInvCumulativeKnuthGaussianRsg::Clone()`</sub>
@@ -2228,7 +2230,7 @@ report applies.
 - `Secant.Solve` <sub>`NanoQL.Numerics.Solver1D`2<NanoQL.Numerics.Secant,NanoQL.Numerics.ISolver1DFunction>::Solve(!!0,System.Double,System.Double,System.Double)`</sub>
 - `Secant.Solve` <sub>`NanoQL.Numerics.Solver1D`2<NanoQL.Numerics.Secant,NanoQL.Numerics.ISolver1DFunction>::Solve(!!0,System.Double,System.Double,System.Double,System.Double)`</sub>
 
-### overload with the same C signature as another (60)
+### overload with the same C signature as another (63)
 
 - `ArithmeticAPOHestonPathPricer.Evaluate (MultiPath)`: overload with the same C signature as another: MultiPath <sub>`NanoQL.Methods.PathPricer`1<NanoQL.Methods.MultiPath>::Evaluate(NanoQL.Methods.MultiPath)`</sub>
 - `ArithmeticAPOPathPricer.Evaluate (MonteCarloPath)`: overload with the same C signature as another: MonteCarloPath <sub>`NanoQL.Methods.PathPricer`1<NanoQL.Methods.MonteCarloPath>::Evaluate(NanoQL.Methods.MonteCarloPath)`</sub>
@@ -2262,6 +2264,8 @@ report applies.
 - `GlobalPiecewiseLogLinearDiscount.Create (int, Calendar, BootstrapHelperYieldTermStructureArray, DayCounter, EvaluationContext, doubleArray, DateArray, LogLinear, GlobalBootstrap)`: overload with the same C signature as another: int, Calendar, BootstrapHelperYieldTermStructureArray, DayCounter, EvaluationContext, doubleArray, DateArray, LogLinear, GlobalBootstrap <sub>`NanoQL.TermStructures.PiecewiseYieldCurve`3<NanoQL.TermStructures.Discount,NanoQL.Numerics.LogLinear,NanoQL.TermStructures.GlobalBootstrap>::Create(System.Int32,NanoQL.Time.Calendar,System.Collections.Generic.IEnumerable`1<NanoQL.TermStructures.BootstrapHelper`1<NanoQL.TermStructures.YieldTermStructure>>,NanoQL.Time.DayCounter,NanoQL.EvaluationContext,System.Collections.Generic.IEnumerable`1<System.Double>,System.Collections.Generic.IEnumerable`1<NanoQL.Time.Date>,NanoQL.Numerics.LogLinear,NanoQL.TermStructures.GlobalBootstrap)`</sub>
 - `GlobalPiecewiseLogMixedLinearCubicDiscount.Create (int, Calendar, BootstrapHelperYieldTermStructureArray, DayCounter, EvaluationContext, doubleArray, DateArray, LogMixedLinearCubic, GlobalBootstrap)`: overload with the same C signature as another: int, Calendar, BootstrapHelperYieldTermStructureArray, DayCounter, EvaluationContext, doubleArray, DateArray, LogMixedLinearCubic, GlobalBootstrap <sub>`NanoQL.TermStructures.PiecewiseYieldCurve`3<NanoQL.TermStructures.Discount,NanoQL.Numerics.LogMixedLinearCubic,NanoQL.TermStructures.GlobalBootstrap>::Create(System.Int32,NanoQL.Time.Calendar,System.Collections.Generic.IEnumerable`1<NanoQL.TermStructures.BootstrapHelper`1<NanoQL.TermStructures.YieldTermStructure>>,NanoQL.Time.DayCounter,NanoQL.EvaluationContext,System.Collections.Generic.IEnumerable`1<System.Double>,System.Collections.Generic.IEnumerable`1<NanoQL.Time.Date>,NanoQL.Numerics.LogMixedLinearCubic,NanoQL.TermStructures.GlobalBootstrap)`</sub>
 - `HestonHullWhitePathPricer.Evaluate (MultiPath)`: overload with the same C signature as another: MultiPath <sub>`NanoQL.Methods.PathPricer`1<NanoQL.Methods.MultiPath>::Evaluate(NanoQL.Methods.MultiPath)`</sub>
+- `InterpolatedYoYInflationOptionletVolatilityCurve.Create (int, Calendar, BusinessDayConvention, DayCounter, Period, Frequency, bool, DateArray, doubleArray, double, double, EvaluationContext, Linear)`: overload with the same C signature as another: int, Calendar, BusinessDayConvention, DayCounter, Period, Frequency, bool, DateArray, doubleArray, double, double, EvaluationContext, Linear <sub>`NanoQL.Experimental.InterpolatedYoYOptionletVolatilityCurve`1<NanoQL.Numerics.Linear>::Create(System.Int32,NanoQL.Time.Calendar,NanoQL.Time.BusinessDayConvention,NanoQL.Time.DayCounter,NanoQL.Time.Period,NanoQL.Time.Frequency,System.Boolean,System.Collections.Generic.IEnumerable`1<NanoQL.Time.Date>,System.Collections.Generic.IEnumerable`1<System.Double>,System.Double,System.Double,NanoQL.EvaluationContext,NanoQL.Numerics.Linear)`</sub>
+- `KInterpolatedYoYInflationOptionletVolatilitySurface.Create (int, Calendar, BusinessDayConvention, DayCounter, Period, YoYCapFloorTermPriceSurface, FuncYoYInflationCapFloorEvaluationContextYoYOptionletVolatilitySurfaceInstrumentResults, YoYOptionletStripper, double, EvaluationContext, Linear, VolatilityType, double)`: overload with the same C signature as another: int, Calendar, BusinessDayConvention, DayCounter, Period, YoYCapFloorTermPriceSurface, FuncYoYInflationCapFloorEvaluationContextYoYOptionletVolatilitySurfaceInstrumentResults, YoYOptionletStripper, double, EvaluationContext, Linear, VolatilityType, double <sub>`NanoQL.Experimental.KInterpolatedYoYOptionletVolatilitySurface`1<NanoQL.Numerics.Linear>::Create(System.Int32,NanoQL.Time.Calendar,NanoQL.Time.BusinessDayConvention,NanoQL.Time.DayCounter,NanoQL.Time.Period,NanoQL.Experimental.YoYCapFloorTermPriceSurface,System.Func`4<NanoQL.Instruments.YoYInflationCapFloor,NanoQL.EvaluationContext,NanoQL.TermStructures.YoYOptionletVolatilitySurface,NanoQL.InstrumentResults>,NanoQL.Experimental.YoYOptionletStripper,System.Double,NanoQL.EvaluationContext,NanoQL.Numerics.Linear,NanoQL.TermStructures.VolatilityType,System.Double)`</sub>
 - `LevyFlightWalk.Clone ()`: overload with the same C signature as another:  <sub>`NanoQL.Experimental.LevyFlightWalk::Clone()`</sub>
 - `PagodaMultiPathPricer.Evaluate (MultiPath)`: overload with the same C signature as another: MultiPath <sub>`NanoQL.Experimental.PagodaMultiPathPricer::Evaluate(NanoQL.Methods.MultiPath)`</sub>
 - `PerformanceOptionPathPricer.Evaluate (MonteCarloPath)`: overload with the same C signature as another: MonteCarloPath <sub>`NanoQL.Methods.PathPricer`1<NanoQL.Methods.MonteCarloPath>::Evaluate(NanoQL.Methods.MonteCarloPath)`</sub>
@@ -2280,6 +2284,7 @@ report applies.
 - `SimpleLocalEstimator.Calculate (TimeSeriesdouble)`: overload with the same C signature as another: TimeSeriesdouble <sub>`NanoQL.Models.SimpleLocalEstimator::Calculate(NanoQL.TimeSeries`1<System.Double>)`</sub>
 - `VariancePathPricer.Evaluate (MonteCarloPath)`: overload with the same C signature as another: MonteCarloPath <sub>`NanoQL.Methods.PathPricer`1<NanoQL.Methods.MonteCarloPath>::Evaluate(NanoQL.Methods.MonteCarloPath)`</sub>
 - `YearOnYearInflationSwapHelper.ImpliedQuote (EvaluationContext)`: overload with the same C signature as another: EvaluationContext <sub>`NanoQL.TermStructures.YearOnYearInflationSwapHelper::ImpliedQuote(NanoQL.EvaluationContext)`</sub>
+- `YoYInflationCapFloorTermPriceSurface.Create (int, Period, YoYInflationIndex, CPIInterpolationType, YieldTermStructure, DayCounter, Calendar, BusinessDayConvention, doubleArray, doubleArray, PeriodArray, Matrix, Matrix, EvaluationContext, Bicubic, Cubic)`: overload with the same C signature as another: int, Period, YoYInflationIndex, CPIInterpolationType, YieldTermStructure, DayCounter, Calendar, BusinessDayConvention, doubleArray, doubleArray, PeriodArray, Matrix, Matrix, EvaluationContext, Bicubic, Cubic <sub>`NanoQL.Experimental.InterpolatedYoYCapFloorTermPriceSurface`2<NanoQL.Numerics.Bicubic,NanoQL.Numerics.Cubic>::Create(System.Int32,NanoQL.Time.Period,NanoQL.Indexes.YoYInflationIndex,NanoQL.Indexes.CPIInterpolationType,NanoQL.TermStructures.YieldTermStructure,NanoQL.Time.DayCounter,NanoQL.Time.Calendar,NanoQL.Time.BusinessDayConvention,System.Collections.Generic.IReadOnlyList`1<System.Double>,System.Collections.Generic.IReadOnlyList`1<System.Double>,System.Collections.Generic.IReadOnlyList`1<NanoQL.Time.Period>,NanoQL.Numerics.Matrix,NanoQL.Numerics.Matrix,NanoQL.EvaluationContext,NanoQL.Numerics.Bicubic,NanoQL.Numerics.Cubic)`</sub>
 - `YoYOptionletHelper.ImpliedQuote (EvaluationContext)`: overload with the same C signature as another: EvaluationContext <sub>`NanoQL.Experimental.YoYOptionletHelper::ImpliedQuote(NanoQL.EvaluationContext)`</sub>
 - `ZabrFullFdInterpolatedSmileSection.Create (Date, double, doubleArray, bool, double, OptdoubleArray, Optdouble, Optdouble, Optdouble, Optdouble, Optdouble, EvaluationContext, bool, bool, bool, bool, bool, bool, EndCriteria, OptimizationMethod, DayCounter)`: overload with the same C signature as another: Date, double, doubleArray, bool, double, OptdoubleArray, Optdouble, Optdouble, Optdouble, Optdouble, Optdouble, EvaluationContext, bool, bool, bool, bool, bool, bool, EndCriteria, OptimizationMethod, DayCounter <sub>`NanoQL.TermStructures.ZabrInterpolatedSmileSection`1<NanoQL.TermStructures.ZabrFullFd>::Create(NanoQL.Time.Date,System.Double,System.ReadOnlySpan`1<System.Double>,System.Boolean,System.Double,System.ReadOnlySpan`1<System.Nullable`1<System.Double>>,System.Nullable`1<System.Double>,System.Nullable`1<System.Double>,System.Nullable`1<System.Double>,System.Nullable`1<System.Double>,System.Nullable`1<System.Double>,NanoQL.EvaluationContext,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,NanoQL.Numerics.EndCriteria,NanoQL.Numerics.OptimizationMethod,NanoQL.Time.DayCounter)`</sub>
 - `ZabrFullFdSmileSection.Create (Date, double, doubleArray, EvaluationContext, DayCounter, doubleArray, int)`: overload with the same C signature as another: Date, double, doubleArray, EvaluationContext, DayCounter, doubleArray, int <sub>`NanoQL.TermStructures.ZabrSmileSection`1<NanoQL.TermStructures.ZabrFullFd>::Create(NanoQL.Time.Date,System.Double,System.ReadOnlySpan`1<System.Double>,NanoQL.EvaluationContext,NanoQL.Time.DayCounter,System.ReadOnlySpan`1<System.Double>,System.Int32)`</sub>
@@ -4372,6 +4377,24 @@ Each crosses in and out (`vector&`, `matrix&`): `double*` with its counts, writt
 - `MCPRHestonHullWhiteEngine.Calculate(VanillaOption, EvaluationContext, HybridHestonHullWhiteProcess, int?, int?, bool, bool, int?, double?, int?, long)`: no pair: no parameter takes the member's ICalibratedModel
 - `QdFpAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, QdFpIterationScheme, QdFpAmericanEngineFixedPointEquation)`: no pair: no parameter takes the member's ICalibratedModel
 - `QdPlusAmericanEngine.Calculate(VanillaOption, EvaluationContext, GeneralizedBlackScholesProcess, int, QdPlusAmericanEngineSolverType, double, int?)`: no pair: no parameter takes the member's ICalibratedModel
+
+### `nql_InterpolatedYoYInflationOptionletStripper_Strip`
+
+- `YoYInflationBachelierCapFloorEngine.Calculate(YoYInflationCapFloor, EvaluationContext, YoYInflationIndex, YoYOptionletVolatilitySurface, YieldTermStructure)`: YoYOptionletVolatilitySurface by type into volatility
+- `YoYInflationBlackCapFloorEngine.Calculate(YoYInflationCapFloor, EvaluationContext, YoYInflationIndex, YoYOptionletVolatilitySurface, YieldTermStructure)`: YoYOptionletVolatilitySurface by type into volatility
+- `YoYInflationUnitDisplacedBlackCapFloorEngine.Calculate(YoYInflationCapFloor, EvaluationContext, YoYInflationIndex, YoYOptionletVolatilitySurface, YieldTermStructure)`: YoYOptionletVolatilitySurface by type into volatility
+
+### `nql_KInterpolatedYoYInflationOptionletVolatilitySurface_Create`
+
+- `YoYInflationBachelierCapFloorEngine.Calculate(YoYInflationCapFloor, EvaluationContext, YoYInflationIndex, YoYOptionletVolatilitySurface, YieldTermStructure)`: YoYOptionletVolatilitySurface by type into volatility
+- `YoYInflationBlackCapFloorEngine.Calculate(YoYInflationCapFloor, EvaluationContext, YoYInflationIndex, YoYOptionletVolatilitySurface, YieldTermStructure)`: YoYOptionletVolatilitySurface by type into volatility
+- `YoYInflationUnitDisplacedBlackCapFloorEngine.Calculate(YoYInflationCapFloor, EvaluationContext, YoYInflationIndex, YoYOptionletVolatilitySurface, YieldTermStructure)`: YoYOptionletVolatilitySurface by type into volatility
+
+### `nql_KInterpolatedYoYOptionletVolatilitySurface_Linear_Create`
+
+- `YoYInflationBachelierCapFloorEngine.Calculate(YoYInflationCapFloor, EvaluationContext, YoYInflationIndex, YoYOptionletVolatilitySurface, YieldTermStructure)`: YoYOptionletVolatilitySurface by type into volatility
+- `YoYInflationBlackCapFloorEngine.Calculate(YoYInflationCapFloor, EvaluationContext, YoYInflationIndex, YoYOptionletVolatilitySurface, YieldTermStructure)`: YoYOptionletVolatilitySurface by type into volatility
+- `YoYInflationUnitDisplacedBlackCapFloorEngine.Calculate(YoYInflationCapFloor, EvaluationContext, YoYInflationIndex, YoYOptionletVolatilitySurface, YieldTermStructure)`: YoYOptionletVolatilitySurface by type into volatility
 
 ### `nql_MakeCapFloor_WithPricingEngine`
 

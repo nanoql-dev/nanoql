@@ -41,9 +41,9 @@ public class PiecewiseSpreadYieldCurveVectorTests
             YieldTermStructure raw = (i.GetProperty("type").GetString() switch
             {
                 "LogLinear" => new SpreadDiscountCurve(baseCurve, nodeDates, nodeData),
-                "LogCubic" => new InterpolatedSpreadDiscountCurve<LogCubic>(
+                "LogCubic" => new LogCubicSpreadDiscountCurve(
                     baseCurve, nodeDates, nodeData, BootstrapInputs.LogCubicOf(i)),
-                _ => (YieldTermStructure)new InterpolatedSpreadDiscountCurve<LogMixedLinearCubic>(
+                _ => (YieldTermStructure)new LogMixedLinearCubicSpreadDiscountCurve(
                     baseCurve, nodeDates, nodeData, BootstrapInputs.LogMixedLinearCubicOf(i)),
             }).EnableExtrapolation();
             check.Output(c, "rawDiscount", YieldCurveInputs.Each(c.DateInputs("rawDates"), d => raw.Discount(d)));
@@ -59,14 +59,14 @@ public class PiecewiseSpreadYieldCurveVectorTests
         switch (i.GetProperty("type").GetString())
         {
             case "LogLinear":
-                var logLinear = new PiecewiseSpreadYieldCurve<LogLinear, IterativeBootstrap>(baseCurve, helpers, context);
+                var logLinear = new PiecewiseLogLinearSpreadDiscount(baseCurve, helpers, context);
                 return (logLinear, logLinear.Dates(), logLinear.Data());
             case "LogCubic":
-                var logCubic = new PiecewiseSpreadYieldCurve<LogCubic, IterativeBootstrap>(
+                var logCubic = new PiecewiseLogCubicSpreadDiscount(
                     baseCurve, helpers, context, BootstrapInputs.LogCubicOf(i));
                 return (logCubic, logCubic.Dates(), logCubic.Data());
             case "LogMixedLinearCubic":
-                var logMixed = new PiecewiseSpreadYieldCurve<LogMixedLinearCubic, IterativeBootstrap>(
+                var logMixed = new PiecewiseLogMixedLinearCubicSpreadDiscount(
                     baseCurve, helpers, context, BootstrapInputs.LogMixedLinearCubicOf(i));
                 return (logMixed, logMixed.Dates(), logMixed.Data());
             case var t:

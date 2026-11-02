@@ -30,8 +30,8 @@ public class PiecewiseForwardSpreadedTermStructureVectorTests
             Date[] spreadDates = c.DateInputs("spreadDates");
             YieldTermStructure curve = c.String("interpolator") switch
             {
-                "Linear" => new InterpolatedPiecewiseForwardSpreadedTermStructure<Linear>(original, spreads, spreadDates),
-                "BackwardFlat" => new InterpolatedPiecewiseForwardSpreadedTermStructure<BackwardFlat>(
+                "Linear" => new PiecewiseLinearForwardSpreadedTermStructure(original, spreads, spreadDates),
+                "BackwardFlat" => new PiecewiseForwardSpreadedTermStructure(
                     original, spreads, spreadDates),
                 var t => throw new InvalidOperationException($"unknown interpolator '{t}'"),
             };

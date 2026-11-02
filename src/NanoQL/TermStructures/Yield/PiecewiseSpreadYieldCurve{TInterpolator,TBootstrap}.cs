@@ -29,7 +29,7 @@ namespace NanoQL.TermStructures;
 /// extrapolate; here the base is read with extrapolation on, as theirs is. A documented divergence.
 /// </para>
 /// </remarks>
-public sealed class PiecewiseSpreadYieldCurve<TInterpolator, TBootstrap> : PiecewiseYieldCurve<Discount, TInterpolator, TBootstrap>
+public class PiecewiseSpreadYieldCurve<TInterpolator, TBootstrap> : PiecewiseYieldCurve<Discount, TInterpolator, TBootstrap>
     where TInterpolator : struct, IInterpolator
     where TBootstrap : struct, IBootstrap
 {

@@ -9962,6 +9962,20 @@ NQL_API nql_status nql_ForwardEuropeanBSPathPricer_new(int32_t type, double mone
 NQL_API nql_status nql_ForwardEuropeanHestonPathPricer_Evaluate(nql_handle self, nql_handle multiPath, double* result);
 /* new ForwardEuropeanHestonPathPricer(OptionType type, double moneyness, int resetIndex, double discount) */
 NQL_API nql_status nql_ForwardEuropeanHestonPathPricer_new(int32_t type, double moneyness, int32_t resetIndex, double discount, nql_handle* result);
+/* ForwardFlatForwardCurve.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_ForwardFlatForwardCurve_Data(nql_handle self, double** result, int32_t* result_count);
+/* ForwardFlatForwardCurve.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_ForwardFlatForwardCurve_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* ForwardFlatForwardCurve.Forwards() -> ImmutableArray<double> */
+NQL_API nql_status nql_ForwardFlatForwardCurve_Forwards(nql_handle self, double** result, int32_t* result_count);
+/* ForwardFlatForwardCurve.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_ForwardFlatForwardCurve_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* ForwardFlatForwardCurve.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_ForwardFlatForwardCurve_Times(nql_handle self, double** result, int32_t* result_count);
+/* ForwardFlatForwardCurve.get_MaxDate() -> Date */
+NQL_API nql_status nql_ForwardFlatForwardCurve_get_MaxDate(nql_handle self, nql_date* result);
+/* new ForwardFlatForwardCurve(IEnumerable<Date> dates, IEnumerable<double> forwards, DayCounter dayCounter, Calendar calendar = null, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, ForwardFlat interpolator = null) */
+NQL_API nql_status nql_ForwardFlatForwardCurve_new(const nql_date* dates, int32_t dates_count, const double* forwards, int32_t forwards_count, nql_handle dayCounter, nql_handle calendar, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle interpolator, nql_handle* result);
 /* new ForwardFlatInterpolation(ReadOnlySpan<double> x, ReadOnlySpan<double> y) */
 NQL_API nql_status nql_ForwardFlatInterpolation_new(const double* x, int32_t x_count, const double* y, int32_t y_count, nql_handle* result);
 /* ForwardFlat.CheckPoints(int points) */
@@ -13313,6 +13327,68 @@ NQL_API nql_status nql_InterpolatedSwaptionVolatilityCube_VolSpreads(nql_handle 
 /* new InterpolatedSwaptionVolatilityCube(SwaptionVolatilityStructure atmVolStructure, IEnumerable<Period> optionTenors, IEnumerable<Period> swapTenors, IEnumerable<double> strikeSpreads, IEnumerable<IEnumerable<double>> volSpreads, SwapIndex swapIndexBase, SwapIndex shortSwapIndexBase, bool vegaWeightedSmileFit, EvaluationContext context) */
 NQL_API nql_status nql_InterpolatedSwaptionVolatilityCube_new(nql_handle atmVolStructure, const nql_period* optionTenors, int32_t optionTenors_count, const nql_period* swapTenors, int32_t swapTenors_count, const double* strikeSpreads, int32_t strikeSpreads_count, const double* volSpreads, int32_t volSpreads_count, const int32_t* volSpreads_row_lengths, int32_t volSpreads_rows, nql_handle swapIndexBase, nql_handle shortSwapIndexBase, bool vegaWeightedSmileFit, nql_handle context, nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
+/* InterpolatedYoYCapFloorTermPriceSurface.AtmYoYRate(Date d, Period? obsLag = null, bool extrapolate = true) -> double */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_AtmYoYRate(nql_handle self, nql_date d, const nql_period* obsLag, bool extrapolate, double* result);
+/* InterpolatedYoYCapFloorTermPriceSurface.AtmYoYSwapDateRates() -> ValueTuple<ImmutableArray<Date>, ImmutableArray<double>> */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_AtmYoYSwapDateRates(nql_handle self, nql_date** dates, int32_t* dates_count, double** rates, int32_t* rates_count);
+/* InterpolatedYoYCapFloorTermPriceSurface.AtmYoYSwapRate(Date d, bool extrapolate = true) -> double */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_AtmYoYSwapRate(nql_handle self, nql_date d, bool extrapolate, double* result);
+/* InterpolatedYoYCapFloorTermPriceSurface.AtmYoYSwapTimeRates() -> ValueTuple<ImmutableArray<double>, ImmutableArray<double>> */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_AtmYoYSwapTimeRates(nql_handle self, double** times, int32_t* times_count, double** rates, int32_t* rates_count);
+/* InterpolatedYoYCapFloorTermPriceSurface.BaseDate() -> Date */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_BaseDate(nql_handle self, nql_date* result);
+/* InterpolatedYoYCapFloorTermPriceSurface.CapPrice(Date d, double k) -> double */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_CapPrice(nql_handle self, nql_date d, double k, double* result);
+/* InterpolatedYoYCapFloorTermPriceSurface.Create(int fixingDays, Period yyLag, YoYInflationIndex yii, CPIInterpolationType interpolation, YieldTermStructure nominal, DayCounter dc, Calendar cal, BusinessDayConvention bdc, IReadOnlyList<double> cStrikes, IReadOnlyList<double> fStrikes, IReadOnlyList<Period> cfMaturities, Matrix cPrice, Matrix fPrice, EvaluationContext context, Bicubic interpolator2d = null, Cubic interpolator1d = null) -> InterpolatedYoYCapFloorTermPriceSurface<Bicubic, Cubic> */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_Create(int32_t fixingDays, nql_period yyLag, nql_handle yii, int32_t interpolation, nql_handle nominal, nql_handle dc, nql_handle cal, int32_t bdc, const double* cStrikes, int32_t cStrikes_count, const double* fStrikes, int32_t fStrikes_count, const nql_period* cfMaturities, int32_t cfMaturities_count, const double* cPrice, int32_t cPrice_rows, int32_t cPrice_columns, const double* fPrice, int32_t fPrice_rows, int32_t fPrice_columns, nql_handle context, nql_handle interpolator2d, nql_handle interpolator1d, nql_handle* result);
+/* InterpolatedYoYCapFloorTermPriceSurface.FloorPrice(Date d, double k) -> double */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_FloorPrice(nql_handle self, nql_date d, double k, double* result);
+/* InterpolatedYoYCapFloorTermPriceSurface.Price(Date d, double k) -> double */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_Price(nql_handle self, nql_date d, double k, double* result);
+/* InterpolatedYoYCapFloorTermPriceSurface.YoYTS() -> YoYInflationTermStructure */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_YoYTS(nql_handle self, nql_handle* result);
+/* InterpolatedYoYCapFloorTermPriceSurface.get_MaxDate() -> Date */
+NQL_API nql_status nql_InterpolatedYoYCapFloorTermPriceSurface_Bicubic_Cubic_get_MaxDate(nql_handle self, nql_date* result);
+/* InterpolatedYoYInflationOptionletStripper.Strip(YoYCapFloorTermPriceSurface surface, Func<YoYInflationCapFloor, EvaluationContext, YoYOptionletVolatilitySurface, InstrumentResults> engine, double slope, EvaluationContext context) -> StrippedYoYOptionlets */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletStripper_Strip(nql_handle self, nql_handle surface, nql_handle engine, double slope, nql_handle context, nql_handle* result);
+/* new InterpolatedYoYInflationOptionletStripper() */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletStripper_new(nql_handle* result);
+/* InterpolatedYoYInflationOptionletVolatilityCurve.Create(int settlementDays, Calendar cal, BusinessDayConvention bdc, DayCounter dc, Period lag, Frequency frequency, bool indexIsInterpolated, IEnumerable<Date> d, IEnumerable<double> v, double minStrike, double maxStrike, EvaluationContext context, Linear i = null) -> InterpolatedYoYInflationOptionletVolatilityCurve */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletVolatilityCurve_Create(int32_t settlementDays, nql_handle cal, int32_t bdc, nql_handle dc, nql_period lag, int32_t frequency, bool indexIsInterpolated, const nql_date* d, int32_t d_count, const double* v, int32_t v_count, double minStrike, double maxStrike, nql_handle context, nql_handle i, nql_handle* result);
+/* InterpolatedYoYInflationOptionletVolatilityCurve.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletVolatilityCurve_Data(nql_handle self, double** result, int32_t* result_count);
+/* InterpolatedYoYInflationOptionletVolatilityCurve.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletVolatilityCurve_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* InterpolatedYoYInflationOptionletVolatilityCurve.MaxStrike() -> double */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletVolatilityCurve_MaxStrike(nql_handle self, double* result);
+/* InterpolatedYoYInflationOptionletVolatilityCurve.MinStrike() -> double */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletVolatilityCurve_MinStrike(nql_handle self, double* result);
+/* InterpolatedYoYInflationOptionletVolatilityCurve.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletVolatilityCurve_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* InterpolatedYoYInflationOptionletVolatilityCurve.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletVolatilityCurve_Times(nql_handle self, double** result, int32_t* result_count);
+/* InterpolatedYoYInflationOptionletVolatilityCurve.get_Interpolator() -> Linear */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletVolatilityCurve_get_Interpolator(nql_handle self, nql_handle* result);
+/* InterpolatedYoYInflationOptionletVolatilityCurve.get_MaxDate() -> Date */
+NQL_API nql_status nql_InterpolatedYoYInflationOptionletVolatilityCurve_get_MaxDate(nql_handle self, nql_date* result);
+/* InterpolatedYoYOptionletVolatilityCurve.Create(int settlementDays, Calendar cal, BusinessDayConvention bdc, DayCounter dc, Period lag, Frequency frequency, bool indexIsInterpolated, IEnumerable<Date> d, IEnumerable<double> v, double minStrike, double maxStrike, EvaluationContext context, Linear i = null) -> InterpolatedYoYOptionletVolatilityCurve<Linear> */
+NQL_API nql_status nql_InterpolatedYoYOptionletVolatilityCurve_Linear_Create(int32_t settlementDays, nql_handle cal, int32_t bdc, nql_handle dc, nql_period lag, int32_t frequency, bool indexIsInterpolated, const nql_date* d, int32_t d_count, const double* v, int32_t v_count, double minStrike, double maxStrike, nql_handle context, nql_handle i, nql_handle* result);
+/* InterpolatedYoYOptionletVolatilityCurve.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_InterpolatedYoYOptionletVolatilityCurve_Linear_Data(nql_handle self, double** result, int32_t* result_count);
+/* InterpolatedYoYOptionletVolatilityCurve.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_InterpolatedYoYOptionletVolatilityCurve_Linear_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* InterpolatedYoYOptionletVolatilityCurve.MaxStrike() -> double */
+NQL_API nql_status nql_InterpolatedYoYOptionletVolatilityCurve_Linear_MaxStrike(nql_handle self, double* result);
+/* InterpolatedYoYOptionletVolatilityCurve.MinStrike() -> double */
+NQL_API nql_status nql_InterpolatedYoYOptionletVolatilityCurve_Linear_MinStrike(nql_handle self, double* result);
+/* InterpolatedYoYOptionletVolatilityCurve.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_InterpolatedYoYOptionletVolatilityCurve_Linear_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* InterpolatedYoYOptionletVolatilityCurve.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_InterpolatedYoYOptionletVolatilityCurve_Linear_Times(nql_handle self, double** result, int32_t* result_count);
+/* InterpolatedYoYOptionletVolatilityCurve.get_Interpolator() -> Linear */
+NQL_API nql_status nql_InterpolatedYoYOptionletVolatilityCurve_Linear_get_Interpolator(nql_handle self, nql_handle* result);
+/* InterpolatedYoYOptionletVolatilityCurve.get_MaxDate() -> Date */
+NQL_API nql_status nql_InterpolatedYoYOptionletVolatilityCurve_Linear_get_MaxDate(nql_handle self, nql_date* result);
 /* InterpolatingCPICapFloorEngine.Bind(CPICapFloorTermPriceSurface priceSurface = null) -> InstrumentResults */
 NQL_API nql_status nql_InterpolatingCPICapFloorEngine_Bind(nql_handle priceSurface, nql_handle* result);
 /* InterpolatingCPICapFloorEngine.BindOn(CPICapFloor instrument, CPICapFloorTermPriceSurface priceSurface = null) -> InstrumentResults */
@@ -13422,6 +13498,12 @@ NQL_API nql_status nql_IntervalPrice_get_Low(nql_handle self, double* result);
 NQL_API nql_status nql_IntervalPrice_get_Open(nql_handle self, double* result);
 /* new IntervalPrice(double open, double close, double high, double low) */
 NQL_API nql_status nql_IntervalPrice_new(double open, double close, double high, double low, nql_handle* result);
+/* InvCumulativeBurley2020SobolGaussianRsg snapshot: Draws(int count) -> InvCumulativeBurley2020SobolGaussianRsg */
+NQL_API nql_status nql_InvCumulativeBurley2020SobolGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
+/* new InvCumulativeBurley2020SobolGaussianRsg(Burley2020SobolRsg uniformSequenceGenerator) */
+NQL_API nql_status nql_InvCumulativeBurley2020SobolGaussianRsg_new__Burley2020SobolRsg(nql_handle uniformSequenceGenerator, nql_handle* result);
+/* new InvCumulativeBurley2020SobolGaussianRsg(Burley2020SobolRsg uniformSequenceGenerator, InverseCumulativeNormal inverseCumulative) */
+NQL_API nql_status nql_InvCumulativeBurley2020SobolGaussianRsg_new__Burley2020SobolRsg_InverseCumulativeNormal(nql_handle uniformSequenceGenerator, nql_handle inverseCumulative, nql_handle* result);
 /* InvCumulativeHaltonGaussianRsg snapshot: Draws(int count) -> InvCumulativeHaltonGaussianRsg */
 NQL_API nql_status nql_InvCumulativeHaltonGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
 /* new InvCumulativeHaltonGaussianRsg(HaltonRsg uniformSequenceGenerator) */
@@ -13709,6 +13791,30 @@ NQL_API nql_status nql_JumpDiffusionEngine_BindOn(nql_handle instrument, nql_han
 /* JumpDiffusionEngine.Calculate(VanillaOption option, EvaluationContext context, Merton76Process process, double relativeAccuracy = 0.0001, int maxIterations = 100) -> OneAssetOptionResults */
 NQL_API nql_status nql_JumpDiffusionEngine_Calculate(nql_handle option, nql_handle context, nql_handle process, double relativeAccuracy, int32_t maxIterations, nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
+/* KInterpolatedYoYInflationOptionletVolatilitySurface.Create(int settlementDays, Calendar cal, BusinessDayConvention bdc, DayCounter dc, Period lag, YoYCapFloorTermPriceSurface capFloorPrices, Func<YoYInflationCapFloor, EvaluationContext, YoYOptionletVolatilitySurface, InstrumentResults> pricer, YoYOptionletStripper yoyOptionletStripper, double slope, EvaluationContext context, Linear interpolator = null, VolatilityType volType = ShiftedLognormal, double displacement = 0) -> KInterpolatedYoYInflationOptionletVolatilitySurface */
+NQL_API nql_status nql_KInterpolatedYoYInflationOptionletVolatilitySurface_Create(int32_t settlementDays, nql_handle cal, int32_t bdc, nql_handle dc, nql_period lag, nql_handle capFloorPrices, nql_handle pricer, nql_handle yoyOptionletStripper, double slope, nql_handle context, nql_handle interpolator, int32_t volType, double displacement, nql_handle* result);
+/* KInterpolatedYoYInflationOptionletVolatilitySurface.Dslice(Date d) -> ValueTuple<ImmutableArray<double>, ImmutableArray<double>> */
+NQL_API nql_status nql_KInterpolatedYoYInflationOptionletVolatilitySurface_Dslice(nql_handle self, nql_date d, double** strikes, int32_t* strikes_count, double** volatilities, int32_t* volatilities_count);
+/* KInterpolatedYoYInflationOptionletVolatilitySurface.MaxStrike() -> double */
+NQL_API nql_status nql_KInterpolatedYoYInflationOptionletVolatilitySurface_MaxStrike(nql_handle self, double* result);
+/* KInterpolatedYoYInflationOptionletVolatilitySurface.MinStrike() -> double */
+NQL_API nql_status nql_KInterpolatedYoYInflationOptionletVolatilitySurface_MinStrike(nql_handle self, double* result);
+/* KInterpolatedYoYInflationOptionletVolatilitySurface.get_MaxDate() -> Date */
+NQL_API nql_status nql_KInterpolatedYoYInflationOptionletVolatilitySurface_get_MaxDate(nql_handle self, nql_date* result);
+/* KInterpolatedYoYInflationOptionletVolatilitySurface.get_Stripped() -> StrippedYoYOptionlets */
+NQL_API nql_status nql_KInterpolatedYoYInflationOptionletVolatilitySurface_get_Stripped(nql_handle self, nql_handle* result);
+/* KInterpolatedYoYOptionletVolatilitySurface.Create(int settlementDays, Calendar cal, BusinessDayConvention bdc, DayCounter dc, Period lag, YoYCapFloorTermPriceSurface capFloorPrices, Func<YoYInflationCapFloor, EvaluationContext, YoYOptionletVolatilitySurface, InstrumentResults> pricer, YoYOptionletStripper yoyOptionletStripper, double slope, EvaluationContext context, Linear interpolator = null, VolatilityType volType = ShiftedLognormal, double displacement = 0) -> KInterpolatedYoYOptionletVolatilitySurface<Linear> */
+NQL_API nql_status nql_KInterpolatedYoYOptionletVolatilitySurface_Linear_Create(int32_t settlementDays, nql_handle cal, int32_t bdc, nql_handle dc, nql_period lag, nql_handle capFloorPrices, nql_handle pricer, nql_handle yoyOptionletStripper, double slope, nql_handle context, nql_handle interpolator, int32_t volType, double displacement, nql_handle* result);
+/* KInterpolatedYoYOptionletVolatilitySurface.Dslice(Date d) -> ValueTuple<ImmutableArray<double>, ImmutableArray<double>> */
+NQL_API nql_status nql_KInterpolatedYoYOptionletVolatilitySurface_Linear_Dslice(nql_handle self, nql_date d, double** strikes, int32_t* strikes_count, double** volatilities, int32_t* volatilities_count);
+/* KInterpolatedYoYOptionletVolatilitySurface.MaxStrike() -> double */
+NQL_API nql_status nql_KInterpolatedYoYOptionletVolatilitySurface_Linear_MaxStrike(nql_handle self, double* result);
+/* KInterpolatedYoYOptionletVolatilitySurface.MinStrike() -> double */
+NQL_API nql_status nql_KInterpolatedYoYOptionletVolatilitySurface_Linear_MinStrike(nql_handle self, double* result);
+/* KInterpolatedYoYOptionletVolatilitySurface.get_MaxDate() -> Date */
+NQL_API nql_status nql_KInterpolatedYoYOptionletVolatilitySurface_Linear_get_MaxDate(nql_handle self, nql_date* result);
+/* KInterpolatedYoYOptionletVolatilitySurface.get_Stripped() -> StrippedYoYOptionlets */
+NQL_API nql_status nql_KInterpolatedYoYOptionletVolatilitySurface_Linear_get_Stripped(nql_handle self, nql_handle* result);
 /* KNeighbors.Clone() -> ParticleSwarmOptimizationTopology */
 NQL_API nql_status nql_KNeighbors_Clone(nql_handle self, nql_handle* result);
 /* KNeighbors.FindSocialBest() */
@@ -14254,6 +14360,38 @@ NQL_API nql_status nql_LogCubicDiscountCurve_new(const nql_date* dates, int32_t 
 NQL_API nql_status nql_LogCubicInterpolation_new(const double* x, int32_t x_count, const double* y, int32_t y_count, int32_t da, bool monotonic, int32_t leftC, double leftConditionValue, int32_t rightC, double rightConditionValue, nql_handle* result);
 /* new LogCubicNaturalSpline(ReadOnlySpan<double> x, ReadOnlySpan<double> y) */
 NQL_API nql_status nql_LogCubicNaturalSpline_new(const double* x, int32_t x_count, const double* y, int32_t y_count, nql_handle* result);
+/* LogCubicSpreadDiscountCurve.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_LogCubicSpreadDiscountCurve_Data(nql_handle self, double** result, int32_t* result_count);
+/* LogCubicSpreadDiscountCurve.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_LogCubicSpreadDiscountCurve_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* LogCubicSpreadDiscountCurve.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_LogCubicSpreadDiscountCurve_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* LogCubicSpreadDiscountCurve.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_LogCubicSpreadDiscountCurve_Times(nql_handle self, double** result, int32_t* result_count);
+/* LogCubicSpreadDiscountCurve.get_BaseCurve() -> YieldTermStructure */
+NQL_API nql_status nql_LogCubicSpreadDiscountCurve_get_BaseCurve(nql_handle self, nql_handle* result);
+/* LogCubicSpreadDiscountCurve.get_Calendar() -> Calendar */
+NQL_API nql_status nql_LogCubicSpreadDiscountCurve_get_Calendar(nql_handle self, nql_handle* result);
+/* LogCubicSpreadDiscountCurve.get_MaxDate() -> Date */
+NQL_API nql_status nql_LogCubicSpreadDiscountCurve_get_MaxDate(nql_handle self, nql_date* result);
+/* LogCubicSpreadDiscountCurve.get_SettlementDays() -> int? */
+NQL_API nql_status nql_LogCubicSpreadDiscountCurve_get_SettlementDays(nql_handle self, int32_t* result, bool* result_has_value);
+/* new LogCubicSpreadDiscountCurve(YieldTermStructure baseCurve, IEnumerable<Date> dates, IEnumerable<double> dfs, LogCubic interpolator = null) */
+NQL_API nql_status nql_LogCubicSpreadDiscountCurve_new(nql_handle baseCurve, const nql_date* dates, int32_t dates_count, const double* dfs, int32_t dfs_count, nql_handle interpolator, nql_handle* result);
+/* LogCubicZeroCurve.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_LogCubicZeroCurve_Data(nql_handle self, double** result, int32_t* result_count);
+/* LogCubicZeroCurve.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_LogCubicZeroCurve_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* LogCubicZeroCurve.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_LogCubicZeroCurve_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* LogCubicZeroCurve.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_LogCubicZeroCurve_Times(nql_handle self, double** result, int32_t* result_count);
+/* LogCubicZeroCurve.ZeroRates() -> ImmutableArray<double> */
+NQL_API nql_status nql_LogCubicZeroCurve_ZeroRates(nql_handle self, double** result, int32_t* result_count);
+/* LogCubicZeroCurve.get_MaxDate() -> Date */
+NQL_API nql_status nql_LogCubicZeroCurve_get_MaxDate(nql_handle self, nql_date* result);
+/* new LogCubicZeroCurve(IEnumerable<Date> dates, IEnumerable<double> yields, DayCounter dayCounter, Calendar calendar = null, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, Compounding compounding = Continuous, Frequency frequency = Annual) */
+NQL_DEPRECATED("QuantLib-Python deprecates LogCubicZeroCurve: zero curves should not use log interpolations. Use CubicZeroCurve.") NQL_API nql_status nql_LogCubicZeroCurve_new(const nql_date* dates, int32_t dates_count, const double* yields, int32_t yields_count, nql_handle dayCounter, nql_handle calendar, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, int32_t compounding, int32_t frequency, nql_handle* result);
 /* LogCubic.CheckPoints(int points) */
 NQL_API nql_status nql_LogCubic_CheckPoints(nql_handle self, int32_t points);
 /* LogCubic.Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y) -> Interpolation */
@@ -14268,6 +14406,20 @@ NQL_API nql_status nql_LogCubic_new__CubicInterpolationDerivativeApprox(int32_t 
 NQL_API nql_status nql_LogCubic_new__void(nql_handle* result);
 /* new LogLinearInterpolation(ReadOnlySpan<double> x, ReadOnlySpan<double> y) */
 NQL_API nql_status nql_LogLinearInterpolation_new(const double* x, int32_t x_count, const double* y, int32_t y_count, nql_handle* result);
+/* LogLinearZeroCurve.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_LogLinearZeroCurve_Data(nql_handle self, double** result, int32_t* result_count);
+/* LogLinearZeroCurve.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_LogLinearZeroCurve_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* LogLinearZeroCurve.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_LogLinearZeroCurve_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* LogLinearZeroCurve.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_LogLinearZeroCurve_Times(nql_handle self, double** result, int32_t* result_count);
+/* LogLinearZeroCurve.ZeroRates() -> ImmutableArray<double> */
+NQL_API nql_status nql_LogLinearZeroCurve_ZeroRates(nql_handle self, double** result, int32_t* result_count);
+/* LogLinearZeroCurve.get_MaxDate() -> Date */
+NQL_API nql_status nql_LogLinearZeroCurve_get_MaxDate(nql_handle self, nql_date* result);
+/* new LogLinearZeroCurve(IEnumerable<Date> dates, IEnumerable<double> yields, DayCounter dayCounter, Calendar calendar = null, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, LogLinear interpolator = null, Compounding compounding = Continuous, Frequency frequency = Annual) */
+NQL_DEPRECATED("QuantLib-Python deprecates LogLinearZeroCurve: zero curves should not use log interpolations. Use ZeroCurve.") NQL_API nql_status nql_LogLinearZeroCurve_new(const nql_date* dates, int32_t dates_count, const double* yields, int32_t yields_count, nql_handle dayCounter, nql_handle calendar, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle interpolator, int32_t compounding, int32_t frequency, nql_handle* result);
 /* LogLinear.CheckPoints(int points) */
 NQL_API nql_status nql_LogLinear_CheckPoints(nql_handle self, int32_t points);
 /* LogLinear.Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y) -> Interpolation */
@@ -14296,6 +14448,24 @@ NQL_API nql_status nql_LogMixedLinearCubicDiscountCurve_new(const nql_date* date
 NQL_API nql_status nql_LogMixedLinearCubicInterpolation_new(const double* x, int32_t x_count, const double* y, int32_t y_count, int32_t n, int32_t behavior, int32_t da, bool monotonic, int32_t leftC, const double* leftConditionValue, int32_t rightC, double rightConditionValue, nql_handle* result);
 /* new LogMixedLinearCubicNaturalSpline(ReadOnlySpan<double> x, ReadOnlySpan<double> y, int n, MixedInterpolationBehavior behavior = ShareRanges) */
 NQL_API nql_status nql_LogMixedLinearCubicNaturalSpline_new(const double* x, int32_t x_count, const double* y, int32_t y_count, int32_t n, int32_t behavior, nql_handle* result);
+/* LogMixedLinearCubicSpreadDiscountCurve.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_LogMixedLinearCubicSpreadDiscountCurve_Data(nql_handle self, double** result, int32_t* result_count);
+/* LogMixedLinearCubicSpreadDiscountCurve.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_LogMixedLinearCubicSpreadDiscountCurve_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* LogMixedLinearCubicSpreadDiscountCurve.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_LogMixedLinearCubicSpreadDiscountCurve_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* LogMixedLinearCubicSpreadDiscountCurve.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_LogMixedLinearCubicSpreadDiscountCurve_Times(nql_handle self, double** result, int32_t* result_count);
+/* LogMixedLinearCubicSpreadDiscountCurve.get_BaseCurve() -> YieldTermStructure */
+NQL_API nql_status nql_LogMixedLinearCubicSpreadDiscountCurve_get_BaseCurve(nql_handle self, nql_handle* result);
+/* LogMixedLinearCubicSpreadDiscountCurve.get_Calendar() -> Calendar */
+NQL_API nql_status nql_LogMixedLinearCubicSpreadDiscountCurve_get_Calendar(nql_handle self, nql_handle* result);
+/* LogMixedLinearCubicSpreadDiscountCurve.get_MaxDate() -> Date */
+NQL_API nql_status nql_LogMixedLinearCubicSpreadDiscountCurve_get_MaxDate(nql_handle self, nql_date* result);
+/* LogMixedLinearCubicSpreadDiscountCurve.get_SettlementDays() -> int? */
+NQL_API nql_status nql_LogMixedLinearCubicSpreadDiscountCurve_get_SettlementDays(nql_handle self, int32_t* result, bool* result_has_value);
+/* new LogMixedLinearCubicSpreadDiscountCurve(YieldTermStructure baseCurve, IEnumerable<Date> dates, IEnumerable<double> dfs, LogMixedLinearCubic interpolator = null) */
+NQL_API nql_status nql_LogMixedLinearCubicSpreadDiscountCurve_new(nql_handle baseCurve, const nql_date* dates, int32_t dates_count, const double* dfs, int32_t dfs_count, nql_handle interpolator, nql_handle* result);
 /* LogMixedLinearCubic.CheckPoints(int points) */
 NQL_API nql_status nql_LogMixedLinearCubic_CheckPoints(nql_handle self, int32_t points);
 /* LogMixedLinearCubic.Interpolate(ReadOnlySpan<double> x, ReadOnlySpan<double> y) -> Interpolation */
@@ -15848,6 +16018,12 @@ NQL_API nql_status nql_Montenegro_get_Name(nql_handle self, char** result);
 /* MoorePenroseInverseFunctions.MoorePenroseInverse(Matrix A, double? tol = null) -> Matrix */
 NQL_API nql_status nql_MoorePenroseInverseFunctions_MoorePenroseInverse(const double* A, int32_t A_rows, int32_t A_columns, const double* tol, double** result, int32_t* result_rows, int32_t* result_columns);
 #endif /* NANOQL_EXPERIMENTAL */
+/* MoroInvCumulativeBurley2020SobolGaussianRsg snapshot: Draws(int count) -> MoroInvCumulativeBurley2020SobolGaussianRsg */
+NQL_API nql_status nql_MoroInvCumulativeBurley2020SobolGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
+/* new MoroInvCumulativeBurley2020SobolGaussianRsg(Burley2020SobolRsg uniformSequenceGenerator) */
+NQL_API nql_status nql_MoroInvCumulativeBurley2020SobolGaussianRsg_new__Burley2020SobolRsg(nql_handle uniformSequenceGenerator, nql_handle* result);
+/* new MoroInvCumulativeBurley2020SobolGaussianRsg(Burley2020SobolRsg uniformSequenceGenerator, MoroInverseCumulativeNormal inverseCumulative) */
+NQL_API nql_status nql_MoroInvCumulativeBurley2020SobolGaussianRsg_new__Burley2020SobolRsg_MoroInverseCumulativeNormal(nql_handle uniformSequenceGenerator, nql_handle inverseCumulative, nql_handle* result);
 /* MoroInvCumulativeHaltonGaussianRsg snapshot: Draws(int count) -> MoroInvCumulativeHaltonGaussianRsg */
 NQL_API nql_status nql_MoroInvCumulativeHaltonGaussianRsg_Draws(nql_handle self, int32_t count, double** values, double** weights, int32_t* dimension, nql_handle* next);
 /* new MoroInvCumulativeHaltonGaussianRsg(HaltonRsg uniformSequenceGenerator) */
@@ -16284,6 +16460,20 @@ NQL_API nql_status nql_MultiplicativePriceSeasonality_new(nql_date seasonalityBa
 NQL_API nql_status nql_NanoQLException_new__string(const char* message, nql_handle* result);
 /* new NanoQLException() */
 NQL_API nql_status nql_NanoQLException_new__void(nql_handle* result);
+/* NaturalCubicDiscountCurve.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_NaturalCubicDiscountCurve_Data(nql_handle self, double** result, int32_t* result_count);
+/* NaturalCubicDiscountCurve.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_NaturalCubicDiscountCurve_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* NaturalCubicDiscountCurve.Discounts() -> ImmutableArray<double> */
+NQL_API nql_status nql_NaturalCubicDiscountCurve_Discounts(nql_handle self, double** result, int32_t* result_count);
+/* NaturalCubicDiscountCurve.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_NaturalCubicDiscountCurve_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* NaturalCubicDiscountCurve.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_NaturalCubicDiscountCurve_Times(nql_handle self, double** result, int32_t* result_count);
+/* NaturalCubicDiscountCurve.get_MaxDate() -> Date */
+NQL_API nql_status nql_NaturalCubicDiscountCurve_get_MaxDate(nql_handle self, nql_date* result);
+/* new NaturalCubicDiscountCurve(IEnumerable<Date> dates, IEnumerable<double> dfs, DayCounter dayCounter, Calendar calendar = null, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null) */
+NQL_DEPRECATED("QuantLib-Python deprecates NaturalCubicDiscountCurve: discount curves should use log interpolations. Use LogCubicDiscountCurve with a natural spline.") NQL_API nql_status nql_NaturalCubicDiscountCurve_new(const nql_date* dates, int32_t dates_count, const double* dfs, int32_t dfs_count, nql_handle dayCounter, nql_handle calendar, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle* result);
 /* NaturalCubicFitting.get_Size() -> int */
 NQL_API nql_status nql_NaturalCubicFitting_get_Size(nql_handle self, int32_t* result);
 /* new NaturalCubicFitting(IEnumerable<double> knotTimes, IEnumerable<double> weights = null, OptimizationMethod optimizationMethod = null, IEnumerable<double> l2 = null, double minCutoffTime = 0, double maxCutoffTime = 1.7976931348623157E+308, Constraint constraint = null) */
@@ -17870,6 +18060,16 @@ NQL_API nql_status nql_PiecewiseFlatHazardRate_get_MaxTime(nql_handle self, doub
 NQL_API nql_status nql_PiecewiseFlatHazardRate_get_Model(nql_handle self, nql_handle* result);
 /* new PiecewiseFlatHazardRate(Date referenceDate, IEnumerable<BootstrapHelper<DefaultProbabilityTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, BackwardFlat i = null, IterativeBootstrap bootstrap = null) */
 NQL_API nql_status nql_PiecewiseFlatHazardRate_new(nql_date referenceDate, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
+/* PiecewiseForwardSpreadedTermStructure.get_Calendar() -> Calendar */
+NQL_API nql_status nql_PiecewiseForwardSpreadedTermStructure_get_Calendar(nql_handle self, nql_handle* result);
+/* PiecewiseForwardSpreadedTermStructure.get_Factory() -> BackwardFlat */
+NQL_API nql_status nql_PiecewiseForwardSpreadedTermStructure_get_Factory(nql_handle self, nql_handle* result);
+/* PiecewiseForwardSpreadedTermStructure.get_MaxDate() -> Date */
+NQL_API nql_status nql_PiecewiseForwardSpreadedTermStructure_get_MaxDate(nql_handle self, nql_date* result);
+/* PiecewiseForwardSpreadedTermStructure.get_SettlementDays() -> int? */
+NQL_API nql_status nql_PiecewiseForwardSpreadedTermStructure_get_SettlementDays(nql_handle self, int32_t* result, bool* result_has_value);
+/* new PiecewiseForwardSpreadedTermStructure(YieldTermStructure originalCurve, IEnumerable<double> spreads, IEnumerable<Date> dates, BackwardFlat factory = null) */
+NQL_API nql_status nql_PiecewiseForwardSpreadedTermStructure_new(nql_handle originalCurve, const double* spreads, int32_t spreads_count, const nql_date* dates, int32_t dates_count, nql_handle factory, nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* PiecewiseFunctionFunctions.Evaluate(IReadOnlyList<double> X, IReadOnlyList<double> Y, double x) -> double */
 NQL_API nql_status nql_PiecewiseFunctionFunctions_Evaluate(const double* X, int32_t X_count, const double* Y, int32_t Y_count, double x, double* result);
@@ -17900,6 +18100,16 @@ NQL_API nql_status nql_PiecewiseKrugerLogDiscount_get_MaxDate(nql_handle self, n
 NQL_API nql_status nql_PiecewiseKrugerLogDiscount_get_MaxTime(nql_handle self, double* result);
 /* new PiecewiseKrugerLogDiscount(Date referenceDate, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, KrugerLog i = null, IterativeBootstrap bootstrap = null) */
 NQL_API nql_status nql_PiecewiseKrugerLogDiscount_new(nql_date referenceDate, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
+/* PiecewiseLinearForwardSpreadedTermStructure.get_Calendar() -> Calendar */
+NQL_API nql_status nql_PiecewiseLinearForwardSpreadedTermStructure_get_Calendar(nql_handle self, nql_handle* result);
+/* PiecewiseLinearForwardSpreadedTermStructure.get_Factory() -> Linear */
+NQL_API nql_status nql_PiecewiseLinearForwardSpreadedTermStructure_get_Factory(nql_handle self, nql_handle* result);
+/* PiecewiseLinearForwardSpreadedTermStructure.get_MaxDate() -> Date */
+NQL_API nql_status nql_PiecewiseLinearForwardSpreadedTermStructure_get_MaxDate(nql_handle self, nql_date* result);
+/* PiecewiseLinearForwardSpreadedTermStructure.get_SettlementDays() -> int? */
+NQL_API nql_status nql_PiecewiseLinearForwardSpreadedTermStructure_get_SettlementDays(nql_handle self, int32_t* result, bool* result_has_value);
+/* new PiecewiseLinearForwardSpreadedTermStructure(YieldTermStructure originalCurve, IEnumerable<double> spreads, IEnumerable<Date> dates, Linear factory = null) */
+NQL_API nql_status nql_PiecewiseLinearForwardSpreadedTermStructure_new(nql_handle originalCurve, const double* spreads, int32_t spreads_count, const nql_date* dates, int32_t dates_count, nql_handle factory, nql_handle* result);
 /* PiecewiseLinearForward.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, Linear i = null, IterativeBootstrap bootstrap = null) -> PiecewiseLinearForward */
 NQL_API nql_status nql_PiecewiseLinearForward_Create(int32_t settlementDays, nql_handle calendar, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
 /* PiecewiseLinearForward.Data() -> ImmutableArray<double> */
@@ -17996,6 +18206,30 @@ NQL_API nql_status nql_PiecewiseLogCubicDiscount_get_MaxDate(nql_handle self, nq
 NQL_API nql_status nql_PiecewiseLogCubicDiscount_get_MaxTime(nql_handle self, double* result);
 /* new PiecewiseLogCubicDiscount(Date referenceDate, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, LogCubic i = null, IterativeBootstrap bootstrap = null) */
 NQL_API nql_status nql_PiecewiseLogCubicDiscount_new(nql_date referenceDate, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
+/* PiecewiseLogCubicSpreadDiscount.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_Data(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseLogCubicSpreadDiscount.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* PiecewiseLogCubicSpreadDiscount.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* PiecewiseLogCubicSpreadDiscount.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_Times(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseLogCubicSpreadDiscount.get_AdditionalVariables() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_get_AdditionalVariables(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseLogCubicSpreadDiscount.get_BaseCurve() -> YieldTermStructure */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_get_BaseCurve(nql_handle self, nql_handle* result);
+/* PiecewiseLogCubicSpreadDiscount.get_Bootstrap() -> IterativeBootstrap */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_get_Bootstrap(nql_handle self, nql_handle* result);
+/* PiecewiseLogCubicSpreadDiscount.get_DayCounter() -> DayCounter */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_get_DayCounter(nql_handle self, nql_handle* result);
+/* PiecewiseLogCubicSpreadDiscount.get_Interpolator() -> LogCubic */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_get_Interpolator(nql_handle self, nql_handle* result);
+/* PiecewiseLogCubicSpreadDiscount.get_MaxDate() -> Date */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_get_MaxDate(nql_handle self, nql_date* result);
+/* PiecewiseLogCubicSpreadDiscount.get_MaxTime() -> double */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_get_MaxTime(nql_handle self, double* result);
+/* new PiecewiseLogCubicSpreadDiscount(YieldTermStructure baseCurve, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, EvaluationContext context, LogCubic i = null, IterativeBootstrap bootstrap = null) */
+NQL_API nql_status nql_PiecewiseLogCubicSpreadDiscount_new(nql_handle baseCurve, const nql_handle* instruments, int32_t instruments_count, nql_handle context, nql_handle i, nql_handle bootstrap, nql_handle* result);
 /* PiecewiseLogLinearDiscount.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, LogLinear i = null, IterativeBootstrap bootstrap = null) -> PiecewiseLogLinearDiscount */
 NQL_API nql_status nql_PiecewiseLogLinearDiscount_Create(int32_t settlementDays, nql_handle calendar, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
 /* PiecewiseLogLinearDiscount.Data() -> ImmutableArray<double> */
@@ -18020,6 +18254,30 @@ NQL_API nql_status nql_PiecewiseLogLinearDiscount_get_MaxDate(nql_handle self, n
 NQL_API nql_status nql_PiecewiseLogLinearDiscount_get_MaxTime(nql_handle self, double* result);
 /* new PiecewiseLogLinearDiscount(Date referenceDate, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, LogLinear i = null, IterativeBootstrap bootstrap = null) */
 NQL_API nql_status nql_PiecewiseLogLinearDiscount_new(nql_date referenceDate, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
+/* PiecewiseLogLinearSpreadDiscount.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_Data(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseLogLinearSpreadDiscount.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* PiecewiseLogLinearSpreadDiscount.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* PiecewiseLogLinearSpreadDiscount.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_Times(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseLogLinearSpreadDiscount.get_AdditionalVariables() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_get_AdditionalVariables(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseLogLinearSpreadDiscount.get_BaseCurve() -> YieldTermStructure */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_get_BaseCurve(nql_handle self, nql_handle* result);
+/* PiecewiseLogLinearSpreadDiscount.get_Bootstrap() -> IterativeBootstrap */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_get_Bootstrap(nql_handle self, nql_handle* result);
+/* PiecewiseLogLinearSpreadDiscount.get_DayCounter() -> DayCounter */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_get_DayCounter(nql_handle self, nql_handle* result);
+/* PiecewiseLogLinearSpreadDiscount.get_Interpolator() -> LogLinear */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_get_Interpolator(nql_handle self, nql_handle* result);
+/* PiecewiseLogLinearSpreadDiscount.get_MaxDate() -> Date */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_get_MaxDate(nql_handle self, nql_date* result);
+/* PiecewiseLogLinearSpreadDiscount.get_MaxTime() -> double */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_get_MaxTime(nql_handle self, double* result);
+/* new PiecewiseLogLinearSpreadDiscount(YieldTermStructure baseCurve, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, EvaluationContext context, LogLinear i = null, IterativeBootstrap bootstrap = null) */
+NQL_API nql_status nql_PiecewiseLogLinearSpreadDiscount_new(nql_handle baseCurve, const nql_handle* instruments, int32_t instruments_count, nql_handle context, nql_handle i, nql_handle bootstrap, nql_handle* result);
 /* PiecewiseLogMixedLinearCubicDiscount.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, LogMixedLinearCubic i = null, IterativeBootstrap bootstrap = null) -> PiecewiseLogMixedLinearCubicDiscount */
 NQL_API nql_status nql_PiecewiseLogMixedLinearCubicDiscount_Create(int32_t settlementDays, nql_handle calendar, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
 /* PiecewiseLogMixedLinearCubicDiscount.Data() -> ImmutableArray<double> */
@@ -18044,6 +18302,56 @@ NQL_API nql_status nql_PiecewiseLogMixedLinearCubicDiscount_get_MaxDate(nql_hand
 NQL_API nql_status nql_PiecewiseLogMixedLinearCubicDiscount_get_MaxTime(nql_handle self, double* result);
 /* new PiecewiseLogMixedLinearCubicDiscount(Date referenceDate, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, LogMixedLinearCubic i = null, IterativeBootstrap bootstrap = null) */
 NQL_API nql_status nql_PiecewiseLogMixedLinearCubicDiscount_new(nql_date referenceDate, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_Data(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_Times(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.get_AdditionalVariables() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_get_AdditionalVariables(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.get_BaseCurve() -> YieldTermStructure */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_get_BaseCurve(nql_handle self, nql_handle* result);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.get_Bootstrap() -> IterativeBootstrap */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_get_Bootstrap(nql_handle self, nql_handle* result);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.get_DayCounter() -> DayCounter */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_get_DayCounter(nql_handle self, nql_handle* result);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.get_Interpolator() -> LogMixedLinearCubic */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_get_Interpolator(nql_handle self, nql_handle* result);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.get_MaxDate() -> Date */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_get_MaxDate(nql_handle self, nql_date* result);
+/* PiecewiseLogMixedLinearCubicSpreadDiscount.get_MaxTime() -> double */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_get_MaxTime(nql_handle self, double* result);
+/* new PiecewiseLogMixedLinearCubicSpreadDiscount(YieldTermStructure baseCurve, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, EvaluationContext context, LogMixedLinearCubic i = null, IterativeBootstrap bootstrap = null) */
+NQL_API nql_status nql_PiecewiseLogMixedLinearCubicSpreadDiscount_new(nql_handle baseCurve, const nql_handle* instruments, int32_t instruments_count, nql_handle context, nql_handle i, nql_handle bootstrap, nql_handle* result);
+/* PiecewiseSplineCubicDiscount.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, Cubic i = null, IterativeBootstrap bootstrap = null) -> PiecewiseYieldCurve<Discount, Cubic, IterativeBootstrap> */
+NQL_DEPRECATED("QuantLib-Python deprecates PiecewiseSplineCubicDiscount: discount curves should use log interpolations. Use PiecewiseLogCubicDiscount with a natural spline.") NQL_API nql_status nql_PiecewiseSplineCubicDiscount_Create__int_Calendar_BootstrapHelperYieldTermStructureArray_DayCounter_EvaluationContext_doubleArray_DateArray_Cubic(int32_t settlementDays, nql_handle calendar, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
+/* PiecewiseSplineCubicDiscount.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, IterativeBootstrap bootstrap = null) -> PiecewiseSplineCubicDiscount */
+NQL_DEPRECATED("QuantLib-Python deprecates PiecewiseSplineCubicDiscount: discount curves should use log interpolations. Use PiecewiseLogCubicDiscount with a natural spline.") NQL_API nql_status nql_PiecewiseSplineCubicDiscount_Create__int_Calendar_BootstrapHelperYieldTermStructureArray_DayCounter_EvaluationContext_doubleArray_DateArray_IterativeBootstrap(int32_t settlementDays, nql_handle calendar, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle bootstrap, nql_handle* result);
+/* PiecewiseSplineCubicDiscount.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseSplineCubicDiscount_Data(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseSplineCubicDiscount.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_PiecewiseSplineCubicDiscount_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* PiecewiseSplineCubicDiscount.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_PiecewiseSplineCubicDiscount_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* PiecewiseSplineCubicDiscount.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseSplineCubicDiscount_Times(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseSplineCubicDiscount.get_AdditionalVariables() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseSplineCubicDiscount_get_AdditionalVariables(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseSplineCubicDiscount.get_Bootstrap() -> IterativeBootstrap */
+NQL_API nql_status nql_PiecewiseSplineCubicDiscount_get_Bootstrap(nql_handle self, nql_handle* result);
+/* PiecewiseSplineCubicDiscount.get_DayCounter() -> DayCounter */
+NQL_API nql_status nql_PiecewiseSplineCubicDiscount_get_DayCounter(nql_handle self, nql_handle* result);
+/* PiecewiseSplineCubicDiscount.get_Interpolator() -> Cubic */
+NQL_API nql_status nql_PiecewiseSplineCubicDiscount_get_Interpolator(nql_handle self, nql_handle* result);
+/* PiecewiseSplineCubicDiscount.get_MaxDate() -> Date */
+NQL_API nql_status nql_PiecewiseSplineCubicDiscount_get_MaxDate(nql_handle self, nql_date* result);
+/* PiecewiseSplineCubicDiscount.get_MaxTime() -> double */
+NQL_API nql_status nql_PiecewiseSplineCubicDiscount_get_MaxTime(nql_handle self, double* result);
+/* new PiecewiseSplineCubicDiscount(Date referenceDate, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, IterativeBootstrap bootstrap = null) */
+NQL_DEPRECATED("QuantLib-Python deprecates PiecewiseSplineCubicDiscount: discount curves should use log interpolations. Use PiecewiseLogCubicDiscount with a natural spline.") NQL_API nql_status nql_PiecewiseSplineCubicDiscount_new(nql_date referenceDate, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle bootstrap, nql_handle* result);
 /* PiecewiseTimeDependentHestonModel.Kappa(double t) -> double */
 NQL_API nql_status nql_PiecewiseTimeDependentHestonModel_Kappa(nql_handle self, double t, double* result);
 /* PiecewiseTimeDependentHestonModel.Rho(double t) -> double */
@@ -18088,6 +18396,30 @@ NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_GlobalBootstrap_get_Ma
 NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_GlobalBootstrap_get_MaxTime(nql_handle self, double* result);
 /* new PiecewiseYieldCurve(Date referenceDate, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, Cubic i = null, GlobalBootstrap bootstrap = null) */
 NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_GlobalBootstrap_new(nql_date referenceDate, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
+/* PiecewiseYieldCurve.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, Cubic i = null, IterativeBootstrap bootstrap = null) -> PiecewiseYieldCurve<Discount, Cubic, IterativeBootstrap> */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_Create(int32_t settlementDays, nql_handle calendar, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
+/* PiecewiseYieldCurve.Data() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_Data(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseYieldCurve.Dates() -> ImmutableArray<Date> */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_Dates(nql_handle self, nql_date** result, int32_t* result_count);
+/* PiecewiseYieldCurve.Nodes() -> ImmutableArray<KeyValuePair<Date, double>> */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_Nodes(nql_handle self, nql_date** result_keys, double** result_values, int32_t* result_count);
+/* PiecewiseYieldCurve.Times() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_Times(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseYieldCurve.get_AdditionalVariables() -> ImmutableArray<double> */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_get_AdditionalVariables(nql_handle self, double** result, int32_t* result_count);
+/* PiecewiseYieldCurve.get_Bootstrap() -> IterativeBootstrap */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_get_Bootstrap(nql_handle self, nql_handle* result);
+/* PiecewiseYieldCurve.get_DayCounter() -> DayCounter */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_get_DayCounter(nql_handle self, nql_handle* result);
+/* PiecewiseYieldCurve.get_Interpolator() -> Cubic */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_get_Interpolator(nql_handle self, nql_handle* result);
+/* PiecewiseYieldCurve.get_MaxDate() -> Date */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_get_MaxDate(nql_handle self, nql_date* result);
+/* PiecewiseYieldCurve.get_MaxTime() -> double */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_get_MaxTime(nql_handle self, double* result);
+/* new PiecewiseYieldCurve(Date referenceDate, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, Cubic i = null, IterativeBootstrap bootstrap = null) */
+NQL_API nql_status nql_PiecewiseYieldCurve_Discount_Cubic_IterativeBootstrap_new(nql_date referenceDate, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
 /* PiecewiseYieldCurve.Create(int settlementDays, Calendar calendar, IEnumerable<BootstrapHelper<YieldTermStructure>> instruments, DayCounter dayCounter, EvaluationContext context, IEnumerable<double> jumps = null, IEnumerable<Date> jumpDates = null, KrugerLog i = null, GlobalBootstrap bootstrap = null) -> PiecewiseYieldCurve<Discount, KrugerLog, GlobalBootstrap> */
 NQL_API nql_status nql_PiecewiseYieldCurve_Discount_KrugerLog_GlobalBootstrap_Create(int32_t settlementDays, nql_handle calendar, const nql_handle* instruments, int32_t instruments_count, nql_handle dayCounter, nql_handle context, const double* jumps, int32_t jumps_count, const nql_date* jumpDates, int32_t jumpDates_count, nql_handle i, nql_handle bootstrap, nql_handle* result);
 /* PiecewiseYieldCurve.Data() -> ImmutableArray<double> */
@@ -20192,6 +20524,26 @@ NQL_API nql_status nql_SpreadDiscountCurve_new(nql_handle baseCurve, const nql_d
 NQL_API nql_status nql_SpreadFittingMethod_get_Size(nql_handle self, int32_t* result);
 /* new SpreadFittingMethod(FittedBondDiscountCurveFittingMethod method, YieldTermStructure discountCurve, double minCutoffTime = 0, double maxCutoffTime = 1.7976931348623157E+308) */
 NQL_API nql_status nql_SpreadFittingMethod_new(nql_handle method, nql_handle discountCurve, double minCutoffTime, double maxCutoffTime, nql_handle* result);
+/* SpreadedBackwardFlatZeroInterpolatedTermStructure.get_Calendar() -> Calendar */
+NQL_API nql_status nql_SpreadedBackwardFlatZeroInterpolatedTermStructure_get_Calendar(nql_handle self, nql_handle* result);
+/* SpreadedBackwardFlatZeroInterpolatedTermStructure.get_Factory() -> BackwardFlat */
+NQL_API nql_status nql_SpreadedBackwardFlatZeroInterpolatedTermStructure_get_Factory(nql_handle self, nql_handle* result);
+/* SpreadedBackwardFlatZeroInterpolatedTermStructure.get_MaxDate() -> Date */
+NQL_API nql_status nql_SpreadedBackwardFlatZeroInterpolatedTermStructure_get_MaxDate(nql_handle self, nql_date* result);
+/* SpreadedBackwardFlatZeroInterpolatedTermStructure.get_SettlementDays() -> int? */
+NQL_API nql_status nql_SpreadedBackwardFlatZeroInterpolatedTermStructure_get_SettlementDays(nql_handle self, int32_t* result, bool* result_has_value);
+/* new SpreadedBackwardFlatZeroInterpolatedTermStructure(YieldTermStructure originalCurve, IEnumerable<double> spreads, IEnumerable<Date> dates, Compounding comp = Continuous, Frequency freq = NoFrequency, BackwardFlat factory = null) */
+NQL_API nql_status nql_SpreadedBackwardFlatZeroInterpolatedTermStructure_new(nql_handle originalCurve, const double* spreads, int32_t spreads_count, const nql_date* dates, int32_t dates_count, int32_t comp, int32_t freq, nql_handle factory, nql_handle* result);
+/* SpreadedCubicZeroInterpolatedTermStructure.get_Calendar() -> Calendar */
+NQL_API nql_status nql_SpreadedCubicZeroInterpolatedTermStructure_get_Calendar(nql_handle self, nql_handle* result);
+/* SpreadedCubicZeroInterpolatedTermStructure.get_Factory() -> Cubic */
+NQL_API nql_status nql_SpreadedCubicZeroInterpolatedTermStructure_get_Factory(nql_handle self, nql_handle* result);
+/* SpreadedCubicZeroInterpolatedTermStructure.get_MaxDate() -> Date */
+NQL_API nql_status nql_SpreadedCubicZeroInterpolatedTermStructure_get_MaxDate(nql_handle self, nql_date* result);
+/* SpreadedCubicZeroInterpolatedTermStructure.get_SettlementDays() -> int? */
+NQL_API nql_status nql_SpreadedCubicZeroInterpolatedTermStructure_get_SettlementDays(nql_handle self, int32_t* result, bool* result_has_value);
+/* new SpreadedCubicZeroInterpolatedTermStructure(YieldTermStructure originalCurve, IEnumerable<double> spreads, IEnumerable<Date> dates, Compounding comp = Continuous, Frequency freq = NoFrequency, Cubic factory = null) */
+NQL_API nql_status nql_SpreadedCubicZeroInterpolatedTermStructure_new(nql_handle originalCurve, const double* spreads, int32_t spreads_count, const nql_date* dates, int32_t dates_count, int32_t comp, int32_t freq, nql_handle factory, nql_handle* result);
 #ifdef NANOQL_EXPERIMENTAL
 /* SpreadedHazardRateCurve.get_MaxDate() -> Date */
 NQL_API nql_status nql_SpreadedHazardRateCurve_get_MaxDate(nql_handle self, nql_date* result);
@@ -23072,6 +23424,30 @@ NQL_API nql_status nql_YoYInflationCapFloorDefaults_with_FixingDays(nql_handle s
 NQL_API nql_status nql_YoYInflationCapFloorDefaults_with_PaymentAdjustment(nql_handle self, int32_t value, nql_handle* result);
 /* YoYInflationCapFloorDefaults.PaymentDayCounter(DayCounter value) -> YoYInflationCapFloorDefaults */
 NQL_API nql_status nql_YoYInflationCapFloorDefaults_with_PaymentDayCounter(nql_handle self, nql_handle value, nql_handle* result);
+#ifdef NANOQL_EXPERIMENTAL
+/* YoYInflationCapFloorTermPriceSurface.AtmYoYRate(Date d, Period? obsLag = null, bool extrapolate = true) -> double */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_AtmYoYRate(nql_handle self, nql_date d, const nql_period* obsLag, bool extrapolate, double* result);
+/* YoYInflationCapFloorTermPriceSurface.AtmYoYSwapDateRates() -> ValueTuple<ImmutableArray<Date>, ImmutableArray<double>> */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_AtmYoYSwapDateRates(nql_handle self, nql_date** dates, int32_t* dates_count, double** rates, int32_t* rates_count);
+/* YoYInflationCapFloorTermPriceSurface.AtmYoYSwapRate(Date d, bool extrapolate = true) -> double */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_AtmYoYSwapRate(nql_handle self, nql_date d, bool extrapolate, double* result);
+/* YoYInflationCapFloorTermPriceSurface.AtmYoYSwapTimeRates() -> ValueTuple<ImmutableArray<double>, ImmutableArray<double>> */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_AtmYoYSwapTimeRates(nql_handle self, double** times, int32_t* times_count, double** rates, int32_t* rates_count);
+/* YoYInflationCapFloorTermPriceSurface.BaseDate() -> Date */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_BaseDate(nql_handle self, nql_date* result);
+/* YoYInflationCapFloorTermPriceSurface.CapPrice(Date d, double k) -> double */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_CapPrice(nql_handle self, nql_date d, double k, double* result);
+/* YoYInflationCapFloorTermPriceSurface.Create(int fixingDays, Period yyLag, YoYInflationIndex yii, CPIInterpolationType interpolation, YieldTermStructure nominal, DayCounter dc, Calendar cal, BusinessDayConvention bdc, IReadOnlyList<double> cStrikes, IReadOnlyList<double> fStrikes, IReadOnlyList<Period> cfMaturities, Matrix cPrice, Matrix fPrice, EvaluationContext context, Bicubic interpolator2d = null, Cubic interpolator1d = null) -> YoYInflationCapFloorTermPriceSurface */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_Create(int32_t fixingDays, nql_period yyLag, nql_handle yii, int32_t interpolation, nql_handle nominal, nql_handle dc, nql_handle cal, int32_t bdc, const double* cStrikes, int32_t cStrikes_count, const double* fStrikes, int32_t fStrikes_count, const nql_period* cfMaturities, int32_t cfMaturities_count, const double* cPrice, int32_t cPrice_rows, int32_t cPrice_columns, const double* fPrice, int32_t fPrice_rows, int32_t fPrice_columns, nql_handle context, nql_handle interpolator2d, nql_handle interpolator1d, nql_handle* result);
+/* YoYInflationCapFloorTermPriceSurface.FloorPrice(Date d, double k) -> double */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_FloorPrice(nql_handle self, nql_date d, double k, double* result);
+/* YoYInflationCapFloorTermPriceSurface.Price(Date d, double k) -> double */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_Price(nql_handle self, nql_date d, double k, double* result);
+/* YoYInflationCapFloorTermPriceSurface.YoYTS() -> YoYInflationTermStructure */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_YoYTS(nql_handle self, nql_handle* result);
+/* YoYInflationCapFloorTermPriceSurface.get_MaxDate() -> Date */
+NQL_API nql_status nql_YoYInflationCapFloorTermPriceSurface_get_MaxDate(nql_handle self, nql_date* result);
+#endif /* NANOQL_EXPERIMENTAL */
 /* YoYInflationCapFloor.AtmRate(YieldTermStructure discountCurve, EvaluationContext context) -> double */
 NQL_API nql_status nql_YoYInflationCapFloor_AtmRate(nql_handle self, nql_handle discountCurve, nql_handle context, double* result);
 /* YoYInflationCapFloor.ImpliedVolatility(double price, YoYInflationTermStructure yoyCurve, double guess, EvaluationContext context, double accuracy = 0.0001, int maxEvaluations = 100, double minVol = 1E-07, double maxVol = 4) -> double */

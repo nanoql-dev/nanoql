@@ -26,7 +26,7 @@ public class InterpolatedYoYOptionletVolatilityCurveCxxVectorTests
         {
             EvaluationContext context = c.Context();
             JsonElement s = c.Input("curve");
-            var curve = InterpolatedYoYOptionletVolatilityCurve<Linear>.Create(
+            var curve = InterpolatedYoYInflationOptionletVolatilityCurve.Create(
                 s.GetProperty("settlementDays").GetInt32(),
                 CashFlowInputs.CalendarOf(s.GetProperty("calendar")),
                 (BusinessDayConvention)s.GetProperty("convention").GetInt32(),

@@ -250,7 +250,8 @@ def make_curve(spec, helpers):
         return cls(*head, helpers, irx.day_counter(spec["dayCounter"]), ql.GlobalBootstrap(), jumps, jump_dates,
                    make_interpolator(traits, spec["interpolator"]))
     cls = WHEEL[(traits, t)]
-    assert spec.get("class", cls.__name__) == cls.__name__, spec
+    # a deprecated name's class is its shim's target, the name with a leading underscore
+    assert spec.get("class", cls.__name__) == cls.__name__.lstrip("_") if "class" in spec else True, spec
     return cls(*head, helpers, irx.day_counter(spec["dayCounter"]), jumps, jump_dates,
                make_interpolator(traits, spec["interpolator"]), make_bootstrap(spec["bootstrap"]))
 
@@ -481,6 +482,21 @@ def named_cases():
     return out
 
 
+def deprecated_named_cases():
+    """The wheel's deprecated PiecewiseSplineCubicDiscount, its shim's target _PiecewiseSplineCubicDiscount on the
+    wheel's SplineCubic, through nanoql's class of the name, on the fixture's helpers, with a fixed reference date and
+    on settlement days."""
+    today = EVALUATION_DATES[0]
+    out = []
+    for moving in (False, True):
+        with v.case_settings(today) as st:
+            specs = [curve_spec("Discount", SPLINE_CUBIC, A365, today, moving, named="PiecewiseSplineCubicDiscount")]
+            form = "on settlement days" if moving else "with a reference date"
+            out.append(group_case(f"{today.ISO()} the deprecated named class on fixture {form}", st, "curves", specs,
+                                  fixture()))
+    return out
+
+
 def four_deposits():
     """4 deposits, so 5 nodes."""
     return [deposits_only()[k] for k in (1, 3, 4, 6)]
@@ -662,6 +678,7 @@ def cases():
     out = grid_cases() + jump_cases() + fallback_cases() + bumped_cases() + moved_cases()
     out += named_cases() + log_mixed_cases() + more_cases() + bma_moved_cases()
     out += convex_monotone_cases()
+    out += deprecated_named_cases()
     check_rows(out)
     return out
 

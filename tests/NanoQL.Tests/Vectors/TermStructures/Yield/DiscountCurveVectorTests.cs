@@ -110,6 +110,9 @@ public class DiscountCurveVectorTests
             "KrugerLogDiscountCurve" => Of(new KrugerLogDiscountCurve(dates, dfs, dayCounter, calendar, jumps, jumpDates)),
             "LogMixedLinearCubicDiscountCurve" => Of(new LogMixedLinearCubicDiscountCurve(
                 dates, dfs, dayCounter, calendar, jumps, jumpDates, BootstrapInputs.LogMixedLinearCubicOf(i))),
+#pragma warning disable CS0618 // QuantLib-Python's deprecated name, checked against the class it builds
+            "NaturalCubicDiscountCurve" => Of(new NaturalCubicDiscountCurve(dates, dfs, dayCounter, calendar, jumps, jumpDates)),
+#pragma warning restore CS0618
             _ => throw new InvalidOperationException($"unknown named curve {named}"),
         };
 

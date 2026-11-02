@@ -163,7 +163,8 @@ def case(name, dates, dfs, dc, cal, interpolators, jumps=None, jump_dates=None, 
                   "discountDates": when, "extrapolate": flags}
     if classes is not None:
         for named, interpolator in zip(classes, interpolators):
-            assert named is None or named == WHEEL[interpolator["type"]].__name__, (named, interpolator)
+            # a deprecated name's class is its shim's target, the name with a leading underscore
+            assert named is None or named == WHEEL[interpolator["type"]].__name__.lstrip("_"), (named, interpolator)
         inputs["classes"] = classes
     return {"name": name, "inputs": inputs, "expected": expected}
 
@@ -203,7 +204,7 @@ def cases():
     out.append(case("3 jumps on default dates", dates, dfs, dc, cal, INTERPOLATORS[:5], [0.999, 0.9985, 1.0005]))
     for name, dates, dfs, dc, jumps, jump_dates in refusals():
         out.append(case(f"refused: {name}", dates, dfs, dc, TARGET, [pw.LOG_LINEAR], jumps, jump_dates))
-    out += named_cases() + log_mixed_cases()
+    out += named_cases() + log_mixed_cases() + deprecated_named_cases()
     check_rows(out)
     return out
 
@@ -228,6 +229,18 @@ def named_cases():
         _, dates, dfs, dc, cal = sets[set_name]
         out.append(case(f"named classes on {set_name}", dates, dfs, dc, cal, [i for _, i in NAMED],
                         classes=[named for named, _ in NAMED]))
+    return out
+
+
+def deprecated_named_cases():
+    """The wheel's deprecated NaturalCubicDiscountCurve, its shim's target _NaturalCubicDiscountCurve on the wheel's
+    SplineCubic, through nanoql's class of the name, on the named cases' three node sets."""
+    sets = {s[0]: s for s in node_sets()}
+    out = []
+    for set_name in ("12 nodes to 30 years", "6 nodes with a hump", "9 nodes over leap years"):
+        _, dates, dfs, dc, cal = sets[set_name]
+        out.append(case(f"the deprecated named class on {set_name}", dates, dfs, dc, cal, [pw.SPLINE_CUBIC],
+                        classes=["NaturalCubicDiscountCurve"]))
     return out
 
 

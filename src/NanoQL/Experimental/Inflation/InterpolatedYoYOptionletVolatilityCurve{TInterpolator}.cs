@@ -34,7 +34,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
-public sealed class InterpolatedYoYOptionletVolatilityCurve<TInterpolator>
+public class InterpolatedYoYOptionletVolatilityCurve<TInterpolator>
     : YoYOptionletVolatilitySurface, IInterpolatedCurve<YoYInflationVolatilityTraits, TInterpolator>
     where TInterpolator : struct, IInterpolator
 {
@@ -43,7 +43,7 @@ public sealed class InterpolatedYoYOptionletVolatilityCurve<TInterpolator>
     private readonly double minStrike;
     private readonly double maxStrike;
 
-    private InterpolatedYoYOptionletVolatilityCurve(
+    private protected InterpolatedYoYOptionletVolatilityCurve(
         Date referenceDate,
         int settlementDays,
         Calendar cal,

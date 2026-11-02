@@ -40,13 +40,13 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
-public sealed class KInterpolatedYoYOptionletVolatilitySurface<TInterpolator> : YoYOptionletVolatilitySurface
+public class KInterpolatedYoYOptionletVolatilitySurface<TInterpolator> : YoYOptionletVolatilitySurface
     where TInterpolator : struct, IInterpolator
 {
     private readonly YoYCapFloorTermPriceSurface capFloorPrices;
     private readonly TInterpolator factory1D;
 
-    private KInterpolatedYoYOptionletVolatilitySurface(
+    private protected KInterpolatedYoYOptionletVolatilitySurface(
         Date referenceDate,
         int settlementDays,
         Calendar cal,

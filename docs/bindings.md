@@ -74,7 +74,12 @@ Visual Studio's C++ tools with the Visual Studio Installer's folder on `PATH`.
   and `MCLD<X>Engine` at `PseudoRandom` or `LowDiscrepancy` and `GeneralStatistics`, QuantLib's default statistics,
   for the 19 engines QuantLib-Python names and the six it doesn't, named as their siblings are; and
   `Binomial<Tree>BarrierEngine` and `Binomial<Tree>DoubleBarrierEngine` for the seven trees on Derman and Kani's
-  assets, the wheel's closings (`nql_MCPREuropeanEngine_Calculate`, `nql_BinomialCRRBarrierEngine_Bind`).
+  assets, the wheel's closings (`nql_MCPREuropeanEngine_Calculate`, `nql_BinomialCRRBarrierEngine_Bind`). A curve,
+  surface or generator QuantLib-Python names with a `%template` crosses as its named class, a sealed subclass of the
+  closed generic (`ForwardFlatForwardCurve`, `PiecewiseLogCubicSpreadDiscount`, `YoYInflationCapFloorTermPriceSurface`,
+  `InvCumulativeBurley2020SobolGaussianRsg`); the four the wheel deprecates (`LogLinearZeroCurve`, `LogCubicZeroCurve`,
+  `NaturalCubicDiscountCurve`, `PiecewiseSplineCubicDiscount`) are deprecated in every layer, their messages the
+  wheel's reasons with nanoql's replacements.
 - **Released names never move:** each release writes its surface to `bindings/surface.shipped.json`, and the generator
   keeps every released function's and type's name. Only a new member is named against the names in use: a member that
   gains its first overload keeps its short name and the newcomer takes the suffix.
@@ -307,6 +312,14 @@ too. Schema 1, its `"schema"` field raised on any change of meaning; one row a l
   its reason. Given `bindings/replay-floor.json`, the C and Java replayers also fail below the floor: at least as many
   facts replayed whole, each with calls, as the floor lists (the facts that reach only crossing members), at least its
   calls replayed, refusals matched, and the facts it names whole.
+- **Parity with QuantLib-Python:** `tools/bindings/wheelparity.py` reads the wheel's `QuantLib.py` (the release
+  `tools/vectors/requirements.txt` pins), `surface.json` and `bindings/wheel-routes.json`, and puts every class the wheel
+  constructs, and every module function that constructs one, in one group: it crosses with a maker (a constructor, a
+  factory, a preset lookup, an engine's calculation or `Bind`); a route the table names, with its reason, to a type the
+  surface makes, an enum it carries, a C function it has or a language form; a ruled exclusion (handles, observers and
+  settings, SWIG's containers, the stepping parts, the caller's own functions); or a gap. `--fail-on-gap` exits 1 on a
+  gap, and CI's bindings job runs it on Windows x64; `--report` writes the parity table. The table's notes keep the
+  differences a crossing class still has (`GlobalBootstrap`'s initial guess).
 
 ## Debugging into nanoql
 

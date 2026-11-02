@@ -37,9 +37,9 @@ public class PiecewiseZeroSpreadedTermStructureVectorTests
                 {
                     "Linear" => new InterpolatedPiecewiseZeroSpreadedTermStructure<Linear>(
                         original, spreads, spreadDates, comp, freq),
-                    "BackwardFlat" => new InterpolatedPiecewiseZeroSpreadedTermStructure<BackwardFlat>(
+                    "BackwardFlat" => new SpreadedBackwardFlatZeroInterpolatedTermStructure(
                         original, spreads, spreadDates, comp, freq),
-                    "Cubic" => new InterpolatedPiecewiseZeroSpreadedTermStructure<Cubic>(
+                    "Cubic" => new SpreadedCubicZeroInterpolatedTermStructure(
                         original, spreads, spreadDates, comp, freq, BootstrapInputs.CubicOf(interpolator)),
                     var t => throw new InvalidOperationException($"unknown interpolator '{t}'"),
                 };

@@ -102,7 +102,7 @@ internal static class InflationSurfaceInputs
     /// <returns>The surface.</returns>
     public static InterpolatedYoYCapFloorTermPriceSurface<Bicubic, Cubic> YoYSurfaceOf(
         JsonElement spec, YieldTermStructure nominal, YoYInflationIndex index, EvaluationContext context) =>
-        InterpolatedYoYCapFloorTermPriceSurface<Bicubic, Cubic>.Create(
+        YoYInflationCapFloorTermPriceSurface.Create(
             spec.GetProperty("fixingDays").GetInt32(),
             InflationInputs.LagOf(spec.GetProperty("lag")),
             index,

@@ -9,7 +9,9 @@ ZeroYieldStructure (ql/termstructures/yield/zeroyieldstructure.hpp): 110 curves 
   wheel's MonotonicCubic, QuantLib's Cubic with the spline, monotonic) and log-linear (_LogLinearZeroCurve, the target
   of the wheel's LogLinearZeroCurve shim). The node sets: 2 nodes; 4 within a year; 8 to 10 years; 12 to 30 years on
   Actual/360; 6 of negative and positive rates; 7 a day apart; on TARGET, the null calendar and QuantLib's empty
-  calendar. The compoundings: continuous; compounded semiannually; simple. Given rates are converted to their
+  calendar. The compoundings: continuous; compounded semiannually; simple. And 2 cases on continuous rates through
+  the wheel's deprecated names' classes, _LogLinearZeroCurve and _LogCubicZeroCurve (QuantLib's DefaultLogCubic,
+  Kruger's derivatives, monotonic), each through nanoql's LogLinearZeroCurve and LogCubicZeroCurve. Given rates are converted to their
   continuous equivalents, at about a day (1/365) for the first node, so the curve's data differ from them.
 - 2 cases on QuantLib's continuous compounding, where the frequency is never read: with NoFrequency, and with 7, no
   member of Frequency; and 2 with jumps: two on given dates, one of them before the reference date, which QuantLib's
@@ -69,6 +71,11 @@ COMPOUNDINGS = [("continuous", int(ql.Continuous), int(ql.Annual)),
                 ("simple", int(ql.Simple), int(ql.Annual))]
 
 
+# The wheel's deprecated names, each with the class its shim builds and its interpolator, by the nanoql class.
+LOG_CUBIC = pw.cubic(CI.Kruger, True, log=True)
+NAMED_WHEEL = {"LogLinearZeroCurve": (ql.QuantLib._LogLinearZeroCurve, lambda: ql.LogLinear()),
+               "LogCubicZeroCurve": (ql.QuantLib._LogCubicZeroCurve, lambda: ql.DefaultLogCubic())}
+
 # The wheel's class and interpolator for each of INTERPOLATORS.
 WHEEL = [(ql.ZeroCurve, lambda: ql.Linear()),
          (ql.CubicZeroCurve, lambda: pw.make_interpolator("ZeroYield", KRUGER_CUBIC)),
@@ -77,9 +84,9 @@ WHEEL = [(ql.ZeroCurve, lambda: ql.Linear()),
          (ql.QuantLib._LogLinearZeroCurve, lambda: ql.LogLinear())]
 
 
-def make_curve(dates, rates, dc, cal, interpolator, compounding, frequency, jumps=None, jump_dates=None):
+def make_curve(dates, rates, dc, cal, interpolator, compounding, frequency, jumps=None, jump_dates=None, named=None):
     """The wheel's curve; jumps or their dates given as None are none."""
-    cls, make = WHEEL[INTERPOLATORS.index(interpolator)]
+    cls, make = NAMED_WHEEL[named] if named in NAMED_WHEEL else WHEEL[INTERPOLATORS.index(interpolator)]
     head = ([ql.Date(x) for x in dates], rates, irx.day_counter(dc),
             ql.Schedule().calendar() if cal is None else irx.calendar(cal))
     if jumps is None and jump_dates is None:
@@ -129,9 +136,9 @@ def case(name, dates, rates, dc, cal, compounding, frequency, interpolators=None
     keys = ["built", "dates", "times", "data", "zeroRates", "nodes", "maxDate", "zeroRateAt", "discountAt"]
     expected = {k: [] for k in keys}
     result_dc = ql.Actual365Fixed()
-    for interpolator in interpolators:
+    for interpolator, named in zip(interpolators, classes):
         try:
-            curve = make_curve(dates, rates, dc, cal, interpolator, compounding, frequency, jumps, jump_dates)
+            curve = make_curve(dates, rates, dc, cal, interpolator, compounding, frequency, jumps, jump_dates, named)
         except RuntimeError:
             one = {"built": dict(v.THROWS), "dates": [], "times": [], "data": [], "zeroRates": [], "nodes": [],
                    "maxDate": None, "zeroRateAt": [], "discountAt": []}
@@ -202,6 +209,10 @@ def cases():
     r = D(15, 1, 2024)
     out.append(case("refused: one jump, two jump dates", [r, r + 182, r + 365], [0.03, 0.031, 0.032], A365, TARGET,
                     int(ql.Continuous), int(ql.Annual), [LINEAR], ["ZeroCurve"], [0.999], [r + 30, r + 60]))
+    for set_name in ("8 nodes to 10 years", "12 nodes to 30 years"):
+        _, dates, rates, dc, cal = sets[set_name]
+        out.append(case(f"the deprecated named classes on {set_name}", dates, rates, dc, cal, int(ql.Continuous),
+                        int(ql.Annual), [LOG_LINEAR, LOG_CUBIC], ["LogLinearZeroCurve", "LogCubicZeroCurve"]))
     check_rows(out)
     return out
 

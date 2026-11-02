@@ -173,11 +173,12 @@ public class ContractTests
         Assert.Equal("NanoQL.Bind.Tests.Fixtures.HiddenOverride", Function(g, "fx_HiddenOverride_Half").Holder.FullName);
         Assert.True(Function(g, "fx_HiddenOverride_Twice").Holder.IsConstructedGenericType);
 
-        // nanoql's four: each named class's own Create returns the class.
+        // nanoql's seven: each named class's own Create returns the class, the three year-on-year ones' too.
         foreach (string name in new[]
                  {
                      "PiecewiseFlatHazardRate", "ZabrLocalVolatilityInterpolatedSmileSection", "ZabrShortMaturityLognormalInterpolatedSmileSection",
-                     "ZabrShortMaturityNormalInterpolatedSmileSection",
+                     "ZabrShortMaturityNormalInterpolatedSmileSection", "YoYInflationCapFloorTermPriceSurface",
+                     "InterpolatedYoYInflationOptionletVolatilityCurve", "KInterpolatedYoYInflationOptionletVolatilitySurface",
                  })
         {
             CFunction f = Function(Surfaces.Nanoql, $"nql_{name}_Create");
@@ -210,8 +211,18 @@ public class ContractTests
             .Where(f => !(Selector.IsNamedClass(f.Type) && f.Type.BaseType == f.Holder))
             .Select(f => f.CName).ToList();
         Assert.Empty(wrong);
+        // the five named classes' closings' Create: GlobalPiecewiseSplineCubicDiscount's, PiecewiseSplineCubicDiscount's
+        // and the three interpolated smile sections'
         int kept = Surfaces.Nanoql.Surface.Functions.Count(f => f.Static && f.Holder != f.Type && f.Kind is "static" or "get" or "field");
-        Assert.Equal(4, kept);
+        Assert.Equal(5, kept);
+
+        // a deprecated named class's closing's Create is deprecated with it, by the class's message
+        CFunction copied = Assert.Single(
+            Surfaces.Nanoql.Surface.Functions, f => f.Static && f.Holder != f.Type && f.Type.Name == "PiecewiseSplineCubicDiscount");
+        Assert.StartsWith("QuantLib-Python deprecates PiecewiseSplineCubicDiscount: ", copied.Deprecated, StringComparison.Ordinal);
+        Assert.All(
+            Surfaces.Nanoql.Surface.Functions.Where(f => f.Static && f.Holder != f.Type && f.Type.Name != "PiecewiseSplineCubicDiscount"),
+            f => Assert.Null(f.Deprecated));
         Assert.DoesNotContain(Surfaces.Nanoql.Surface.Functions, f => f.CName is "nql_GaussianDefProbLM_FromCorrelation" or "nql_Brent_get_MaxFunctionEvaluations");
         Assert.Contains(Surfaces.Nanoql.Surface.Functions, f => f.CName == "nql_LatentModel_GaussianCopulaPolicy_GaussianCopulaPolicyInitTraits_FromCorrelation");
     }

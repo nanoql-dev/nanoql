@@ -81,6 +81,12 @@ public class ZeroCurveVectorTests
                 n.Dates, n.Rates, n.DayCounter, n.Calendar, n.Jumps, n.JumpDates, BootstrapInputs.CubicOf(i), compounding, frequency)),
             ("LogLinear", null) => Of(new InterpolatedZeroCurve<LogLinear>(
                 n.Dates, n.Rates, n.DayCounter, n.Calendar, n.Jumps, n.JumpDates, default, compounding, frequency)),
+#pragma warning disable CS0618 // QuantLib-Python's deprecated names, checked against the classes they build
+            ("LogLinear", "LogLinearZeroCurve") => Of(new LogLinearZeroCurve(
+                n.Dates, n.Rates, n.DayCounter, n.Calendar, n.Jumps, n.JumpDates, default, compounding, frequency)),
+            ("LogCubic", "LogCubicZeroCurve") => Of(new LogCubicZeroCurve(
+                n.Dates, n.Rates, n.DayCounter, n.Calendar, n.Jumps, n.JumpDates, compounding, frequency)),
+#pragma warning restore CS0618
             var (t, k) => throw new InvalidOperationException($"unknown interpolator {t} through {k}"),
         };
 

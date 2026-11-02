@@ -537,7 +537,9 @@ internal sealed class Selector
             TypeArguments = typeArguments ?? [],
             Key = (definition ?? m).MemberKey() + (typeArguments is { Length: > 0 } ? "<" + string.Join(",", typeArguments.Select(a => a.KeyName())) + ">" : string.Empty),
             Experimental = IsExperimental(m),
-            Deprecated = Deprecation(m),
+
+            // a static a named class carries from its closing takes the class's deprecation where it has none
+            Deprecated = Deprecation(m) ?? (isStatic && holder != t ? Deprecation(t) : null),
         };
         if (!isStatic && kind != "new")
         {

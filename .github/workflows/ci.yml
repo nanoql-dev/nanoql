@@ -249,6 +249,21 @@ jobs:
         run: dotnet build src/NanoQL.Bind -c Release
       - name: The checked-in surface (nanoql.h, surface.json, coverage.md)
         run: dotnet run --project src/NanoQL.Bind -c Release --no-build -- check
+      # On the reference leg: every class QuantLib-Python constructs crosses, has a route or a ruled exclusion, the wheel
+      # installed as the vector jobs install it, so an API change that loses a route, or a pin that adds a class, reds.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        if: matrix.rid == 'win-x64'
+        with:
+          python-version: "3.12"
+      - name: Parity with QuantLib-Python
+        if: matrix.rid == 'win-x64'
+        run: |
+          python -m venv "$RUNNER_TEMP/venv-parity"
+          py="$RUNNER_TEMP/venv-parity/Scripts/python.exe"
+          "$py" -m pip install -q --require-hashes --only-binary :all: -r tools/vectors/build-requirements.txt
+          "$py" -m pip install -q --require-hashes --no-build-isolation -r tools/vectors/requirements.txt
+          wheel=$("$py" -c "import os, QuantLib; print(os.path.join(os.path.dirname(QuantLib.__file__), 'QuantLib.py'))")
+          "$py" -I tools/bindings/wheelparity.py "$wheel" bindings/surface.json bindings/wheel-routes.json --fail-on-gap
       - name: The native library
         run: |
           start=$(date +%s)

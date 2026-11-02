@@ -386,6 +386,32 @@ class Misc(unittest.TestCase):
             self.assertEqual(Deprecations.old(2.0), 2.0)
         self.assertTrue(any(issubclass(w.category, DeprecationWarning) and "use Echo.Double" in str(w.message) for w in caught))
 
+    def test_wheels_deprecated_templates(self):
+        # QuantLib-Python's four deprecated names warn with its reasons, naming nanoql's replacements
+        qs = ConventionSet.quant_lib()
+        dc = qs.day_counter("Actual365Fixed")
+        dates = [datetime.date(2024, 1, 15), datetime.date(2025, 1, 15), datetime.date(2026, 1, 15), datetime.date(2027, 1, 15)]
+        context = Fixtures.context()
+        made = [
+            ("LogLinearZeroCurve", "Use ZeroCurve.", lambda: nanoql.LogLinearZeroCurve(dates, [0.03, 0.031, 0.032, 0.033], dc)),
+            ("LogCubicZeroCurve", "Use CubicZeroCurve.", lambda: nanoql.LogCubicZeroCurve(dates, [0.03, 0.031, 0.032, 0.033], dc)),
+            ("NaturalCubicDiscountCurve", "Use LogCubicDiscountCurve with a natural spline.",
+             lambda: nanoql.NaturalCubicDiscountCurve(dates, [1.0, 0.97, 0.94, 0.91], dc)),
+            ("PiecewiseSplineCubicDiscount", "Use PiecewiseLogCubicDiscount with a natural spline.",
+             lambda: nanoql.PiecewiseSplineCubicDiscount(context.evaluation_date, Fixtures.deposit_helpers(), dc, context)),
+            # the closing's Create the class carries, taking an interpolator
+            ("PiecewiseSplineCubicDiscount", "Use PiecewiseLogCubicDiscount with a natural spline.",
+             lambda: nanoql.PiecewiseSplineCubicDiscount.create(0, qs.calendar("TARGET"), Fixtures.deposit_helpers(), dc, context,
+                                                               i=nanoql.Cubic())),
+        ]
+        for name, replacement, make in made:
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                make()
+            messages = [str(w.message) for w in caught if issubclass(w.category, DeprecationWarning)]
+            self.assertTrue(any(m.startswith(f"QuantLib-Python deprecates {name}: ") and m.endswith(replacement) for m in messages),
+                            (name, messages))
+
     def test_use_library(self):
         path = nanoql.library_path()
         o = EchoObject(1.0, "one")

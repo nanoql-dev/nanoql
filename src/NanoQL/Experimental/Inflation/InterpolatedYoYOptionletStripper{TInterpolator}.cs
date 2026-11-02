@@ -36,7 +36,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
-public sealed class InterpolatedYoYOptionletStripper<TInterpolator> : YoYOptionletStripper
+public class InterpolatedYoYOptionletStripper<TInterpolator> : YoYOptionletStripper
     where TInterpolator : struct, IInterpolator
 {
     // The provider at the stripper's construction, which a strip builds its index, caps and curves in.

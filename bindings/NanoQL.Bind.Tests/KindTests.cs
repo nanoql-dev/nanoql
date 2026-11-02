@@ -138,7 +138,9 @@ public class KindTests
             }
             else if (line.Contains("NQL_API nql_status nql_", StringComparison.Ordinal))
             {
-                string name = line[(line.IndexOf("nql_status ", StringComparison.Ordinal) + 11)..line.IndexOf('(', StringComparison.Ordinal)];
+                // after a deprecated declaration's NQL_DEPRECATED("...")
+                int start = line.IndexOf("nql_status ", StringComparison.Ordinal) + 11;
+                string name = line[start..line.IndexOf('(', start)];
                 if (experimental.TryGetValue(name, out bool e))
                 {
                     seen++;

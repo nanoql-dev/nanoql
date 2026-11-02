@@ -148,6 +148,84 @@ public class NamedClassesTests
     }
 
     [Fact]
+    public void EachNamedCurveSurfaceAndGeneratorIsASubclassOfItsClosedGeneric()
+    {
+        // the curves, surfaces and generators QuantLib-Python names: each sealed on its closed generic; the
+        // year-on-year price surface's and volatility curve's and surface's own Create return their own type, as the
+        // iterative spline discount curve's does; and the four the wheel deprecates carry its reasons with nanoql's
+        // replacements
+#pragma warning disable CS0618 // the deprecated four, checked here
+        (Type Named, Type Generic)[] classes =
+        [
+            (typeof(ForwardFlatForwardCurve), typeof(InterpolatedForwardCurve<ForwardFlat>)),
+            (typeof(LogCubicSpreadDiscountCurve), typeof(InterpolatedSpreadDiscountCurve<LogCubic>)),
+            (typeof(LogMixedLinearCubicSpreadDiscountCurve),
+                typeof(InterpolatedSpreadDiscountCurve<LogMixedLinearCubic>)),
+            (typeof(SpreadedBackwardFlatZeroInterpolatedTermStructure),
+                typeof(InterpolatedPiecewiseZeroSpreadedTermStructure<BackwardFlat>)),
+            (typeof(SpreadedCubicZeroInterpolatedTermStructure),
+                typeof(InterpolatedPiecewiseZeroSpreadedTermStructure<Cubic>)),
+            (typeof(LogLinearZeroCurve), typeof(InterpolatedZeroCurve<LogLinear>)),
+            (typeof(LogCubicZeroCurve), typeof(InterpolatedZeroCurve<LogCubic>)),
+            (typeof(NaturalCubicDiscountCurve), typeof(InterpolatedDiscountCurve<Cubic>)),
+            (typeof(PiecewiseSplineCubicDiscount), typeof(PiecewiseYieldCurve<Discount, Cubic, IterativeBootstrap>)),
+            (typeof(InvCumulativeBurley2020SobolGaussianRsg),
+                typeof(InverseCumulativeRsg<Burley2020SobolRsg, InverseCumulativeNormal>)),
+            (typeof(MoroInvCumulativeBurley2020SobolGaussianRsg),
+                typeof(InverseCumulativeRsg<Burley2020SobolRsg, MoroInverseCumulativeNormal>)),
+            (typeof(PiecewiseLogLinearSpreadDiscount),
+                typeof(PiecewiseSpreadYieldCurve<LogLinear, IterativeBootstrap>)),
+            (typeof(PiecewiseLogCubicSpreadDiscount), typeof(PiecewiseSpreadYieldCurve<LogCubic, IterativeBootstrap>)),
+            (typeof(PiecewiseLogMixedLinearCubicSpreadDiscount),
+                typeof(PiecewiseSpreadYieldCurve<LogMixedLinearCubic, IterativeBootstrap>)),
+            (typeof(PiecewiseForwardSpreadedTermStructure),
+                typeof(InterpolatedPiecewiseForwardSpreadedTermStructure<BackwardFlat>)),
+            (typeof(PiecewiseLinearForwardSpreadedTermStructure),
+                typeof(InterpolatedPiecewiseForwardSpreadedTermStructure<Linear>)),
+            (typeof(InterpolatedYoYInflationOptionletStripper), typeof(InterpolatedYoYOptionletStripper<Linear>)),
+            (typeof(YoYInflationCapFloorTermPriceSurface),
+                typeof(InterpolatedYoYCapFloorTermPriceSurface<Bicubic, Cubic>)),
+            (typeof(InterpolatedYoYInflationOptionletVolatilityCurve),
+                typeof(InterpolatedYoYOptionletVolatilityCurve<Linear>)),
+            (typeof(KInterpolatedYoYInflationOptionletVolatilitySurface),
+                typeof(KInterpolatedYoYOptionletVolatilitySurface<Linear>)),
+        ];
+        foreach ((Type named, Type generic) in classes)
+        {
+            Assert.True(named.IsSealed, named.Name);
+            Assert.Equal(generic, named.BaseType);
+        }
+
+        Type[] creating =
+        [
+            typeof(YoYInflationCapFloorTermPriceSurface),
+            typeof(InterpolatedYoYInflationOptionletVolatilityCurve),
+            typeof(KInterpolatedYoYInflationOptionletVolatilitySurface),
+            typeof(PiecewiseSplineCubicDiscount),
+        ];
+        foreach (Type named in creating)
+        {
+            MethodInfo create = named.GetMethod("Create", BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!;
+            Assert.Equal(named, create.ReturnType);
+        }
+
+        (Type Named, string Message)[] deprecated =
+        [
+            (typeof(LogLinearZeroCurve), "QuantLib-Python deprecates LogLinearZeroCurve: zero curves should not use log interpolations. Use ZeroCurve."),
+            (typeof(LogCubicZeroCurve), "QuantLib-Python deprecates LogCubicZeroCurve: zero curves should not use log interpolations. Use CubicZeroCurve."),
+            (typeof(NaturalCubicDiscountCurve), "QuantLib-Python deprecates NaturalCubicDiscountCurve: discount curves should use log interpolations. Use LogCubicDiscountCurve with a natural spline."),
+            (typeof(PiecewiseSplineCubicDiscount), "QuantLib-Python deprecates PiecewiseSplineCubicDiscount: discount curves should use log interpolations. Use PiecewiseLogCubicDiscount with a natural spline."),
+        ];
+#pragma warning restore CS0618
+        foreach ((Type named, string message) in deprecated)
+        {
+            Assert.Equal(message, named.GetCustomAttribute<ObsoleteAttribute>()?.Message);
+        }
+
+        Assert.Equal(4, classes.Count(c => c.Named.IsDefined(typeof(ObsoleteAttribute))));
+    }
+
+    [Fact]
     public void EachNamedEngineIsItsGenericsCalculationsClosed()
     {
         // QuantLib-Python's engine names, and the six the wheel doesn't name, named as their siblings are: static

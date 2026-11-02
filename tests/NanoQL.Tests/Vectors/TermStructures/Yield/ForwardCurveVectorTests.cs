@@ -101,6 +101,8 @@ public class ForwardCurveVectorTests
                 dates, forwards, dayCounter, calendar, jumps, jumpDates, BootstrapInputs.CubicOf(i))),
             ("Cubic", null) => Of(new InterpolatedForwardCurve<Cubic>(
                 dates, forwards, dayCounter, calendar, jumps, jumpDates, BootstrapInputs.CubicOf(i))),
+            ("ForwardFlat", "ForwardFlatForwardCurve") =>
+                Of(new ForwardFlatForwardCurve(dates, forwards, dayCounter, calendar, jumps, jumpDates)),
             var (t, k) => throw new InvalidOperationException($"unknown interpolator {t} through {k}"),
         };
 

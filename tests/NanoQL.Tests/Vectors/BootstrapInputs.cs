@@ -241,6 +241,12 @@ internal static class BootstrapInputs
                 (r, dc, j, jd, b) => Of(new PiecewiseLogCubicDiscount(r, h, dc, x, j, jd, LogCubicOf(i), b)),
                 (sd, cal, dc, j, jd, b) =>
                     Of(PiecewiseLogCubicDiscount.Create(sd, cal, h, dc, x, j, jd, LogCubicOf(i), b))),
+#pragma warning disable CS0618 // QuantLib-Python's deprecated name, checked against the class it builds
+            "PiecewiseSplineCubicDiscount" => Named(
+                spec,
+                (r, dc, j, jd, b) => Of(new PiecewiseSplineCubicDiscount(r, h, dc, x, j, jd, b)),
+                (sd, cal, dc, j, jd, b) => Of(PiecewiseSplineCubicDiscount.Create(sd, cal, h, dc, x, j, jd, b))),
+#pragma warning restore CS0618
             "PiecewiseKrugerLogDiscount" => Named(
                 spec,
                 (r, dc, j, jd, b) => Of(new PiecewiseKrugerLogDiscount(r, h, dc, x, j, jd, bootstrap: b)),

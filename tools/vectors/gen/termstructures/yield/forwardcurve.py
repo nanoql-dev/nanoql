@@ -56,6 +56,9 @@ A360, A365 = irx.A360, irx.A365
 INTERPOLATORS = [pw.BACKWARD_FLAT, pw.LINEAR, pw.KRUGER_CUBIC, pw.SPLINE_CUBIC]
 # The nanoql class each curve is built through: the named class of its closed generic, or the generic itself.
 CLASSES = ["ForwardCurve", "LinearForwardCurve", "CubicForwardCurve", None]
+# The wheel's names nanoql's INTERPOLATORS don't cover, each with its class and interpolator, by the nanoql class.
+FORWARD_FLAT = {"type": "ForwardFlat"}
+NAMED_WHEEL = {"ForwardFlatForwardCurve": (ql.ForwardFlatForwardCurve, lambda: ql.ForwardFlat())}
 # The wheel's class and interpolator for each of INTERPOLATORS.
 WHEEL = [(ql.ForwardCurve, lambda: ql.BackwardFlat()),
          (ql.LinearForwardCurve, lambda: ql.Linear()),
@@ -63,9 +66,9 @@ WHEEL = [(ql.ForwardCurve, lambda: ql.BackwardFlat()),
          (ql.NaturalCubicForwardCurve, lambda: ql.SplineCubic())]
 
 
-def make_curve(dates, forwards, dc, cal, interpolator, jumps=None, jump_dates=None):
+def make_curve(dates, forwards, dc, cal, interpolator, jumps=None, jump_dates=None, named=None):
     """The wheel's curve; jumps or their dates given as None are none."""
-    cls, make = WHEEL[INTERPOLATORS.index(interpolator)]
+    cls, make = NAMED_WHEEL[named] if named in NAMED_WHEEL else WHEEL[INTERPOLATORS.index(interpolator)]
     head = ([ql.Date(x) for x in dates], forwards, irx.day_counter(dc),
             ql.Schedule().calendar() if cal is None else irx.calendar(cal))
     if jumps is None and jump_dates is None:
@@ -113,9 +116,9 @@ def case(name, dates, forwards, dc, cal, interpolators=None, classes=None, jumps
     keys = ["built", "dates", "times", "forwards", "nodes", "maxDate", "zeroRateAt", "forwardAt", "discountAt"]
     expected = {k: [] for k in keys}
     result_dc = ql.Actual365Fixed()
-    for interpolator in interpolators:
+    for interpolator, named in zip(interpolators, classes):
         try:
-            curve = make_curve(dates, forwards, dc, cal, interpolator, jumps, jump_dates)
+            curve = make_curve(dates, forwards, dc, cal, interpolator, jumps, jump_dates, named)
         except RuntimeError:
             one = {"built": dict(v.THROWS), "dates": [], "times": [], "forwards": [], "nodes": [], "maxDate": None,
                    "zeroRateAt": [], "forwardAt": [], "discountAt": []}
@@ -167,6 +170,12 @@ def cases():
     for name, dates, forwards, jumps, jump_dates in refusals():
         out.append(case(f"refused: {name}", dates, forwards, A365, TARGET, [pw.LINEAR], ["LinearForwardCurve"],
                         jumps, jump_dates))
+    for set_name in ("5 nodes within a year", "9 nodes to 20 years", "6 nodes of negative and positive forwards"):
+        _, dates, forwards, dc, cal = sets[set_name]
+        out.append(case(f"ForwardFlatForwardCurve on {set_name}", dates, forwards, dc, cal, [FORWARD_FLAT],
+                        ["ForwardFlatForwardCurve"]))
+    out.append(case("ForwardFlatForwardCurve with 2 jumps on given dates", *sets["9 nodes to 20 years"][1:],
+                    [FORWARD_FLAT], ["ForwardFlatForwardCurve"], [0.998, 0.9995], [D(10, 1, 2024), D(30, 6, 2031)]))
     check_rows(out)
     return out
 

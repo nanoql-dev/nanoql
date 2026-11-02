@@ -39,7 +39,7 @@ namespace NanoQL.TermStructures;
 /// divergence.
 /// </para>
 /// </remarks>
-public sealed class InterpolatedPiecewiseForwardSpreadedTermStructure<TInterpolator> : ZeroYieldStructure
+public class InterpolatedPiecewiseForwardSpreadedTermStructure<TInterpolator> : ZeroYieldStructure
     where TInterpolator : struct, IInterpolator
 {
     private readonly YieldTermStructure originalCurve;

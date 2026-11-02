@@ -360,7 +360,9 @@ QuantLib's builders (`MakeSchedule`, `FixedRateLeg`, `MakeVanillaSwap`, …) are
   `InterpolatedHazardRateCurve<TInterpolator>`, `InterpolatedDefaultDensityCurve<TInterpolator>` and
   `InterpolatedSurvivalProbabilityCurve<TInterpolator>`, `InterpolatedSmileSection<TInterpolator>`,
   `XabrSwaptionVolatilityCube<TModel>`, `ZabrSmileSection<TEvaluation>`, `AdaptiveRungeKutta<T>`,
-  `TrapezoidIntegral<TIntegrationPolicy>` and `GenericSequenceStatistics<TStats>`, for their named classes (unsealed); `IInterpolator` (the interpolation
+  `TrapezoidIntegral<TIntegrationPolicy>`, `GenericSequenceStatistics<TStats>`,
+  `PiecewiseSpreadYieldCurve<TInterpolator, TBootstrap>`, `InterpolatedPiecewiseForwardSpreadedTermStructure<TInterpolator>`
+  and `InterpolatedYoYOptionletStripper<TInterpolator>`, for their named classes (unsealed); `IInterpolator` (the interpolation
   traits: a factory of one's own overrides its `CheckPoints` with its construction checks, whose default refuses
   nothing, so that a curve on it takes a bootstrap's first-pass fallback where QuantLib's would), `IInterpolator2D` (the
   2-D factory concept), the bootstrap's concepts `IBootstrap`, `IBootstrapState`, `IBootstrapHelper`,

@@ -29,7 +29,7 @@ public class InterpolatedYoYOptionletStripperVectorTests
             EvaluationContext context = c.Context();
             (var nominal, var index) = InflationSurfaceInputs.EuroMarketOf(c.Input("market"));
             var surf = InflationSurfaceInputs.YoYSurfaceOf(c.Input("surface"), nominal, index, context);
-            var k = KInterpolatedYoYOptionletVolatilitySurface<Linear>.Create(
+            var k = KInterpolatedYoYInflationOptionletVolatilitySurface.Create(
                 0,
                 new TARGET(),
                 BusinessDayConvention.ModifiedFollowing,
@@ -37,7 +37,7 @@ public class InterpolatedYoYOptionletStripperVectorTests
                 surf.ObservationLag,
                 surf,
                 (cf, ctx, v) => YoYInflationUnitDisplacedBlackCapFloorEngine.Calculate(cf, ctx, index, v, nominal),
-                new InterpolatedYoYOptionletStripper<Linear>(),
+                new InterpolatedYoYInflationOptionletStripper(),
                 c.Input("slope").GetDouble(),
                 context);
             check.Output(c, "minStrike", k.MinStrike());

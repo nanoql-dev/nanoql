@@ -42,7 +42,7 @@ namespace NanoQL.Experimental;
 /// </para>
 /// </remarks>
 [Experimental("NQL0001")]
-public sealed class InterpolatedYoYCapFloorTermPriceSurface<TInterpolator2D, TInterpolator1D> : YoYCapFloorTermPriceSurface
+public class InterpolatedYoYCapFloorTermPriceSurface<TInterpolator2D, TInterpolator1D> : YoYCapFloorTermPriceSurface
     where TInterpolator2D : struct, IInterpolator2D
     where TInterpolator1D : struct, IInterpolator
 {
@@ -62,7 +62,7 @@ public sealed class InterpolatedYoYCapFloorTermPriceSurface<TInterpolator2D, TIn
     private readonly Interpolation atmYoYSwapRateCurve;
     private readonly YoYInflationTermStructure yoy;
 
-    private InterpolatedYoYCapFloorTermPriceSurface(
+    private protected InterpolatedYoYCapFloorTermPriceSurface(
         Date referenceDate,
         int fixingDays,
         Period yyLag,

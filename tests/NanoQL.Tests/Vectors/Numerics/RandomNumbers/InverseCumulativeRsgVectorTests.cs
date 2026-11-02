@@ -66,6 +66,8 @@ public class InverseCumulativeRsgVectorTests
         LecuyerUniformRsg Lecuyer() => c.String("construction") == "seed"
             ? new LecuyerUniformRsg(dimension, seed)
             : new LecuyerUniformRsg(dimension, new LecuyerUniformRng(seed));
+        // the wheel's defaults: Jaeckel's direction integers, the scramble seed 43
+        Burley2020SobolRsg Burley() => new(dimension, seed, SobolRsgDirectionIntegers.Jaeckel, 43);
         Xoshiro256StarStarUniformRsg Xoshiro() => c.String("construction") == "seed"
             ? new Xoshiro256StarStarUniformRsg(dimension, seed)
             : new Xoshiro256StarStarUniformRsg(dimension, new Xoshiro256StarStarUniformRng(seed));
@@ -107,6 +109,12 @@ public class InverseCumulativeRsgVectorTests
             "MoroInvCumulativeXoshiro256StarStarGaussianRsg" => given
                 ? new MoroInvCumulativeXoshiro256StarStarGaussianRsg(Xoshiro(), new MoroInverseCumulativeNormal(average, sigma))
                 : new MoroInvCumulativeXoshiro256StarStarGaussianRsg(Xoshiro()),
+            "InvCumulativeBurley2020SobolGaussianRsg" => given
+                ? new InvCumulativeBurley2020SobolGaussianRsg(Burley(), new InverseCumulativeNormal(average, sigma))
+                : new InvCumulativeBurley2020SobolGaussianRsg(Burley()),
+            "MoroInvCumulativeBurley2020SobolGaussianRsg" => given
+                ? new MoroInvCumulativeBurley2020SobolGaussianRsg(Burley(), new MoroInverseCumulativeNormal(average, sigma))
+                : new MoroInvCumulativeBurley2020SobolGaussianRsg(Burley()),
             string other => throw new InvalidOperationException($"no composition {other}"),
         };
     }
