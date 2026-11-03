@@ -104,7 +104,8 @@ internal sealed class CppReplayWriter(CppWriter cpp)
         }
 
         c.AppendLine("    if (r.stop) return 0;");
-        string call = m.Style switch
+        // A record's generated equality pair, which no class declares, through Object's == and != (nql_equals).
+        string call = f.GeneratedEquality ? $"({args[0]} {(f.BaseName == "op_Inequality" ? "!=" : "==")} {args[1]})" : m.Style switch
         {
             "new" => $"{m.Class}({string.Join(", ", args)})",
             "static" => $"{m.Class}::{m.Name}({string.Join(", ", args)})",

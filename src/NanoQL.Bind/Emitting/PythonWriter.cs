@@ -136,7 +136,9 @@ internal sealed class PythonWriter(Surface surface)
             stable.AppendLine("_runtime._time_unit = TimeUnit").AppendLine();
         }
 
-        var byType = surface.Functions.GroupBy(f => f.Type).ToDictionary(g => g.Key, g => g.ToList());
+        // A record's generated equality pair is Python's own == and != (nql_equals): no class declares it, and the
+        // function table keeps its C function.
+        var byType = surface.Functions.Where(f => !f.GeneratedEquality).GroupBy(f => f.Type).ToDictionary(g => g.Key, g => g.ToList());
         var stableAll = new List<string>();
         var experimentalAll = new List<string>();
         var py = new List<string>();

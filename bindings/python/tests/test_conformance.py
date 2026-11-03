@@ -295,7 +295,7 @@ class Handles(unittest.TestCase):
         o.close()
         p = EchoObject(4.0, "four")
         with self.assertRaises(HandleError):
-            EchoObject.op_equality(o, p)
+            _ = o == p
         p.close()
 
     def test_refusals(self):

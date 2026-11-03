@@ -116,7 +116,10 @@ internal sealed class JavaWriter
             Enum(files, e);
         }
 
-        var byType = Members.Values.GroupBy(m => m.Type.Type).ToDictionary(g => g.Key, g => g.ToList());
+        // A record's generated equality pair is Java's own equals (nql_equals): no class declares it, and the plan keeps
+        // it for the replayer.
+        var declared = Members.Values.Where(m => !m.Function.GeneratedEquality).ToList();
+        var byType = declared.GroupBy(m => m.Type.Type).ToDictionary(g => g.Key, g => g.ToList());
         foreach (TypeRow t in classes.Where(t => Mine(t.Prefix)))
         {
             Class(files, t, byType.GetValueOrDefault(t.Type, []));
@@ -127,7 +130,7 @@ internal sealed class JavaWriter
             Value(files, t, byType.GetValueOrDefault(t.Type, []));
         }
 
-        foreach (IGrouping<string, JavaMember> holder in Members.Values.Where(m => m.Holder != Fqn(m.Type) && m.Type.Form != "value" && Mine(m.Type.Prefix)).GroupBy(m => m.Holder))
+        foreach (IGrouping<string, JavaMember> holder in declared.Where(m => m.Holder != Fqn(m.Type) && m.Type.Form != "value" && Mine(m.Type.Prefix)).GroupBy(m => m.Holder))
         {
             Holder(files, holder.Key, [.. holder]);
         }
@@ -269,6 +272,12 @@ internal sealed class JavaWriter
             var ps = f.Params.Where(p => !p.IsSelf).ToList();
             var m = new JavaMember(f, t, holder, name, style, ParamNames(ps), [.. ps.Select(p => Type(p.Kind, false))]);
             Members[f] = m;
+            if (f.GeneratedEquality)
+            {
+                // A record's generated equality pair: no class declares it, so it takes no part in a class's names.
+                continue;
+            }
+
             if (!byClass.TryGetValue(holder, out List<JavaMember>? list))
             {
                 byClass[holder] = list = [];

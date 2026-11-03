@@ -117,7 +117,8 @@ internal sealed class JavaReplayWriter(JavaWriter java)
 
         c.AppendLine("        if (r.stop) {").AppendLine("            return 0;").AppendLine("        }");
         string list = string.Join(", ", args);
-        string call = m.Style switch
+        // A record's generated equality pair, which no class declares, through equals (nql_equals), null as C#'s == takes it.
+        string call = f.GeneratedEquality ? $"{(f.BaseName == "op_Inequality" ? "!" : string.Empty)}java.util.Objects.equals({args[0]}, {args[1]})" : m.Style switch
         {
             "new" => $"new {m.Holder}({list})",
             "static" => $"{m.Holder}.{m.Name}({list})",

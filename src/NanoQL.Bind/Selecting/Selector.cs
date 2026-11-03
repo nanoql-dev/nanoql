@@ -540,6 +540,9 @@ internal sealed class Selector
 
             // a static a named class carries from its closing takes the class's deprecation where it has none
             Deprecated = Deprecation(m) ?? (isStatic && holder != t ? Deprecation(t) : null),
+
+            // read here, while the metadata is open: the back ends run after it is closed
+            GeneratedEquality = kind == "operator" && m.Name is "op_Equality" or "op_Inequality" && m.Has("System.Runtime.CompilerServices.CompilerGeneratedAttribute"),
         };
         if (!isStatic && kind != "new")
         {

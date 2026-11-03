@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using NanoQL.Bind.Model;
 using NanoQL.Bind.Selecting;
 
@@ -12,8 +14,8 @@ namespace NanoQL.Bind.Tests;
 /// The C ABI's forms and rules (docs/bindings.md): tuples in, as a parameter per element or an array per element and a
 /// count, and collections of tuples out; a bound engine's nullable inputs open on both sides as null; optional
 /// parameters of a type that doesn't cross left at their defaults; a closed generator construction taking a deriving
-/// class's snapshot; a type's own members hiding its base's; statics under their declaring type; and Python's classes
-/// each with a constructor of their own.
+/// class's snapshot; a type's own members hiding its base's; statics under their declaring type; Python's classes each
+/// with a constructor of their own; and a record's generated equality left to each language's own.
 /// </summary>
 public class ContractTests
 {
@@ -22,6 +24,10 @@ public class ContractTests
     private static string? Nql(string name) => Surfaces.Declaration(Surfaces.Nanoql, name);
 
     private static CFunction Function(Generation g, string name) => g.Surface.Functions.Single(f => f.CName == name);
+
+    // The C functions a layer's text calls, by a pattern whose first group is the name.
+    private static HashSet<string> Called(IEnumerable<string> texts, string pattern) =>
+        [.. texts.SelectMany(t => Regex.Matches(t, pattern).Select(m => m.Groups[1].Value))];
 
     [Fact]
     public void ATupleIsAParameterPerElementInItsOwnForm()
@@ -257,5 +263,61 @@ public class ContractTests
         {
             Directory.Delete(dir, true);
         }
+    }
+
+    [Fact]
+    public void ARecordsGeneratedEqualityPairIsLeftToEachLanguagesOwnAndAWrittenPairStaysAMember()
+    {
+        // Each pair by reflection over nanoql's assemblies: the compiler's (a record's, its Equals) or nanoql's own.
+        Assembly[] nanoql = [.. new[] { "NanoQL.dll", "NanoQL.Extensions.dll" }.Select(n => Assembly.LoadFrom(Path.Combine(AppContext.BaseDirectory, n)))];
+        var generated = new List<string>();
+        var written = new List<string>();
+        foreach (CFunction f in Surfaces.Nanoql.Surface.Functions.Where(f => f.Kind == "operator" && f.BaseName is "op_Equality" or "op_Inequality"))
+        {
+            string type = f.Key[..f.Key.IndexOf("::", StringComparison.Ordinal)].Split('<')[0];
+            MethodInfo op = nanoql.Select(a => a.GetType(type)).Single(t => t != null)!.GetMethod(f.BaseName, BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)!;
+            (op.IsDefined(typeof(CompilerGeneratedAttribute)) ? generated : written).Add(f.CName);
+        }
+
+        Assert.True(generated.Count > 300 && written.Count > 20, $"{generated.Count} generated, {written.Count} written");
+
+        // A layer's member calls its C function: Python's through _F, C++'s and Java's by name.
+        string dir = Directory.CreateTempSubdirectory("nanoql-bind-equality-").FullName;
+        try
+        {
+            Surfaces.Nanoql.WritePython(Path.Combine(dir, "python"));
+            Surfaces.Nanoql.WriteJava(Path.Combine(dir, "java"));
+            var layers = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal)
+            {
+                ["Python"] = Called(Directory.EnumerateFiles(Path.Combine(dir, "python"), "*.py", SearchOption.AllDirectories).Select(File.ReadAllText), @"_F\[""(nql_\w+)""\]"),
+                ["C++"] = Called(Surfaces.Nanoql.CppHeaders().Values, @"\b(nql_\w+)\("),
+                ["Java"] = Called(Directory.EnumerateFiles(Path.Combine(dir, "java"), "*.java", SearchOption.AllDirectories).Select(File.ReadAllText), @"\bnanoql_h\.(nql_\w+)\("),
+            };
+            var wrong = new List<string>();
+            foreach ((string layer, HashSet<string> called) in layers)
+            {
+                Assert.True(called.Count > 8000, $"{layer} calls {called.Count} functions");
+                var declared = generated.Where(called.Contains).ToList();
+                if (declared.Count > 0)
+                {
+                    wrong.Add($"{layer} declares {declared.Count} generated pairs: {string.Join(", ", declared.Take(2))}");
+                }
+
+                var missing = written.Where(n => !called.Contains(n)).ToList();
+                if (missing.Count > 0)
+                {
+                    wrong.Add($"{layer} leaves out {missing.Count} written pairs: {string.Join(", ", missing.Take(2))}");
+                }
+            }
+
+            Assert.True(wrong.Count == 0, string.Join("; ", wrong));
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
+
+        // Every pair's C function stays.
+        Assert.All(generated.Concat(written), n => Assert.NotNull(Nql(n)));
     }
 }

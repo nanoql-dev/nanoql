@@ -701,7 +701,9 @@ internal sealed class CppWriter
 
     private void Class(StringBuilder h, StringBuilder defs, List<(bool, string, string)> free, TypeRow t)
     {
-        var ms = Members.Values.Where(m => m.Function.Type == t.Type).OrderBy(m => m.Function.CName, StringComparer.Ordinal).ToList();
+        // A record's generated equality pair is Object's == and != (nql_equals): the class doesn't declare it, and the
+        // plan keeps it for the replayer.
+        var ms = Members.Values.Where(m => m.Function.Type == t.Type && !m.Function.GeneratedEquality).OrderBy(m => m.Function.CName, StringComparer.Ordinal).ToList();
         if (t.Experimental)
         {
             h.AppendLine("#ifdef NANOQL_EXPERIMENTAL");
@@ -786,7 +788,7 @@ internal sealed class CppWriter
     }
 
     private HashSet<string> Declared(TypeRow t) =>
-        [.. Members.Values.Where(m => m.Function.Type == t.Type && m.Style is "instance" or "static" && !m.Function.Experimental && !t.Experimental).Select(m => m.Name)];
+        [.. Members.Values.Where(m => m.Function.Type == t.Type && m.Style is "instance" or "static" && !m.Function.Experimental && !t.Experimental && !m.Function.GeneratedEquality).Select(m => m.Name)];
 
     private IEnumerable<TypeRow> Ancestors(TypeRow t)
     {

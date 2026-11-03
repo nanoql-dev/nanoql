@@ -52,6 +52,13 @@ internal sealed class CFunction
     /// <summary>Gets or sets the member's <c>[Obsolete]</c> message, when nanoql deprecates it.</summary>
     public string? Deprecated { get; set; }
 
+    /// <summary>
+    /// Gets or sets whether the function is a record's <c>op_Equality</c> or <c>op_Inequality</c>, which the compiler
+    /// writes as its <c>Equals</c>: Python's, C++'s and Java's classes leave it to the language's own equality, which
+    /// <c>nql_equals</c> gives, and its C function stays.
+    /// </summary>
+    public bool GeneratedEquality { get; set; }
+
     /// <summary>Gets or sets whether the member's C name carries an overload suffix.</summary>
     public bool Overloaded { get; set; }
 

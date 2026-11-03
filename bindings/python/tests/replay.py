@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 """The Python replayer of the vector suite's trace (docs/bindings.md, "The vector suite through each binding"): each
 line's C function called through the Python member the generated map names, an overload's through its group's
-dispatch, its arguments converted from the trace's C forms, every result compared with C#'s, doubles by their bits with
-NaN as NaN, refusals by their code. Where the dispatch, reading the arguments' own classes, takes another form than C#'s
+dispatch, a record's generated equality pair, which no class declares, through == and != (nql_equals); its arguments
+converted from the trace's C forms, every result compared with C#'s, doubles by their bits with NaN as NaN, refusals by
+their code. Where the dispatch, reading the arguments' own classes, takes another form than C#'s
 static choice, the replay counts it and calls the recorded form. A fact replays up to its first call that needs what
 the trace couldn't write or the replay didn't make.
 
@@ -342,6 +343,10 @@ class Replay:
 
     def invoke(self, cls_name, member, style, group, cname, args):
         if not cls_name:
+            pair = re.search(r"_op_(Equality|Inequality)$", cname)
+            if pair:
+                # A record's generated equality pair, which no class declares: Python's own == and != (nql_equals).
+                return (args[0] == args[1]) if pair.group(1) == "Equality" else (args[0] != args[1])
             # A value type's constructor (Date, Period) has no member: datetime.date and nanoql.Period stand in for it.
             return _F[cname](*args)
         cls = _runtime._by_cname.get("nql." + cls_name) or getattr(nanoql, cls_name, None) or getattr(nanoql.experimental, cls_name, None) or getattr(_generated, cls_name)
